@@ -74,6 +74,7 @@ public:
     bool IsReady();
     bool NeedsRepaint();
     SkDrawable* GetDrawable(OffsetF offset);
+    std::shared_ptr<OHOS::Render3D::TextureLayer> GetTextureLayer(OffsetF offset);
     bool HandleTouchEvent(const TouchEventInfo& info);
 
 private:
@@ -105,7 +106,7 @@ private:
     std::shared_ptr<OHOS::Render3D::TextureInfo> textureInfo_;
     std::shared_ptr<OHOS::Render3D::TextureLayer> textureLayer_;
     RefPtr<ModelTouchHandler> touchHandler_;
-
+    EGLContext eglContext_ = EGL_NO_CONTEXT;
     ACE_DISALLOW_COPY_AND_MOVE(ModelAdapterWrapper);
 };
 

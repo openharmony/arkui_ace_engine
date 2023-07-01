@@ -168,6 +168,12 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame() const
     return nullptr;
 }
 
+bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint,
+    int32_t sourceType)
+{
+    return true;
+}
+
 bool FrameNode::IsMeasureBoundary()
 {
     return false;
@@ -209,7 +215,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return HitTestResult::BUBBLING;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect)
+std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
 {
     return std::vector<RectF>();
 }

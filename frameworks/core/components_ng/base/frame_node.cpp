@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -444,6 +446,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+    }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
     // TODO: temp use and need to delete.
     needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
@@ -691,11 +697,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
         {
-            ACE_SCOPED_TRACE("LayoutWrapper::RestoreGeoState");
-            // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
-            LayoutWrapper::RestoreGeoState(depth);
-        }
-        {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
         }
@@ -733,9 +734,17 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
-    auto task = [wrapper, paintProperty = paintProperty_]() {
+    auto weak = AceType::WeakClaim(this);
+    auto task = [weak, wrapper, paintProperty = paintProperty_]() {
+        ACE_SCOPED_TRACE("FrameNode::RenderTask");
+        auto ref = weak.Upgrade();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
+
+        if (ref->GetInspectorId().has_value()) {
+            auto renderContext = ref->GetRenderContext();
+            renderContext->RequestNextFrame();
+        }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
         return UITask(std::move(task), MAIN_TASK);
@@ -1117,6 +1126,13 @@ HitTestMode FrameNode::GetHitTestMode() const
     return gestureHub ? gestureHub->GetHitTestMode() : HitTestMode::HTMDEFAULT;
 }
 
+void FrameNode::SetHitTestMode(HitTestMode mode)
+{
+    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetHitTestMode(mode);
+}
+
 bool FrameNode::GetTouchable() const
 {
     auto gestureHub = eventHub_->GetGestureEventHub();
@@ -1153,11 +1169,11 @@ VectorF FrameNode::GetTransformScale() const
     return renderContext_->GetTransformScaleValue({ 1.0f, 1.0f });
 }
 
-bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
+bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType)
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect);
+    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -1169,7 +1185,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = *iter;
-            if (!child->IsOutOfTouchTestRegion(localPoint)) {
+            if (!child->IsOutOfTouchTestRegion(localPoint, sourceType)) {
                 LOGD("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
                 isInChildRegion = true;
                 break;
@@ -1186,12 +1202,12 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
-    if (!isActive_ || !eventHub_->IsEnabled()) {
+    if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect);
+    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         LOGD("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
             GetTag().c_str(), GetDepth());
@@ -1204,11 +1220,11 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        if (IsOutOfTouchTestRegion(parentLocalPoint)) {
+        if (IsOutOfTouchTestRegion(parentLocalPoint, static_cast<int32_t>(touchRestrict.sourceType))) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
-    pattern_->OnTouchTestHit();
+    pattern_->OnTouchTestHit(touchRestrict.hitTestType);
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
@@ -1304,7 +1320,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return testResult;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect)
+std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
 {
     std::vector<RectF> responseRegionList;
     auto gestureHub = eventHub_->GetGestureEventHub();
@@ -1570,6 +1586,21 @@ OffsetF FrameNode::GetPaintRectOffsetToPage() const
     return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
 }
 
+std::optional<RectF> FrameNode::GetViewPort() const
+{
+    if (viewPort_.has_value()) {
+        return viewPort_;
+    }
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        if (parent->GetViewPort().has_value()) {
+            return parent->GetViewPort();
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return std::nullopt;
+}
+
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
@@ -1792,8 +1823,8 @@ bool FrameNode::IsContentRoot()
         // so stop traversing if we're beyond that
         return false;
     }
-    // overlay root
-    if (GetDepth() == 2 && GetTag() != V2::STAGE_ETS_TAG) {
+    // title bar
+    if (GetDepth() == 2 && GetTag() == V2::CONTAINER_MODAL_ETS_TAG) {
         return true;
     }
     // page root
@@ -1802,5 +1833,53 @@ bool FrameNode::IsContentRoot()
     auto grandParent = parent->GetParent();
     CHECK_NULL_RETURN_NOLOG(grandParent, false);
     return parent->GetTag() == V2::JS_VIEW_ETS_TAG && grandParent->GetTag() == V2::PAGE_ETS_TAG;
+}
+
+void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect, const TouchRestrict& touchRestrict)
+{
+    auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
+    if (IsSecurityComponent()) {
+        if (CheckRectIntersect(responseRegionList, rect)) {
+            bypass_ = true;
+        }
+    }
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        const auto& child = *iter;
+        child->CheckSecurityComponentStatus(rect, touchRestrict);
+    }
+    rect.insert(rect.end(), responseRegionList.begin(), responseRegionList.end());
+}
+
+bool FrameNode::CheckRectIntersect(std::vector<RectF>& dest, std::vector<RectF>& origin)
+{
+    for (auto destRect : dest) {
+        for (auto originRect : origin) {
+            if (originRect.IsIntersectWith(destRect)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool FrameNode::HaveSecurityComponent()
+{
+    if (IsSecurityComponent()) {
+        return true;
+    }
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        const auto& child = *iter;
+        if (child->HaveSecurityComponent()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool FrameNode::IsSecurityComponent()
+{
+    return GetTag() == V2::SEC_LOCATION_BUTTON_ETS_TAG || GetTag() == V2::SEC_PASTE_BUTTON_ETS_TAG ||
+           GetTag() == V2::SEC_SAVE_BUTTON_ETS_TAG;
 }
 } // namespace OHOS::Ace::NG

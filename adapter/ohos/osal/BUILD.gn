@@ -122,13 +122,13 @@ template("ace_osal_ohos_source_set") {
       "ability_runtime:abilitykit_native",
       "ability_runtime:runtime",
       "bundle_framework:appexecfwk_core",
+      "graphic_standard:librender_service_client",
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
       "hitrace:libhitracechain",
     ]
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
-      "//foundation/graphic/graphic_2d/rosen/modules/frame_analyzer:libframe_analyzer",
     ]
   }
 }

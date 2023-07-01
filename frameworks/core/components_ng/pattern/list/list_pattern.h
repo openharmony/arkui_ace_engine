@@ -215,10 +215,13 @@ private:
     void CheckRestartSpring();
     void StopAnimate();
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
-    void ProcessScrollSnapSpringMotion(float predictSnapOffset);
+    void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
+    bool NeedScrollSnapAlignEffect() const;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void RegistOritationListener();
 
     // multiSelectable
     void UninitMouseEvent();
@@ -244,6 +247,7 @@ private:
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    int32_t centerIndex_ = -1;
     float startMainPos_;
     float endMainPos_;
     bool isInitialized_ = false;
@@ -284,6 +288,8 @@ private:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     bool mousePressed_ = false;
+
+    bool isOritationListenerRegisted_ = false;
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
@@ -292,6 +298,7 @@ private:
     WeakPtr<ListItemPattern> swiperItem_;
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
+    RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
 

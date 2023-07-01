@@ -296,6 +296,11 @@ void JSList::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSList::SetScrollEnabled(bool scrollEnabled)
+{
+    ListModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+}
+
 void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -394,9 +399,9 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
         auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                 const int32_t start, const int32_t end) {
+                                 const int32_t start, const int32_t end, const int32_t center) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(start, end);
+            auto params = ConvertToJSValues(start, end, center);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
         };
@@ -601,6 +606,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
     JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
+    JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);

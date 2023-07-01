@@ -40,6 +40,7 @@ public:
 
     void SetLayoutDirection(FlexDirection value) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
+    void SetScrollEnabled(bool scrollEnabled) override {};
 
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;

@@ -295,6 +295,9 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetForce(touchPoint.force);
         if (touchPoint.tiltX.has_value()) {
             info.SetTiltX(touchPoint.tiltX.value());
@@ -306,6 +309,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
 #ifdef SECURITY_COMPONENT_ENABLE
         info.SetDisplayX(touchPoint.screenX);
         info.SetDisplayY(touchPoint.screenY);
+        info.SetEnhanceData(touchPoint.enhanceData_);
 #endif
         (*onAction)(info);
     }

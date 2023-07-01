@@ -2155,38 +2155,7 @@ void WebPattern::OnWindowHide()
     isWindowShow_ = false;
 }
 
-void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
-{
-    auto contentSize = GetHost()->GetGeometryNode()->GetContentSize();
-    ACE_SCOPED_TRACE("WebPattern::OnWindowSizeChanged || reason=%d || width=%f || height=%f",
-        static_cast<uint32_t>(type), contentSize.Width(), contentSize.Height());
-
-    if (type == WindowSizeChangeReason::DRAG_START) {
-        delegate_->SetShouldFrameSubmissionBeforeDraw(true);
-        isInWindowDrag_ = true;
-    } else if (type == WindowSizeChangeReason::DRAG_END) {
-        if (!isInWindowDrag_)
-            return;
-
-        drawSize_.SetWidth(contentSize.Width());
-        drawSize_.SetHeight(contentSize.Height());
-        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
-        delegate_->SetBoundsOrResize(drawSize_, offset);
-
-        delegate_->SetShouldFrameSubmissionBeforeDraw(false);
-        isInWindowDrag_ = false;
-        isWaiting_ = false;
-    } else if (type == WindowSizeChangeReason::DRAG) {
-        if (!isInWindowDrag_ || isWaiting_)
-            return;
-
-        drawSize_.SetWidth(contentSize.Width());
-        drawSize_.SetHeight(contentSize.Height());
-        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
-        delegate_->SetBoundsOrResize(drawSize_, offset);
-        isWaiting_ = true;
-    }
-}
+void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 
 void WebPattern::OnCompleteSwapWithNewSize()
 {

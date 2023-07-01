@@ -238,6 +238,7 @@ void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEv
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->SetControlButtonClick(true);
         pattern->DoAnimation();
     };
     controlButtonClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));
@@ -323,11 +324,24 @@ void SideBarContainerPattern::DoAnimation()
             }
         }
     });
-    if (animDir_ == SideBarAnimationDirection::LTR) {
-        currentOffset_ = 0.0f + realDividerWidth_;
+
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
+    if (sideBarPosition == SideBarPosition::START) {
+        if (animDir_ == SideBarAnimationDirection::LTR) {
+            currentOffset_ = 0.0f;
+        } else {
+            currentOffset_ = -realSideBarWidth_ - realDividerWidth_;
+        }
     } else {
-        currentOffset_ = -realSideBarWidth_ - realDividerWidth_;
+        if (animDir_ == SideBarAnimationDirection::LTR) {
+            currentOffset_ = 0.0f + realDividerWidth_;
+        } else {
+            currentOffset_ = -realSideBarWidth_;
+        }
     }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
     context->CloseImplicitAnimation();
@@ -485,6 +499,10 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
 
     if (needInitRealSideBarWidth_) {
         needInitRealSideBarWidth_ = false;
+    }
+
+    if (isControlButtonClick_) {
+        isControlButtonClick_ = false;
     }
 
     adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();

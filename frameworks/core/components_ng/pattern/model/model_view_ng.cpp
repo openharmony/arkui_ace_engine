@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 
 ModelViewNG::ModelViewNG()
 {
-    RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
+    const RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline) {
         cameraPosition_.SetContextAndCallbacks(pipeline,

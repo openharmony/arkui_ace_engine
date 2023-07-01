@@ -17,7 +17,9 @@
 
 #include <memory>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkRRect.h"
+#endif
 #include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_property.h"
 
@@ -34,7 +36,11 @@ public:
     void SetCornerRadius(const Rosen::Vector4f& radius);
 
 protected:
+#ifndef USE_ROSEN_DRAWING
     SkRRect MakeRRect(const RSDrawingContext& context) const;
+#else
+    RSRoundRect MakeRRect(const RSDrawingContext& context) const;
+#endif
 
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> property_;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector4f>> radius_;

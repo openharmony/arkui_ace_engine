@@ -73,6 +73,11 @@ void SwiperModelNG::SetDisplayCount(int32_t displayCount)
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount);
 }
 
+void SwiperModelNG::ResetDisplayCount()
+{
+    ACE_RESET_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount);
+}
+
 void SwiperModelNG::SetShowIndicator(bool showIndicator)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ShowIndicator, showIndicator);

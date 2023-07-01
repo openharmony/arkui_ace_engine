@@ -218,7 +218,7 @@ void GridModelImpl::SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>
 }
 
 void GridModelImpl::SetOnScrollBarUpdate(
-    std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, float)>&& value)
+    std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>&& value)
 {}
 
 void GridModelImpl::SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value)

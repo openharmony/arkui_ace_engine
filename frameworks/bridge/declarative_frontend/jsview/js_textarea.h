@@ -41,6 +41,7 @@ public:
     static void Destructor(JSTextAreaController* scroller);
     void CaretPosition(int32_t caretPosition);
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
+    void StopEditing();
     void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controllerWeak_ = controller;

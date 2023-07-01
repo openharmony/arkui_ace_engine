@@ -29,6 +29,12 @@ public:
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& titleNode, int32_t originIndex) override;
+    virtual void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus) override;
+
+    virtual void ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus) override;
+
+    virtual void ChangeTitleButtonIcon(
+        const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

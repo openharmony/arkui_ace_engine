@@ -34,7 +34,11 @@ public:
     // initialize animator
     AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url);
     ~AnimatedImage() override = default;
+#ifndef USE_ROSEN_DRAWING
     static RefPtr<CanvasImage> Create(const RefPtr<SkiaImageData>& data, const SizeF& size, const std::string& url);
+#else
+    static RefPtr<CanvasImage> Create(const RefPtr<RosenImageData>& data, const SizeF& size, const std::string& url);
+#endif
     void ControlAnimation(bool play) override;
     void SetRedrawCallback(std::function<void()>&& callback) override
     {
@@ -71,6 +75,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(AnimatedImage);
 };
 
+#ifndef USE_ROSEN_DRAWING
 class AnimatedSkImage : public AnimatedImage, public SkiaImage {
     DECLARE_ACE_TYPE(AnimatedSkImage, AnimatedImage, SkiaImage)
 public:
@@ -80,6 +85,17 @@ public:
     ~AnimatedSkImage() override = default;
 
     sk_sp<SkImage> GetImage() const override;
+#else
+class AnimatedRSImage : public AnimatedImage, public RosenImage {
+    DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, RosenImage)
+public:
+    AnimatedRSImage(std::unique_ptr<SkCodec> codec, std::string url)
+        : AnimatedImage(codec, std::move(url)), codec_(std::move(codec))
+    {}
+    ~AnimatedRSImage() override = default;
+
+    std::shared_ptr<RSImage> GetImage() const override;
+#endif
 
     RefPtr<CanvasImage> Clone() override
     {
@@ -93,11 +109,19 @@ private:
     RefPtr<CanvasImage> GetCachedFrameImpl(const std::string& key) override;
     void UseCachedFrame(RefPtr<CanvasImage>&& image) override;
 
+#ifndef USE_ROSEN_DRAWING
     SkBitmap requiredFrame_;
     std::unique_ptr<SkCodec> codec_;
     sk_sp<SkImage> currentFrame_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AnimatedSkImage);
+#else
+    RSBitmap requiredFrame_;
+    std::unique_ptr<SkCodec> codec_;
+    std::shared_ptr<RSImage> currentFrame_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(AnimatedRSImage);
+#endif
 };
 
 class AnimatedPixmap : public AnimatedImage, public PixelMapImage {

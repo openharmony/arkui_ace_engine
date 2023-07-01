@@ -26,9 +26,9 @@
 #endif
 
 #include "node_api.h"
-#include "uv.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/common/ace_engine.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::Napi {
@@ -39,23 +39,25 @@ struct SnapshotAsyncCtx {
     napi_ref callbackRef = nullptr;
     std::shared_ptr<Media::PixelMap> pixmap = nullptr;
     int32_t errCode = -1;
+    int32_t instanceId = -1;
 };
 
 void OnComplete(SnapshotAsyncCtx* asyncCtx)
 {
-    uv_loop_s* loop = nullptr;
-    napi_get_uv_event_loop(asyncCtx->env, &loop);
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    if (!container) {
+        LOGW("container is null. %{public}d", asyncCtx->instanceId);
+        return;
+    }
 
-    auto* work = new uv_work_t;
-    work->data = asyncCtx;
-    // use lib uv to run callback in JS thread
-    uv_queue_work(
-        loop, work, [](uv_work_t* work) {},
-        [](uv_work_t* workRawPtr, int32_t /* status */) {
-            std::unique_ptr<uv_work_t> work(workRawPtr);
-            auto* ctxPtr = static_cast<SnapshotAsyncCtx*>(work->data);
-            std::unique_ptr<SnapshotAsyncCtx> ctx(ctxPtr);
-
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGW("taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostTask(
+        [asyncCtx]() {
+            std::unique_ptr<SnapshotAsyncCtx> ctx(asyncCtx);
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(ctx->env, &scope);
 
@@ -89,7 +91,8 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx)
             }
 
             napi_close_handle_scope(ctx->env, scope);
-        });
+        },
+        TaskExecutor::TaskType::JS);
 }
 } // namespace
 
@@ -154,6 +157,7 @@ std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)> JsComponentSnapsh
     }
 
     asyncCtx->env = env_;
+    asyncCtx->instanceId = Container::CurrentId();
 
     return [asyncCtx](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode) {
         asyncCtx->pixmap = std::move(pixmap);

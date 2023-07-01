@@ -108,7 +108,7 @@ public:
     static constexpr int32_t DEFAULT_HOVER_ENTER_ANIMATION_ID = -1;
     using TimeProvider = std::function<int64_t(void)>;
     using SurfaceChangedCallbackMap =
-        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
 
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -619,7 +619,8 @@ public:
 
     bool IsVisibleChangeNodeExists(NodeId index) const;
 
-    int32_t RegisterSurfaceChangedCallback(std::function<void(int32_t, int32_t, int32_t, int32_t)>&& callback)
+    int32_t RegisterSurfaceChangedCallback(
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
     {
         if (callback) {
             surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));

@@ -637,6 +637,16 @@ public:
     {
         return secCompHandleEvent_;
     }
+
+    void SetEnhanceData(std::vector<uint8_t> enhanceData)
+    {
+        enhanceData_ = enhanceData;
+    }
+
+    std::vector<uint8_t> GetEnhanceData() const
+    {
+        return enhanceData_;
+    }
 #endif
 private:
     bool repeat_ = false;
@@ -656,6 +666,7 @@ private:
 #ifdef SECURITY_COMPONENT_ENABLE
     double displayX_ = 0.0;
     double displayY_ = 0.0;
+    std::vector<uint8_t> enhanceData_;
     std::shared_ptr<JsonValue> secCompHandleEvent_;
 #endif
     Point globalPoint_;

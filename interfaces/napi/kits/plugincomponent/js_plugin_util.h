@@ -197,43 +197,19 @@ bool AceCreateAsyncCallback(napi_env env, napi_value param, ACEAsyncJSCallbackIn
 napi_ref AceCreateCallbackRefFromJS(napi_env env, napi_value param);
 
 /**
- * @brief Asynchronous callback processing.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param asyncCallbackInfo Process data asynchronously.
- * @param param other param.
- *
- * @return Return JS data successfully, otherwise return nullptr.
- */
-napi_value AceExecuteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo,
-    const ACEAsyncParamEx* param);
-
-/**
- * @brief Asynchronous promise processing.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param asyncCallbackInfo Process data asynchronously.
- * @param param other param.
- *
- * @return Return JS data successfully, otherwise return nullptr.
- */
-napi_value AceExecutePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo,
-    const ACEAsyncParamEx* param);
-
-/**
  * @brief The callback at the end of the asynchronous callback.
  *
  * @param env The environment that the Node-API call is invoked under.
- * @param data Point to asynchronous processing of data.
+ * @param asyncCallbackInfo Point to asynchronous processing of data.
  */
-void AceCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data);
+void AceCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo);
 
 /**
  * @brief The callback at the end of the Promise callback.
  *
  * @param env The environment that the Node-API call is invoked under.
- * @param data Point to asynchronous processing of data.
+ * @param asyncCallbackInfo Point to asynchronous processing of data.
  */
-void AceCompletePromiseCallbackWork(napi_env env, napi_status status, void* data);
+void AceCompletePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo);
 }  // namespace OHOS::Ace::Napi
 #endif  // OHOS_NAPI_ACE_PLUGIN_UTIL_H

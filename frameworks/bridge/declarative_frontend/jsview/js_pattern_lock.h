@@ -21,6 +21,7 @@
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 class JSPatternLock : public JSViewAbstract {

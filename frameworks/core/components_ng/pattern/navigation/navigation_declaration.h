@@ -86,6 +86,7 @@ constexpr Dimension HORIZONTAL_MARGIN_M = 8.0_vp; // ohos_id_elements_margin_hor
 constexpr Dimension MENU_ITEM_PADDING = 24.0_vp;
 constexpr Dimension BUTTON_PADDING = 12.0_vp;
 constexpr Dimension BUTTON_RADIUS = 5.0_vp;
+constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;
 
 // more button
 constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;

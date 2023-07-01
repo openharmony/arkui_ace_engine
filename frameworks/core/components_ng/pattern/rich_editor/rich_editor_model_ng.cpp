@@ -55,4 +55,11 @@ void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReady(std::move(func));
 }
+
+void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelect(std::move(func));
+}
 } // namespace OHOS::Ace::NG

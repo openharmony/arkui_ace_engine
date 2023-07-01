@@ -94,6 +94,9 @@ public:
 
     void OnSurfaceChanged(int32_t width, int32_t height) override {}
 
+    void OnLayoutCompleted(const std::string& componentId) override {}
+    void OnDrawCompleted(const std::string& componentId) override {}
+
     void ReplacePage(const std::string& url, const std::string& params) override {}
 
     void DumpFrontend() const override

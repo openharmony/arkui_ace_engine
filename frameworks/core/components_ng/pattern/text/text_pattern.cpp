@@ -304,10 +304,14 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnSelectAll();
     };
-    selectInfo.onClose = [weak = WeakClaim(this)]() {
+    selectInfo.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->showSelectOverlay_ = false;
+        if (closedByGlobalEvent) {
+            pattern->ResetSelection();
+        } else {
+            pattern->showSelectOverlay_ = false;
+        }
     };
 
     if (!menuOptionItems_.empty()) {
@@ -326,6 +330,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     } else {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
+        selectInfo.callerFrameNode = GetHost();
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
         CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
@@ -591,9 +596,9 @@ void TextPattern::HandlePanEnd(const GestureEvent& info)
 #ifdef ENABLE_DRAG_FRAMEWORK
 DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
 {
-    LOGI("OnDragStart");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
+    CHECK_NULL_RETURN(dragNodeWk_.Upgrade(), {});
 
     DragDropInfo itemInfo;
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
@@ -604,6 +609,7 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
 
     AceEngineExt::GetInstance().DragStartExt();
 
+    CloseSelectOverlay();
     ResetSelection();
     return itemInfo;
 }
@@ -641,6 +647,7 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         CHECK_NULL_VOID(pattern);
         if (pattern->BetweenSelectedPosition(point)) {
             pattern->dragNode_ = TextDragPattern::CreateDragNode(pattern->GetHost());
+            pattern->dragNodeWk_ = pattern->dragNode_;
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
@@ -777,6 +784,10 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
 
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (showSelectOverlay_) {
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
@@ -795,11 +806,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
-
-    if (showSelectOverlay_) {
-        CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-    }
     return true;
 }
 
@@ -903,7 +909,8 @@ void TextPattern::InitSurfaceChangedCallback()
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+                WindowSizeChangeReason type) {
                 auto pattern = weak.Upgrade();
                 if (pattern) {
                     pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);

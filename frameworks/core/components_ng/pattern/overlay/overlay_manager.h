@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
+#include <functional>
 #include <unordered_map>
 #include <utility>
 
@@ -26,6 +27,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -63,6 +65,7 @@ public:
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
+    void HideCustomPopups();
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
@@ -221,10 +224,12 @@ public:
     void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, int32_t targetId);
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle, int32_t targetId);
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, int32_t targetId);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
 
@@ -253,6 +258,8 @@ private:
     void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void DefaultModalTransition(bool isTransitionIn);
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
+    void FireModalPageShow();
+    void FireModalPageHide();
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
@@ -269,6 +276,7 @@ private:
     std::unordered_map<int32_t, RefPtr<FrameNode>> dialogMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
+    std::list<WeakPtr<FrameNode>> modalList_;
     WeakPtr<FrameNode> lastModalNode_;
     float sheetHeight_ {0.0};
     WeakPtr<UINode> rootNodeWeak_;

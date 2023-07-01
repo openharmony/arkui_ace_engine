@@ -31,6 +31,7 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -243,9 +244,11 @@ public:
     virtual void BindContextMenu(
         ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, int32_t type) = 0;
+        std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear) = 0;
     virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) = 0;
+        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear) = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;

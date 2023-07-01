@@ -24,6 +24,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -524,6 +525,11 @@ NG::PaddingProperty JSButton::SetPaddings(const std::optional<CalcDimension>& to
 void JSButton::JsOnClick(const JSCallbackInfo& info)
 {
     LOGD("JSButton JsOnClick");
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnClick callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnClick();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("OnClick parameter need a function.");
         return;

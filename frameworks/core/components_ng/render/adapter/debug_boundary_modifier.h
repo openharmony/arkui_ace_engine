@@ -34,10 +34,15 @@ public:
     {
         CHECK_NULL_VOID(property_);
         CHECK_NULL_VOID(context.canvas);
+#ifndef USE_ROSEN_DRAWING
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
         RSCanvas rsCanvas(&skCanvas);
         CHECK_NULL_VOID(&rsCanvas);
         paintTask_(rsCanvas);
+#else
+        CHECK_NULL_VOID(paintTask_);
+        paintTask_(*context.canvas);
+#endif
     }
 
     void SetCustomData(bool paint)

@@ -17,17 +17,22 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/want/want_wrap.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
+
+namespace OHOS::AAFwk {
+class Want;
+}
 
 namespace OHOS::Ace::NG {
 class UIExtensionPattern : public WindowPattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, WindowPattern);
 
 public:
-    UIExtensionPattern(const std::string& bundleName, const std::string& abilityName);
+    explicit UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     ~UIExtensionPattern() override;
 
     void OnWindowShow() override;
@@ -39,9 +44,12 @@ public:
     }
 
     void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
+    void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
 
     void OnConnect() override;
     void OnDisconnect() override;
+
+    void OnResult(int32_t code, const AAFwk::Want& want);
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
@@ -70,10 +78,13 @@ private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
+    void UnregisterAbilityResultListener();
+    void OnConnectInner();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     std::function<void(int32_t)> onReleaseCallback_;
+    std::function<void(int32_t, const AAFwk::Want&)> OnResultCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

@@ -378,6 +378,16 @@ public:
         return isAtHotRegion_;
     }
 
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -389,11 +399,12 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
-    void OnTouchTestHit() override;
+    void OnTouchTestHit(SourceType hitTestType) override;
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
@@ -580,6 +591,7 @@ private:
     bool mainSizeIsMeasured_ = false;
 
     bool usePropertyAnimation_ = false;
+    std::optional<int32_t> surfaceChangedCallbackId_;
 };
 } // namespace OHOS::Ace::NG
 

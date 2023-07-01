@@ -1195,19 +1195,19 @@ class BottomTabBarStyle {
 
 class Indicator {
   top(value) {
-    this.top = value;
+    this.topValue = value;
     return this;
   }
   left(value) {
-    this.left = value;
+    this.leftValue = value;
     return this;
   }
   right(value) {
-    this.right = value;
+    this.rightValue = value;
     return this;
   }
   bottom(value) {
-    this.bottom = value;
+    this.bottomValue = value;
     return this;
   }
   static dot() {
@@ -1224,31 +1224,31 @@ class DotIndicator extends Indicator {
     this.type = 'DotIndicator';
   }
   itemWidth(value) {
-    this.itemWidth = value;
+    this.itemWidthValue = value;
     return this;
   }
   itemHeight(value) {
-    this.itemHeight = value;
+    this.itemHeightValue = value;
     return this;
   }
   selectedItemWidth(value) {
-    this.selectedItemWidth = value;
+    this.selectedItemWidthValue = value;
     return this;
   }
   selectedItemHeight(value) {
-    this.selectedItemHeight = value;
+    this.selectedItemHeightValue = value;
     return this;
   }
   mask(value) {
-    this.mask = value;
+    this.maskValue = value;
     return this;
   }
   color(value) {
-    this.color = value;
+    this.colorValue = value;
     return this;
   }
   selectedColor(value) {
-    this.selectedColor = value;
+    this.selectedColorValue = value;
     return this;
   }
 }
@@ -1259,19 +1259,19 @@ class DigitIndicator extends Indicator {
     this.type = 'DigitIndicator';
   }
   fontColor(value) {
-    this.fontColor = value;
+    this.fontColorValue = value;
     return this;
   }
   selectedFontColor(value) {
-    this.selectedFontColor = value;
+    this.selectedFontColorValue = value;
     return this;
   }
   digitFont(value) {
-    this.digitFont = value;
+    this.digitFontValue = value;
     return this;
   }
   selectedDigitFont(value) {
-    this.selectedDigitFont = value;
+    this.selectedDigitFontValue = value;
     return this;
   }
 }

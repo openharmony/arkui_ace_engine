@@ -90,6 +90,11 @@ void JSScroll::SetScrollable(int32_t value)
     ScrollModel::GetInstance()->SetAxis(AXIS[value]);
 }
 
+void JSScroll::SetScrollEnabled(bool scrollEnabled)
+{
+    ScrollModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+}
+
 void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -248,6 +253,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("width", &JSScroll::JsWidth);
     JSClass<JSScroll>::StaticMethod("height", &JSScroll::JsHeight);
     JSClass<JSScroll>::StaticMethod("nestedScroll", &JSScroll::SetNestedScroll);
+    JSClass<JSScroll>::StaticMethod("enableScrollInteraction", &JSScroll::SetScrollEnabled);
     JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

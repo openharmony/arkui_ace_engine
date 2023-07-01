@@ -406,7 +406,11 @@ void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> size = obj->GetProperty("size");
         if (!size->IsNull()) {
-            ParseJsDimensionVp(size, fontSize);
+            CalcDimension fontSizeData;
+            if (ParseJsDimensionFp(size, fontSizeData) && !fontSizeData.IsNegative() &&
+                fontSizeData.Unit() != DimensionUnit::PERCENT) {
+                fontSize = fontSizeData;
+            }
         }
 
         auto jsWeight = obj->GetProperty("weight");
@@ -472,6 +476,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSIndexer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSIndexer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSIndexer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

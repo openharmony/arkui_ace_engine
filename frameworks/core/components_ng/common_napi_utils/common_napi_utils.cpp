@@ -31,7 +31,55 @@ namespace {
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr uint32_t ERROR_COLOR_ID = -1;
+
+enum class ResourceType : uint32_t {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000
+};
 } // namespace
+
+NapiAsyncEvnet::NapiAsyncEvnet(napi_env env, napi_value callback)
+{
+    env_ = env;
+    napi_create_reference(env_, callback, 1, &ref_);
+}
+
+NapiAsyncEvnet::~NapiAsyncEvnet()
+{
+    napi_delete_reference(env_, ref_);
+}
+
+napi_value NapiAsyncEvnet::Call(int32_t argc, napi_value* argv)
+{
+    napi_value result = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(env_, &scope);
+    if (scope == nullptr) {
+        napi_close_handle_scope(env_, scope);
+        return result;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, ref_, &callback);
+    napi_value undefined = nullptr;
+    napi_get_undefined(env_, &undefined);
+    napi_call_function(env_, undefined, callback, argc, argv, &result);
+    napi_close_handle_scope(env_, scope);
+    return result;
+}
+
+napi_env NapiAsyncEvnet::GetEnv()
+{
+    return env_;
+}
 
 napi_value CommonNapiUtils::CreateInt32(napi_env env, int32_t code)
 {
@@ -281,8 +329,7 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     return result;
 }
 
-RefPtr<ThemeConstants> CommonNapiUtils::GetThemeConstantsNapi(
-    const std::string& bundleName, const std::string& moduleName)
+RefPtr<ThemeConstants> CommonNapiUtils::GetThemeConstants(const std::string& bundleName, const std::string& moduleName)
 {
     auto cardId = CardScope::CurrentId();
     if (cardId != INVALID_CARD_ID) {
@@ -330,7 +377,7 @@ std::unique_ptr<JsonValue> CommonNapiUtils::PutJsonValue(napi_env env, napi_valu
     return result;
 }
 
-Color CommonNapiUtils::ParseNapiColor(napi_env env, napi_value value)
+Color CommonNapiUtils::ParseColor(napi_env env, napi_value value)
 {
     Color colorResult = Color::BLACK;
     napi_valuetype valueType = CommonNapiUtils::GetValueType(env, value);
@@ -350,7 +397,7 @@ Color CommonNapiUtils::ParseNapiColor(napi_env env, napi_value value)
         napi_value jsModuleName = CommonNapiUtils::GetNamedProperty(env, value, "moduleName");
         std::string bundleName = CommonNapiUtils::GetStringFromValueUtf8(env, jsBundleName);
         std::string moduleName = CommonNapiUtils::GetStringFromValueUtf8(env, jsModuleName);
-        auto themeConstants = GetThemeConstantsNapi(bundleName, moduleName);
+        auto themeConstants = GetThemeConstants(bundleName, moduleName);
         CHECK_NULL_RETURN(themeConstants, colorResult);
 
         napi_value jsColorId = CommonNapiUtils::GetNamedProperty(env, value, "id");
@@ -375,5 +422,62 @@ Color CommonNapiUtils::ParseNapiColor(napi_env env, napi_value value)
         return themeConstants->GetColor(colorId);
         ;
     }
+}
+
+CalcDimension CommonNapiUtils::GetDimensionResult(napi_env env, napi_value value)
+{
+    CalcDimension dimensionResult;
+    napi_valuetype valueType = GetValueType(env, value);
+    if (valueType == napi_number) {
+        double radius = GetDouble(env, value);
+        dimensionResult = CalcDimension(radius, DimensionUnit::VP);
+        return dimensionResult;
+    }
+    if (valueType == napi_string) {
+        std::string dimensionString = GetStringFromValueUtf8(env, value);
+        dimensionResult = StringUtils::StringToCalcDimension(dimensionString, false, DimensionUnit::VP);
+        return dimensionResult;
+    }
+    napi_value jsBundleName = GetNamedProperty(env, value, "bundleName");
+    napi_value jsModuleName = GetNamedProperty(env, value, "moduleName");
+    std::string bundleName = GetStringFromValueUtf8(env, jsBundleName);
+    std::string moduleName = GetStringFromValueUtf8(env, jsModuleName);
+    auto themeConstants = GetThemeConstants(bundleName, moduleName);
+    CHECK_NULL_RETURN(themeConstants, dimensionResult);
+
+    napi_value jsDimensionId = GetNamedProperty(env, value, "id");
+    napi_value jsParams = GetNamedProperty(env, value, "params");
+    uint32_t dimensionId = GetCInt32(jsDimensionId, env);
+    bool isArray = IsArray(env, jsParams);
+    if (dimensionId == ERROR_COLOR_ID && isArray) {
+        uint32_t length;
+        napi_get_array_length(env, jsParams, &length);
+        auto jsonArray = JsonUtil::CreateArray(false);
+        for (uint32_t i = 0; i < length; i++) {
+            napi_value elementValue;
+            napi_get_element(env, jsParams, i, &elementValue);
+            std::string key = std::to_string(i);
+            jsonArray->Put(key.c_str(), PutJsonValue(env, elementValue, key));
+        }
+        const char* jsonKey = std::to_string(0).c_str();
+        std::string dimensionName = jsonArray->GetValue(jsonKey)->GetValue(jsonKey)->ToString();
+        return themeConstants->GetDimensionByName(dimensionName);
+    }
+
+    napi_value jsType = GetNamedProperty(env, value, "type");
+    napi_valuetype temp = GetValueType(env, jsType);
+    uint32_t type = GetCInt32(jsType, env);
+    if (temp != napi_null && temp == napi_number && type == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto dimensionValue = themeConstants->GetString(dimensionId);
+        dimensionResult = StringUtils::StringToCalcDimension(dimensionValue, false, DimensionUnit::VP);
+        return dimensionResult;
+    }
+    if (temp != napi_null && temp == napi_number && type == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto dimensionValue = std::to_string(themeConstants->GetInt(dimensionId));
+        dimensionResult = StringUtils::StringToDimensionWithUnit(dimensionValue, DimensionUnit::VP);
+        return dimensionResult;
+    }
+
+    return themeConstants->GetDimension(dimensionId);
 }
 } // namespace OHOS::Ace

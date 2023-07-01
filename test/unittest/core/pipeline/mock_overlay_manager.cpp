@@ -32,6 +32,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo) {}
 
 void OverlayManager::HideAllPopups() {}
 
+void OverlayManager::HideCustomPopups() {};
+
 bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
     return true;

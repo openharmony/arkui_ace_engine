@@ -45,6 +45,7 @@ public:
     ~NGConnectionCallback() override = default;
     void OnWindowReady(const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode) override
     {
+        LOGI("OnWindowReady called");
         CHECK_NULL_VOID(rsSurfaceNode);
         auto nodeStrong = originNode_.Upgrade();
         CHECK_NULL_VOID(nodeStrong);

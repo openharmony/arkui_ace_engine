@@ -26,7 +26,11 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
+#include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
+#include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -156,6 +160,8 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         current = innerExclusiveRecognizer_;
     }
 
+    auto geometryNode = host->GetGeometryNode();
+    auto size = geometryNode->GetFrameSize();
     auto context = host->GetContext();
     int32_t parallelIndex = 0;
     int32_t exclusiveIndex = 0;
@@ -172,6 +178,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 }
             }
         }
+        recognizer->SetSize(size.Height(), size.Width());
         recognizer->SetCoordinateOffset(offset);
         recognizer->BeginReferee(touchId, true);
         auto gestureMask = recognizer->GetPriorityMask();
@@ -523,7 +530,13 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     std::string udKey;
     int32_t recordsSize = 1;
     auto unifiedData = event->GetData();
-    if (unifiedData) {
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetDragRecordSize() >= 0) {
+        recordsSize = pattern->GetDragRecordSize();
+    } else if (unifiedData) {
         auto recordSize = unifiedData->GetSize();
         recordsSize = recordSize > 1 ? recordSize : 1;
     }

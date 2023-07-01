@@ -452,7 +452,7 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
             pos.second.first += delta;
             pos.second.second += delta;
         }
-        totalMainSize_ = std::max(totalMainSize_, GetEndPosition() + footerMainSize_);
+        totalMainSize_ = std::max(totalMainSize_ + delta, GetEndPosition() + footerMainSize_);
     } else if (GetStartIndex() == 0 && currentStartPos > headerMainSize_) {
         auto delta = currentStartPos - headerMainSize_;
         for (auto& pos : itemPosition_) {

@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,10 +37,47 @@ const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
 const char TEXT_ETS_TAG[] = "Text";
 const std::string EMPTY_STRING = "";
 const int32_t RET_OK = 0;
+constexpr float START = 50.0f;
+constexpr float MAIN_DELTA = 80.0f;
 } // namespace
 
-class NavBarTestNg : public testing::Test {};
+class NavBarTestNg : public testing::Test {
+public:
+    void DestroyTitleBarObject();
+    void CreateNavBar();
+    void CreateTitlebar();
 
+    RefPtr<NavBarPattern> navBarpattern_;
+    RefPtr<NavBarNode> navBarNode_;
+    RefPtr<TitleBarNode> titleBarNode_;
+};
+
+void NavBarTestNg::CreateNavBar()
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    navBarNode_ = NavBarNode::GetOrCreateNavBarNode(
+        barTag, navBarNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::NavBarPattern>(); });
+    ASSERT_NE(navBarNode_, nullptr);
+    navBarpattern_ = navBarNode_->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarpattern_, nullptr);
+}
+
+void NavBarTestNg::CreateTitlebar()
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    titleBarNode_ = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode_, nullptr);
+}
+
+void NavBarTestNg::DestroyTitleBarObject()
+{
+    navBarpattern_ = nullptr;
+    navBarNode_ = nullptr;
+    titleBarNode_ = nullptr;
+}
 /**
  * @tc.name: GetOrCreateNavBarNode001
  * @tc.desc: Test create nav bar node.
@@ -574,5 +612,63 @@ HWTEST_F(NavBarTestNg, OnToolBarNodeOperationUpdate001, TestSize.Level1)
     ChildNodeOperation value = ChildNodeOperation::ADD;
     barNode->OnToolBarNodeOperationUpdate(value);
     EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: NarBarPattern002
+ * @tc.desc: Test InitPanEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NarBarPattern002, TestSize.Level1)
+{
+    std::string frameTag = FRAME_ITEM_ETS_TAG;
+    CreateNavBar();
+    CreateTitlebar();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(frameTag, nodeId, AceType::MakeRefPtr<Pattern>());
+
+    GestureEvent info;
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    navBarpattern_->InitPanEvent(gestureHub);
+    auto panEvent = navBarpattern_->panEvent_;
+    EXPECT_NE(panEvent, nullptr);
+}
+
+/**
+ * @tc.name: NarBarPattern003
+ * @tc.desc: Test HandleOnDragStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NarBarPattern003, TestSize.Level1)
+{
+    CreateNavBar();
+    CreateTitlebar();
+
+    GestureEvent startInfo;
+    startInfo.SetOffsetY(START);
+    navBarNode_->SetTitleBarNode(titleBarNode_);
+    navBarpattern_->HandleOnDragStart(static_cast<float>(startInfo.GetOffsetY()));
+    EXPECT_TRUE(startInfo.GetOffsetY() == START);
+}
+
+/**
+ * @tc.name: NarBarPattern004
+ * @tc.desc: Test HandleOnDragUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NarBarPattern004, TestSize.Level1)
+{
+    CreateNavBar();
+    CreateTitlebar();
+
+    GestureEvent updateInfo;
+    updateInfo.SetOffsetY(MAIN_DELTA);
+    navBarNode_->SetTitleBarNode(titleBarNode_);
+    navBarpattern_->HandleOnDragUpdate(static_cast<float>(updateInfo.GetOffsetY()));
+    EXPECT_TRUE(updateInfo.GetOffsetY() == MAIN_DELTA);
+    navBarpattern_->HandleOnDragEnd();
 }
 } // namespace OHOS::Ace::NG

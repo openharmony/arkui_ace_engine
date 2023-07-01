@@ -49,7 +49,7 @@ class ACE_EXPORT PipelineContext : public PipelineBase {
 
 public:
     using SurfaceChangedCallbackMap =
-        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -162,6 +162,9 @@ public:
     void OnSurfaceChanged(int32_t width, int32_t height,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+
+    void OnLayoutCompleted(const std::string& componentId);
+    void OnDrawCompleted(const std::string& componentId);
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
@@ -303,7 +306,8 @@ public:
 
     void FlushReload() override;
 
-    int32_t RegisterSurfaceChangedCallback(std::function<void(int32_t, int32_t, int32_t, int32_t)>&& callback)
+    int32_t RegisterSurfaceChangedCallback(
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
     {
         if (callback) {
             surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
@@ -365,6 +369,8 @@ public:
     void HandleWindowSceneTouchEvent(const TouchEvent& point);
     // ------------------------------------------------------------------------------
 
+    void SetNeedRenderNode(const RefPtr<FrameNode>& node);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -379,7 +385,7 @@ protected:
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
 private:
-    void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight);
+    void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
 
     void FlushWindowStateChangedCallback(bool isShow);
 
@@ -389,6 +395,8 @@ private:
 
     void FlushTouchEvents();
 
+    void InspectDrew();
+
     void FlushBuildFinishCallbacks();
 
     void DumpPipelineInfo() const;
@@ -396,6 +404,8 @@ private:
     void RegisterRootEvent();
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
+
+    void SyncSafeArea();
 
     template<typename T>
     struct NodeCompare {
@@ -433,6 +443,8 @@ private:
 
     RefPtr<FrameNode> rootNode_;
     RefPtr<FrameNode> appBarNode_;
+
+    std::set<RefPtr<FrameNode>> needRenderNode_;
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;

@@ -17,10 +17,12 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <regex>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -54,6 +56,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -3059,8 +3062,7 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
         return true;
     }
     if (jsValue->IsString()) {
-        result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
-        return true;
+        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -3090,20 +3092,19 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
-        result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
-        return true;
+        return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
-        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         return true;
     }
 
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         auto value = std::to_string(themeConstants->GetDouble(resId->ToNumber<uint32_t>()));
-        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         return true;
     }
 
@@ -4134,6 +4135,11 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnAreaChange callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnAreaChange();
+        return;
+    }
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     if (!CheckJSCallbackInfo("JsOnAreaChange", info, checkList)) {
         return;
@@ -4691,6 +4697,11 @@ void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
 
 void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
 {
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnKeyEvent callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnKeyEvent();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnKeyEvent args need a function.");
         return;
@@ -4706,6 +4717,11 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
 
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 {
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnFocus callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnFocus();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnFocus args need a function.");
         return;
@@ -4722,6 +4738,11 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 
 void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
 {
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnBlur callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnBlur();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnBlur args need a function.");
         return;
@@ -4915,11 +4936,6 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
 {
-    if (info.Length() != 2 && info.Length() != 3) {
-        LOGE("BindContentCover params number are not correct.");
-        return;
-    }
-
     // parse isShow
     bool isShow = false;
     DoubleBindCallback callback = nullptr;
@@ -4952,23 +4968,43 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     };
 
     // parse ModalTransition
-    int32_t type = 0;
-    if (info.Length() == 3 && info[info.Length() - 1]->IsNumber()) { // 3: include modal transition
-        auto modalTransition = info[info.Length() - 1]->ToNumber<int32_t>();
-        if (modalTransition >= 0 && modalTransition <= 2) { // 2: transition number
-            type = modalTransition;
+    NG::ModalStyle modalStyle;
+    modalStyle.modalTransition = NG::ModalTransition::DEFAULT;
+    std::function<void()> onShowCallback;
+    std::function<void()> onDismissCallback;
+    if (info.Length() == 3) {
+        if (info[2]->IsObject()) {
+            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback);
+            ParseModalStyle(info[2], modalStyle);
+        } else if (info[2]->IsNumber()) {
+            auto transitionNumber = info[2]->ToNumber<int32_t>();
+            if (transitionNumber >= 0 && transitionNumber <= 2) {
+                modalStyle.modalTransition = static_cast<NG::ModalTransition>(transitionNumber);
+            }
         }
     }
-    ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), type);
+    ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), modalStyle,
+        std::move(onShowCallback), std::move(onDismissCallback));
+}
+
+void JSViewAbstract::ParseModalStyle(const JSRef<JSObject> &paramObj, NG::ModalStyle &modalStyle)
+{
+    auto modalTransition = paramObj->GetProperty("modalTransition");
+    auto backgroundColor = paramObj->GetProperty("backgroundColor");
+    if (modalTransition->IsNumber()) {
+        auto transitionNumber = modalTransition->ToNumber<int32_t>();
+        if (transitionNumber >= 0 && transitionNumber <= 2) {
+            modalStyle.modalTransition = static_cast<NG::ModalTransition>(transitionNumber);
+        }
+    }
+    Color color;
+    if (ParseJsColor(backgroundColor, color)) {
+        modalStyle.backgroundColor = color;
+    }
 }
 
 void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
 {
-    if (info.Length() != 2 && info.Length() != 3) {
-        LOGE("BindSheet params number are not correct.");
-        return;
-    }
-
     // parse isShow
     bool isShow = false;
     DoubleBindCallback callback = nullptr;
@@ -5000,21 +5036,27 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
         func->Execute();
     };
 
-    // parse SheetStyle
+    // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
-    if (info.Length() == 3) {                 // 3 : parameter total
-        ParseSheetStyle(info[2], sheetStyle); // 2 : The last parameter
-    } else {
-        sheetStyle.sheetMode = NG::SheetMode::LARGE;
-        sheetStyle.showDragBar = true;
+    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.showDragBar = true;
+    std::function<void()> onShowCallback;
+    std::function<void()> onDismissCallback;
+    if (info.Length() == 3) {
+        if (info[2]->IsObject()) {
+            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback);
+            ParseSheetStyle(info[2], sheetStyle);
+        }
     }
-    ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc), sheetStyle);
+    ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc), sheetStyle,
+        std::move(onShowCallback), std::move(onDismissCallback));
 }
 
 void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
 {
     auto height = paramObj->GetProperty("height");
     auto showDragBar = paramObj->GetProperty("dragBar");
+    auto backgroundColor = paramObj->GetProperty("backgroundColor");
     if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
         sheetStyle.showDragBar = true;
     } else {
@@ -5024,46 +5066,62 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             LOGW("show drag indicator failed.");
         }
     }
+    Color color;
+    if (ParseJsColor(backgroundColor, color)) {
+        sheetStyle.backgroundColor = color;
+    }
     CalcDimension sheetHeight;
-    if (height->IsNull() || height->IsUndefined()) {
-        sheetStyle.sheetMode = NG::SheetMode::LARGE;
-        sheetStyle.height.reset();
-    } else {
-        if (height->IsString()) {
-            std::string heightStr = height->ToString();
-            // Remove all " ".
-            heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
-            std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
-            if (heightStr.compare("medium") == 0) {
-                sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
-                sheetStyle.height.reset();
-                return;
-            } else if (heightStr.compare("large") == 0) {
-                sheetStyle.sheetMode = NG::SheetMode::LARGE;
-                sheetStyle.height.reset();
-                return;
-            } else {
-                if (heightStr.find("calc") != std::string::npos) {
-                    LOGI("calc value = %{public}s", heightStr.c_str());
-                    sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
-                } else {
-                    sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
-                }
-                if (sheetHeight.Value() < 0) {
-                    sheetStyle.sheetMode = NG::SheetMode::LARGE;
-                    sheetStyle.height.reset();
-                    return;
-                }
-            }
+    if (height->IsString()) {
+        std::string heightStr = height->ToString();
+        // Remove all " ".
+        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
+        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
+        if (heightStr == "medium") {
+            sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
+            sheetStyle.height.reset();
+            return;
         }
-        if (!ParseJsDimensionVp(height, sheetHeight)) {
+        if (heightStr == "large") {
             sheetStyle.sheetMode = NG::SheetMode::LARGE;
             sheetStyle.height.reset();
-            LOGW("Parse to dimension VP failed, set defalt mode.");
-        } else {
-            sheetStyle.height = sheetHeight;
-            sheetStyle.sheetMode.reset();
+            return;
         }
+        if (heightStr.find("calc") != std::string::npos) {
+                LOGI("calc value = %{public}s", heightStr.c_str());
+                sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+        } else {
+            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
+        }
+        if (sheetHeight.Value() < 0) {
+            sheetStyle.sheetMode = NG::SheetMode::LARGE;
+            sheetStyle.height.reset();
+            return;
+        }
+    }
+    if (!ParseJsDimensionVp(height, sheetHeight)) {
+        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.height.reset();
+        LOGW("Parse to dimension VP failed, set default mode.");
+    } else {
+        sheetStyle.height = sheetHeight;
+        sheetStyle.sheetMode.reset();
+    }
+}
+
+void JSViewAbstract::ParseOverlayCallback(
+    const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear)
+{
+    auto showCallback = paramObj->GetProperty("onAppear");
+    auto dismissCallback = paramObj->GetProperty("onDisappear");
+    if (showCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(showCallback));
+        onAppear = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+    if (dismissCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(dismissCallback));
+        onDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
     }
 }
 
@@ -5791,6 +5849,11 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnMouse callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnMouse();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("the param is not a function");
         return;
@@ -5807,6 +5870,11 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnHover callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnHover();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("the param is not a function");
         return;
@@ -5824,6 +5892,11 @@ void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnClick callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnClick();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGW("the info is not click function");
         return;

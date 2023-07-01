@@ -40,6 +40,7 @@ public:
         value->propMinCount_ = CloneMinCount();
         value->propCellLength_ = CloneCellLength();
         value->propEdgeEffect_ = CloneEdgeEffect();
+        value->propScrollEnabled_ = CloneScrollEnabled();
         return value;
     }
 
@@ -56,6 +57,7 @@ public:
         ResetMinCount();
         ResetCellLength();
         ResetEdgeEffect();
+        ResetScrollEnabled();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -121,6 +123,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutProperty);

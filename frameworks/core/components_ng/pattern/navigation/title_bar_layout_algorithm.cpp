@@ -37,6 +37,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr int32_t MAX_MENU_ITEMS_NUM = 3;
+constexpr int32_t MENU_OFFSET_RATIO = 9;
+
 }
 
 void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
@@ -357,9 +359,9 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         titleWrapper->Layout();
         return;
     }
-
-    OffsetF titleOffset =
-        OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), titlePattern->GetTempTitleOffsetY());
+    auto overDragOffset = titlePattern->GetOverDragOffset();
+    OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
+        titlePattern->GetTempTitleOffsetY() + overDragOffset / 6.0f);
     geometryNode->SetMarginFrameOffset(titleOffset);
     titleWrapper->Layout();
 }
@@ -423,9 +425,9 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
                 subtitleWrapper->Layout();
                 return;
             }
-
-            OffsetF titleOffset =
-                OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), titlePattern->GetTempSubTitleOffsetY());
+            auto overDragOffset = titlePattern->GetOverDragOffset();
+            OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
+                titlePattern->GetTempSubTitleOffsetY() + overDragOffset / 6.0f);
             geometryNode->SetMarginFrameOffset(titleOffset);
             subtitleWrapper->Layout();
             return;
@@ -464,9 +466,11 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     auto maxWidth = geometryNode->GetParentLayoutConstraint()->maxSize.Width();
 
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
+        auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+        auto overDragOffset = titlePattern->GetOverDragOffset();
         auto menuOffsetY = (SINGLE_LINE_TITLEBAR_HEIGHT - menuHeight_) / 2;
         OffsetF menuOffset(maxWidth - menuWidth - static_cast<float>(defaultPaddingStart_.ConvertToPx()),
-            static_cast<float>(menuOffsetY.ConvertToPx()));
+            static_cast<float>(menuOffsetY.ConvertToPx()) + overDragOffset / MENU_OFFSET_RATIO);
         geometryNode->SetMarginFrameOffset(menuOffset);
         menuWrapper->Layout();
         return;

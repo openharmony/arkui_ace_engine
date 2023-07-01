@@ -24,12 +24,15 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -184,6 +187,195 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 }
 } // namespace
 
+void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID_NOLOG(!panEvent_);
+
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
+        }
+        pattern->HandleOnDragStart(info.GetOffsetY());
+    };
+
+    auto actionUpdateTask = [weak = WeakClaim(this), this](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
+        }
+        pattern->HandleOnDragUpdate(info.GetOffsetY());
+    };
+
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
+        }
+        pattern->HandleOnDragEnd();
+    };
+
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleOnDragEnd();
+    };
+
+    if (panEvent_) {
+        gestureHub->RemovePanEvent(panEvent_);
+    }
+
+    panEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    PanDirection panDirection = { .type = PanDirection::VERTICAL };
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void NavBarPattern::HandleOnDragStart(float offset)
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->ProcessTittleDragStart(offset);
+}
+
+void NavBarPattern::HandleOnDragUpdate(float offset)
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->ProcessTittleDragUpdate(offset);
+}
+
+void NavBarPattern::HandleOnDragEnd()
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->ProcessTittleDragEnd();
+}
+
+void NavBarPattern::InitCoordinationEvent()
+{
+    auto scrollableNode = FindScrollableChild();
+    scrollableNode_ = WeakClaim(AceType::RawPtr(scrollableNode));
+    CHECK_NULL_VOID(scrollableNode);
+    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
+    auto onScrollEvent = [weak = WeakClaim(this)](double offset) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnCoordScrollUpdate(static_cast<float>(offset));
+    };
+    coordinationEvent->SetOnScrollEvent(onScrollEvent);
+    auto onScrollStartEvent = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnCoordScrollStart();
+    };
+    coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
+    auto onScrollEndEvent = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnCoordScrollEnd();
+    };
+    coordinationEvent->SetOnScrollEndEvent(onScrollEndEvent);
+    scrollablePattern->SetCoordinationEvent(coordinationEvent);
+    scrollablePattern->SetParentDraggedDown(true);
+    scrollablePattern->SetCoordEventNeedSpringEffect(false);
+    scrollablePattern->SetCoordEventNeedMoveUp(true);
+}
+
+void NavBarPattern::OnCoordScrollStart()
+{
+    offset_ = 0.0f;
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->ProcessTittleDragStart(offset_);
+    auto scrollableNode = scrollableNode_.Upgrade();
+    CHECK_NULL_VOID(scrollableNode);
+    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->SetParentDraggedDown(titlePattern->IsTitleDraggedDown());
+    springEffect_ = scrollablePattern->IsScrollableSpringEffect();
+}
+
+void NavBarPattern::OnCoordScrollUpdate(float offset)
+{
+    offset_ += offset;
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->ProcessTittleDragUpdate(offset_);
+
+    auto scrollableNode = scrollableNode_.Upgrade();
+    CHECK_NULL_VOID(scrollableNode);
+    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->SetParentDraggedDown(titlePattern->IsTitleDraggedDown());
+}
+
+void NavBarPattern::OnCoordScrollEnd()
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    titlePattern->ProcessTittleDragEnd();
+    offset_ = 0.0f;
+}
+
+RefPtr<FrameNode> NavBarPattern::FindScrollableChild()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    std::queue<RefPtr<FrameNode>> frameNodeQueue;
+    frameNodeQueue.push(host);
+    while (!frameNodeQueue.empty()) {
+        auto size = frameNodeQueue.size();
+        while (size > 0) {
+            auto node = frameNodeQueue.front();
+            CHECK_NULL_RETURN(node, nullptr);
+            if ((AceType::InstanceOf<ScrollablePattern>(node->GetPattern())) &&
+                ((AceType::InstanceOf<ListPattern>(node->GetPattern())) ||
+                    (AceType::InstanceOf<GridPattern>(node->GetPattern())))) {
+                return node;
+            }
+            frameNodeQueue.pop();
+            auto children = node->GetChildren();
+            for (auto const& child : children) {
+                auto childNode = DynamicCast<FrameNode>(child);
+                if (childNode) {
+                    frameNodeQueue.push(childNode);
+                }
+            }
+            size--;
+        }
+    }
+    return nullptr;
+}
+
 void NavBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -191,6 +383,10 @@ void NavBarPattern::OnModifyDone()
     CHECK_NULL_VOID(hostNode);
     MountTitleBar(hostNode);
     MountToolBar(hostNode);
+    auto gesture = hostNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    InitPanEvent(gesture);
+    InitCoordinationEvent();
 }
 
 } // namespace OHOS::Ace::NG

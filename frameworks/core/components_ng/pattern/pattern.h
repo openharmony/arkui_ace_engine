@@ -313,6 +313,13 @@ public:
         return false;
     }
 
+    virtual int32_t GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
+    {
+        return -1;
+    }
+
+    virtual void ScrollToFocusNodeIndex(int32_t index) {}
+
     // out of viewport or visible is none or gone.
     virtual void OnInActive() {}
     virtual void OnActive() {}
@@ -348,7 +355,12 @@ public:
         return layoutProperty->HasAspectRatio();
     }
 
-    virtual void OnTouchTestHit() {}
+    virtual void OnTouchTestHit(SourceType hitTestType) {}
+
+    virtual int32_t GetDragRecordSize()
+    {
+        return -1;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}
