@@ -625,10 +625,11 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         }
         double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
         LOGD("[scrollMotion]position(%{public}lf), velocity(%{public}lf)", mainPosition, correctVelocity);
+        double friction = friction_ > 0 ? friction_ : sFriction_;
         if (motion_) {
-            motion_->Reset(sFriction_, mainPosition, correctVelocity);
+            motion_->Reset(friction, mainPosition, correctVelocity);
         } else {
-            motion_ = AceType::MakeRefPtr<FrictionMotion>(sFriction_, mainPosition, correctVelocity);
+            motion_ = AceType::MakeRefPtr<FrictionMotion>(friction, mainPosition, correctVelocity);
             motion_->AddListener([weakScroll = AceType::WeakClaim(this)](double value) {
                 auto scroll = weakScroll.Upgrade();
                 if (scroll) {
@@ -765,12 +766,13 @@ void Scrollable::FixScrollMotion(double position)
             motion_->GetFinalPosition(), finalPoisition);
         if (!NearEqual(finalPoisition, motion_->GetFinalPosition(), DISTANCE_EPSILON)) {
             double velocity = motion_->GetVelocityByFinalPosition(finalPoisition);
-            motion_->Reset(sFriction_, position, velocity);
+            double friction = friction_ > 0 ? friction_ : sFriction_;
+            motion_->Reset(friction, position, velocity);
 
             // fix again when velocity is less than velocity threshold
             if (!NearEqual(finalPoisition, motion_->GetFinalPosition(), DISTANCE_EPSILON)) {
                 velocity = motion_->GetVelocityByFinalPosition(finalPoisition, 0.0);
-                motion_->Reset(sFriction_, position, velocity, 0.0);
+                motion_->Reset(friction, position, velocity, 0.0);
             }
             LOGD("final position after fix (%{public}lf), ", motion_->GetFinalPosition());
         }

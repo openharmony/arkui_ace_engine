@@ -254,6 +254,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("height", &JSScroll::JsHeight);
     JSClass<JSScroll>::StaticMethod("nestedScroll", &JSScroll::SetNestedScroll);
     JSClass<JSScroll>::StaticMethod("enableScrollInteraction", &JSScroll::SetScrollEnabled);
+    JSClass<JSScroll>::StaticMethod("friction", &JSScroll::SetFriction);
     JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -359,5 +360,15 @@ void JSScroll::SetNestedScroll(const JSCallbackInfo& args)
     nestedOpt.backward = static_cast<NestedScrollMode>(backward);
     ScrollModel::GetInstance()->SetNestedScroll(nestedOpt);
     args.ReturnSelf();
+}
+
+void JSScroll::SetFriction(const JSCallbackInfo& info)
+{
+    double friction = -1.0;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+        LOGW("Friction params invalid,can not convert to double");
+        friction = -1.0;
+    }
+    ScrollModel::GetInstance()->SetFriction(friction);
 }
 } // namespace OHOS::Ace::Framework

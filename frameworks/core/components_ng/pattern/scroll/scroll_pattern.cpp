@@ -208,6 +208,11 @@ bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
     return true;
 }
 
+void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("friction", GetFriction());
+}
+
 void ScrollPattern::OnScrollEndCallback()
 {
     auto host = GetHost();

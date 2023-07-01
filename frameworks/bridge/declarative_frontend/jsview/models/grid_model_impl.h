@@ -47,6 +47,7 @@ public:
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
     void SetScrollEnabled(bool scrollEnabled) override {};
+    void SetFriction(double friction) override {};
     void SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>&& value) override;
     void SetOnScrollBarUpdate(
         std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>&& value) override;

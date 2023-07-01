@@ -53,6 +53,7 @@ public:
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
+    void SetFriction(double friction) override;
     void SetOnScrollToIndex(ScrollToIndexFunc&& value) override;
     void SetOnScrollBarUpdate(ScrollBarUpdateFunc&& value) override;
     void SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;

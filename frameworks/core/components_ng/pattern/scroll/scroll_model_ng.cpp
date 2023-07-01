@@ -183,4 +183,13 @@ void ScrollModelNG::SetScrollEnabled(bool scrollEnabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, scrollEnabled);
 }
+
+void ScrollModelNG::SetFriction(double friction)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFriction(friction);
+}
 } // namespace OHOS::Ace::NG

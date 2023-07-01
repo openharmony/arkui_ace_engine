@@ -24,6 +24,11 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
+#ifndef WEARABLE_PRODUCT
+constexpr double FRICTION = 0.6;
+#else
+constexpr double FRICTION = 0.9;
+#endif
 class ScrollablePattern : public Pattern {
     DECLARE_ACE_TYPE(ScrollablePattern, Pattern);
 
@@ -191,6 +196,13 @@ public:
         }
     }
 
+    void SetFriction(double friction);
+
+    double GetFriction() const
+    {
+        return friction_;
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -229,6 +241,7 @@ private:
     bool isDraggedDown_ = false;
     bool isCoordEventNeedSpring_ = true;
     bool isCoordEventNeedMoveUp_ = false;
+    double friction_ = FRICTION;
 
     NestedScrollOptions nestedScroll_;
 };

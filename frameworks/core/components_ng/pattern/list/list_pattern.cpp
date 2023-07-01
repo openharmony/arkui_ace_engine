@@ -1589,6 +1589,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (!itemPosition_.empty()) {
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
+    json->Put("friction", GetFriction());
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)

@@ -174,6 +174,11 @@ public:
         scrollTouchUpCallback_ = scrollTouchUpCallback;
     }
 
+    void SetUnstaticFriction(double friction)
+    {
+        friction_ = friction;
+    }
+
     void HandleTouchDown();
     void HandleTouchUp();
     void HandleTouchCancel();
@@ -469,6 +474,7 @@ private:
     double dragStartPosition_ = 0.0;
     double dragEndPosition_ = 0.0;
     double lastVelocity_ = 0.0;
+    double friction_ = -1.0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif
