@@ -22,6 +22,9 @@
 #endif
 
 #include "core/components/swiper/render_swiper.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace {
 class RosenRenderSwiper : public RenderSwiper {

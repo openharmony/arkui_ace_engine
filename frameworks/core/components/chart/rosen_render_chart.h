@@ -19,6 +19,8 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "base/geometry/offset.h"

@@ -34,14 +34,24 @@ public:
 
     void Paint(RenderContext& context, const Offset& offset) override;
 
+#ifndef USE_ROSEN_DRAWING
     void PaintRing(SkCanvas* canvas, const Offset& offset);
 
     void PaintComet(SkCanvas* canvas, const Offset& offset);
+#else
+    void PaintRing(RSCanvas* canvas, const Offset& offset);
+
+    void PaintComet(RSCanvas* canvas, const Offset& offset);
+#endif
 
 private:
     void RotateCalculate(const Offset& src, Offset& dst, float degrees);
 
+#ifndef USE_ROSEN_DRAWING
     Sk3DView* camera_ = nullptr;
+#else
+    RSCamera3D* camera_ = nullptr;
+#endif
     double locationOffsetY_ = 0.0;
     Offset cometCenter_;
 };

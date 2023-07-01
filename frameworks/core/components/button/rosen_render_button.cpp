@@ -90,11 +90,12 @@ void RosenRenderButton::PaintLayer(RSCanvas* canvas)
 #endif
 {
 #ifdef OHOS_PLATFORM
+#ifndef USE_ROSEN_DRAWING
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     recordingCanvas->MultiplyAlpha(opacityLayer_ / 255.0f);
-#ifndef USE_ROSEN_DRAWING
     recordingCanvas->concat(RosenSvgPainter::ToSkMatrix(transformLayer_));
 #else
+    auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
     recordingCanvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(transformLayer_));
 #endif
 #endif
@@ -303,19 +304,19 @@ void RosenRenderButton::DrawShape(RSCanvas* canvas, const Offset& offset, bool i
 
         if (buttonComponent_->GetType() == ButtonType::CUSTOM) {
             ConvertToVector(buttonComponent_->GetRectRadii(), radii_);
-            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSscalar>(buttonSize_.Width()),
-                static_cast<RSscalar>(buttonSize_.Height())), radii_);
+            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSScalar>(buttonSize_.Width()),
+                static_cast<RSScalar>(buttonSize_.Height())), radii_);
         } else {
-            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSscalar>(buttonSize_.Width()),
-                static_cast<RSscalar>(buttonSize_.Height())),
+            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSScalar>(buttonSize_.Width()),
+                static_cast<RSScalar>(buttonSize_.Height())),
                 rrectRadius_, rrectRadius_);
         }
         rRect.Offset(offset.GetX(), offset.GetY());
 
 #ifdef OHOS_PLATFORM
-        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+        auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
         recordingCanvas->AttachPen(pen);
-        recordingCanvas->DrawAdaptiveRRect(rRect.GetCornerRadius(RSRoundRect::CornerPos::TOP_LEFT_POS).GetX());
+        LOGE("Drawing is not supported");
         recordingCanvas->DetachPen();
 #else
         canvas->AttachPen(pen);
@@ -329,19 +330,19 @@ void RosenRenderButton::DrawShape(RSCanvas* canvas, const Offset& offset, bool i
 
         if (buttonComponent_->GetType() == ButtonType::CUSTOM) {
             ConvertToVector(buttonComponent_->GetRectRadii(), radii_);
-            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSscalar>(buttonSize_.Width()),
-                static_cast<RSscalar>(buttonSize_.Height())), radii_);
+            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSScalar>(buttonSize_.Width()),
+                static_cast<RSScalar>(buttonSize_.Height())), radii_);
         } else {
-            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSscalar>(buttonSize_.Width()),
-                static_cast<RSscalar>(buttonSize_.Height())),
+            rRect = RSRoundRect(RSRect(0, 0, static_cast<RSScalar>(buttonSize_.Width()),
+                static_cast<RSScalar>(buttonSize_.Height())),
                 rrectRadius_, rrectRadius_);
         }
         rRect.Offset(offset.GetX(), offset.GetY());
 
 #ifdef OHOS_PLATFORM
-        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+        auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
         recordingCanvas->AttachBrush(brush);
-        recordingCanvas->DrawAdaptiveRRect(rRect.GetCornerRadius(RSRoundRect::CornerPos::TOP_LEFT_POS).GetX());
+        LOGE("Drawing is not supported");
         recordingCanvas->DetachBrush();
 #else
         canvas->AttachBrush(brush);
@@ -648,7 +649,7 @@ bool RosenRenderButton::HasEffectiveTransform() const
 #ifndef USE_ROSEN_DRAWING
 void RosenRenderButton::ConvertToSkVector(const std::array<Radius, 4>& radii, SkVector* skRadii)
 #else
-void RosenRenderButton::ConvertToVector(const std::array<Radius, 4>& radii, RSPoint* pRadii)
+void RosenRenderButton::ConvertToVector(const std::array<Radius, 4>& radii, std::vector<RSPoint>& pRadii)
 #endif
 {
     auto context = context_.Upgrade();

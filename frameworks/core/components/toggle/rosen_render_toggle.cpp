@@ -52,10 +52,11 @@ void RosenRenderToggle::Paint(RenderContext& context, const Offset& offset)
     }
     UpdateLayer();
 #ifdef OHOS_PLATFORM
-    auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
 #ifndef USE_ROSEN_DRAWING
+    auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     recordingCanvas->concat(RosenSvgPainter::ToSkMatrix(transformLayer_));
 #else
+    auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
     recordingCanvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(transformLayer_));
 #endif
 #endif
@@ -95,8 +96,8 @@ void RosenRenderToggle::DrawToggle(RSCanvas* canvas, const Offset& offset) const
 
     double radius = toggleSize_.Height() / 2;
     RSRoundRect rRect(
-        RSRect(0, 0, static_cast<RSscalar>(toggleSize_.Width()),
-            static_cast<RSscalar>(toggleSize_.Height())),
+        RSRect(0, 0, static_cast<RSScalar>(toggleSize_.Width()),
+            static_cast<RSScalar>(toggleSize_.Height())),
         radius, radius);
     rRect.Offset(offset.GetX(), offset.GetY());
     canvas->AttachBrush(brush);

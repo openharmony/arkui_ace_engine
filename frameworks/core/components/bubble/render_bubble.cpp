@@ -25,6 +25,9 @@
 #include "core/components/bubble/bubble_element.h"
 #include "core/components/slider/render_slider.h"
 #include "core/components/stack/stack_element.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_element.h"
@@ -692,23 +695,20 @@ void RenderBubble::BuildCornerPath(RSPath& path, Placement placement, double rad
 {
     switch (placement) {
         case Placement::TOP_LEFT:
-            path.ArcTo(radius, radius, 0.0f, RSPathArcSize::SMALL_ARCSIZE,
-                RSPathDirection::CW_DIRECTION, childOffset_.GetX() + radius, childOffset_.GetY());
+            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION,
+                childOffset_.GetX() + radius, childOffset_.GetY());
             break;
         case Placement::TOP_RIGHT:
-            path.ArcTo(radius, radius, 0.0f, RSPathArcSize::SMALL_ARCSIZE,
-                RSPathDirection::CW_DIRECTION, childOffset_.GetX() + childSize_.Width(),
-                childOffset_.GetY() + radius);
+            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION,
+                childOffset_.GetX() + childSize_.Width(), childOffset_.GetY() + radius);
             break;
         case Placement::BOTTOM_RIGHT:
-            path.ArcTo(radius, radius, 0.0f, RSPathArcSize::SMALL_ARCSIZE,
-                RSPathDirection::CW_DIRECTION, childOffset_.GetX() + childSize_.Width() - radius,
-                childOffset_.GetY() + childSize_.Height());
+            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION,
+                childOffset_.GetX() + childSize_.Width() - radius, childOffset_.GetY() + childSize_.Height());
             break;
         case Placement::BOTTOM_LEFT:
-            path.ArcTo(radius, radius, 0.0f, RSPathArcSize::SMALL_ARCSIZE,
-                RSPathDirection::CW_DIRECTION, childOffset_.GetX(),
-                childOffset_.GetY() + childSize_.Height() - radius);
+            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION,
+                childOffset_.GetX(), childOffset_.GetY() + childSize_.Height() - radius);
             break;
         default:
             break;

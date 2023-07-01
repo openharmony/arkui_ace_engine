@@ -176,28 +176,26 @@ void RosenRenderTip::PaintTopTip(RSCanvas* canvas, RSBrush brush, const Offset& 
         globalArrowPosition.GetY() - bubbleSpacing);
     path_.ArcTo(
         NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
-        0.0f, RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION,
-        globalArrowPosition.GetX() + childHalfWidth,
+        0.0f, RSPathDirection::CCW_DIRECTION, globalArrowPosition.GetX() + childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetY()));
     path_.LineTo(globalArrowPosition.GetX() + childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopRightRadius().GetY())));
     path_.ArcTo(
         NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()),
-        0.0f, RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION,
+        0.0f, RSPathDirection::CCW_DIRECTION,
         globalArrowPosition.GetX() + childHalfWidth - NormalizeToPx(border_.TopRightRadius().GetX()),
         globalArrowPosition.GetY() - bubbleSpacing - childHeight);
     path_.LineTo(globalArrowPosition.GetX() - (childHalfWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
         globalArrowPosition.GetY() - bubbleSpacing - childHeight);
     path_.ArcTo(
         NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()),
-        0.0f, RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION,
-        globalArrowPosition.GetX() - childHalfWidth,
+        0.0f, RSPathDirection::CCW_DIRECTION, globalArrowPosition.GetX() - childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopLeftRadius().GetY())));
     path_.LineTo(globalArrowPosition.GetX() - childHalfWidth,
         globalArrowPosition.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomLeftRadius().GetY()));
     path_.ArcTo(
         NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
-        0.0f, RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION,
+        0.0f, RSPathDirection::CCW_DIRECTION,
         globalArrowPosition.GetX() - (childHalfWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())),
         globalArrowPosition.GetY() - bubbleSpacing);
     path_.LineTo(globalArrowPosition.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
@@ -308,30 +306,26 @@ void RosenRenderTip::PaintLeftTip(RSCanvas* canvas, RSBrush brush, const Offset&
         globalArrowPosition.GetY() - (childHalfHeight - NormalizeToPx(border_.TopRightRadius().GetY())));
     path_.ArcTo(
         NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
-        RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION,
+        RSPathDirection::CCW_DIRECTION,
         globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.TopRightRadius().GetX()),
         globalArrowPosition.GetY() - childHalfHeight);
     path_.LineTo(
         globalArrowPosition.GetX() - bubbleSpacing - (childWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
         globalArrowPosition.GetY() - childHalfHeight);
     path_.ArcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
-        RSPathArcSize::SMALL_ARCSIZE,
-        RSPathDirection::CCW_DIRECTION,
-        globalArrowPosition.GetX() - bubbleSpacing - childWidth,
+        RSPathDirection::CCW_DIRECTION, globalArrowPosition.GetX() - bubbleSpacing - childWidth,
         globalArrowPosition.GetY() - childHalfHeight + NormalizeToPx(border_.TopLeftRadius().GetY()));
     path_.LineTo(globalArrowPosition.GetX() - bubbleSpacing - childWidth,
         globalArrowPosition.GetY() + (childHalfHeight - NormalizeToPx(border_.BottomLeftRadius().GetY())));
     path_.ArcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
-        0.0f, RSPathArcSize::SMALL_ARCSIZE,
-        RSPathDirection::CCW_DIRECTION,
+        0.0f, RSPathDirection::CCW_DIRECTION,
         globalArrowPosition.GetX() - bubbleSpacing - (childWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())),
         globalArrowPosition.GetY() + childHalfHeight);
     path_.LineTo(globalArrowPosition.GetX() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetX()),
         globalArrowPosition.GetY() + childHalfHeight);
     path_.ArcTo(
         NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()), 0.0f,
-        RSPathArcSize::SMALL_ARCSIZE, RSPathDirection::CCW_DIRECTION,
-        globalArrowPosition.GetX() - bubbleSpacing,
+        RSPathDirection::CCW_DIRECTION, globalArrowPosition.GetX() - bubbleSpacing,
         globalArrowPosition.GetY() + (childHalfHeight - NormalizeToPx(border_.BottomRightRadius().GetY())));
     path_.LineTo(globalArrowPosition.GetX() - NormalizeToPx(8.0_vp),
         globalArrowPosition.GetY() + NormalizeToPx(16.0_vp) + arrowOffset);

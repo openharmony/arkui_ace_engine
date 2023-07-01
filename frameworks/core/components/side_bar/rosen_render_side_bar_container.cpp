@@ -39,8 +39,7 @@ void RosenRenderSideBarContainer::Paint(RenderContext& context, const Offset& of
     rsNode->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 #else
     RSRecordingPath dPath;
-    dPath.AddRect(RSRect(paintRect.GetLeft(), paintRect.GetTop(),
-        paintRect.GetWidth() + paintRect.GetLeft(), paintRect.GetHeight()));
+    dPath.AddRect(RSRect(paintRect.Left(), paintRect.Top(), paintRect.Right(), paintRect.Bottom()));
     rsNode->SetClipBounds(Rosen::RSPath::CreateRSPath(dPath));
 #endif
 
