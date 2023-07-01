@@ -3100,8 +3100,7 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
 
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        auto value = std::to_string(themeConstants->GetDouble(resId->ToNumber<uint32_t>()));
-        StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
+        result = themeConstants->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
         return true;
     }
 
