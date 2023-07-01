@@ -2990,7 +2990,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         inputAttribute.enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
         if (context) {
-            LOGI("RequestKeyboard set calling window id is : %{public}zu", context->GetFocusWindowId());
+            LOGI("RequestKeyboard set calling window id is : %{public}u", context->GetFocusWindowId());
             inputMethod->SetCallingWindow(context->GetFocusWindowId());
         }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
