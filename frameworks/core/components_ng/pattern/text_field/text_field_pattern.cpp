@@ -2744,16 +2744,6 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
 }
 
-void TextFieldPattern::InitEditingValueTextWithFilter()
-{
-    auto content = textEditingValue_.text;
-    ClearEditingValue();
-    InsertValue(content);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
-}
-
 void TextFieldPattern::InitCaretPosition(std::string content)
 {
     textEditingValue_.caretPosition = static_cast<int32_t>(StringUtils::ToWstring(content).length());
