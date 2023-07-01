@@ -149,6 +149,9 @@ public:
     static bool ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result);
     static bool ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result);
 
+    // mouse response response region
+    static void JsMouseResponseRegion(const JSCallbackInfo& info);
+
     // for number and string with no unit, use default dimension unit.
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);

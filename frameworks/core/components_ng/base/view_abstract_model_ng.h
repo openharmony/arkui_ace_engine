@@ -773,6 +773,11 @@ public:
         ViewAbstract::SetResponseRegion(responseRegion);
     }
 
+    void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) override
+    {
+        ViewAbstract::SetMouseResponseRegion(responseRegion);
+    }
+
     void SetEnabled(bool enabled) override
     {
         ViewAbstract::SetEnabled(enabled);

@@ -219,6 +219,7 @@ public:
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
+    virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
