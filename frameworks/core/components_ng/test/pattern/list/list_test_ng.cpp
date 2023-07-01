@@ -4826,7 +4826,7 @@ HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset001, TestSize.Level
     listLayoutAlgorithm->SetTotalOffset(20.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 20);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 25);
 
     listLayoutAlgorithm->SetTotalOffset(10.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
@@ -4922,7 +4922,7 @@ HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset003, TestSize.Level
     listLayoutAlgorithm->SetTotalOffset(20.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 20);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 25);
 
     listLayoutAlgorithm->SetTotalOffset(10.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
