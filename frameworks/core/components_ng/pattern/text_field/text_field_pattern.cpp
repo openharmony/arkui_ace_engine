@@ -1116,7 +1116,7 @@ void TextFieldPattern::HandleFocusEvent()
             }
         } else {
             caretUpdateType_ = CaretUpdateType::EVENT;
-            needToRequestKeyboardInner_ = !(dragRecipientStatus_ == DragStatus::DRAGGING);
+            needToRequestKeyboardInner_ = dragRecipientStatus_ == DragStatus::DRAGGING ? false : true;
         }
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
@@ -2141,8 +2141,7 @@ void TextFieldPattern::OnModifyDone()
     }
     obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     ProcessInnerPadding();
-    textRect_.SetLeft(textRect_.GetX() + offsetDifference_.GetX());
-    textRect_.SetTop(textRect_.GetY() + offsetDifference_.GetY());
+    textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     CalculateDefaultCursor();
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     if (renderContext->HasBackgroundColor()) {
@@ -2151,6 +2150,7 @@ void TextFieldPattern::OnModifyDone()
     auto textWidth = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     if (SelectOverlayIsOn()) {
         needToRefreshSelectOverlay_ = true;
+        CloseSelectOverlay();
         UpdateSelection(
             std::clamp(textSelector_.GetStart(), 0, textWidth), std::clamp(textSelector_.GetEnd(), 0, textWidth));
         UpdateCaretPositionWithClamp(textSelector_.GetEnd());
@@ -2270,17 +2270,12 @@ void TextFieldPattern::ProcessInnerPadding()
     auto themePadding = textFieldTheme->GetPadding();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto left = layoutProperty->GetPaddingProperty()
-                    ->left.value_or(CalcLength(themePadding.Left()))
-                    .GetDimension()
-                    .ConvertToPx();
-    offsetDifference_.SetX(left - GetPaddingLeft());
-    utilPadding_.left = left;
-    auto top =
+    utilPadding_.left = layoutProperty->GetPaddingProperty()
+                            ->left.value_or(CalcLength(themePadding.Left()))
+                            .GetDimension()
+                            .ConvertToPx();
+    utilPadding_.top =
         layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
-    offsetDifference_.SetY(top - GetPaddingTop());
-    utilPadding_.top = top;
-
     utilPadding_.bottom = layoutProperty->GetPaddingProperty()
                               ->bottom.value_or(CalcLength(themePadding.Bottom()))
                               .GetDimension()
