@@ -21,6 +21,7 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/panel/close_icon_layout_property.h"
@@ -38,6 +39,7 @@ namespace {
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double HALF_VALUS = 2.0;
+constexpr int32_t DOUBLENESS = 2;
 
 } // namespace
 
@@ -46,32 +48,41 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<SlidingPanelLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    const auto& constraint = layoutProperty->GetLayoutConstraint();
-    if (!constraint) {
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    if (!layoutConstraint) {
         LOGE("fail to measure slidingPanel due to layoutConstraint is nullptr");
         return;
     }
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
+    auto maxSize = childLayoutConstraint.maxSize;
+    auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::PANEL);
+    columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto idealSize =
         !invisibleFlag_
             ? ((PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9)
-                      ? CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
+                      ? CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL,
                             layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT))
                             .ConvertToSizeT()
-                      : CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
+                      : CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL,
                             layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true))
             : SizeF();
-
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetFrameSize(idealSize);
+    auto width = 0.0f;
+    if (gridSizeType == ScreenSizeType::SM) {
+        width = idealSize.Width();
+    } else {
+        auto columns = columnInfo->GetColumns(gridSizeType);
+        width = columnInfo->GetWidth(columns) + columnInfo->GetParent()->GetGutterWidth().ConvertToPx() * DOUBLENESS;
+    }
+    maxWidth_ = width;
+    idealSize_ = idealSize;
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
-
-    // Calculate child layout constraint.
-    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    auto childIdeaSize = idealSize;
-    childIdeaSize.SetHeight(static_cast<float>(idealSize.Height() - currentOffset_));
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(childIdeaSize);
-    childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
+    childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    childLayoutConstraint.percentReference = childLayoutConstraint.maxSize;
     auto colunmNodeWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::COLUMN_ETS_TAG);
     if (colunmNodeWrapper) {
         colunmNodeWrapper->Measure(childLayoutConstraint);
@@ -97,6 +108,7 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto columnGeometryNode = columnWrapper->GetGeometryNode();
     CHECK_NULL_VOID(columnGeometryNode);
 
+    auto childOffsetX = static_cast<float>((idealSize_.Width() - maxWidth_) / HALF_VALUS);
     fullHeight_ =
         layoutProperty->GetFullHeight().value_or(Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()));
     halfHeight_ = layoutProperty->GetHalfHeight().value_or(
@@ -106,14 +118,14 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (isFirstLayout_) {
         if (invisibleFlag_) {
             auto rootHeight = PipelineContext::GetCurrentRootHeight();
-            childOffset = OffsetF(0.0f, rootHeight);
+            childOffset = OffsetF(childOffsetX, rootHeight);
         } else {
-            childOffset = OffsetF(0.0f, frameSize.Height());
+            childOffset = OffsetF(childOffsetX, frameSize.Height());
         }
         columnWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
         isFirstLayout_ = false;
     } else {
-        childOffset = OffsetF(0.0f, currentOffset_);
+        childOffset = OffsetF(childOffsetX, currentOffset_);
         columnGeometryNode->SetMarginFrameOffset(childOffset + padding.Offset());
     }
     columnWrapper->Layout();
@@ -125,7 +137,7 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto closeIconWidth = closeIconLayoutProperty->GetCloseIconWidthValue();
     auto closeIconMarginTop = closeIconLayoutProperty->GetCloseIconMarginTopValue();
     auto closeIconMargionRight = closeIconLayoutProperty->GetCloseIconMarginRightValue();
-    auto closeIconX = static_cast<float>(Dimension(frameSize.Width()).ConvertToPx()) -
+    auto closeIconX = static_cast<float>(Dimension(frameSize.Width()).ConvertToPx()) - childOffsetX -
                       static_cast<float>(closeIconWidth.ConvertToPx()) -
                       static_cast<float>(closeIconMargionRight.ConvertToPx());
     auto closeIconY = childOffset.GetY() + static_cast<float>(closeIconMarginTop.ConvertToPx());

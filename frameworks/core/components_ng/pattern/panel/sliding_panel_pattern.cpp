@@ -111,6 +111,7 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
     fullHeight_ = layoutAlgorithm->GetFullHeight();
     halfHeight_ = layoutAlgorithm->GetHalfHeight();
     miniHeight_ = layoutAlgorithm->GetMiniHeight();
+    maxWidth_ = layoutAlgorithm->GetMaxWidth();
     return true;
 }
 
@@ -684,8 +685,7 @@ void SlidingPanelPattern::FireSizeChangeEvent()
     } else {
         height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_.value_or(PanelMode::HALF)]);
     }
-    float width = std::floor(frameSize.Width());
-    slidingPanelEventHub->FireSizeChangeEvent(mode_.value_or(PanelMode::HALF), width, height);
+    slidingPanelEventHub->FireSizeChangeEvent(mode_.value_or(PanelMode::HALF), maxWidth_, height);
     previousMode_ = mode_.value_or(PanelMode::HALF);
 }
 

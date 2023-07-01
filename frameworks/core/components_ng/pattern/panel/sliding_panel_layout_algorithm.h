@@ -79,6 +79,11 @@ public:
         invisibleFlag_ = invisibleFlag;
     }
 
+    float GetMaxWidth() const
+    {
+        return maxWidth_;
+    }
+
 private:
     RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
     void MeasureCloseIcon(
@@ -90,6 +95,8 @@ private:
     Dimension halfHeight_;
     Dimension miniHeight_;
     bool invisibleFlag_ = false;
+    float maxWidth_ = 0.0f;
+    SizeF idealSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelLayoutAlgorithm);
 };

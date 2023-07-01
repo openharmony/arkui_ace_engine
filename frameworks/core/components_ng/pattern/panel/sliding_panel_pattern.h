@@ -130,6 +130,7 @@ private:
     Dimension fullHeight_;
     Dimension halfHeight_;
     Dimension miniHeight_;
+    float maxWidth_ = 0.0f;
     SizeF maxSize_;
 
     float minBlankHeight_ = 0.0;
