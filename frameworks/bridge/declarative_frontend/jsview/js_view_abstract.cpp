@@ -1344,7 +1344,7 @@ void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
 void JSViewAbstract::JsMouseResponseRegion(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The args is wrong, it is supposed to have at least 1 arguments");
+        LOGI("The args is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     std::vector<DimensionRect> result;

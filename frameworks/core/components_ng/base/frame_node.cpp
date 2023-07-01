@@ -1337,8 +1337,8 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         return responseRegionList;
     }
     auto scaleProperty = ScaleProperty::CreateScaleProperty();
-    
-    if (sourceType == 1) {
+    bool isMouseEvent = (static_cast<SourceType>(sourceType) == SourceType::MOUSE);
+    if (isMouseEvent) {
         if (gestureHub->GetResponseRegion().empty() && (gestureHub->GetMouseResponseRegion().empty())) {
             responseRegionList.emplace_back(rect);
             return responseRegionList;
@@ -1350,7 +1350,7 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         }
     }
 
-    if (sourceType == 1 && (!gestureHub->GetMouseResponseRegion().empty())) {
+    if (isMouseEvent && (!gestureHub->GetMouseResponseRegion().empty())) {
         for (const auto& region : gestureHub->GetMouseResponseRegion()) {
             auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
             auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
