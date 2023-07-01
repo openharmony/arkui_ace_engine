@@ -830,10 +830,10 @@ public:
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear) override;
 
-    void SetAccessibilityGroup(bool accessible) override {}
-    void SetAccessibilityText(const std::string& text) override {}
-    void SetAccessibilityDescription(const std::string& description) override {}
-    void SetAccessibilityImportance(const std::string& importance) override {}
+    void SetAccessibilityGroup(bool accessible) override;
+    void SetAccessibilityText(const std::string& text) override;
+    void SetAccessibilityDescription(const std::string& description) override;
+    void SetAccessibilityImportance(const std::string& importance) override;
 
     void SetForegroundColor(const Color& color) override
     {

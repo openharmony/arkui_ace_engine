@@ -276,4 +276,36 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), sheetStyle,
         std::move(onAppear), std::move(onDisappear), targetNode->GetId());
 }
+
+void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityGroup(accessible);
+}
+
+void ViewAbstractModelNG::SetAccessibilityText(const std::string& text)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityText(text);
+}
+
+void ViewAbstractModelNG::SetAccessibilityDescription(const std::string& description)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityDescription(description);
+}
+
+void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importance)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityLevel(importance);
+}
 } // namespace OHOS::Ace::NG

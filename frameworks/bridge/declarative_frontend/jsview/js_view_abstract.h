@@ -256,6 +256,7 @@ public:
     static void JsAccessibilityText(const std::string& text);
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
+    static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);
 
     static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
