@@ -750,6 +750,7 @@ private:
     int32_t backgroundColor_ = 0xffffffff;
     uint32_t rosenWindowId_ = 0;
     RefPtr<WebDelegateObserver> observer_;
+    std::shared_ptr<Rosen::RSNode> rsNode_;
 #endif
 };
 
