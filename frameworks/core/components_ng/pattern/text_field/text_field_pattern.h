@@ -826,6 +826,8 @@ public:
         return HasFocus();
     }
 
+    bool IsSearchParentNode() const;
+
     void MarkRedrawOverlay()
     {
         ++drawOverlayFlag_;
@@ -970,10 +972,7 @@ private:
     void OnImageDataReady(bool checkHidePasswordIcon);
     void OnImageLoadSuccess(bool checkHidePasswordIcon);
     void OnImageLoadFail(bool checkHidePasswordIcon);
-
     void CalculateDefaultCursor();
-
-    bool IsSearchParentNode() const;
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
     void SaveUnderlineStates();

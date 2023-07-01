@@ -858,11 +858,6 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
         ShowSelectOverlay(firstHandle, secondHandle);
     }
     UpdateScrollBarOffset();
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    eventHub->FireOnScrollChangeEvent(textRect_.GetX(), currentOffset_);
 }
 
 void TextFieldPattern::OnTextInputScroll(float offset)
@@ -892,20 +887,7 @@ void TextFieldPattern::OnTextInputScroll(float offset)
         CheckHandles(firstHandle, secondHandle);
         ShowSelectOverlay(firstHandle, secondHandle);
     }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    // If the parent node is a Search, the Search callback is executed.
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
-        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-        eventHub->FireOnScrollChangeEvent(currentOffset_, textRect_.GetY());
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        return;
-    }
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    eventHub->FireOnScrollChangeEvent(currentOffset_, textRect_.GetY());
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::GetTextRectsInRange(

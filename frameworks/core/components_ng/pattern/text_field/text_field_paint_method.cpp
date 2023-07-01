@@ -27,6 +27,8 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/search/search_event_hub.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -69,11 +71,30 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     std::string text = textEditingValue.text;
     textFieldContentModifier_->SetTextValue(text);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
+
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto currentTextRectOffsetX = textFieldPattern->GetTextRect().GetX();
+    auto currentTextRectOffsetY = textFieldPattern->GetTextRect().GetY();
+    if (textFieldContentModifier_->GetTextRectX() != currentTextRectOffsetX ||
+        textFieldContentModifier_->GetTextRectY() != currentTextRectOffsetY) {
+        // If the parent node is a Search, the Search callback is executed.
+        if (textFieldPattern->IsSearchParentNode()) {
+            auto parentFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
+            auto searchPattern = parentFrameNode->GetPattern<SearchPattern>();
+            CHECK_NULL_VOID(searchPattern);
+            auto textFieldOffset = searchPattern->GetTextFieldOffset();
+            auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+            eventHub->FireOnScrollChangeEvent(
+                currentTextRectOffsetX + textFieldOffset.GetX(), currentTextRectOffsetY + textFieldOffset.GetY());
+        } else {
+            auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+            eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
+        }
+    }
     textFieldContentModifier_->SetTextRectY(textFieldPattern->GetTextRect().GetY());
     textFieldContentModifier_->SetTextRectX(textFieldPattern->GetTextRect().GetX());
     textFieldContentModifier_->SetTextAlign(textFieldPattern->GetTextAlign());
-    auto frameNode = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());

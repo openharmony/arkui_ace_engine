@@ -356,7 +356,7 @@ void TextFieldModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int3
     eventHub->SetOnSelectionChange(std::move(func));
 }
 
-void TextFieldModelNG::SetOnScroll(std::function<void(float, float)>&& func)
+void TextFieldModelNG::SetOnContentScroll(std::function<void(float, float)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
