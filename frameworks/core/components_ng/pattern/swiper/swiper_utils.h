@@ -37,7 +37,7 @@ public:
     {
         // If display count is setted, use stretch mode.
         CHECK_NULL_RETURN(property, true);
-        if (property->HasDisplayCount()) {
+        if (property->HasDisplayCount() && !property->HasMinSize()) {
             return true;
         }
 

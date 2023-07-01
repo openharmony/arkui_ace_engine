@@ -50,6 +50,8 @@ namespace {
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 180;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
+constexpr Dimension SWIPER_MARGIN = 16.0_vp;
+constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -504,7 +506,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     endMainPos_ = swiperLayoutAlgorithm->GetEndPosition();
     startIndex_ = swiperLayoutAlgorithm->GetStartIndex();
     endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
-
     oldIndex_ = currentIndex_;
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
@@ -1637,6 +1638,15 @@ float SwiperPattern::MainSize() const
     return geometryNode->GetFrameSize().MainSize(GetDirection());
 }
 
+float SwiperPattern::GetMainContentSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    return geometryNode->GetPaddingSize().Width();
+}
+
 float SwiperPattern::CalculateVisibleSize() const
 {
     auto prevMargin = GetPrevMargin();
@@ -1708,7 +1718,51 @@ int32_t SwiperPattern::GetDisplayCount() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, 1);
-    return swiperLayoutProperty->GetDisplayCount().value_or(1);
+    auto displayCount = CalculateDisplayCount();
+    return displayCount;
+}
+
+int32_t SwiperPattern::CalculateDisplayCount() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 1);
+    bool isAutoFill = IsAutoFill();
+    if (isAutoFill) {
+        auto minSize = swiperLayoutProperty->GetMinSize()->ConvertToPx();
+        if (LessOrEqual(minSize, 0)) {
+            return 1;
+        }
+        float contentWidth = GetMainContentSize();
+        auto displayCount =
+            CalculateCount(contentWidth, minSize, SWIPER_MARGIN.ConvertToPx(), SWIPER_GUTTER.ConvertToPx());
+
+        displayCount = displayCount > 0 ? displayCount : 1;
+        auto displayCountProperty = swiperLayoutProperty->GetDisplayCount().value_or(1);
+
+        if (displayCountProperty != displayCount) {
+            swiperLayoutProperty->UpdateDisplayCount(displayCount);
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, 1);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
+        }
+        return displayCount;
+    } else {
+        return swiperLayoutProperty->GetDisplayCount().value_or(1);
+    }
+}
+
+int32_t SwiperPattern::CalculateCount(
+    float contentWidth, float minSize, float margin, float gutter, float swiperPadding) const
+{
+    return static_cast<int32_t>(floor((contentWidth - 2 * margin + gutter - 2 * swiperPadding) / (minSize + gutter)));
+}
+
+bool SwiperPattern::IsAutoFill() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, false);
+    return swiperLayoutProperty->GetMinSize().has_value() &&
+           !LessOrEqual(swiperLayoutProperty->GetMinSize()->ConvertToPx(), 0);
 }
 
 bool SwiperPattern::IsAutoPlay() const

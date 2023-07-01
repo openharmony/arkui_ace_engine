@@ -77,9 +77,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // calculate main size.
     auto contentConstraint = swiperLayoutProperty->GetContentLayoutConstraint().value();
+    bool hasMinSize = swiperLayoutProperty->GetMinSize().has_value() &&
+                      !LessOrEqual(swiperLayoutProperty->GetMinSizeValue().Value(), 0);
+
     auto isSingleCase =
-        (swiperLayoutProperty->GetDisplayCount().has_value() && swiperLayoutProperty->GetDisplayCountValue() == 1) ||
-        (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty));
+        !hasMinSize &&
+        ((swiperLayoutProperty->GetDisplayCount().has_value() && swiperLayoutProperty->GetDisplayCountValue() == 1) ||
+            (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
 
     OptionalSizeF contentIdealSize;
     if (isSingleCase) {
@@ -400,10 +404,13 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         if (!result) {
             break;
         }
+        bool hasMinSize = swiperLayoutProperty->GetMinSize().has_value() &&
+                          !LessOrEqual(swiperLayoutProperty->GetMinSizeValue().Value(), 0);
         auto isSingleCase =
-            (swiperLayoutProperty->GetDisplayCount().has_value() &&
-                swiperLayoutProperty->GetDisplayCountValue() == 1) ||
-            (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty));
+            !hasMinSize &&
+            ((swiperLayoutProperty->GetDisplayCount().has_value() &&
+                 swiperLayoutProperty->GetDisplayCountValue() == 1) ||
+                (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
         if (isSingleCase && jumpIndex_) {
             if (!mainSizeIsDefined_) {
                 endMainPos = startPos + itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
