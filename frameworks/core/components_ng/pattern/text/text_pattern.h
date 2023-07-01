@@ -247,12 +247,12 @@ protected:
     virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void ResetSelection();
+    void HandleLongPress(GestureEvent& info);
 
 private:
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
-    void HandleLongPress(GestureEvent& info);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();

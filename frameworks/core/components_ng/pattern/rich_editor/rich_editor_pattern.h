@@ -193,13 +193,14 @@ private:
     CancelableCallback<void()> caretTwinklingTask_;
     struct UpdateSpanStyle updateSpanStyle_;
     RefPtr<TouchEventImpl> touchListener_;
-
-    ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
+    bool isMousePressed_ = false;
+    bool isFirstmouseSelect_ = false;
+    ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG
 
