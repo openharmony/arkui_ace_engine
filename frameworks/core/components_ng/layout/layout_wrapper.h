@@ -250,7 +250,7 @@ private:
     // Speed up the speed of getting child by index.
     std::unordered_map<int32_t, RefPtr<LayoutWrapper>> childrenMap_;
     
-    RefPtr<LayoutWrapper> overlayChild;
+    RefPtr<LayoutWrapper> overlayChild_;
 
     // cached for GetAllChildrenWithBuild function.
     std::list<RefPtr<LayoutWrapper>> cachedList_;
