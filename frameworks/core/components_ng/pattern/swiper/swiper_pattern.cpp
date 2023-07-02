@@ -999,7 +999,7 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
-    if (IsChildrenSizeLessThanSwiper()) {
+    if (IsChildrenSizeLessThanSwiper() && !IsAutoFill()) {
         return;
     }
     auto edgeEffect = GetEdgeEffect();
@@ -1737,6 +1737,8 @@ int32_t SwiperPattern::CalculateDisplayCount() const
             CalculateCount(contentWidth, minSize, SWIPER_MARGIN.ConvertToPx(), SWIPER_GUTTER.ConvertToPx());
 
         displayCount = displayCount > 0 ? displayCount : 1;
+        auto totalCount = TotalCount();
+        displayCount = displayCount > totalCount ? totalCount : displayCount;
         auto displayCountProperty = swiperLayoutProperty->GetDisplayCount().value_or(1);
 
         if (displayCountProperty != displayCount) {
