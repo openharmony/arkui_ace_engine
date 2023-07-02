@@ -200,6 +200,13 @@ private:
 #endif
     bool isMousePressed_ = false;
     bool isFirstmouseSelect_ = false;
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    bool imeAttached_ = false;
+    bool imeShown_ = false;
+#endif
+    bool isTextChange_ = false;
+    int32_t moveLength_ = 0;
+    MoveDirection moveDirection_ = MoveDirection::FORWARD;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

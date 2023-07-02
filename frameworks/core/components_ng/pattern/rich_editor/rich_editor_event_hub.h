@@ -24,6 +24,29 @@ class TextInsertValueInfo {
 public:
     TextInsertValueInfo() = default;
     ~TextInsertValueInfo() = default;
+    void SetSpanIndex(int32_t spanIndex)
+    {
+        spanIndex_ = spanIndex;
+    }
+
+    int32_t GetSpanIndex() const
+    {
+        return spanIndex_;
+    }
+
+    void SetOffsetInSpan(int32_t offsetInSpan)
+    {
+        offsetInSpan_ = offsetInSpan;
+    }
+
+    int32_t GetOffsetInSpan() const
+    {
+        return offsetInSpan_;
+    }
+
+private:
+    int32_t spanIndex_ = 0;
+    int32_t offsetInSpan_ = 0;
 };
 
 class RichEditorInsertValue : public BaseEventInfo {
@@ -31,7 +54,9 @@ class RichEditorInsertValue : public BaseEventInfo {
 public:
     RichEditorInsertValue() : BaseEventInfo("RichEditorInsertValue") {}
     ~RichEditorInsertValue() override = default;
+    void SetInsertOffset(int32_t insertOffset);
     int32_t GetInsertOffset() const;
+    void SetInsertValue(const std::string& insertValue);
     const std::string& GetInsertValue() const;
 
 private:
@@ -45,25 +70,45 @@ class RichEditorAbstractSpanResult {
 public:
     RichEditorAbstractSpanResult() = default;
     ~RichEditorAbstractSpanResult() = default;
+    void SetSpanIndex(int32_t spanIndex);
     int32_t GetSpanIndex() const;
+    void SetSpanRangeStart(int32_t spanRangeStart);
     int32_t GetSpanRangeStart() const;
+    void SetSpanRangeEnd(int32_t spanRangeEnd);
     int32_t GetSpanRangeEnd() const;
+    void SetSpanType(SpanResultType spanType);
     SpanResultType GetType() const;
+    void SetOffsetInSpan(int32_t offsetInSpan);
     int32_t OffsetInSpan() const;
+    void SetEraseLength(int32_t eraseLength);
     int32_t GetEraseLength() const;
+    void SetValue(const std::string& value);
     const std::string& GetValue() const;
+    void SetFontColor(const std::string& fontColor);
     const std::string& GetFontColor() const;
+    void SetFontSize(double fontSize);
     double GetFontSize() const;
-    Ace::FontStyle GetFontStyle() const;
+    void SetFontStyle(FontStyle fontStyle);
+    FontStyle GetFontStyle() const;
+    void SetFontWeight(int32_t fontWeigth);
     int32_t GetFontWeight() const;
+    void SetFontFamily(const std::string& fontFamily);
     const std::string& GetFontFamily() const;
+    void SetTextDecoration(TextDecoration textDecoration);
     TextDecoration GetTextDecoration() const;
+    void SetColor(const std::string& color);
     const std::string& GetColor() const;
+    void SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap);
     const RefPtr<PixelMap>& GetValuePixelMap() const;
+    void SetValueResourceStr(const std::string valueResourceStr);
     const std::string& GetValueResourceStr() const;
+    void SetSizeWidth(int32_t width);
     int32_t GetSizeWidth() const;
+    void SetSizeHeight(int32_t height);
     int32_t GetSizeHeight() const;
+    void SetVerticalAlign(VerticalAlign verticalAlign);
     VerticalAlign GetVerticalAlign() const;
+    void SetImageFit(ImageFit objectFit);
     ImageFit GetObjectFit() const;
 
 private:
@@ -96,9 +141,13 @@ class RichEditorDeleteValue : public BaseEventInfo {
 public:
     RichEditorDeleteValue() : BaseEventInfo("RichEditorDeleteValue") {}
     ~RichEditorDeleteValue() = default;
+    void SetOffset(int32_t offset);
     int32_t GetOffset() const;
+    void SetRichEditorDeleteDirection(RichEditorDeleteDirection direction);
     RichEditorDeleteDirection GetRichEditorDeleteDirection() const;
+    void SetLength(int32_t length);
     int32_t GetLength() const;
+    void SetRichEditorDeleteSpans(const RichEditorAbstractSpanResult& deleteSpan);
     const std::list<RichEditorAbstractSpanResult>& GetRichEditorDeleteSpans() const;
 
 private:
