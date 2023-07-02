@@ -961,6 +961,21 @@ void NavigationModelNG::SetNavBarWidth(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value);
 }
 
+void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value);
+}
+
+void NavigationModelNG::SetMaxNavBarWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value);
+}
+
+void NavigationModelNG::SetMinContentWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinContentWidth, value);
+}
+
 void NavigationModelNG::SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
