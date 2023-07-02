@@ -116,7 +116,7 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
         if (onScroll) {
             onScroll(offset);
             DraggedDownScrollEndProcess();
-            if (isDraggedDown && Negative(offset)) {
+            if (isDraggedDown && Negative(offset) && !OutBoundaryCallback()) {
                 return false;
             }
             return scrollEffect_ && scrollEffect_->IsSpringEffect();
