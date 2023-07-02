@@ -35,6 +35,7 @@ build_component_ng("security_component_pattern_ng") {
     configs = [ ":ohos_security_component_config" ]
     external_deps = []
     if (security_component_enable) {
+      sources += [ "security_component_probe.cpp" ]
       external_deps += [
         "access_token:libaccesstoken_sdk",
         "security_component:libsecurity_component_framework",
