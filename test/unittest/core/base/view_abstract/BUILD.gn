@@ -176,6 +176,8 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/frameworks/core/animation/spring_model.cpp",
+    "$ace_root/frameworks/core/animation/spring_motion.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/ace_engine_ext.cpp",
     "$ace_root/frameworks/core/common/anr_thread.cpp",

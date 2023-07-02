@@ -740,10 +740,12 @@ HWTEST_F(WaterFlowTestNg, PositionControllerCoverage002, TestSize.Level1)
      */
     RunMeasureAndLayout();
     controller->ScrollPage(true, true);
+    RunMeasureAndLayout();
     EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
 
     controller->ScrollPage(false, true);
-    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 0));
+    RunMeasureAndLayout();
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset(0, 200));
 }
 
 /**

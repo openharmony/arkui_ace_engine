@@ -20,6 +20,11 @@
 #include "base/geometry/dimension.h"
 
 namespace OHOS::Ace {
+constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
+constexpr float DEFAULT_SCROLL_TO_STIFFNESS = 227.0f;
+constexpr float DEFAULT_SCROLL_TO_DAMPING = 33.0f;
+constexpr float DEFAULT_SCROLL_TO_VELOCITY = 7.0f;
+
 enum class ScrollState {
     IDLE = 0,
     SCROLL,

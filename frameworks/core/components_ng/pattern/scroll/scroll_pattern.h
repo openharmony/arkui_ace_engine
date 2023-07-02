@@ -40,7 +40,6 @@ public:
     ScrollPattern() = default;
     ~ScrollPattern() override
     {
-        animator_ = nullptr;
         positionController_ = nullptr;
     }
 
@@ -109,6 +108,11 @@ public:
         return currentOffset_;
     }
 
+    float GetTotalOffset() const override
+    {
+        return -currentOffset_;
+    }
+
     void ResetPosition();
 
     Offset GetCurrentOffset() const
@@ -171,12 +175,13 @@ public:
     bool IsAtBottom() const override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
+    void OnAnimateStop() override;
     bool UpdateCurrentOffset(float offset, int32_t source) override;
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
-        const std::function<void()>& onFinish = nullptr);
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
     bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);
+    void ScrollTo(float position) override;
     void JumpToPosition(float position, int32_t source = SCROLL_FROM_JUMP);
     bool ScrollPageCheck(float delta, int32_t source);
     void AdjustOffset(float& delta, int32_t source);
@@ -198,7 +203,6 @@ private:
 
     void RegisterScrollEventTask();
     void RegisterScrollBarEventTask();
-    void CreateOrStopAnimator();
     void HandleScrollEffect();
     void HandleScrollBarOutBoundary();
     void ValidateOffset(int32_t source);
@@ -212,7 +216,6 @@ private:
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 
-    RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
@@ -222,7 +225,6 @@ private:
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
     bool scrollStop_ = false;
-    bool scrollAbort_ = false;
     int32_t source_ = SCROLL_FROM_NONE;
 };
 

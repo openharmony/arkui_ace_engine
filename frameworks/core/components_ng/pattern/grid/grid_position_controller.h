@@ -16,24 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_POSITION_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_POSITION_CONTROLLER_H
 
-#include "core/components_ng/pattern/scroll/scroll_controller.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT GridPositionController : public ScrollController {
-    DECLARE_ACE_TYPE(GridPositionController, ScrollController);
+class ACE_EXPORT GridPositionController : public ScrollableController {
+    DECLARE_ACE_TYPE(GridPositionController, ScrollableController);
 
 public:
     GridPositionController() = default;
     ~GridPositionController() override = default;
 
-    Axis GetScrollDirection() const override;
-    Offset GetCurrentOffset() const override;
     void ScrollBy(double pixelX, double pixelY, bool smooth) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollPage(bool reverse, bool smooth) override;
     void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
-    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
     bool IsAtEnd() const override;
 };
 

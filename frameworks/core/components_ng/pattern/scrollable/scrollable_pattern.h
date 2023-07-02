@@ -100,7 +100,7 @@ public:
         return estimatedHeight_;
     }
 
-    float GetCurrentPosition() const
+    float GetBarOffset() const
     {
         return barOffset_;
     }
@@ -203,6 +203,39 @@ public:
         return friction_;
     }
 
+    void StopAnimate();
+    bool AnimateRunning() const
+    {
+        return animator_ && animator_->IsRunning();
+    }
+    bool AnimateStoped() const
+    {
+        return !animator_ || animator_->IsStopped();
+    }
+    void AbortScrollAnimator()
+    {
+        if (animator_ && !animator_->IsStopped()) {
+            scrollAbort_ = true;
+            animator_->Stop();
+        }
+    }
+    bool GetScrollAbort() const
+    {
+        return scrollAbort_;
+    }
+    void SetScrollAbort(bool abort)
+    {
+        scrollAbort_ = abort;
+    }
+    void PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping);
+    virtual float GetTotalOffset() const
+    {
+        return 0.0f;
+    }
+    virtual void OnAnimateStop() {}
+    virtual void ScrollTo(float position);
+    virtual void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth);
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -242,6 +275,10 @@ private:
     bool isCoordEventNeedSpring_ = true;
     bool isCoordEventNeedMoveUp_ = false;
     double friction_ = FRICTION;
+    // scroller
+    RefPtr<Animator> animator_;
+    RefPtr<SpringMotion> springMotion_;
+    bool scrollAbort_ = false;
 
     NestedScrollOptions nestedScroll_;
 };
