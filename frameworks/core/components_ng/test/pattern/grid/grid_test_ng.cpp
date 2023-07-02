@@ -3126,4 +3126,43 @@ HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(fireOnScroll.first.value(), 1.0f);
     EXPECT_FLOAT_EQ(fireOnScroll.second.value(), 1.0f);
 }
+
+/**
+ * @tc.name: GridSetFrictionTest001
+ * @tc.desc: Test SetFriction Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridSetFriction001, TestSize.Level1)
+{
+    constexpr double friction = -1;
+    GridModelNG gridModelNG;
+    RefPtr<ScrollControllerBase> positionController = gridModelNG.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModelNG.CreateScrollBarProxy();
+    gridModelNG.Create(positionController, scrollBarProxy);
+    gridModelNG.SetFriction(friction);
+    GetInstance();
+    RunMeasureAndLayout();
+    /**
+     * @tc.expected: friction shouled be more than 0.0,if out of range,should be default value.
+     */
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 0.6);
+}
+
+/**
+ * @tc.name: GridSetFrictionTest002
+ * @tc.desc: Test SetFriction Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridSetFriction002, TestSize.Level1)
+{
+    constexpr double friction = 10;
+    GridModelNG gridModelNG;
+    RefPtr<ScrollControllerBase> positionController = gridModelNG.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModelNG.CreateScrollBarProxy();
+    gridModelNG.Create(positionController, scrollBarProxy);
+    gridModelNG.SetFriction(friction);
+    GetInstance();
+    RunMeasureAndLayout();
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 10);
+}
 } // namespace OHOS::Ace::NG
