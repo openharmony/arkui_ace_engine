@@ -51,6 +51,7 @@ void ModelViewNG::Create(const std::string& src)
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelLights, {});
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelAnimations, {});
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelGeometries, {});
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRenders, {});
 
     lightsIdx_ = 0;
     if (lights_.empty()) {
@@ -166,7 +167,8 @@ void ModelViewNG::AddGLTFAnimation(const RefPtr<OHOS::Render3D::GLTFAnimation>& 
 
 void ModelViewNG::AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>& customRender)
 {
-    LOGD("MODEL_NG: NOT IMPLEMENTED YET");
+    LOGD("MODEL_NG: AddCustomRender");
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleCustomRender, customRender);
 }
 
 void ModelViewNG::SetWidth(Dimension& width)
