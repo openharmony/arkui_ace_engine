@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
@@ -306,6 +307,7 @@ public:
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void OnRenderFitUpdate(RenderFit renderFit) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
@@ -420,6 +422,9 @@ public:
 
     // obscured
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
+
+    // renderFit
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
     virtual void SetOverrideContentRect(const std::optional<RectF>& rect) {}
 

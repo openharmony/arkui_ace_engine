@@ -1718,3 +1718,23 @@ var SafeAreaEdge;
   SafeAreaEdge[SafeAreaEdge["START"] = 2] = "START";
   SafeAreaEdge[SafeAreaEdge["END"] = 3] = "END";
 })(SafeAreaEdge || (SafeAreaEdge = {}));
+
+var RenderFit;
+(function (RenderFit) {
+  RenderFit[RenderFit["CENTER"] = 0] = "CENTER";
+  RenderFit[RenderFit["TOP"] = 1] = "TOP";
+  RenderFit[RenderFit["BOTTOM"] = 2] = "BOTTOM";
+  RenderFit[RenderFit["LEFT"] = 3] = "LEFT";
+  RenderFit[RenderFit["RIGHT"] = 4] = "RIGHT";
+  RenderFit[RenderFit["TOP_LEFT"] = 5] = "TOP_LEFT";
+  RenderFit[RenderFit["TOP_RIGHT"] = 6] = "TOP_RIGHT";
+  RenderFit[RenderFit["BOTTOM_LEFT"] = 7] = "BOTTOM_LEFT";
+  RenderFit[RenderFit["BOTTOM_RIGHT"] = 8] = "BOTTOM_RIGHT";
+  RenderFit[RenderFit["RESIZE_FILL"] = 9] = "RESIZE_FILL";
+  RenderFit[RenderFit["RESIZE_CONTAIN"] = 10] = "RESIZE_CONTAIN";
+  RenderFit[RenderFit["RESIZE_CONTAIN_TOP_LEFT"] = 11] = "RESIZE_CONTAIN_TOP_LEFT";
+  RenderFit[RenderFit["RESIZE_CONTAIN_BOTTOM_RIGHT"] = 12] = "RESIZE_CONTAIN_BOTTOM_RIGHT";
+  RenderFit[RenderFit["RESIZE_COVER"] = 13] = "RESIZE_COVER";
+  RenderFit[RenderFit["RESIZE_COVER_TOP_LEFT"] = 14] = "RESIZE_COVER_TOP_LEFT";
+  RenderFit[RenderFit["RESIZE_COVER_BOTTOM_RIGHT"] = 15] = "RESIZE_COVER_BOTTOM_RIGHT";
+})(RenderFit || (RenderFit = {}));

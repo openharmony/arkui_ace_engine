@@ -160,6 +160,8 @@ public:
     static void SetZIndex(int32_t value);
     // renderGroup
     static void SetRenderGroup(bool isRenderGroup);
+    // renderFit, i.e. gravity
+    static void SetRenderFit(RenderFit renderFit);
 
     // transform
     static void SetScale(const NG::VectorF& value);

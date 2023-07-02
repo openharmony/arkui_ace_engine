@@ -24,7 +24,6 @@ MATERIAL_BLUR_STYLE GetRosenBlurStyleValue(const BlurStyleOption& option)
     if (option.colorMode == ThemeColorMode::SYSTEM) {
         colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
     }
-    SystemProperties::GetColorMode();
     const static std::map<std::pair<BlurStyle, ThemeColorMode>, MATERIAL_BLUR_STYLE> mp = {
         { { BlurStyle::THIN, ThemeColorMode::LIGHT }, MATERIAL_BLUR_STYLE::STYLE_CARD_THIN_LIGHT },
         { { BlurStyle::THIN, ThemeColorMode::DARK }, MATERIAL_BLUR_STYLE::STYLE_CARD_THIN_DARK },

@@ -265,6 +265,7 @@ public:
     static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
     static void JSRenderGroup(const JSCallbackInfo& info);
+    static void JSRenderFit(const JSCallbackInfo& info);
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
 
