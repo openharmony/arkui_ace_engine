@@ -65,8 +65,12 @@ const std::string TEST_TAG = "test";
 constexpr Dimension SPLIT_WIDTH = 520.0_vp;
 constexpr Dimension STACK_WIDTH = 510.0_vp;
 constexpr float HEIGHT = 1000.0f;
+constexpr float FLOAT_260 = 260.0f;
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH_PER = Dimension(0.2, DimensionUnit::PERCENT);
+constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH_PER = Dimension(0.5, DimensionUnit::PERCENT);
+constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH_PER = Dimension(0.3, DimensionUnit::PERCENT);
 } // namespace
 
 class NavigationTestNg : public testing::Test {
@@ -691,6 +695,244 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_009, TestSize.Level1)
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_011
+ * @tc.desc: Test Navigation OnHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode and pattern.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetUsrNavigationMode(NavigationMode::AUTO);
+    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnHover(true);
+    pattern->OnHover(false);
+    /**
+     * @tc.steps: step2. check pattern
+     * @tc.expected: pattern is not nullptr.
+     */
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_012
+ * @tc.desc: Test Navigation AddDividerHotZoneRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    /**
+     * @tc.steps: step2. create navbar frameNode.
+     */
+    auto navBar = FrameNode::CreateFrameNode(
+        V2::NAVBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigationPattern>());
+    ASSERT_NE(navBar, nullptr);
+    navBar->MountToParent(frameNode);
+    /**
+     * @tc.steps: step3. create navigationPattern.
+     */
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(frameNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navLayoutAlgorithm = navigationPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(navLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(navLayoutAlgorithm));
+    LayoutConstraintF LayoutConstraintVaildSize;
+    LayoutConstraintVaildSize.selfIdealSize.SetSize(SizeF(1000000, 1000000));
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildSize);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    auto navigationLayoutAlgorithm =
+        AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    navigationPattern->AddDividerHotZoneRect(navigationLayoutAlgorithm);
+    navigationPattern->realDividerWidth_ = 2.0f;
+    navigationPattern->AddDividerHotZoneRect(navigationLayoutAlgorithm);
+    /**
+     * @tc.steps: step4. check navigationLayoutAlgorithm
+     * @tc.expected: navigationLayoutAlgorithm is not nullptr.
+     */
+    EXPECT_NE(navigationLayoutAlgorithm, nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_013
+ * @tc.desc: Test Navigation HandleDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Navigation ,then get pattern.
+     */
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+    auto layoutProperty = pattern->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    pattern->HandleDragStart();
+    pattern->HandleDragEnd();
+    /**
+     * @tc.steps: step2. check pattern->preNavBarWidth_.
+     * @tc.expected: preNavBarWidth_ is correct.
+     */
+    EXPECT_EQ(pattern->preNavBarWidth_, 360.0);
+    pattern->preNavBarWidth_ = 0;
+    pattern->HandleDragUpdate(FLOAT_260);
+    EXPECT_EQ(pattern->realNavBarWidth_, -361.0f);
+    pattern->HandleDragUpdate(500.0f);
+    EXPECT_EQ(pattern->realNavBarWidth_, 280.0f);
+    pattern->dragRect_.width_ = 200.0f;
+    pattern->HandleDragUpdate(100.0f);
+    EXPECT_EQ(pattern->realNavBarWidth_, 240.0f);
+    pattern->dragRect_.width_ = 500.0f;
+    pattern->HandleDragUpdate(100.0f);
+    EXPECT_EQ(pattern->realNavBarWidth_, 240.0f);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_014
+ * @tc.desc: Test Navigation Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode and pattern.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    navigationLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto navigationLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(navigationLayoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. get geometryNode .
+     * @tc.expected: layoutWrapper is not nullptr.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    navigationLayoutProperty->UpdateMinNavBarWidth(DEFAULT_MIN_NAV_BAR_WIDTH_PER);
+    navigationLayoutProperty->UpdateMaxNavBarWidth(DEFAULT_MAX_NAV_BAR_WIDTH_PER);
+    navigationLayoutProperty->UpdateMinContentWidth(DEFAULT_MIN_CONTENT_WIDTH_PER);
+    navigationLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_NE(layoutWrapper, nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_015
+ * @tc.desc: Test NavigationPattern hoverEvent_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode and pattern.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    /**
+     * @tc.steps: step2. get inputHub.
+     * @tc.expected: hoverEvent_ is not nullptr.
+     */
+    auto hub = host->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+    auto inputHub = hub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    pattern->InitDividerMouseEvent(inputHub);
+    ASSERT_NE(pattern->hoverEvent_, nullptr);
+    pattern->hoverEvent_->GetOnHoverEventFunc()(false);
+    EXPECT_NE(pattern->hoverEvent_, nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_016
+ * @tc.desc: Test NavigationPattern dragEvent_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode and pattern.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    navigationLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    /**
+     * @tc.steps: step2. get gestureHub.
+     * @tc.expected: pattern is not nullptr.
+     */
+    auto hub = host->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    pattern->InitDragEvent(gestureHub);
+    ASSERT_NE(pattern->dragEvent_, nullptr);
+    GestureEvent event;
+    pattern->dragEvent_->GetActionStartEventFunc()(event);
+    pattern->dragEvent_->GetActionUpdateEventFunc()(event);
+    pattern->dragEvent_->GetActionEndEventFunc()(event);
+    pattern->dragEvent_->GetActionCancelEventFunc()();
+    EXPECT_NE(pattern->dragEvent_, nullptr);
 }
 
 /**
