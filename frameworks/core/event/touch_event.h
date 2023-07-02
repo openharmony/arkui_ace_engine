@@ -88,6 +88,8 @@ struct TouchEvent final {
     std::vector<TouchPoint> pointers;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     std::vector<uint8_t> enhanceData_;
+    // historical points
+    std::vector<TouchEvent> history;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
@@ -541,6 +543,10 @@ public:
     {
         changedTouches_.emplace_back(info);
     }
+    void AddHistoryLocationInfo(TouchLocationInfo&& info)
+    {
+        history_.emplace_back(std::move(info));
+    }
 
     const std::list<TouchLocationInfo>& GetTouches() const
     {
@@ -549,6 +555,10 @@ public:
     const std::list<TouchLocationInfo>& GetChangedTouches() const
     {
         return changedTouches_;
+    }
+    const std::list<TouchLocationInfo>& GetHistory() const
+    {
+        return history_;
     }
 
     void SetPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -564,6 +574,7 @@ private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     std::list<TouchLocationInfo> touches_;
     std::list<TouchLocationInfo> changedTouches_;
+    std::list<TouchLocationInfo> history_;
 };
 
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;
