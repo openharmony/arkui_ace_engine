@@ -420,9 +420,6 @@ public:
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
 
-    // returns true if the node is the root FrameNode under Page, or is the root of an overlay component
-    bool IsContentRoot();
-
     // called during LayoutWrapper creation, used for finding corresponding LayoutWrapper during RestoreGeoState
     void RecordLayoutWrapper(WeakPtr<LayoutWrapper> layoutWrapper)
     {

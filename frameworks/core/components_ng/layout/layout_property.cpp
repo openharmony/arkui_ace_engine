@@ -574,7 +574,6 @@ void LayoutProperty::UpdateSafeAreaInsets(const SafeAreaInsets& safeArea)
     }
     if (*safeAreaInsets_ != safeArea) {
         *safeAreaInsets_ = safeArea;
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
 }
 } // namespace OHOS::Ace::NG

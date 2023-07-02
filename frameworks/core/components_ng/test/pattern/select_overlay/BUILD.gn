@@ -108,6 +108,7 @@ ohos_unittest("select_overlay_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "select_overlay_test_ng.cpp",
   ]
 

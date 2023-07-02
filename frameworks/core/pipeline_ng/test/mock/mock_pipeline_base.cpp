@@ -314,7 +314,8 @@ void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSc
 
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
-    return {};
+    // top inset = 1
+    return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}

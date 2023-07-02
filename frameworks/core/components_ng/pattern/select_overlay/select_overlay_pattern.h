@@ -27,11 +27,12 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT SelectOverlayPattern : public Pattern {
-    DECLARE_ACE_TYPE(SelectOverlayPattern, Pattern);
+class ACE_EXPORT SelectOverlayPattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(SelectOverlayPattern, PopupBasePattern);
 
 public:
     explicit SelectOverlayPattern(std::shared_ptr<SelectOverlayInfo> info) : info_(std::move(info)) {}

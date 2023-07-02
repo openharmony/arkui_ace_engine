@@ -216,6 +216,7 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
     if (insets) {
         ApplySafeArea(*insets, constraint);
     }
+
     geometryNode_->SetParentLayoutConstraint(constraint);
     layoutProperty_->UpdateLayoutConstraint(constraint);
 }
@@ -224,6 +225,23 @@ void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraint
 {
     constraint.MinusPadding(
         insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
+}
+
+void LayoutWrapper::OffsetNodeToSafeArea()
+{
+    auto&& insets = layoutProperty_->GetSafeAreaInsets();
+    CHECK_NULL_VOID_NOLOG(insets);
+    auto offset = geometryNode_->GetParentGlobalOffset() + geometryNode_->GetMarginFrameOffset();
+    if (offset.GetX() < insets->left_.end) {
+        offset.SetX(insets->left_.end);
+    }
+    if (offset.GetY() < insets->top_.end) {
+        offset.SetY(insets->top_.end);
+    }
+    geometryNode_->SetMarginFrameOffset(offset);
+    for (auto&& child : GetAllChildrenWithBuild()) {
+        child->geometryNode_->SetParentGlobalOffset(offset);
+    }
 }
 
 // This will call child and self measure process.
@@ -319,8 +337,9 @@ void LayoutWrapper::Layout()
     CHECK_NULL_VOID(layoutAlgorithm_);
 
     auto&& expandOpts = layoutProperty_->GetSafeAreaExpandOpts();
-    if ((expandOpts && expandOpts->Expansive()) || host->IsContentRoot()) {
+    if ((expandOpts && expandOpts->Expansive()) || host->GetTag() == V2::PAGE_ETS_TAG) {
         // record expansive wrappers during Layout traversal to speed up SafeArea expansion
+        // Page node needs to avoid keyboard, record it too.
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->GetSafeAreaManager()->AddWrapper(WeakClaim(this));
@@ -355,7 +374,9 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
     layoutAlgorithm_->Layout(this);
+    OffsetNodeToSafeArea();
     LayoutOverlay();
+
     time = GetSysTimestamp() - time;
     AddNodeFlexLayouts();
     AddNodeLayoutTime(time);
@@ -387,8 +408,8 @@ void LayoutWrapper::AvoidKeyboard()
             continue;
         }
         auto host = wrapper->GetHostNode();
-        // apply keyboard avoidance on content rootNodes
-        if (host && host->IsContentRoot()) {
+        // apply keyboard avoidance on Page
+        if (host && host->GetTag() == V2::PAGE_ETS_TAG) {
             wrapper->geometryNode_->SetFrameOffset(
                 wrapper->geometryNode_->GetFrameOffset() + OffsetF(0, manager->GetKeyboardOffset()));
         }
@@ -641,7 +662,7 @@ void LayoutWrapper::LayoutOverlay()
     }
 
     auto childSize = overlayChild_->GetGeometryNode()->GetMarginFrameSize();
-    auto translate =  Alignment::GetAlignPosition(size, childSize, align) + offset;
+    auto translate = Alignment::GetAlignPosition(size, childSize, align) + offset;
     overlayChild_->GetGeometryNode()->SetMarginFrameOffset(translate);
 }
 

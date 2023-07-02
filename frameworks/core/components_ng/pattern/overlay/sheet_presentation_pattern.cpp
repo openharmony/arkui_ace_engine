@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+
 #include "sheet_presentation_property.h"
 
 #include "core/animation/animation_pub.h"
@@ -24,6 +25,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void SheetPresentationPattern::OnModifyDone()

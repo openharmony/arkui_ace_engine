@@ -153,6 +153,7 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toast/toast_view.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",

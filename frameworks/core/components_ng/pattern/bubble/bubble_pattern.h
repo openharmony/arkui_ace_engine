@@ -29,11 +29,11 @@
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-class BubblePattern : public Pattern {
-    DECLARE_ACE_TYPE(BubblePattern, Pattern);
+class BubblePattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern);
 
 public:
     BubblePattern() = default;
@@ -109,8 +109,8 @@ private:
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
     void PopBubble();
-    void Animation(RefPtr<RenderContext>& renderContext, const Color& endColor,
-        int32_t duration, const RefPtr<Curve>& curve);
+    void Animation(
+        RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
 
     OffsetT<Dimension> GetInvisibleOffset();
     RefPtr<RenderContext> GetRenderContext();
