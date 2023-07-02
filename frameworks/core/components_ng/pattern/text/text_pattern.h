@@ -214,7 +214,7 @@ public:
     {
         onClick_ = std::move(onClick);
     }
-
+    void OnColorConfigurationUpdate() override;
 protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);

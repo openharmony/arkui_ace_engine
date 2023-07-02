@@ -266,4 +266,12 @@ bool FrameNode::IsContentRoot()
 {
     return false;
 }
+
+void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
+{
+}
+
+void FrameNode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
+{
+}
 } // namespace OHOS::Ace::NG

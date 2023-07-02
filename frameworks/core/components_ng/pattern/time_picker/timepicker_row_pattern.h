@@ -63,6 +63,20 @@ public:
         return MakeRefPtr<LinearLayoutAlgorithm>();
     }
 
+    void SetConfirmNode(WeakPtr<FrameNode> buttonConfirmNode)
+    {
+        weakButtonConfirm_ = buttonConfirmNode;
+    }
+
+    void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
+    {
+        weakButtonCancel_ = buttonCancelNode;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
+
+    bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange) override;
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TimePickerLayoutProperty>();
@@ -335,6 +349,8 @@ private:
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;
     std::optional<int32_t> DividerId_;
+    WeakPtr<FrameNode> weakButtonConfirm_;
+    WeakPtr<FrameNode> weakButtonCancel_;
 
     bool hasSecond_ = false;
     std::vector<RefPtr<FrameNode>> timePickerColumns_;

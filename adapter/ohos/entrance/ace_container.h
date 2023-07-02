@@ -32,6 +32,7 @@
 #include "core/common/container.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
@@ -377,7 +378,8 @@ public:
     void UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice,
         const std::string& languageTag, const std::string& configuration);
 
-    void NotifyConfigurationChange(bool needReloadTransition) override;
+    void NotifyConfigurationChange(
+        bool needReloadTransition, const OnConfigurationChange& configurationChange = {false, false}) override;
     void HotReload() override;
 
     bool IsUseStageModel() const override

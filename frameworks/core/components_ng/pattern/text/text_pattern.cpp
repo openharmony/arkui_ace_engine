@@ -1065,4 +1065,12 @@ void TextPattern::SetAccessibilityAction()
         }
     });
 }
+
+void TextPattern::OnColorConfigurationUpdate()
+{
+    auto context = GetHost()->GetContext();
+    auto theme = context->GetTheme<TextTheme>();
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+}
 } // namespace OHOS::Ace::NG

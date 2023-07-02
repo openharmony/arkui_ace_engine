@@ -212,6 +212,20 @@ public:
         return isCascade_;
     }
 
+    void SetConfirmNode(WeakPtr<FrameNode> buttonConfirmNode)
+    {
+        weakButtonConfirm_ = buttonConfirmNode;
+    }
+
+    void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
+    {
+        weakButtonCancel_ = buttonCancelNode;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
+
+    bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange) override;
+
     void SetValues(const std::vector<std::string>& values)
     {
         values_.clear();
@@ -308,6 +322,8 @@ private:
     std::vector<NG::TextCascadePickerOptions> cascadeOriginptions_;
     bool isCascade_ = false;
     bool isHasSelectAttr_ = false;
+    WeakPtr<FrameNode> weakButtonConfirm_;
+    WeakPtr<FrameNode> weakButtonCancel_;
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
     Color backgroundColor_ = Color::WHITE;
