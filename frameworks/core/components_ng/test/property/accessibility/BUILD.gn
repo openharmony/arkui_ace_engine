@@ -25,6 +25,7 @@ ohos_unittest("accessibility_property_test_ng") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
 
     # components
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
@@ -65,6 +66,10 @@ ohos_unittest("accessibility_property_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
@@ -79,6 +84,11 @@ ohos_unittest("accessibility_property_test_ng") {
 
     # pipeline
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
+
+    # animation
+    "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
+    "$ace_root/frameworks/core/animation/cubic_curve.cpp",
+    "$ace_root/frameworks/core/animation/curves.cpp",
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
