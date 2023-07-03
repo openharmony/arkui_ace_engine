@@ -119,9 +119,9 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg002, TestSize.Level1)
     SideBarContainerModelInstance.SetControlButtonHeight(HEIGHT);
     SideBarContainerModelInstance.SetControlButtonLeft(LEFT);
     SideBarContainerModelInstance.SetControlButtonTop(TOP);
-    SideBarContainerModelInstance.SetControlButtonShowIconStr(SHOW_ICON_STR);
-    SideBarContainerModelInstance.SetControlButtonHiddenIconStr(HIDDEN_ICON_STR);
-    SideBarContainerModelInstance.SetControlButtonSwitchingIconStr(SWITCHING_ICON_STR);
+    SideBarContainerModelInstance.SetControlButtonShowIconInfo(SHOW_ICON_STR, false, nullptr);
+    SideBarContainerModelInstance.SetControlButtonHiddenIconInfo(HIDDEN_ICON_STR, false, nullptr);
+    SideBarContainerModelInstance.SetControlButtonSwitchingIconInfo(SWITCHING_ICON_STR, false, nullptr);
     ChangeEvent eventOnChange = [](const bool) {};
     SideBarContainerModelInstance.SetOnChange(std::move(eventOnChange));
     SideBarContainerModelInstance.MarkNeedInitRealSideBarWidth();
@@ -147,9 +147,9 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg002, TestSize.Level1)
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHeight(), HEIGHT);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonLeft(), LEFT);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonTop(), TOP);
-    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonShowIconStr(), SHOW_ICON_STR);
-    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHiddenIconStr(), HIDDEN_ICON_STR);
-    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonSwitchingIconStr(), SWITCHING_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonShowIconInfo()->GetSrc(), SHOW_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHiddenIconInfo()->GetSrc(), HIDDEN_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonSwitchingIconInfo()->GetSrc(), SWITCHING_ICON_STR);
 }
 
 /**

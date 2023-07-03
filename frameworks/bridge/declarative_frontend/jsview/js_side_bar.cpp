@@ -16,8 +16,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_side_bar.h"
 
 #include "base/geometry/dimension.h"
+#include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/side_bar_container_model_impl.h"
@@ -229,6 +233,40 @@ void JSSideBar::JsShowSideBar(const JSCallbackInfo& info)
     }
 }
 
+void JSSideBar::SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JSVal> icon)
+{
+    if (icon->IsUndefined() || icon->IsNull()) {
+        LOGE("SetControlButtonIcon icon parse failed, icon is null.");
+        return;
+    }
+    std::string iconPath;
+    auto isStrType = ParseJsMedia(icon, iconPath);
+    RefPtr<PixelMap> pixMap = nullptr;
+#if defined (PIXEL_MAP_SUPPORTED)
+    if (!isStrType) {
+        pixMap = CreatePixelMapFromNapiValue(icon);
+    }
+#endif
+    if (isStrType || pixMap != nullptr) {
+        switch (iconType) {
+            case SideBarControlButtonType::SHOWN:
+                SideBarContainerModel::GetInstance()->SetControlButtonShowIconInfo(
+                    iconPath, !isStrType, pixMap);
+                break;
+            case SideBarControlButtonType::HIDDEN:
+                SideBarContainerModel::GetInstance()->SetControlButtonHiddenIconInfo(
+                    iconPath, !isStrType, pixMap);
+                break;
+            case SideBarControlButtonType::SWITCHING:
+                SideBarContainerModel::GetInstance()->SetControlButtonSwitchingIconInfo(
+                    iconPath, !isStrType, pixMap);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void JSSideBar::JsControlButton(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -275,18 +313,9 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
             JSRef<JSVal> showIcon = iconsVal->GetProperty("shown");
             JSRef<JSVal> switchingIcon = iconsVal->GetProperty("switching");
             JSRef<JSVal> hiddenIcon = iconsVal->GetProperty("hidden");
-            std::string showIconStr;
-            if (!showIcon->IsNull() && ParseJsMedia(showIcon, showIconStr)) {
-                SideBarContainerModel::GetInstance()->SetControlButtonShowIconStr(showIconStr);
-            }
-            std::string hiddenIconStr;
-            if (!hiddenIcon->IsNull() && ParseJsMedia(hiddenIcon, hiddenIconStr)) {
-                SideBarContainerModel::GetInstance()->SetControlButtonHiddenIconStr(hiddenIconStr);
-            }
-            std::string switchingIconStr;
-            if (!switchingIcon->IsNull() && ParseJsMedia(switchingIcon, switchingIconStr)) {
-                SideBarContainerModel::GetInstance()->SetControlButtonSwitchingIconStr(switchingIconStr);
-            }
+            SetControlButtonIcon(SideBarControlButtonType::SHOWN, showIcon);
+            SetControlButtonIcon(SideBarControlButtonType::HIDDEN, hiddenIcon);
+            SetControlButtonIcon(SideBarControlButtonType::SWITCHING, switchingIcon);
         }
     }
 }

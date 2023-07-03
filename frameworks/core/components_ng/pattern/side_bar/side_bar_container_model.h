@@ -51,9 +51,12 @@ public:
     virtual void SetControlButtonHeight(const Dimension& height);
     virtual void SetControlButtonLeft(const Dimension& left);
     virtual void SetControlButtonTop(const Dimension& top);
-    virtual void SetControlButtonShowIconStr(const std::string& showIconStr);
-    virtual void SetControlButtonHiddenIconStr(const std::string& hiddenIconStr);
-    virtual void SetControlButtonSwitchingIconStr(const std::string& switchingIconStr);
+    virtual void SetControlButtonShowIconInfo(
+        const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    virtual void SetControlButtonHiddenIconInfo(
+        const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    virtual void SetControlButtonSwitchingIconInfo(
+        const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
     virtual void SetOnChange(std::function<void(const bool)>&& onChange);
     virtual void SetDividerStrokeWidth(const Dimension& strokeWidth);
     virtual void SetDividerColor(const Color& color);
