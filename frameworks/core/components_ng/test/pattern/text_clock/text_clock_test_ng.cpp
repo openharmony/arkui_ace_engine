@@ -16,6 +16,7 @@
 #define private public
 #include <optional>
 #include <string>
+#include <sys/time.h>
 
 #include "gtest/gtest.h"
 
@@ -38,7 +39,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HOURS_WEST = -8;
 constexpr int32_t HOURS_WEST2 = INT_MAX;
-constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
+constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 inline const std::string CLOCK_FORMAT = "hms";
 inline const std::string UTC_1 = "1000000000000";
 inline const std::string UTC_2 = "2000000000000";
@@ -49,10 +50,7 @@ const std::string TEXTCLOCK_CONTENT = "08:00:00";
 
 int32_t GetSystemTimeZone()
 {
-    struct timeval currentTime {};
-    struct timezone timeZone {};
-    gettimeofday(&currentTime, &timeZone);
-    int32_t hoursWest = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
+    int32_t hoursWest = timezone / TOTAL_SECONDS_OF_HOUR;
     return hoursWest;
 }
 } // namespace
