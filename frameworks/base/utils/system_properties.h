@@ -378,6 +378,8 @@ public:
 
     static bool IsFormAnimationLimited();
 
+    static bool IsSceneBoardEnabled();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;

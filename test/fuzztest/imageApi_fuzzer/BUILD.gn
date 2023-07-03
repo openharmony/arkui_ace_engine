@@ -131,7 +131,10 @@ ohos_fuzztest("ImageApiFuzzTest") {
       "init_lite:libbegetutil",
     ]
   }
-  external_deps += [ "c_utils:utils" ]
+  external_deps += [
+    "c_utils:utils",
+    "window_manager:libwsutils",
+  ]
   sources += [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
