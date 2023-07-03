@@ -34,7 +34,7 @@ void WindowEventProcess::ProcessWindowEvent(const RefPtr<WindowNode>& windowNode
         LOGD("Enter window:%{public}d first", windowNode->GetId());
         enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
         DispatchPointerEvent(windowNode, enterEvent);
-    } else if (windowNode->GetId() != lastWindowNode->GetId()) {
+    } else if ((lastWindowNode != nullptr) && (windowNode->GetId() != lastWindowNode->GetId())) {
         LOGD("Window switching, enter window:%{public}d, leave window:%{public}d",
             windowNode->GetId(), lastWindowNode->GetId());
         int32_t dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW :
