@@ -210,6 +210,21 @@ public:
         return turnPageRate_;
     }
 
+    void SetTurnPageRate(float turnPageRate)
+    {
+        turnPageRate_ = turnPageRate;
+    }
+
+    float GetTouchBottomRate() const
+    {
+        return touchBottomRate_;
+    }
+
+    void SetTouchBottomRate(float touchBottomRate)
+    {
+        touchBottomRate_ = touchBottomRate;
+    }
+
     RefPtr<Animator> GetController()
     {
         return controller_;
@@ -405,7 +420,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
     void OnTouchTestHit(SourceType hitTestType) override;
-
+    void SwipeToWithoutAnimation(int32_t index);
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -454,7 +469,7 @@ private:
     void PlayIndicatorTranslateAnimation(float translate);
 
     // Implement of swiper controller
-    void SwipeToWithoutAnimation(int32_t index);
+
     void FinishAnimation();
     void StopTranslateAnimation();
     void StopSpringAnimation();
@@ -551,6 +566,7 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    float touchBottomRate_ = 1.0f;
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;

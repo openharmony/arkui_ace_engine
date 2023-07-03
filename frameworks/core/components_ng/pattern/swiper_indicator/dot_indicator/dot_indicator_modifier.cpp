@@ -448,7 +448,8 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
 }
 
 void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
-    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX,
+    float touchBottomRate)
 {
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
@@ -461,6 +462,8 @@ void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBotto
     if (touchBottomType != TouchBottomType::NONE) {
         backgroundWidthDilateRatio = 1.225f - 0.0125f * vectorBlackPointCenterX_->Get().size();
         backgroundHeightDilateRatio = 0.8f;
+        backgroundWidthDilateRatio = (backgroundWidthDilateRatio - 1.0f) * touchBottomRate + 1.0f;
+        backgroundHeightDilateRatio = (backgroundHeightDilateRatio - 1.0f) * touchBottomRate + 1.0f;
     }
     touchBottomType_ = touchBottomType;
     AnimationUtils::Animate(option, [weak = WeakClaim(this), backgroundWidthDilateRatio, backgroundHeightDilateRatio,
