@@ -1529,7 +1529,7 @@ void ViewAbstractModelImpl::BindMenu(
     click->SetOnClick(tapGesture);
 }
 
-void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam&)
+void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);

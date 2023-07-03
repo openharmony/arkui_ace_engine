@@ -1648,7 +1648,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     EXPECT_TRUE(MockPipelineBase::GetCurrent()->GetOverlayManager()->onShowMenuCallback_);
     params.push_back(OptionParam());
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
-    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, std::move(buildFunc), menuParam);
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam);
     CallShowHideFunc();
     EXPECT_EQ(flag, 0);
     /**
@@ -1658,7 +1658,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     menuParam.onAppear = flagFunc;
     menuParam.onDisappear = flagFunc;
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
-    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, std::move(buildFunc), menuParam);
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam);
     CallShowHideFunc();
     EXPECT_EQ(flag, 4);
     /**

@@ -865,7 +865,7 @@ public:
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam) override;
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
@@ -946,6 +946,8 @@ private:
     void RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam);
     void RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam);
     void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
+    void RegisterContextMenuKeyEvent(
+        const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent) override

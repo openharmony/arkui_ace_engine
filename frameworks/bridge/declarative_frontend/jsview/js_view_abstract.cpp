@@ -4951,7 +4951,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         LOGI("Set the responseType is %{public}d.", response);
         responseType = static_cast<ResponseType>(response);
     }
-    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BuildContextMenu");
         func->Execute();
@@ -4962,7 +4962,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         ParseBindContentOptionParam(info, info[2], menuParam);
     }
 
-    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc), menuParam);
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam);
 }
 
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
