@@ -27,6 +27,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -69,6 +70,19 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     }
     if (textLineStyle) {
         json->Put("lineHeight", textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str());
+    }
+}
+
+SpanNode::~SpanNode()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        context->RemoveFontNodeNG(AceType::WeakClaim(this));
+        auto fontManager = context->GetFontManager();
+        if (fontManager) {
+            fontManager->UnRegisterCallbackNG(AceType::WeakClaim(this));
+            fontManager->RemoveVariationNodeNG(AceType::WeakClaim(this));
+        }
     }
 }
 

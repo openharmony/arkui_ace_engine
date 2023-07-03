@@ -28,6 +28,7 @@
 namespace OHOS::Ace {
 
 const char FONT_SRC_NETWORK[] = "http";
+const char FONT_SRC_RESOURCE[] = "resource";
 
 RefPtr<FontLoader> FontLoader::Create(const std::string& familyName, const std::string& familySrc)
 {

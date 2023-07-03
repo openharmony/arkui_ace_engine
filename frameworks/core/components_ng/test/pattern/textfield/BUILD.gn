@@ -106,6 +106,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock_icon_theme.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_drag_drop_manager.cpp",

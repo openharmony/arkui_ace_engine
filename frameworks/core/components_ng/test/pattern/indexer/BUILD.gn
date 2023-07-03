@@ -87,6 +87,7 @@ ohos_unittest("indexer_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     #self

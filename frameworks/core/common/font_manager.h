@@ -55,6 +55,14 @@ public:
     void RemoveVariationNode(const WeakPtr<RenderNode>& node);
     void NotifyVariationNodes();
 
+    bool RegisterCallbackNG(
+        const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback);
+    void UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node);
+    void AddFontNodeNG(const WeakPtr<NG::UINode>& node);
+    void RemoveFontNodeNG(const WeakPtr<NG::UINode>& node);
+    void AddVariationNodeNG(const WeakPtr<NG::UINode>& node);
+    void RemoveVariationNodeNG(const WeakPtr<NG::UINode>& node);
+
 protected:
     static float fontWeightScale_;
 
@@ -62,8 +70,10 @@ private:
     std::list<RefPtr<FontLoader>> fontLoaders_;
     std::vector<std::string> fontNames_;
     std::set<WeakPtr<RenderNode>> fontNodes_;
+    std::set<WeakPtr<NG::UINode>> fontNodesNG_;
     // Render nodes need to layout when wght scale is changed.
     std::set<WeakPtr<RenderNode>> variationNodes_;
+    std::set<WeakPtr<NG::UINode>> variationNodesNG_;
 };
 
 } // namespace OHOS::Ace
