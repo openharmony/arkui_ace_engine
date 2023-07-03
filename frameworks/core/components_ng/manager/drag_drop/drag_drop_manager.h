@@ -107,6 +107,11 @@ public:
         isDragged_ = isDragged;
     }
 
+    void SetIsDragCancel(bool isDragCancel)
+    {
+        isDragCancel_ = isDragCancel;
+    }
+
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes);
 
@@ -140,6 +145,7 @@ private:
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
     std::string extraInfo_;
     std::unique_ptr<JsonValue> newData_ = nullptr;
+    bool isDragCancel_ = false;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::map<std::string, int64_t> summaryMap_;
 #endif // ENABLE_DRAG_FRAMEWORK

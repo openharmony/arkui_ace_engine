@@ -1249,6 +1249,13 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.action == KeyAction::DOWN) {
         eventManager_->DispatchKeyboardShortcut(event);
     }
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        auto manager = GetDragDropManager();
+        if (manager) {
+            manager->SetIsDragCancel(true);
+            manager->OnDragEnd(0.0f, 0.0f, "");
+        }
+    }
     // TAB key set focus state from inactive to active.
     // If return success. This tab key will just trigger onKeyEvent process.
     isTabJustTriggerOnKeyEvent_ =
