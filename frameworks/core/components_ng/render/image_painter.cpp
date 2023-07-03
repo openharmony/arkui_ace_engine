@@ -119,7 +119,7 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Size
     } else if (config.isSvg_) {
         DrawSVGImage(canvas, offset, contentSize);
     } else {
-        DrawStaticImage(canvas, {}, contentSize);
+        DrawStaticImage(canvas, offset, contentSize);
     }
 }
 
