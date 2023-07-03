@@ -1306,7 +1306,16 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
     info.velocity = Dimension(velocity, DimensionUnit::PX).ConvertToVp();
     info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     info.targetOffset = GetCustomPropertyOffset() - Dimension(translate, DimensionUnit::PX).ConvertToVp();
-    FireAnimationStartEvent(currentIndex_, nextIndex, info);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->AddAfterRenderTask([weak = WeakClaim(this), info, nextIndex = GetLoopIndex(nextIndex)]() {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            swiper->FireAnimationStartEvent(swiper->currentIndex_, nextIndex, info);
+        });
+    }
+
     // enable lazy load feature.
     SetLazyLoadFeature(true);
 }
@@ -2146,6 +2155,7 @@ void SwiperPattern::TriggerAnimationEndOnTouchDown()
         }
 
         OnIndexChange();
+        oldIndex_ = currentIndex_;
     }
 }
 

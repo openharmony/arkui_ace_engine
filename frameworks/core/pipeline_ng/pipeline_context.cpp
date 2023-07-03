@@ -275,6 +275,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isNeedFlushMouseEvent_ = false;
     }
     needRenderNode_.clear();
+    taskScheduler_.FlushAfterRenderTask();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
 }
@@ -1781,6 +1782,11 @@ void PipelineContext::Finish(bool /*autoFinish*/) const
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_.AddAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
+{
+    taskScheduler_.AddAfterRenderTask(std::move(task));
 }
 
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)

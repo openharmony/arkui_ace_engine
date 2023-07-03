@@ -200,4 +200,20 @@ void UITaskScheduler::FlushAfterLayoutTask()
     }
 }
 
+void UITaskScheduler::AddAfterRenderTask(std::function<void()>&& task)
+{
+    afterRenderTasks_.emplace_back(std::move(task));
+}
+
+void UITaskScheduler::FlushAfterRenderTask()
+{
+    ACE_SCOPED_TRACE("UITaskScheduler::FlushAfterRenderTask");
+    decltype(afterRenderTasks_) tasks(std::move(afterRenderTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG
