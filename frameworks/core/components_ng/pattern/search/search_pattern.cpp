@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/search/search_pattern.h"
+#include <cstdint>
 
+#include "base/geometry/rect.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/search/search_model.h"
@@ -244,6 +246,18 @@ void SearchPattern::InitSearchController()
         search->HandleCaretPosition(caretPosition);
     });
 
+    searchController_->SetGetTextContentRect([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(search, Rect(0, 0, 0, 0));
+        return search->HandleTextContentRect();
+    });
+
+    searchController_->SetGetTextContentLinesNum([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(search, 0);
+        return search->HandleTextContentLines();
+    });
+
     searchController_->SetStopEditing([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(search);
@@ -260,6 +274,49 @@ void SearchPattern::HandleCaretPosition(int32_t caretPosition)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->SetCaretPosition(caretPosition);
+}
+
+Rect SearchPattern::HandleTextContentRect()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Rect(0, 0, 0, 0));
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, Rect(0, 0, 0, 0));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, Rect(0, 0, 0, 0));
+    RectF rect = textFieldPattern->GetTextRect();
+    auto y = rect.GetY();
+    if (rect.GetY() == 0) {
+        y = textFieldPattern->GetPaddingTop();
+    }
+    if (!textFieldPattern->IsOperation()) {
+        return Rect(rect.GetX(), y, 0, 0);
+    }
+    if (NearEqual(rect.GetX(), -Infinity<float>())) {
+        return Rect(textFieldPattern->GetPaddingLeft(), y, 0, 0);
+    }
+    return Rect(rect.GetX(), y, rect.Width(), rect.Height());
+}
+
+int32_t SearchPattern::HandleTextContentLines()
+{
+    int lines = 0;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, lines);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, lines);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, lines);
+    if (!textFieldPattern->IsOperation()) {
+        return lines;
+    }
+    RectF textRect = textFieldPattern->GetTextRect();
+
+    if ((int32_t)textFieldPattern->GetLineHeight() == 0) {
+        return lines;
+    }
+    lines = (int32_t)textRect.Height() / (int32_t)textFieldPattern->GetLineHeight();
+    return lines;
 }
 
 void SearchPattern::StopEditing()

@@ -443,6 +443,14 @@ public:
         return isUsingMouse_;
     }
 
+    bool IsOperation() const
+    {
+        if (textEditingValue_.ToString().length() > 1) {
+            return true;
+        }
+        return false;
+    }
+
     bool CursorMoveLeft();
     bool CursorMoveRight();
     bool CursorMoveUp();

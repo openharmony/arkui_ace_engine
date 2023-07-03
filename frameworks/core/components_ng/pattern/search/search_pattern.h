@@ -115,6 +115,8 @@ private:
     void OnClickButtonAndImage();
     void OnClickCancelButton();
     void HandleCaretPosition(int32_t caretPosition);
+    Rect HandleTextContentRect();
+    int32_t HandleTextContentLines();
     void StopEditing();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);

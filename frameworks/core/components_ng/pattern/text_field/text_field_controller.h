@@ -40,6 +40,8 @@ public:
     void Insert(const std::string& args) override;
     void CaretPosition(int32_t caretPosition) override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) override;
+    Rect GetTextContentRect() override;
+    int32_t GetTextContentLinesNum() override;
     void StopEditing() override;
 
 private:
