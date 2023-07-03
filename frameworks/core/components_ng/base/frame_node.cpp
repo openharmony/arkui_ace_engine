@@ -1907,29 +1907,24 @@ bool FrameNode::IsContentRoot()
     return parent->GetTag() == V2::JS_VIEW_ETS_TAG && grandParent->GetTag() == V2::PAGE_ETS_TAG;
 }
 
-void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect, const TouchRestrict& touchRestrict)
+void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)
 {
-    auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
+    auto paintRect = GetTransformRectRelativeToWindow();
     if (IsSecurityComponent()) {
-        if (CheckRectIntersect(responseRegionList, rect)) {
-            bypass_ = true;
-        }
+        bypass_ = CheckRectIntersect(paintRect, rect);
     }
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         const auto& child = *iter;
-        child->CheckSecurityComponentStatus(rect, touchRestrict);
+        child->CheckSecurityComponentStatus(rect);
     }
-    rect.insert(rect.end(), responseRegionList.begin(), responseRegionList.end());
+    rect.push_back(paintRect);
 }
 
-bool FrameNode::CheckRectIntersect(std::vector<RectF>& dest, std::vector<RectF>& origin)
+bool FrameNode::CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin)
 {
-    for (auto destRect : dest) {
-        for (auto originRect : origin) {
-            if (originRect.IsIntersectWith(destRect)) {
-                return true;
-            }
+    for (auto originRect : origin) {
+        if (originRect.IsInnerIntersectWith(dest)) {
+            return true;
         }
     }
     return false;

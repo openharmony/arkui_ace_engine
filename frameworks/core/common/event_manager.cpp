@@ -89,7 +89,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     }
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect, touchRestrict);
+        frameNode->CheckSecurityComponentStatus(rect);
     }
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, touchRestrict, hitTestResult, touchPoint.id);
@@ -121,7 +121,7 @@ void EventManager::TouchTest(
     const NG::PointF point { event.x, event.y };
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect, touchRestrict);
+        frameNode->CheckSecurityComponentStatus(rect);
     }
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, event.id);
@@ -546,7 +546,7 @@ void EventManager::MouseTest(
     TouchTestResult testResult;
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect, touchRestrict);
+        frameNode->CheckSecurityComponentStatus(rect);
     }
     frameNode->TouchTest(point, point, touchRestrict, testResult, event.GetId());
     if (testResult.empty()) {
