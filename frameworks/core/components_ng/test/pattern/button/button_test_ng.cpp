@@ -810,8 +810,8 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest011, TestSize.Level1)
 
     EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::CLIP);
     EXPECT_EQ(textLayoutProp->GetMaxLines(), 10);
-    EXPECT_EQ(textLayoutProp->GetAdaptMinFontSize()->ConvertToPx(), 15);
-    EXPECT_EQ(textLayoutProp->GetAdaptMaxFontSize()->ConvertToPx(), 50);
+    EXPECT_EQ(buttonLayoutProperty->GetMinFontSize()->ConvertToPx(), 15);
+    EXPECT_EQ(buttonLayoutProperty->GetMaxFontSize()->ConvertToPx(), 50);
     EXPECT_EQ(textLayoutProp->GetFontSize()->ConvertToPx(), 20);
     EXPECT_EQ(textLayoutProp->GetFontWeight(), Ace::FontWeight::W100);
     EXPECT_EQ(textLayoutProp->GetFontFamily(), fontFamily);
