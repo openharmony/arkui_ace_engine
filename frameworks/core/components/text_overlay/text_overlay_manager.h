@@ -28,7 +28,9 @@ namespace txt {
 class Paragraph;
 }
 
+#ifndef USE_ROSEN_DRAWING
 class SkCanvas;
+#endif
 
 namespace OHOS::Ace {
 
