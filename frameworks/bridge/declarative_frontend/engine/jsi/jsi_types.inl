@@ -69,10 +69,10 @@ JsiType<T>& JsiType<T>::operator=(JsiType<T>&& rhs)
 }
 
 template<typename T>
-void JsiType<T>::SetWeak()
+void JsiType<T>::SetWeakCallback(void *ref, panda::WeakRefClearCallBack callback)
 {
     if (!handle_.IsEmpty()) {
-        handle_.SetWeak();
+        handle_.SetWeakCallback(ref, callback, nullptr);
     }
 }
 

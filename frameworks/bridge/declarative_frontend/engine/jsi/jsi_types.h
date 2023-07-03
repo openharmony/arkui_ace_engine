@@ -56,7 +56,7 @@ public:
     }
     static JsiType<T> New();
 
-    void SetWeak();
+    void SetWeakCallback(void *ref, panda::WeakRefClearCallBack callback);
     const panda::CopyableGlobal<T>& GetHandle() const;
     const panda::CopyableGlobal<T>& operator->() const;
     Local<T> GetLocalHandle() const;
