@@ -618,6 +618,11 @@ void ListItemPattern::SwiperReset()
 
 void ListItemPattern::MarkIsSelected(bool isSelected)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemTheme);
+    auto selectColor = listItemTheme->GetItemSelectedColor();
     if (isSelected_ != isSelected) {
         isSelected_ = isSelected;
         auto eventHub = GetEventHub<ListItemEventHub>();
@@ -636,7 +641,11 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
         CHECK_NULL_VOID(geometryNode);
         auto context = host->GetRenderContext();
         CHECK_NULL_VOID(context);
-        context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        if (listItemStyle_ == V2::ListItemStyle::CARD) {
+            context->OnMouseSelectUpdate(isSelected, selectColor, selectColor);
+        } else {
+            context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        }
     }
 }
 
