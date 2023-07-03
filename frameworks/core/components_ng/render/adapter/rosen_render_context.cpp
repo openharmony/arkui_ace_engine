@@ -92,6 +92,7 @@ constexpr float ANIMATION_CURVE_DAMPING_MIDDLE = 35.0f;
 constexpr float ANIMATION_CURVE_DAMPING_HEAVY = 28.0f;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
+constexpr int32_t DEFAULT_OPTION_DURATION = 100;
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
     static const LinearEnumMapNode<RenderFit, Rosen::Gravity> gravityMap[] = {
@@ -2870,6 +2871,7 @@ void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
 
     AnimationOption option;
     option.SetCurve(springCurve);
+    option.SetDuration(DEFAULT_OPTION_DURATION);
 
     if (touchType == TouchType::DOWN && level != ClickEffectLevel::UNDEFINED) {
         if (isTouchUpFinished_) {
