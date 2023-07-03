@@ -124,6 +124,12 @@ public:
         return time;
     }
 
+    const std::string ToString() override
+    {
+        std::string curveString("linear");
+        return curveString;
+    }
+
 private:
     float fractionMin = 0.0f;
     float fractionMax = 1.0f;
