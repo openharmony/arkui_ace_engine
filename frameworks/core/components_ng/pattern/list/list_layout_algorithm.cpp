@@ -985,7 +985,8 @@ int32_t ListLayoutAlgorithm::GetMidIndex()
     float midPos = contentMainSize_ / 2.0f;
     if (GetStartIndex() == 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
         midPos = GetStartPosition() + contentMainSize_ / 2.0f;
-    } else if (GetEndIndex() == totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_)) {
+    } else if (GetEndIndex() == totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_) &&
+        (GetStartIndex() != 0 || !NearEqual(GetStartPosition(), startMainPos_))) {
         midPos = GetEndPosition() - contentMainSize_ / 2.0f;
     }
     for (auto & pos : itemPosition_) {
