@@ -124,6 +124,11 @@ public:
         return TypeInfoHelper::InstanceOf<T>(RawPtr(ptr));
     }
 
+    struct OnConfigurationChange {
+        bool colorModeUpdate = false;
+        bool languageUpdate = false;
+    };
+
 protected:
     AceType() = default;
 };

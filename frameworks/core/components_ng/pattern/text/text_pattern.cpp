@@ -909,7 +909,8 @@ void TextPattern::InitSurfaceChangedCallback()
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+                WindowSizeChangeReason type) {
                 auto pattern = weak.Upgrade();
                 if (pattern) {
                     pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
@@ -1063,5 +1064,13 @@ void TextPattern::SetAccessibilityAction()
             pattern->ResetSelection();
         }
     });
+}
+
+void TextPattern::OnColorConfigurationUpdate()
+{
+    auto context = GetHost()->GetContext();
+    auto theme = context->GetTheme<TextTheme>();
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
 }
 } // namespace OHOS::Ace::NG

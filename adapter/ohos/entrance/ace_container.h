@@ -32,6 +32,7 @@
 #include "core/common/container.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
@@ -377,7 +378,8 @@ public:
     void UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice,
         const std::string& languageTag, const std::string& configuration);
 
-    void NotifyConfigurationChange(bool needReloadTransition) override;
+    void NotifyConfigurationChange(
+        bool needReloadTransition, const OnConfigurationChange& configurationChange = {false, false}) override;
     void HotReload() override;
 
     bool IsUseStageModel() const override
@@ -419,7 +421,7 @@ private:
     void InitWindowCallback();
 
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
-        int32_t windowId, UIEnvCallback callback = nullptr);
+        uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;

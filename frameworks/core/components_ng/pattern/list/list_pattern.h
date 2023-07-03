@@ -69,6 +69,11 @@ public:
         return MakeRefPtr<ListAccessibilityProperty>();
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -147,21 +152,25 @@ public:
         }
     }
 
-    float GetTotalOffset() const
+    float GetTotalOffset() const override
     {
         return currentOffset_;
     }
 
     // scroller
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
-    void StartSpringMotion(float start, float end, float velocity);
-    void ScrollTo(float position, bool smooth);
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override
+    {
+        ScrollablePattern::AnimateTo(position, duration, curve, smooth);
+        FireOnScrollStart();
+    }
+    void ScrollTo(float position) override;
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START);
     void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
+    void OnAnimateStop() override;
 
     void UpdateScrollBarOffset() override;
     // chain animation
@@ -213,7 +222,6 @@ private:
     void HandleScrollEffect(float offset);
     void FireOnScrollStart();
     void CheckRestartSpring();
-    void StopAnimate();
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
@@ -237,16 +245,13 @@ private:
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();
 
-    bool CheckWhetherCurvesRelyOnDuration(const RefPtr<Curve>& curve);
-    void PlayCustomSpringCurverDoNotRelyOnDuration(float position, const RefPtr<Curve>& curve);
-
     RefPtr<ListContentModifier> listContentModifier_;
 
-    RefPtr<Animator> animator_;
     RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    int32_t centerIndex_ = -1;
     float startMainPos_;
     float endMainPos_;
     bool isInitialized_ = false;
@@ -270,13 +275,12 @@ private:
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;
-    bool scrollAbort_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
     std::list<WeakPtr<FrameNode>> itemGroupList_;
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
-
+    float laneGutter_ = 0.0f;
     // chain animation
     RefPtr<ChainAnimation> chainAnimation_;
     bool dragFromSpring_ = false;
@@ -300,8 +304,6 @@ private:
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
-
-    RefPtr<SpringMotion> springMotion_;
 };
 } // namespace OHOS::Ace::NG
 

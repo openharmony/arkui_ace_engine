@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 
+#include <securec.h>
+
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
@@ -26,6 +28,9 @@ namespace OHOS::Ace::NG {
 #ifdef SECURITY_COMPONENT_ENABLE
 using namespace OHOS::Security;
 using namespace OHOS::Security::SecurityComponent;
+namespace {
+constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
+}
 
 static std::vector<uintptr_t> g_callList = {
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::RegisterSecurityComponent),
@@ -436,7 +441,12 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId
     SecCompClickEvent secEvent;
     secEvent.touchX = event.GetDisplayX();
     secEvent.touchY = event.GetDisplayY();
-    secEvent.timestamp = static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count());
+    secEvent.timestamp = static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+    auto data = event.GetEnhanceData();
+    if (data.size() > 0) {
+        secEvent.extraInfo.data = data.data();
+        secEvent.extraInfo.dataSize = data.size();
+    }
     return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, secEvent);
 }
 #else

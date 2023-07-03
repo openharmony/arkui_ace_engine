@@ -64,7 +64,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>();
+        auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>(WeakClaim(this));
         textPickerPaintMethod->SetDefaultPickerItemHeight(CalculateHeight());
         textPickerPaintMethod->SetEnabled(enabled_);
         textPickerPaintMethod->SetBackgroundColor(backgroundColor_);
@@ -212,6 +212,20 @@ public:
         return isCascade_;
     }
 
+    void SetConfirmNode(WeakPtr<FrameNode> buttonConfirmNode)
+    {
+        weakButtonConfirm_ = buttonConfirmNode;
+    }
+
+    void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
+    {
+        weakButtonCancel_ = buttonCancelNode;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
+
+    bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange) override;
+
     void SetValues(const std::vector<std::string>& values)
     {
         values_.clear();
@@ -223,6 +237,36 @@ public:
     void SetHasSelectAttr(bool value)
     {
         isHasSelectAttr_ = value;
+    }
+
+    void SetResizePickerItemHeight(double resizePickerItemHeight)
+    {
+        resizePickerItemHeight_ = resizePickerItemHeight;
+    }
+
+    double GetResizePickerItemHeight() const
+    {
+        return resizePickerItemHeight_;
+    }
+
+    void SetResizeFlag(bool resizeFlag)
+    {
+        resizeFlag_ = resizeFlag;
+    }
+
+    bool GetResizeFlag() const
+    {
+        return resizeFlag_;
+    }
+
+    void SetIsShowInDialog(bool isShowInDialog)
+    {
+        isShowInDialog_ = isShowInDialog;
+    }
+
+    bool GetIsShowInDialog() const
+    {
+        return isShowInDialog_;
     }
 
     void SetSelecteds(const std::vector<uint32_t>& values);
@@ -268,6 +312,7 @@ private:
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_;
+    double resizePickerItemHeight_;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
@@ -277,9 +322,13 @@ private:
     std::vector<NG::TextCascadePickerOptions> cascadeOriginptions_;
     bool isCascade_ = false;
     bool isHasSelectAttr_ = false;
+    WeakPtr<FrameNode> weakButtonConfirm_;
+    WeakPtr<FrameNode> weakButtonCancel_;
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
     Color backgroundColor_ = Color::WHITE;
+    bool resizeFlag_ = false;
+    bool isShowInDialog_ = false;
 
     // inner focus switch
     bool operationOn_ = false;

@@ -180,9 +180,16 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     idealHeight = idealSize.Height();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, std::nullopt);
+    auto isInlineStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE;
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
+        if (isInlineStyle && !pattern->IsTextArea()) {
+            textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+            pattern->SetTextInputFlag(true);
+        }
     } else {
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
@@ -206,7 +213,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         CreateParagraph(textStyle, textContent,
             isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
     }
-    if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
+    if (textStyle.GetMaxLines() == 1 && !showPlaceHolder && !isInlineStyle) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
@@ -228,7 +235,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         }
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
-    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea() && !showPlaceHolder) {
+    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea() && !showPlaceHolder &&
+        !isInlineStyle) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
         if (counterParagraph_) {
             counterParagraph_->Layout(std::ceil(paragraphNewWidth));
@@ -238,11 +246,19 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
+    if (isInlineStyle && pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
+        pattern->SetSingleLineHeight(preferredHeight);
+    }
     if (pattern->IsTextArea()) {
         auto paragraphHeight =
             (textContent.empty() || !showPlaceHolder) ? preferredHeight : static_cast<float>(paragraph_->GetHeight());
         auto useHeight =
             static_cast<float>(paragraphHeight + (counterParagraph_ ? counterParagraph_->GetHeight() : 0.0f));
+        if (isInlineStyle && pattern->GetTextInputFlag()) {
+            idealHeight = pattern->GetSingleLineHeight() *
+                layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+            idealWidth = paragraph_->GetLongestLine();
+        }
         textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
             paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));

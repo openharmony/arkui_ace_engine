@@ -81,6 +81,15 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
     if (colsLen.empty()) {
         colsLen.push_back(idealSize.Width());
     }
+
+    if (mainCount_ != rowsLen.size()) {
+        mainCount_ = rowsLen.size();
+    }
+    if (crossCount_ != colsLen.size()) {
+        crossCount_ = colsLen.size();
+        gridLayoutInfo_.crossCount_ = crossCount_;
+    }
+
     gridCells_.clear();
     int32_t row = 0;
     for (const auto& height : rowsLen) {

@@ -77,7 +77,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         .isVertical = vertical_,
         .lanes = lanes_ > 1 ? lanes_ : 1,
         .totalItemCount = totalItemCount_,
-        .color = divider_.color
+        .color = divider_.color,
+        .laneGutter = laneGutter_
     };
     float checkMargin = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
     if (NearZero(checkMargin)) return;

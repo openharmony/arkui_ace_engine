@@ -21,7 +21,27 @@
 
 namespace OHOS::Ace::Framework {
 
-JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchInfo)
+JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> touchInfoObj = objectTemplate->NewInstance();
+    const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
+    const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
+    touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
+    touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
+    touchInfoObj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalLocation.GetX()));
+    touchInfoObj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalLocation.GetY()));
+    touchInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(localLocation.GetX()));
+    touchInfoObj->SetProperty<double>("y", SystemProperties::Px2Vp(localLocation.GetY()));
+    touchInfoObj->SetPropertyObject(
+        "getHistoricalPoints", JSRef<JSFunc>::New<FunctionCallback>(JsGetHistoricalPoints));
+    touchInfoObj->Wrap<TouchEventInfo>(&info);
+    return touchInfoObj;
+    
+}
+
+JSRef<JSObject> JsTouchFunction::CreateHistoricalPoint(const TouchLocationInfo& touchInfo, TouchEventInfo& info)
 {
     JSRef<JSObject> touchInfoObj = JSRef<JSObject>::New();
     const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
@@ -32,6 +52,12 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     touchInfoObj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalLocation.GetY()));
     touchInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(localLocation.GetX()));
     touchInfoObj->SetProperty<double>("y", SystemProperties::Px2Vp(localLocation.GetY()));
+    touchInfoObj->SetProperty<double>("tiltX", touchInfo.GetTiltX().value());
+    touchInfoObj->SetProperty<double>("tiltY", touchInfo.GetTiltY().value());
+    touchInfoObj->SetProperty<double>("size", touchInfo.GetSize());
+    touchInfoObj->SetProperty<double>("force", static_cast<int32_t>(touchInfo.GetForce()));
+    touchInfoObj->SetProperty<double>("timestamp",
+        static_cast<double>(touchInfo.GetTimeStamp().time_since_epoch().count()));
     return touchInfoObj;
 }
 
@@ -58,7 +84,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     const std::list<TouchLocationInfo>& touchList = info.GetTouches();
     uint32_t idx = 0;
     for (const TouchLocationInfo& location : touchList) {
-        JSRef<JSObject> element = CreateTouchInfo(location);
+        JSRef<JSObject> element = CreateTouchInfo(location, info);
         touchArr->SetValueAt(idx++, element);
     }
     eventObj->SetPropertyObject("touches", touchArr);
@@ -66,7 +92,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     idx = 0; // reset index counter
     const std::list<TouchLocationInfo>& changeTouch = info.GetChangedTouches();
     for (const TouchLocationInfo& change : changeTouch) {
-        JSRef<JSObject> element = CreateTouchInfo(change);
+        JSRef<JSObject> element = CreateTouchInfo(change, info);
         changeTouchArr->SetValueAt(idx++, element);
     }
     if (changeTouch.size() > 0) {

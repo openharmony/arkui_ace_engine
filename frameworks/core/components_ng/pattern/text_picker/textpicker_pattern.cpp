@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <securec.h>
 
+#include "base/i18n/localization.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
@@ -55,6 +56,26 @@ bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return true;
 }
 
+void TextPickerPattern::OnLanguageConfigurationUpdate()
+{
+    auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
+    CHECK_NULL_VOID(buttonConfirmNode);
+    auto confirmNode = buttonConfirmNode->GetFirstChild();
+    auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
+    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    
+    auto buttonCancelNode = weakButtonCancel_.Upgrade();
+    CHECK_NULL_VOID(buttonCancelNode);
+    auto cancelNode = buttonCancelNode->GetFirstChild();
+    auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
+    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+}
+
+bool TextPickerPattern::NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
+{
+    return false;
+}
+
 void TextPickerPattern::SetButtonIdeaSize()
 {
     auto host = GetHost();
@@ -71,9 +92,13 @@ void TextPickerPattern::SetButtonIdeaSize()
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+        auto buttonHeight = CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * RATE;
+        if (resizeFlag_) {
+            buttonHeight = resizePickerItemHeight_ - PRESS_INTERVAL.ConvertToPx() * RATE;
+        }
         buttonLayoutProperty->
             UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx() * RATE),
-                CalcLength(CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * RATE)));
+                CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();

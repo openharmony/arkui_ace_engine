@@ -55,6 +55,7 @@ public:
     virtual void SetHasHeight(bool hasHeight) = 0;
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
+    virtual void SetFriction(double friction) = 0;
 
 private:
     static std::unique_ptr<ScrollModel> instance_;

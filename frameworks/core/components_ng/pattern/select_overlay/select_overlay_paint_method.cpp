@@ -19,7 +19,6 @@
 #include "base/utils/utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -27,12 +26,13 @@ namespace OHOS::Ace::NG {
 CanvasDrawFunction SelectOverlayPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     // paint rect is in global position, need to convert to local position
-    auto rect = paintWrapper->GetGeometryNode()->GetFrameRect();
-    info_->firstHandle.paintRect -= rect.GetOffset();
-    info_->secondHandle.paintRect -= rect.GetOffset();
+    auto offset = paintWrapper->GetGeometryNode()->GetFrameOffset();
+    info_.firstHandle.paintRect -= offset;
+    info_.secondHandle.paintRect -= offset;
 
-    return [info = info_, frameRect = rect](
-               RSCanvas& canvas) { SelectOverlayPaintMethod::DrawHandles(info, canvas, frameRect); };
+    auto rect = paintWrapper->GetGeometryNode()->GetFrameRect();
+    rect -= offset;
+    return [this, frameRect = rect](RSCanvas& canvas) { DrawHandles(canvas, frameRect); };
 }
 
 void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
@@ -52,19 +52,18 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
     auto offset = defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, buttonRadius + top);
     selectOverlayModifier_->SetMenuOptionOffset(offset);
-    selectOverlayModifier_->SetHasExtensitonMenu(hasExtensitonMenu_);
+    selectOverlayModifier_->SetHasExtensitonMenu(hasExtensionMenu_);
 }
 
-void SelectOverlayPaintMethod::DrawHandles(
-    const std::shared_ptr<SelectOverlayInfo>& info, RSCanvas& canvas, const RectF& frameRect)
+void SelectOverlayPaintMethod::DrawHandles(RSCanvas& canvas, const RectF& frameRect)
 {
-    if (!SelectOverlayLayoutAlgorithm::CheckInShowArea(info)) {
+    if (!SelectOverlayLayoutAlgorithm::CheckInShowArea(info_)) {
         LOGD("hide handles due to handle is out of show area");
         return;
     }
 
     canvas.Save();
-    auto frameNode = info->callerFrameNode.Upgrade();
+    auto frameNode = info_.callerFrameNode.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto viewPortOption = frameNode->GetViewPort();
     RectF viewPort = frameRect;
@@ -75,21 +74,21 @@ void SelectOverlayPaintMethod::DrawHandles(
     RSRect clipInnerRect = RSRect(
         viewPort.GetX(), viewPort.GetY(), viewPort.Width() + viewPort.GetX(), viewPort.Height() + viewPort.GetY());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-    if (info->isSingleHandle) {
+    if (info_.isSingleHandle) {
         // Paint one handle.
-        if (info->firstHandle.isShow) {
-            PaintHandle(canvas, info->firstHandle.paintRect, false);
+        if (info_.firstHandle.isShow) {
+            PaintHandle(canvas, info_.firstHandle.paintRect, false);
             return;
         }
-        if (info->secondHandle.isShow) {
-            PaintHandle(canvas, info->secondHandle.paintRect, false);
+        if (info_.secondHandle.isShow) {
+            PaintHandle(canvas, info_.secondHandle.paintRect, false);
         }
     } else {
-        if (info->firstHandle.isShow) {
-            PaintHandle(canvas, info->firstHandle.paintRect, !info->handleReverse);
+        if (info_.firstHandle.isShow) {
+            PaintHandle(canvas, info_.firstHandle.paintRect, !info_.handleReverse);
         }
-        if (info->secondHandle.isShow) {
-            PaintHandle(canvas, info->secondHandle.paintRect, info->handleReverse);
+        if (info_.secondHandle.isShow) {
+            PaintHandle(canvas, info_.secondHandle.paintRect, info_.handleReverse);
         }
     }
     canvas.Restore();

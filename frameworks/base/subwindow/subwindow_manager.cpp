@@ -326,11 +326,11 @@ void SubwindowManager::ClearMenu()
     }
 }
 
-void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects)
+void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->SetHotAreas(rects);
+        subwindow->SetHotAreas(rects, overlayId);
     }
 }
 

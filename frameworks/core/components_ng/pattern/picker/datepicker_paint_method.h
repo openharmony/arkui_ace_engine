@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
@@ -31,6 +32,11 @@ class ACE_EXPORT DatePickerPaintMethod : public NodePaintMethod {
 public:
     DatePickerPaintMethod() = default;
     ~DatePickerPaintMethod() override = default;
+
+    DatePickerPaintMethod(const WeakPtr<Pattern>& pattern)
+    {
+        pattern_ = pattern;
+    }
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
     void PaintGradient(RSCanvas& canvas, const RectF& frameRect);
@@ -49,6 +55,8 @@ public:
 private:
     bool enabled_ = true;
     Color backgroundColor_ = Color::WHITE;
+    
+    WeakPtr<Pattern> pattern_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DATEPICKER_DATEPICKER_PAINT_METHOD_H

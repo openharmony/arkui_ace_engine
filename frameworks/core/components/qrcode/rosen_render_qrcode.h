@@ -22,6 +22,9 @@
 #include "qrcodegen.hpp"
 
 #include "core/components/qrcode/render_qrcode.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace {
 

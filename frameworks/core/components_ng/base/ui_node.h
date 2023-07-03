@@ -70,6 +70,8 @@ public:
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
 
+    virtual void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
@@ -272,8 +274,6 @@ public:
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     virtual void SetActive(bool active);
-
-    virtual void SetJSViewActive(bool active);
 
     virtual void OnVisibleChange(bool isVisible);
 

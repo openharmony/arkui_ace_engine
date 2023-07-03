@@ -38,6 +38,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <vector>
 
 #include "native_xcomponent_key_event.h"
 
@@ -158,6 +159,27 @@ typedef enum {
     OH_NATIVEXCOMPONENT_BACK_BUTTON = 0x08,
     OH_NATIVEXCOMPONENT_FORWARD_BUTTON = 0x10,
 } OH_NativeXComponent_MouseEventButton;
+
+typedef struct {
+    /** Unique identifier of a finger. */
+    int32_t id;
+    /** X coordinate of the touch point relative to the left edge of the screen. */
+    float screenX;
+    /** Y coordinate of the touch point relative to the upper edge of the screen. */
+    float screenY;
+    /** X coordinate of the touch point relative to the left edge of the element to touch. */
+    float x;
+    /** Y coordinate of the touch point relative to the upper edge of the element to touch. */
+    float y;
+    /** Touch type of the touch event. */
+    OH_NativeXComponent_TouchEventType type;
+    /** Contact area between the finger pad and the screen. */
+    double size;
+    /** Pressure of the current touch event. */
+    float force;
+    /** Timestamp of the current touch event. */
+    int64_t timeStamp;
+} OH_NativeXComponent_HistoricalPoint;
 
 typedef struct {
     /** Unique identifier of a finger. */
@@ -372,6 +394,19 @@ int32_t OH_NativeXComponent_GetTouchPointTiltX(OH_NativeXComponent* component, u
  * @version 1.0
  */
 int32_t OH_NativeXComponent_GetTouchPointTiltY(OH_NativeXComponent* component, uint32_t pointIndex, float* tiltY);
+
+/**
+ * @brief Obtains the touch event dispatched by the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param window Indicates the native window handler.
+ * @param historicalPoints Indicates the pointer to the current historicalPoints.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetHistoricalPoints(OH_NativeXComponent* component, const void* window,
+    std::vector<OH_NativeXComponent_HistoricalPoint>& historicalPoints);
 
 /**
  * @brief Obtains the mouse event dispatched by the ArkUI XComponent.

@@ -57,6 +57,8 @@ public:
     std::list<RefPtr<SpanItem>>&& GetSpanItemChildren();
 
     float GetBaselineOffset() const;
+    
+    size_t GetLineCount() const;
 
     std::optional<TextStyle> GetTextStyle() const;
     void ApplyIndents(const TextStyle& textStyle, double width);

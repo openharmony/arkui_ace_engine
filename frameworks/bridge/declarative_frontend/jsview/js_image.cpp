@@ -472,10 +472,6 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
     JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
-    JSClass<JSImage>::StaticMethod("onDragEnter", &JSImage::JsOnDragEnter);
-    JSClass<JSImage>::StaticMethod("onDragMove", &JSImage::JsOnDragMove);
-    JSClass<JSImage>::StaticMethod("onDragLeave", &JSImage::JsOnDragLeave);
-    JSClass<JSImage>::StaticMethod("onDrop", &JSImage::JsOnDrop);
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
@@ -524,68 +520,6 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
         return itemInfo;
     };
     ImageModel::GetInstance()->SetOnDragStart(std::move(onDragStartId));
-}
-
-void JSImage::JsOnDragEnter(const JSCallbackInfo& info)
-{
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
-        return;
-    }
-    auto jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragEnter");
-        func->Execute(info, extraParams);
-    };
-    ImageModel::GetInstance()->SetOnDragEnter(std::move(onDragEnterId));
-}
-
-void JSImage::JsOnDragMove(const JSCallbackInfo& info)
-{
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
-        return;
-    }
-    auto jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragMove");
-        func->Execute(info, extraParams);
-    };
-    ImageModel::GetInstance()->SetOnDragMove(std::move(onDragMoveId));
-}
-
-void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    auto jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragLeave");
-        func->Execute(info, extraParams);
-    };
-    ImageModel::GetInstance()->SetOnDragLeave(std::move(onDragLeaveId));
-}
-
-void JSImage::JsOnDrop(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    auto jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDrop");
-        func->Execute(info, extraParams);
-    };
-    ImageModel::GetInstance()->SetOnDrop(std::move(onDropId));
 }
 
 void JSImage::SetCopyOption(const JSCallbackInfo& info)

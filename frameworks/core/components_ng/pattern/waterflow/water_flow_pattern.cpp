@@ -155,11 +155,10 @@ void WaterFlowPattern::CheckScrollable()
 {
     auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    SetScrollEnable(IsScrollable());
     if (!layoutProperty->GetScrollEnabled().value_or(IsScrollable())) {
         SetScrollEnable(false);
-        return;
     }
-    SetScrollEnable(IsScrollable());
 }
 
 void WaterFlowPattern::OnAttachToFrameNode()
@@ -254,5 +253,10 @@ void WaterFlowPattern::ScrollPage(bool reverse)
     UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
 
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+}
+
+void WaterFlowPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("friction", GetFriction());
 }
 } // namespace OHOS::Ace::NG

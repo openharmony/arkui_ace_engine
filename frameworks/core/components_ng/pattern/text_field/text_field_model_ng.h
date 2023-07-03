@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT TextFieldModelNG : public TextFieldModel {
 public:
     TextFieldModelNG() = default;
@@ -56,6 +55,8 @@ public:
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
     void SetOnChange(std::function<void(const std::string&)>&& func) override;
+    void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
+    void SetOnScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
@@ -67,6 +68,8 @@ public:
     void SetPasswordIcon(const PasswordIcon& passwordIcon) override;
     void SetShowUnit(std::function<void()>&& unitFunction) override;
     void SetShowError(const std::string& errorText, bool visible) override;
+    void SetBarState(OHOS::Ace::DisplayMode value) override;
+    void SetMaxViewLines(uint32_t value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetShowCounter(bool value) override;
@@ -75,6 +78,7 @@ public:
     void SetHeight(const Dimension& value) override;
     void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
+    void SetSelectionMenuHidden(bool contextMenuHidden) override;
 
 private:
     void AddDragFrameNodeToManager() const;

@@ -60,9 +60,10 @@ public:
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
+    virtual void SetFriction(double friction) = 0;
     virtual void SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>&& value) = 0;
     virtual void SetOnScrollBarUpdate(
-        std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, float)>&& value) = 0;
+        std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>&& value) = 0;
     virtual void SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value) = 0;
     virtual void SetOnItemDragEnter(std::function<void(const ItemDragInfo&)>&& value) = 0;
     virtual void SetOnItemDragMove(std::function<void(const ItemDragInfo&, int32_t, int32_t)>&& value) = 0;

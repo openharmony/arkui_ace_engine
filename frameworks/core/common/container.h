@@ -305,7 +305,7 @@ public:
         return container ? container->state_ == Frontend::State::ON_SHOW : false;
     }
 
-    virtual void NotifyConfigurationChange(bool) {}
+    virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = {false, false}) {}
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)

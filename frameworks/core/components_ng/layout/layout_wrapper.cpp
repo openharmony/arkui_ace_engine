@@ -17,10 +17,13 @@
 
 #include <algorithm>
 
+#include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
@@ -50,6 +53,18 @@ LayoutWrapper::LayoutWrapper(
     auto host = hostNode_.Upgrade();
     CHECK_NULL_VOID(host);
     host->RecordLayoutWrapper(WeakClaim(this));
+}
+
+void LayoutWrapper::AppendChild(const RefPtr<LayoutWrapper>& child, bool isOverlayNode)
+{
+    CHECK_NULL_VOID(child);
+    if (!isOverlayNode) {
+        children_.emplace_back(child);
+        childrenMap_.try_emplace(currentChildCount_, child);
+        ++currentChildCount_;
+    } else {
+        overlayChild_ = child;
+    }
 }
 
 RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool addToRenderTree)
@@ -105,6 +120,12 @@ const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(b
             child->BuildLazyItem();
             if (!child->isActive_) {
                 child->isActive_ = true;
+            }
+        }
+        if (overlayChild_) {
+            overlayChild_->BuildLazyItem();
+            if (!overlayChild_->isActive_) {
+                overlayChild_->isActive_ = true;
             }
         }
     }
@@ -212,6 +233,9 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     CHECK_NULL_VOID(layoutProperty_);
     CHECK_NULL_VOID(geometryNode_);
     CHECK_NULL_VOID(host);
+    // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
+    RestoreGeoState();
+
     CHECK_NULL_VOID(layoutAlgorithm_);
     if (layoutAlgorithm_->SkipMeasure()) {
         LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
@@ -259,6 +283,10 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
             geometryNode_->SetContentSize(size.value());
         }
         layoutAlgorithm_->Measure(this);
+
+        if (overlayChild_) {
+            overlayChild_->Measure(GetLayoutProperty()->CreateChildConstraint());
+        }
 
         // check aspect radio.
         auto pattern = host->GetPattern();
@@ -327,6 +355,7 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
     layoutAlgorithm_->Layout(this);
+    LayoutOverlay();
     time = GetSysTimestamp() - time;
     AddNodeFlexLayouts();
     AddNodeLayoutTime(time);
@@ -334,30 +363,16 @@ void LayoutWrapper::Layout()
         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
 }
 
-void LayoutWrapper::RestoreGeoState(int32_t rootDepth)
+void LayoutWrapper::RestoreGeoState()
 {
-    std::vector<WeakPtr<FrameNode>> untraversedNodes;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     auto&& restoreNodes = manager->GetGeoRestoreNodes();
-
-    for (auto&& nodeWk : restoreNodes) {
-        auto node = nodeWk.Upgrade();
-        if (!node) {
-            continue;
-        }
-        // only restore nodes that are involved in this LayoutTask
-        if (node->GetDepth() >= rootDepth) {
-            auto wrapper = node->GetLayoutWrapper().Upgrade();
-            if (wrapper) {
-                wrapper->geometryNode_->Restore();
-            }
-        } else {
-            untraversedNodes.emplace_back(nodeWk);
-        }
+    if (restoreNodes.find(hostNode_) != restoreNodes.end()) {
+        geometryNode_->Restore();
+        manager->RemoveRestoreNode(hostNode_);
     }
-    manager->SwapGeoRestoreNodes(untraversedNodes);
 }
 
 void LayoutWrapper::AvoidKeyboard()
@@ -508,21 +523,30 @@ void LayoutWrapper::MountToHostOnMainThread()
     SwapDirtyLayoutWrapperOnMainThread();
 }
 
+void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThreadForChild(RefPtr<LayoutWrapper> child)
+{
+    if (!child) {
+        return;
+    }
+    auto node = child->GetHostNode();
+    if (node && node->GetLayoutProperty()) {
+        const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
+        if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
+            return;
+        }
+    }
+    child->SwapDirtyLayoutWrapperOnMainThread();
+}
+
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
     if (isActive_) {
         for (const auto& child : children_) {
-            if (!child) {
-                continue;
-            }
-            auto node = child->GetHostNode();
-            if (node && node->GetLayoutProperty()) {
-                const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
-                if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
-                    continue;
-                }
-            }
-            child->SwapDirtyLayoutWrapperOnMainThread();
+            SwapDirtyLayoutWrapperOnMainThreadForChild(child);
+        }
+
+        if (overlayChild_) {
+            SwapDirtyLayoutWrapperOnMainThreadForChild(overlayChild_);
         }
 
         if (layoutWrapperBuilder_) {
@@ -599,4 +623,26 @@ void LayoutWrapper::AddNodeLayoutTime(int64_t time)
     CHECK_NULL_VOID(host);
     host->SetLayoutTime(time);
 }
+
+void LayoutWrapper::LayoutOverlay()
+{
+    if (!overlayChild_) {
+        return;
+    }
+    overlayChild_->Layout();
+    auto size = GetGeometryNode()->GetMarginFrameSize();
+    auto align = Alignment::TOP_LEFT;
+    Dimension offsetX, offsetY;
+    auto childLayoutProperty = overlayChild_->GetLayoutProperty();
+    childLayoutProperty->GetOverlayOffset(offsetX, offsetY);
+    auto offset = OffsetF(offsetX.ConvertToPx(), offsetY.ConvertToPx());
+    if (childLayoutProperty->GetPositionProperty()) {
+        align = childLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+    }
+
+    auto childSize = overlayChild_->GetGeometryNode()->GetMarginFrameSize();
+    auto translate =  Alignment::GetAlignPosition(size, childSize, align) + offset;
+    overlayChild_->GetGeometryNode()->SetMarginFrameOffset(translate);
+}
+
 } // namespace OHOS::Ace::NG

@@ -618,7 +618,13 @@ void FrontendDelegateDeclarative::CallPopPage()
 
 void FrontendDelegateDeclarative::ResetStagingPage()
 {
-    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS);
+    if (resetStagingPage_) {
+        taskExecutor_->PostTask(
+            [resetStagingPage = resetStagingPage_] { resetStagingPage(); },
+            TaskExecutor::TaskType::JS);
+    } else {
+        LOGE("resetStagingPage_ is null");
+    }
 }
 
 void FrontendDelegateDeclarative::OnApplicationDestroy(const std::string& packageName)

@@ -21,9 +21,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
-
 using ChangeAndSubmitEvent = std::function<void(const std::string)>;
-
 class SearchEventHub : public EventHub {
     DECLARE_ACE_TYPE(SearchEventHub, EventHub)
 
@@ -92,6 +90,31 @@ public:
         onValueChangeEvent_ = std::move(onChangeEvent);
     }
 
+    void SetOnSelectionChange(std::function<void(int32_t, int32_t)>&& func)
+    {
+        onSelectionChange_ = std::move(func);
+    }
+
+    void FireOnSelectionChange(int32_t selectionStart, int32_t selectionEnd)
+    {
+        if (onSelectionChange_) {
+            LOGI("On selection change start %{private}d, end %{private}d", selectionStart, selectionEnd);
+            onSelectionChange_(selectionStart, selectionEnd);
+        }
+    }
+
+    void SetOnScrollChangeEvent(std::function<void(float, float)>&& func)
+    {
+        onScrollChangeEvent_ = std::move(func);
+    }
+
+    void FireOnScrollChangeEvent(float offsetX, float offsetY)
+    {
+        if (onScrollChangeEvent_) {
+            onScrollChangeEvent_(offsetX, offsetY);
+        }
+    }
+
 private:
     ChangeAndSubmitEvent submitEvent_;
     ChangeAndSubmitEvent changeEvent_;
@@ -100,6 +123,8 @@ private:
     std::function<void(const std::string&)> onCopy_;
     std::function<void(const std::string&)> onCut_;
     std::function<void(const std::string&)> onPaste_;
+    std::function<void(int32_t, int32_t)> onSelectionChange_;
+    std::function<void(float, float)> onScrollChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchEventHub);
 };

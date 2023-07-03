@@ -737,10 +737,18 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                      ? layoutConstraint->maxSize.Width()
                                      : layoutConstraint->maxSize.Height());
     if (NearEqual(mainAxisSize_, -1.0f)) {
+        bool calcMinOnMainAxis = false;
         if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
             mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                 ? layoutConstraint->maxSize.Width()
                                 : layoutConstraint->maxSize.Height();
+        } else if (isLinearLayoutFeature_ && IsHorizontal(direction_) && !NearZero(layoutConstraint->minSize.Width())) {
+            calcMinOnMainAxis = true;
+            mainAxisSize_ = layoutConstraint->minSize.Width();
+        } else if (isLinearLayoutFeature_ && !IsHorizontal(direction_) &&
+                   !NearZero(layoutConstraint->minSize.Height())) {
+            calcMinOnMainAxis = true;
+            mainAxisSize_ = layoutConstraint->minSize.Height();
         } else {
             mainAxisSize_ =
                 direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
@@ -748,7 +756,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                     : (mainAxisInf ? layoutConstraint->percentReference.Height() : layoutConstraint->maxSize.Height());
         }
 
-        isInfiniteLayout_ = isLinearLayoutFeature_;
+        isInfiniteLayout_ = isLinearLayoutFeature_ && !calcMinOnMainAxis;
     }
     if (!isInfiniteLayout_) {
         isInfiniteLayout_ = mainAxisInf;
@@ -809,10 +817,14 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         finialCrossAxisSize += horizontalPadding;
         finialMainAxisSize += verticalPadding;
     }
-    finialMainAxisSize = std::clamp(finialMainAxisSize, GetMainAxisSizeHelper(layoutConstraint->minSize, direction_),
-        GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_));
-    finialCrossAxisSize = std::clamp(finialCrossAxisSize, GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_),
-        GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_));
+    auto mainAxisSizeMin = GetMainAxisSizeHelper(layoutConstraint->minSize, direction_);
+    auto mainAxisSizeMax = GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_);
+    auto crossAxisSizeMin = GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_);
+    auto crossAxisSizeMax = GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_);
+    finialMainAxisSize = std::clamp(
+        finialMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
+    finialCrossAxisSize = std::clamp(finialCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax),
+        std::max(crossAxisSizeMin, crossAxisSizeMax));
 
     realSize.UpdateIllegalSizeWithCheck(
         GetCalcSizeHelper(finialMainAxisSize, finialCrossAxisSize, direction_).ConvertToSizeT());

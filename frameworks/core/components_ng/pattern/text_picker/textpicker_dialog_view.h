@@ -50,8 +50,11 @@ public:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
         GestureEventFunc callback);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
-    static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent);
-    static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
+    static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
+        const RefPtr<FrameNode>& textPickerNode,
+        DialogEvent& acceptEvent);
+    static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
+        const RefPtr<FrameNode>& textPickerNode);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

@@ -119,9 +119,9 @@ struct BlurStyleOption {
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
-        static const char* STYLE[] = { "", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
-            "BlurStyle.BackgroundThin", "BlurStyle.BackgroundRegular", "BlurStyle.BackgroundThick",
-            "BlurStyle.BackgroundUltraThick" };
+        static const char* STYLE[] = { "BlurStyle.NONE", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
+            "BlurStyle.BACKGROUND_THIN", "BlurStyle.BACKGROUND_REGULAR", "BlurStyle.BACKGROUND_THICK",
+            "BlurStyle.BACKGROUND_ULTRA_THICK" };
         static const char* COLOR_MODE[] = { "ThemeColorMode.System", "ThemeColorMode.Light", "ThemeColorMode.Dark" };
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
         auto jsonBlurStyle = JsonUtil::Create(true);

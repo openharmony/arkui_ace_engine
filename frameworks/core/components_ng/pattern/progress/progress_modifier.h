@@ -104,6 +104,7 @@ private:
     void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     Gradient CreateCapsuleGradient() const;
     bool PostTask(const TaskExecutor::Task& task);
+    Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height

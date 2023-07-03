@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
 
+#include <utility>
+
 #include "base/memory/ace_type.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -184,8 +186,9 @@ void ViewAbstractModelNG::SetScale(float x, float y, float z)
     ViewAbstract::SetScale(scale);
 }
 
-void ViewAbstractModelNG::BindContentCover(
-    bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc, int32_t type)
+void ViewAbstractModelNG::BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+    std::function<void()>&& onDisappear)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
@@ -200,7 +203,8 @@ void ViewAbstractModelNG::BindContentCover(
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), type, targetNode->GetId());
+    overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
+        std::move(onAppear), std::move(onDisappear), targetNode->GetId());
 }
 
 void ViewAbstractModelNG::RegisterMenuAppearCallback(
@@ -253,7 +257,8 @@ void ViewAbstractModelNG::RegisterContextMenuDisappearCallback(const MenuParam& 
 }
 
 void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-    std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle)
+    std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+    std::function<void()>&& onDisappear)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
@@ -268,6 +273,39 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), sheetStyle, targetNode->GetId());
+    overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), sheetStyle,
+        std::move(onAppear), std::move(onDisappear), targetNode->GetId());
+}
+
+void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityGroup(accessible);
+}
+
+void ViewAbstractModelNG::SetAccessibilityText(const std::string& text)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityText(text);
+}
+
+void ViewAbstractModelNG::SetAccessibilityDescription(const std::string& description)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityDescription(description);
+}
+
+void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importance)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityLevel(importance);
 }
 } // namespace OHOS::Ace::NG

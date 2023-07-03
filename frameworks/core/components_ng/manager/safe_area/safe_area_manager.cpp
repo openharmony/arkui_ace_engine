@@ -15,6 +15,7 @@
 #include "safe_area_manager.h"
 
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
 {
@@ -31,6 +32,22 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
         return false;
     }
     systemSafeArea_ = safeArea;
+    return true;
+}
+
+bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
+{
+    uint32_t bottom;
+    if (systemSafeArea_.bottom_.IsValid()) {
+        bottom = systemSafeArea_.bottom_.start;
+    } else {
+        bottom = PipelineContext::GetCurrentRootHeight();
+    }
+    SafeAreaInsets::Inset inset = { .start = bottom - keyboardHeight, .end = bottom };
+    if (inset == keyboardInset_) {
+        return false;
+    }
+    keyboardInset_ = inset;
     return true;
 }
 

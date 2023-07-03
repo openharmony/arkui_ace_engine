@@ -160,6 +160,8 @@ public:
     static void SetZIndex(int32_t value);
     // renderGroup
     static void SetRenderGroup(bool isRenderGroup);
+    // renderFit, i.e. gravity
+    static void SetRenderFit(RenderFit renderFit);
 
     // transform
     static void SetScale(const NG::VectorF& value);
@@ -193,6 +195,7 @@ public:
     static void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList);
     static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
+    static void SetMouseResponseRegion(const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
     static void SetDraggable(bool draggable);

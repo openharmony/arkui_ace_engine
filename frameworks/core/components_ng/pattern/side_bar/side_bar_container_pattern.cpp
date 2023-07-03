@@ -324,11 +324,24 @@ void SideBarContainerPattern::DoAnimation()
             }
         }
     });
-    if (animDir_ == SideBarAnimationDirection::LTR) {
-        currentOffset_ = 0.0f + realDividerWidth_;
+
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
+    if (sideBarPosition == SideBarPosition::START) {
+        if (animDir_ == SideBarAnimationDirection::LTR) {
+            currentOffset_ = 0.0f;
+        } else {
+            currentOffset_ = -realSideBarWidth_ - realDividerWidth_;
+        }
     } else {
-        currentOffset_ = -realSideBarWidth_ - realDividerWidth_;
+        if (animDir_ == SideBarAnimationDirection::LTR) {
+            currentOffset_ = 0.0f + realDividerWidth_;
+        } else {
+            currentOffset_ = -realSideBarWidth_;
+        }
     }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
     context->CloseImplicitAnimation();

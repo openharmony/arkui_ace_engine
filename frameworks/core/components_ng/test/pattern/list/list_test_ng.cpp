@@ -1111,6 +1111,31 @@ HWTEST_F(ListTestNg, AttrLanes005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrLanes006
+ * @tc.desc: Test LayoutProperty about laneGutter,
+ * LaneGutter can be set correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, AttrLanes006, TestSize.Level1)
+{
+    constexpr Dimension laneGutter = 16.0_vp;
+    constexpr int32_t lanes = 3;
+    constexpr int32_t groupCount = 10;
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetLanes(lanes);
+    listModelNG.SetLaneGutter(laneGutter);
+    CreateListItemGroup(groupCount);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+
+    EXPECT_EQ(laneGutter, layoutProperty->GetLaneGutter());
+}
+
+/**
  * @tc.name: AttrAlignListItem001
  * @tc.desc: Test LayoutProperty about alignListItem,
  * when ListItem width less than List, the default is align to start
@@ -2147,7 +2172,7 @@ HWTEST_F(ListTestNg, Callback001, TestSize.Level1)
     bool isReachStartCalled = false;
     bool isReachEndCalled = false;
     auto scroll = [&isScrollCalled](Dimension, ScrollState) { isScrollCalled = true; };
-    auto scrollIndex = [&isScrollIndexCalled](int32_t, int32_t) { isScrollIndexCalled = true; };
+    auto scrollIndex = [&isScrollIndexCalled](int32_t, int32_t, int32_t) { isScrollIndexCalled = true; };
     auto reachStart = [&isReachStartCalled]() { isReachStartCalled = true; };
     auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
     listModelNG.SetOnScroll(scroll);
@@ -3220,15 +3245,15 @@ HWTEST_F(ListTestNg, Pattern002, TestSize.Level1)
 {
     CreateList(TOTAL_NUMBER);
 
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     EXPECT_NE(pattern_->animator_, nullptr);
 
     pattern_->animator_->Pause();
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     EXPECT_NE(pattern_->animator_, nullptr);
 
     pattern_->animator_->Stop();
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     EXPECT_NE(pattern_->animator_, nullptr);
 }
 
@@ -3488,7 +3513,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
      * @tc.steps: step1. Test ScrollToIndex.
      */
     pattern_->ScrollToIndex(1, 0, ScrollAlign::START);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 100)));
     pattern_->ScrollToIndex(2, 0, ScrollAlign::CENTER);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(3, 0, ScrollAlign::END);
@@ -3497,7 +3522,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
 
     pattern_->ScrollToIndex(1, false, ScrollAlign::START);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 100)));
     pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
     pattern_->ScrollToIndex(3, false, ScrollAlign::END);
@@ -3515,14 +3540,14 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
 
     pattern_->ScrollToIndex(-1, 0, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200))); // Scroll to last ListItem.
     pattern_->ScrollToIndex(-2, 0, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));  // Invalid param, not scroll.
 
     pattern_->ScrollToIndex(-2, false, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 0)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));  // Invalid param, not scroll.
     pattern_->ScrollToIndex(1, true, ScrollAlign::END);
-    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200)));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, 1200))); // Use animate not update offset immediately.
 }
 
 /**
@@ -3552,9 +3577,11 @@ HWTEST_F(ListTestNg, Pattern011, TestSize.Level1)
      * @tc.steps: step1. When has animator_ and not stop, call OnScrollCallback.
      * @tc.expected: Would stop.
      */
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     pattern_->animator_->Resume();
     EXPECT_TRUE(pattern_->animator_->IsRunning());
+    pattern_->OnScrollPosition(100.f, SCROLL_FROM_START);
+    EXPECT_TRUE(pattern_->scrollAbort_);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(pattern_->scrollAbort_);
     const Offset expectOffset1 = Offset(0, 0);
@@ -4674,7 +4701,7 @@ HWTEST_F(ListTestNg, AccessibilityEvent001, TestSize.Level1)
      * @tc.steps: step2. Call NotifyStopListener func.
      * @tc.expected isScrollEnd_ is true
      */
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     pattern_->animator_->NotifyStopListener();
     EXPECT_TRUE(pattern_->isScrollEnd_);
 }
@@ -4915,7 +4942,7 @@ HWTEST_F(ListTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     GetInstance();
-    pattern_->AnimateTo(0, 0, nullptr);
+    pattern_->AnimateTo(0, 0, nullptr, true);
     pattern_->UpdateScrollSnap();
     EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
     pattern_->animator_->Stop();
@@ -4937,5 +4964,37 @@ HWTEST_F(ListTestNg, ListPattern_NeedScrollSnapAlignEffect001, TestSize.Level1)
     EXPECT_FALSE(pattern_->NeedScrollSnapAlignEffect());
     layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::START);
     EXPECT_TRUE(pattern_->NeedScrollSnapAlignEffect());
+}
+/**
+ * @tc.name: ListPattern_SetFriction001
+ * @tc.desc: Test SetFriction:friction shouled be more than 0.0,if out of range,should be default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_SetFriction001, TestSize.Level1)
+{
+    constexpr double friction = -1;
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetFriction(friction);
+    GetInstance();
+    /**
+     * @tc.expected: friction shouled be more than 0.0,if out of range,should be default value.
+     */
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 0.6);
+}
+
+/**
+ * @tc.name: ListPattern_SetFriction002
+ * @tc.desc: Test SetFriction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListPattern_SetFriction002, TestSize.Level1)
+{
+    constexpr double friction = 10;
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetFriction(friction);
+    GetInstance();
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 10);
 }
 } // namespace OHOS::Ace::NG

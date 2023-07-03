@@ -109,6 +109,11 @@ public:
         return MakeRefPtr<GridEventHub>();
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+
     GridLayoutInfo GetGridLayoutInfo() const
     {
         return gridLayoutInfo_;
@@ -148,13 +153,21 @@ public:
 
     bool OutBoundaryCallback() override;
 
-    void SetPositionController(const RefPtr<ScrollController>& controller);
+    void SetPositionController(const RefPtr<ScrollableController>& controller);
 
     void ScrollPage(bool reverse);
 
     bool UpdateStartIndex(int32_t index);
 
-    bool AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
+    float GetTotalOffset() const override
+    {
+        return EstimateHeight();
+    }
+
+    void OnAnimateStop() override;
+
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
+    void ScrollTo(float position) override;
 
     void ScrollBy(float offset);
 
@@ -204,12 +217,10 @@ private:
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
-    void StopAnimate();
-    float EstimateHeight();
+    float EstimateHeight() const;
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;
-    RefPtr<Animator> animator_;
     float animatorOffset_ = 0.0f;
 
     bool multiSelectable_ = false;
@@ -219,7 +230,7 @@ private:
     bool scrollable_ = true;
     int32_t scrollState_ = SCROLL_FROM_NONE;
     bool mousePressed_ = false;
-    bool firstShow_ = false;
+    bool firstShow_ = true;
 
     int32_t lastFocusItemMainIndex_ = 0;
     int32_t lastFocusItemCrossIndex_ = 0;

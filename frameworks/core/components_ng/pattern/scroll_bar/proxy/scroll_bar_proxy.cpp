@@ -41,7 +41,7 @@ float GetScrollOffset(RefPtr<Pattern> pattern)
 {
     auto scrollPattern = AceType::DynamicCast<ScrollablePattern>(pattern);
     CHECK_NULL_RETURN(scrollPattern, 0.0f);
-    return scrollPattern->GetCurrentPosition();
+    return scrollPattern->GetBarOffset();
 }
 } // namespace
 

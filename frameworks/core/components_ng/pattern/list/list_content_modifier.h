@@ -37,6 +37,7 @@ struct DividerInfo {
     int32_t lanes;
     int32_t totalItemCount;
     Color color;
+    float laneGutter = 0.0f;
 };
 
 class ListContentModifier : public ContentModifier {

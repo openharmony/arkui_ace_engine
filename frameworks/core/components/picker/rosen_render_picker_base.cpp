@@ -62,8 +62,13 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     rsNode->SetPaintOrder(true);
 
 #ifdef OHOS_PLATFORM
+#ifndef USE_ROSEN_DRAWING
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     recordingCanvas->MultiplyAlpha((disabled_ ? 102.0 / 255 : 1));
+#else
+    auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
+    LOGE("Drawing is not supported");
+#endif
 #endif
 
     RenderNode::Paint(context, offset);
@@ -155,9 +160,9 @@ void RosenRenderPickerBase::PaintGradient(
 #else
     RSPen pen;
     RSPoint beginPoint(
-        static_cast<RSscalar>(rect.Left()), static_cast<RSscalar>(rect.Top()));
+        static_cast<RSScalar>(rect.Left()), static_cast<RSScalar>(rect.Top()));
     RSPoint endPoint(
-        static_cast<RSscalar>(rect.Left()), static_cast<RSscalar>(rect.Bottom()));
+        static_cast<RSScalar>(rect.Left()), static_cast<RSScalar>(rect.Bottom()));
     std::vector<RSPoint> points = { beginPoint, endPoint };
 #endif
     auto backDecoration = theme->GetPopupDecoration(false);
@@ -184,9 +189,9 @@ void RosenRenderPickerBase::PaintGradient(
 #else // USE_ROSEN_DRAWING
     std::vector<RSColorQuad> colors = { endColor.GetValue(), middleColor.GetValue(),
         middleColor.GetValue(), endColor.GetValue() };
-    const std::vector<RSscalar> stopPositions = { 0.0,
-        static_cast<RSscalar>(gradientHeight / rect.Height()),
-        static_cast<RSscalar>((rect.Height() - gradientHeight) / rect.Height()), 1.0f };
+    const std::vector<RSScalar> stopPositions = { 0.0,
+        static_cast<RSScalar>(gradientHeight / rect.Height()),
+        static_cast<RSScalar>((rect.Height() - gradientHeight) / rect.Height()), 1.0f };
     pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
         points.at(0), points.at(1), colors, stopPositions, RSTileMode::CLAMP));
     canvas->AttachPen(pen);

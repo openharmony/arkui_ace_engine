@@ -50,6 +50,8 @@ namespace {
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 180;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
+constexpr Dimension SWIPER_MARGIN = 16.0_vp;
+constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -74,6 +76,7 @@ void SwiperPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    InitSurfaceChangedCallback();
 }
 
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
@@ -210,6 +213,36 @@ void SwiperPattern::OnModifyDone()
         translateTask_.Cancel();
     }
     SetAccessibilityAction();
+    if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
+        mainSizeIsMeasured_ = false;
+        itemPosition_.clear();
+        jumpIndex_ = currentIndex_;
+    }
+}
+
+void SwiperPattern::InitSurfaceChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+                WindowSizeChangeReason type) {
+                auto swiper = weak.Upgrade();
+                if (!swiper) {
+                    return;
+                }
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    swiper->currentOffset_ = 0.0f;
+                    swiper->itemPosition_.clear();
+                    swiper->jumpIndex_ = swiper->currentIndex_;
+                }
+            });
+        LOGD("Add surface changed callback id %{public}d", callbackId);
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
 }
 
 void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
@@ -473,7 +506,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     endMainPos_ = swiperLayoutAlgorithm->GetEndPosition();
     startIndex_ = swiperLayoutAlgorithm->GetStartIndex();
     endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
-
     oldIndex_ = currentIndex_;
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
@@ -498,6 +530,9 @@ void SwiperPattern::FireAnimationStartEvent(
 
 void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
 {
+    if (currentIndex == -1) {
+        return;
+    }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationEndEvent(currentIndex, info);
@@ -553,6 +588,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
 void SwiperPattern::ShowNext()
 {
+    LOGI("SwiperPattern::ShowNext");
     indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -651,6 +687,7 @@ void SwiperPattern::ShowPrevious()
 
 void SwiperPattern::FinishAnimation()
 {
+    LOGI("SwiperPattern::FinishAnimation");
     isFinishAnimation_ = true;
     StopTranslateAnimation();
     if (swiperController_ && swiperController_->GetFinishCallback()) {
@@ -962,7 +999,7 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
-    if (IsChildrenSizeLessThanSwiper()) {
+    if (IsChildrenSizeLessThanSwiper() && !IsAutoFill()) {
         return;
     }
     auto edgeEffect = GetEdgeEffect();
@@ -1350,8 +1387,8 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion(float velocity) const
         return curve;
     }
     // use spring motion feature.
-    // interpolatingSpring: (mass: 1, stiffness:228, damping: 30)
-    return AceType::MakeRefPtr<InterpolatingSpring>(velocity, 1, 228, 30);
+    // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
+    return AceType::MakeRefPtr<InterpolatingSpring>(velocity, 1, 328, 34);
 }
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
@@ -1452,8 +1489,8 @@ void SwiperPattern::PlayTranslateAnimation(
         return;
     }
     // use spring motion feature.
-    // interpolatingSpring: (mass: 1, stiffness:228, damping: 30)
-    static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 228, 30);
+    // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
+    static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 328, 34);
     auto scrollMotion = AceType::MakeRefPtr<SpringMotion>(startPos, endPos, velocity, springProperty);
     scrollMotion->AddListener([weak](double value) {
         auto swiper = weak.Upgrade();
@@ -1601,6 +1638,15 @@ float SwiperPattern::MainSize() const
     return geometryNode->GetFrameSize().MainSize(GetDirection());
 }
 
+float SwiperPattern::GetMainContentSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    return geometryNode->GetPaddingSize().Width();
+}
+
 float SwiperPattern::CalculateVisibleSize() const
 {
     auto prevMargin = GetPrevMargin();
@@ -1672,7 +1718,53 @@ int32_t SwiperPattern::GetDisplayCount() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, 1);
-    return swiperLayoutProperty->GetDisplayCount().value_or(1);
+    auto displayCount = CalculateDisplayCount();
+    return displayCount;
+}
+
+int32_t SwiperPattern::CalculateDisplayCount() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 1);
+    bool isAutoFill = IsAutoFill();
+    if (isAutoFill) {
+        auto minSize = swiperLayoutProperty->GetMinSize()->ConvertToPx();
+        if (LessOrEqual(minSize, 0)) {
+            return 1;
+        }
+        float contentWidth = GetMainContentSize();
+        auto displayCount =
+            CalculateCount(contentWidth, minSize, SWIPER_MARGIN.ConvertToPx(), SWIPER_GUTTER.ConvertToPx());
+
+        displayCount = displayCount > 0 ? displayCount : 1;
+        auto totalCount = TotalCount();
+        displayCount = displayCount > totalCount ? totalCount : displayCount;
+        auto displayCountProperty = swiperLayoutProperty->GetDisplayCount().value_or(1);
+
+        if (displayCountProperty != displayCount) {
+            swiperLayoutProperty->UpdateDisplayCount(displayCount);
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, 1);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
+        }
+        return displayCount;
+    } else {
+        return swiperLayoutProperty->GetDisplayCount().value_or(1);
+    }
+}
+
+int32_t SwiperPattern::CalculateCount(
+    float contentWidth, float minSize, float margin, float gutter, float swiperPadding) const
+{
+    return static_cast<int32_t>(floor((contentWidth - 2 * margin + gutter - 2 * swiperPadding) / (minSize + gutter)));
+}
+
+bool SwiperPattern::IsAutoFill() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, false);
+    return swiperLayoutProperty->GetMinSize().has_value() &&
+           !LessOrEqual(swiperLayoutProperty->GetMinSize()->ConvertToPx(), 0);
 }
 
 bool SwiperPattern::IsAutoPlay() const
@@ -2123,6 +2215,9 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
     }
     if (currentIndex_ != nextIndex) {
         if (isFinishAnimation_) {
+            if (nextIndex == -1) {
+                return;
+            }
             jumpIndex_ = nextIndex;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             auto pipeline = PipelineContext::GetCurrentContext();
@@ -2171,7 +2266,7 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
 
 bool SwiperPattern::IsChildrenSizeLessThanSwiper()
 {
-    if (static_cast<int32_t>(itemPosition_.size()) == TotalCount()) {
+    if (static_cast<int32_t>(itemPosition_.size()) == TotalCount() && !itemPosition_.empty()) {
         auto totalChildrenSize = 0.0f;
         totalChildrenSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos;
         auto prevMargin = GetPrevMargin();

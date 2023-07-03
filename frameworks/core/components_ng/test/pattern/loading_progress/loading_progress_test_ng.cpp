@@ -147,7 +147,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest002, TestSize.Level1)
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
     loadingProgressPattern->CreateNodePaintMethod();
-    EXPECT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
     auto layoutProperty = loadingProgressPattern->GetLayoutProperty<LoadingProgressLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
@@ -156,7 +156,127 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest002, TestSize.Level1)
     layoutProperty->UpdateVisibility(VisibleType::GONE);
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    loadingProgressPattern->RegisterVisibleAreaChange();
     EXPECT_TRUE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = true, isVisible_ = true, isShow_ = false, eableLoading_ = true
+    loadingProgressPattern->OnWindowHide();
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = false, isVisible_ = true, isShow_ = false, eableLoading_ = true
+    loadingProgressPattern->isVisibleArea_ = false;
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = false, isVisible_ = true, isShow_ = true, eableLoading_ = true
+    loadingProgressPattern->OnWindowShow();
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = false, isVisible_ = true, isShow_ = true, eableLoading_ = false
+    loadingProgressPattern->enableLoading_ = false;
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = false, isVisible_ = true, isShow_ = false, eableLoading_ = false
+    loadingProgressPattern->OnWindowHide();
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+}
+
+/**
+ * @tc.name: LoadingProgressPatternTest003
+ * @tc.desc: Test LoadingProgress enableLoading property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test enableLoading property will be set in pattern successfully.
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    modelNg.SetEnableLoading(true);
+    RefPtr<FrameNode> frameNode =
+        AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto paintMethod =
+        AceType::DynamicCast<LoadingProgressPaintMethod>(loadingProgressPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_TRUE(paintProperty->GetEnableLoading().value());
+    loadingProgressPattern->OnModifyDone();
+    PaintWrapper paintWrapper(nullptr, nullptr, paintProperty);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    EXPECT_TRUE(loadingProgressPattern->enableLoading_);
+    EXPECT_TRUE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    EXPECT_TRUE(loadingProgressPattern->loadingProgressModifier_->enableLoading_->Get());
+    /**
+     * @tc.steps: step2. when enableLoading property is false, loadingProgress will StopAnimation and not onDraw.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    modelNg.SetEnableLoading(false);
+    loadingProgressPattern->OnModifyDone();
+    EXPECT_FALSE(paintProperty->GetEnableLoading().value());
+    EXPECT_FALSE(loadingProgressPattern->enableLoading_);
+    PaintWrapper paintWrapper2(nullptr, nullptr, paintProperty);
+    paintMethod->UpdateContentModifier(&paintWrapper2);
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->enableLoading_->Get());
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(0);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).Times(0);
+    EXPECT_CALL(rsCanvas, DetachBrush()).Times(0);
+    EXPECT_CALL(rsCanvas, AttachPen(_)).Times(0);
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(0);
+    EXPECT_CALL(rsCanvas, DetachPen()).Times(0);
+    EXPECT_CALL(rsCanvas, Restore()).Times(0);
+    loadingProgressPattern->loadingProgressModifier_->onDraw(context);
+}
+
+/**
+ * @tc.name: LoadingProgressPatternTest004
+ * @tc.desc: Test LoadingProgress StartAnimation will fail in some scene.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest004, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    loadingProgressPattern->CreateNodePaintMethod();
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    // Loading StartAnimation: isVisibleArea_ = true, isVisible_ = false, isShow_ = false, eableLoading_ = false
+    loadingProgressPattern->isVisible_ = false;
+    loadingProgressPattern->OnWindowHide();
+    loadingProgressPattern->enableLoading_ = false;
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = false, isVisible_ = false, isShow_ = false, eableLoading_ = false
+    loadingProgressPattern->isVisibleArea_ = false;
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = false, isVisible_ = false, isShow_ = false, eableLoading_ = true
+    loadingProgressPattern->enableLoading_ = true;
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = false, isVisible_ = false, isShow_ = true, eableLoading_ = true
+    loadingProgressPattern->OnWindowShow();
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = true, isVisible_ = false, isShow_ = true, eableLoading_ = true
+    loadingProgressPattern->isVisibleArea_ = true;
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    // Loading StartAnimation: isVisibleArea_ = true, isVisible_ = false, isShow_ = true, eableLoading_ = false
+    loadingProgressPattern->enableLoading_ = false;
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
 }
 
 /**
@@ -223,6 +343,8 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
     /**
      * test loadingState == REFRESH_STATE_FOLLOW_TO_RESYCLE
     */
+    auto context = PipelineBase::GetCurrentContext();
+    context->SetIsFormRender(true);
     loadingProgressPaintProperty->UpdateRefreshAnimationState(REFRESH_STATE_FOLLOW_TO_RESYCLE);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper3);

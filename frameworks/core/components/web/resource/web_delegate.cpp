@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "core/event/ace_event_helper.h"
@@ -1740,7 +1741,7 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
         LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create due to context is null");
         return false;
     }
-    int32_t windowId = pipelineContext->GetWindowId();
+    uint32_t windowId = pipelineContext->GetWindowId();
     surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
     if (surfaceDelegate_ == nullptr) {
         LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceDelegate is null");
@@ -4854,6 +4855,15 @@ WebDelegate::EventCallbackV2 WebDelegate::GetAudioStateChangedCallback(
 void WebDelegate::SetSurface(const sptr<Surface>& surface)
 {
     surface_ = surface;
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto host = webPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    rsNode_ = rosenRenderContext->GetRSNode();
 }
 #endif
 

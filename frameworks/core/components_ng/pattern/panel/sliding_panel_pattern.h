@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/panel/panel_component.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/panel/close_icon_pattern.h"
 #include "core/components_ng/pattern/panel/drag_bar_pattern.h"
 #include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
@@ -101,11 +102,16 @@ private:
     void IsShowChanged(bool isShow);
     void HeightDynamicUpdate();
     void SetDragBarCallBack();
+    void SetCloseIconCallBack();
 
     PanelType GetPanelType() const;
     PanelMode GetPanelMode() const;
     RefPtr<FrameNode> GetDragBarNode();
     void FireChangeEvent() const;
+    RefPtr<FrameNode> GetCloseIconNode();
+    RefPtr<UINode> GetChildNodeByTag(const std::string& tagName) const;
+    void AddOrRemoveDragBarNode(const RefPtr<SlidingPanelLayoutProperty>& layoutProperty) const;
+    void AddOrRemoveCloseIconNode(const RefPtr<SlidingPanelLayoutProperty>& layoutProperty) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> animator_;
@@ -124,6 +130,8 @@ private:
     Dimension fullHeight_;
     Dimension halfHeight_;
     Dimension miniHeight_;
+    float maxWidth_ = 0.0f;
+    SizeF maxSize_;
 
     float minBlankHeight_ = 0.0;
     float currentOffset_ = 0.0f;
@@ -133,6 +141,7 @@ private:
     bool isDrag_ = false;
     std::optional<bool> invisibleFlag_;
     std::queue<bool> isShowQueue_;
+    bool isClosePanel_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);
 };

@@ -79,7 +79,7 @@ public:
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode);
     void HideSubWindowNG();
 
-    void SetHotAreas(const std::vector<Rect>& rects);
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1);
 
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.

@@ -30,6 +30,7 @@ build_component_ng("window_scene") {
   sources = [
     "root/root_scene_model.cpp",
     "scene/system_window_scene.cpp",
+    "scene/window_event_process.cpp",
     "scene/window_node.cpp",
     "scene/window_pattern.cpp",
     "scene/window_scene.cpp",
@@ -40,12 +41,11 @@ build_component_ng("window_scene") {
 
   if (is_ohos_standard_system) {
     configs = [ ":window_scene_config" ]
+
     external_deps = [
-      "ability_runtime:abilitykit_native",
       "graphic_standard:librender_service_client",
       "input:libmmi-client",
       "ipc:ipc_single",
-      "power_manager:powermgr_client",
       "window_manager:libwm",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",

@@ -1633,7 +1633,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
      * @tc.expected: Do nothing
      */
     CreateScroll();
-    pattern_->CreateOrStopAnimator();
+    pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Resume();
     EXPECT_FALSE(pattern_->OnScrollCallback(-100.f, SCROLL_FROM_UPDATE));
 
@@ -1642,7 +1642,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
      * @tc.expected: Trigger UpdateCurrentOffset()
      */
     CreateScroll();
-    pattern_->CreateOrStopAnimator();
+    pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Stop();
     EXPECT_TRUE(pattern_->OnScrollCallback(-100.f, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, -100.f)));
@@ -1672,7 +1672,7 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
      */
     isTrigger = false;
     CreateScroll(Axis::VERTICAL, std::move(event));
-    pattern_->CreateOrStopAnimator();
+    pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Stop();
     EXPECT_TRUE(pattern_->OnScrollCallback(-100.f, SCROLL_FROM_START));
     EXPECT_TRUE(isTrigger);
@@ -1683,9 +1683,10 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
      */
     isTrigger = false;
     CreateScroll(Axis::VERTICAL, std::move(event));
-    pattern_->CreateOrStopAnimator();
+    pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Resume();
-    EXPECT_TRUE(pattern_->OnScrollCallback(-100.f, SCROLL_FROM_START));
+    auto onScrollCallback = pattern_->scrollableEvent_->GetScrollPositionCallback();
+    EXPECT_TRUE(onScrollCallback(-100.f, SCROLL_FROM_START));
     EXPECT_TRUE(pattern_->animator_->IsStopped());
     EXPECT_FALSE(isTrigger);
 }
@@ -1857,41 +1858,6 @@ HWTEST_F(ScrollTestNg, Pattern007, TestSize.Level1)
     scrollBar->displayMode_ = DisplayMode::OFF;
     pattern_->HandleScrollBarOutBoundary();
     EXPECT_EQ(scrollBar->outBoundary_, 100.f);
-}
-
-/**
- * @tc.name: Pattern008
- * @tc.desc: Test CreateOrStopAnimator
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollTestNg, Pattern008, TestSize.Level1)
-{
-    CreateScroll();
-
-    /**
-     * @tc.steps: step1. Trigger CreateOrStopAnimator
-     * @tc.expected: animator_ would be create
-     */
-    pattern_->CreateOrStopAnimator();
-    ASSERT_NE(pattern_->animator_, nullptr);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-
-    /**
-     * @tc.steps: step2. animator is running and Trigger CreateOrStopAnimator
-     * @tc.expected: animator_ would be stop
-     */
-    pattern_->animator_->Resume();
-    pattern_->CreateOrStopAnimator();
-    EXPECT_TRUE(pattern_->scrollAbort_);
-    EXPECT_TRUE(pattern_->animator_->IsStopped());
-
-    /**
-     * @tc.steps: step3. animator is stop and Trigger CreateOrStopAnimator
-     * @tc.expected: animator_ would be stop
-     */
-    pattern_->CreateOrStopAnimator();
-    EXPECT_TRUE(pattern_->scrollAbort_);
-    EXPECT_TRUE(pattern_->animator_->IsStopped());
 }
 
 /**
@@ -2135,5 +2101,38 @@ HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
     CreateScroll(Axis::NONE);
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
+}
+
+/**
+ * @tc.name: ScrollSetFrictionTest001
+ * @tc.desc: Test ScrollSetFriction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
+{
+    constexpr double friction = -1;
+    ScrollModelNG scrollModelNG;
+    scrollModelNG.Create();
+    scrollModelNG.SetFriction(friction);
+    GetInstance();
+    /**
+     * @tc.expected: friction shouled be more than 0.0,if out of range,should be default value.
+     */
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 0.6);
+}
+
+/**
+ * @tc.name: ScrollSetFrictionTest002
+ * @tc.desc: Test ScrollSetFriction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollSetFrictionTest002, TestSize.Level1)
+{
+    constexpr double friction = 10;
+    ScrollModelNG scrollModelNG;
+    scrollModelNG.Create();
+    scrollModelNG.SetFriction(friction);
+    GetInstance();
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 10);
 }
 } // namespace OHOS::Ace::NG

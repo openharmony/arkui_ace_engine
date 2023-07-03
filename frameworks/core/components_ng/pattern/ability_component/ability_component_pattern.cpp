@@ -38,7 +38,7 @@ void AbilityComponentPattern::OnModifyDone()
     } else {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        int32_t windowId = pipelineContext->GetWindowId();
+        auto windowId = pipelineContext->GetWindowId();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
@@ -81,7 +81,7 @@ bool AbilityComponentPattern::OnDirtyLayoutWrapperSwap(
 void AbilityComponentPattern::UpdateWindowRect()
 {
     if (!hasConnectionToAbility_) {
-        LOGW("AbilityComponent has not be connected");
+        LOGD("AbilityComponent has not be connected");
         return;
     }
     auto host = GetHost();

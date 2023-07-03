@@ -426,7 +426,7 @@ template("ace_core_source_set") {
         "common/rosen/rosen_convert_helper.cpp",
       ]
       if (is_ohos) {
-        deps += [ "$ace_graphic/rosen/modules/texgine:libtexgine" ]
+        external_deps += [ "graphic_standard:libtexgine" ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
@@ -453,6 +453,7 @@ template("ace_core_source_set") {
     }
 
     deps += [
+      "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
@@ -838,7 +839,10 @@ template("ace_core_ng_source_set") {
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
     } else {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform" ]
+      deps += [
+        "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
+      ]
     }
 
     if (defined(config.enable_ability_component) &&
@@ -861,7 +865,7 @@ template("ace_core_ng_source_set") {
         "common/rosen/rosen_convert_helper.cpp",
       ]
       if (is_ohos) {
-        deps += [ "$ace_graphic/rosen/modules/texgine:libtexgine" ]
+        external_deps += [ "graphic_standard:libtexgine" ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {

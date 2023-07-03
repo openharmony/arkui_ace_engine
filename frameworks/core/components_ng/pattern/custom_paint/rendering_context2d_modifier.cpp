@@ -43,6 +43,8 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     if (drawCmdList->GetSize() == 0) {
         return;
     }
+    recordingCanvas->GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());
+    recordingCanvas->GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
     drawCmdList->Playback(*skCanvas);
     rsRecordingCanvas_->Clear();
 }

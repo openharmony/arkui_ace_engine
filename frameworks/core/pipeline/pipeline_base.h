@@ -24,6 +24,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <optional>
 
 #include "base/geometry/dimension.h"
 #include "base/resource/asset_manager.h"
@@ -571,14 +572,24 @@ public:
     }
     void SetFontScale(float fontScale);
 
-    int32_t GetWindowId() const
+    uint32_t GetWindowId() const
     {
         return windowId_;
     }
 
-    void SetWindowId(int32_t windowId)
+    void SetWindowId(uint32_t windowId)
     {
         windowId_ = windowId;
+    }
+
+    void SetFocusWindowId(uint32_t windowId)
+    {
+        focusWindowId_ = windowId;
+    }
+
+    uint32_t GetFocusWindowId()
+    {
+        return focusWindowId_.value_or(windowId_);
     }
 
     float GetViewScale() const
@@ -932,7 +943,10 @@ protected:
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     int32_t minPlatformVersion_ = 0;
-    int32_t windowId_ = 0;
+    uint32_t windowId_ = 0;
+    // UIExtensionAbility need component windowID
+    std::optional<uint32_t> focusWindowId_;
+
     int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;
     float designWidthScale_ = 1.0f;
