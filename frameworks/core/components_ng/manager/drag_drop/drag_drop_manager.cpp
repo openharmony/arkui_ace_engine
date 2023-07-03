@@ -48,6 +48,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 {
     CHECK_NULL_RETURN(pixelMap, nullptr);
     isDragged_ = true;
+    isDragCancel_ = false;
 #if !defined(PREVIEW)
     if (dragWindow_) {
         LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
@@ -70,6 +71,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     dragWindowRootNode_ = CreateDragRootNode(customNode);
     CHECK_NULL_RETURN(dragWindowRootNode_, nullptr);
     isDragged_ = true;
+    isDragCancel_ = false;
 #if !defined(PREVIEW)
     if (dragWindow_) {
         LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
@@ -93,6 +95,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
 {
     isDragged_ = true;
+    isDragCancel_ = false;
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
 }
@@ -396,6 +399,14 @@ DragResult TranslateDragResult(DragRet dragResult)
 void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string& extraInfo)
 {
     preTargetFrameNode_ = nullptr;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (isDragCancel_) {
+        LOGD("DragDropManager Is On DragCancel");
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_CANCEL, false);
+        summaryMap_.clear();
+        return;
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     auto frameNodes = FindDragFrameNodeMapByPosition(globalX, globalY, DragType::COMMON);
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool isUseDefaultDrop = false;
@@ -806,6 +817,7 @@ void DragDropManager::DestroyDragWindow()
 RefPtr<DragDropProxy> DragDropManager::CreateFrameworkDragDropProxy()
 {
     isDragged_ = true;
+    isDragCancel_ = false;
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
 }
