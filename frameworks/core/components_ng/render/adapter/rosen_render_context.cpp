@@ -805,7 +805,7 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     const float pi = 3.14159265;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto translate = GetTranslateXY();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
     // calculate new pos.
@@ -845,7 +845,7 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
     RectF rect;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto translate = GetTranslateXY();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
     return rect;
 }
@@ -853,9 +853,23 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
     // TODO: add rotation and center support
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto translate = GetTranslateXY();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
+}
+
+Rosen::Vector2f RosenRenderContext::GetTranslateXY() const
+{
+    Rosen::Vector2f translate = { 0.0, 0.0 };
+    if (translateXY_) {
+        translate = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty())->Get();
+    }
+    if (transformMatrixModifier_.has_value() && transformMatrixModifier_->translateXY) {
+        translate += std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(
+            transformMatrixModifier_->translateXY->GetProperty())
+                         ->Get();
+    }
+    return translate;
 }
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
