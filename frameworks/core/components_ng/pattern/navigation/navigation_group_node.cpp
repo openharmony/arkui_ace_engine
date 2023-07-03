@@ -253,7 +253,7 @@ void NavigationGroupNode::SetBackButtonEvent(
             navigationPattern->GetPreNavDestination(navDestinationPattern->GetName(), navDestinationNode);
         auto preNavDestination =
             AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(preNavDestinationNode));
-        if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
+        if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
             if (preNavDestination) {
                 navigation->BackToPreNavDestination(preNavDestinationNode, navDestination, navRouterPattern);
                 navigation->SetOnStateChangeFalse(preNavDestination, navDestination, true);
@@ -266,7 +266,7 @@ void NavigationGroupNode::SetBackButtonEvent(
             return;
         }
 
-        if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
+        if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
             if (preNavDestination) {
                 navigation->BackToPreNavDestination(preNavDestinationNode, navDestination, navRouterPattern);
                 navigation->SetOnStateChangeFalse(preNavDestination, navDestination, true);
@@ -303,6 +303,9 @@ void NavigationGroupNode::BackToNavBar(const RefPtr<UINode>& navDestinationNode)
     }
     if (backButtonNode) {
         BackButtonAnimation(backButtonNode, false);
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
     // let navBarNode request focus
     auto navBarContentNode = navBarNode->GetNavBarContentNode();
@@ -343,6 +346,9 @@ void NavigationGroupNode::BackToPreNavDestination(const RefPtr<UINode>& preNavDe
         auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
         if (backButtonNode) {
             BackButtonAnimation(backButtonNode, false);
+            auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(backButtonLayoutProperty);
+            backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
         }
         NavTransitionBackToPreAnimation(preNavDestination, navDestination, navigationContentNode);
     }

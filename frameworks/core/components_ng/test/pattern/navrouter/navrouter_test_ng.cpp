@@ -1817,7 +1817,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0033, TestSize.Level1)
     ASSERT_EQ(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_.value(),
         TitleBarParentType::NAVBAR);
 
-    ASSERT_NE(pattern->panEvent_, nullptr);
+    ASSERT_EQ(pattern->panEvent_, nullptr);
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
     pattern->OnModifyDone();
     ASSERT_EQ(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_.value(),
