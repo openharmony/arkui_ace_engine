@@ -2247,6 +2247,17 @@ void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)
 {
     ParseBorderStyle(info[0]);
 }
+namespace {
+BorderStyle ConvertBorderStyle(int32_t value)
+{
+    auto style = static_cast<BorderStyle>(value);
+    if (style < BorderStyle::SOLID || style > BorderStyle::NONE) {
+        LOGW("border style(%{public}d) is invalid, use default value.", value);
+        style = BorderStyle::SOLID;
+    }
+    return style;
+}
+} // namespace
 
 void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 {
@@ -2263,24 +2274,24 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         auto leftValue = object->GetProperty("left");
         if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
-            styleLeft = static_cast<BorderStyle>(leftValue->ToNumber<int32_t>());
+            styleLeft = ConvertBorderStyle(leftValue->ToNumber<int32_t>());
         }
         auto rightValue = object->GetProperty("right");
         if (!rightValue->IsUndefined() && rightValue->IsNumber()) {
-            styleRight = static_cast<BorderStyle>(rightValue->ToNumber<int32_t>());
+            styleRight = ConvertBorderStyle(rightValue->ToNumber<int32_t>());
         }
         auto topValue = object->GetProperty("top");
         if (!topValue->IsUndefined() && topValue->IsNumber()) {
-            styleTop = static_cast<BorderStyle>(topValue->ToNumber<int32_t>());
+            styleTop = ConvertBorderStyle(topValue->ToNumber<int32_t>());
         }
         auto bottomValue = object->GetProperty("bottom");
         if (!bottomValue->IsUndefined() && bottomValue->IsNumber()) {
-            styleBottom = static_cast<BorderStyle>(bottomValue->ToNumber<int32_t>());
+            styleBottom = ConvertBorderStyle(bottomValue->ToNumber<int32_t>());
         }
         ViewAbstractModel::GetInstance()->SetBorderStyle(styleLeft, styleRight, styleTop, styleBottom);
         return;
     }
-    auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
+    auto borderStyle = ConvertBorderStyle(args->ToNumber<int32_t>());
     ViewAbstractModel::GetInstance()->SetBorderStyle(borderStyle);
 }
 
