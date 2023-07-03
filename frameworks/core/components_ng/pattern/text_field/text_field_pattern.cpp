@@ -923,6 +923,9 @@ void TextFieldPattern::GetTextRectsInRange(
         if (offset.GetX() < textBoxes[0].rect_.GetLeft() || offset.GetY() < textBoxes[0].rect_.GetTop()) {
             auto tmp = paragraph_->GetRectsForRange(base - 1, destination - 1,
                 RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
+            if (tmp.size() != 1) {
+                return;
+            }
             bool isInRange = offset.GetX() >= tmp[0].rect_.GetLeft() && offset.GetX() <= tmp[0].rect_.GetRight() &&
                              offset.GetY() >= tmp[0].rect_.GetTop() && offset.GetY() <= tmp[0].rect_.GetBottom();
             if (isInRange) {
