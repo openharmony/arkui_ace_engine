@@ -1002,6 +1002,9 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     if (IsChildrenSizeLessThanSwiper() && !IsAutoFill()) {
         return;
     }
+    if (itemPosition_.empty()) {
+        return;
+    }
     auto edgeEffect = GetEdgeEffect();
     if (!IsLoop() && IsOutOfBoundary() && edgeEffect == EdgeEffect::SPRING) {
         LOGD("Swiper has reached boundary, can't drag any more, effect spring.");
@@ -1226,6 +1229,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->FlushUITasks();
+    }
+    if (itemPosition_.empty()) {
+        return;
     }
 
     // Play edge effect animation.
@@ -1521,6 +1527,9 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     auto mainSize = CalculateVisibleSize();
     if (LessOrEqual(mainSize, 0)) {
         LOGE("Main size is not positive.");
+        return;
+    }
+    if (itemPosition_.empty()) {
         return;
     }
 
@@ -1912,11 +1921,17 @@ int32_t SwiperPattern::TotalCount() const
 
 float SwiperPattern::GetTranslateLength() const
 {
+    if (itemPosition_.empty()) {
+        return 0.0f;
+    }
     return itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
 }
 
 std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea() const
 {
+    if (itemPosition_.empty()) {
+        return std::make_pair(0, SwiperItemInfo {});
+    }
     auto targetIndex = 0;
     if (GetPrevMargin() != 0.0f) {
         for (const auto& item : itemPosition_) {
@@ -1939,6 +1954,9 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea(
 
 std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetSecondItemInfoInVisibleArea() const
 {
+    if (itemPosition_.empty()) {
+        return std::make_pair(0, SwiperItemInfo {});
+    }
     auto targetIndex = itemPosition_.begin()->first;
     if (GetPrevMargin() != 0.0f) {
         for (const auto& item : itemPosition_) {
@@ -2083,7 +2101,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
         if (swiper) {
             auto childrenSize = swiper->TotalCount();
             auto displayCount = swiper->GetDisplayCount();
-            if (childrenSize <= 0 || displayCount <= 0) {
+            if (childrenSize <= 0 || displayCount <= 0 || swiper->itemPosition_.empty()) {
                 return;
             }
             if (!swiper->IsLoop() && (swiper->itemPosition_.begin()->first + 1) > (childrenSize - displayCount)) {
