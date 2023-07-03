@@ -35,13 +35,13 @@
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_styles.h"
-#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/test/mock/render/mock_media_player.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/render/mock_render_surface.h"
@@ -85,6 +85,8 @@ const std::string VIDEO_SEEKED_EVENT = "seeked";
 const std::string VIDEO_UPDATE_EVENT = "update";
 const std::string VIDEO_FULLSCREEN_EVENT = "fullScreen";
 const std::string EXTRA_INFO_KEY = "extraInfo";
+const std::string VIDEO_ERROR_ID = "";
+const std::string VIDEO_CALLBACK_RESULT = "result_ok";
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
 constexpr float VIDEO_WIDTH = 300.0f;
@@ -107,6 +109,8 @@ constexpr uint32_t VIDEO_CHILDREN_NUM = 2;
 constexpr uint32_t DURATION = 100;
 constexpr uint32_t CURRENT_TIME = 100;
 constexpr int32_t SLIDER_INDEX = 2;
+constexpr int32_t VIDEO_NODE_ID_1 = 1;
+constexpr int32_t VIDEO_NODE_ID_2 = 2;
 TestProperty testProperty;
 } // namespace
 
@@ -1112,23 +1116,23 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
     EXPECT_FALSE(fullScreenPattern == nullptr);
     auto fullScreenLayout = fullScreenPattern->CreateLayoutAlgorithm();
     auto fullScreenGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper fullScreenLayoutWrapper = LayoutWrapper(fullScreenNode,
-        fullScreenGeometryNode, fullScreenNode->GetLayoutProperty());
+    LayoutWrapper fullScreenLayoutWrapper =
+        LayoutWrapper(fullScreenNode, fullScreenGeometryNode, fullScreenNode->GetLayoutProperty());
     fullScreenLayoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(fullScreenLayout));
-    auto videoSize = fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper)
-        .value_or(SizeF(0.0f, 0.0f));
+    auto videoSize =
+        fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper).value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(videoSize, SCREEN_SIZE_MEDIUM);
 
     // Change the root size to small
     MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL);
-    auto size = fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper)
-        .value_or(SizeF(0.0f, 0.0f));
+    auto size =
+        fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper).value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(size, SCREEN_SIZE_SMALL);
 
     // Change the root size to large
     MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_LARGE, SCREEN_HEIGHT_LARGE);
-    videoSize = fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper)
-        .value_or(SizeF(0.0f, 0.0f));
+    videoSize =
+        fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper).value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(videoSize, SCREEN_SIZE_LARGE);
 
     /**
@@ -1752,5 +1756,147 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
     videoController->ExitFullscreen(true);
     EXPECT_FALSE(pattern->GetFullScreenNode() != nullptr);
     EXPECT_EQ(fullScreenCheck, fullScreenFalse);
+}
+
+/**
+ * @tc.name: VideoNodeTest001
+ * @tc.desc: Create Video.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    auto videoNode = VideoNode::GetOrCreateVideoNode(V2::VIDEO_ETS_TAG, VIDEO_NODE_ID_1,
+        [videoController]() { return AceType::MakeRefPtr<VideoPattern>(videoController); });
+    EXPECT_TRUE(videoNode);
+    EXPECT_EQ(videoNode->GetTag(), V2::VIDEO_ETS_TAG);
+
+    auto secondVideoNode = VideoNode::GetOrCreateVideoNode(V2::VIDEO_ETS_TAG, VIDEO_NODE_ID_1,
+        [videoController]() { return AceType::MakeRefPtr<VideoPattern>(videoController); });
+    EXPECT_TRUE(secondVideoNode);
+    EXPECT_EQ(videoNode->GetTag(), secondVideoNode->GetTag());
+    EXPECT_EQ(videoNode->GetId(), secondVideoNode->GetId());
+
+    /**
+     * @tc.steps: step2. Create Video again
+     * @tc.expected: step2. Create Video node successfully
+     */
+    auto thirdVideoNode = VideoNode::GetOrCreateVideoNode(V2::VIDEO_ETS_TAG, VIDEO_NODE_ID_2,
+        [videoController]() { return AceType::MakeRefPtr<VideoPattern>(videoController); });
+    EXPECT_TRUE(secondVideoNode);
+    EXPECT_EQ(videoNode->GetTag(), thirdVideoNode->GetTag());
+    EXPECT_NE(videoNode->GetId(), thirdVideoNode->GetId());
+}
+
+/**
+ * @tc.name: VideoPatternEventTest001
+ * @tc.desc: Create Video and test onerror event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    ASSERT_NE(videoController, nullptr);
+    video.Create(videoController);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    /**
+     * @tc.steps: step2. Execute onerror
+     * @tc.expected: step1. Execute onerror successfully
+     */
+    std::string result;
+    auto errorCallback = [&result](const std::string& error) { result = VIDEO_CALLBACK_RESULT; };
+    auto eventHub = pattern->GetEventHub<VideoEventHub>();
+    eventHub->SetOnError(std::move(errorCallback));
+    pattern->OnError(VIDEO_ERROR_ID);
+    EXPECT_EQ(result, VIDEO_CALLBACK_RESULT);
+}
+
+/**
+ * @tc.name: VideoPatternEventTest002
+ * @tc.desc: Create Video and test onvisiblechange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    ASSERT_NE(videoController, nullptr);
+    video.Create(videoController);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    bool result;
+
+    /**
+     * @tc.steps: step2. Make video visible
+     * @tc.expected: step2. Video callback result is false.
+     */
+    auto visibleChangeCallback = [&result](bool visible) { result = visible; };
+    pattern->SetHiddenChangeEvent(std::move(visibleChangeCallback));
+    pattern->OnVisibleChange(true);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step3. Make video visible false
+     * @tc.expected: step3. Video callback result is true.
+     */
+    pattern->OnVisibleChange(false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: VideoPatternPlayerTest001
+ * @tc.desc: Create Video and test HasPlayer() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternPlayerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    ASSERT_NE(videoController, nullptr);
+    video.Create(videoController);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+
+    /**
+     * @tc.steps: step2. Make video
+     * @tc.expected: step2. Video HasPlayer Func result is true.
+     */
+    bool result = pattern->HasPlayer();
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG
