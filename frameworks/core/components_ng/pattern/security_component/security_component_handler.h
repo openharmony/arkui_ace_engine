@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #ifdef SECURITY_COMPONENT_ENABLE
+#include "core/components_ng/pattern/security_component/security_component_probe.h"
 #include "location_button.h"
 #include "paste_button.h"
 #include "save_button.h"
@@ -34,7 +35,9 @@ public:
     static int32_t UnregisterSecurityComponent(int32_t scId);
     static int32_t ReportSecurityComponentClickEvent(int32_t scId, RefPtr<FrameNode>& node, GestureEvent& event);
 #ifdef SECURITY_COMPONENT_ENABLE
+    static bool InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node);
     static OHOS::Security::SecurityComponent::SecCompUiRegister uiRegister;
+    static SecurityComponentProbe probe;
 
 private:
     static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
@@ -60,7 +63,6 @@ private:
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
-    static bool InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node);
 #endif
 };
 } // namespace OHOS::Ace
