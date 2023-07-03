@@ -62,6 +62,15 @@ void ModelAdapterWrapper::OnPaint(const RefPtr<ModelPaintProperty>& modelPaintPr
     if (modelPaintProperty->NeedsCustomRendersSetup()) {
         UpdateCustomRenders(properties);
     }
+    if (modelPaintProperty->NeedsShaderPathSetup()) {
+        UpdateShaderPath(properties);
+    }
+    if (modelPaintProperty->NeedsImageTexturePathsSetup()) {
+        UpdateImageTexturePaths(properties);
+    }
+    if (modelPaintProperty->NeedsShaderInputBuffersSetup()) {
+        UpdateShaderInputBuffers(properties);
+    }
     DrawFrame();
 }
 
@@ -324,6 +333,11 @@ SceneViewerAdapterProperties ModelAdapterWrapper::ExtractPaintProperties(
     properties.animations_ = modelPaintProperty->GetModelAnimations().value_or(properties.animations_);
     properties.geometries_ = modelPaintProperty->GetModelGeometries().value_or(properties.geometries_);
     properties.customRenders_ = modelPaintProperty->GetModelCustomRenders().value_or(properties.customRenders_);
+    properties.shaderPath_ = modelPaintProperty->GetShaderPath().value_or(properties.shaderPath_);
+    properties.imageTexturePaths_ =
+        modelPaintProperty->GetModelImageTexturePaths().value_or(properties.imageTexturePaths_);
+    properties.shaderInputBuffers_ =
+        modelPaintProperty->GetModelShaderInputBuffers().value_or(properties.shaderInputBuffers_);
     return properties;
 }
 
@@ -401,6 +415,52 @@ void ModelAdapterWrapper::UpdateCustomRenders(const SceneViewerAdapterProperties
             auto adapter = weak.Upgrade();
             CHECK_NULL_VOID(adapter);
             adapter->sceneViewerAdapter_->AddCustomRenders(properties.customRenders_);
+        });
+    }
+}
+
+void ModelAdapterWrapper::UpdateShaderPath(const SceneViewerAdapterProperties& properties)
+{
+    LOGD("ModelAdapterWrapper::UpdateShaderPath() %s", properties.shaderPath_.c_str());
+#if MULTI_ECS_UPDATE_AT_ONCE
+    OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
+#else
+    OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
+#endif
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+        adapter->sceneViewerAdapter_->UpdateShaderPath(properties.shaderPath_);
+    });
+}
+
+void ModelAdapterWrapper::UpdateImageTexturePaths(const SceneViewerAdapterProperties& properties)
+{
+    LOGD("MODEL_NG: ModelAdapterWrapper::UpdateImageTexturePaths() size: %zu", properties.imageTexturePaths_.size());
+    if (!properties.imageTexturePaths_.empty()) {
+#if MULTI_ECS_UPDATE_AT_ONCE
+        OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
+#else
+        OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
+#endif
+            auto adapter = weak.Upgrade();
+            CHECK_NULL_VOID(adapter);
+            adapter->sceneViewerAdapter_->UpdateImageTexturePaths(properties.imageTexturePaths_);
+        });
+    }
+}
+
+void ModelAdapterWrapper::UpdateShaderInputBuffers(const SceneViewerAdapterProperties& properties)
+{
+    LOGD("MODEL_NG: ModelAdapterWrapper::UpdateShaderInputBuffers() size: %zu", properties.shaderInputBuffers_.size());
+    if (!properties.shaderInputBuffers_.empty()) {
+#if MULTI_ECS_UPDATE_AT_ONCE
+        OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
+#else
+        OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
+#endif
+            auto adapter = weak.Upgrade();
+            CHECK_NULL_VOID(adapter);
+            adapter->sceneViewerAdapter_->UpdateShaderInputBuffers(properties.shaderInputBuffers_);
         });
     }
 }

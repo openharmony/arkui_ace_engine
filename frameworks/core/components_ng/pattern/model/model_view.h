@@ -29,6 +29,7 @@
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/gltf_animation.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/light.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/position.h"
+#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/shader_input_buffer.h"
 
 namespace OHOS::Ace {
 
@@ -52,6 +53,9 @@ public:
     virtual void AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>& customRender) = 0;
     virtual void SetWidth(Dimension& width) = 0;
     virtual void SetHeight(Dimension& height) = 0;
+    virtual void SetShader(const std::string& path) = 0;
+    virtual void AddShaderImageTexture(const std::string& path) = 0;
+    virtual void AddShaderInputBuffer(const RefPtr<OHOS::Render3D::ShaderInputBuffer>& buffer) = 0;
 
 private:
     static std::unique_ptr<ModelView> instance_;

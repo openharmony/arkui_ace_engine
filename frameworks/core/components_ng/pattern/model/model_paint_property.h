@@ -25,6 +25,7 @@
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/geometry.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/gltf_animation.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/light.h"
+#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/shader_input_buffer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,6 +39,8 @@ public:
         propModelAnimations_ = std::vector<RefPtr<OHOS::Render3D::GLTFAnimation>> {};
         propModelGeometries_ = std::vector<RefPtr<OHOS::Render3D::SVGeometry>> {};
         propModelCustomRenders_ = std::vector<RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>> {};
+        propModelImageTexturePaths_ = std::vector<std::string> {};
+        propModelShaderInputBuffers_ = std::vector<RefPtr<OHOS::Render3D::ShaderInputBuffer>> {};
     };
     ~ModelPaintProperty() override = default;
 
@@ -58,11 +61,18 @@ public:
         paintProperty->propModelAnimations_ = CloneModelAnimations();
         paintProperty->propModelGeometries_ = CloneModelGeometries();
         paintProperty->propModelCustomRenders_ = CloneModelCustomRenders();
+        paintProperty->propShaderPath_ = CloneShaderPath();
+        paintProperty->propModelImageTexturePaths_ = CloneModelImageTexturePaths();
+        paintProperty->propModelShaderInputBuffers_ = CloneModelShaderInputBuffers();
+
         paintProperty->needsCameraSetup_ = CloneNeedsCameraSetup();
         paintProperty->needsLightsSetup_ = CloneNeedsLightsSetup();
         paintProperty->needsAnimationsSetup_ = CloneNeedsAnimationsSetup();
         paintProperty->needsGeometriesSetup_ = CloneNeedsGeometriesSetup();
         paintProperty->needsCustomRendersSetup_ = CloneNeedsCustomRendersSetup();
+        paintProperty->needsShaderPathSetup_ = CloneNeedsShaderPathSetup();
+        paintProperty->needsImageTexturePathsSetup_ = CloneNeedsImageTexturePathsSetup();
+        paintProperty->needsShaderInputBuffersSetup_ = CloneNeedsShaderInputBuffersSetup();
         return paintProperty;
     }
 
@@ -73,6 +83,9 @@ public:
         UpdateNeedsCameraSetup(false);
         UpdateNeedsLightsSetup(false);
         UpdateNeedsCustomRendersSetup(false);
+        UpdateNeedsShaderPathSetup(false);
+        UpdateNeedsImageTexturePathsSetup(false);
+        UpdateNeedsShaderInputBuffersSetup(false);
     }
 
     void Reset() override
@@ -95,6 +108,11 @@ public:
         ResetModelSingleGeometry();
         ResetModelCustomRenders();
         ResetModelSingleCustomRender();
+        ResetShaderPath();
+        ResetModelImageTexturePaths();
+        ResetModelSingleImageTexturePath();
+        ResetModelShaderInputBuffers();
+        ResetModelSingleShaderInputBuffer();
         ResetFlagProperties();
     }
 
@@ -137,6 +155,22 @@ public:
         UpdateNeedsCustomRendersSetup(true);
     }
 
+    void OnModelSingleImageTexturePathUpdate(const std::string& path)
+    {
+        propModelImageTexturePaths_.value().push_back(path);
+        LOGD("MODEL_NG: propModelImageTexturePaths_: %zu", GetModelImageTexturePathsValue().size());
+        ResetModelSingleImageTexturePath();
+        UpdateNeedsImageTexturePathsSetup(true);
+    }
+
+    void OnModelSingleShaderInputBufferUpdate(const RefPtr<OHOS::Render3D::ShaderInputBuffer>& buffer)
+    {
+        propModelShaderInputBuffers_.value().push_back(buffer);
+        LOGD("MODEL_NG: propModelShaderInputBuffers_: %zu", GetModelShaderInputBuffersValue().size());
+        ResetModelSingleShaderInputBuffer();
+        UpdateNeedsShaderInputBuffersSetup(true);
+    }
+
     DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
         CameraPosition, OHOS::Ace::Vec3, Camera, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
@@ -155,6 +189,9 @@ public:
         CameraZFar, float, Camera, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
         CameraFOV, float, Camera, PROPERTY_UPDATE_RENDER);
+
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        ShaderPath, std::string, ShaderPath, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
         ModelLights, std::vector<RefPtr<OHOS::Render3D::SVLight>>, PROPERTY_UPDATE_RENDER);
@@ -176,11 +213,24 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(
         ModelSingleCustomRender, RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>, PROPERTY_UPDATE_RENDER);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
+        ModelImageTexturePaths, std::vector<std::string>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(
+        ModelSingleImageTexturePath, std::string, PROPERTY_UPDATE_RENDER);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
+        ModelShaderInputBuffers, std::vector<RefPtr<OHOS::Render3D::ShaderInputBuffer>>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(
+        ModelSingleShaderInputBuffer, RefPtr<OHOS::Render3D::ShaderInputBuffer>, PROPERTY_UPDATE_RENDER);
+
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(Camera, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(Lights, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(Animations, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(Geometries, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(CustomRenders, false, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_PROPERTY(ShaderPath, false, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_PROPERTY(ImageTexturePaths, false, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_PROPERTY(ShaderInputBuffers, false, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ModelPaintProperty);
