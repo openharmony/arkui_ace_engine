@@ -171,6 +171,7 @@ foreach(item, ace_platforms) {
       external_deps = [
         "init:libbeget_proxy",
         "init:libbegetutil",
+        "window_manager:libwsutils",
       ]
     }
   }

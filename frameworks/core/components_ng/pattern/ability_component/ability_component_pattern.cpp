@@ -18,6 +18,7 @@
 #include "session/host/include/extension_session.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -25,14 +26,16 @@ namespace OHOS::Ace::NG {
 
 void AbilityComponentPattern::OnModifyDone()
 {
-    Pattern::OnModifyDone();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    InitTouchEvent(gestureHub);
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        Pattern::OnModifyDone();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitTouchEvent(gestureHub);
+    }
     if (adapter_) {
         UpdateWindowRect();
     } else {
