@@ -112,6 +112,7 @@ private:
     BaselineProperties baselineProperties_;
     bool isLinearLayoutFeature_ = false;
     bool isInfiniteLayout_ = false;
+    bool selfAdaptive_ = false;
     TextDirection textDir_ = TextDirection::LTR;
     bool childrenHasAlignSelfBaseLine_ = false;
 
