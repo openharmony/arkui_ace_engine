@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_GRAPHIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_GRAPHIC_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
 
@@ -34,8 +38,13 @@ public:
 
     void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override
     {
+#ifndef USE_ROSEN_DRAWING
         fillPaint_.reset();
         strokePaint_.reset();
+#else
+        fillBrush_.Reset();
+        strokePen_.Reset();
+#endif
         path_ = AsPath(layout); // asPath override by graphic tag
         UpdateGradient(layout);
         if (UpdateFillStyle(color)) {
@@ -49,16 +58,32 @@ public:
 protected:
     void OnGraphicFill()
     {
+#ifndef USE_ROSEN_DRAWING
         if (skCanvas_) {
             skCanvas_->drawPath(path_, fillPaint_);
         }
+#else
+        if (rsCanvas_) {
+            rsCanvas_->AttachBrush(fillBrush_);
+            rsCanvas_->DrawPath(path_);
+            rsCanvas_->DetachBrush();
+        }
+#endif
     }
 
     void OnGraphicStroke()
     {
+#ifndef USE_ROSEN_DRAWING
         if (skCanvas_) {
             skCanvas_->drawPath(path_, strokePaint_);
         }
+#else
+        if (rsCanvas_) {
+            rsCanvas_->AttachPen(strokePen_);
+            rsCanvas_->DrawPath(path_);
+            rsCanvas_->DetachPen();
+        }
+#endif
     }
 
     // rect line polygon path circle ellipse
@@ -78,9 +103,15 @@ protected:
     void SetGradientStyle(double opacity);
     void UpdateLineDash();
 
+#ifndef USE_ROSEN_DRAWING
     SkPath path_;
     SkPaint fillPaint_;
     SkPaint strokePaint_;
+#else
+    RSRecordingPath path_;
+    RSBrush fillBrush_;
+    RSPen strokePen_;
+#endif
     FillState fillState_;
 };
 

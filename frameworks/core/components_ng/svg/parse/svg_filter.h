@@ -44,7 +44,11 @@ private:
     Dimension height_;
     Dimension width_;
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint filterPaint_;
+#else
+    RSBrush filterBrush_;
+#endif
 };
 
 } // namespace OHOS::Ace::NG
