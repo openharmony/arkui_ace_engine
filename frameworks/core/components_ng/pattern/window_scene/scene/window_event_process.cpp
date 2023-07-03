@@ -39,7 +39,8 @@ void WindowEventProcess::ProcessWindowEvent(const RefPtr<WindowNode>& windowNode
             windowNode->GetId(), lastWindowNode->GetId());
         int32_t dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW :
             MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW;
-        lastPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+        lastPointEvent_->SetPointerAction(dispatchAction);
+        lastPointEvent_->SetId(pointerEvent->GetId());
         DispatchPointerEvent(lastWindowNode, lastPointEvent_);
 
         dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW :
