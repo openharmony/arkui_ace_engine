@@ -21,18 +21,18 @@ ohos_unittest("ability_component_pattern_test_ng") {
   include_dirs = [
     "//third_party/jsoncpp/include",
     "//third_party/bounds_checking_function/include",
-    "//base/account/os_account/interfaces/innerkits/domain_account/native/include",
-    "//base/account/os_account/interfaces/innerkits/osaccount/native/include",
-    "//foundation/window/window_manager/interfaces/innerkits/extension",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
-    "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager/include",
-    "//foundation/barrierfree/accessibility/services/aams/test/mock/include",
+    "$base_inner_kits_path/domain_account/native/include",
+    "$base_inner_kits_path/osaccount/native/include",
+    "$window_base_path/interfaces/innerkits/extension",
+    "$graphic_2d_root/rosen/modules/2d_graphics/src",
+    "$graphic_2d_root/rosen/modules/2d_graphics/include",
+    "$graphic_2d_root/rosen/modules/2d_graphics/include/draw",
+    "$graphic_2d_root/rosen/modules/2d_graphics/src/drawing",
+    "$graphic_2d_root/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "$multimodalinput_inner_kits_path/event/include",
+    "$multimodalinput_inner_kits_path/proxy/include",
+    "$ability_runtime_inner_api_path/ability_manager/include",
+    "$barrierfree_accessibility_path/services/aams/test/mock/include",
   ]
 
   sources = [
@@ -85,7 +85,7 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
-    "//foundation/barrierfree/accessibility/services/aams/test/mock/src/mock_os_account_manager.cpp",
+    "$barrierfree_accessibility_path/services/aams/test/mock/src/mock_os_account_manager.cpp",
 
     # self
     "ability_component_pattern_test_ng.cpp",
@@ -105,24 +105,24 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$cjson_root:cjson",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/wm:libwm",
+    "$graphic_2d_root/rosen/modules/2d_graphics:2d_graphics",
+    "$graphic_2d_root/rosen/modules/render_service_client:librender_service_client",
+    "$window_base_path/wm:libwm",
     "//third_party/googletest:gmock_main",
   ]
 
   configs = [
     "$ace_root:ace_test_config",
     "$ace_root:ace_config",
-    "//commonlibrary/c_utils/base:utils_config",
-    "//foundation/graphic/graphic_2d/utils/buffer_handle:buffer_handle_public_config",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:export_config",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text_public_config",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
-    "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client_private_config",
-    "//foundation/window/window_manager/extension/extension_connection:libextension_connection_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/barrierfree/accessibility/frameworks/aafwk/test:module_private_config",
+    "$commonlibrary_utils_path/base:utils_config",
+    "$graphic_2d_root/utils/buffer_handle:buffer_handle_public_config",
+    "$graphic_2d_root/rosen/modules/render_service_base:export_config",
+    "$graphic_2d_root/rosen/modules/2d_engine/rosen_text:rosen_text_public_config",
+    "$graphic_2d_root/rosen/modules/render_service_client:render_service_client_config",
+    "$window_base_path/extension/extension_connection:libwindow_extension_client_private_config",
+    "$window_base_path/extension/extension_connection:libextension_connection_public_config",
+    "$window_base_path/resources/config/build:coverage_flags",
+    "$barrierfree_accessibility_path/frameworks/aafwk/test:module_private_config",
   ]
 
   defines = [
