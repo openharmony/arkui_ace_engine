@@ -177,12 +177,12 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
-RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(const RefPtr<UINode> parentNode,
-    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes)
+RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
+    const RefPtr<UINode> parentNode, std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
     auto children = parentNode->GetChildren();
-    
+
     for (auto index = static_cast<int>(children.size()) - 1; index >= 0; index--) {
         auto child = parentNode->GetChildAtIndex(index);
         if (child == nullptr) {
@@ -545,8 +545,8 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
     // use -1 for grid item not in eventGrid
-    auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType]
-        (const RefPtr<FrameNode>& eventGrid) {
+    auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](
+                               const RefPtr<FrameNode>& eventGrid) {
         return (dragType == DragType::GRID) ? (eventGrid == draggedGrid ? draggedIndex : -1) : draggedIndex;
     };
 
@@ -706,11 +706,15 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (!newData_) {
-        newData_ = JsonUtil::Create(true);
-        newData_->Put("customDragInfo", extraInfo.c_str());
+    if (!extraInfo.empty()) {
+        if (!newData_) {
+            newData_ = JsonUtil::Create(true);
+            newData_->Put("customDragInfo", extraInfo.c_str());
+        } else {
+            newData_->Replace("customDragInfo", extraInfo.c_str());
+        }
     } else {
-        newData_->Replace("customDragInfo", extraInfo.c_str());
+        return;
     }
     if (!clipboard_) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
