@@ -78,7 +78,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
     JSClass<JSSearch>::StaticMethod("onTextSelectionChange", &JSSearch::SetOnTextSelectionChange);
-    JSClass<JSSearch>::StaticMethod("onScroll", &JSSearch::SetOnScroll);
+    JSClass<JSSearch>::StaticMethod("onContentScroll", &JSSearch::SetOnScroll);
     JSClass<JSSearch>::StaticMethod("border", &JSSearch::JsBorder);
     JSClass<JSSearch>::StaticMethod("borderWidth", &JSSearch::JsBorderWidth);
     JSClass<JSSearch>::StaticMethod("borderColor", &JSSearch::JsBorderColor);

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_PATTERN_H
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "core/components/text_field/text_field_controller.h"
@@ -73,6 +74,11 @@ public:
     void SetSearchController(const RefPtr<TextFieldController>& searchController)
     {
         searchController_ = searchController;
+    }
+
+    const OffsetF& GetTextFieldOffset() const
+    {
+        return textFieldOffset_;
     }
 
     FocusPattern GetFocusPattern() const override;
@@ -160,6 +166,8 @@ private:
     OffsetF buttonOffset_;
     SizeF cancelButtonSize_;
     OffsetF cancelButtonOffset_;
+    SizeF textFieldSize_;
+    OffsetF textFieldOffset_;
     RefPtr<ClickEvent> imageClickListener_;
     RefPtr<ClickEvent> buttonClickListener_;
     RefPtr<ClickEvent> cancelButtonClickListener_;

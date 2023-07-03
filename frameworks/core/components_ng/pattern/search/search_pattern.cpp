@@ -91,6 +91,13 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     searchSize_ = geometryNode->GetContentSize();
     searchOffset_ = geometryNode->GetContentOffset();
 
+    auto textFieldLayoutWrapper = dirty->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    CHECK_NULL_RETURN(textFieldLayoutWrapper, true);
+    auto textFieldGeometryNode = textFieldLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(textFieldGeometryNode, true);
+    textFieldOffset_ = textFieldGeometryNode->GetFrameOffset();
+    textFieldSize_ = textFieldGeometryNode->GetFrameSize();
+
     auto buttonLayoutWrapper = dirty->GetOrCreateChildByIndex(BUTTON_INDEX);
     CHECK_NULL_RETURN(buttonLayoutWrapper, true);
     auto buttonGeometryNode = buttonLayoutWrapper->GetGeometryNode();

@@ -46,9 +46,11 @@ public:
     void SetErrorTextValue(const std::string& value);
     void SetPlaceholderValue(std::string&& value);
     void SetTextRectY(const float value);
+    float GetTextRectX();
     void SetTextObscured(bool value);
     void ChangeDragStatus();
     void SetTextRectX(const float value);
+    float GetTextRectY();
     void SetTextAlign(const TextAlign value);
     void SetShowCounter(bool value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);

@@ -80,7 +80,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextInput>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
-    JSClass<JSTextInput>::StaticMethod("onScroll", &JSTextField::SetOnScroll);
+    JSClass<JSTextInput>::StaticMethod("onContentScroll", &JSTextField::SetOnContentScroll);
     JSClass<JSTextInput>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
     JSClass<JSTextInput>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextInput>::StaticMethod("onPaste", &JSTextField::SetOnPaste);

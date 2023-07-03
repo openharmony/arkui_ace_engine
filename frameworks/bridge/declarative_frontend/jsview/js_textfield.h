@@ -67,7 +67,7 @@ public:
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
-    static void SetOnScroll(const JSCallbackInfo& info);
+    static void SetOnContentScroll(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
