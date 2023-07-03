@@ -66,13 +66,23 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
     }
 }
 
-void FormRendererGroup::ReloadForm()
+void FormRendererGroup::ReloadForm(const AppExecFwk::FormJsInfo& formJsInfo)
 {
     if (formRenderer_ == nullptr) {
         HILOG_ERROR("ReloadForm failed, formRenderer is null");
         return;
     }
-    formRenderer_->ReloadForm();
+
+    formRenderer_->ReloadForm(formJsInfo.formSrc);
+    for (auto &formRequest : formRequests_) {
+        formRequest.formJsInfo = formJsInfo;
+        formRequest.isDynamic = formJsInfo.isDynamic;
+        if (!formJsInfo.isDynamic && currentCompId_ == formRequest.compId) {
+            HILOG_INFO("SurfaceReuse due to change to static card when curCompId is %{public}s.",
+                formRequest.compId.c_str());
+            formRenderer_->OnSurfaceReuse(formJsInfo);
+        }
+    }
 }
 
 void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -116,6 +126,11 @@ void FormRendererGroup::DeleteForm(const std::string& compId)
 bool FormRendererGroup::IsFormRequestsEmpty()
 {
     return formRequests_.empty();
+}
+
+const std::vector<FormRequest>& FormRendererGroup::GetAllRendererFormRequests() const
+{
+    return formRequests_;
 }
 
 void FormRendererGroup::DeleteForm()
