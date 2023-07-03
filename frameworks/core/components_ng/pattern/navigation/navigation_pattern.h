@@ -75,6 +75,16 @@ public:
         builder_ = std::move(builder);
     }
 
+    NavigationMode GetNavigationMode() const
+    {
+        return navigationMode_;
+    }
+
+    void SetNavigationMode(NavigationMode navigationMode)
+    {
+        navigationMode_ = navigationMode;
+    }
+
     void SetNavigationStack(RefPtr<NavigationStack>&& navigationStack)
     {
         navigationStack_ = std::move(navigationStack);

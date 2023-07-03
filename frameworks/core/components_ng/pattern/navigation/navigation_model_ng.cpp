@@ -591,6 +591,11 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         backButtonNode->MountToParent(navigator);
         backButtonNode->MarkModifyDone();
 
+        auto hasBackButton = navBarNode->GetBackButton();
+        if (hasBackButton) {
+            hasBackButton->Clean();
+        }
+
         navBarNode->SetBackButton(navigator);
         navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
         return;
