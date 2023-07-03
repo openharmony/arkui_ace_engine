@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include <cstdint>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -82,10 +83,10 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
         colsLen.push_back(idealSize.Width());
     }
 
-    if (mainCount_ != rowsLen.size()) {
+    if (static_cast<uint32_t>(mainCount_) != rowsLen.size()) {
         mainCount_ = rowsLen.size();
     }
-    if (crossCount_ != colsLen.size()) {
+    if (static_cast<uint32_t>(crossCount_) != colsLen.size()) {
         crossCount_ = colsLen.size();
         gridLayoutInfo_.crossCount_ = crossCount_;
     }

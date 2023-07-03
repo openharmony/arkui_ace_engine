@@ -283,7 +283,7 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
         if (cacheData) {
             LOGD("drawing data from memory cache.");
             return nullptr;
-            // return AceType::DynamicCast<DrawingCachedImageData>(cacheData)->imageData;  // TODO depend on flutter
+            // return AceType::DynamicCast<DrawingCachedImageData>(cacheData)->imageData;
         }
     }
     // 2. try load raw image file.
