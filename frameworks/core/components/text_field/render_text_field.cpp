@@ -1188,7 +1188,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         }
         auto context = context_.Upgrade();
         if (context) {
-            LOGI("RequestKeyboard set calling window id is : %{public}u", context->GetFocusWindowId());
+            LOGI("RequestKeyboard set calling window id is : %{public}zu", context->GetFocusWindowId());
             inputMethod->SetCallingWindow(context->GetFocusWindowId());
         }
         MiscServices::InputAttribute inputAttribute;

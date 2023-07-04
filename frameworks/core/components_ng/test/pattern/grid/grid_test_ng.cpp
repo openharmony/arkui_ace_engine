@@ -83,6 +83,7 @@ protected:
         int32_t currentIndex, std::map<FocusStep, int32_t> next);
     testing::AssertionResult IsEqualRect(RectF rect, RectF expectRect);
     testing::AssertionResult IsEqualCurrentOffset(float expectOffset);
+    void UpdateLayoutInfo();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;
@@ -90,6 +91,17 @@ protected:
     RefPtr<GridLayoutProperty> layoutProperty_;
     RefPtr<GridAccessibilityProperty> accessibilityProperty_;
 };
+
+void GridTestNg::UpdateLayoutInfo()
+{
+    GetInstance();
+    RunMeasureAndLayout();
+    pattern_->gridLayoutInfo_.lineHeightMap_[0] = ITEM_HEIGHT;
+    pattern_->gridLayoutInfo_.gridMatrix_[0][0] = 0;
+    pattern_->gridLayoutInfo_.gridMatrix_[0][1] = 1;
+    pattern_->gridLayoutInfo_.gridMatrix_[1][0] = 0;
+    pattern_->gridLayoutInfo_.gridMatrix_[1][1] = 1;
+}
 
 void GridTestNg::SetUpTestSuite()
 {
@@ -3151,8 +3163,116 @@ HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
     RunMeasureAndLayout();
     Dimension offset(1.0);
     auto fireOnScroll = eventHub_->FireOnScrollBarUpdate(1.0, offset);
-    EXPECT_FLOAT_EQ(fireOnScroll.first.value(), 1.0f);
-    EXPECT_FLOAT_EQ(fireOnScroll.second.value(), 1.0f);
+    EXPECT_FLOAT_EQ(fireOnScroll.first.value(), 10.0f);
+    EXPECT_FLOAT_EQ(fireOnScroll.second.value(), 10.0f);
+}
+
+/**
+ * @tc.name: GridScrollTest002
+ * @tc.desc: Test CalculateLargeItemOffset Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create girdItem and initialize related properties.
+     */
+
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetRowsTemplate("1fr 1fr");
+    gridModelNG.SetRowsGap(Dimension(5));
+    UpdateLayoutInfo();
+    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
+    ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
+    auto ret = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(100, 100), 0, 1, 0);
+    EXPECT_EQ(ret.GetY(), 0.0f);
+    EXPECT_EQ(ret.GetX(), 100.0f);
+}
+
+/**
+ * @tc.name: GridScrollTest003
+ * @tc.desc: Test CalculateLargeItemOffset Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create girdItem and initialize related properties.
+     */
+
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetColumnsTemplate("1fr 1fr");
+    gridModelNG.SetRowsGap(Dimension(5));
+    CreateGridItem(10, -1, ITEM_HEIGHT);
+    UpdateLayoutInfo();
+    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
+    ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
+    auto ret = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(0, 100), 1, 1, 0);
+    EXPECT_EQ(ret.GetY(), 100.0f);
+    EXPECT_EQ(ret.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: GridScrollTest004
+ * @tc.desc: Test CalculateLargeItemOffset Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create girdItem and initialize related properties.
+     */
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetRowsTemplate("1fr 1fr");
+    gridModelNG.SetRowsGap(Dimension(5));
+    UpdateLayoutInfo();
+    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
+    auto ret1 = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(0, 100), 1, 1, 0);
+    EXPECT_EQ(ret1.GetY(), 100.0f);
+    EXPECT_EQ(ret1.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: GridScrollTest005
+ * @tc.desc: Test AdjustRowColSpan Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridScrollTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gridItem and Set properties.
+     */
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+    gridModelNG.SetRowsTemplate("1fr 1fr");
+
+    /**
+     * @tc.steps: step2. Create heading GridItem.
+     */
+    GridItemModelNG gridItemModelNG;
+    gridItemModelNG.Create();
+    gridItemModelNG.SetRowStart(-1);
+    gridItemModelNG.SetRowEnd(-1);
+    gridItemModelNG.SetColumnStart(-1);
+    gridItemModelNG.SetColumnEnd(-1);
+    ViewStackProcessor::GetInstance()->Pop();
+    GetInstance();
+    auto layoutWrapper = RunMeasureAndLayout();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto item = GetItemFrameNode(0);
+    auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
+    ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
+    auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    gridScrollLayoutAlgorithm->AdjustRowColSpan(itemWrapper);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto layoutProperty = item->GetLayoutProperty<GridItemLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetRowStart(), -1);
+    EXPECT_EQ(layoutProperty->GetRowEnd(), -1);
+    EXPECT_EQ(layoutProperty->GetColumnStart(), -1);
+    EXPECT_EQ(layoutProperty->GetColumnEnd(), -1);
 }
 
 /**
