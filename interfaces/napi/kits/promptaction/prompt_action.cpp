@@ -536,6 +536,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
     auto* asyncContext = new PromptAsyncContext();
     asyncContext->env = env;
+    asyncContext->instanceId = Container::CurrentId();
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
