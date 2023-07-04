@@ -921,6 +921,17 @@ public:
         return onPreKeyEvent_;
     }
 
+    void SetOverScrollId(const EventMarker& overScrollId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetOverScrollId(overScrollId);
+    }
+
+    const EventMarker& GetOverScrollId() const
+    {
+        return declaration_->GetOverScrollId();
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;

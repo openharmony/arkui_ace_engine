@@ -136,6 +136,7 @@ public:
     virtual void NotifyPopupWindowResult(int32_t webId, bool result) {};
     virtual void SetAudioResumeInterval(int32_t resumeInterval) {};
     virtual void SetAudioExclusive(bool audioExclusive) {};
+    virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 
 private:
     static std::unique_ptr<WebModel> instance_;

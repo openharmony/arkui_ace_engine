@@ -566,6 +566,7 @@ public:
     void OnAudioStateChanged(bool audible);
     void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs);
     void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
+    void OnOverScroll(float xOffset, float yOffset);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -723,6 +724,7 @@ private:
     EventCallbackV2 onTouchIconUrlV2_;
     EventCallbackV2 onAudioStateChangedV2_;
     EventCallbackV2 onFirstContentfulPaintV2_;
+    EventCallbackV2 onOverScrollV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

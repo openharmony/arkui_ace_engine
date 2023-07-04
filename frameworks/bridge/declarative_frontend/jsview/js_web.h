@@ -124,9 +124,11 @@ public:
     static void MediaOptions(const JSCallbackInfo& args);
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
     static void OnControllerAttached(const JSCallbackInfo& args);
+    static void OnOverScroll(const JSCallbackInfo& args);
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
+
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
 };

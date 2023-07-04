@@ -1329,6 +1329,30 @@ private:
     long navigationStartTick_;
     long firstContentfulPaintMs_;
 };
+
+class ACE_EXPORT WebOnOverScrollEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebOnOverScrollEvent, BaseEventInfo);
+
+public:
+    WebOnOverScrollEvent(double xOffset, double yOffset)
+        : BaseEventInfo("OnOverScrollEvent"), xOffset_(xOffset), yOffset_(yOffset)
+    {}
+    ~WebOnOverScrollEvent() = default;
+
+    float GetX() const
+    {
+        return xOffset_;
+    }
+
+    float GetY() const
+    {
+        return yOffset_;
+    }
+
+private:
+    float xOffset_ = 0.0f;
+    float yOffset_ = 0.0f;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

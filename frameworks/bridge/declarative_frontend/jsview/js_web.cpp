@@ -1582,6 +1582,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
+    JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -3495,5 +3496,32 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
         });
     };
     WebModel::GetInstance()->SetOnControllerAttached(std::move(uiCallback));
+}
+
+JSRef<JSVal> OverScrollEventToJSValue(const WebOnOverScrollEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("xOffset", eventInfo.GetX());
+    obj->SetProperty("yOffset", eventInfo.GetY());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnOverScroll(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebOnOverScrollEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), OverScrollEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnOverScrollEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOverScrollId(jsCallback);
 }
 } // namespace OHOS::Ace::Framework
