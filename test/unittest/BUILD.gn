@@ -118,7 +118,7 @@ ohos_source_set("ace_components_base") {
   configs = [ ":ace_unittest_config" ]
 }
 
-# ace components evnet
+# ace components event
 ohos_source_set("ace_components_event") {
   testonly = true
   subsystem_name = ace_engine_subsystem
