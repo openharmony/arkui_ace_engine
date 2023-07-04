@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -33,7 +34,7 @@ namespace OHOS::Ace::NG {
 
 // has full screen size
 // used for detecting clicks outside Menu area
-class MenuWrapperPattern : public Pattern {
+class MenuWrapperPattern : public PopupBasePattern {
     DECLARE_ACE_TYPE(MenuWrapperPattern, Pattern);
 
 public:

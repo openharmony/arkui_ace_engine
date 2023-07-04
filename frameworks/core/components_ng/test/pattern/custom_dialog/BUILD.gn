@@ -93,6 +93,7 @@ ohos_unittest("custom_dialog_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
     "$ace_root/frameworks/core/components_ng/render/divider_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
 

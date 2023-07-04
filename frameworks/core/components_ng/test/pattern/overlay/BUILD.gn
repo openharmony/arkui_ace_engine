@@ -205,6 +205,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/render/divider_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # components_v2

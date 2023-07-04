@@ -28,11 +28,11 @@
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-class DialogPattern : public Pattern {
-    DECLARE_ACE_TYPE(DialogPattern, Pattern);
+class DialogPattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)

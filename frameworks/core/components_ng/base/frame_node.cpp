@@ -1889,27 +1889,6 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
-bool FrameNode::IsContentRoot()
-{
-    constexpr int32_t MAX_DEPTH_OF_FRONTEND_ROOT = 6;
-    if (GetDepth() > MAX_DEPTH_OF_FRONTEND_ROOT) {
-        // depth of frontend root is always 5 / 6
-        // (Root->Stage->[Stack]->Page->JsView->content)
-        // so stop traversing if we're beyond that
-        return false;
-    }
-    // title bar
-    if (GetDepth() == 2 && GetTag() == V2::CONTAINER_MODAL_ETS_TAG) {
-        return true;
-    }
-    // page root
-    auto parent = GetParent();
-    CHECK_NULL_RETURN_NOLOG(parent, false);
-    auto grandParent = parent->GetParent();
-    CHECK_NULL_RETURN_NOLOG(grandParent, false);
-    return parent->GetTag() == V2::JS_VIEW_ETS_TAG && grandParent->GetTag() == V2::PAGE_ETS_TAG;
-}
-
 void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)
 {
     auto paintRect = GetTransformRectRelativeToWindow();
