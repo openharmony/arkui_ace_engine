@@ -491,8 +491,12 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     parseOk = JSViewAbstract::ParseJsColor(selectedFontColorValue, fontColor);
     digitalParameters.selectedFontColor =
         parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
-    GetFontContent(digitFontValue, false, digitalParameters);
-    GetFontContent(selectedDigitFontValue, true, digitalParameters);
+    if (!digitFontValue->IsNull() && digitFontValue->IsObject()) {
+        GetFontContent(digitFontValue, false, digitalParameters);
+    }
+    if (!selectedDigitFontValue->IsNull() && selectedDigitFontValue->IsObject()) {
+        GetFontContent(selectedDigitFontValue, true, digitalParameters);
+    }
     return digitalParameters;
 }
 
