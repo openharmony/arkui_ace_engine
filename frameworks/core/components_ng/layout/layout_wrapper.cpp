@@ -222,8 +222,16 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
-    constraint.MinusPadding(
-        insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
+    SizeF safeSize { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
+    safeSize.MinusPadding(insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
+    if (safeSize < constraint.maxSize) {
+        constraint.maxSize = safeSize;
+        constraint.parentIdealSize = OptionalSizeF(safeSize);
+        constraint.percentReference = safeSize;
+    }
+    if (safeSize < constraint.minSize) {
+        constraint.minSize = safeSize;
+    }
 }
 
 void LayoutWrapper::OffsetNodeToSafeArea()
@@ -500,7 +508,6 @@ void LayoutWrapper::ExpandSafeAreaInner()
     frame -= parentGlobalOffset;
     geometryNode_->SetFrameOffset(frame.GetOffset());
     geometryNode_->SetFrameSize(frame.GetSize());
-
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()
