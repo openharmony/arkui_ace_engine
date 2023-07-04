@@ -64,7 +64,7 @@
                 "camera_framework",
                 "player_framework",
                 "access_token",
-                "hilog_native",
+                "hilog",
                 "input",
                 "power_manager",
                 "webview",
