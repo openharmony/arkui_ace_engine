@@ -35,11 +35,11 @@ constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
 static std::vector<uintptr_t> g_callList = {
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::RegisterSecurityComponent),
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::UpdateSecurityComponent),
-    reinterpret_cast<uintptr_t>(SecurityComponentHandler::UnregisterSecurityComponent),
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::ReportSecurityComponentClickEvent)
 };
 
-SecurityComponent::SecCompUiRegister uiRegister(g_callList);
+SecurityComponentProbe SecurityComponentHandler::probe;
+SecurityComponent::SecCompUiRegister uiRegister(g_callList, &SecurityComponentHandler::probe);
 
 bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
 {
@@ -286,6 +286,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     CHECK_NULL_RETURN(node, false);
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
+    buttonInfo.nodeId_ = node->GetId();
     buttonInfo.padding_.top = layoutProperty->GetBackgroundTopPadding().value().ConvertToVp();
     buttonInfo.padding_.right = layoutProperty->GetBackgroundRightPadding().value().ConvertToVp();
     buttonInfo.padding_.bottom = layoutProperty->GetBackgroundBottomPadding().value().ConvertToVp();
@@ -400,6 +401,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
 
 int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
 {
+    SecurityComponentHandler::probe.InitProbeTask();
     std::string componentInfo;
     if (!InitButtonInfo(componentInfo, node)) {
         return -1;

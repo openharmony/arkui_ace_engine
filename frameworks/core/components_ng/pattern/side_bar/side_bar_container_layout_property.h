@@ -21,6 +21,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,9 +30,9 @@ struct ControlButtonStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonHeight, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonLeft, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonTop, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonShowIconStr, std::string);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonHiddenIconStr, std::string);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonSwitchingIconStr, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonShowIconInfo, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonHiddenIconInfo, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonSwitchingIconInfo, ImageSourceInfo);
 };
 
 struct DividerStyle {
@@ -152,9 +153,9 @@ public:
 
         auto jsonIcon = JsonUtil::Create(true);
         CHECK_NULL_VOID(jsonIcon);
-        jsonIcon->Put("shown", propControlButtonStyle_->propControlButtonShowIconStr->c_str());
-        jsonIcon->Put("hidden", propControlButtonStyle_->propControlButtonHiddenIconStr->c_str());
-        jsonIcon->Put("switching", propControlButtonStyle_->propControlButtonSwitchingIconStr->c_str());
+        jsonIcon->Put("shown", propControlButtonStyle_->propControlButtonShowIconInfo->GetSrc().c_str());
+        jsonIcon->Put("hidden", propControlButtonStyle_->propControlButtonHiddenIconInfo->GetSrc().c_str());
+        jsonIcon->Put("switching", propControlButtonStyle_->propControlButtonSwitchingIconInfo->GetSrc().c_str());
 
         jsonControl->Put("icon", jsonIcon);
         json->Put("controlButton", jsonControl->ToString().c_str());
@@ -176,11 +177,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ControlButtonStyle, ControlButtonLeft, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ControlButtonStyle, ControlButtonTop, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        ControlButtonStyle, ControlButtonShowIconStr, std::string, PROPERTY_UPDATE_MEASURE);
+        ControlButtonStyle, ControlButtonShowIconInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        ControlButtonStyle, ControlButtonHiddenIconStr, std::string, PROPERTY_UPDATE_MEASURE);
+        ControlButtonStyle, ControlButtonHiddenIconInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        ControlButtonStyle, ControlButtonSwitchingIconStr, std::string, PROPERTY_UPDATE_MEASURE);
+        ControlButtonStyle, ControlButtonSwitchingIconInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(DividerStyle, DividerStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DividerStrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);

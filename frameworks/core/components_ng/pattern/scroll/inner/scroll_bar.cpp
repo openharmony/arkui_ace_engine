@@ -335,7 +335,8 @@ void ScrollBar::SetGestureEvent()
                 }
                 scrollBar->MarkNeedRender();
             }
-            if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+                info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayShrinkAnimation();
                 }

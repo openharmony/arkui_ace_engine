@@ -26,6 +26,7 @@ public:
     explicit WindowScene(const sptr<Rosen::Session>& session);
     ~WindowScene() override;
 
+    void OnSetDepth(const int32_t depth) override;
 private:
     bool HasStartingPage() override
     {

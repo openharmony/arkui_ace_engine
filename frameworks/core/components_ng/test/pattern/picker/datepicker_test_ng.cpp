@@ -805,8 +805,8 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest002, TestSize.Level1)
     EXPECT_EQ(pickerProperty->GetEndDate()->year, datePickerPattern->GetEndDateLunar().year);
     datePickerPattern->SetStartDate(PickerDate(0, 1, 1));
     datePickerPattern->SetEndDate(PickerDate(0, 1, 1));
-    EXPECT_EQ(datePickerPattern->startDateSolar_.ToString(true),
-                datePickerPattern->startDefaultDateSolar_.ToString(true));
+    EXPECT_EQ(
+        datePickerPattern->startDateSolar_.ToString(true), datePickerPattern->startDefaultDateSolar_.ToString(true));
     EXPECT_EQ(datePickerPattern->endDateSolar_.ToString(true), datePickerPattern->endDefaultDateSolar_.ToString(true));
 }
 
@@ -1099,8 +1099,9 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest001, TestSize.Level1)
     auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
     ASSERT_NE(pickerPaintProperty, nullptr);
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    auto datePickerPaintMethod = AceType::MakeRefPtr<DatePickerPaintMethod>();
     ASSERT_NE(datePickerPattern, nullptr);
+    auto datePickerPaintMethod =
+        AceType::MakeRefPtr<DatePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(datePickerPattern)));
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
@@ -1136,7 +1137,8 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest002, TestSize.Level1)
     auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
     ASSERT_NE(pickerPaintProperty, nullptr);
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    auto datePickerPaintMethod = AceType::MakeRefPtr<DatePickerPaintMethod>();
+    auto datePickerPaintMethod =
+        AceType::MakeRefPtr<DatePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(datePickerPattern)));
     datePickerPaintMethod->SetEnabled(false);
     ASSERT_NE(datePickerPattern, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();

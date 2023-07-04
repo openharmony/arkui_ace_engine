@@ -32,6 +32,8 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
+#include "core/components/picker/picker_data.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -50,9 +52,11 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -67,6 +71,9 @@ const OffsetF MENU_OFFSET(10.0, 10.0);
 const std::string MESSAGE = "hello world";
 const std::string BOTTOM = "test";
 constexpr int32_t DURATION = 2;
+constexpr int32_t START_YEAR_BEFORE = 1990;
+constexpr int32_t SELECTED_YEAR = 2000;
+constexpr int32_t END_YEAR = 2090;
 } // namespace
 class OverlayManagerTestNg : public testing::Test {
 public:
@@ -1055,5 +1062,91 @@ HWTEST_F(OverlayManagerTestNg, DialogTest002, TestSize.Level1)
     EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
     EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+}
+/**
+ * @tc.name: DialogTest003
+ * @tc.desc: Test OverlayManager::ShowDateDialog->ShowTimeDialog->RemoveOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and prepare dialogProperties.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+    dialogProperties.isShowInSubWindow = true;
+
+    DatePickerSettingData datePickerSettingData;
+    datePickerSettingData.isLunar = false;
+    datePickerSettingData.showTime = true;
+    datePickerSettingData.useMilitary = false;
+
+    PickerTextProperties properties;
+    properties.disappearTextStyle_.textColor = Color::RED;
+    properties.disappearTextStyle_.fontSize = Dimension(0);
+    properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    properties.normalTextStyle_.textColor = Color::BLACK;
+    properties.normalTextStyle_.fontSize = Dimension(10);
+    properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    properties.selectedTextStyle_.textColor = Color::RED;
+    properties.selectedTextStyle_.fontSize = Dimension(15);
+    properties.selectedTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    datePickerSettingData.properties = properties;
+    datePickerSettingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    datePickerSettingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    datePickerSettingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    datePickerSettingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDateDialog.
+     * @tc.expected: dateDialogNode is created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowDateDialog(dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+
+    /**
+     * @tc.steps: step3. create timePickerSettingData and call ShowTimeDialog.
+     * @tc.expected: timeDialogNode is created successfully
+     */
+    TimePickerSettingData timePickerSettingData;
+    timePickerSettingData.properties = properties;
+    timePickerSettingData.isUseMilitaryTime = false;
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(1, 1, 1);
+
+    overlayManager->ShowTimeDialog(
+        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+
+    /**
+     * @tc.steps: step4. call RemoveOverlay when dialogChildCount is 2
+     * @tc.expected: remove lastChild successfully
+     */
+    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+
+    /**
+     * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
+     * @tc.expected: remove  successfully
+     */
+    overlayManager->ShowTimeDialog(
+        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 } // namespace OHOS::Ace::NG

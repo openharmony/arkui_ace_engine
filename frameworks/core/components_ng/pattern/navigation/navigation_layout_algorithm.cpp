@@ -94,7 +94,8 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         navBarWrapper->Layout();
         return geometryNode->GetFrameSize().Width();
     }
-    if (hostNode->GetIsModeChange() && (navigationLayoutProperty->GetDestinationChange().value_or(false) ||
+    if (hostNode->GetIsModeChange() &&
+        (navigationLayoutProperty->GetDestinationChange().value_or(false) ||
             contentNode->FindChildNodeOfClass<NavDestinationGroupNode>()) &&
         navigationLayoutProperty->GetNavigationMode() == NavigationMode::STACK) {
         auto contentOffset = OffsetT<float>(-geometryNode->GetFrameSize().Width(), 0.0f);
@@ -222,7 +223,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     usrNavigationMode_ = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
     navigationMode_ = usrNavigationMode_;
-    navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -240,16 +241,20 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (size.Width() >= navigationWidth) {
             navigationMode_ = NavigationMode::SPLIT;
             navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
+            navigationPattern->SetNavigationMode(navigationMode_);
         } else {
             navigationMode_ = NavigationMode::STACK;
             navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
+            navigationPattern->SetNavigationMode(navigationMode_);
         }
     } else {
         auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
         CHECK_NULL_VOID(layoutAlgorithmWrapper);
         auto navigationLayoutAlgorithm =
             DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
         navigationLayoutAlgorithm->SetNavigationMode(navigationMode_);
+        navigationPattern->SetNavigationMode(navigationMode_);
     }
 
     auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
@@ -315,6 +320,8 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
             contentSize.SetWidth(contentWidth);
         }
+    } else {
+        navBarWidth = 0.0f;
     }
     MeasureNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize);
     MeasureContentChild(layoutWrapper, hostNode, navigationLayoutProperty, contentSize);

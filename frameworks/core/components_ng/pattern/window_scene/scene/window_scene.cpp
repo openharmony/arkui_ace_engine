@@ -99,4 +99,10 @@ void WindowScene::OnBackground()
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
 }
+
+void WindowScene::OnSetDepth(const int32_t depth)
+{
+    CHECK_NULL_VOID(session_);
+    session_->SetZOrder(static_cast<uint32_t>(depth));
+}
 } // namespace OHOS::Ace::NG

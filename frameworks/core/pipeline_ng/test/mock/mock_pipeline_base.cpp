@@ -253,6 +253,8 @@ void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
+
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -316,6 +318,10 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 {
     return {};
 }
+
+void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+
+void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

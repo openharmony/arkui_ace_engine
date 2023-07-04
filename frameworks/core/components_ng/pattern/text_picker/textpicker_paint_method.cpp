@@ -45,6 +45,7 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
         CHECK_NULL_VOID_NOLOG(picker);
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
         auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern.Upgrade());
+        CHECK_NULL_VOID_NOLOG(textPickerPattern);
         auto height = picker->defaultPickerItemHeight_;
         if (textPickerPattern->GetResizeFlag()) {
             height = textPickerPattern->GetResizePickerItemHeight();

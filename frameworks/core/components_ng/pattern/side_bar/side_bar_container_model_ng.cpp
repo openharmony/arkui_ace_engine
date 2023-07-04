@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "base/image/pixel_map.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -25,6 +26,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -35,6 +37,17 @@ constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
+
+ImageSourceInfo CreateSourceInfo(
+    const std::string& src, bool isPixelMap, RefPtr<PixelMap>& pixMap)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (isPixelMap && pixMap) {
+        return ImageSourceInfo(pixMap);
+    }
+#endif
+    return ImageSourceInfo(src);
+}
 } // namespace
 
 void SideBarContainerModelNG::Create()
@@ -103,21 +116,16 @@ void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::Frame
     CHECK_NULL_VOID(sideBarTheme);
     Color controlButtonColor = sideBarTheme->GetControlImageColor();
 
-    ImageSourceInfo info((std::string()));
+    std::optional<ImageSourceInfo> info = std::nullopt;
     if (showSideBar) {
-        if (layoutProperty->GetControlButtonShowIconStr().has_value()) {
-            info.SetSrc(layoutProperty->GetControlButtonShowIconStr().value());
-        } else {
-            info.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-            info.SetFillColor(controlButtonColor);
-        }
+        info = layoutProperty->GetControlButtonShowIconInfo();
     } else {
-        if (layoutProperty->GetControlButtonHiddenIconStr().has_value()) {
-            info.SetSrc(layoutProperty->GetControlButtonHiddenIconStr().value());
-        } else {
-            info.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-            info.SetFillColor(controlButtonColor);
-        }
+        info = layoutProperty->GetControlButtonHiddenIconInfo();
+    }
+    if (!info.has_value()) {
+        info = std::make_optional<ImageSourceInfo>();
+        info->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        info->SetFillColor(controlButtonColor);
     }
 
     int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -138,7 +146,7 @@ void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::Frame
 
     auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(info);
+    imageLayoutProperty->UpdateImageSourceInfo(info.value());
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
 
     imgNode->MountToParent(parentNode);
@@ -259,19 +267,25 @@ void SideBarContainerModelNG::SetControlButtonTop(const Dimension& top)
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, top);
 }
 
-void SideBarContainerModelNG::SetControlButtonShowIconStr(const std::string& showIconStr)
+void SideBarContainerModelNG::SetControlButtonShowIconInfo(const std::string& showIconStr,
+    bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonShowIconStr, showIconStr);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonShowIconInfo,
+        CreateSourceInfo(showIconStr, isPixelMap, pixMap));
 }
 
-void SideBarContainerModelNG::SetControlButtonHiddenIconStr(const std::string& hiddenIconStr)
+void SideBarContainerModelNG::SetControlButtonHiddenIconInfo(const std::string& hiddenIconStr,
+    bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHiddenIconStr, hiddenIconStr);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo,
+        CreateSourceInfo(hiddenIconStr, isPixelMap, pixMap));
 }
 
-void SideBarContainerModelNG::SetControlButtonSwitchingIconStr(const std::string& switchingIconStr)
+void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(const std::string& switchingIconStr,
+    bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonSwitchingIconStr, switchingIconStr);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo,
+        CreateSourceInfo(switchingIconStr, isPixelMap, pixMap));
 }
 
 void SideBarContainerModelNG::SetDividerStrokeWidth(const Dimension& strokeWidth)

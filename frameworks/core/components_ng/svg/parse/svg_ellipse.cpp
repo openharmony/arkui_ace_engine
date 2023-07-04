@@ -32,9 +32,15 @@ RefPtr<SvgNode> SvgEllipse::Create()
     return AceType::MakeRefPtr<SvgEllipse>();
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgEllipse::AsPath(const Size& viewPort) const
 {
     SkPath path;
+#else
+RSRecordingPath SvgEllipse::AsPath(const Size& viewPort) const
+{
+    RSRecordingPath path;
+#endif
     auto declaration = AceType::DynamicCast<SvgEllipseDeclaration>(declaration_);
     CHECK_NULL_RETURN_NOLOG(declaration, path);
     double rx = 0.0;
@@ -53,9 +59,16 @@ SkPath SvgEllipse::AsPath(const Size& viewPort) const
             ry = ConvertDimensionToPx(declaration->GetRx(), viewPort, SvgLengthType::HORIZONTAL);
         }
     }
+#ifndef USE_ROSEN_DRAWING
     SkRect rect = SkRect::MakeXYWH(ConvertDimensionToPx(declaration->GetCx(), viewPort, SvgLengthType::HORIZONTAL) - rx,
         ConvertDimensionToPx(declaration->GetCy(), viewPort, SvgLengthType::VERTICAL) - ry, rx + rx, ry + ry);
     path.addOval(rect);
+#else
+    RSScalar left = ConvertDimensionToPx(declaration->GetCx(), viewPort, SvgLengthType::HORIZONTAL) - rx;
+    RSScalar top = ConvertDimensionToPx(declaration->GetCy(), viewPort, SvgLengthType::VERTICAL) - ry;
+    RSRect rect = RSRect(left, top, rx + rx + left, ry + ry + top);
+    path.AddOval(rect);
+#endif
     return path;
 }
 

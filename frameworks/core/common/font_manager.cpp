@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/components_ng/base/frame_node.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
 #include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_parser.h"
@@ -135,11 +136,25 @@ void FontManager::RebuildFontNode()
 #ifndef NG_BUILD
     for (auto iter = fontNodes_.begin(); iter != fontNodes_.end();) {
         auto fontNode = iter->Upgrade();
-        if (fontNode) {
-            fontNode->MarkNeedLayout();
+        CHECK_NULL_VOID(fontNode);
+        auto renderNode = DynamicCast<RenderNode>(fontNode);
+        if (renderNode) {
+            renderNode->MarkNeedLayout();
             ++iter;
         } else {
             iter = fontNodes_.erase(iter);
+        }
+    }
+#else
+    for (auto iter = fontNodesNG_.begin(); iter != fontNodesNG_.end();) {
+        auto fontNode = iter->Upgrade();
+        CHECK_NULL_VOID(fontNode);
+        auto uiNode = DynamicCast<UINode>(fontNode);
+        if (uiNode) {
+            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
+            ++iter;
+        } else {
+            iter = fontNodesNG_.erase(iter);
         }
     }
 #endif
@@ -178,15 +193,71 @@ void FontManager::NotifyVariationNodes()
 #ifndef NG_BUILD
     for (const auto& node : variationNodes_) {
         auto refNode = node.Upgrade();
-        if (refNode) {
-            auto text = DynamicCast<RenderText>(refNode);
-            if (text) {
-                text->MarkNeedMeasure();
-            }
-            refNode->MarkNeedLayout();
+        CHECK_NULL_VOID(refNode);
+        auto renderNode = DynamicCast<RenderNode>(refNode);
+        CHECK_NULL_VOID(renderNode);
+        auto text = DynamicCast<RenderText>(renderNode);
+        if (text) {
+            text->MarkNeedMeasure();
         }
+        renderNode->MarkNeedLayout();
+    }
+#else
+    for (const auto& node : variationNodesNG_) {
+        auto uiNode = node.Upgrade();
+        CHECK_NULL_VOID(uiNode);
+        auto frameNode = DynamicCast<FrameNode>(uiNode);
+        if (frameNode) {
+            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+        }
+        uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
     }
 #endif
+}
+
+bool FontManager::RegisterCallbackNG(
+    const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
+{
+    CHECK_NULL_RETURN(callback, false);
+    bool isCustomFont = false;
+    for (auto& fontLoader : fontLoaders_) {
+        if (fontLoader->GetFamilyName() == familyName) {
+            fontLoader->SetOnLoadedNG(node, callback);
+            isCustomFont = true;
+        }
+    }
+    return isCustomFont;
+}
+
+void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)
+{
+    if (fontNodesNG_.find(node) == fontNodesNG_.end()) {
+        fontNodesNG_.emplace(node);
+    }
+}
+
+void FontManager::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node)
+{
+    fontNodesNG_.erase(node);
+}
+
+void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node)
+{
+    for (auto& fontLoader : fontLoaders_) {
+        fontLoader->RemoveCallbackNG(node);
+    }
+}
+
+void FontManager::AddVariationNodeNG(const WeakPtr<NG::UINode>& node)
+{
+    if (variationNodesNG_.find(node) == variationNodesNG_.end()) {
+        variationNodesNG_.emplace(node);
+    }
+}
+
+void FontManager::RemoveVariationNodeNG(const WeakPtr<NG::UINode>& node)
+{
+    variationNodesNG_.erase(node);
 }
 
 } // namespace OHOS::Ace

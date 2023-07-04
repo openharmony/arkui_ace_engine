@@ -232,6 +232,9 @@ bool ParseString(int32_t resId, int32_t type, std::vector<std::string>& params, 
         }
         ReplaceHolder(originStr, params, 1);
         result = originStr;
+    } else if (type == static_cast<int>(ResourceType::RAWFILE)) {
+        auto fileName = params[0];
+        result = themeConstants->GetRawfile(fileName);
     } else {
         auto originStr = themeConstants->GetString(resId);
         ReplaceHolder(originStr, params, 0);

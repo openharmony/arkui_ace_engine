@@ -39,7 +39,7 @@ type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 // function type of recycle node update function
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
-// Nativeview
+// NativeView
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 abstract class ViewPU extends NativeViewPartialUpdate
@@ -57,6 +57,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // flag for initgial rendering or re-render on-going.
   private isRenderInProgress: boolean = false;
+
+  // flag if active of inActive
+  // inActive means updates are delayed
+  private isActive_ : boolean = true;
 
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
@@ -76,14 +80,17 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected updateFuncByElmtId: Map<number, UpdateFunc>
     = new Map<number, UpdateFunc>();
 
-  // my LocalStorge instance, shared with ancestor Views.
+  // set of all @Local/StorageLink/Prop variables owned by this ViwPU
+  private ownStorageLinksProps_ : Set<ObservedPropertyAbstractPU<any>> = new Set<ObservedPropertyAbstractPU<any>>();
+
+  // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
   protected localStoragebackStore_: LocalStorage = undefined;
 
   protected get localStorage_() {
     if (!this.localStoragebackStore_) {
       stateMgmtConsole.info(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
-      this.localStoragebackStore_ = new LocalStorage({ /* emty */ });
+      this.localStoragebackStore_ = new LocalStorage({ /* empty */ });
     }
     return this.localStoragebackStore_;
   }
@@ -169,8 +176,62 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
+    this.ownStorageLinksProps_.clear();
     if (this.parent_) {
       this.parent_.removeChild(this);
+    }
+  }
+
+  
+  /**
+ * ArkUI engine will call this function when the corresponding CustomNode's active status change.
+ * @param active true for active, false for inactive
+ */
+  public setActive(active: boolean): void {
+    if (this.isActive_ == active) {
+      stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active} with unchanged state - ignoring`);
+      return;
+    }
+    stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+    this.isActive_ = active;
+    if (this.isActive_) {
+      this.onActive()
+    } else {
+      this.onInactive();
+    }
+  }
+
+  private onActive(): void {   
+    if (!this.isActive_) {
+      return;
+    }
+
+    stateMgmtConsole.debug(`${this.constructor.name}: onActive`);
+    this.performDelayedUpdate();
+    for (const child of this.childrenWeakrefMap_.values()) {
+      const childViewPU: ViewPU | undefined = child.deref();
+      if (childViewPU) {
+        childViewPU.setActive(this.isActive_);
+      }
+    }
+  }
+
+
+  private onInactive(): void {
+    if (this.isActive_) {
+      return;
+    }
+
+    stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}): onInactive`);
+    for (const storageProp of this.ownStorageLinksProps_) {
+      storageProp.enableDelayedNotification();
+    }
+
+    for (const child of this.childrenWeakrefMap_.values()) {
+      const childViewPU: ViewPU | undefined = child.deref();
+      if (childViewPU) {
+        childViewPU.setActive(this.isActive_);
+      }
     }
   }
 
@@ -343,7 +404,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
       if (dependentElmtIds.size && !this.isFirstRender()) {
         if (!this.dirtDescendantElementIds_.size) {
-          // mark Composedelement dirty when first elmtIds are added
+          // mark ComposedElement dirty when first elmtIds are added
           // do not need to do this every time
           this.markNeedUpdate();
         }
@@ -362,6 +423,40 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
       this.restoreInstanceId();
     }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+  }
+
+
+  private performDelayedUpdate(): void {
+    stateMgmtTrace.scopedTrace(() => {
+    stateMgmtConsole.debug(`${this.constructor.name}: performDelayedUpdate ...`);
+    this.syncInstanceId();
+
+    for (const storageProp of this.ownStorageLinksProps_) {
+      const changedElmtIds = storageProp.moveElmtIdsForDelayedUpdate();
+      if (changedElmtIds) {
+        const varName = storageProp.info();
+        if (changedElmtIds.size && !this.isFirstRender()) {
+          for (const elmtId of changedElmtIds) {
+            this.dirtDescendantElementIds_.add(elmtId);
+          }
+        }
+
+        stateMgmtConsole.debug(`${this.constructor.name}: performDelayedUpdate: all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
+
+        const cb = this.watchedProps.get(varName)
+        if (cb) {
+          stateMgmtConsole.debug(`   .. calling @Watch function`);
+          cb.call(this, varName);
+        }
+      }
+    } // for all ownStorageLinksProps_
+    this.restoreInstanceId();
+
+    if (this.dirtDescendantElementIds_.size) {
+      this.markNeedUpdate();
+    }
+
+    }, "ViewPU.performDelayedUpdate", this.constructor.name);
   }
 
   /**
@@ -682,44 +777,52 @@ abstract class ViewPU extends NativeViewPartialUpdate
      * @returns SynchedPropertySimple/ObjectTwoWay/PU
      */
   public createStorageLink<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return AppStorage.__createSync<T>(storagePropName, defaultValue,
+    const appStorageLink = AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
           ? new SynchedPropertySimpleTwoWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    this.ownStorageLinksProps_.add(appStorageLink);
+    return appStorageLink;
   }
 
   public createStorageProp<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return AppStorage.__createSync<T>(storagePropName, defaultValue,
+    const appStorageProp = AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
           ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    this.ownStorageLinksProps_.add(appStorageProp);
+    return appStorageProp;
   }
 
   public createLocalStorageLink<T>(storagePropName: string, defaultValue: T,
     viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return this.localStorage_.__createSync<T>(storagePropName, defaultValue,
+      const localStorageLink =  this.localStorage_.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
           ? new SynchedPropertySimpleTwoWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-  }
+    this.ownStorageLinksProps_.add(localStorageLink);
+    return localStorageLink;
+}
 
   public createLocalStorageProp<T>(storagePropName: string, defaultValue: T,
     viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return this.localStorage_.__createSync<T>(storagePropName, defaultValue,
+      const localStorageProp = this.localStorage_.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
           ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    this.ownStorageLinksProps_.add(localStorageProp);
+    return localStorageProp;
   }
 }

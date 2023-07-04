@@ -787,11 +787,11 @@ void JSSwiper::SetCurve(const JSCallbackInfo& info)
             };
         }
         auto jsCurveString = object->GetProperty("__curveString");
-        if (jsCurveString->IsString() && customCallBack) {
+        if (jsCurveString->IsString()) {
             auto aniTimFunc = jsCurveString->ToString();
-            if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
+            if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM && customCallBack) {
                 curve = CreateCurve(customCallBack);
-            } else {
+            } else if (aniTimFunc != DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
                 curve = CreateCurve(aniTimFunc);
             }
         }

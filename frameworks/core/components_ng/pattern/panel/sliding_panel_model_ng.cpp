@@ -61,7 +61,6 @@ void SlidingPanelModelNG::Create(bool isShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, true);                   // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, PanelMode::HALF);         // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
-    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, ShowCloseIcon, false);               // default value
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {

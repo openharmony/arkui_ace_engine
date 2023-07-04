@@ -56,7 +56,7 @@ public:
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
     void SetOnChange(std::function<void(const std::string&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
-    void SetOnScroll(std::function<void(float, float)>&& func) override;
+    void SetOnContentScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;

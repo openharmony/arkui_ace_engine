@@ -44,6 +44,7 @@
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
@@ -275,6 +276,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isNeedFlushMouseEvent_ = false;
     }
     needRenderNode_.clear();
+    taskScheduler_.FlushAfterRenderTask();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
 }
@@ -1248,6 +1250,13 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.action == KeyAction::DOWN) {
         eventManager_->DispatchKeyboardShortcut(event);
     }
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        auto manager = GetDragDropManager();
+        if (manager) {
+            manager->SetIsDragCancel(true);
+            manager->OnDragEnd(0.0f, 0.0f, "");
+        }
+    }
     // TAB key set focus state from inactive to active.
     // If return success. This tab key will just trigger onKeyEvent process.
     isTabJustTriggerOnKeyEvent_ =
@@ -1787,6 +1796,11 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
     taskScheduler_.AddAfterLayoutTask(std::move(task));
 }
 
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
+{
+    taskScheduler_.AddAfterRenderTask(std::move(task));
+}
+
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
 {
     if (!nodeInfo->IsObject()) {
@@ -1888,6 +1902,20 @@ void PipelineContext::HandleWindowSceneTouchEvent(const TouchEvent& point)
 
     if (iter->second) {
         iter->second(point.pointerEvent);
+    }
+}
+
+void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node)
+{
+    if (fontManager_) {
+        fontManager_->AddFontNodeNG(node);
+    }
+}
+
+void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node)
+{
+    if (fontManager_) {
+        fontManager_->RemoveFontNodeNG(node);
     }
 }
 // ----------------------------------------------------------------------------------

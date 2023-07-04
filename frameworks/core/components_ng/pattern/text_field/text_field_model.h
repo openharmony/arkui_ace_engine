@@ -73,11 +73,23 @@ public:
 
     virtual void CaretPosition(int32_t caretPosition) {}
     virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
+    virtual Rect GetTextContentRect() { return {}; }
+    virtual int32_t GetTextContentLinesNum() { return {}; }
     virtual void StopEditing() {}
 
     void SetCaretPosition(std::function<void(const int32_t)>&& setCaretPosition)
     {
         setCaretPosition_ = std::move(setCaretPosition);
+    }
+
+    void SetGetTextContentRect(std::function<Rect()>&& getTextContentRect)
+    {
+        getTextContentRect_ = std::move(getTextContentRect);
+    }
+
+    void SetGetTextContentLinesNum(std::function<int32_t()>&& getTextContentLinesNum)
+    {
+        getTextContentLinesNum_ = std::move(getTextContentLinesNum);
     }
 
     void SetStopEditing(std::function<void(void)>&& stopEditing)
@@ -115,6 +127,8 @@ public:
 
 protected:
     std::function<void(const int32_t)> setCaretPosition_;
+    std::function<Rect(void)> getTextContentRect_;
+    std::function<int32_t(void)> getTextContentLinesNum_;
     std::function<void(void)> stopEditing_;
 };
 
@@ -154,7 +168,7 @@ public:
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnChange(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
-    virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
+    virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;

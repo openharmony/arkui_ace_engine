@@ -45,7 +45,7 @@ class TextPattern : public Pattern, public TextDragBase {
 
 public:
     TextPattern() = default;
-    ~TextPattern() override = default;
+    ~TextPattern() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
@@ -271,6 +271,8 @@ private:
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
+    void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
+    void FontRegisterCallback(RefPtr<SpanNode> spanNode);
 
     RefPtr<Clipboard> clipboard_;
     RefPtr<DragWindow> dragWindow_;

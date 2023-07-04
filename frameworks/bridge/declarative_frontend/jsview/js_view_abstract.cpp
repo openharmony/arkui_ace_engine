@@ -1355,7 +1355,6 @@ void JSViewAbstract::JsMouseResponseRegion(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetMouseResponseRegion(result);
-
 }
 
 bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result)
@@ -4952,7 +4951,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         LOGI("Set the responseType is %{public}d.", response);
         responseType = static_cast<ResponseType>(response);
     }
-    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BuildContextMenu");
         func->Execute();
@@ -4963,7 +4962,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         ParseBindContentOptionParam(info, info[2], menuParam);
     }
 
-    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc), menuParam);
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam);
 }
 
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
@@ -5238,10 +5237,10 @@ void JSViewAbstract::JSUpdateAnimatableProperty(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
 {
-    NG::SafeAreaExpandOpts opts;
+    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_ALL, .edges = NG::SAFE_AREA_EDGE_ALL };
     if (info.Length() >= 1 && info[0]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
-        uint32_t safeAreaType = 0;
+        uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
         for (size_t i = 0; i < paramArray->Length(); ++i) {
             safeAreaType |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
@@ -5249,7 +5248,7 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
     }
     if (info.Length() >= 2 && info[1]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[1]);
-        uint32_t safeAreaEdge = 0;
+        uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
         for (size_t i = 0; i < paramArray->Length(); ++i) {
             safeAreaEdge |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }

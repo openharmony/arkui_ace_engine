@@ -33,6 +33,7 @@ public:
         return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
+    void OnSetDepth(const int32_t depth) override;
 protected:
     void OnAttachToFrameNode() override;
 

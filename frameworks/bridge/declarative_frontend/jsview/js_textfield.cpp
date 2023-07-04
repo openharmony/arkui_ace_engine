@@ -795,11 +795,11 @@ void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
 }
 
-void JSTextField::SetOnScroll(const JSCallbackInfo& info)
+void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
     JsEventCallback<void(float, float)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    TextFieldModel::GetInstance()->SetOnScroll(std::move(callback));
+    TextFieldModel::GetInstance()->SetOnContentScroll(std::move(callback));
 }
 
 void JSTextField::SetOnCopy(const JSCallbackInfo& info)

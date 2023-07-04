@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
@@ -79,7 +80,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextInput>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
-    JSClass<JSTextInput>::StaticMethod("onScroll", &JSTextField::SetOnScroll);
+    JSClass<JSTextInput>::StaticMethod("onContentScroll", &JSTextField::SetOnContentScroll);
     JSClass<JSTextInput>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
     JSClass<JSTextInput>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextInput>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
@@ -109,6 +110,9 @@ void JSTextInputController::JSBind(BindingTarget globalObj)
     JSClass<JSTextInputController>::Declare("TextInputController");
     JSClass<JSTextInputController>::Method("caretPosition", &JSTextInputController::CaretPosition);
     JSClass<JSTextInputController>::Method("setTextSelection", &JSTextInputController::SetTextSelection);
+    JSClass<JSTextInputController>::CustomMethod("getTextContentRect", &JSTextInputController::GetTextContentRect);
+    JSClass<JSTextInputController>::CustomMethod("getTextContentLineCount",
+        &JSTextInputController::GetTextContentLinesNum);
     JSClass<JSTextInputController>::Method("stopEditing", &JSTextInputController::StopEditing);
     JSClass<JSTextInputController>::Bind(
         globalObj, JSTextInputController::Constructor, JSTextInputController::Destructor);
@@ -141,6 +145,41 @@ void JSTextInputController::SetTextSelection(int32_t selectionStart, int32_t sel
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
         controller->SetTextSelection(selectionStart, selectionEnd);
+    }
+}
+
+JSRef<JSObject> JSTextInputController::CreateRectangle(const Rect& info)
+{
+    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+    rectObj->SetProperty<double>("x", info.Left());
+    rectObj->SetProperty<double>("y", info.Top());
+    rectObj->SetProperty<double>("width", info.Width());
+    rectObj->SetProperty<double>("height", info.Height());
+    return rectObj;
+}
+
+void JSTextInputController::GetTextContentRect(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        auto rectObj = CreateRectangle(controller->GetTextContentRect());
+        JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
+        info.SetReturnValue(rect);
+    } else {
+        LOGE("GetTextContentRect: The JSTextInputController is NULL");
+    }
+}
+
+void JSTextInputController::GetTextContentLinesNum(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        auto lines = controller->GetTextContentLinesNum();
+        auto linesNum = JSVal(ToJSValue(lines));
+        auto textLines = JSRef<JSVal>::Make(linesNum);
+        info.SetReturnValue(textLines);
+    } else {
+        LOGE("GetTextContentRect: The JSTextInputController is NULL");
     }
 }
 

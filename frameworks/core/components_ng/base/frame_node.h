@@ -225,7 +225,7 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
-    void CheckSecurityComponentStatus(std::vector<RectF>& rect, const TouchRestrict& touchRestrict);
+    void CheckSecurityComponentStatus(std::vector<RectF>& rect);
 
     bool HaveSecurityComponent();
 
@@ -339,7 +339,7 @@ public:
     void RemoveLastHotZoneRect() const;
 
     virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
-    bool CheckRectIntersect(std::vector<RectF>& dest, std::vector<RectF>& origin);
+    bool CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -448,6 +448,7 @@ public:
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     void AddFRCSceneInfo(std::string name, float speed, SceneStatus status);
 
+    void SetDepth(int32_t depth);
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

@@ -69,7 +69,9 @@
                 "power_manager",
                 "webview",
                 "imf",
-                "device_status"
+                "device_status",
+                "soc_perf",
+                "security_component"
             ],
             "third_party": [
                 "json",

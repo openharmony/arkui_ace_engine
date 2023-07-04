@@ -146,6 +146,9 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID_NOLOG(isRenderDone_);
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
     CHECK_NULL_VOID_NOLOG(Container::IsForeground());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetJSViewActive(true);
     isOnShow_ = true;
     JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
     if (onPageShow_) {
@@ -157,6 +160,9 @@ void PagePattern::OnHide()
 {
     CHECK_NULL_VOID_NOLOG(isOnShow_);
     JankFrameReport::FlushRecord();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetJSViewActive(false);
     isOnShow_ = false;
     if (onPageHide_) {
         onPageHide_();

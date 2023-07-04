@@ -93,7 +93,13 @@ void NavigationPattern::DoAnimation(NavigationMode currentMode)
     auto renderContext = GetTitleBarRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-    context->OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    std::function<void()> finishCallback = [optionAlpha, renderContext, hostNode]() {
+        renderContext->OpacityAnimation(optionAlpha, 0, 1);
+        hostNode->SetIsModeChange(false);
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    context->OpenImplicitAnimation(option, option.GetCurve(), finishCallback);
     layoutProperty->UpdateUsrNavigationMode(currentMode);
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
@@ -106,6 +112,7 @@ void NavigationPattern::DoAnimation(NavigationMode currentMode)
     }
     context->CloseImplicitAnimation();
     layoutProperty->UpdateUsrNavigationMode(usrNavigationMode);
+    layoutProperty->UpdateNavigationMode(usrNavigationMode);
 }
 
 void NavigationPattern::OnModifyDone()
@@ -202,8 +209,7 @@ void NavigationPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto currentMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
-    if (currentMode != NavigationMode::AUTO && navigationMode_ != currentMode &&
-        navigationMode_ != NavigationMode::AUTO) {
+    if (navigationMode_ != currentMode) {
         hostNode->SetIsModeChange(true);
         DoAnimation(currentMode);
     }
@@ -241,17 +247,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(hostNode, false);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
-    if (config.frameSizeChange) {
-        if (navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
-            auto currentMode = navigationLayoutAlgorithm->GetNavigationMode();
-            if (navigationMode_ != NavigationMode::AUTO && navigationMode_ != currentMode) {
-                hostNode->SetIsModeChange(true);
-                DoAnimation(currentMode);
-            }
-            navigationMode_ = currentMode;
-        }
-    }
-    navigationLayoutProperty->UpdateNavigationMode(navigationLayoutAlgorithm->GetNavigationMode());
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_RETURN(navBarNode, false);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();

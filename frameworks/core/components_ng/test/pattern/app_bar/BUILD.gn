@@ -28,6 +28,7 @@ ace_unittest("app_bar_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/stage/mock_stage_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/theme/mock_theme_constants.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
 
     # text
     "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",

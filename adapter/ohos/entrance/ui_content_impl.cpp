@@ -1284,8 +1284,9 @@ void UIContentImpl::Background()
     Platform::AceContainer::OnHide(instanceId_);
 }
 
-void UIContentImpl::ReloadForm()
+void UIContentImpl::ReloadForm(const std::string& url)
 {
+    startUrl_ = url;
     LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());

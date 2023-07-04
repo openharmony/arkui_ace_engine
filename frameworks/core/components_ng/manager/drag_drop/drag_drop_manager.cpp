@@ -48,6 +48,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 {
     CHECK_NULL_RETURN(pixelMap, nullptr);
     isDragged_ = true;
+    isDragCancel_ = false;
 #if !defined(PREVIEW)
     if (dragWindow_) {
         LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
@@ -70,6 +71,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     dragWindowRootNode_ = CreateDragRootNode(customNode);
     CHECK_NULL_RETURN(dragWindowRootNode_, nullptr);
     isDragged_ = true;
+    isDragCancel_ = false;
 #if !defined(PREVIEW)
     if (dragWindow_) {
         LOGW("CreateAndShowDragWindow: There is a drag window, create drag window failed.");
@@ -93,6 +95,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
 {
     isDragged_ = true;
+    isDragCancel_ = false;
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
 }
@@ -177,12 +180,12 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
-RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(const RefPtr<UINode> parentNode,
-    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes)
+RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
+    const RefPtr<UINode> parentNode, std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
     auto children = parentNode->GetChildren();
-    
+
     for (auto index = static_cast<int>(children.size()) - 1; index >= 0; index--) {
         auto child = parentNode->GetChildAtIndex(index);
         if (child == nullptr) {
@@ -396,6 +399,14 @@ DragResult TranslateDragResult(DragRet dragResult)
 void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string& extraInfo)
 {
     preTargetFrameNode_ = nullptr;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (isDragCancel_) {
+        LOGD("DragDropManager Is On DragCancel");
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_CANCEL, false);
+        summaryMap_.clear();
+        return;
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     auto frameNodes = FindDragFrameNodeMapByPosition(globalX, globalY, DragType::COMMON);
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool isUseDefaultDrop = false;
@@ -487,8 +498,13 @@ void DragDropManager::FireOnDragEvent(
 
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_.empty() ? extraInfo : extraInfo_, point, type);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    event->SetX((double)point.GetX());
-    event->SetY((double)point.GetY());
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        event->SetX(static_cast<double>(point.GetX()));
+        event->SetY(static_cast<double>(point.GetY()));
+    } else {
+        event->SetX(pipeline->ConvertPxToVp(Dimension(point.GetX(), DimensionUnit::PX)));
+        event->SetY(pipeline->ConvertPxToVp(Dimension(point.GetY(), DimensionUnit::PX)));
+    }
 
     switch (type) {
         case DragEventType::ENTER:
@@ -540,8 +556,8 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
     // use -1 for grid item not in eventGrid
-    auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType]
-        (const RefPtr<FrameNode>& eventGrid) {
+    auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](
+                               const RefPtr<FrameNode>& eventGrid) {
         return (dragType == DragType::GRID) ? (eventGrid == draggedGrid ? draggedIndex : -1) : draggedIndex;
     };
 
@@ -701,11 +717,15 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (!newData_) {
-        newData_ = JsonUtil::Create(true);
-        newData_->Put("customDragInfo", extraInfo.c_str());
+    if (!extraInfo.empty()) {
+        if (!newData_) {
+            newData_ = JsonUtil::Create(true);
+            newData_->Put("customDragInfo", extraInfo.c_str());
+        } else {
+            newData_->Replace("customDragInfo", extraInfo.c_str());
+        }
     } else {
-        newData_->Replace("customDragInfo", extraInfo.c_str());
+        return;
     }
     if (!clipboard_) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
@@ -806,6 +826,7 @@ void DragDropManager::DestroyDragWindow()
 RefPtr<DragDropProxy> DragDropManager::CreateFrameworkDragDropProxy()
 {
     isDragged_ = true;
+    isDragCancel_ = false;
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
 }

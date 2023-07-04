@@ -195,6 +195,8 @@ public:
 
     void AddAfterLayoutTask(std::function<void()>&& task);
 
+    void AddAfterRenderTask(std::function<void()>&& task);
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -352,6 +354,10 @@ public:
     {
         isNeedFlushMouseEvent_ = true;
     }
+
+    // font
+    void AddFontNodeNG(const WeakPtr<UINode>& node);
+    void RemoveFontNodeNG(const WeakPtr<UINode>& node);
 
     // restore
     void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;

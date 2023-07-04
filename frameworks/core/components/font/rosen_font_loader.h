@@ -20,7 +20,8 @@
 
 namespace OHOS::Ace {
 
-extern const char FONT_SRC_NETWORK[];
+extern const char FONT_SRC_NETWORK[5];
+extern const char FONT_SRC_RESOURCE[9];
 
 class RosenFontLoader : public FontLoader {
     DECLARE_ACE_TYPE(RosenFontLoader, FontLoader);
@@ -33,7 +34,9 @@ public:
 
 private:
     void LoadFromNetwork(const RefPtr<PipelineBase>& context);
+    void LoadFromResource(const RefPtr<PipelineBase>& context);
     void LoadFromAsset(const RefPtr<PipelineBase>& context);
+    void NotifyCallbacks();
 };
 
 } // namespace OHOS::Ace
