@@ -20,7 +20,6 @@
 #include <memory>
 #include <optional>
 
-#include "common/rs_vector2.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
@@ -374,8 +373,6 @@ private:
     void PaintDebugBoundary();
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
-    Rosen::Vector2f GetTranslateXY() const;
-
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
@@ -410,7 +407,6 @@ private:
 
     // translate modifiers for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
-    std::shared_ptr<Rosen::RSTranslateZModifier> translateZ_;
 
     // graphics modifiers
     struct GraphicModifiers {
