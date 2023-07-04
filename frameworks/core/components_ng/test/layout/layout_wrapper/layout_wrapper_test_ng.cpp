@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -1499,7 +1500,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest039, TestSize.Level1)
     parentHost->AddChild(popupHost);
     popupHost->layoutProperty_->UpdateSafeAreaInsets(SafeAreaInsets({}, { 0, 1 }, {}, {}));
 
-        LayoutConstraintF constraint;
+    LayoutConstraintF constraint;
     UpdateParentConstraint(parent, constraint);
     stage->ApplyConstraint(constraint);
     popup->ApplyConstraint(constraint);
@@ -1538,5 +1539,50 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest040, TestSize.Level1)
     EXPECT_EQ(manager->GetGeoRestoreNodes().size(), 0UL);
     EXPECT_FALSE(wrapper->geometryNode_->previousState_);
     EXPECT_EQ(wrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+}
+
+/**
+ * @tc.name: LayoutWrapperTest041
+ * @tc.desc: Test ExpandSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest041, TestSize.Level1)
+{
+    auto safeAreaManager = PipelineContext::GetCurrentContext()->safeAreaManager_;
+    safeAreaManager->systemSafeArea_ = SafeAreaInsets({}, { 0, 1 }, {}, {});
+    /**
+     * @tc.steps: step1. call CreateLayoutWrapper create a layoutwrapper and setup properties.
+     */
+    auto [node, layoutWrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
+    /**
+     * @tc.steps: step2. call ExpandSafeArea on a frame that overlaps with SafeAreaInset {top = (0, 1)}.
+     * @tc.expected: frame is expanded.
+     */
+    layoutWrapper->ExpandSafeAreaInner();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT + 1));
+
+    /**
+     * @tc.steps: step3. call ExpandSafeArea on a frame that does not overlap with SafeAreaInset.
+     * @tc.expected: frame is not expanded.
+     */
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 5 });
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
+    layoutWrapper->ExpandSafeAreaInner();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 5));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
+
+    /**
+     * @tc.steps: step4. call ExpandSafeArea on a frame that has user defined size.
+     * @tc.expected: frame is moved but size remains the same.
+     */
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
+    layoutWrapper->layoutProperty_->UpdateUserDefinedIdealSize({ CalcLength(RK356_WIDTH), CalcLength(RK356_HEIGHT) });
+    layoutWrapper->ExpandSafeAreaInner();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
 }
 } // namespace OHOS::Ace::NG

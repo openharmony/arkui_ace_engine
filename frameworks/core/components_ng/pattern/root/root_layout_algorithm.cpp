@@ -20,9 +20,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-// not in use, Root is using BoxLayoutAlgorithm
-// safeArea of Popup node is applied in PopupBasePattern to adapt to different tree structures (i.e. ContainerModal)
-// safeArea of Page is applied in StageLayoutAlgorithm
 void RootLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
