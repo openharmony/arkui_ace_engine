@@ -291,6 +291,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
+        info.SetScreenLocation(touchPoint.GetScreenOffset());
         info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);

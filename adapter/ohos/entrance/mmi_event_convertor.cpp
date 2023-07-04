@@ -284,6 +284,8 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.id = item.GetPointerId();
     event.x = static_cast<float>(item.GetWindowX());
     event.y = static_cast<float>(item.GetWindowY());
+    event.screenX = static_cast<float>(item.GetDisplayX());
+    event.screenY = static_cast<float>(item.GetDisplayY());
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);

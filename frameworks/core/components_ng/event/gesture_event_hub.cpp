@@ -495,6 +495,10 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(pipeline);
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    event->SetX(info.GetGlobalPoint().GetX());
+    event->SetY(info.GetGlobalPoint().GetY());
+    event->SetScreenX(info.GetScreenLocation().GetX());
+    event->SetScreenY(info.GetScreenLocation().GetY());
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
     if (dragDropInfo.customNode) {
@@ -531,8 +535,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto pipeline = AceType::DynamicCast<PipelineContext>(context);
     CHECK_NULL_VOID(pipeline);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-    event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+    event->SetX(info.GetGlobalPoint().GetX());
+    event->SetY(info.GetGlobalPoint().GetY());
+    event->SetScreenX(info.GetScreenLocation().GetX());
+    event->SetScreenY(info.GetScreenLocation().GetY());
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -655,8 +661,10 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
     // The onDrop callback of target frame node is triggered in PipelineContext::OnDragEvent.
     if (eventHub->HasOnDrop()) {
         RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-        event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-        event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+        event->SetX(info.GetGlobalPoint().GetX());
+        event->SetY(info.GetGlobalPoint().GetY());
+        event->SetScreenX(info.GetScreenLocation().GetX());
+        event->SetScreenY(info.GetScreenLocation().GetY());
         eventHub->FireOnDrop(event, "");
     }
 

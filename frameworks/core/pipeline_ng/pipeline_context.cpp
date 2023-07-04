@@ -1254,7 +1254,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         auto manager = GetDragDropManager();
         if (manager) {
             manager->SetIsDragCancel(true);
-            manager->OnDragEnd(0.0f, 0.0f, "");
+            manager->OnDragEnd({ 0.0f, 0.0f }, "");
         }
     }
     // TAB key set focus state from inactive to active.
@@ -1725,11 +1725,11 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
             manager->SetExtraInfo(extraInfo);
         }
 #endif // ENABLE_DRAG_FRAMEWORK
-        manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
+        manager->OnDragEnd(Point(x, y, x, y), extraInfo);
         manager->RestoreClipboardData();
         return;
     }
-    manager->OnDragMove(static_cast<float>(x), static_cast<float>(y), extraInfo);
+    manager->OnDragMove(Point(x, y, x, y), extraInfo);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)

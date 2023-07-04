@@ -46,8 +46,13 @@ JSRef<JSObject> JsTouchFunction::CreateHistoricalPoint(const TouchLocationInfo& 
     JSRef<JSObject> touchInfoObj = JSRef<JSObject>::New();
     const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
+    const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
     touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
+    touchInfoObj->SetProperty<double>("displayX", SystemProperties::Px2Vp(screenLocation.GetX()));
+    touchInfoObj->SetProperty<double>("displayY", SystemProperties::Px2Vp(screenLocation.GetY()));
+    touchInfoObj->SetProperty<double>("windowX", SystemProperties::Px2Vp(globalLocation.GetX()));
+    touchInfoObj->SetProperty<double>("windowY", SystemProperties::Px2Vp(globalLocation.GetY()));
     touchInfoObj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalLocation.GetX()));
     touchInfoObj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalLocation.GetY()));
     touchInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(localLocation.GetX()));

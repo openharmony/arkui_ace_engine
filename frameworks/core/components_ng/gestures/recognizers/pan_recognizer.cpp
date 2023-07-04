@@ -430,10 +430,12 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetDelta(delta_);
         info.SetMainDelta(mainDelta_);
         if (inputEventType_ == InputEventType::AXIS) {
+            info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
             info.SetVelocity(Velocity());
             info.SetMainVelocity(0.0);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
         } else {
+            info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
             info.SetVelocity(velocityTracker_.GetVelocity());
             info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
             info.SetSourceTool(lastTouchEvent_.sourceTool);
