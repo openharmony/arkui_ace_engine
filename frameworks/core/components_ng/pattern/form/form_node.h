@@ -37,11 +37,22 @@ public:
     static RefPtr<FormNode> GetOrCreateFormNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
-    void DispatchPointerEvent(const TouchEvent& point) const;
+    void DispatchPointerEvent(const TouchEvent& touchEvent) const;
 
     void OnDetachFromMainTree(bool) override;
 
     OffsetF GetFormOffset() const;
+
+    int32_t GetImageId()
+    {
+        if (!imageId_.has_value()) {
+            imageId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return imageId_.value();
+    }
+
+private:
+    std::optional<int32_t> imageId_;
 };
 
 } // namespace OHOS::Ace::NG

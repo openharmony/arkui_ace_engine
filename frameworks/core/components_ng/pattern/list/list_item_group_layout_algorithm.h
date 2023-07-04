@@ -31,6 +31,8 @@ class ACE_EXPORT ListItemGroupLayoutAlgorithm : public LayoutAlgorithm {
 public:
     using PositionMap = std::map<int32_t, std::pair<float, float>>;
 
+    static const int32_t LAST_ITEM = -1;
+    
     ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex)
         :headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex) {}
 
@@ -63,6 +65,16 @@ public:
         return lanes_;
     }
 
+    float GetLaneGutter() const
+    {
+        return laneGutter_;
+    }
+
+    float GetChildCrossSize() const
+    {
+        return childCrossSize_;
+    }
+
     int32_t GetLanesFloor(int32_t index) const
     {
         if (lanes_ <= 1) {
@@ -87,6 +99,11 @@ public:
     void SetJumpIndex(int32_t index)
     {
         jumpIndex_ = index;
+    }
+
+    void SetTargetIndex(int32_t index)
+    {
+        targetIndex_ = index;
     }
 
     int32_t GetStartIndex() const
@@ -127,13 +144,19 @@ public:
     }
 
     float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
+
     void CheckRecycle(const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos,
         bool forwardLayout);
 
+    void SetNeedAllLayout()
+    {
+        needAllLayout_ = true;
+    }
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
+    void LayoutListItemAll(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, float startPos);
     void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
         float crossSize, float startPos);
@@ -158,7 +181,7 @@ private:
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
-    float GetMaxGridWidth();
+    float GetListItemGroupMaxWidth(const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty);
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;
@@ -169,20 +192,26 @@ private:
     PositionMap itemPosition_;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
+    float laneGutter_ = 0.0f;
+    float childCrossSize_ = 0.0f;
     std::optional<float> minLaneLength_;
     std::optional<float> maxLaneLength_;
     V2::ListItemAlign itemAlign_ = V2::ListItemAlign::START;
     float spaceWidth_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> targetIndex_;
     int32_t totalItemCount_ = 0;
     float totalMainSize_ = 0.0f;
     float headerMainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
     float startPos_ = 0.0f;
+    float prevStartPos_ = 0.0f;
+    float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
     bool forwardLayout_ = true;
+    bool needAllLayout_ = false;
 };
 } // namespace OHOS::Ace::NG
 

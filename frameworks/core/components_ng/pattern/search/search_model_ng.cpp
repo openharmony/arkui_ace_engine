@@ -201,7 +201,7 @@ void SearchModelNG::SetSearchSrcPath(const std::string& src)
         auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
         imageSourceInfo.SetSrc(iconPath, color);
     } else {
-        imageSourceInfo.SetSrc(src);
+        imageSourceInfo.SetSrc(src, color);
     }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageFrameNode->MarkModifyDone();
@@ -230,7 +230,7 @@ void SearchModelNG::SetRightIconSrcPath(const std::string& src)
         auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
         imageSourceInfo.SetSrc(iconPath, color);
     } else {
-        imageSourceInfo.SetSrc(src);
+        imageSourceInfo.SetSrc(src, color);
     }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageFrameNode->MarkModifyDone();
@@ -487,6 +487,32 @@ void SearchModelNG::SetOnChange(std::function<void(const std::string&)>&& onChan
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void SearchModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
+}
+
+void SearchModelNG::SetOnScroll(std::function<void(float, float)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void SearchModelNG::SetSelectionMenuHidden(bool selectionMenuHidden)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateSelectionMenuHidden(selectionMenuHidden);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)

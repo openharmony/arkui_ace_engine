@@ -153,3 +153,15 @@ UI_BLOCK_DIALOG:
   PACKAGE_NAME: {type: STRING, desc: application package name}
   PROCESS_NAME: {type: STRING, desc: application process name}
   MSG: {type: STRING, desc: application event message}
+
+JANK_STATS_APP:
+  __BASE: {type: STATISTIC, level: MINOR, tag: performance, desc: jank statistics}
+  STARTTIME: {type: INT64, desc: begin time since last report}
+  DURATION: {type: INT64, desc: duration since last report}
+  VERSION_CODE: {type: UINT32, desc: app version code}
+  VERSION_NAME: {type: STRING, desc: app version name}
+  BUNDLE_NAME: {type: STRING, desc: package name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  PAGE_URL: {type: STRING, desc: page name}
+  JANK_STATS: {type: UINT16, arrsize: 8, desc: jank frame stats}
+  JANK_STATS_VER: {type: UINT32, desc: jank range version}

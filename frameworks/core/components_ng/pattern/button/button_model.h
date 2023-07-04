@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_H
 
-#include "core/components/button/button_component.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
@@ -46,8 +45,11 @@ public:
     virtual void SetAspectRatio(const double& ratio) {}
     virtual void SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height) = 0;
     virtual void SetBorderRadius(const Dimension& radius) = 0;
+    virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) = 0;
     virtual void SetHoverEffect(const int32_t& hoverEffectNum) = 0;
-    virtual void SetRemoteMessage(RemoteCallback remoteCallback) {}
+    virtual void SetRemoteMessage(RemoteCallback&& remoteCallback) {}
 
 private:
     static std::unique_ptr<ButtonModel> instance_;

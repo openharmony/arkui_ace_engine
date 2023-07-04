@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/size.h"
 #include "frameworks/core/pipeline/pipeline_context.h"
 
@@ -31,7 +32,8 @@ class GridContainerUtils : public AceType {
 public:
     ~GridContainerUtils() override = default;
 
-    static GridSizeType ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size);
+    static GridSizeType ProcessGridSizeType(
+        const V2::BreakPoints& breakpoints, const Size& size, const WindowMode& mode);
     static GridSizeType ProcessGridSizeType(
         const RefPtr<BreakPoints>& breakpoints, const Size& size, const RefPtr<PipelineContext>& pipeline);
     static std::pair<Dimension, Dimension> ProcessGutter(GridSizeType sizeType, const RefPtr<Gutter>& gutter);

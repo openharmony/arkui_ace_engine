@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,12 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
 
     JSClass<JSLoadingProgress>::StaticMethod("create", &JSLoadingProgress::Create, opt);
     JSClass<JSLoadingProgress>::StaticMethod("color", &JSLoadingProgress::SetColor, opt);
+    JSClass<JSLoadingProgress>::StaticMethod("enableLoading", &JSLoadingProgress::SetEnableLoading, opt);
     JSClass<JSLoadingProgress>::StaticMethod("foregroundColor", &JSLoadingProgress::SetForegroundColor, opt);
+
+    JSClass<JSLoadingProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSLoadingProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSLoadingProgress>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSLoadingProgress>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -85,5 +90,13 @@ void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
         return;
     }
     LoadingProgressModel::GetInstance()->SetColor(progressColor);
+}
+
+void JSLoadingProgress::SetEnableLoading(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        return;
+    }
+    LoadingProgressModel::GetInstance()->SetEnableLoading(info[0]->ToBoolean());
 }
 }; // namespace OHOS::Ace::Framework

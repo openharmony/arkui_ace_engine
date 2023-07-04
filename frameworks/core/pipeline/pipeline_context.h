@@ -108,7 +108,7 @@ public:
     static constexpr int32_t DEFAULT_HOVER_ENTER_ANIMATION_ID = -1;
     using TimeProvider = std::function<int64_t(void)>;
     using SurfaceChangedCallbackMap =
-        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
 
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -296,12 +296,6 @@ public:
     Rect GetRootRect() const;
     Rect GetStageRect() const;
     Rect GetPageRect() const;
-
-    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) override {};
-
-    SafeAreaEdgeInserts GetCurrentViewSafeArea() const override { return SafeAreaEdgeInserts(); };
-
-    void ResetViewSafeArea() override {};
 
     bool IsSurfaceReady() const
     {
@@ -625,7 +619,8 @@ public:
 
     bool IsVisibleChangeNodeExists(NodeId index) const;
 
-    int32_t RegisterSurfaceChangedCallback(std::function<void(int32_t, int32_t, int32_t, int32_t)>&& callback)
+    int32_t RegisterSurfaceChangedCallback(
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
     {
         if (callback) {
             surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
@@ -1005,8 +1000,6 @@ private:
 
     std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
-
-    int32_t rotationAnimationCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

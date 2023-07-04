@@ -25,6 +25,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -181,15 +182,23 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->flexItemProperty_) {
         flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
     }
+    if (layoutProperty->safeAreaInsets_) {
+        safeAreaInsets_ = std::make_unique<SafeAreaInsets>(*layoutProperty->safeAreaInsets_);
+    }
+    if (layoutProperty->safeAreaExpandOpts_) {
+        safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>(*layoutProperty->safeAreaExpandOpts_);
+    }
     geometryTransition_ = layoutProperty->geometryTransition_;
     propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
-    safeArea_ = layoutProperty->safeArea_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     propIsBindOverlay_ = layoutProperty->propIsBindOverlay_;
 #endif // ENABLE_DRAG_FRAMEWORK
+    isOverlayNode_ = layoutProperty->isOverlayNode_;
+    overlayOffsetX_ = layoutProperty->overlayOffsetX_;
+    overlayOffsetY_ = layoutProperty->overlayOffsetY_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
@@ -218,7 +227,12 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     if (margin_ && (!hasWidth || !hasHeight)) {
         // TODO: add margin is negative case.
         auto margin = CreateMargin();
-        Axis reserveAxis = !hasWidth && !hasHeight ? Axis::NONE : !hasWidth ? Axis::VERTICAL : Axis::HORIZONTAL;
+        Axis reserveAxis =
+            PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9
+                ? Axis::NONE
+                : (!hasWidth && !hasHeight ? Axis::NONE
+                      : !hasWidth          ? Axis::VERTICAL
+                                           : Axis::HORIZONTAL);
         MinusPaddingToSize(margin, layoutConstraint_->maxSize, reserveAxis);
         MinusPaddingToSize(margin, layoutConstraint_->minSize, reserveAxis);
         MinusPaddingToSize(margin, layoutConstraint_->percentReference, reserveAxis);
@@ -228,18 +242,18 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
+                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
             layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
+                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
             LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
                 calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
             layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
-                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
-                    parentConstraint.percentReference));
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), layoutConstraint_->scaleProperty,
+                    layoutConstraint_->percentReference));
         }
     }
 
@@ -417,12 +431,12 @@ void LayoutProperty::UpdateContentConstraint()
     if (padding_) {
         auto paddingF = ConvertToPaddingPropertyF(
             *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPaddingOnBothSize(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
             *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPaddingOnBothSize(
+        contentConstraint_->MinusPadding(
             borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
     }
 }
@@ -494,7 +508,7 @@ MarginPropertyF LayoutProperty::CreateMargin()
         return ConvertToMarginPropertyF(
             margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
     }
-
+    // root node
     return ConvertToMarginPropertyF(
         margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
@@ -520,10 +534,11 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
     if (allowTransition) {
-        if (preVisible == VisibleType::VISIBLE && visible == VisibleType::INVISIBLE) {
+        if (preVisible == VisibleType::VISIBLE && (visible == VisibleType::INVISIBLE || visible == VisibleType::GONE)) {
             // only trigger transition when visibility changes between visible and invisible.
             host->GetRenderContext()->OnNodeDisappear(false);
-        } else if (preVisible == VisibleType::INVISIBLE && visible == VisibleType::VISIBLE) {
+        } else if ((preVisible == VisibleType::INVISIBLE || preVisible == VisibleType::GONE) &&
+                   visible == VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeAppear(false);
         }
     }
@@ -541,4 +556,24 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void LayoutProperty::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
+{
+    if (!safeAreaExpandOpts_) {
+        safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>();
+    }
+    if (*safeAreaExpandOpts_ != opts) {
+        *safeAreaExpandOpts_ = opts;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateSafeAreaInsets(const SafeAreaInsets& safeArea)
+{
+    if (!safeAreaInsets_) {
+        safeAreaInsets_ = std::make_unique<SafeAreaInsets>();
+    }
+    if (*safeAreaInsets_ != safeArea) {
+        *safeAreaInsets_ = safeArea;
+    }
+}
 } // namespace OHOS::Ace::NG

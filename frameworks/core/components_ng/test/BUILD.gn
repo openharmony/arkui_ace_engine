@@ -18,8 +18,7 @@ group("unittest") {
   deps = []
   if (!is_asan) {
     deps = [
-      "accessibility:accessibility_unittest",
-      "base:base_unittest",
+      "animation:animation_unittest",
       "event:event_unittest",
       "image_provider:image_provider_test_ng",
       "layout:layout_unittest",

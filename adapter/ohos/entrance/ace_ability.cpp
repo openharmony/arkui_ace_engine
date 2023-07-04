@@ -19,7 +19,6 @@
 #include <ui/rs_surface_node.h>
 
 #include "ability_process.h"
-#include "display_type.h"
 #include "dm/display_manager.h"
 #include "form_utils_impl.h"
 #include "init_data.h"
@@ -28,6 +27,7 @@
 #include "resource_manager.h"
 #include "session_info.h"
 #include "string_wrapper.h"
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
@@ -35,22 +35,21 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
-#include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/rect.h"
-#include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
+#include "core/common/form_manager.h"
 #include "core/common/frontend.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/plugin_utils.h"
-#include "core/common/form_manager.h"
-#include "core/common/layout_inspector.h"
 namespace OHOS {
 namespace Ace {
 namespace {
@@ -59,6 +58,7 @@ const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 static int32_t g_instanceId = 0;
 
 FrontendType GetFrontendType(const std::string& frontendType)
@@ -224,6 +224,8 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         AceApplicationInfo::GetInstance().SetPackageName(abilityContext->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
         AceApplicationInfo::GetInstance().SetApiTargetVersion(abilityContext->GetApplicationInfo()->apiTargetVersion);
+        AceApplicationInfo::GetInstance().SetAppVersionName(abilityContext->GetApplicationInfo()->versionName);
+        AceApplicationInfo::GetInstance().SetAppVersionCode(abilityContext->GetApplicationInfo()->versionCode);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         ImageCache::SetImageCacheFilePath(cacheDir);
@@ -404,26 +406,8 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
         auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/"),
-                                  std::string("assets/js/") };
+            std::string("assets/js/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
-    }
-
-    /* Note: DO NOT modify the sequence of adding libPath  */
-    std::string nativeLibraryPath = appInfo->nativeLibraryPath;
-    std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
-    std::vector<std::string> libPaths;
-    if (!quickFixLibraryPath.empty()) {
-        std::string libPath = GenerateFullPath(GetBundleCodePath(), quickFixLibraryPath);
-        libPaths.push_back(libPath);
-        LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
-    }
-    if (!nativeLibraryPath.empty()) {
-        std::string libPath = GenerateFullPath(GetBundleCodePath(), nativeLibraryPath);
-        libPaths.push_back(libPath);
-        LOGI("napi lib path = %{private}s", libPath.c_str());
-    }
-    if (!libPaths.empty()) {
-        Platform::AceContainer::AddLibPath(abilityId_, libPaths);
     }
 
     if (!useNewPipe) {
@@ -493,6 +477,11 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             rsConfig.durationOut_ };
         context->SetKeyboardAnimationConfig(config);
         context->SetMinPlatformVersion(apiCompatibleVersion);
+
+        if (apiCompatibleVersion >= PLATFORM_VERSION_TEN && context->GetIsAppWindow()) {
+            context->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
+            context->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+        }
     }
 
     // get url
@@ -608,7 +597,6 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
 {
     LOGI("AceAbility::OnConfigurationUpdated called ");
     Ability::OnConfigurationUpdated(configuration);
-    Platform::AceContainer::OnConfigurationUpdated(abilityId_, configuration.GetName());
 
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_VOID(container);
@@ -621,7 +609,7 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
             auto colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             auto deviceAccess = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
             auto languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-            container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
+            container->UpdateConfiguration(colorMode, deviceAccess, languageTag, configuration.GetName());
         },
         TaskExecutor::TaskType::UI);
     LOGI("AceAbility::OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
@@ -777,10 +765,7 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
     CHECK_NULL_VOID(taskExecutor);
     ContainerScope scope(abilityId_);
     taskExecutor->PostSyncTask(
-        [container, params, &info] {
-            container->Dump(params, info);
-        },
-        TaskExecutor::TaskType::UI);
+        [container, params, &info] { container->Dump(params, info); }, TaskExecutor::TaskType::UI);
 }
 
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
@@ -889,24 +874,31 @@ uint32_t AceAbility::GetBackgroundColor()
     return bgColor;
 }
 
-void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
-    if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM || type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
-        LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d", type);
-        auto container = Platform::AceContainer::GetContainer(abilityId_);
-        CHECK_NULL_VOID(container);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [container, abilityId = abilityId_] {
-                CHECK_NULL_VOID(container);
-                ContainerScope scope(abilityId);
-                auto context = container->GetPipelineContext();
-                CHECK_NULL_VOID_NOLOG(context);
-                context->ResetViewSafeArea();
-            },
-            TaskExecutor::TaskType::UI);
-    }
+    auto container = Platform::AceContainer::GetContainer((abilityId_));
+    CHECK_NULL_VOID_NOLOG(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID_NOLOG(pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
+    LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
+         "width:%{public}d, height%{public}d",
+        type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
+        (int32_t)avoidArea.topRect_.height_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    auto safeArea = ConvertAvoidArea(avoidArea);
+    ContainerScope scope(abilityId_);
+    taskExecutor->PostTask(
+        [pipeline, safeArea, type]() {
+            if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+                pipeline->UpdateSystemSafeArea(safeArea);
+            } else if (type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
+                pipeline->UpdateCutoutSafeArea(safeArea);
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
+
 } // namespace Ace
 } // namespace OHOS

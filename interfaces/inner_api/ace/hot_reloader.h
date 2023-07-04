@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW HotReloader {
+class ACE_FORCE_EXPORT HotReloader {
 public:
     static void HotReload();
 };

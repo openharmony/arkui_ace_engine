@@ -89,9 +89,9 @@ public:
         return backgroundLeftPadding_;
     }
 
-    const Dimension& GetTextIconPadding() const
+    const Dimension& GetTextIconSpace() const
     {
-        return textIconPadding_;
+        return textIconSpace_;
     }
 
     const Dimension& GetPaddingWithoutBg() const
@@ -142,10 +142,25 @@ public:
     const std::string& GetLocationDescriptions(int32_t index)
     {
         if (index < 0 || index >= static_cast<int32_t>(locationDescriptions_.size())) {
-            LOGE("deciprtions index %{public}d is invalid", static_cast<int>(index));
             return emptyString_;
         }
         return locationDescriptions_[index];
+    }
+
+    const std::string& GetPasteDescriptions(int32_t index)
+    {
+        if (index < 0 || index >= static_cast<int32_t>(pasteDescriptions_.size())) {
+            return emptyString_;
+        }
+        return pasteDescriptions_[index];
+    }
+
+    const std::string& GetSaveDescriptions(int32_t index)
+    {
+        if (index < 0 || index >= static_cast<int32_t>(saveDescriptions_.size())) {
+            return emptyString_;
+        }
+        return saveDescriptions_[index];
     }
 
 private:
@@ -177,6 +192,34 @@ private:
             securityComponentPattern->GetAttr<std::string>("description_current_position", ""));
     }
 
+    static void ParsePasteDescriptions(RefPtr<ThemeStyle> securityComponentPattern,
+        const RefPtr<SecurityComponentTheme>& theme)
+    {
+        theme->pasteDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_paste", ""));
+    }
+
+    static void ParseSaveDescriptions(RefPtr<ThemeStyle> securityComponentPattern,
+        const RefPtr<SecurityComponentTheme>& theme)
+    {
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_download", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_download_files", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_save", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_save_images", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_save_files", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_download_and_share", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_receive", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_continue_to_receive", ""));
+    }
+
     static void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SecurityComponentTheme>& theme)
     {
         if (!themeStyle) {
@@ -185,7 +228,6 @@ private:
         auto securityComponentPattern =
             themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SECURITY_COMPONENT, nullptr);
         if (!securityComponentPattern) {
-            LOGE("Pattern of security component is null, please check!");
             return;
         }
         theme->iconSize_ = securityComponentPattern->GetAttr<Dimension>("icon_size", 0.0_vp);
@@ -200,7 +242,7 @@ private:
             securityComponentPattern->GetAttr<Dimension>("background_bottom_padding", 0.0_vp);
         theme->backgroundLeftPadding_ =
             securityComponentPattern->GetAttr<Dimension>("background_left_padding", 0.0_vp);
-        theme->textIconPadding_ = securityComponentPattern->GetAttr<Dimension>("text_icon_padding", 0.0_vp);
+        theme->textIconSpace_ = securityComponentPattern->GetAttr<Dimension>("text_icon_padding", 0.0_vp);
         theme->paddingWithoutBg_ = securityComponentPattern->GetAttr<Dimension>("padding_without_background", 0.0_vp);
         theme->borderRadius_ = securityComponentPattern->GetAttr<Dimension>("border_radius", 0.0_vp);
         theme->borderWidth_ = securityComponentPattern->GetAttr<Dimension>("border_width", 0.0_vp);
@@ -211,6 +253,8 @@ private:
         theme->backgroundColor_ = securityComponentPattern->GetAttr<Color>("background_color", Color());
         theme->borderColor_ = securityComponentPattern->GetAttr<Color>("border_color", Color());
         ParseLocationDescriptions(securityComponentPattern, theme);
+        ParsePasteDescriptions(securityComponentPattern, theme);
+        ParseSaveDescriptions(securityComponentPattern, theme);
     }
 
     Dimension iconSize_;
@@ -221,7 +265,7 @@ private:
     Dimension backgroundRightPadding_;
     Dimension backgroundBottomPadding_;
     Dimension backgroundLeftPadding_;
-    Dimension textIconPadding_;
+    Dimension textIconSpace_;
     Dimension borderRadius_;
     Dimension borderWidth_;
     Dimension paddingWithoutBg_;
@@ -234,6 +278,8 @@ private:
     Color borderColor_;
 
     std::vector<std::string> locationDescriptions_;
+    std::vector<std::string> pasteDescriptions_;
+    std::vector<std::string> saveDescriptions_;
     std::string emptyString_;
 };
 } // namespace OHOS::Ace::NG

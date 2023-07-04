@@ -178,7 +178,7 @@ public:
         }
     };
 
-    void SetShadowColors(const std::vector<Gradient>& valueColors)
+    void SetShadowColors(const std::vector<Gradient>& valueColors, const size_t shadowColorsLastLength)
     {
         for (size_t i = 0; i < valueColors.size(); i++) {
             if (i >= MAX_COUNT) {
@@ -186,12 +186,13 @@ public:
             }
             shadowColors_[i]->Set(GradientArithmetic(valueColors[i]));
         }
-        shadowColorsLastLength_ = valueColors.size();
+        shadowColorsLastLength_ = shadowColorsLastLength;
     };
 
 private:
     void PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData) const;
     void PaintColorSegmentFilterMask(RSCanvas& canvas, const LinearData& segmentLinearData) const;
+    Gradient SortGradientColorsOffset(const Gradient& srcGradient) const;
     RefPtr<AnimatablePropertyFloat> date_;
     RefPtr<PropertyBool> isEffect_;
     size_t dataPanelType_;

@@ -33,7 +33,7 @@ namespace OHOS::Ace {
 
 class AcePage;
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW AceEngine {
+class ACE_FORCE_EXPORT AceEngine {
 public:
     ~AceEngine();
 

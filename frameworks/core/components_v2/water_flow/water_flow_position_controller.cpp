@@ -19,7 +19,7 @@
 #include "core/components_v2/water_flow/water_flow_scroll_controller.h"
 
 namespace OHOS::Ace::V2 {
-void WaterFlowPositionController::JumpTo(int32_t index, int32_t source)
+void WaterFlowPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
 {
     auto waterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scroll_.Upgrade());
     if (!waterFlow) {

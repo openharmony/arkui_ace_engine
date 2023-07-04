@@ -428,4 +428,65 @@ void TextPickerModelNG::SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectedChangeEvent(std::move(onSelectedChangeEvent));
 }
+
+RefPtr<AceType> TextPickerDialogModelNG::CreateObject()
+{
+    return nullptr;
+}
+
+void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerText,
+    NG::TextPickerSettingData& settingData, std::function<void()>&& onCancel,
+    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
+    TextPickerDialog& textPickerDialog)
+{
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    if (!pipelineContext) {
+        return;
+    }
+    auto executor = pipelineContext->GetTaskExecutor();
+    if (!executor) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    if (!theme) {
+        LOGE("DialogTheme is null");
+        return;
+    }
+
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogEvent["acceptId"] = onAccept;
+    dialogEvent["changeId"] = onChange;
+    auto func = [onCancel](const GestureEvent& /* info */) {
+        if (onCancel) {
+            onCancel();
+        }
+    };
+    dialogCancelEvent["cancelId"] = func;
+    DialogProperties properties;
+    ButtonInfo buttonInfo;
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        properties.alignment = DialogAlignment::BOTTOM;
+    } else {
+        properties.alignment = DialogAlignment::CENTER;
+    }
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+
+    auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    executor->PostTask(
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+        },
+        TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace::NG

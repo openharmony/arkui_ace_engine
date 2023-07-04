@@ -19,12 +19,18 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
+class PixelMap;
+
 class ACE_EXPORT ImageSource : public AceType {
     DECLARE_ACE_TYPE(ImageSource, AceType)
 
 public:
     static RefPtr<ImageSource> Create(int32_t fd);
+    static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size);
+
     virtual std::string GetProperty(const std::string& key) = 0;
+    virtual RefPtr<PixelMap> CreatePixelMap(int32_t width, int32_t height) = 0;
+    virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, int32_t width, int32_t height) = 0;
 };
 } // namespace OHOS::Ace
 

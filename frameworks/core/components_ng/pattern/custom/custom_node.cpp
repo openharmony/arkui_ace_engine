@@ -45,6 +45,7 @@ void CustomNode::Build()
 void CustomNode::Render()
 {
     if (renderFunction_) {
+        auto renderFunction = std::move(renderFunction_);
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
@@ -53,12 +54,11 @@ void CustomNode::Render()
             ACE_SCOPED_TRACE("CustomNode:BuildItem %s", GetJSViewName().c_str());
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
-            auto child = renderFunction_();
+            auto child = renderFunction();
             if (child) {
                 child->MountToParent(Claim(this));
             }
         }
-        renderFunction_ = nullptr;
     }
     {
         FireRecycleRenderFunc();
@@ -72,6 +72,11 @@ void CustomNode::FlushReload()
     Clean();
     renderFunction_ = completeReloadFunc_;
     Render();
+}
+
+void CustomNode::SetJSViewActive(bool active)
+{
+    FireSetActiveFunc(active);
 }
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)

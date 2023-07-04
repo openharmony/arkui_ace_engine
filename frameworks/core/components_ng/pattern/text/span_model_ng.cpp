@@ -43,6 +43,22 @@ void SpanModelNG::Create(const std::string& content)
     ACE_UPDATE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE);
 }
 
+void SpanModelNG::SetFont(const Font& value)
+{
+    if (value.fontSize.has_value()) {
+        SetFontSize(value.fontSize.value());
+    }
+    if (value.fontWeight.has_value()) {
+        SetFontWeight(value.fontWeight.value());
+    }
+    if (!value.fontFamilies.empty()) {
+        SetFontFamily(value.fontFamilies);
+    }
+    if (value.fontStyle.has_value()) {
+        SetItalicFontStyle(value.fontStyle.value());
+    }
+}
+
 void SpanModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(FontSize, value, PropertyInfo::FONTSIZE);
@@ -97,6 +113,11 @@ void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& cl
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc), PropertyInfo::NONE);
+}
+
+void SpanModelNG::ClearOnClick()
+{
+    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE);
 }
 
 } // namespace OHOS::Ace::NG

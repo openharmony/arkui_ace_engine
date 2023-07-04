@@ -24,6 +24,11 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
+#ifndef WEARABLE_PRODUCT
+constexpr double FRICTION = 0.6;
+#else
+constexpr double FRICTION = 0.9;
+#endif
 class ScrollablePattern : public Pattern {
     DECLARE_ACE_TYPE(ScrollablePattern, Pattern);
 
@@ -95,7 +100,7 @@ public:
         return estimatedHeight_;
     }
 
-    float GetCurrentPosition() const
+    float GetBarOffset() const
     {
         return barOffset_;
     }
@@ -144,6 +149,93 @@ public:
         return false;
     }
 
+    bool IsScrollableSpringEffect() const
+    {
+        CHECK_NULL_RETURN_NOLOG(scrollEffect_, false);
+        return scrollEffect_->IsSpringEffect();
+    }
+
+    void SetParentDraggedDown(bool isDraggedDown)
+    {
+        isDraggedDown_ = isDraggedDown;
+    }
+
+    void SetCoordEventNeedSpringEffect(bool IsCoordEventNeedSpring)
+    {
+        isCoordEventNeedSpring_ = IsCoordEventNeedSpring;
+    }
+
+    void SetCoordEventNeedMoveUp(bool isCoordEventNeedMoveUp)
+    {
+        isCoordEventNeedMoveUp_ = isCoordEventNeedMoveUp;
+    }
+    
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
+    RefPtr<ScrollablePattern> GetParentScrollable();
+    virtual OverScrollOffset GetOverScrollOffset(double delta) const
+    {
+        return { 0, 0 };
+    }
+
+    virtual bool OnScrollSnapCallback(double targetOffset, double velocity)
+    {
+        return false;
+    }
+
+    void StartScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StartScrollBarAnimator();
+        }
+    }
+
+    void StopScrollBarAnimatorByProxy()
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StopScrollBarAnimator();
+        }
+    }
+
+    void SetFriction(double friction);
+
+    double GetFriction() const
+    {
+        return friction_;
+    }
+
+    void StopAnimate();
+    bool AnimateRunning() const
+    {
+        return animator_ && animator_->IsRunning();
+    }
+    bool AnimateStoped() const
+    {
+        return !animator_ || animator_->IsStopped();
+    }
+    void AbortScrollAnimator()
+    {
+        if (animator_ && !animator_->IsStopped()) {
+            scrollAbort_ = true;
+            animator_->Stop();
+        }
+    }
+    bool GetScrollAbort() const
+    {
+        return scrollAbort_;
+    }
+    void SetScrollAbort(bool abort)
+    {
+        scrollAbort_ = abort;
+    }
+    void PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping);
+    virtual float GetTotalOffset() const
+    {
+        return 0.0f;
+    }
+    virtual void OnAnimateStop() {}
+    virtual void ScrollTo(float position);
+    virtual void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth);
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -162,9 +254,11 @@ protected:
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
 private:
+    void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
     void OnScrollEnd();
     bool OnScrollPosition(double offset, int32_t source);
+    void SetParentScrollable();
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -177,6 +271,16 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     double scrollBarOutBoundaryExtent_ = 0.0;
+    bool isDraggedDown_ = false;
+    bool isCoordEventNeedSpring_ = true;
+    bool isCoordEventNeedMoveUp_ = false;
+    double friction_ = FRICTION;
+    // scroller
+    RefPtr<Animator> animator_;
+    RefPtr<SpringMotion> springMotion_;
+    bool scrollAbort_ = false;
+
+    NestedScrollOptions nestedScroll_;
 };
 } // namespace OHOS::Ace::NG
 

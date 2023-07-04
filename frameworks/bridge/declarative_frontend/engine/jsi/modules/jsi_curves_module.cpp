@@ -30,12 +30,22 @@ shared_ptr<JsValue> CurvesInterpolate(const shared_ptr<JsRuntime>& runtime, cons
 {
     auto jsCurveString = thisObj->GetProperty(runtime, "__curveString");
     auto curveString = jsCurveString->ToString(runtime);
-
+    auto curveObjFunc = thisObj->GetProperty(runtime, "__curveCustomFunc");
     if (argv.size() == 0) {
         return runtime->NewNull();
     }
     double time = argv[0]->ToDouble(runtime);
     auto animationCurve = CreateCurve(curveString, false);
+    if (curveObjFunc->IsFunction(runtime)) {
+        std::function<float(float)> customCallBack = [func = std::move(curveObjFunc),
+                    id = Container::CurrentId(), runtime] (float time)->float {
+                    ContainerScope scope(id);
+                    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(time) };
+                    auto result = func->Call(runtime, runtime->GetGlobal(), argv, 1);
+                    return result->IsNumber(runtime) ? static_cast<float>(result->ToDouble(runtime)) : 1.0f;
+                };
+        animationCurve = CreateCurve(customCallBack);
+    }
     if (!animationCurve) {
         LOGW("created animationCurve is null, curveString:%{public}s", curveString.c_str());
         return runtime->NewNull();
@@ -229,6 +239,15 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
         curveCreated = CreateSpringMotionCurve(runtime, thisObj, argv, argc, curve);
     } else if (curveString == RESPONSIVE_SPRING_MOTION) {
         curveCreated = CreateResponsiveSpringMotionCurve(runtime, thisObj, argv, argc, curve);
+    } else if (curveString == CURVES_CUSTOM) {
+        curve = AceType::MakeRefPtr<CustomCurve>(nullptr);
+        curveCreated = true;
+        if (argv[0]->IsFunction(runtime)) {
+            curveObj->SetProperty(runtime, "__curveCustomFunc", argv[0]);
+        } else {
+            curveCreated = false;
+            LOGW("customCruve argv is not function argv[0] = %{public}s", argv[0]->ToString(runtime).c_str());
+        }
     } else {
         LOGE("curve params: %{public}s is illegal", curveString.c_str());
         return runtime->NewNull();
@@ -300,6 +319,12 @@ shared_ptr<JsValue> StepsCurve(const shared_ptr<JsRuntime>& runtime, const share
     std::string curveString(STEPS_CURVE);
     return ParseCurves(runtime, thisObj, argv, argc, curveString);
 }
+shared_ptr<JsValue> CustomCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(CURVES_CUSTOM);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
 
 shared_ptr<JsValue> SpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
@@ -328,6 +353,8 @@ void InitCurvesModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>&
     moduleObj->SetProperty(runtime, STEPS_CURVE, runtime->NewFunction(StepsCurve));
     moduleObj->SetProperty(runtime, SPRING_MOTION, runtime->NewFunction(SpringMotionCurve));
     moduleObj->SetProperty(runtime, RESPONSIVE_SPRING_MOTION, runtime->NewFunction(ResponsiveSpringMotionCurve));
+    moduleObj->SetProperty(runtime, CURVES_CUSTOM, runtime->NewFunction(CustomCurve));
+    
 }
 
 } // namespace OHOS::Ace::Framework

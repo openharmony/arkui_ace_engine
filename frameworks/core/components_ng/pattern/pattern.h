@@ -59,14 +59,9 @@ public:
         return false;
     }
 
-    virtual std::optional<std::string> GetSurfaceNodeName() const
+    virtual std::optional<RenderContext::ContextParam> GetContextParam() const
     {
         return std::nullopt;
-    }
-
-    virtual bool UseExternalRSNode() const
-    {
-        return false;
     }
 
     void DetachFromFrameNode(FrameNode* frameNode)
@@ -318,6 +313,18 @@ public:
         return ScopeFocusAlgorithm();
     }
 
+    virtual bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+    {
+        return false;
+    }
+
+    virtual int32_t GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
+    {
+        return -1;
+    }
+
+    virtual void ScrollToFocusNodeIndex(int32_t index) {}
+
     // out of viewport or visible is none or gone.
     virtual void OnInActive() {}
     virtual void OnActive() {}
@@ -353,6 +360,21 @@ public:
         return layoutProperty->HasAspectRatio();
     }
 
+    virtual void OnTouchTestHit(SourceType hitTestType) {}
+
+    virtual int32_t GetDragRecordSize()
+    {
+        return -1;
+    }
+    
+    virtual void OnLanguageConfigurationUpdate() {}
+    virtual void OnColorConfigurationUpdate() {}
+    virtual bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
+    {
+        return true;
+    }
+
+    virtual void OnSetDepth(const int32_t depth) {}
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

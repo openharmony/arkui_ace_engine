@@ -29,7 +29,8 @@
 #include "core/common/rosen/rosen_asset_manager.h"
 #endif
 
-#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
+#include "native_engine/native_engine.h"
+
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/stage_card_parser.h"
 #include "base/log/ace_trace.h"
@@ -59,6 +60,7 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "previewer/include/window.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -73,9 +75,13 @@ const char LOCALE_KEY[] = "locale";
 
 std::once_flag AceContainer::onceFlag_;
 bool AceContainer::isComponentMode_ = false;
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context, bool useCurrentEventRunner)
-    : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type), context_(context)
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool useNewPipeline, bool useCurrentEventRunner)
+    : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type)
 {
+    LOGI("Using %{public}s pipeline context ...", (useNewPipeline ? "new" : "old"));
+    if (useNewPipeline) {
+        SetUseNewPipeline();
+    }
     ThemeConstants::InitDeviceType();
 #ifndef ENABLE_ROSEN_BACKEND
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
@@ -99,39 +105,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context
 void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
-    auto stageContext = AceType::DynamicCast<StageContext>(context_);
-    auto faContext = AceType::DynamicCast<FaContext>(context_);
-    bool useNewPipe = true;
-    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
-        useNewPipe = false;
-    } else if (stageContext) {
-        auto appInfo = stageContext->GetAppInfo();
-        CHECK_NULL_VOID(appInfo);
-        auto hapModuleInfo = stageContext->GetHapModuleInfo();
-        CHECK_NULL_VOID(hapModuleInfo);
-        auto compatibleVersion = appInfo->GetMinAPIVersion();
-        auto targetVersion = appInfo->GetTargetAPIVersion();
-        auto releaseType = appInfo->GetApiReleaseType();
-        labelId_ = hapModuleInfo->GetLabelId();
-        bool enablePartialUpdate = hapModuleInfo->GetPartialUpdateFlag();
-        // only app should have menubar, card don't need
-        if (type_ == FrontendType::DECLARATIVE_JS) {
-            installationFree_ = appInfo->IsInstallationFree();
-        }
-        useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
-            "", compatibleVersion, targetVersion, releaseType, !enablePartialUpdate);
-    } else if (faContext) {
-        auto appInfo = faContext->GetAppInfo();
-        CHECK_NULL_VOID(appInfo);
-        auto compatibleVersion = appInfo->GetMinAPIVersion();
-        auto targetVersion = appInfo->GetTargetAPIVersion();
-        auto releaseType = appInfo->GetApiReleaseType();
-        useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFA("", compatibleVersion, targetVersion, releaseType);
-    }
-    LOGI("Using %{public}s pipeline context ...", (useNewPipe ? "new" : "old"));
-    if (useNewPipe) {
-        SetUseNewPipeline();
-    }
     if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
         InitializeFrontend();
     }
@@ -201,7 +174,13 @@ void AceContainer::InitializeFrontend()
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
         frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-        auto jsEngine = Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_);
+        auto& loader = Framework::JsEngineLoader::GetDeclarative();
+        RefPtr<Framework::JsEngine> jsEngine;
+        if (GetSettings().usingSharedRuntime) {
+            jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+        } else {
+            jsEngine = loader.CreateJsEngine(instanceId_);
+        }
         EngineHelper::AddEngine(instanceId_, jsEngine);
         declarativeFrontend->SetJsEngine(jsEngine);
         declarativeFrontend->SetPageProfile(pageProfile_);
@@ -239,21 +218,14 @@ void AceContainer::RunNativeEngineLoop()
     taskExecutor_->PostTask([this]() { RunNativeEngineLoop(); }, TaskExecutor::TaskType::PLATFORM);
 }
 
-void AceContainer::InitializeStageAppConfig(const std::string& assetPath, bool formsEnabled)
+void AceContainer::InitializeStageAppConfig(const std::string& assetPath, const std::string& bundleName,
+    const std::string& moduleName, const std::string& compileMode, uint32_t minPlatformVersion)
 {
-    auto stageContext = AceType::DynamicCast<StageContext>(context_);
-    CHECK_NULL_VOID(stageContext);
-    auto appInfo = stageContext->GetAppInfo();
-    CHECK_NULL_VOID(appInfo);
-    auto hapModuleInfo = stageContext->GetHapModuleInfo();
-    CHECK_NULL_VOID(hapModuleInfo);
     if (pipelineContext_) {
-        LOGI("Set MinPlatformVersion to %{public}d", appInfo->GetMinAPIVersion());
-        pipelineContext_->SetMinPlatformVersion(appInfo->GetMinAPIVersion());
+        LOGI("Set MinPlatformVersion to %{public}d", minPlatformVersion);
+        pipelineContext_->SetMinPlatformVersion(minPlatformVersion);
     }
-    auto& bundleName = appInfo->GetBundleName();
-    auto& compileMode = hapModuleInfo->GetCompileMode();
-    auto& moduleName = hapModuleInfo->GetModuleName();
+
     bool isBundle = (compileMode != "esmodule");
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
     CHECK_NULL_VOID(declarativeFrontend);
@@ -454,13 +426,9 @@ void AceContainer::InitializeCallback()
 }
 
 void AceContainer::CreateContainer(
-    int32_t instanceId, FrontendType type, const AceRunArgs& runArgs, bool useCurrentEventRunner)
+    int32_t instanceId, FrontendType type, bool useNewPipeline, bool useCurrentEventRunner)
 {
-    // for ohos container use newPipeline
-    SystemProperties::SetExtSurfaceEnabled(!runArgs.containerSdkPath.empty());
-
-    auto context = Context::CreateContext(runArgs.projectModel == ProjectModel::STAGE, runArgs.appResourcesPath);
-    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, context, useCurrentEventRunner);
+    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, useNewPipeline, useCurrentEventRunner);
     AceEngine::Get().AddContainer(aceContainer->GetInstanceId(), aceContainer);
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
@@ -916,10 +884,22 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         flutterTaskExecutor->InitJsThread(false);
         InitializeFrontend();
-        auto front = GetFrontend();
+        auto front = AceType::DynamicCast<DeclarativeFrontend>(GetFrontend());
         if (front) {
             front->UpdateState(Frontend::State::ON_CREATE);
             front->SetJsMessageDispatcher(AceType::Claim(this));
+            auto weak = AceType::WeakClaim(AceType::RawPtr(front->GetJsEngine()));
+            taskExecutor_->PostTask(
+                [weak, containerSdkPath = containerSdkPath_]() {
+                    auto jsEngine = weak.Upgrade();
+                    CHECK_NULL_VOID(jsEngine);
+                    auto* nativeEngine = jsEngine->GetNativeEngine();
+                    CHECK_NULL_VOID(nativeEngine);
+                    auto* moduleManager = nativeEngine->GetModuleManager();
+                    CHECK_NULL_VOID(moduleManager);
+                    moduleManager->SetPreviewSearchPath(containerSdkPath);
+                },
+                TaskExecutor::TaskType::JS);
         }
     }
     resRegister_ = aceView_->GetPlatformResRegister();
@@ -1013,33 +993,20 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
 }
 #endif
 
-void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
-{
-    ContainerScope scope(instanceId);
-    SystemProperties::InitDeviceInfo(runArgs.deviceWidth, runArgs.deviceHeight,
-        runArgs.deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1, runArgs.deviceConfig.density,
-        runArgs.isRound);
-    SystemProperties::InitDeviceType(runArgs.deviceConfig.deviceType);
-    SystemProperties::SetColorMode(runArgs.deviceConfig.colorMode);
-    auto container = GetContainerInstance(instanceId);
-    if (!container) {
-        LOGE("container is null, AceContainer::InitDeviceInfo failed.");
-        return;
-    }
-    auto config = container->GetResourceConfiguration();
-    config.SetDeviceType(SystemProperties::GetDeviceType());
-    config.SetOrientation(SystemProperties::GetDeviceOrientation());
-    config.SetDensity(runArgs.deviceConfig.density);
-    config.SetColorMode(runArgs.deviceConfig.colorMode);
-    config.SetFontRatio(runArgs.deviceConfig.fontRatio);
-    container->SetResourceConfiguration(config);
-    isComponentMode_ = runArgs.isComponentMode;
-}
-
 RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     return container;
+}
+
+std::string AceContainer::GetContentInfo(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN_NOLOG(container, "");
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN_NOLOG(front, "");
+    return front->GetContentInfo();
 }
 
 void AceContainer::LoadDocument(const std::string& url, const std::string& componentName)

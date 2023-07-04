@@ -111,6 +111,11 @@ public:
         ViewStackProcessor::GetInstance()->ImplicitPopBeforeContinue();
     }
 
+    void GetAndPushFrameNode(const std::string& tag, int32_t elmtId) override
+    {
+        ViewStackProcessor::GetInstance()->GetAndPushFrameNode(tag, elmtId);
+    }
+
 private:
     std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };

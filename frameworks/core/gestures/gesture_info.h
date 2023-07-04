@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H
 
 #include <functional>
+#include <map>
 #include <list>
 #include <string>
 #include <unordered_map>
@@ -34,11 +35,8 @@
 #include "core/gestures/velocity_tracker.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
+#include "core/common/udmf/unified_data.h"
 #include "base/geometry/rect.h"
-namespace OHOS::UDMF {
-class UnifiedData;
-struct Summary;
-}
 #endif
 
 namespace OHOS::Ace {
@@ -267,6 +265,26 @@ public:
         return pasteData_;
     }
 
+    double GetScreenX() const
+    {
+        return screenX_;
+    }
+
+    double GetScreenY() const
+    {
+        return screenY_;
+    }
+
+    void SetScreenX(double x)
+    {
+        screenX_ = x;
+    }
+
+    void SetScreenY(double y)
+    {
+        screenY_ = y;
+    }
+
     double GetX() const
     {
         return x_;
@@ -308,13 +326,13 @@ public:
     }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void SetData(std::shared_ptr<UDMF::UnifiedData>& unifiedData);
+    void SetData(const RefPtr<UnifiedData>& unifiedData);
 
-    std::shared_ptr<UDMF::UnifiedData>& GetData();
+    RefPtr<UnifiedData>& GetData();
 
-    void SetSummary(std::shared_ptr<UDMF::Summary>& summary);
+    void SetSummary(std::map<std::string, int64_t>& summary);
 
-    std::shared_ptr<UDMF::Summary>& GetSummary();
+    std::map<std::string, int64_t>& GetSummary();
 
     void SetResult(DragRet dragRet);
 
@@ -328,9 +346,9 @@ public:
 
     bool IsUseCustomAnimation();
 
-    void SetDragInfo(std::shared_ptr<UDMF::UnifiedData>& dragInfo);
+    void SetDragInfo(const RefPtr<UnifiedData>& dragInfo);
 
-    std::shared_ptr<UDMF::UnifiedData>& GetDragInfo();
+    RefPtr<UnifiedData>& GetDragInfo();
 
     void SetCopy(bool copy);
 
@@ -339,17 +357,19 @@ public:
 
 private:
     RefPtr<PasteData> pasteData_;
+    double screenX_ = 0.0;
+    double screenY_ = 0.0;
     double x_ = 0.0;
     double y_ = 0.0;
     std::string description_;
     RefPtr<PixelMap> pixelMap_;
 #ifdef ENABLE_DRAG_FRAMEWORK
-    std::shared_ptr<UDMF::UnifiedData> unifiedData_;
-    std::shared_ptr<UDMF::Summary> summary_;
+    RefPtr<UnifiedData> unifiedData_;
+    std::map<std::string, int64_t> summary_;
     DragRet dragRet_;
     Rect previewRect_;
     bool useCustomAnimation_ = false;
-    std::shared_ptr<UDMF::UnifiedData> dragInfo_;
+    RefPtr<UnifiedData> dragInfo_;
     bool copy_ = true;
 #endif
 };
@@ -639,6 +659,16 @@ public:
     {
         return secCompHandleEvent_;
     }
+
+    void SetEnhanceData(std::vector<uint8_t> enhanceData)
+    {
+        enhanceData_ = enhanceData;
+    }
+
+    std::vector<uint8_t> GetEnhanceData() const
+    {
+        return enhanceData_;
+    }
 #endif
 private:
     bool repeat_ = false;
@@ -658,6 +688,7 @@ private:
 #ifdef SECURITY_COMPONENT_ENABLE
     double displayX_ = 0.0;
     double displayY_ = 0.0;
+    std::vector<uint8_t> enhanceData_;
     std::shared_ptr<JsonValue> secCompHandleEvent_;
 #endif
     Point globalPoint_;

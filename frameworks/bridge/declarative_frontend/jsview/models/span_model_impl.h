@@ -27,6 +27,7 @@ namespace OHOS::Ace::Framework {
 class ACE_EXPORT SpanModelImpl : public SpanModel {
 public:
     void Create(const std::string& content) override;
+    void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
@@ -38,6 +39,7 @@ public:
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetOnClick(std::function<void(const BaseEventInfo*)>&& click) override;
+    void ClearOnClick() override {};
 
 private:
     static RefPtr<TextSpanComponent> GetComponent();

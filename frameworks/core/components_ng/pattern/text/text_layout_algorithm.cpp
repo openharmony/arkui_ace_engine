@@ -30,6 +30,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -81,6 +82,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         contentModifier->ModifyTextStyle(textStyle);
     }
 
+    // Register callback for fonts.
+    FontRegisterCallback(frameNode, textStyle);
+
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
 
@@ -88,6 +92,29 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         return BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, pipeline, layoutWrapper);
     }
 
+    if (!AddPropertiesAndAnimations(textStyle, textLayoutProperty, contentConstraint, pipeline, layoutWrapper)) {
+        return std::nullopt;
+    }
+
+    textStyle_ = textStyle;
+    
+    auto height = static_cast<float>(paragraph_->GetHeight());
+    double baselineOffset = 0.0;
+    textStyle.GetBaselineOffset().NormalizeToPx(
+        pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), 0.0f, baselineOffset);
+
+    baselineOffset_ = static_cast<float>(baselineOffset);
+
+    float heightFinal =
+        std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
+
+    return SizeF(paragraph_->GetMaxWidth(), heightFinal);
+}
+
+bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, const LayoutConstraintF& contentConstraint,
+    const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
+{
     bool result = false;
     switch (textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST)) {
         case TextHeightAdaptivePolicy::MAX_LINES_FIRST:
@@ -104,22 +131,26 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         default:
             break;
     }
-    if (result == false) {
-        return std::nullopt;
+    return result;
+}
+
+void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  const TextStyle& textStyle)
+{
+    auto callback = [weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))] {
+        auto frameNode = weakNode.Upgrade();
+        if (frameNode) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        for (const auto& familyName : textStyle.GetFontFamilies()) {
+            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+        }
+        fontManager->AddVariationNodeNG(frameNode);
     }
-    textStyle_ = textStyle;
-
-    auto height = static_cast<float>(paragraph_->GetHeight());
-    double baselineOffset = 0.0;
-    textStyle.GetBaselineOffset().NormalizeToPx(
-        pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), 0.0f, baselineOffset);
-
-    baselineOffset_ = static_cast<float>(baselineOffset);
-
-    float heightFinal =
-        std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-
-    return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
 
 void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -167,7 +198,9 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             auto width = geometryNode->GetMarginFrameSize().Width();
             auto height = geometryNode->GetMarginFrameSize().Height();
             child->placeHolderIndex = child->UpdateParagraph(paragraph_, width, height, verticalAlign);
-            child->position += 1;
+            child->content = " ";
+            child->position = spanTextLength + 1;
+            spanTextLength += 1;
             iterItems++;
         } else {
             child->UpdateParagraph(paragraph_);
@@ -814,5 +847,11 @@ bool TextLayoutAlgorithm::CreateImageSpanAndLayout(const TextStyle& textStyle, c
         paragraph_->Layout(maxSize.Width());
     }
     return true;
+}
+
+size_t TextLayoutAlgorithm::GetLineCount() const
+{
+    CHECK_NULL_RETURN(paragraph_, 0);
+    return paragraph_->GetLineCount();
 }
 } // namespace OHOS::Ace::NG

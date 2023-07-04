@@ -15,14 +15,16 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_layout_algorithm.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -47,6 +49,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         childConstraint.selfIdealSize.SetWidth(layoutConstraint->selfIdealSize.Width().value());
     }
+    UpdateHeaderAndFooterMargin(layoutWrapper);
 
     // measure children (header, footer, menuItem)
     float maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper->GetAllChildrenWithBuild(), childConstraint);
@@ -141,7 +144,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     float headerPadding = (needHeaderPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
                           (headerHeight < minItemHeight ? (minItemHeight - headerHeight) / 2 : 0.0f);
-    LayoutIndex(wrapper, OffsetF(static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()), headerPadding));
+    LayoutIndex(wrapper, OffsetF(0.0f, headerPadding));
 }
 
 void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
@@ -162,8 +165,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     float footerPadding = (needFooterPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
                           (footerHeight < minItemHeight ? (minItemHeight - footerHeight) / 2 : 0.0f);
-    LayoutIndex(wrapper, OffsetF(static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()),
-                             (groupHeight - footerHeight - footerPadding)));
+    LayoutIndex(wrapper, OffsetF(0.0f, (groupHeight - footerHeight - footerPadding)));
 }
 
 void MenuItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& offset)
@@ -173,28 +175,17 @@ void MenuItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrap
     wrapper->Layout();
 }
 
+// Need head padding if left brother is menu item group
 bool MenuItemGroupLayoutAlgorithm::NeedHeaderPadding(const RefPtr<FrameNode>& host)
 {
-    int32_t hostId = host->GetId();
-    auto menu = AceType::DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(menu, false);
-    int32_t index = menu->GetChildIndexById(hostId);
-    if (index == 0) {
-        return false;
-    }
-    auto brotherNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(index - 1));
+    auto brotherNode = GetBrotherNode(host);
     CHECK_NULL_RETURN_NOLOG(brotherNode, false);
     return brotherNode->GetTag() != V2::MENU_ITEM_GROUP_ETS_TAG;
 }
 
 bool MenuItemGroupLayoutAlgorithm::NeedFooterPadding(const RefPtr<FrameNode>& host)
 {
-    int32_t hostId = host->GetId();
-    auto menu = AceType::DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(menu, false);
-    int32_t index = menu->GetChildIndexById(hostId);
-    int32_t menuCount = menu->TotalChildCount();
-    return index != (menuCount - 1);
+    return !IsLastNode(host);
 }
 
 float MenuItemGroupLayoutAlgorithm::GetChildrenMaxWidth(
@@ -204,9 +195,82 @@ float MenuItemGroupLayoutAlgorithm::GetChildrenMaxWidth(
 
     for (const auto& child : children) {
         child->Measure(layoutConstraint);
-        auto childSize = child->GetGeometryNode()->GetFrameSize();
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         width = std::max(width, childSize.Width());
     }
     return width;
+}
+
+std::list<WeakPtr<UINode>> MenuItemGroupLayoutAlgorithm::GetItemsAndGroups(const RefPtr<FrameNode>& host) const
+{
+    std::list<WeakPtr<UINode>> itemsAndGroups;
+    auto pattern = host->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_RETURN(pattern, itemsAndGroups);
+    auto menu = pattern->GetMenu();
+    CHECK_NULL_RETURN(menu, itemsAndGroups);
+    auto menuPattern = menu->GetPattern<InnerMenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, itemsAndGroups);
+    return menuPattern->GetItemsAndGroups();
+}
+
+// get the left brother node
+RefPtr<FrameNode> MenuItemGroupLayoutAlgorithm::GetBrotherNode(const RefPtr<FrameNode>& host)
+{
+    auto itemsAndGroups = GetItemsAndGroups(host);
+    if (itemsAndGroups.empty()) {
+        return nullptr;
+    }
+    auto iter = std::find(itemsAndGroups.begin(), itemsAndGroups.end(), host);
+    if (iter == itemsAndGroups.begin() || iter == itemsAndGroups.end()) {
+        return nullptr;
+    }
+    return DynamicCast<FrameNode>((--iter)->Upgrade());
+}
+
+bool MenuItemGroupLayoutAlgorithm::IsLastNode(const RefPtr<FrameNode>& host) const
+{
+    auto itemsAndGroups = GetItemsAndGroups(host);
+    if (itemsAndGroups.empty()) {
+        return true;
+    }
+    return host == itemsAndGroups.back().Upgrade();
+}
+
+void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* layoutWrapper) const
+{
+    if (headerIndex_ < 0 && footerIndex_ < 0) {
+        // no header and footer, no need to update.
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    auto pattern = host->GetPattern<MenuItemGroupPattern>();
+    pattern->UpdateMenuItemIconInfo();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto iconWidth = selectTheme->GetIconSideLength();
+    auto iconContentPadding = selectTheme->GetIconContentPadding();
+    auto margin = MarginProperty();
+    if (pattern->HasSelectIcon() && pattern->HasStartIcon()) {
+        margin.left = CalcLength(iconWidth * 2.0 + iconContentPadding * 2.0);
+    } else if (pattern->HasSelectIcon() || pattern->HasStartIcon()) {
+        margin.left = CalcLength(iconWidth + iconContentPadding);
+    } else {
+        // no need to update zero margin.
+        return;
+    }
+
+    if (headerIndex_ >= 0) {
+        auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
+        auto headLayoutProps = headerWrapper->GetLayoutProperty();
+        headLayoutProps->UpdateMargin(margin);
+    }
+    if (footerIndex_ >= 0) {
+        auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
+        auto footerLayoutProps = footerWrapper->GetLayoutProperty();
+        footerLayoutProps->UpdateMargin(margin);
+    }
 }
 } // namespace OHOS::Ace::NG

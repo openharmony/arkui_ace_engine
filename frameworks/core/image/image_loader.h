@@ -20,7 +20,9 @@
 #include <regex>
 #include <string>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkImage.h"
+#endif
 
 #include "base/geometry/size.h"
 #include "base/memory/ace_type.h"

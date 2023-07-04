@@ -37,14 +37,20 @@ std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size t
            std::to_string(static_cast<int32_t>(targetImageSize.Height()));
 }
 
+#ifndef USE_ROSEN_DRAWING
 RefPtr<ImageObject> ImageObject::BuildImageObject(
     ImageSourceInfo source, const RefPtr<PipelineBase> context, const sk_sp<SkData>& skData, bool useSkiaSvg)
+#else
+RefPtr<ImageObject> ImageObject::BuildImageObject(ImageSourceInfo source, const RefPtr<PipelineBase> context,
+    const std::shared_ptr<RSData>& data, bool useDrawingSvg)
+#endif
 {
     // build svg image object.
     if (source.IsSvg()) {
 #ifdef NG_BUILD
         return nullptr;
 #else
+#ifndef USE_ROSEN_DRAWING
         const auto svgStream = std::make_unique<SkMemoryStream>(skData);
         if (!svgStream) {
             return nullptr;
@@ -62,13 +68,20 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
             auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, colorValue);
             return skiaDom ? MakeRefPtr<SvgSkiaImageObject>(source, Size(), 1, skiaDom) : nullptr;
         }
+#else
+    // TODO Drawing : SkMemoryStream
+#endif
 #endif
     }
 
     // if is png or apng check
 #ifdef APNG_IMAGE_SUPPORT
     if (source.isPng()) {
+#ifndef USE_ROSEN_DRAWING
         auto apngDecoder = AceType::MakeRefPtr<PNGImageDecoder>(skData);
+#else
+        auto apngDecoder = AceType::MakeRefPtr<PNGImageDecoder>(data);
+#endif
         if (apngDecoder && apngDecoder->isApng()) {
             if (!apngDecoder->DecodeImage()) {
                 return nullptr;
@@ -76,12 +89,17 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
 
             Size imageSize = apngDecoder->GetImageSize();
             uint32_t frameCount = apngDecoder->GetFrameCount();
+#ifndef USE_ROSEN_DRAWING
             return MakeRefPtr<ApngImageObject>(source, imageSize, frameCount, skData, apngDecoder);
+#else
+            return MakeRefPtr<ApngImageObject>(source, imageSize, frameCount, data, apngDecoder);
+#endif
         }
     }
 #endif
 
     // build normal pixel image object.
+#ifndef USE_ROSEN_DRAWING
     auto codec = SkCodec::MakeFromData(skData);
     int32_t totalFrames = 1;
     Size imageSize;
@@ -103,6 +121,9 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
     } else {
         return CreateAnimatedImageObject(source, imageSize, totalFrames, skData);
     }
+#else
+    // TODO Drawing : SkCodec
+#endif
 }
 
 Size ImageObject::MeasureForImage(RefPtr<RenderImage> image)
@@ -120,13 +141,22 @@ Size SvgImageObject::MeasureForImage(RefPtr<RenderImage> image)
     return image->MeasureForSvgImage();
 }
 
+#ifndef USE_ROSEN_DRAWING
 void SvgSkiaImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image) {}
+#else
+void SvgDrawingImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image) {}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
+#else
+Size SvgDrawingImageObject::MeasureForImage(RefPtr<RenderImage> image)
+#endif
 {
     return image->MeasureForSvgImage();
 }
 
+#ifndef USE_ROSEN_DRAWING
 void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
     const UploadSuccessCallback& successCallback,
     const FailedCallback& failedCallback, const Size& imageSize, bool forceResize, bool syncMode)
@@ -240,6 +270,9 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
     uploadForPaintTask_ = CancelableTask(std::move(task));
     BackgroundTaskExecutor::GetInstance().PostTask(uploadForPaintTask_);
 }
+#else
+    // TODO Drawing ：SkImage::MakeFromEncoded(skData)
+#endif
 
 bool StaticImageObject::CancelBackgroundTasks()
 {

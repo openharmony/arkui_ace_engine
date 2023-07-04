@@ -83,24 +83,6 @@ foreach(item, ace_platforms) {
 foreach(item, ace_platforms) {
   platform = item.name
   if (platform == "ohos") {
-    # libace target
-    ohos_shared_library("libace") {
-      if (current_os == "ohos") {
-        sanitize = {
-          integer_overflow = true
-          boundary_sanitize = true
-          debug = ace_sanitize_debug
-        }
-      }
-
-      deps = [ "$ace_root/build:libace_static_ohos" ]
-      version_script = "libace.map"
-      innerapi_tags = [ "platformsdk" ]
-      part_name = ace_engine_part
-      subsystem_name = ace_engine_subsystem
-      configs = [ "$ace_root/test/unittest:ace_coverage_config" ]
-    }
-
     ohos_source_set("ace_ohos_unittest_base") {
       subsystem_name = ace_engine_subsystem
       part_name = ace_engine_part
@@ -123,7 +105,7 @@ foreach(item, ace_platforms) {
 
       configs = [
         "$ace_root:ace_test_config",
-        "$ace_root/test/unittest:ace_coverage_config",
+        "$ace_root:ace_coverage_config",
       ]
 
       deps = [
@@ -150,4 +132,27 @@ config("reduce_eh_frame_config") {
     ]
     cflags_cc = cflags
   }
+}
+
+ohos_shared_library("libace") {
+  if (is_ohos) {
+    sanitize = {
+      integer_overflow = true
+      boundary_sanitize = true
+      debug = ace_sanitize_debug
+    }
+    deps = [ "$ace_root/build:libace_static_ohos" ]
+    version_script = "libace.map"
+    innerapi_tags = [ "platformsdk" ]
+    configs = [ "$ace_root:ace_coverage_config" ]
+  } else if (use_mingw_win) {
+    deps = [ "$ace_root/build:libace_static_windows" ]
+  } else if (use_mac) {
+    deps = [ "$ace_root/build:libace_static_mac" ]
+  } else if (use_linux) {
+    deps = [ "$ace_root/build:libace_static_linux" ]
+  }
+
+  part_name = ace_engine_part
+  subsystem_name = ace_engine_subsystem
 }

@@ -36,6 +36,11 @@ void JsClickFunction::Execute(const ClickInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
+    obj->SetProperty<double>("displayX", SystemProperties::Px2Vp(screenOffset.GetX()));
+    obj->SetProperty<double>("displayY", SystemProperties::Px2Vp(screenOffset.GetY()));
+    obj->SetProperty<double>("windowX", SystemProperties::Px2Vp(globalOffset.GetX()));
+    obj->SetProperty<double>("windowY", SystemProperties::Px2Vp(globalOffset.GetY()));
     obj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
     obj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
@@ -65,6 +70,11 @@ void JsClickFunction::Execute(const GestureEvent& info)
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
+    obj->SetProperty<double>("displayX", SystemProperties::Px2Vp(screenOffset.GetX()));
+    obj->SetProperty<double>("displayY", SystemProperties::Px2Vp(screenOffset.GetY()));
+    obj->SetProperty<double>("windowX", SystemProperties::Px2Vp(globalOffset.GetX()));
+    obj->SetProperty<double>("windowY", SystemProperties::Px2Vp(globalOffset.GetY()));
     obj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
     obj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
@@ -98,6 +108,11 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
+    obj->SetProperty<double>("displayX", SystemProperties::Px2Vp(screenOffset.GetX()));
+    obj->SetProperty<double>("displayY", SystemProperties::Px2Vp(screenOffset.GetY()));
+    obj->SetProperty<double>("windowX", SystemProperties::Px2Vp(globalOffset.GetX()));
+    obj->SetProperty<double>("windowY", SystemProperties::Px2Vp(globalOffset.GetY()));
     obj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
     obj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));

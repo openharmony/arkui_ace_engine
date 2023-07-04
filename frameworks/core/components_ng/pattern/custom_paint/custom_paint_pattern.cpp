@@ -21,8 +21,15 @@
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+#include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+
+namespace {
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
+} // namespace
 
 namespace OHOS::Ace::NG {
+class RosenRenderContext;
 void CustomPaintPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -31,7 +38,12 @@ void CustomPaintPattern::OnAttachToFrameNode()
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context);
+
+    if (!contentModifier_) {
+        contentModifier_ =
+            AceType::MakeRefPtr<RenderingContext2DModifier>();
+    }
+    paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_);
 }
 
 RefPtr<NodePaintMethod> CustomPaintPattern::CreateNodePaintMethod()
@@ -48,7 +60,13 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
     if (config.contentSizeChange || config.frameSizeChange) {
-        isCanvasInit_ = false;
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            isCanvasInit_ = !config.frameSizeChange;
+        } else {
+            isCanvasInit_ = false;
+        }
     } else if (config.frameOffsetChange || config.contentOffsetChange) {
         isCanvasInit_ = true;
     }
@@ -100,6 +118,7 @@ void CustomPaintPattern::ClearRect(const Rect& rect)
         paintMethod.ClearRect(paintWrapper, rect);
     };
     paintMethod_->PushTask(task);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -348,10 +367,16 @@ std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, do
         data->dirtyHeight = height;
         return data;
     }
+    // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and GetImageData
     if (paintMethod_->HasTask()) {
         paintMethod_->FlushPipelineImmediately();
     }
-    return paintMethod_->GetImageData(left, top, width, height);
+    auto host = GetHost();
+    if (!host) {
+        return paintMethod_->GetImageData(nullptr, left, top, width, height);
+    }
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(host->GetRenderContext());
+    return paintMethod_->GetImageData(rosenRenderContext, left, top, width, height);
 }
 
 void CustomPaintPattern::PutImageData(const Ace::ImageData& imageData)
@@ -700,6 +725,7 @@ void CustomPaintPattern::Save()
         paintMethod.Save();
     };
     paintMethod_->PushTask(task);
+    paintMethod_->SaveMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -711,6 +737,7 @@ void CustomPaintPattern::Restore()
         paintMethod.Restore();
     };
     paintMethod_->PushTask(task);
+    paintMethod_->RestoreMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -722,6 +749,7 @@ void CustomPaintPattern::Scale(double x, double y)
         paintMethod.Scale(x, y);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->ScaleMatrix(x, y);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -733,6 +761,7 @@ void CustomPaintPattern::Rotate(double angle)
         paintMethod.Rotate(angle);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->RotateMatrix(angle);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -744,6 +773,7 @@ void CustomPaintPattern::SetTransform(const TransformParam& param)
         paintMethod.SetTransform(param);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->SetTransformMatrix(param);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -755,6 +785,7 @@ void CustomPaintPattern::ResetTransform()
         paintMethod.ResetTransform();
     };
     paintMethod_->PushTask(task);
+    paintMethod_->ResetTransformMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -766,6 +797,7 @@ void CustomPaintPattern::Transform(const TransformParam& param)
         paintMethod.Transform(param);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->TransformMatrix(param);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -777,6 +809,7 @@ void CustomPaintPattern::Translate(double x, double y)
         paintMethod.Translate(x, y);
     };
     paintMethod_->PushTask(task);
+    paintMethod_->TranslateMatrix(x, y);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -784,10 +817,16 @@ void CustomPaintPattern::Translate(double x, double y)
 
 std::string CustomPaintPattern::ToDataURL(const std::string& args)
 {
+    // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and ToDataURL
     if (paintMethod_->HasTask()) {
         paintMethod_->FlushPipelineImmediately();
     }
-    return paintMethod_->ToDataURL(args);
+    auto host = GetHost();
+    if (!host) {
+        return paintMethod_->ToDataURL(nullptr, args);
+    }
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(host->GetRenderContext());
+    return paintMethod_->ToDataURL(rosenRenderContext, args);
 }
 
 std::string CustomPaintPattern::GetJsonData(const std::string& path)

@@ -36,6 +36,8 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
 {}
 void SubContainer::RunSameCard() {}
 
+void SubContainer::UpdateConfiguration() {}
+
 void SubContainer::UpdateCard(
     const std::string& content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap)
 {}

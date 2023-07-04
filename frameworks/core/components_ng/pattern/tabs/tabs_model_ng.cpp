@@ -40,6 +40,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension BAR_BLUR_RADIUS = 200.0_vp;
+constexpr Dimension BAR_SATURATE = 1.3_vp;
+} // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
     const RefPtr<SwiperController>& swiperController)
@@ -75,7 +79,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     swiperLayoutProperty->UpdateShowIndicator(false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto controller = swiperController;
+    auto controller = swiperController ? swiperController : swiperPattern->GetSwiperController();
     if (!controller) {
         controller = AceType::MakeRefPtr<SwiperController>();
     }
@@ -131,12 +135,12 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
         CHECK_NULL_VOID(tabsFrameNode);
         auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
-        tabsLayoutProperty->UpdateIndex(index);
+        tabsLayoutProperty->UpdateIndex(index < 0 ? 0 : index);
         return;
     }
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     auto preIndex = tabsLayoutProperty->GetIndexValue(0);
-    if (index != preIndex) {
+    if ((index != preIndex) && (index >= 0)) {
         SetIndex(index);
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
         tabBarPattern->SetMaskAnimationByCreate(true);
@@ -279,11 +283,11 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     if (barOverlap) {
-        BlurStyleOption option;
-        option.blurStyle = BlurStyle::REGULAR;
-        tabBarRenderContext->UpdateBackBlurStyle(option);
+        tabBarRenderContext->UpdateBackBlurRadius(BAR_BLUR_RADIUS);
+        tabBarRenderContext->UpdateFrontSaturate(BAR_SATURATE);
     } else {
-        tabBarRenderContext->ResetBackBlurStyle();
+        tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
+        tabBarRenderContext->ResetFrontSaturate();
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -307,6 +311,15 @@ void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChan
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetOnChangeEvent(std::move(onChange));
+}
+
+void TabsModelNG::SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnTabBarClickEvent(std::move(onTabBarClick));
 }
 
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
@@ -405,6 +418,16 @@ void TabsModelNG::Pop()
     CHECK_NULL_VOID(swiperNode);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
+
+    auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
+    auto tabsFocusNode = tabsNode->GetFocusHub();
+    CHECK_NULL_VOID(tabsFocusNode);
+    auto tabBarFocusNode = tabBarNode->GetFocusHub();
+    CHECK_NULL_VOID(tabBarFocusNode);
+    if (tabBarPosition == BarPosition::START) {
+        tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+    }
+
     auto tabContentNum = swiperNode->TotalChildCount();
     if (index > tabContentNum - 1 || index < 0) {
         index = 0;

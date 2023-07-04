@@ -108,8 +108,9 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     }
     canvas.Restore();
     if (showCounter_->Get() && counterParagraph) {
-        counterParagraph->Paint(&canvas, textRectX_->Get(), textFrameRect.Bottom() - textFrameRect.Top()
-            - COUNTER_TEXT_AREA_MARGIN.ConvertToPx() - textFieldPattern->GetCountHeight());
+        counterParagraph->Paint(&canvas, textRectX_->Get(),
+            textFrameRect.Bottom() - textFrameRect.Top() - COUNTER_TEXT_AREA_MARGIN.ConvertToPx() -
+                textFieldPattern->GetCountHeight());
     }
     canvas.Save();
     if (showErrorState_->Get() && errorParagraph) {
@@ -118,7 +119,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
 
     clipInnerRect = RSRect(contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(),
         contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(), contentOffset.GetY() + contentSize.Height());
-    canvas.ClipRect(clipInnerRect, RSClipOp::UNION);
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     canvas.Restore();
 
     if (!textFieldPattern->NeedShowPasswordIcon()) {
@@ -131,10 +132,10 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
 }
 
 void TextFieldContentModifier::UpdatePaintConfig(
-    RefPtr<CanvasImage> &passwordIconCanvasImage, DrawingContext context, RectF iconRect) const
+    RefPtr<CanvasImage>& passwordIconCanvasImage, DrawingContext context, RectF iconRect) const
 {
     CHECK_NULL_VOID(passwordIconCanvasImage);
-    auto &&config = passwordIconCanvasImage->GetPaintConfig();
+    auto&& config = passwordIconCanvasImage->GetPaintConfig();
     config.renderMode_ = ImageRenderMode::ORIGINAL;
     config.imageInterpolation_ = ImageInterpolation::NONE;
     config.imageRepeat_ = ImageRepeat::NO_REPEAT;
@@ -186,11 +187,13 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
     errorTextValue_ = AceType::MakeRefPtr<PropertyString>("");
     placeholderValue_ = AceType::MakeRefPtr<PropertyString>("");
-    textRectY_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Top().ConvertToPx());
-    textRectX_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Left().ConvertToPx());
+    textRectY_ = AceType::MakeRefPtr<PropertyFloat>(textFieldPattern->GetTextRect().GetY());
+    textRectX_ = AceType::MakeRefPtr<PropertyFloat>(textFieldPattern->GetTextRect().GetX());
     textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(TextAlign::START));
     showCounter_ = AceType::MakeRefPtr<PropertyBool>(false);
     showErrorState_ = AceType::MakeRefPtr<PropertyBool>(false);
+    showPasswordIconSrc_ = AceType::MakeRefPtr<PropertyString>("");
+    hidePasswordIconSrc_ = AceType::MakeRefPtr<PropertyString>("");
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
@@ -204,6 +207,8 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(showCounter_);
     AttachProperty(showErrorState_);
     AttachProperty(showUnderline_);
+    AttachProperty(showPasswordIconSrc_);
+    AttachProperty(hidePasswordIconSrc_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -313,6 +318,11 @@ void TextFieldContentModifier::SetTextRectY(const float value)
     }
 }
 
+float TextFieldContentModifier::GetTextRectY()
+{
+    return textRectY_->Get();
+}
+
 void TextFieldContentModifier::SetTextObscured(bool value)
 {
     if (textObscured_) {
@@ -330,6 +340,11 @@ void TextFieldContentModifier::SetTextRectX(const float value)
     if (textRectX_->Get() != value) {
         textRectX_->Set(value);
     }
+}
+
+float TextFieldContentModifier::GetTextRectX()
+{
+    return textRectX_->Get();
 }
 
 void TextFieldContentModifier::SetTextAlign(const TextAlign value)
@@ -357,6 +372,20 @@ void TextFieldContentModifier::SetShowUnderlineState(bool value)
 {
     if (showUnderline_) {
         showUnderline_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetShowPasswordIcon(const std::string& value)
+{
+    if (showPasswordIconSrc_->Get() != value) {
+        showPasswordIconSrc_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetHidePasswordIcon(const std::string& value)
+{
+    if (hidePasswordIconSrc_->Get() != value) {
+        hidePasswordIconSrc_->Set(value);
     }
 }
 

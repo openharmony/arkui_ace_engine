@@ -18,26 +18,22 @@
 namespace OHOS::Ace::NG {
 void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    if (!divider_.strokeWidth.IsValid()) {
+    if (!divider_.strokeWidth.IsValid() || divider_.strokeWidth.Unit() == DimensionUnit::PERCENT) {
         return;
     }
     const auto& geometryNode = paintWrapper->GetGeometryNode();
-    auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
-    Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
-
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
-    float crossSize = frameSize.CrossSize(axis);
     float constrainStrokeWidth = divider_.strokeWidth.ConvertToPx();
     float halfSpaceWidth = (spaceWidth_ + divider_.strokeWidth.ConvertToPx()) / 2.0f; /* 2.0f half */
     auto startMargin = std::max(0.0, divider_.startMargin.ConvertToPx());
     auto endMargin = std::max(0.0, divider_.endMargin.ConvertToPx());
-    float laneLen = crossSize / lanes - startMargin - endMargin;
+    float laneLen = childCrossSize_ - startMargin - endMargin;
     if (NearZero(laneLen)) return;
     if (LessNotEqual(laneLen, 0.0f)) {
         startMargin = 0.0f;
         endMargin = 0.0f;
-        laneLen = crossSize / lanes - startMargin - endMargin;
+        laneLen = childCrossSize_;
     }
     DividerPainter dividerPainter(constrainStrokeWidth, laneLen, vertical_, divider_.color, LineCap::SQUARE);
     int32_t laneIdx = 0;
@@ -45,7 +41,7 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
     for (const auto& child : itemPosition_) {
         if (!isFirstItem) {
             float mainPos = child.second.first - halfSpaceWidth;
-            float crossPos = startMargin + laneIdx * crossSize / lanes;
+            float crossPos = startMargin + laneIdx * (childCrossSize_ + laneGutter_);
             OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
             dividerPainter.DrawLine(canvas, offset + paddingOffset);
         }

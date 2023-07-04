@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,8 @@ ACE_EXPORT extern const char ROOT_ETS_TAG[];
 ACE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
+// container modal view (title bar)
+ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
 // js custom view
 ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_VIEW_COMPONENT_TAG[];
@@ -87,6 +89,9 @@ ACE_EXPORT extern const char TEXT_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXT_ETS_TAG[];
 ACE_EXPORT extern const char TEXT_ATTRS_OVER_FLOW[];
 ACE_EXPORT extern const char TEXT_ATTRS_MAX_LINES[];
+
+// rich editor
+ACE_EXPORT extern const char RICH_EDITOR_ETS_TAG[];
 
 // stack
 ACE_EXPORT extern const char STACK_COMPONENT_TAG[];
@@ -191,10 +196,11 @@ ACE_EXPORT extern const char NAVIGATOR_ETS_TAG[];
 // panel
 ACE_EXPORT extern const char PANEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char PANEL_ETS_TAG[];
+ACE_EXPORT extern const char PANEL_CLOSE_ICON_ETS_TAG[];
 
 // pattern-lock
 ACE_EXPORT extern const char PATTERN_LOCK_COMPONENT_TAG[];
-ACE_EXPORT extern const char PATTERN_LOCK_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char PATTERN_LOCK_ETS_TAG[];
 
 // row
 ACE_EXPORT extern const char ROW_COMPONENT_TAG[];
@@ -239,7 +245,7 @@ ACE_EXPORT extern const char IMAGE_ETS_TAG[];
 
 // qrcode
 ACE_EXPORT extern const char QRCODE_COMPONENT_TAG[];
-ACE_EXPORT extern const char QRCODE_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char QRCODE_ETS_TAG[];
 
 // span
 ACE_EXPORT extern const char SPAN_COMPONENT_TAG[];
@@ -303,6 +309,10 @@ ACE_EXPORT extern const char SEARCH_ETS_TAG[];
 // formComponent
 ACE_EXPORT extern const char FORM_COMPONENT_TAG[];
 ACE_EXPORT extern const char FORM_ETS_TAG[];
+
+// formLink
+ACE_EXPORT extern const char FORM_LINK_TAG[];
+ACE_EXPORT extern const char FORM_LINK_ETS_TAG[];
 
 // PluginComponent
 ACE_EXPORT extern const char PLUGIN_COMPONENT_TAG[];
@@ -385,7 +395,7 @@ ACE_EXPORT extern const char GRID_ROW_ETS_TAG[];
 
 // relativeContainer
 ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[];
-ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
 
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
@@ -494,6 +504,9 @@ ACE_EXPORT extern const char POPUP_ETS_TAG[];
 // remote window
 ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[];
 
+// effect view
+ACE_EXPORT extern const char EFFECT_COMPONENT_ETS_TAG[];
+
 // button
 ACE_EXPORT extern const char MODEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char MODEL_ETS_TAG[];
@@ -511,5 +524,12 @@ ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
 ACE_EXPORT extern const char SEC_LOCATION_BUTTON_COMPONENT_TAG[];
 ACE_EXPORT extern const char SEC_LOCATION_BUTTON_ETS_TAG[];
 
+// PasteButton
+ACE_EXPORT extern const char SEC_PASTE_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char SEC_PASTE_BUTTON_ETS_TAG[];
+
+// SaveButton
+ACE_EXPORT extern const char SEC_SAVE_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char SEC_SAVE_BUTTON_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

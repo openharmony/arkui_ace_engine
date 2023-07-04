@@ -38,9 +38,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
     this.unsubscribeWrappedObject();
-    if (unsubscribeMe) {
-      this.unlinkSuscriber(unsubscribeMe.id__());
-    }
+    this.removeSubscriber(unsubscribeMe);
     super.aboutToBeDeleted();
   }
 
@@ -72,8 +70,8 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
   
   private unsubscribeWrappedObject() {
     if (this.wrappedValue_) {
-      if (this.wrappedValue_ instanceof SubscribaleAbstract) {
-        (this.wrappedValue_ as SubscribaleAbstract).removeOwningProperty(this);
+      if (this.wrappedValue_ instanceof SubscribableAbstract) {
+        (this.wrappedValue_ as SubscribableAbstract).removeOwningProperty(this);
       } else {
         ObservedObject.removeOwningProperty(this.wrappedValue_, this);
       }
@@ -86,7 +84,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
     and also notify with this.aboutToChange();
   */
   private setValueInternal(newValue: T): boolean {
-    if (newValue== undefined || newValue==null) {
+    if (newValue == undefined || newValue == null) {
       stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide value must not be undefined or null. Application error!`);
       // TODO enable support for undefined and null
       // unsubscribe old value, set wrappedValue_ to null/undefined
@@ -95,22 +93,22 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
       stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
       return false;
     }
-    
-    if (newValue == this.wrappedValue_){
+
+    if (newValue == this.wrappedValue_) {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] newValue unchanged`);
       return false;
     }
 
     this.unsubscribeWrappedObject();
 
-    if (ObservedObject.IsObservedObject(newValue)) {
+    if (newValue instanceof SubscribableAbstract) {
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribableAbstract, subscribiung to it.`);
+      this.wrappedValue_ = newValue;
+      (this.wrappedValue_ as unknown as SubscribableAbstract).addOwningProperty(this);
+    } else if (ObservedObject.IsObservedObject(newValue)) {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
       ObservedObject.addOwningProperty(newValue, this);
       this.wrappedValue_ = newValue;
-    } else if (newValue instanceof SubscribaleAbstract) {
-      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
-      this.wrappedValue_ = newValue;
-      (this.wrappedValue_ as unknown as SubscribaleAbstract).addOwningProperty(this);
     } else {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
       this.wrappedValue_ = ObservedObject.createNew(newValue, this);

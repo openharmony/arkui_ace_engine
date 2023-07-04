@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "base/image/pixel_map.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -23,7 +24,9 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,6 +36,18 @@ constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
+constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
+
+ImageSourceInfo CreateSourceInfo(
+    const std::string& src, bool isPixelMap, RefPtr<PixelMap>& pixMap)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (isPixelMap && pixMap) {
+        return ImageSourceInfo(pixMap);
+    }
+#endif
+    return ImageSourceInfo(src);
+}
 } // namespace
 
 void SideBarContainerModelNG::Create()
@@ -55,6 +70,7 @@ void SideBarContainerModelNG::Pop()
     auto children = sideBarContainerNode->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
         LOGE("SideBarContainerView::Pop children's size is wrong[%{public}zu].", children.size());
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
         return;
     }
 
@@ -67,30 +83,25 @@ void SideBarContainerModelNG::Pop()
 
     auto sideBarNode = children.front();
     sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
-    sideBarContainerNode->RebuildRenderContextTree();
 
-    auto begin = children.begin();
-    // when side bar only have one component, no need to init side bar content
-    if (children.size() > DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
-        InitSideBarContentEvent(sideBarContainerNode, AceType::DynamicCast<FrameNode>(*(++begin)));
+    auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
+    if (sideBarFrameNode) {
+        auto renderContext = sideBarFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (!renderContext->HasBackgroundColor()) {
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto sideBarTheme = context->GetTheme<SideBarTheme>();
+            CHECK_NULL_VOID(sideBarTheme);
+            Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
+            renderContext->UpdateBackgroundColor(bgColor);
+        }
     }
+    sideBarContainerNode->RebuildRenderContextTree();
 
     CreateAndMountDivider(sideBarContainerNode);
     CreateAndMountControlButton(sideBarContainerNode);
     NG::ViewStackProcessor::GetInstance()->PopContainer();
-}
-
-void SideBarContainerModelNG::InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
-    const RefPtr<NG::FrameNode>& sideBarContentFrameNode)
-{
-    CHECK_NULL_VOID(parentNode);
-    CHECK_NULL_VOID(sideBarContentFrameNode);
-    auto gestureHub = sideBarContentFrameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    auto parentPattern = parentNode->GetPattern<SideBarContainerPattern>();
-    CHECK_NULL_VOID(parentPattern);
-    parentPattern->InitSideBarContentEvent(gestureHub);
-    sideBarContentFrameNode->MarkModifyDone();
 }
 
 void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode)
@@ -99,19 +110,22 @@ void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::Frame
     CHECK_NULL_VOID(layoutProperty);
     auto showSideBar = layoutProperty->GetShowSideBar().value_or(true);
 
-    ImageSourceInfo info((std::string()));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    CHECK_NULL_VOID(sideBarTheme);
+    Color controlButtonColor = sideBarTheme->GetControlImageColor();
+
+    std::optional<ImageSourceInfo> info = std::nullopt;
     if (showSideBar) {
-        if (layoutProperty->GetControlButtonShowIconStr().has_value()) {
-            info.SetSrc(layoutProperty->GetControlButtonShowIconStr().value());
-        } else {
-            info.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-        }
+        info = layoutProperty->GetControlButtonShowIconInfo();
     } else {
-        if (layoutProperty->GetControlButtonHiddenIconStr().has_value()) {
-            info.SetSrc(layoutProperty->GetControlButtonHiddenIconStr().value());
-        } else {
-            info.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-        }
+        info = layoutProperty->GetControlButtonHiddenIconInfo();
+    }
+    if (!info.has_value()) {
+        info = std::make_optional<ImageSourceInfo>();
+        info->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        info->SetFillColor(controlButtonColor);
     }
 
     int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -126,9 +140,13 @@ void SideBarContainerModelNG::CreateAndMountControlButton(const RefPtr<NG::Frame
     parentPattern->SetHasControlButton(true);
     parentPattern->InitControlButtonTouchEvent(gestureHub);
 
+    auto inputHub = imgHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    parentPattern->InitControlButtonMouseEvent(inputHub);
+
     auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(info);
+    imageLayoutProperty->UpdateImageSourceInfo(info.value());
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
 
     imgNode->MountToParent(parentNode);
@@ -249,19 +267,25 @@ void SideBarContainerModelNG::SetControlButtonTop(const Dimension& top)
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, top);
 }
 
-void SideBarContainerModelNG::SetControlButtonShowIconStr(const std::string& showIconStr)
+void SideBarContainerModelNG::SetControlButtonShowIconInfo(const std::string& showIconStr,
+    bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonShowIconStr, showIconStr);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonShowIconInfo,
+        CreateSourceInfo(showIconStr, isPixelMap, pixMap));
 }
 
-void SideBarContainerModelNG::SetControlButtonHiddenIconStr(const std::string& hiddenIconStr)
+void SideBarContainerModelNG::SetControlButtonHiddenIconInfo(const std::string& hiddenIconStr,
+    bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHiddenIconStr, hiddenIconStr);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo,
+        CreateSourceInfo(hiddenIconStr, isPixelMap, pixMap));
 }
 
-void SideBarContainerModelNG::SetControlButtonSwitchingIconStr(const std::string& switchingIconStr)
+void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(const std::string& switchingIconStr,
+    bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonSwitchingIconStr, switchingIconStr);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo,
+        CreateSourceInfo(switchingIconStr, isPixelMap, pixMap));
 }
 
 void SideBarContainerModelNG::SetDividerStrokeWidth(const Dimension& strokeWidth)
@@ -282,6 +306,15 @@ void SideBarContainerModelNG::SetDividerStartMargin(const Dimension& startMargin
 void SideBarContainerModelNG::SetDividerEndMargin(const Dimension& endMargin)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin);
+}
+
+void SideBarContainerModelNG::SetMinContentWidth(const Dimension& minContentWidth)
+{
+    if (minContentWidth.IsNonNegative()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, DEFAULT_MIN_CONTENT_WIDTH);
+    }
 }
 
 void SideBarContainerModelNG::SetOnChange(std::function<void(const bool)>&& onChange)

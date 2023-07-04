@@ -86,7 +86,7 @@ public:
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
     void UpdateFormData(const std::string& data) override;
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
-    void ReloadForm() override;
+    void ReloadForm(const std::string& url) override;
 
     void SetFormWidth(float width) override
     {
@@ -146,6 +146,9 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) override;
     void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) override;
+    NativeValue* GetUIContext() override;
+    void SetIsFocusActive(bool isFocusActive) override;
+    void SetFocusWindowId(uint32_t focusWindowId) override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
@@ -153,6 +156,8 @@ private:
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+
+    void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -162,7 +167,7 @@ private:
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
-    
+
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
 
@@ -171,6 +176,7 @@ private:
     bool isFormRenderInit_ = false;
     std::string bundleName_;
     std::string moduleName_;
+    std::string hapPath_;
     bool isBundle_ = false;
     int32_t minCompatibleVersionCode_ = 0;
     float formWidth_ = 0.0;

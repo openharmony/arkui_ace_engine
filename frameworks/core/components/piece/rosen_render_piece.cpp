@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #include "core/components/piece/rosen_render_piece.h"
 
 #include "render_service_client/core/ui/rs_node.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#endif
 
 #include "core/components/box/render_box.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -50,6 +52,7 @@ void RosenRenderPiece::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     rsNode->SetPaintOrder(true);
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     canvas->save();
 
@@ -62,8 +65,24 @@ void RosenRenderPiece::Paint(RenderContext& context, const Offset& offset)
     Rect pieceRect(pieceOffset + offset - GetPosition(), pieceSize);
     canvas->drawRRect(MakeRRect(pieceRect.GetOffset(), pieceRect.GetSize(), pieceComponent_->GetBorder()), paint);
     canvas->restore();
+#else
+    RSPen pen;
+    canvas->Save();
+
+    auto contextColor = context_.Upgrade();
+    if (contextColor->GetIsDeclarative()) {
+        pen.SetColor(pieceComponent_->GetBackGroundColor().GetValue());
+    } else {
+        pen.SetColor(pieceComponent_->GetHoverColor().GetValue());
+    }
+    Rect pieceRect(pieceOffset + offset - GetPosition(), pieceSize);
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(MakeRRect(pieceRect.GetOffset(), pieceRect.GetSize(), pieceComponent_->GetBorder()));
+    canvas->Restore();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkRRect RosenRenderPiece::MakeRRect(const Offset& offset, const Size& size, const Border& border) const
 {
     SkRect rect = SkRect::MakeXYWH(offset.GetX(), offset.GetY(), size.Width(), size.Height());
@@ -80,5 +99,30 @@ SkRRect RosenRenderPiece::MakeRRect(const Offset& offset, const Size& size, cons
     rrect.setRectRadii(rect, rectRadii);
     return rrect;
 }
+#else
+RSRoundRect RosenRenderPiece::MakeRRect(
+    const Offset& offset, const Size& size, const Border& border) const
+{
+    RSRect rect =
+        RSRect(offset.GetX(), offset.GetY(), size.Width() + offset.GetX(), size.Height() + offset.GetY());
+
+    std::vector<RSPoint> rectRadii(4, RSPoint(0.0, 0.0));
+    // kUpperLeft_Corner
+    rectRadii.at(0) = RSPoint(
+        NormalizeToPx(border.TopLeftRadius().GetX()), NormalizeToPx(border.TopLeftRadius().GetY()));
+    // kUpperRight_Corner
+    rectRadii.at(1) = RSPoint(
+        NormalizeToPx(border.TopRightRadius().GetX()), NormalizeToPx(border.TopRightRadius().GetY()));
+    // kLowerRight_Corner
+    rectRadii.at(2) = RSPoint(
+        NormalizeToPx(border.BottomRightRadius().GetX()), NormalizeToPx(border.BottomRightRadius().GetY()));
+    // kLowerLeft_Corner
+    rectRadii.at(3) = RSPoint(
+        NormalizeToPx(border.BottomLeftRadius().GetX()), NormalizeToPx(border.BottomLeftRadius().GetY()));
+
+    RSRoundRect rrect(rect, rectRadii);
+    return rrect;
+}
+#endif
 
 } // namespace OHOS::Ace

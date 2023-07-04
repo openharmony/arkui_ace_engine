@@ -22,6 +22,8 @@ if (is_standard_system) {
 build_component_ng("security_component_pattern_ng") {
   sources = [
     "location_button/location_button_model_ng.cpp",
+    "paste_button/paste_button_model_ng.cpp",
+    "save_button/save_button_model_ng.cpp",
     "security_component_accessibility_property.cpp",
     "security_component_handler.cpp",
     "security_component_layout_algorithm.cpp",
@@ -33,7 +35,9 @@ build_component_ng("security_component_pattern_ng") {
     configs = [ ":ohos_security_component_config" ]
     external_deps = []
     if (security_component_enable) {
+      sources += [ "security_component_probe.cpp" ]
       external_deps += [
+        "access_token:libaccesstoken_sdk",
         "security_component:libsecurity_component_framework",
         "security_component:libsecurity_component_sdk",
       ]

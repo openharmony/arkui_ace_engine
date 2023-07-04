@@ -28,6 +28,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -89,6 +90,57 @@ void JSText::SetHeight(const JSCallbackInfo& info)
     TextModel::GetInstance()->OnSetHeight();
 }
 
+void JSText::SetFont(const JSCallbackInfo& info)
+{
+    Font font;
+    GetFontInfo(info, font);
+    TextModel::GetInstance()->SetFont(font);
+}
+
+void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto fontSize = paramObject->GetProperty("size");
+    CalcDimension size;
+    if (!JSContainerBase::ParseJsDimensionFp(fontSize, size) || fontSize->IsNull()) {
+        font.fontSize = std::nullopt;
+    } else {
+        if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            font.fontSize = theme->GetTextStyle().GetFontSize();
+        } else {
+            font.fontSize = size;
+        }
+    }
+    std::string weight;
+    auto fontWeight = paramObject->GetProperty("weight");
+    if (!fontWeight->IsNull()) {
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            JSContainerBase::ParseJsString(fontWeight, weight);
+        }
+        font.fontWeight = ConvertStrToFontWeight(weight);
+    }
+    auto fontFamily = paramObject->GetProperty("family");
+    if (!fontFamily->IsNull()) {
+        std::vector<std::string> fontFamilies;
+        if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies)) {
+            font.fontFamilies = fontFamilies;
+        }
+    }
+    auto style = paramObject->GetProperty("style");
+    if (!style->IsNull() || style->IsNumber()) {
+        font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
+    }
+}
+
 void JSText::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -145,30 +197,27 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
         TextModel::GetInstance()->SetTextShadow(shadow);
         return;
     }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGW("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.ReturnSelf();
-        return;
-    }
-    double radius = 0.0;
-    ParseJsDouble(JSRef<JSObject>::Cast(info[0])->GetProperty("radius"), radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
+
+    auto jsObject = JSRef<JSObject>::Cast(info[0]);
     Shadow shadow;
-    shadow.SetBlurRadius(radius);
-    CalcDimension offsetX;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
-        shadow.SetOffsetX(offsetX.Value());
-    }
-    CalcDimension offsetY;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
-        shadow.SetOffsetY(offsetY.Value());
-    }
-    Color color;
-    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        shadow.SetColor(color);
+    double radius = 0.0;
+    if (ParseJsDouble(jsObject->GetProperty("radius"), radius)) {
+        if (LessNotEqual(radius, 0.0)) {
+            radius = 0.0;
+        }
+        shadow.SetBlurRadius(radius);
+        CalcDimension offsetX;
+        if (ParseJsDimensionVp(jsObject->GetProperty("offsetX"), offsetX)) {
+            shadow.SetOffsetX(offsetX.Value());
+        }
+        CalcDimension offsetY;
+        if (ParseJsDimensionVp(jsObject->GetProperty("offsetY"), offsetY)) {
+            shadow.SetOffsetY(offsetY.Value());
+        }
+        Color color;
+        if (ParseJsColor(jsObject->GetProperty("color"), color)) {
+            shadow.SetColor(color);
+        }
     }
     TextModel::GetInstance()->SetTextShadow(shadow);
 }
@@ -354,11 +403,23 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         std::optional<TextDecoration> textDecoration;
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+        } else if (typeValue->IsUndefined()) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            textDecoration = theme->GetTextStyle().GetTextDecoration();
         }
         std::optional<Color> colorVal;
         Color result;
         if (ParseJsColor(colorValue, result)) {
             colorVal = result;
+        } else if (colorValue->IsUndefined()) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            colorVal = theme->GetTextStyle().GetTextDecorationColor();
         }
 
         if (textDecoration) {
@@ -383,7 +444,24 @@ void JSText::SetHeightAdaptivePolicy(int32_t value)
 void JSText::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        JSInteractableView::JsOnClick(info);
+        if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+            LOGD("JsOnClick callback is undefined");
+            TextModel::GetInstance()->ClearOnClick();
+            return;
+        }
+        if (!info[0]->IsFunction()) {
+            LOGW("the info is not click function");
+            return;
+        }
+        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGD("About to call onclick method on js");
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            ACE_SCORING_EVENT("Text.onClick");
+            func->Execute(*clickInfo);
+        };
+        TextModel::GetInstance()->SetOnClick(std::move(onClick));
     } else {
 #ifndef NG_BUILD
         if (info[0]->IsFunction()) {
@@ -565,6 +643,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("create", &JSText::Create, opt);
     JSClass<JSText>::StaticMethod("width", &JSText::SetWidth);
     JSClass<JSText>::StaticMethod("height", &JSText::SetHeight);
+    JSClass<JSText>::StaticMethod("font", &JSText::SetFont, opt);
     JSClass<JSText>::StaticMethod("fontColor", &JSText::SetTextColor, opt);
     JSClass<JSText>::StaticMethod("textShadow", &JSText::SetTextShadow, opt);
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);

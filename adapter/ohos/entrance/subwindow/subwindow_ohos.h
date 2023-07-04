@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_SUBWINDOW_OHOS_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_SUBWINDOW_OHOS_H
 
+#include <unordered_map>
+
 #include "event_handler.h"
 #include "event_runner.h"
 #include "resource_manager.h"
@@ -71,8 +73,12 @@ public:
     RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) override;
     void HideSubWindowNG() override;
+    bool GetShown() override
+    {
+        return isShowed_;
+    }
 
-    void SetHotAreas(const std::vector<Rect>& rects) override;
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
@@ -83,7 +89,7 @@ public:
     void CloseDialog(int32_t instanceId) override;
     const RefPtr<NG::OverlayManager> GetOverlayManager() override;
 
-    int32_t GetChildContainerId() const
+    int32_t GetChildContainerId() const override
     {
         return childContainerId_;
     }
@@ -101,6 +107,11 @@ public:
     }
 
     void UpdateAceView(int32_t width, int32_t height, float density, int32_t containerId);
+
+    // Gets parent window's size and offset
+    Rect GetParentWindowRect() const override;
+
+    void RequestFocus() override;
 
 private:
     RefPtr<StackElement> GetStack();
@@ -143,6 +154,7 @@ private:
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
+    std::unordered_map<int32_t, std::vector<Rosen::Rect>> hotAreasMap_;
 
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
@@ -151,6 +163,7 @@ private:
     bool isToastWindow_ = false;
     int32_t popupTargetId_ = -1;
     bool isShowed_ = false;
+    sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
 };
 
 } // namespace OHOS::Ace

@@ -29,8 +29,8 @@ template("ace_osal_ohos_source_set") {
     }
     if (is_ohos_standard_system) {
       external_deps = [
-        "hitrace_native:hitrace_meter",
-        "hiviewdfx_hilog_native:libhilog",
+        "hilog:libhilog",
+        "hitrace:hitrace_meter",
         "init:libbeget_proxy",
         "init:libbegetutil",
       ]
@@ -38,7 +38,7 @@ template("ace_osal_ohos_source_set") {
     } else {
       external_deps = [
         "hilog:libhilog",
-        "hitrace_native:hitrace_meter",
+        "hitrace:hitrace_meter",
         "init_lite:libbegetutil",
       ]
 
@@ -61,12 +61,16 @@ template("ace_osal_ohos_source_set") {
       "layout_inspector.cpp",
       "log_wrapper.cpp",
       "ressched_report.cpp",
+      "socperf_client_impl.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",
       "want_wrap_ohos.cpp",
     ]
 
-    public_deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
+    external_deps += [
+      "init:libbegetutil",
+      "window_manager:libwsutils",
+    ]
 
     if (is_ohos_standard_system) {
       sources += [
@@ -74,10 +78,7 @@ template("ace_osal_ohos_source_set") {
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
       ]
-      deps = [
-        "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
-        "$ace_flutter_engine_root/icu:ace_libicu_ohos",
-      ]
+      deps = [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
 
       if (ace_use_new_skia) {
         deps += [ "$skia_root_new:skia_ohos" ]
@@ -85,14 +86,18 @@ template("ace_osal_ohos_source_set") {
         deps += [ "$ace_flutter_engine_root/skia:ace_skia_ohos" ]
       }
 
-      public_deps += [
-        "//base/global/resource_management/frameworks/resmgr:global_resmgr",
-      ]
+      if (defined(global_parts_info) &&
+          defined(global_parts_info.resourceschedule_soc_perf)) {
+        external_deps += [ "soc_perf:socperf_client" ]
+      }
+
       external_deps += [
         "ability_base:want",
+        "ability_runtime:abilitykit_native",
         "input:libmmi-client",
         "multimedia_image_framework:image",
         "napi:ace_napi",
+        "resource_management:global_resmgr",
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
@@ -109,7 +114,7 @@ template("ace_osal_ohos_source_set") {
       if (frame_trace_support) {
         include_dirs += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
         sources += [ "frame_trace_adapter_impl.cpp" ]
-        deps += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf" ]
+        external_deps += [ "frame_aware_sched:frame_trace_intf" ]
       } else {
         sources += [ "frame_trace_adapter_fake_impl.cpp" ]
       }
@@ -126,13 +131,13 @@ template("ace_osal_ohos_source_set") {
       "ability_runtime:abilitykit_native",
       "ability_runtime:runtime",
       "bundle_framework:appexecfwk_core",
-      "hicollie_native:libhicollie",
-      "hisysevent_native:libhisysevent",
-      "hitrace_native:libhitracechain",
+      "graphic_standard:librender_service_client",
+      "hicollie:libhicollie",
+      "hisysevent:libhisysevent",
+      "hitrace:libhitracechain",
     ]
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
-      "//foundation/graphic/graphic_2d/rosen/modules/frame_analyzer:libframe_analyzer",
     ]
   }
 }

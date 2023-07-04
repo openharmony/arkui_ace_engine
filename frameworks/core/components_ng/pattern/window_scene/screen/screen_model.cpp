@@ -35,5 +35,6 @@ void ScreenModel::Create(uint64_t screenId)
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCREEN_ETS_TAG, nodeId,
         [&screenSession]() { return AceType::MakeRefPtr<ScreenPattern>(screenSession); });
     stack->Push(frameNode);
+    frameNode->SetExclusiveEventForChild(true);
 }
 } // namespace OHOS::Ace::NG

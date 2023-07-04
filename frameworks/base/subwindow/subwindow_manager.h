@@ -62,6 +62,7 @@ public:
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
     const RefPtr<Subwindow>& GetCurrentWindow();
+    Rect GetParentWindowRect();
 
     void ShowMenu(const RefPtr<Component>& newComponent);
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset);
@@ -78,7 +79,7 @@ public:
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode);
     void HideSubWindowNG();
 
-    void SetHotAreas(const std::vector<Rect>& rects);
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1);
 
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
@@ -95,6 +96,7 @@ public:
     void CloseDialog(int32_t instanceId);
     void RegisterOnShowMenu(const std::function<void()>& callback);
     void RegisterOnHideMenu(const std::function<void()>& callback);
+    void RequestFocusSubwindow(int32_t instanceId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();

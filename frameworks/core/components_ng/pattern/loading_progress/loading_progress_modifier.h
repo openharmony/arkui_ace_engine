@@ -30,7 +30,7 @@ class LoadingProgressModifier : public ContentModifier {
     DECLARE_ACE_TYPE(LoadingProgressModifier, ContentModifier);
 
 public:
-    LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner = LoadingProgressOwner::SELF);
+    explicit LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner = LoadingProgressOwner::SELF);
     ~LoadingProgressModifier() override = default;
     void onDraw(DrawingContext& context) override;
     void DrawOrbit(DrawingContext& canvas, const CometParam& cometParam, float orbitRadius, float date);
@@ -62,14 +62,22 @@ public:
     {
         CHECK_NULL_VOID(isVisible_ != isVisible);
         isVisible_ = isVisible;
+        LOGD("LoadingModifier SetVisible %d", isVisible_);
         isLoading_ = false;
     }
 
+    void SetEnableLoading(bool enable)
+    {
+        if (enableLoading_) {
+            enableLoading_->Set(enable);
+        }
+    }
 private:
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
     float GetCurentCometAngle(float baseAngle, uint32_t index, uint32_t totalNumber);
 
     uint32_t GetCometNumber();
+    RefPtr<PropertyBool> enableLoading_;
     RefPtr<AnimatablePropertyFloat> date_;
     RefPtr<AnimatablePropertyColor> color_;
     RefPtr<AnimatablePropertyFloat> centerDeviation_;

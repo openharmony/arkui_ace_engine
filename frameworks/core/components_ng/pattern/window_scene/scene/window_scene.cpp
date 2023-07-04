@@ -22,6 +22,11 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t COLOR_BLACK = 0xff000000;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
+} // namespace
+
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 {
     session_ = session;
@@ -57,57 +62,47 @@ void WindowScene::OnForeground()
 {
     CHECK_NULL_VOID(snapshotNode_);
 
-    auto uiTask = [weakThis = WeakClaim(this)]() {
-        auto windowScene = weakThis.Upgrade();
-        CHECK_NULL_VOID(windowScene);
-
-        auto host = windowScene->GetHost();
-        CHECK_NULL_VOID(host);
-
-        host->RemoveChild(windowScene->snapshotNode_);
-        windowScene->snapshotNode_.Reset();
-
-        host->AddChild(windowScene->contentNode_);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    host->RemoveChild(snapshotNode_);
+    snapshotNode_.Reset();
+    host->AddChild(contentNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void WindowScene::OnBackground()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
-        auto windowScene = weakThis.Upgrade();
-        CHECK_NULL_VOID(windowScene);
-
-        windowScene->snapshotNode_ = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        auto imageLayoutProperty = windowScene->snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
-        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        windowScene->snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
-
-        auto host = windowScene->GetHost();
-        CHECK_NULL_VOID(host);
-        host->RemoveChild(windowScene->contentNode_);
-        host->AddChild(windowScene->snapshotNode_);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-        CHECK_NULL_VOID(windowScene->session_);
-        auto snapshot = windowScene->session_->GetSnapshot();
-        auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
-
-        CHECK_NULL_VOID(pixelMap);
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-        imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-        windowScene->snapshotNode_->MarkModifyDone();
-    };
-
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+
+    snapshotNode_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(contentNode_);
+    host->AddChild(snapshotNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    CHECK_NULL_VOID(session_);
+    auto snapshot = session_->GetSnapshot();
+    auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
+
+    CHECK_NULL_VOID(pixelMap);
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    snapshotNode_->MarkModifyDone();
+}
+
+void WindowScene::OnSetDepth(const int32_t depth)
+{
+    CHECK_NULL_VOID(session_);
+    session_->SetZOrder(static_cast<uint32_t>(depth));
 }
 } // namespace OHOS::Ace::NG

@@ -68,7 +68,7 @@ private:
 
 class ACE_EXPORT UITaskScheduler final {
 public:
-    using PredictTask = std::function<void(int64_t)>;
+    using PredictTask = std::function<void(int64_t, bool)>;
     UITaskScheduler() = default;
     ~UITaskScheduler();
 
@@ -77,12 +77,14 @@ public:
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
     void AddAfterLayoutTask(std::function<void()>&& task);
+    void AddAfterRenderTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
-    void FlushPredictTask(int64_t deadline);
+    void FlushPredictTask(int64_t deadline, bool canUseLongPredictTask = false);
     void FlushAfterLayoutTask();
+    void FlushAfterRenderTask();
 
     void UpdateCurrentPageId(uint32_t id)
     {
@@ -130,6 +132,7 @@ private:
     RootDirtyMap dirtyRenderNodes_;
     std::list<PredictTask> predictTask_;
     std::list<std::function<void()>> afterLayoutTasks_;
+    std::list<std::function<void()>> afterRenderTasks_;
 
     uint32_t currentPageId_ = 0;
 

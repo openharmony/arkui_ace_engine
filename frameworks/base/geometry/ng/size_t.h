@@ -112,17 +112,26 @@ public:
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
         const std::optional<T>& bottom, Axis reserveAxis = Axis::NONE)
     {
-        T zero = 0;
+        T tempWidth = width_ - left.value_or(0) - right.value_or(0);
+        T tempHeight = height_ - top.value_or(0) - bottom.value_or(0);
         switch (reserveAxis) {
             case Axis::NONE:
-                width_ = std::max(width_ - left.value_or(0) - right.value_or(0), zero);
-                height_ = std::max(height_ - top.value_or(0) - bottom.value_or(0), zero);
+                if (NonNegative(tempWidth)) {
+                    width_ = tempWidth;
+                }
+                if (NonNegative(tempHeight)) {
+                    height_ = tempHeight;
+                }
                 break;
             case Axis::HORIZONTAL:
-                width_ = std::max(width_ - left.value_or(0) - right.value_or(0), zero);
+                if (NonNegative(tempHeight)) {
+                    height_ = tempHeight;
+                }
                 break;
             case Axis::VERTICAL:
-                height_ = std::max(height_ - top.value_or(0) - bottom.value_or(0), zero);
+                if (NonNegative(tempWidth)) {
+                    width_ = tempWidth;
+                }
                 break;
             default:
                 break;

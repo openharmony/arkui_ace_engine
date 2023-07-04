@@ -35,6 +35,7 @@ public:
     void SetEdgeEffect(EdgeEffect EdgeEffect) override;
     void SetDisplayMode(SwiperDisplayMode displayMode) override;
     void SetDisplayCount(int32_t displayCount) override;
+    void SetMinSize(const Dimension& minSize) override {};
     void SetShowIndicator(bool showIndicator) override;
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;

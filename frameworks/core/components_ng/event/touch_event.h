@@ -47,7 +47,7 @@ private:
     TouchEventFunc callback_;
 };
 
-class TouchEventActuator : public GestureEventActuator, public TouchEventTarget {
+class ACE_FORCE_EXPORT TouchEventActuator : public GestureEventActuator, public TouchEventTarget {
     DECLARE_ACE_TYPE(TouchEventActuator, GestureEventActuator, TouchEventTarget)
 public:
     TouchEventActuator() = default;
@@ -59,6 +59,15 @@ public:
             userCallback_.Reset();
         }
         userCallback_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
+    }
+
+    void ClearUserCallback()
+    {
+        // When the event param is undefined, it will clear the callback.
+        LOGI("Clear user callback.");
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
     }
 
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)

@@ -33,7 +33,7 @@ public:
     static AbilityComponentModel* GetInstance();
     virtual ~AbilityComponentModel() = default;
 
-    virtual void Create() = 0;
+    virtual void Create(const std::string& bundleName, const std::string& abilityName) = 0;
     virtual void SetWant(const std::string& want) = 0;
     virtual void SetOnConnect(std::function<void()>&& onConnect) = 0;
     virtual void SetOnDisConnect(std::function<void()>&& onDisConnect) = 0;

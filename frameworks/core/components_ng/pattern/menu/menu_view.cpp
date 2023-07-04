@@ -31,7 +31,6 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -58,7 +57,6 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(
     auto menuNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
 
-    auto menuFrameNode = menuNode->GetPattern<MenuPattern>();
     menuNode->MountToParent(wrapperNode);
 
     return { wrapperNode, menuNode };
@@ -181,7 +179,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
     }
-    UpdateWrapperPaintProperty(wrapperNode, menuParam, type);
+    UpdateMenuPaintProperty(menuNode, menuParam, type);
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
     scroll->MountToParent(menuNode);
@@ -211,7 +209,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
     }
-    UpdateWrapperPaintProperty(wrapperNode, menuParam, type);
+    UpdateMenuPaintProperty(menuNode, menuParam, type);
     if (type == MenuType::SUB_MENU) {
         wrapperNode->RemoveChild(menuNode);
         wrapperNode.Reset();
@@ -220,13 +218,13 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     return wrapperNode;
 }
 
-void MenuView::UpdateWrapperPaintProperty(
-    const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam, const MenuType& type)
+void MenuView::UpdateMenuPaintProperty(
+    const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& type)
 {
     if (!(type == MenuType::CONTEXT_MENU)) {
         return;
     }
-    auto paintProperty = wrapperNode->GetPaintProperty<MenuWrapperPaintProperty>();
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateEnableArrow(menuParam.enableArrow.value_or(false));
     paintProperty->UpdateArrowOffset(menuParam.arrowOffset.value_or(Dimension(0)));
@@ -260,17 +258,5 @@ RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32
 
     menuPattern->SetIsSelectMenu(true);
     return wrapperNode;
-}
-
-// create menu with menuItem and menuItemGroup
-void MenuView::Create()
-{
-    LOGI("MenuView::Create");
-    auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
-    CHECK_NULL_VOID(menuNode);
-    ViewStackProcessor::GetInstance()->Push(menuNode);
 }
 } // namespace OHOS::Ace::NG

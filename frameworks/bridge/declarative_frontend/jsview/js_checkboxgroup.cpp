@@ -169,11 +169,18 @@ void JSCheckboxGroup::JsWidth(const JSCallbackInfo& info)
 
 void JSCheckboxGroup::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto defaultWidth = checkBoxTheme->GetDefaultWidth();
+    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
+    auto width = defaultWidth - horizontalPadding * 2;
+    CalcDimension value(width);
+    ParseJsDimensionVp(jsValue, value);
+    if (value.IsNegative()) {
+        value = width;
     }
-
     CheckBoxGroupModel::GetInstance()->SetWidth(value);
 }
 
@@ -189,11 +196,18 @@ void JSCheckboxGroup::JsHeight(const JSCallbackInfo& info)
 
 void JSCheckboxGroup::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto defaultHeight = checkBoxTheme->GetDefaultHeight();
+    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
+    auto height = defaultHeight - verticalPadding * 2;
+    CalcDimension value(height);
+    ParseJsDimensionVp(jsValue, value);
+    if (value.IsNegative()) {
+        value = height;
     }
-
     CheckBoxGroupModel::GetInstance()->SetHeight(value);
 }
 

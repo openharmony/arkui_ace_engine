@@ -52,4 +52,11 @@ RefPtr<PageTransitionEffect> PagePattern::GetTopTransition() const
 {
     return nullptr;
 }
+
+void PagePattern::AddJsAnimator(const std::string& animatorId, const RefPtr<Framework::AnimatorInfo>& animatorInfo) {}
+
+RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& animatorId)
+{
+    return AceType::MakeRefPtr<Framework::AnimatorInfo>();
+}
 } // namespace OHOS::Ace::NG

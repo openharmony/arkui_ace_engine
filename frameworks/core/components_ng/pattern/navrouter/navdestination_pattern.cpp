@@ -25,12 +25,12 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
+#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -39,8 +39,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void BuildTitle(
-    const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
+void BuildTitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
     CHECK_NULL_VOID_NOLOG(navDestinationNode->GetTitle());
     if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
@@ -53,8 +52,7 @@ void BuildTitle(
     titleBarNode->AddChild(titleBarNode->GetTitle());
 }
 
-void BuildSubtitle(
-    const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
+void BuildSubtitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
     if (!navDestinationNode->GetSubtitle() && titleBarNode->GetSubtitle()) {
         auto subtitleNode = titleBarNode->GetSubtitle();
@@ -118,13 +116,14 @@ void NavDestinationPattern::OnModifyDone()
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
-    if (hostNode->GetInspectorId().has_value()) {
-        navDestinationPattern->SetName(hostNode->GetInspectorIdValue());
-    } else {
-        auto id = GetHost()->GetId();
-        navDestinationPattern->SetName(std::to_string(id));
+    if (navDestinationPattern->GetName().empty()) {
+        if (hostNode->GetInspectorId().has_value()) {
+            navDestinationPattern->SetName(hostNode->GetInspectorIdValue());
+        } else {
+            auto id = GetHost()->GetId();
+            navDestinationPattern->SetName(std::to_string(id));
+        }
     }
     MountTitleBar(hostNode);
 }
-
 } // namespace OHOS::Ace::NG

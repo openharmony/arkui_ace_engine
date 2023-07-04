@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,8 @@ constexpr float WIDTH = 400.0f;
 constexpr float HEIGHT = 400.0f;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 constexpr bool HOVER_VALUE = true;
+const std::string RESULT_SUCCESS_ONE = "sucess1";
+const std::string RESULT_SUCCESS_TWO = "sucess2";
 } // namespace
 
 class InputEventHubTestNg : public testing::Test {
@@ -161,7 +163,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubHoverEventTest003, TestSize.Level1)
      * @tc.steps: step3. Set HoverEvent.
      * @tc.expected: hoverEventActuator_ will be initialized.
      */
-    OnHoverEventFunc onHover = [](bool) {};
+    OnHoverFunc onHover = [](bool, HoverInfo) {};
     inputEventHub->SetHoverEvent(std::move(onHover));
     EXPECT_NE(inputEventHub->hoverEventActuator_, nullptr);
 
@@ -278,8 +280,8 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     /**
      * @tc.steps: step6. Set HoverEvent and hoverEventActuator_ and userCallback_ will be initialized.
      */
-    const OnHoverEventFunc onHover = [](bool) {};
-    OnHoverEventFunc onHover1 = onHover;
+    const OnHoverFunc onHover = [](bool, HoverInfo) {};
+    OnHoverFunc onHover1 = onHover;
     inputEventHub->SetHoverEvent(std::move(onHover1));
     EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
 
@@ -295,7 +297,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     /**
      * @tc.steps: step8. Set HoverEvent and inputEvents_ will not be empty.
      */
-    OnHoverEventFunc onHover2 = onHover;
+    OnHoverFunc onHover2 = onHover;
     auto onHoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHover2));
     inputEventHub->AddOnHoverEvent(onHoverEvent);
     inputEventHub->AddOnHoverEvent(nullptr);
@@ -409,5 +411,111 @@ HWTEST_F(InputEventHubTestNg, InputEventHubBindContextMenuTest007, TestSize.Leve
     inputEventHub->BindContextMenu(std::move(onMouse1));
     inputEventHub->BindContextMenu(std::move(onMouse2));
     EXPECT_NE(inputEventHub->mouseEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: DisableMouseEvent001
+ * @tc.desc: Test disable mouse event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, DisableMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize mouseEventActuator_, and set callback
+     * @tc.expected: callback is right.
+     */
+    inputEventHub->mouseEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    std::string result;
+    OnMouseEventFunc onMouse = [&result](MouseInfo& info) { result = RESULT_SUCCESS_ONE; };
+    inputEventHub->SetMouseEvent(std::move(onMouse));
+    EXPECT_NE(inputEventHub->mouseEventActuator_->userCallback_, nullptr);
+
+    MouseInfo press;
+    press.SetButton(MouseButton::LEFT_BUTTON);
+    press.SetAction(MouseAction::PRESS);
+    inputEventHub->mouseEventActuator_->userCallback_->onMouseCallback_(press);
+    EXPECT_EQ(result, RESULT_SUCCESS_ONE);
+
+    /**
+     * @tc.steps: step3. Clear the callback.
+     * @tc.expected: callback is null.
+     */
+    inputEventHub->ClearUserOnMouse();
+    EXPECT_EQ(inputEventHub->mouseEventActuator_->userCallback_, nullptr);
+
+    /**
+     * @tc.steps: step4. Set the callback again.
+     * @tc.expected: callback is right.
+     */
+    OnMouseEventFunc onMouse2 = [&result](MouseInfo& info) { result = RESULT_SUCCESS_TWO; };
+    inputEventHub->SetMouseEvent(std::move(onMouse2));
+    EXPECT_NE(inputEventHub->mouseEventActuator_->userCallback_, nullptr);
+
+    MouseInfo release;
+    release.SetButton(MouseButton::LEFT_BUTTON);
+    release.SetAction(MouseAction::RELEASE);
+    inputEventHub->mouseEventActuator_->userCallback_->onMouseCallback_(release);
+    EXPECT_EQ(result, RESULT_SUCCESS_TWO);
+}
+
+/**
+ * @tc.name: DisableHoverEvent001
+ * @tc.desc: Test disable hover event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, DisableHoverEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize hoverEventActuator_, and set callback
+     * @tc.expected: callback is right.
+     */
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    std::string result;
+    OnHoverFunc onHover = [&result](bool, HoverInfo) { result = RESULT_SUCCESS_ONE; };
+    inputEventHub->SetHoverEvent(std::move(onHover));
+    EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
+
+    HoverInfo hover;
+    inputEventHub->hoverEventActuator_->userCallback_->onHoverEventCallback_(true, hover);
+    EXPECT_EQ(result, RESULT_SUCCESS_ONE);
+
+    /**
+     * @tc.steps: step3. Clear the callback.
+     * @tc.expected: callback is null.
+     */
+    inputEventHub->ClearUserOnHover();
+    EXPECT_EQ(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
+
+    /**
+     * @tc.steps: step4. Set the callback again.
+     * @tc.expected: callback is right.
+     */
+    OnHoverFunc onHover2 = [&result](bool, HoverInfo) { result = RESULT_SUCCESS_TWO; };
+    inputEventHub->SetHoverEvent(std::move(onHover2));
+    EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
+
+    HoverInfo hover2;
+    inputEventHub->hoverEventActuator_->userCallback_->onHoverEventCallback_(true, hover2);
+    EXPECT_EQ(result, RESULT_SUCCESS_TWO);
 }
 } // namespace OHOS::Ace::NG

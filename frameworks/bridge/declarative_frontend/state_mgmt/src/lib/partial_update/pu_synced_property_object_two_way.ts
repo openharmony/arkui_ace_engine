@@ -26,7 +26,7 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
 
   private source_: ObservedPropertyObjectAbstract<C>;
   private changeNotificationIsOngoing_: boolean = false;
-    
+        
   constructor(source: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo) {
@@ -34,8 +34,7 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
     this.source_ = source;
     if (this.source_) {
       // register to the parent property
-      this.source_.subscribeMe(this);
-
+      this.source_.addSubscriber(this);
       // register to the ObservedObject
       ObservedObject.addOwningProperty(this.source_.get(), this);
     } else {
@@ -50,15 +49,18 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
   aboutToBeDeleted() {
     // unregister from parent of this link
     if (this.source_) {
-        this.source_.unlinkSuscriber(this.id__());
-    
+      this.source_.removeSubscriber(this);
+
         // unregister from the ObservedObject
         ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
     }
     super.aboutToBeDeleted();
   }
 
-  
+  private isStorageLinkProp() : boolean {
+    return  (this.source_ && this.source_ instanceof ObservedPropertyAbstract && (!(this.source_ instanceof ObservedPropertyAbstractPU)));
+  }
+
   private setObject(newValue: C): void {
     if (!this.source_) {
         stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), @Link/@Consume: no linked parent property. Likely a consequence of earlier application error.`);

@@ -156,11 +156,18 @@ void JSCheckbox::JsWidth(const JSCallbackInfo& info)
 
 void JSCheckbox::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto defaultWidth = checkBoxTheme->GetDefaultWidth();
+    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
+    auto width = defaultWidth - horizontalPadding * 2;
+    CalcDimension value(width);
+    ParseJsDimensionVp(jsValue, value);
+    if (value.IsNegative()) {
+        value = width;
     }
-
     CheckBoxModel::GetInstance()->SetWidth(value);
 }
 
@@ -176,11 +183,18 @@ void JSCheckbox::JsHeight(const JSCallbackInfo& info)
 
 void JSCheckbox::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto defaultHeight = checkBoxTheme->GetDefaultHeight();
+    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
+    auto height = defaultHeight - verticalPadding * 2;
+    CalcDimension value(height);
+    ParseJsDimensionVp(jsValue, value);
+    if (value.IsNegative()) {
+        value = height;
     }
-
     CheckBoxModel::GetInstance()->SetHeight(value);
 }
 
@@ -253,13 +267,12 @@ void JSCheckbox::Mark(const JSCallbackInfo& info)
 
     auto sizeValue = markObj->GetProperty("size");
     CalcDimension size;
-    if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&
-        (size.ConvertToVp() >= 0)) {
+    if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) && (size.ConvertToVp() >= 0)) {
         CheckBoxModel::GetInstance()->SetCheckMarkSize(size);
     } else {
         CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
     }
-    
+
     auto strokeWidthValue = markObj->GetProperty("strokeWidth");
     CalcDimension strokeWidth;
     if ((ParseJsDimensionVp(strokeWidthValue, strokeWidth)) && (strokeWidth.Unit() != DimensionUnit::PERCENT) &&
@@ -379,24 +392,24 @@ NG::PaddingProperty JSCheckbox::GetPadding(const std::optional<CalcDimension>& t
         { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
     if (left.has_value()) {
         if (left.value().Unit() == DimensionUnit::CALC) {
-            padding.left = NG::CalcLength(
-                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+            padding.left =
+                NG::CalcLength(left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             padding.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
         }
     }
     if (right.has_value()) {
         if (right.value().Unit() == DimensionUnit::CALC) {
-            padding.right = NG::CalcLength(
-                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+            padding.right =
+                NG::CalcLength(right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             padding.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
         }
     }
     if (top.has_value()) {
         if (top.value().Unit() == DimensionUnit::CALC) {
-            padding.top = NG::CalcLength(
-                top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+            padding.top =
+                NG::CalcLength(top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             padding.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
         }
@@ -406,8 +419,7 @@ NG::PaddingProperty JSCheckbox::GetPadding(const std::optional<CalcDimension>& t
             padding.bottom = NG::CalcLength(
                 bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
         } else {
-            padding.bottom = NG::CalcLength(
-                bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+            padding.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
         }
     }
     return padding;

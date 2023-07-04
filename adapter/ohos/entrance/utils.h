@@ -20,14 +20,18 @@
 
 #include "base/log/log.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
+namespace OHOS::Rosen {
+    class AvoidArea;
+}
 namespace OHOS::Ace {
 
 std::string GetStringFromFile(const std::string& packagePathStr, const std::string& fileName);
 std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName);
 
-RefPtr<FlutterAssetProvider> CreateAssetProvider(const std::string& packagePath,
-    const std::vector<std::string>& assetBasePaths, bool useCache = true);
+RefPtr<FlutterAssetProvider> CreateAssetProvider(
+    const std::string& packagePath, const std::vector<std::string>& assetBasePaths, bool useCache = true);
 
 inline const std::string GenerateFullPath(const std::string& prePath, const std::string& postPath)
 {
@@ -46,6 +50,8 @@ inline const std::string GenerateFullPath(const std::string& prePath, const std:
     }
     return fullPath;
 }
+
+NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea);
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_UTILS_H

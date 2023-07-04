@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,13 +21,16 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/panel/close_icon_layout_property.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/canvas_image.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,6 +38,8 @@ namespace {
 
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
+constexpr double HALF_VALUS = 2.0;
+constexpr int32_t DOUBLENESS = 2;
 
 } // namespace
 
@@ -43,34 +48,49 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<SlidingPanelLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    const auto& constraint = layoutProperty->GetLayoutConstraint();
-    if (!constraint) {
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    if (!layoutConstraint) {
         LOGE("fail to measure slidingPanel due to layoutConstraint is nullptr");
         return;
     }
-    auto idealSize = !invisibleFlag_ ? CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
-                                           layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true)
-                                     : SizeF();
-
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetFrameSize(idealSize);
-    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
-
-    // Calculate child layout constraint.
-    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    auto childIdeaSize = idealSize;
-    childIdeaSize.SetHeight(static_cast<float>(idealSize.Height() - currentOffset_));
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(childIdeaSize);
-    childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
-
-    // Measure child( is a Column).
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    if (!childWrapper) {
-        LOGI("There is no child.");
-        return;
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
+    auto maxSize = childLayoutConstraint.maxSize;
+    auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::PANEL);
+    columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
+    auto idealSize =
+        !invisibleFlag_
+            ? ((PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9)
+                      ? CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL,
+                            layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT))
+                            .ConvertToSizeT()
+                      : CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL,
+                            layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true))
+            : SizeF();
+    auto width = 0.0f;
+    if (gridSizeType == ScreenSizeType::SM) {
+        width = idealSize.Width();
+    } else {
+        auto columns = columnInfo->GetColumns(gridSizeType);
+        width = columnInfo->GetWidth(columns) + columnInfo->GetParent()->GetGutterWidth().ConvertToPx() * DOUBLENESS;
     }
-    childWrapper->Measure(childLayoutConstraint);
+    maxWidth_ = width;
+    idealSize_ = idealSize;
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
+    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
+    childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    childLayoutConstraint.percentReference = childLayoutConstraint.maxSize;
+    auto colunmNodeWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::COLUMN_ETS_TAG);
+    if (colunmNodeWrapper) {
+        colunmNodeWrapper->Measure(childLayoutConstraint);
+    }
+    auto closeIconWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::PANEL_CLOSE_ICON_ETS_TAG);
+    if (closeIconWrapper) {
+        MeasureCloseIcon(closeIconWrapper, layoutProperty);
+    }
 }
 
 void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -83,53 +103,84 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
 
     auto frameSize = geometryNode->GetFrameSize();
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childWrapper);
-    auto childGeometryNode = childWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(childGeometryNode);
+    auto columnWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::COLUMN_ETS_TAG);
+    CHECK_NULL_VOID(columnWrapper);
+    auto columnGeometryNode = columnWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(columnGeometryNode);
 
+    auto childOffsetX = static_cast<float>((idealSize_.Width() - maxWidth_) / HALF_VALUS);
     fullHeight_ =
         layoutProperty->GetFullHeight().value_or(Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()));
-    halfHeight_ = layoutProperty->GetHalfHeight().value_or(Dimension(frameSize.Height() / 2));
+    halfHeight_ = layoutProperty->GetHalfHeight().value_or(
+        Dimension((frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()) / HALF_VALUS));
     miniHeight_ = layoutProperty->GetMiniHeight().value_or(Dimension(DRAG_UP_THRESHOLD.ConvertToPx()));
-
-    auto currentPanelType = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
-    auto currentPanelMode = layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     auto childOffset = OffsetF();
     if (isFirstLayout_) {
-        switch (currentPanelMode) {
-            case PanelMode::FULL:
-                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(fullHeight_.ConvertToPx()));
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
-                break;
-            case PanelMode::HALF:
-                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight_.ConvertToPx()));
-                if (currentPanelType == PanelType::MINI_BAR) {
-                    childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight_.ConvertToPx()));
-                }
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
-                break;
-            case PanelMode::MINI:
-                childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight_.ConvertToPx()));
-                if (currentPanelType == PanelType::TEMP_DISPLAY) {
-                    childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight_.ConvertToPx()));
-                }
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
-                break;
-            case PanelMode::AUTO:
-                childOffset = OffsetF(0.0, static_cast<float>(halfHeight_.ConvertToPx()));
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
-                break;
-            default:
-                LOGE("Unsupported mode:%{public}d", currentPanelMode);
-                return;
+        if (invisibleFlag_) {
+            auto rootHeight = PipelineContext::GetCurrentRootHeight();
+            childOffset = OffsetF(childOffsetX, rootHeight);
+        } else {
+            childOffset = OffsetF(childOffsetX, frameSize.Height());
         }
+        columnWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
         isFirstLayout_ = false;
     } else {
-        auto childOffset = OffsetF(0.0f, currentOffset_);
-        childGeometryNode->SetMarginFrameOffset(childOffset + padding.Offset());
+        childOffset = OffsetF(childOffsetX, currentOffset_);
+        columnGeometryNode->SetMarginFrameOffset(childOffset + padding.Offset());
     }
-    childWrapper->Layout();
+    columnWrapper->Layout();
+
+    auto closeIconWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::PANEL_CLOSE_ICON_ETS_TAG);
+    CHECK_NULL_VOID(closeIconWrapper);
+    auto closeIconLayoutProperty = AceType::DynamicCast<CloseIconLayoutProperty>(closeIconWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(closeIconLayoutProperty);
+    auto closeIconWidth = closeIconLayoutProperty->GetCloseIconWidthValue();
+    auto closeIconMarginTop = closeIconLayoutProperty->GetCloseIconMarginTopValue();
+    auto closeIconMargionRight = closeIconLayoutProperty->GetCloseIconMarginRightValue();
+    auto closeIconX = static_cast<float>(Dimension(frameSize.Width()).ConvertToPx()) - childOffsetX -
+                      static_cast<float>(closeIconWidth.ConvertToPx()) -
+                      static_cast<float>(closeIconMargionRight.ConvertToPx());
+    auto closeIconY = childOffset.GetY() + static_cast<float>(closeIconMarginTop.ConvertToPx());
+    auto closeIconOffset = OffsetF(closeIconX, closeIconY);
+    closeIconWrapper->GetGeometryNode()->SetMarginFrameOffset(closeIconOffset + padding.Offset());
+    closeIconWrapper->Layout();
 }
 
+RefPtr<LayoutWrapper> SlidingPanelLayoutAlgorithm::GetNodeLayoutWrapperByTag(
+    LayoutWrapper* layoutWrapper, const std::string& tagName) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, nullptr);
+    auto totalChildCount = layoutWrapper->GetTotalChildCount();
+    if (totalChildCount == 0) {
+        return nullptr;
+    }
+    RefPtr<LayoutWrapper> nodeWrapper = nullptr;
+    for (int32_t i = 0; i < totalChildCount; i++) {
+        nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
+        if (nodeWrapper && (nodeWrapper->GetHostTag() == tagName)) {
+            return nodeWrapper;
+        }
+    }
+    return nullptr;
+}
+
+void SlidingPanelLayoutAlgorithm::MeasureCloseIcon(
+    const RefPtr<LayoutWrapper>& closeIconWrapper, const RefPtr<LayoutProperty>& layoutProperty) const
+{
+    CHECK_NULL_VOID(closeIconWrapper);
+    CHECK_NULL_VOID(layoutProperty);
+    auto slidingPanelLayoutProperty = AceType::DynamicCast<SlidingPanelLayoutProperty>(layoutProperty);
+    CHECK_NULL_VOID(slidingPanelLayoutProperty);
+    auto closeIconGeometryNode = closeIconWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(closeIconGeometryNode);
+    auto closeIconLayoutProperty = AceType::DynamicCast<CloseIconLayoutProperty>(closeIconWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(closeIconLayoutProperty);
+    auto closeIconWidth = closeIconLayoutProperty->GetCloseIconWidthValue();
+    auto closeIconHeigth = closeIconLayoutProperty->GetCloseIconHeightValue();
+    SizeF frameSize =
+        SizeF(static_cast<float>(closeIconWidth.ConvertToPx()), static_cast<float>(closeIconHeigth.ConvertToPx()));
+    closeIconGeometryNode->SetFrameSize(frameSize);
+    auto childConstraint = slidingPanelLayoutProperty->CreateChildConstraint();
+    closeIconWrapper->Measure(childConstraint);
+}
 } // namespace OHOS::Ace::NG

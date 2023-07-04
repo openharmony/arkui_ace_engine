@@ -62,15 +62,13 @@ template("uiservice_static") {
       ":uiservicems_config",
       "$ace_root:ace_config",
     ]
-
-    deps = [ "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk" ]
-
     external_deps = [
       "ability_base:want",
       "c_utils:utils",
       "eventhandler:libeventhandler",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "ipc:ipc_core",
+      "safwk:system_ability_fwk",
     ]
   }
 }
@@ -103,5 +101,5 @@ ohos_shared_library("uiservice") {
   deps = [ ":uiservice_static_ohos" ]
   part_name = ace_engine_part
   subsystem_name = ace_engine_subsystem
-  configs = [ "$ace_root/test/unittest:ace_coverage_config" ]
+  configs = [ "$ace_root:ace_coverage_config" ]
 }

@@ -217,6 +217,10 @@ void GridModelImpl::SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>
     grid->SetScrolledEvent(EventMarker(std::move(value)));
 }
 
+void GridModelImpl::SetOnScrollBarUpdate(
+    std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>&& value)
+{}
+
 void GridModelImpl::SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value)
 {
     auto grid = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

@@ -35,14 +35,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-struct ChainAnimationOptions {
-    Dimension minSpace;
-    Dimension maxSpace;
-    float conductivity;
-    float intensity;
-    int32_t edgeEffect;
-};
-
 class ListPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 
@@ -53,11 +45,6 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool IsAtomicNode() const override
-    {
-        return false;
-    }
-
-    bool UsResRegion() override
     {
         return false;
     }
@@ -80,6 +67,11 @@ public:
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<ListAccessibilityProperty>();
+    }
+
+    bool UsResRegion() override
+    {
+        return false;
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -123,6 +115,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool OutBoundaryCallback() override;
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -159,20 +152,25 @@ public:
         }
     }
 
-    float GetTotalOffset() const
+    float GetTotalOffset() const override
     {
         return currentOffset_;
     }
 
     // scroller
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
-    void ScrollTo(float position, bool smooth);
-    void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
-    void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align);
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override
+    {
+        ScrollablePattern::AnimateTo(position, duration, curve, smooth);
+        FireOnScrollStart();
+    }
+    void ScrollTo(float position) override;
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START);
+    void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
+    void OnAnimateStop() override;
 
     void UpdateScrollBarOffset() override;
     // chain animation
@@ -191,13 +189,21 @@ public:
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
 
+    void SetPredictSnapOffset(float predictSnapOffset)
+    {
+        predictSnapOffset_ = predictSnapOffset;
+    }
+    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
+
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
+
 private:
     void OnScrollEndCallback() override;
 
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    float CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -216,8 +222,14 @@ private:
     void HandleScrollEffect(float offset);
     void FireOnScrollStart();
     void CheckRestartSpring();
-    void StopAnimate();
-    void StartDefaultSpringMotion(float start, float end, float velocity);
+    void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
+    void UpdateScrollSnap();
+    bool IsScrollSnapAlignCenter() const;
+    void SetChainAnimationLayoutAlgorithm(
+        RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
+    bool NeedScrollSnapAlignEffect() const;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void RegistOritationListener();
 
     // multiSelectable
     void UninitMouseEvent();
@@ -227,18 +239,19 @@ private:
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
-    void HandleCardModeSelectedEvent(const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode);
+    void HandleCardModeSelectedEvent(
+        const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();
 
     RefPtr<ListContentModifier> listContentModifier_;
 
-    RefPtr<Animator> animator_;
     RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    int32_t centerIndex_ = -1;
     float startMainPos_;
     float endMainPos_;
     bool isInitialized_ = false;
@@ -248,23 +261,26 @@ private:
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
+    bool smooth_ = false;
+    float scrollSnapVelocity_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
-    ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
+    std::optional<int32_t> targetIndex_;
+    std::optional<float> predictSnapOffset_;
+    ScrollAlign scrollAlign_ = ScrollAlign::START;
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;
-    bool scrollAbort_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
     std::list<WeakPtr<FrameNode>> itemGroupList_;
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
-
+    float laneGutter_ = 0.0f;
     // chain animation
     RefPtr<ChainAnimation> chainAnimation_;
     bool dragFromSpring_ = false;
@@ -275,16 +291,19 @@ private:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     bool mousePressed_ = false;
+
+    bool isOritationListenerRegisted_ = false;
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
 
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
+    RefPtr<SpringMotion> scrollToIndexMotion_;
+    RefPtr<SpringMotion> scrollSnapMotion_;
+    RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
-
-    RefPtr<SpringMotion> springMotion_;
 };
 } // namespace OHOS::Ace::NG
 

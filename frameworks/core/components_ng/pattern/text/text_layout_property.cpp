@@ -60,27 +60,27 @@ std::string TextLayoutProperty::GetCopyOptionString() const
     return copyOptionString;
 }
 
+std::string TextLayoutProperty::GetFont() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("style", GetFontStyleInJson(GetItalicFontStyle()).c_str());
+    jsonValue->Put("size", GetFontSizeInJson(GetFontSize()).c_str());
+    jsonValue->Put("weight", GetFontWeightInJson(GetFontWeight()).c_str());
+    jsonValue->Put("family", GetFontFamilyInJson(GetFontFamily()).c_str());
+    return jsonValue->ToString();
+}
+
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);
     json->Put("content", GetContent().value_or("").c_str());
-    json->Put("fontSize", GetFontSize().value_or(16.0_fp).ToString().c_str());
+    json->Put("font", GetFont().c_str());
+    json->Put("fontSize", GetFontSizeInJson(GetFontSize()).c_str());
     json->Put("fontColor",
         GetForegroundColor().value_or(GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
-    json->Put("fontStyle", GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-                               ? "FontStyle.Normal"
-                               : "FontStyle.Italic");
-    json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-    std::vector<std::string> fontFamilyVector =
-        GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
-    if (fontFamilyVector.empty()) {
-        fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
-    }
-    std::string fontFamily = fontFamilyVector.at(0);
-    for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
-        fontFamily += ',' + fontFamilyVector.at(i);
-    }
-    json->Put("fontFamily", fontFamily.c_str());
+    json->Put("fontStyle", GetFontStyleInJson(GetItalicFontStyle()).c_str());
+    json->Put("fontWeight", GetFontWeightInJson(GetFontWeight()).c_str());
+    json->Put("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str());
 
     auto jsonDecoration = JsonUtil::Create(true);
     std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecoration().value_or(TextDecoration::NONE));

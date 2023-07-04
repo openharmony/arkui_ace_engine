@@ -21,9 +21,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "base/geometry/offset.h"
-#include "base/log/ace_performance_check.h"
-#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
@@ -46,33 +43,20 @@ class FrameNode;
 
 using LazyBuildFunction = std::function<void(RefPtr<LayoutWrapper>)>;
 
-class ACE_EXPORT LayoutWrapper : public AceType {
+class ACE_FORCE_EXPORT LayoutWrapper : public AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
-    LayoutWrapper(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
-        : hostNode_(std::move(hostNode)), geometryNode_(std::move(geometryNode)),
-          layoutProperty_(std::move(layoutProperty))
-    {}
+    LayoutWrapper(
+        WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty);
     LayoutWrapper(LazyBuildFunction&& fun)
         : geometryNode_(MakeRefPtr<GeometryNode>()), layoutProperty_(MakeRefPtr<LayoutProperty>()),
           lazyBuildFunction_(fun)
     {}
     ~LayoutWrapper() override = default;
 
-    void Update(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
-    {
-        hostNode_ = std::move(hostNode);
-        geometryNode_ = std::move(geometryNode);
-        layoutProperty_ = std::move(layoutProperty);
-    }
+    void Update(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty);
 
-    void AppendChild(const RefPtr<LayoutWrapper>& child)
-    {
-        CHECK_NULL_VOID(child);
-        children_.emplace_back(child);
-        childrenMap_.try_emplace(currentChildCount_, child);
-        ++currentChildCount_;
-    }
+    void AppendChild(const RefPtr<LayoutWrapper>& child, bool isOverlayNode = false);
 
     void SetLayoutWrapperBuilder(const RefPtr<LayoutWrapperBuilder>& builder)
     {
@@ -186,6 +170,7 @@ public:
     // Notice: only the cached layoutWrapper (after call GetChildLayoutWrapper) will update the host.
     void MountToHostOnMainThread();
     void SwapDirtyLayoutWrapperOnMainThread();
+    void SwapDirtyLayoutWrapperOnMainThreadForChild(RefPtr<LayoutWrapper> child);
 
     bool IsForceSyncRenderTree() const
     {
@@ -215,6 +200,11 @@ public:
         outOfLayout_ = outOfLayout;
     }
 
+    void SetIsOverlayNode(bool isOverlayNode)
+    {
+        isOverlayNode_ = isOverlayNode;
+    }
+
     // ------------------------------------------------------------------------
     // performance check
     void AddNodeFlexLayouts();
@@ -226,17 +216,43 @@ public:
 
     bool CheckChildNeedForceMeasureAndLayout();
 
-    void SetCacheCount(int32_t cacheCount = 0);
+    void SetCacheCount(int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt);
+
+    void SetLongPredictTask();
 
     void BuildLazyItem();
 
     std::pair<int32_t, int32_t> GetLazyBuildRange();
 
+    static void ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint);
+
+    // apply keyboard avoidance on content rootNodes
+    static void AvoidKeyboard();
+    // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
+    static void ExpandSafeArea();
+
+    // save geometry states before SafeArea expansion / keyboard avoidance
+    static void SaveGeoState();
+    // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
+    void RestoreGeoState();
+
 private:
+    void CreateRootConstraint();
+    void ApplyConstraint(LayoutConstraintF constraint);
+
+    void OffsetNodeToSafeArea();
+    void ExpandSafeAreaInner();
+    // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
+    void ExpandIntoKeyboard();
+    void LayoutOverlay();
+
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;
     // Speed up the speed of getting child by index.
     std::unordered_map<int32_t, RefPtr<LayoutWrapper>> childrenMap_;
+    
+    RefPtr<LayoutWrapper> overlayChild_;
+
     // cached for GetAllChildrenWithBuild function.
     std::list<RefPtr<LayoutWrapper>> cachedList_;
 
@@ -253,6 +269,7 @@ private:
     bool isActive_ = false;
     bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;
+    bool isOverlayNode_ = false;
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
 

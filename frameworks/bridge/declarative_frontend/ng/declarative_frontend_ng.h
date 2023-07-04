@@ -77,34 +77,30 @@ public:
     void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override {}
 
     // application lifecycle.
-    void UpdateState(Frontend::State state) override {}
+    void UpdateState(Frontend::State state) override;
 
     // page lifecycle.
     bool OnBackPressed() override;
     void OnShow() override;
     void OnHide() override;
-    void OnConfigurationUpdated(const std::string& data) override {}
+    void OnConfigurationUpdated(const std::string& data) override;
+    void OnActive() override;
     void OnSaveAbilityState(std::string& data) override {}
     void OnRestoreAbilityState(const std::string& data) override {}
     void OnNewWant(const std::string& data) override {}
-    void OnActive() override {}
     void OnInactive() override {}
-    bool OnStartContinuation() override
-    {
-        return false;
-    }
-    void OnCompleteContinuation(int32_t code) override {}
-    void OnSaveData(std::string& data) override {}
-    void GetPluginsUsed(std::string& data) override {}
-    bool OnRestoreData(const std::string& data) override
-    {
-        return false;
-    }
-    void OnRemoteTerminated() override {}
+    bool OnStartContinuation() override;
+    void OnCompleteContinuation(int32_t code) override;
+    void OnSaveData(std::string& data) override;
+    bool OnRestoreData(const std::string& data) override;
+    void OnRemoteTerminated() override;
     void OnNewRequest(const std::string& data) override {}
     void OnMemoryLevel(const int32_t level) override {}
     void CallRouterBack() override;
     void OnSurfaceChanged(int32_t width, int32_t height) override;
+
+    void OnLayoutCompleted(const std::string& componentId) override;
+    void OnDrawCompleted(const std::string& componentId) override;
 
     void DumpFrontend() const override;
     std::string GetPagePath() const override;
@@ -112,7 +108,7 @@ public:
     void DumpHeapSnapshot(bool isPrivate) override;
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
-    void NotifyAppStorage(const std::string& key, const std::string& value) override {}
+    void NotifyAppStorage(const std::string& key, const std::string& value) override;
 
     RefPtr<NG::PageRouterManager> GetPageRouterManager() const;
 
@@ -139,14 +135,10 @@ public:
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
 
     // distribute
-    std::string RestoreRouterStack(const std::string& contentInfo) override
-    {
-        return "";
-    }
-    std::string GetContentInfo() const override
-    {
-        return "";
-    }
+    std::string RestoreRouterStack(const std::string& contentInfo) override;
+    std::string GetContentInfo() const override;
+
+    int32_t GetRouterSize() const override;
 
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
 

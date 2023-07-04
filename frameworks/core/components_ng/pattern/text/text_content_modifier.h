@@ -61,7 +61,24 @@ public:
         paintOffset_ = paintOffset;
     }
 
+    void SetObscured(const std::vector<ObscuredReasons>& reasons)
+    {
+        obscuredReasons_ = reasons;
+    }
+
+    void SetIfHaveSpanItemChildren(bool value)
+    {
+        ifHaveSpanItemChildren_ = value;
+    }
+
+    void SetDrawObscuredRects(const std::vector<Rect>& drawObscuredRects)
+    {
+        drawObscuredRects_ = drawObscuredRects;
+    }
+
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
+
+    void SetClip(bool clip);
 
 private:
     double NormalizeToPx(const Dimension& dimension);
@@ -88,6 +105,8 @@ private:
     void UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag);
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
+
+    void DrawObscuration(DrawingContext& drawingContext);
 
 private:
     std::optional<Dimension> fontSize_;
@@ -122,10 +141,15 @@ private:
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyBool> contentChange_;
+    RefPtr<PropertyBool> clip_;
 
     RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;
+
+    std::vector<ObscuredReasons> obscuredReasons_;
+    bool ifHaveSpanItemChildren_ = false;
+    std::vector<Rect> drawObscuredRects_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextContentModifier);
 };

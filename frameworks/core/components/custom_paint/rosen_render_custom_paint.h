@@ -22,10 +22,12 @@
 #include "experimental/svg/model/SkSVGDOM.h"
 #endif
 #include "txt/paragraph.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#endif
 
 #include "base/utils/measure_util.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
@@ -47,8 +49,13 @@ public:
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas) override;
     void DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
         const std::vector<double>& mesh, int32_t column, int32_t row) override;
+#ifndef USE_ROSEN_DRAWING
     void Mesh(SkBitmap& bitmap, int column, int row,
         const float* vertices, const int* colors, const SkPaint* paint);
+#else
+    void Mesh(RSBitmap& bitmap, int column, int row,
+        const float* vertices, const int* colors, const RSBrush* brush);
+#endif
     std::string ToDataURL(const std::string& args) override;
     void SetAntiAlias(bool isEnabled) override;
     void FillRect(const Offset& offset, const Rect& rect) override;
@@ -104,16 +111,30 @@ public:
 
 private:
     void InitImagePaint();
+#ifndef USE_ROSEN_DRAWING
     void InitPaintBlend(SkPaint& paint);
+#else
+    void InitPaintBlend(RSBrush& brush);
+#endif
     bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = false);
     void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = false);
     double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
+#ifndef USE_ROSEN_DRAWING
     SkPaint GetStrokePaint();
+#else
+    RSPen GetStrokePaint();
+#endif
     bool HasShadow() const;
+#ifndef USE_ROSEN_DRAWING
     void UpdatePaintShader(const Offset& offset, SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void UpdateLineDash(SkPaint& paint);
+#else
+    void UpdatePaintShader(const Offset& offset, RSPen* pen, RSBrush* brush, const Gradient& gradient);
+    void UpdatePaintShader(const Pattern& pattern, RSPen* pen, RSBrush* brush);
+    void UpdateLineDash(RSPen& paint);
+#endif
     void UpdateTextStyleForeground(const Offset& offset, bool isStroke, txt::TextStyle& style, bool hasShadow);
 
     void Path2DAddPath(const Offset& offset, const PathArgs& args);
@@ -135,12 +156,17 @@ private:
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
     void DrawSvgImage(const Offset& offset, const CanvasImage& canvasImage);
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImage> GetImage(const std::string& src);
+#else
+    std::shared_ptr<RSImage> GetImage(const std::string& src);
+#endif
     void CreateBitmap(double viewScale);
     bool CreateSurface(double viewScale);
 
     bool antiAlias_ = false;
     std::unique_ptr<txt::Paragraph> paragraph_;
+#ifndef USE_ROSEN_DRAWING
     SkPath skPath_;
     // Specifically refers to the class Path2D in canvas.d.ts
     SkPath skPath2d_;
@@ -154,6 +180,19 @@ private:
     SkBitmap webglBitmap_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
+#else
+    RSRecordingPath drawingPath_;
+    // Specifically refers to the class Path2D in canvas.d.ts
+    RSRecordingPath drawingPath2d_;
+    RSBrush imageBrush_;
+    RSBrush cacheBrush_;
+    RSSamplingOptions options_;
+    RSBitmap cacheBitmap_;
+    RSBitmap canvasCache_;
+    RSBitmap webglBitmap_;
+    std::unique_ptr<RSCanvas> drawingCanvas_;
+    std::unique_ptr<RSCanvas> cacheCanvas_;
+#endif
     ImageSourceInfo loadingSource_;
     ImageSourceInfo currentSource_;
     ImageObjSuccessCallback imageObjSuccessCallback_;

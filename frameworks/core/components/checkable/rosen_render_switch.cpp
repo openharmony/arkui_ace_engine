@@ -54,7 +54,7 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
     trackPaint.setAntiAlias(true);
     paint.setAntiAlias(true);
 #else
-    RSAutoCanvasRestore acr(canvas, true);
+    RSAutoCanvasRestore acr(*canvas, true);
     canvas->ClipRect(RSRect(0, 0, GetLayoutSize().Width(), GetLayoutSize().Height()),
         RSClipOp::INTERSECT);
     Offset paintOffset = offset + paintPosition_;
@@ -72,7 +72,11 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
     uint32_t trackColor = 0;
     uint32_t pointColor = 0;
     paintTrackSize_ = switchSize_;
+#ifndef USE_ROSEN_DRAWING
     SetPaintStyle(originX, originY, trackColor, pointColor, trackPaint);
+#else
+    SetPaintStyle(originX, originY, trackColor, pointColor, trackPen);
+#endif
     if (!isDeclarative_) {
         if (IsPhone() && onFocus_) {
             RequestFocusBorder(paintOffset, switchSize_, switchSize_.Height() / 2.0);
@@ -92,21 +96,35 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
     // paint track rect
     if (!isSwitchDuringAnimation_) {
 #ifdef OHOS_PLATFORM
+#ifndef USE_ROSEN_DRAWING
         auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
         recordingCanvas->SaveAlpha();
         recordingCanvas->MultiplyAlpha(ConfigureOpacity(disabled_));
         PaintTrack(canvas, trackPaint, originX, originY, trackColor);
         recordingCanvas->RestoreAlpha();
 #else
+        auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
+        LOGE("Drawing is not supported");
+        PaintTrack(canvas, trackPen, originX, originY, trackColor);
+#endif
+#else
         PaintTrack(canvas, trackPaint, originX, originY, trackColor);
 #endif
     } else {
         // current status is during the switch on/off
+#ifndef USE_ROSEN_DRAWING
         DrawTrackAnimation(paintOffset, canvas, trackPaint);
+#else
+        DrawTrackAnimation(paintOffset, canvas, trackPen);
+#endif
     }
 
     // paint center point
+#ifndef USE_ROSEN_DRAWING
     PaintCenterPoint(canvas, paint, pointOriginX, pointOriginY, pointColor);
+#else
+    PaintCenterPoint(canvas, pen, pointOriginX, pointOriginY, pointColor);
+#endif
 
     // paint text
     if (renderTextOn_ && renderTextOff_ && showText_) {
@@ -366,7 +384,7 @@ void RosenRenderSwitch::PaintFocusBorder(RenderContext& context, const Offset& o
     double focusBorderHeight = switchSize_.Height() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
     double focusBorderWidth = switchSize_.Width() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
     double focusRadius = focusBorderHeight * HALF;
-#ifndef USE_ROSEN_DRAWIG
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setColor(FOCUS_BORDER_COLOR);
     paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));

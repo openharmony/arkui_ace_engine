@@ -40,6 +40,7 @@ class ACE_EXPORT ListItemPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemPattern, Pattern);
 
 public:
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
     explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
         : shallowBuilder_(shallowBuilder), listItemStyle_(listItemStyle)
     {}
@@ -205,7 +206,7 @@ private:
     void HandlePressEvent(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& itemNode);
     void InitDisableEvent();
     void SetAccessibilityAction();
-    void DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRightDelete);
+    void DoDeleteAnimation(bool isRightDelete);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;

@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
@@ -38,6 +39,10 @@
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
+
+namespace OHOS::Rosen {
+class DrawCmdList;
+}
 
 namespace OHOS::Ace::NG {
 class GeometryNode;
@@ -99,7 +104,12 @@ public:
 
     virtual void OnModifyDone() {}
 
-    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
+    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS };
+    struct ContextParam {
+        ContextType type;
+        std::optional<std::string> surfaceName;
+    };
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param)
     {}
 
     virtual void StartRecording() {}
@@ -212,6 +222,14 @@ public:
         return {};
     }
 
+    // stop the property animation and get the current paint rect.
+    virtual OffsetF GetShowingTranslateProperty()
+    {
+        return OffsetF();
+    }
+    // update translateXY in backend.
+    virtual void UpdateTranslateInXY(const OffsetF& offset) {}
+
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
@@ -219,6 +237,8 @@ public:
     virtual void ClearDrawCommands() {}
 
     virtual void DumpInfo() const {}
+
+    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
     {
@@ -249,6 +269,7 @@ public:
     {
         isModalRootNode_ = isModalRootNode;
     }
+
     std::optional<BlurStyleOption> GetBackBlurStyle() const
     {
         return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
@@ -285,6 +306,8 @@ public:
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
+    virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void OnRenderFitUpdate(RenderFit renderFit) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
@@ -293,6 +316,7 @@ public:
     {
         return nullptr;
     }
+
     virtual void SetActualForegroundColor(const Color& value) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -326,6 +350,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
@@ -340,6 +365,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
 
     // BorderRadius.
@@ -388,8 +414,19 @@ public:
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
 
+    // useEffect
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
+
     // freeze
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
+
+    // obscured
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
+
+    // renderFit
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
+
+    virtual void SetOverrideContentRect(const std::optional<RectF>& rect) {}
 
 protected:
     RenderContext() = default;
@@ -443,11 +480,14 @@ protected:
     virtual void OnFrontInvertUpdate(const Dimension& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
+    virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
+    virtual void OnUseEffectUpdate(bool useEffect) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
+    virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
 
 private:
     std::function<void()> requestFrame_;

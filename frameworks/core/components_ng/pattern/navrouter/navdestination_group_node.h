@@ -102,7 +102,11 @@ public:
 
     void OnAttachToMainTree(bool recursive) override;
 
+    void OnOffscreenProcess(bool recursive) override;
+
 private:
+    void ProcessShallowBuilder();
+
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> titleBarNode_;

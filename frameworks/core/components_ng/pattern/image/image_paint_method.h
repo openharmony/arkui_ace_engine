@@ -29,20 +29,18 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, const RefPtr<ImageModifier>& imageModifier, bool selected)
-        : canvasImage_(canvasImage), imageModifier_(imageModifier), selected_(selected)
+    explicit ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected)
+        : canvasImage_(canvasImage), selected_(selected)
     {}
     ~ImagePaintMethod() override = default;
 
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
     void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper);
     void UpdateBorderRadius(PaintWrapper* paintWrapper);
     RefPtr<CanvasImage> canvasImage_;
-    RefPtr<ImageModifier> imageModifier_;
     bool selected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePaintMethod);

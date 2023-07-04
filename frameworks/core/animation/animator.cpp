@@ -15,6 +15,7 @@
 
 #include "core/animation/animator.h"
 
+#include "base/log/jank_frame_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/animation/scheduler.h"
@@ -307,16 +308,20 @@ bool Animator::GetAllowRunningAsynchronously()
 // return false, the animation is played forward
 bool Animator::GetInitAnimationDirection()
 {
-    if (repeatTimes_ == ANIMATION_REPEAT_INFINITE) {
+    if (direction_ == AnimationDirection::NORMAL) {
         return isReverse_;
     }
-    if (direction_ == AnimationDirection::ALTERNATE_REVERSE || direction_ == AnimationDirection::REVERSE) {
-        isReverse_ = true;
+    if (direction_ == AnimationDirection::REVERSE) {
+        return !isReverse_;
     }
-    if (direction_ != AnimationDirection::ALTERNATE) {
-        return isReverse_;
+    // for Alternate and Alternate_Reverse
+    bool isOddRound = ((repeatTimes_ - repeatTimesLeft_ + 1) % 2) == 1;
+    bool oddRoundDirectionNormal = direction_ == AnimationDirection::ALTERNATE;
+    if (isOddRound ^ oddRoundDirectionNormal) {
+        // if isOddRound is different from oddRoundDirectionNormal, same with AnimationDirection::REVERSE
+        return !isReverse_;
     }
-    return isReverse_ ? (repeatTimesLeft_ % 2) == 0 : false;
+    return isReverse_;
 }
 
 void Animator::UpdatePlayedTime(int32_t playedTime, bool checkReverse)
@@ -445,6 +450,9 @@ void Animator::Pause()
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
     }
+    if (needFrameJankReport_) {
+        JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    }
     status_ = Status::PAUSED;
     asyncTrace_ = nullptr;
     StatusListenable::NotifyPauseListener();
@@ -467,6 +475,9 @@ void Animator::Resume()
     LOGD("animation resume. id: %{public}d", controllerId_);
     if (scheduler_ && !scheduler_->IsActive()) {
         scheduler_->Start();
+    }
+    if (needFrameJankReport_) {
+        JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
     status_ = Status::RUNNING;
     if (!motion_) {
@@ -499,6 +510,9 @@ void Animator::Stop()
         return;
     }
     LOGD("animation stop. id: %{public}d", controllerId_);
+    if (needFrameJankReport_) {
+        JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    }
 
     elapsedTime_ = 0;
     repeatTimesLeft_ = repeatTimes_;
@@ -587,7 +601,7 @@ void Animator::OnFrame(int64_t duration)
     if (elapsedTime_ < scaledStartDelay_) {
         if ((fillMode_ == FillMode::BACKWARDS || fillMode_ == FillMode::BOTH) && !isBothBackwards) {
             for (const auto& interpolator : interpolators_) {
-                interpolator->OnNormalizedTimestampChanged(0.0f, isReverse_);
+                interpolator->OnNormalizedTimestampChanged(isCurDirection_ ? 1.0f : 0.0f, isReverse_);
             }
             isBothBackwards = true;
         }
@@ -701,6 +715,9 @@ void Animator::StartInner(bool alwaysNotify)
         }
     }
     StatusListenable::NotifyStartListener();
+    if (needFrameJankReport_) {
+        JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
+    }
     status_ = Status::RUNNING;
     if (!motion_) {
         asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_.c_str());
@@ -735,13 +752,13 @@ AnimationOption Animator::GetAnimationOption()
                 direction = AnimationDirection::REVERSE;
                 break;
             case AnimationDirection::ALTERNATE:
-                direction_ = AnimationDirection::ALTERNATE_REVERSE;
+                direction = AnimationDirection::ALTERNATE_REVERSE;
                 break;
             case AnimationDirection::REVERSE:
                 direction = AnimationDirection::NORMAL;
                 break;
             case AnimationDirection::ALTERNATE_REVERSE:
-                direction_ = AnimationDirection::ALTERNATE;
+                direction = AnimationDirection::ALTERNATE;
                 break;
             default:
                 direction = AnimationDirection::NORMAL;
@@ -887,13 +904,13 @@ void Animator::ToggleDirection()
         return;
     }
     if (repeatTimes_ == ANIMATION_REPEAT_INFINITE) {
-        elapsedTime_ = scaledDuration_ - elapsedTime_;
+        elapsedTime_ = (scaledStartDelay_ + scaledDuration_ - elapsedTime_) + scaledStartDelay_;
         LOGI("duration is infinite, can not reverse time related params. id: %{public}d", controllerId_);
         return;
     }
     repeatTimesLeft_ = repeatTimes_ - repeatTimesLeft_;
     LOGD("change left repeat times: %{public}d. id: %{public}d", repeatTimesLeft_, controllerId_);
-    elapsedTime_ = scaledDuration_ - elapsedTime_;
+    elapsedTime_ = (scaledStartDelay_ + scaledDuration_ - elapsedTime_) + scaledStartDelay_;
 }
 
 float Animator::GetNormalizedTime(float playedTime, bool needStop) const

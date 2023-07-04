@@ -42,7 +42,6 @@ void ButtonPattern::OnAttachToFrameNode()
     SetDefaultAttributes(host, pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetClipToFrame(true);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
@@ -90,12 +89,6 @@ void ButtonPattern::UpdateTextLayoutProperty(
     }
     if (layoutProperty->GetMaxLines().has_value()) {
         textLayoutProperty->UpdateMaxLines(layoutProperty->GetMaxLines().value());
-    }
-    if (layoutProperty->GetMinFontSize().has_value()) {
-        textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
-    }
-    if (layoutProperty->GetMaxFontSize().has_value()) {
-        textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
     }
     if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
         textLayoutProperty->UpdateHeightAdaptivePolicy(layoutProperty->GetHeightAdaptivePolicy().value());

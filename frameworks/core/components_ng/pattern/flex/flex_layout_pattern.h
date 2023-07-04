@@ -62,12 +62,12 @@ public:
         if (!property) {
             return {};
         }
-        bool isVertical = true;
+        bool isVertical = false;
         if (property->GetFlexDirection().has_value()) {
             isVertical = property->GetFlexDirection().value() == FlexDirection::COLUMN ||
                          property->GetFlexDirection().value() == FlexDirection::COLUMN_REVERSE;
         }
-        return { isVertical, true, ScopeType::FLEX };
+        return { isVertical, true, isWrap_ ? ScopeType::PROJECT_AREA : ScopeType::FLEX };
     }
 
     void SetDialogStretch(bool stretch)

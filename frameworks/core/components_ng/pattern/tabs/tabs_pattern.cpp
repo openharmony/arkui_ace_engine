@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -60,6 +61,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
         CHECK_NULL_VOID(tabsLayoutProperty);
         tabsLayoutProperty->UpdateIndex(index);
+        tabBarPattern->SetIsAnimating(false);
         auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(tabBarLayoutProperty);
         if (!tabBarPattern->IsMaskAnimationByCreate()) {
@@ -96,6 +98,23 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnChangeEvent(onChangeEvent_);
+    }
+}
+
+void TabsPattern::SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)>&& event)
+{
+    ChangeEvent tabBarClickEvent([jsEvent = std::move(event)](int32_t index) {
+        /* js callback */
+        if (jsEvent) {
+            TabContentChangeEvent eventInfo(index);
+            jsEvent(&eventInfo);
+        }
+    });
+
+    if (onTabBarClickEvent_) {
+        (*onTabBarClickEvent_).swap(tabBarClickEvent);
+    } else {
+        onTabBarClickEvent_ = std::make_shared<ChangeEvent>(tabBarClickEvent);
     }
 }
 
@@ -157,5 +176,108 @@ void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnChangeEvent(onIndexChangeEvent_);
     }
+}
+
+std::string TabsPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_RETURN(tabsNode, "");
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, "");
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_RETURN(tabBarPattern, "");
+    return tabBarPattern->ProvideRestoreInfo();
+}
+
+void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("TabsPattern:: restore info is invalid");
+        return;
+    }
+    auto jsonIsOn = info->GetValue("Index");
+    swiperLayoutProperty->UpdateIndex(jsonIsOn->GetInt());
+    
+    swiperPattern->OnRestoreInfo(restoreInfo);
+    tabBarPattern->OnRestoreInfo(restoreInfo);
+}
+
+ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, {});
+    bool isVertical = true;
+    if (property->GetAxis().has_value()) {
+        isVertical = property->GetAxis().value() == Axis::HORIZONTAL;
+    }
+    return ScopeFocusAlgorithm(isVertical, true, ScopeType::OTHERS,
+        [wp = WeakClaim(this)](
+            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+            auto tabs = wp.Upgrade();
+            if (tabs) {
+                nextFocusNode = tabs->GetNextFocusNode(step, currFocusNode);
+            }
+        });
+}
+
+WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    auto curFocusNode = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocusNode, nullptr);
+
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, nullptr);
+    auto axis = property->GetAxis().value_or(Axis::HORIZONTAL);
+    auto tabBarPosition = property->GetTabBarPosition().value_or(BarPosition::START);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, nullptr);
+    auto tabBarFocusNode = tabBarNode->GetFocusHub();
+    CHECK_NULL_RETURN(tabBarFocusNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperFocusNode = swiperNode->GetFocusHub();
+    CHECK_NULL_RETURN(swiperFocusNode, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_RETURN(tabBarPattern, nullptr);
+    tabBarPattern->SetFirstFocus(true);
+
+    if (curFocusNode->GetFrameName() == V2::TAB_BAR_ETS_TAG &&
+        ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
+        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::RIGHT) ||
+        (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
+        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::LEFT))) {
+        return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
+    }
+    if (curFocusNode->GetFrameName() == V2::SWIPER_ETS_TAG) {
+        if ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
+            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::LEFT) ||
+            (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
+            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::RIGHT)) {
+            return AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode));
+        }
+        if (step == FocusStep::LEFT_END || step == FocusStep::RIGHT_END || step == FocusStep::UP_END ||
+            step == FocusStep::DOWN_END) {
+            return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

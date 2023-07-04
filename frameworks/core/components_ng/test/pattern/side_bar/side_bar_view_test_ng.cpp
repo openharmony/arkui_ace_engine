@@ -327,6 +327,11 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg004, TestSize.Level1)
     frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>()->UpdateSideBarPosition(SideBarPosition::END);
     sideLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     sideLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    
+    frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>
+        ()->UpdateSideBarContainerType(SideBarContainerType::AUTO);
+    sideLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    sideLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 }
 
 /**

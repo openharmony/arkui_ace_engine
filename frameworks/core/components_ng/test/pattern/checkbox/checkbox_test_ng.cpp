@@ -978,17 +978,17 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest028, TestSize.Level1)
      * test event.action != KeyAction::DOWN
      */
     KeyEvent keyEventOne(KeyCode::KEY_A, KeyAction::UP);
-    eventHub->onKeyEventInternal_(keyEventOne);
+    eventHub->ProcessOnKeyEventInternal(keyEventOne);
     /**
      * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_ENTER
      */
     KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
-    eventHub->onKeyEventInternal_(keyEventTwo);
+    eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     /**
      * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_ENTER
      */
     KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
-    eventHub->onKeyEventInternal_(keyEventThr);
+    eventHub->ProcessOnKeyEventInternal(keyEventThr);
 }
 
 /**
@@ -1410,5 +1410,46 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest006, TestSize.Level1)
     checkBoxPaintMethod.checkboxModifier_->checkStroke_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(2.0f);
     checkBoxPaintMethod.checkboxModifier_->strokeSize_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(2.0f);
     checkBoxPaintMethod.checkboxModifier_->DrawCheck(canvas, CONTENT_OFFSET, pen, shadowPen, CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest033
+ * @tc.desc: Test the distributed capability of CheckBox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. get pattern .
+     * @tc.expected: function ProvideRestoreInfo is called.
+     */
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto checkBoxPaintProperty = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    checkBoxPaintProperty->UpdateCheckBoxSelect(true);
+    std::string ret = pattern->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"isOn":true})");
+
+    /**
+     * @tc.steps: step3. function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = R"({"isOn":true})";
+    pattern->OnRestoreInfo(restoreInfo_);
+    EXPECT_TRUE(checkBoxPaintProperty->GetCheckBoxSelectValue(false));
+    restoreInfo_ = "invalid_json_string";
+    pattern->OnRestoreInfo(restoreInfo_);
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_TRUE(checkBoxPaintProperty->GetCheckBoxSelectValue(false));
 }
 } // namespace OHOS::Ace::NG

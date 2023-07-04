@@ -56,6 +56,7 @@ public:
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnAttachToFrameNode() override;
     float constrainStrokeWidth_ = 0;
     float dividerLength_ = 0;
     bool vertical_ = false;

@@ -21,6 +21,7 @@
 #include "core/components/camera/camera_theme.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/clock/clock_theme.h"
+#include "core/components/close_icon/close_icon_theme.h"
 #include "core/components/counter/counter_theme.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -61,6 +62,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "core/components/theme/advanced_pattern_theme.h"
 
@@ -122,7 +124,9 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::AppBarTheme::TypeId(), &ThemeBuildFunc<NG::AppBarTheme::Builder> },
     { AdvancedPatternTheme::TypeId(), &ThemeBuildFunc<AdvancedPatternTheme::Builder> },
     { NG::SecurityComponentTheme::TypeId(), &ThemeBuildFunc<NG::SecurityComponentTheme::Builder> },
-    { NG::FormTheme::TypeId(), &ThemeBuildFunc<NG::FormTheme::Builder> }
+    { NG::FormTheme::TypeId(), &ThemeBuildFunc<NG::FormTheme::Builder> },
+    { CloseIconTheme::TypeId(), &ThemeBuildFunc<CloseIconTheme::Builder> },
+    { NG::SideBarTheme::TypeId(), &ThemeBuildFunc<NG::SideBarTheme::Builder> }
 };
 } // namespace
 

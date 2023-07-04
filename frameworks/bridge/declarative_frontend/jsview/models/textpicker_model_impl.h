@@ -28,7 +28,6 @@ public:
     void SetSelected(uint32_t value) override;
     void SetRange(const std::vector<NG::RangeContent>& value) override;
     void SetValue(const std::string& value) override {}
-    void SetOnChange(TextChangeEvent&& onChange) override;
     void SetDefaultPickerItemHeight(const Dimension& value) override;
     void SetCanLoop(const bool value) override {};
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override {}
@@ -38,10 +37,10 @@ public:
     void MultiInit(const RefPtr<PickerTheme> pickerTheme) override {};
     void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) override {};
     void SetIsCascade(bool isCascade) override {};
-    void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override {};
+    void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override;
     void SetValues(const std::vector<std::string>& values) override {};
     void SetSelecteds(const std::vector<uint32_t>& values) override {};
-    void SetBackgroundColor(const Color& color) override {};
+    void SetBackgroundColor(const Color& color) override;
     bool IsSingle() override
     {
         return true;
@@ -66,6 +65,14 @@ public:
     void SetHasSelectAttr(bool value) override {};
     void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override {};
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override {};
+};
+
+class ACE_EXPORT TextPickerDialogModelImpl : public TextPickerDialogModel {
+public:
+    RefPtr<AceType> CreateObject() override;
+    void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
+        std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
+        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H

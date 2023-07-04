@@ -146,7 +146,8 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
 
     if (context && callbackId_ <= 0) {
         callbackId_ = context->RegisterSurfaceChangedCallback(
-            [weak = WeakClaim(this)](int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight) {
+            [weak = WeakClaim(this)](
+                int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight, WindowSizeChangeReason type) {
                 auto swiper = weak.Upgrade();
                 if (swiper) {
                     swiper->OnSurfaceChanged();
@@ -2096,7 +2097,10 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
     // update position on stretch or retract indicator zone
     UpdatePositionOnStretch(position, indicatorData);
 
-    // update  position
+    // update position
+    if (digitalIndicator_ && indicatorData.flexRender) {
+        indicatorData.flexRender->SetPaintRect(indicatorData.flexRender->GetPaintRect() + position);
+    }
     indicatorPosition_ = position;
     indicatorData.indicatorPaintData.position = position;
     indicatorData.indicatorPaintData.center = position + Offset(indicatorData.indicatorPaintData.width / 2,

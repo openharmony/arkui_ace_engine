@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ class ApngImageObject : public ImageObject {
 public:
     using CancelableTask = CancelableCallback<void()>;
 
+#ifndef USE_ROSEN_DRAWING
     ApngImageObject(
         ImageSourceInfo source,
         const Size& imageSize,
@@ -36,6 +37,19 @@ public:
         skData_ = data;
         apngDecoder_ = decoder;
     }
+#else
+    ApngImageObject(
+        ImageSourceInfo source,
+        const Size& imageSize,
+        int32_t frameCount,
+        const std::shared_ptr<RSData>& data,
+        const RefPtr<PNGImageDecoder>& decoder)
+        : ImageObject(source, imageSize, frameCount), drawingData_(data)
+    {
+        drawingData_ = data;
+        apngDecoder_ = decoder;
+    }
+#endif
 
     void UploadToGpuForRender(
         const WeakPtr<PipelineBase>& context,
@@ -74,7 +88,11 @@ public:
     }
 
 private:
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkData> skData_;
+#else
+    std::shared_ptr<RSData> drawingData_;
+#endif
     RefPtr<APngImagePlayer> animatedPlayer_;
     RefPtr<PNGImageDecoder> apngDecoder_;
 };

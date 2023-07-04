@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,10 @@
 #include "experimental/svg/model/SkSVGDOM.h"
 #endif
 #include "txt/paragraph.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
+#endif
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
@@ -90,11 +92,17 @@ private:
     void InitImagePaint();
     void InitCachePaint();
     bool antiAlias_ = true;
+#ifndef USE_ROSEN_DRAWING
     SkPaint GetStrokePaint();
 #ifdef NEW_SKIA
     SkSamplingOptions options_;
 #endif
+#else
+    RSPen GetStrokePaint();
+    RSSamplingOptions options_;
+#endif
     WeakPtr<PipelineBase> pipelineContext_;
+#ifndef USE_ROSEN_DRAWING
     SkBitmap skBitmap_;
     SkPath skPath_;
     SkPath skPath2d_;
@@ -103,6 +111,16 @@ private:
     SkBitmap cacheBitmap_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
     std::unique_ptr<SkCanvas> skCanvas_;
+#else
+    RSBitmap bitmap_;
+    RSRecordingPath path_;
+    RSRecordingPath path2d_;
+    RSBrush imageBrush_;
+    RSBrush cacheBrush_;
+    RSBitmap cacheBitmap_;
+    std::unique_ptr<RSCanvas> cacheCanvas_;
+    std::unique_ptr<RSCanvas> canvas_;
+#endif
     std::map<std::string, setColorFunc> filterFunc_;
     ImageSourceInfo loadingSource_;
     ImageSourceInfo currentSource_;
@@ -113,8 +131,13 @@ private:
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     CanvasImage canvasImage_;
 
+#ifndef USE_ROSEN_DRAWING
     void UpdatePaintShader(SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
+#else
+    void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Gradient& gradient);
+    void UpdatePaintShader(const Pattern& pattern, RSPen* pen, RSBrush* brush);
+#endif
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     std::unique_ptr<txt::Paragraph> paragraph_;
@@ -124,7 +147,11 @@ private:
     double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     TextDirection GetTextDirection(const std::string& text);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
+#ifndef USE_ROSEN_DRAWING
     void UpdateLineDash(SkPaint& paint);
+#else
+    void UpdateLineDash(RSPen& pen);
+#endif
     void Path2DAddPath(const PathArgs& args);
     void Path2DSetTransform(const PathArgs& args);
     void Path2DMoveTo(const PathArgs& args);
@@ -141,7 +168,11 @@ private:
     void Path2DClip();
     void ParsePath2D(const RefPtr<CanvasPath2D>& path);
     void TranspareCmdToPath(const RefPtr<CanvasPath2D>& path);
+#ifndef USE_ROSEN_DRAWING
     bool IsPointInPathByColor(double x, double y, SkPath& path, SkColor colorMatch);
+#else
+    bool IsPointInPathByColor(double x, double y, RSPath& path, RSColorQuad colorMatch);
+#endif
     void SetPaintImage();
     void InitFilterFunc();
     bool GetFilterType(std::string& filterType, std::string& filterParam);

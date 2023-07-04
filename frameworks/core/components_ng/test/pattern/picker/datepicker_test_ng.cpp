@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
@@ -71,6 +72,8 @@ class DatePickerTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
 };
 
 class TestNode : public UINode {
@@ -102,6 +105,17 @@ void DatePickerTestNg::SetUpTestSuite()
 void DatePickerTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void DatePickerTestNg::SetUp()
+{
+    auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+}
+
+void DatePickerTestNg::TearDown()
+{
+    MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
 }
 
 /**
@@ -789,6 +803,11 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest002, TestSize.Level1)
     ASSERT_NE(datePickerPattern, nullptr);
     EXPECT_EQ(pickerProperty->GetStartDate()->year, datePickerPattern->GetStartDateLunar().year);
     EXPECT_EQ(pickerProperty->GetEndDate()->year, datePickerPattern->GetEndDateLunar().year);
+    datePickerPattern->SetStartDate(PickerDate(0, 1, 1));
+    datePickerPattern->SetEndDate(PickerDate(0, 1, 1));
+    EXPECT_EQ(
+        datePickerPattern->startDateSolar_.ToString(true), datePickerPattern->startDefaultDateSolar_.ToString(true));
+    EXPECT_EQ(datePickerPattern->endDateSolar_.ToString(true), datePickerPattern->endDefaultDateSolar_.ToString(true));
 }
 
 /**
@@ -809,6 +828,8 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest003, TestSize.Level1)
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
     EXPECT_EQ(pickerProperty->GetSelectedDate()->year, datePickerPattern->GetSelectDate().year);
+    datePickerPattern->SetSelectDate(PickerDate(0, 1, 1));
+    EXPECT_EQ(datePickerPattern->selectedDate_.ToString(true), PickerDate::Current().ToString(true));
 }
 
 /**
@@ -1078,8 +1099,9 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest001, TestSize.Level1)
     auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
     ASSERT_NE(pickerPaintProperty, nullptr);
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    auto datePickerPaintMethod = AceType::MakeRefPtr<DatePickerPaintMethod>();
     ASSERT_NE(datePickerPattern, nullptr);
+    auto datePickerPaintMethod =
+        AceType::MakeRefPtr<DatePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(datePickerPattern)));
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
@@ -1115,7 +1137,8 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest002, TestSize.Level1)
     auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
     ASSERT_NE(pickerPaintProperty, nullptr);
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    auto datePickerPaintMethod = AceType::MakeRefPtr<DatePickerPaintMethod>();
+    auto datePickerPaintMethod =
+        AceType::MakeRefPtr<DatePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(datePickerPattern)));
     datePickerPaintMethod->SetEnabled(false);
     ASSERT_NE(datePickerPattern, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();
@@ -1151,6 +1174,24 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest005, TestSize.Level1)
     auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     datePickerPattern->PaintFocusState();
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    // default focusWidth < columnWidth, focusWidth = columnWidth
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->dividerSpacing_ = Dimension(50.0f);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(pickerTheme));
+    auto stackChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(datePickerPattern->focusKeyID_));
+    ASSERT_NE(stackChild, nullptr);
+    auto pickerChild = AceType::DynamicCast<FrameNode>(stackChild->GetLastChild());
+    const float FRAME_WIDTH = 10.0f;
+    frameNode->GetGeometryNode()->frame_.rect_.SetWidth(PATTERN_OFFSET);
+    pickerChild->GetGeometryNode()->frame_.rect_.SetWidth(FRAME_WIDTH);
+    RoundRect paintRect;
+    datePickerPattern->GetInnerFocusPaintRect(paintRect);
+    auto rect = paintRect.GetRect();
+    EXPECT_EQ(rect.GetX(), 0);
+    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width());
 }
 
 /**
@@ -1975,7 +2016,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest011, TestSize.Level1)
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     KeyEvent keyEvent;
-    focusHub->onKeyEventInternal_(keyEvent);
+    focusHub->ProcessOnKeyEventInternal(keyEvent);
     /**
      * test callback getInnerFocusRectFunc_
      */

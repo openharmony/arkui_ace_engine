@@ -30,15 +30,11 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
-#include "core/common/thread_checker.h"
-#include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
-#include "core/image/image_cache.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -98,11 +94,13 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_VOID_NOLOG(view);
+    CHECK_NULL_VOID(pointerEvent);
     LogPointInfo(pointerEvent);
+    int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
-        if (pointerEvent->GetPointerAction() >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
-            pointerEvent->GetPointerAction() <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+        if (pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
             LOGD("ProcessAxisEvent");
             view->ProcessAxisEvent(pointerEvent);
         } else {
@@ -118,7 +116,12 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
 #ifdef ENABLE_DRAG_FRAMEWORK
         view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
-        view->ProcessTouchEvent(pointerEvent);
+        if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+            view->ProcessMouseEvent(pointerEvent);
+        } else {
+            view->ProcessTouchEvent(pointerEvent);
+        }
     }
 }
 
@@ -226,7 +229,7 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
             break;
         }
         default:
-            LOGW("unknown type");
+            LOGD("unknown type %{public}d", orgAction);
             break;
     }
 }

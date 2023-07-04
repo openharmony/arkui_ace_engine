@@ -23,9 +23,10 @@ class WindowScene : public WindowPattern {
     DECLARE_ACE_TYPE(WindowScene, WindowPattern);
 
 public:
-    WindowScene(const sptr<Rosen::Session>& session);
+    explicit WindowScene(const sptr<Rosen::Session>& session);
     ~WindowScene() override;
 
+    void OnSetDepth(const int32_t depth) override;
 private:
     bool HasStartingPage() override
     {

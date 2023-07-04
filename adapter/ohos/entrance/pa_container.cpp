@@ -45,23 +45,19 @@ const char* GetPaEngineSharedLibrary()
 
 } // namespace
 
-PaContainer::PaContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
+PaContainer::PaContainer(int32_t instanceId, void* paAbility, const PaContainerOptions& options,
     std::unique_ptr<PlatformEventCallback> callback)
-    : instanceId_(instanceId), type_(type), paAbility_(paAbility)
+    : instanceId_(instanceId), paAbility_(paAbility)
 {
     ACE_DCHECK(callback);
-    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    flutterTaskExecutor->InitPlatformThread();
-    flutterTaskExecutor->InitJsThread();
-    taskExecutor_ = flutterTaskExecutor;
-    hapPath_ = hapPath;
-
-    InitializeBackend();
-
+    type_ = options.type;
+    hapPath_ = options.hapPath;
+    workerPath_ =  options.workerPath;
+    InitializeBackend(options.language);
     platformEventCallback_ = std::move(callback);
 }
 
-void PaContainer::InitializeBackend()
+void PaContainer::InitializeBackend(SrcLanguage language)
 {
     // create backend
     backend_ = Backend::Create();
@@ -75,10 +71,11 @@ void PaContainer::InitializeBackend()
     jsEngine->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
     jsEngine->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
     jsEngine->SetHapPath(hapPath_);
+    jsEngine->SetWorkerPath(workerPath_);
     paBackend->SetJsEngine(jsEngine);
 
     ACE_DCHECK(backend_);
-    backend_->Initialize(type_, taskExecutor_);
+    backend_->Initialize(type_, language);
 }
 
 RefPtr<PaContainer> PaContainer::GetContainer(int32_t instanceId)
@@ -87,10 +84,10 @@ RefPtr<PaContainer> PaContainer::GetContainer(int32_t instanceId)
     return AceType::DynamicCast<PaContainer>(container);
 }
 
-void PaContainer::CreateContainer(int32_t instanceId, BackendType type, void* paAbility, const std::string& hapPath,
+void PaContainer::CreateContainer(int32_t instanceId, void* paAbility, const PaContainerOptions& options,
     std::unique_ptr<PlatformEventCallback> callback)
 {
-    auto aceContainer = AceType::MakeRefPtr<PaContainer>(instanceId, type, paAbility, hapPath, std::move(callback));
+    auto aceContainer = AceType::MakeRefPtr<PaContainer>(instanceId, paAbility, options, std::move(callback));
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     auto back = aceContainer->GetBackend();
@@ -434,17 +431,6 @@ Uri PaContainer::DenormalizeUri(int32_t instanceId, const Uri& uri)
     CHECK_NULL_RETURN_NOLOG(back, ret);
     ret = back->DenormalizeUri(uri);
     return ret;
-}
-
-void PaContainer::Dispatch(
-    const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const
-{
-    return;
-}
-
-void PaContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const
-{
-    return;
 }
 
 sptr<IRemoteObject> PaContainer::OnConnect(int32_t instanceId, const OHOS::AAFwk::Want& want)

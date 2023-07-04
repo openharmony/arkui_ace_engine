@@ -258,4 +258,78 @@ void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
+
+void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDialog,
+    NG::DatePickerSettingData& settingData, std::function<void()>&& onCancel,
+    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
+    DatePickerType pickerType)
+{
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    if (!pipelineContext) {
+        return;
+    }
+
+    auto executor = pipelineContext->GetTaskExecutor();
+    if (!executor) {
+        return;
+    }
+    auto startDays = pickerDialog.parseStartDate.ToDays();
+    auto endDays = pickerDialog.parseEndDate.ToDays();
+    auto selectedDays = pickerDialog.parseSelectedDate.ToDays();
+    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
+        LOGE("date error");
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    if (!theme) {
+        LOGE("DialogTheme is null");
+        return;
+    }
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogEvent["changeId"] = onChange;
+    dialogEvent["acceptId"] = onAccept;
+    auto func = [onCancel](const GestureEvent& /* info */) {
+        if (onCancel) {
+            onCancel();
+        }
+    };
+    dialogCancelEvent["cancelId"] = func;
+    ButtonInfo buttonInfo;
+    DialogProperties properties;
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        properties.alignment = DialogAlignment::BOTTOM;
+    } else {
+        properties.alignment = DialogAlignment::CENTER;
+    }
+
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    std::map<std::string, PickerDate> datePickerProperty;
+    std::map<std::string, PickerTime> timePickerProperty;
+    if (pickerDialog.isStartDate == true) {
+        settingData.datePickerProperty["start"] = pickerDialog.parseStartDate;
+    }
+    if (pickerDialog.isEndDate == true) {
+        settingData.datePickerProperty["end"] = pickerDialog.parseEndDate;
+    }
+    if (pickerDialog.isSelectedDate == true) {
+        settingData.datePickerProperty["selected"] = pickerDialog.parseSelectedDate;
+        settingData.timePickerProperty["selected"] = pickerDialog.pickerTime;
+    }
+    auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    executor->PostTask(
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+        },
+        TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace::NG

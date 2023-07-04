@@ -39,6 +39,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -46,7 +47,7 @@ namespace OHOS::Ace::NG {
 
 class FrameNode;
 
-class ACE_EXPORT LayoutProperty : public Property {
+class ACE_FORCE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:
@@ -280,6 +281,17 @@ public:
         }
     }
 
+    void ResetCalcMinSize()
+    {
+        if (!calcLayoutConstraint_) {
+            return;
+        }
+        if (calcLayoutConstraint_->minSize.has_value()) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        calcLayoutConstraint_->minSize.reset();
+    }
+
     void UpdateFlexGrow(float flexGrow)
     {
         if (!flexItemProperty_) {
@@ -288,6 +300,17 @@ public:
         if (flexItemProperty_->UpdateFlexGrow(flexGrow)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
+    }
+
+    void ResetFlexGrow()
+    {
+        if (!flexItemProperty_) {
+            return;
+        }
+        if (flexItemProperty_->HasFlexGrow()) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        flexItemProperty_->ResetFlexGrow();
     }
 
     void UpdateFlexShrink(float flexShrink)
@@ -329,6 +352,17 @@ public:
         if (flexItemProperty_->UpdateAlignSelf(flexAlign)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
+    }
+
+    void ResetAlignSelf()
+    {
+        if (!flexItemProperty_) {
+            return;
+        }
+        if (flexItemProperty_->HasAlignSelf()) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        flexItemProperty_->ResetAlignSelf();
     }
 
     void UpdateAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
@@ -404,15 +438,19 @@ public:
             (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
     }
 
-    SafeAreaEdgeInserts GetSafeArea() const
+    const std::unique_ptr<SafeAreaInsets>& GetSafeAreaInsets() const
     {
-        return safeArea_;
+        return safeAreaInsets_;
     }
 
-    void SetSafeArea(SafeAreaEdgeInserts safeArea)
+    void UpdateSafeAreaInsets(const SafeAreaInsets& safeArea);
+
+    const std::unique_ptr<SafeAreaExpandOpts>& GetSafeAreaExpandOpts() const
     {
-        safeArea_ = safeArea;
+        return safeAreaExpandOpts_;
     }
+
+    void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
 
     bool IsUsingPosition() const
     {
@@ -422,6 +460,56 @@ public:
     void SetUsingPosition(bool usingPosition)
     {
         usingPosition_ = usingPosition;
+    }
+
+    void SetIsOverlayNode(bool isOverlayNode)
+    {
+        isOverlayNode_ = isOverlayNode;
+    }
+
+    bool IsOverlayNode()
+    {
+        return isOverlayNode_;
+    }
+
+    void SetOverlayOffset(const std::optional<Dimension> &overlayOffsetX,
+        const std::optional<Dimension> &overlayOffsetY)
+    {
+        bool xChanged = true;
+        bool yChanged = false;
+        if ((!overlayOffsetX.has_value() && overlayOffsetX_.Value() == 0) ||
+            (overlayOffsetX.has_value() && overlayOffsetX.value() == overlayOffsetX_)) {
+            xChanged = false;
+        }
+
+        if ((!overlayOffsetY.has_value() && overlayOffsetY_.Value() == 0) ||
+            (overlayOffsetY.has_value() && overlayOffsetY.value() == overlayOffsetY_)) {
+            yChanged = false;
+        }
+
+        if (!xChanged && !yChanged) {
+            return;
+        }
+
+        if (overlayOffsetX.has_value()) {
+            overlayOffsetX_ = overlayOffsetX.value();
+        } else {
+            overlayOffsetX_.Reset();
+        }
+
+        if (overlayOffsetY.has_value()) {
+            overlayOffsetY_ = overlayOffsetY.value();
+        } else {
+            overlayOffsetY_.Reset();
+        }
+
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+
+    void GetOverlayOffset(Dimension &overlayOffsetX, Dimension &overlayOffsetY)
+    {
+        overlayOffsetX = overlayOffsetX_;
+        overlayOffsetY = overlayOffsetY_;
     }
 
 protected:
@@ -443,6 +531,10 @@ private:
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
+
+    std::unique_ptr<SafeAreaExpandOpts> safeAreaExpandOpts_;
+    std::unique_ptr<SafeAreaInsets> safeAreaInsets_;
+
     std::unique_ptr<BorderWidthProperty> borderWidth_;
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
@@ -455,8 +547,12 @@ private:
 
     WeakPtr<FrameNode> host_;
 
-    SafeAreaEdgeInserts safeArea_;
     bool usingPosition_ = true;
+
+    bool isOverlayNode_ = false;
+    Dimension overlayOffsetX_;
+    Dimension overlayOffsetY_;
+
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG

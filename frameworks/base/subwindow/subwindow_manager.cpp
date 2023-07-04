@@ -20,6 +20,7 @@
 
 #include "unistd.h"
 
+#include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "core/common/ace_page.h"
@@ -160,6 +161,14 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {
     std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
     return currentSubwindow_;
+}
+
+Rect SubwindowManager::GetParentWindowRect()
+{
+    std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
+    Rect rect;
+    CHECK_NULL_RETURN(currentSubwindow_, rect);
+    return currentSubwindow_->GetParentWindowRect();
 }
 
 void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
@@ -317,11 +326,11 @@ void SubwindowManager::ClearMenu()
     }
 }
 
-void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects)
+void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->SetHotAreas(rects);
+        subwindow->SetHotAreas(rects, overlayId);
     }
 }
 
@@ -535,6 +544,20 @@ void SubwindowManager::RegisterOnHideMenu(const std::function<void()>& callback)
         auto overlayManager = currentSubwindow_->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->RegisterOnHideMenu(callback);
+    }
+}
+
+void SubwindowManager::RequestFocusSubwindow(int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+    if (subwindow) {
+        subwindow->RequestFocus();
     }
 }
 } // namespace OHOS::Ace

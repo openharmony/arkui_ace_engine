@@ -48,6 +48,7 @@ common_sources = [
   # components_ng_base
   "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
   "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
+  "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
   "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
 
   # components_ng_render
@@ -64,6 +65,7 @@ common_sources = [
 
   # mock
   "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
+  "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
   "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
   "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_media_player_creator.cpp",

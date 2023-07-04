@@ -39,14 +39,21 @@ public:
 
     void Draw(RSDrawingContext& context) const override
     {
+#ifndef USE_ROSEN_DRAWING
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /*unused*/) {} };
         RSCanvas rsCanvas(&skCanvas);
         CHECK_NULL_VOID(&rsCanvas);
         paintTask_(roundRect_, rsCanvas);
+#else
+        CHECK_NULL_VOID(context.canvas);
+        CHECK_NULL_VOID(paintTask_);
+        paintTask_(roundRect_, *context.canvas);
+#endif
     }
 
     void SetRoundRect(const RoundRect& rect, float borderWidth)
     {
+#ifndef USE_ROSEN_DRAWING
         roundRect_.SetRect(
             rosen::Rect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
         roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::TOP_LEFT_POS,
@@ -61,6 +68,22 @@ public:
         roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::BOTTOM_RIGHT_POS,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y);
+#else
+        roundRect_.SetRect(
+            RSRect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::TOP_LEFT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y);
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::TOP_RIGHT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).y);
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::BOTTOM_LEFT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).y);
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::BOTTOM_RIGHT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y);
+#endif
     }
 
     void SetPaintTask(const std::function<void(const RSRoundRect&, RSCanvas&)>& paintTask)

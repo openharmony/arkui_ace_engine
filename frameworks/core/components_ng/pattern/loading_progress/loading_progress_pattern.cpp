@@ -39,14 +39,88 @@ void LoadingProgressPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    RegisterVisibleAreaChange();
+}
+
+void LoadingProgressPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    auto paintProperty = GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    enableLoading_ = paintProperty->GetEnableLoadingValue(true);
+    enableLoading_ ? StartAnimation() : StopAnimation();
 }
 
 void LoadingProgressPattern::OnVisibleChange(bool isVisible)
 {
+    isVisible_ = isVisible;
+    LOGD("Loading OnVisibleChange: isVisible = %d", isVisible_);
+    isVisible_ ? StartAnimation() : StopAnimation();
+}
+
+void LoadingProgressPattern::StartAnimation()
+{
     CHECK_NULL_VOID(loadingProgressModifier_);
-    loadingProgressModifier_->SetVisible(isVisible);
+    LOGD("Loading StartAnimation: isVisibleArea_ = %d, isVisible_ = %d, isShow_ = %d, enableLoading_ = %d",
+        isVisibleArea_, isVisible_, isShow_, enableLoading_);
+    if (isVisibleArea_ && isVisible_ && isShow_ && enableLoading_) {
+        loadingProgressModifier_->SetVisible(true);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void LoadingProgressPattern::StopAnimation()
+{
+    CHECK_NULL_VOID(loadingProgressModifier_);
+    LOGD("Loading StopAnimation");
+    loadingProgressModifier_->SetVisible(false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void LoadingProgressPattern::RegisterVisibleAreaChange()
+{
+    if (hasVisibleChangeRegistered_) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        LOGD("Loading VisibleAreaChange CallBack: visible = %d", visible);
+        if (visible) {
+            pattern->isVisibleArea_ = true;
+            pattern->StartAnimation();
+        } else {
+            pattern->isVisibleArea_ = false;
+            pattern->StopAnimation();
+        }
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+    hasVisibleChangeRegistered_ = true;
+}
+
+void LoadingProgressPattern::OnWindowHide()
+{
+    isShow_ = false;
+    LOGD("Loading OnWindowHide");
+    StopAnimation();
+}
+
+void LoadingProgressPattern::OnWindowShow()
+{
+    isShow_ = true;
+    LOGD("Loading OnWindowShow");
+    StartAnimation();
 }
 } // namespace OHOS::Ace::NG

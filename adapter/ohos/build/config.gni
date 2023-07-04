@@ -55,6 +55,7 @@ rich_components_support = true
 advance_components_support = false
 form_components_support = true
 remote_window_support = true
+effect_component_support = true
 plugin_components_support = true
 xcomponent_components_support = true
 pixel_map_support = true
@@ -63,7 +64,11 @@ connect_server_support = true
 hdc_register_support = true
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
 enable_rosen_backend = true
-enable_drag_framework = false
+if (defined(global_parts_info.distributeddatamgr_udmf)) {
+  enable_drag_framework = true
+} else {
+  enable_drag_framework = false
+}
 if (defined(global_parts_info.inputmethod_imf)) {
   enable_standard_input = true
 } else {
@@ -128,6 +133,10 @@ if (form_components_support) {
 
 if (remote_window_support) {
   defines += [ "REMOTE_WINDOW_SUPPORTED" ]
+}
+
+if (effect_component_support) {
+  defines += [ "EFFECT_COMPONENT_SUPPORTED" ]
 }
 
 if (xcomponent_components_support) {

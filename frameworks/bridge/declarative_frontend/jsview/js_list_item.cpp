@@ -146,6 +146,7 @@ void JSListItem::SetSelectable(bool selectable)
 void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, bool isStartArea)
 {
     auto deleteAreaObj = JSRef<JSObject>::Cast(jsValue);
+    auto listItemTheme = GetTheme<ListItemTheme>();
 
     std::function<void()> builderAction;
     auto builderObject = deleteAreaObj->GetProperty("builder");
@@ -186,7 +187,9 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     }
     auto deleteAreaDistance = deleteAreaObj->GetProperty("deleteAreaDistance");
     CalcDimension length;
-    ParseJsDimensionVp(deleteAreaDistance, length);
+    if (!ParseJsDimensionVp(deleteAreaDistance, length)) {
+        length = listItemTheme->GetDeleteDistance();
+    }
 
     ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), useDefaultDeleteAnimation,
         std::move(onDeleteCallback), std::move(onEnterDeleteAreaCallback), std::move(onExitDeleteAreaCallback), length,

@@ -23,12 +23,12 @@
 
 namespace OHOS::Ace::NG {
 struct SecurityComponentLayoutPaddingParams {
-    double top;
-    double right;
-    double bottom;
-    double left;
-    double textIconPadding;
-    bool iconStart;
+    double top = 0.0;
+    double right = 0.0;
+    double bottom = 0.0;
+    double left = 0.0;
+    double textIconSpace = 0.0;
+    bool iconStart = false;
 };
 
 class ACE_EXPORT SecurityComponentLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -63,7 +63,7 @@ private:
     SizeF iconSizeF_;
     SizeF textSizeF_;
     SizeF buttonSizeF_;
-    SecurityComponentBackgroundType buttonType_ = SecurityComponentBackgroundType::NORMAL;
+    int32_t buttonType_ = static_cast<int32_t>(ButtonType::NORMAL);
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

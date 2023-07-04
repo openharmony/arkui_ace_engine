@@ -177,7 +177,7 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index)
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     navDestBuilderFunc_->Call(JSRef<JSObject>(), 2, params);
     auto node = NG::ViewStackProcessor::GetInstance()->Finish();
-    return BuildCustomNodeFromUINode(node);
+    return GetNavDestinationNodeFromUINode(node);
 }
 
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo)
@@ -192,7 +192,7 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     navDestBuilderFunc_->Call(JSRef<JSObject>(), 2, params);
     auto node = NG::ViewStackProcessor::GetInstance()->Finish();
-    return BuildCustomNodeFromUINode(node);
+    return GetNavDestinationNodeFromUINode(node);
 }
 
 void JSNavigationStack::SetJSExecutionContext(const JSExecutionContext& context)
@@ -221,22 +221,22 @@ JSRef<JSVal> JSNavigationStack::GetParamByIndex(int32_t index) const
     return func->Call(dataSourceObj_, 1, params);
 }
 
-RefPtr<NG::CustomNode> JSNavigationStack::BuildCustomNodeFromUINode(RefPtr<NG::UINode> node)
+RefPtr<NG::UINode> JSNavigationStack::GetNavDestinationNodeFromUINode(RefPtr<NG::UINode> node)
 {
-    RefPtr<NG::CustomNode> customNode;
+    RefPtr<NG::UINode> navDesNode;
     while (node) {
         if (node->GetTag() == V2::JS_VIEW_ETS_TAG) {
-            customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            navDesNode = AceType::DynamicCast<NG::UINode>(node);
+            navDesNode->Build();
             break;
         }
-
+        if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            navDesNode = AceType::DynamicCast<NG::UINode>(node);
+            break;
+        }
         auto children = node->GetChildren();
         node = children.front();
     }
-
-    if (customNode) {
-        customNode->Build();
-    }
-    return customNode;
+    return navDesNode;
 }
 } // namespace OHOS::Ace::Framework

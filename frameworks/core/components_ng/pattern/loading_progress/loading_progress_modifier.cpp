@@ -69,7 +69,8 @@ constexpr float FULL_OPACITY = 255.0f;
 constexpr float TWO = 2.0f;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
-    : date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+    : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
+      date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE)),
       centerDeviation_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       cometOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_OPACITY_SCALE)),
@@ -77,6 +78,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
       sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)), loadingProgressOwner_(loadingProgressOwner)
 {
+    AttachProperty(enableLoading_);
     AttachProperty(date_);
     AttachProperty(color_);
     AttachProperty(centerDeviation_);
@@ -88,6 +90,9 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
 
 void LoadingProgressModifier::onDraw(DrawingContext& context)
 {
+    if (!enableLoading_->Get()) {
+        return;
+    }
     float date = date_->Get();
     auto diameter = std::min(context.width, context.height);
     RingParam ringParam;
@@ -143,18 +148,18 @@ void LoadingProgressModifier::DrawOrbit(
 {
     auto pointCounts = cometParam.pointCount;
     auto& canvas = context.canvas;
-    float width_ = context.width;
-    float height_ = context.height;
+    float width = context.width;
+    float height = context.height;
     double angle = TOTAL_ANGLE * date / FULL_COUNT;
-    auto* camera_ = new RSCamera3D();
-    camera_->Save();
-    camera_->RotateYDegrees(ROTATEY);
-    camera_->RotateXDegrees(ROTATEX);
-    camera_->RotateZDegrees(ROTATEZ);
+    RSCamera3D camera;
+    camera.Save();
+    camera.RotateYDegrees(ROTATEY);
+    camera.RotateXDegrees(ROTATEX);
+    camera.RotateZDegrees(ROTATEZ);
     RSMatrix matrix;
-    camera_->ApplyToMatrix(matrix);
-    camera_->Restore();
-    auto center = RSPoint(width_ / 2, height_ / 2);
+    camera.ApplyToMatrix(matrix);
+    camera.Restore();
+    auto center = RSPoint(width / 2, height / 2);
     RSBrush brush;
     brush.SetAntiAlias(true);
     canvas.Save();
@@ -353,6 +358,7 @@ void LoadingProgressModifier::StartRecycle()
         date_->Set(0.0f);
         AnimationOption option = AnimationOption();
         RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
+        LOGD("Loading StartRecycle Visible %d", isVisible_);
         option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
         option.SetDelay(0);
         option.SetCurve(curve);

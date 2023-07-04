@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ namespace OHOS::Ace {
 class AnimatedImageObject : public ImageObject {
     DECLARE_ACE_TYPE(AnimatedImageObject, ImageObject);
 public:
+#ifndef USE_ROSEN_DRAWING
     AnimatedImageObject(
         ImageSourceInfo source,
         const Size& imageSize,
@@ -26,6 +27,15 @@ public:
         const sk_sp<SkData>& data)
         : ImageObject(source, imageSize, frameCount), skData_(data)
     {}
+#else
+    AnimatedImageObject(
+        ImageSourceInfo source,
+        const Size& imageSize,
+        int32_t frameCount,
+        const std::shared_ptr<RSData>& data)
+        : ImageObject(source, imageSize, frameCount), drawingData_(data)
+    {}
+#endif
 
     ~AnimatedImageObject() override = default;
 
@@ -64,7 +74,11 @@ public:
     }
 
 private:
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkData> skData_;
+#else
+    std::shared_ptr<RSData> drawingData_;
+#endif
     RefPtr<AnimatedImagePlayer> animatedPlayer_;
 };
 
@@ -78,7 +92,11 @@ void AnimatedImageObject::UploadToGpuForRender(
 {
     constexpr float SizeOffset = 0.5f;
     if (!animatedPlayer_ && skData_) {
+#ifndef USE_ROSEN_DRAWING
         auto codec = SkCodec::MakeFromData(skData_);
+#else
+    // TODO Drawing : SkCodec
+#endif
         int32_t dstWidth = -1;
         int32_t dstHeight = -1;
         if (forceResize) {
@@ -105,8 +123,13 @@ void AnimatedImageObject::UploadToGpuForRender(
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 RefPtr<ImageObject> CreateAnimatedImageObject(ImageSourceInfo source, const Size& imageSize, int32_t frameCount,
     const sk_sp<SkData>& data)
+#else
+RefPtr<ImageObject> CreateAnimatedImageObject(ImageSourceInfo source, const Size& imageSize, int32_t frameCount,
+    const std::shared_ptr<RSData>& data)
+#endif
 {
     return Referenced::MakeRefPtr<AnimatedImageObject>(source, imageSize, frameCount, data);
 }

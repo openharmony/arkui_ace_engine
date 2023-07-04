@@ -29,8 +29,7 @@ public:
     ~MockPattern() override = default;
 
     MOCK_CONST_METHOD0(IsAtomicNode, bool());
-    MOCK_CONST_METHOD0(GetSurfaceNodeName, std::optional<std::string>());
-    MOCK_CONST_METHOD0(UseExternalRSNode, bool());
+    MOCK_CONST_METHOD0(GetContextParam, std::optional<RenderContext::ContextParam>());
     MOCK_CONST_METHOD0(GetOverridePaintRect, std::optional<RectF>());
     MOCK_METHOD0(CreateAccessibilityProperty, RefPtr<AccessibilityProperty>());
     MOCK_METHOD0(CreatePaintProperty, RefPtr<PaintProperty>());

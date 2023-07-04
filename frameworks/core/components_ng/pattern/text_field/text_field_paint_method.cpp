@@ -27,6 +27,8 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/search/search_event_hub.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -61,15 +63,38 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->GetContChange()) {
+        textFieldContentModifier_->ChangeDragStatus();
+        textFieldPattern->ResetContChange();
+    }
     auto textEditingValue = textFieldPattern->GetTextEditingValue();
     std::string text = textEditingValue.text;
     textFieldContentModifier_->SetTextValue(text);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
+
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto currentTextRectOffsetX = textFieldPattern->GetTextRect().GetX();
+    auto currentTextRectOffsetY = textFieldPattern->GetTextRect().GetY();
+    if (textFieldContentModifier_->GetTextRectX() != currentTextRectOffsetX ||
+        textFieldContentModifier_->GetTextRectY() != currentTextRectOffsetY) {
+        // If the parent node is a Search, the Search callback is executed.
+        if (textFieldPattern->IsSearchParentNode()) {
+            auto parentFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
+            auto searchPattern = parentFrameNode->GetPattern<SearchPattern>();
+            CHECK_NULL_VOID(searchPattern);
+            auto textFieldOffset = searchPattern->GetTextFieldOffset();
+            auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+            eventHub->FireOnScrollChangeEvent(
+                currentTextRectOffsetX + textFieldOffset.GetX(), currentTextRectOffsetY + textFieldOffset.GetY());
+        } else {
+            auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+            eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
+        }
+    }
     textFieldContentModifier_->SetTextRectY(textFieldPattern->GetTextRect().GetY());
     textFieldContentModifier_->SetTextRectX(textFieldPattern->GetTextRect().GetX());
     textFieldContentModifier_->SetTextAlign(textFieldPattern->GetTextAlign());
-    auto frameNode = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
@@ -78,6 +103,8 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false));
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
+    textFieldContentModifier_->SetShowPasswordIcon(textFieldPattern->GetShowResultImageSrc());
+    textFieldContentModifier_->SetHidePasswordIcon(textFieldPattern->GetHideResultImageSrc());
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
@@ -107,8 +134,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(textFieldPattern);
     auto cursorVisible = textFieldPattern->GetCursorVisible();
     textFieldOverlayModifier_->SetCursorVisible(cursorVisible);
-    auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
-    textFieldOverlayModifier_->SetCursorOffsetX(cursorOffsetX);
+    auto cursorOffset = textFieldPattern->GetCaretOffset();
+    textFieldOverlayModifier_->SetCursorOffset(cursorOffset);
     auto currentOffset = textFieldPattern->GetCurrentOffset();
     textFieldOverlayModifier_->SetCurrentOffset(currentOffset);
 

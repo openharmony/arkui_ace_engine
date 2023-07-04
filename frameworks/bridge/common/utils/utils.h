@@ -85,6 +85,7 @@ constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCap
 constexpr int32_t ERROR_CODE_INTERNAL_ERROR = 100001;      // Internal error.
 constexpr int32_t ERROR_CODE_URI_ERROR = 100002;           // Uri error.
 constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;     // The pages are pushed too much.
+constexpr int32_t ERROR_CODE_NAMED_ROUTE_ERROR = 100004;           // Named route error.
 constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;      // Uri error for lite.
 
 template<class T>
@@ -425,11 +426,13 @@ inline TabBarMode ConvertStrToTabBarMode(const std::string& value)
     return temp == "fixed" ? TabBarMode::FIXED : TabBarMode::SCROLLABLE;
 }
 
-ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
+ACE_FORCE_EXPORT RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
 
-ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
+ACE_FORCE_EXPORT RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
 
-ACE_FORCE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
+ACE_FORCE_EXPORT RefPtr<Curve> CreateCurve(const std::function<float(float)>& jsFunc);
+
+ACE_FORCE_EXPORT RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
 
 ACE_EXPORT TransitionType ParseTransitionType(const std::string& transitionType);
 

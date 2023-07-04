@@ -25,6 +25,9 @@
 
 #include "base/geometry/offset.h"
 #include "core/components/track/render_track.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -48,8 +51,7 @@ private:
 #ifndef USE_ROSEN_DRAWING
     sk_sp<SkShader> BlendSkShader(const SkPoint pts, const SkColor color, bool useAnimator = false);
 #else
-    std::shared_ptr<RSShaderEffect> BlendSkShader(const RSPoint pts,
-        const RSColorQuad color, bool useAnimator = false);
+    std::shared_ptr<RSShaderEffect> BlendSkShader(const RSPoint pts, const RSColorQuad color, bool useAnimator = false);
 #endif
 };
 

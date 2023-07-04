@@ -13,7 +13,6 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("../../build/uicast.gni")
 
 # build core sources
 template("ace_core_source_set") {
@@ -214,9 +213,6 @@ template("ace_core_source_set") {
       sources += [ "common/flutter/flutter_window.cpp" ]
     }
 
-    defines += uicast_configs.uicast_defines
-    sources += uicast_configs.uicast_core_sources
-
     if (platform == "ohos") {
       sources -= [ "common/anr_thread.cpp" ]
     }
@@ -248,6 +244,8 @@ template("ace_core_source_set") {
       "pipeline:ace_core_pipeline_$platform",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
+
+    external_deps = []
 
     if (ace_use_new_skia) {
       if (is_ohos) {
@@ -427,11 +425,14 @@ template("ace_core_source_set") {
         "animation/native_curve_helper.cpp",
         "common/rosen/rosen_convert_helper.cpp",
       ]
-
+      if (is_ohos) {
+        external_deps += [ "graphic_standard:libtexgine" ]
+        defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
+      }
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+        external_deps += [ "graphic_standard:librender_service_client" ]
       }
     }
 
@@ -452,6 +453,7 @@ template("ace_core_source_set") {
     }
 
     deps += [
+      "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
@@ -474,7 +476,6 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/image/apng:ace_core_apng_$platform" ]
     }
 
-    external_deps = []
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
@@ -489,7 +490,6 @@ template("ace_core_source_set") {
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
       sources += [ "gestures/gesture_info.cpp" ]
-      external_deps += [ "udmf:udmf_client" ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -507,7 +507,7 @@ template("ace_core_source_set") {
       if (is_cross_platform_build) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        external_deps += [ "napi:ace_container_scope" ]
       }
     }
 
@@ -518,7 +518,7 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components_ng/pattern/plugin:ace_core_components_plugin_pattern_ng_$platform",
       ]
       sources += [ "common/plugin_manager.cpp" ]
-      deps += [ "//commonlibrary/c_utils/base:utils" ]
+      external_deps += [ "c_utils:utils" ]
     }
 
     if (defined(config.preview_support) && config.preview_support) {
@@ -533,9 +533,6 @@ template("ace_core_source_set") {
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
       ]
     }
-
-    include_dirs += uicast_configs.uicast_root_include
-
     if (!is_wearable_product) {
       deps += [
         "$ace_root/frameworks/core/components/camera:ace_core_components_camera_$platform",
@@ -548,8 +545,6 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform",
       ]
     }
-
-    deps += uicast_configs.uicast_root_deps
 
     if ((current_os == "mingw" || current_os == "mac" ||
          current_os == "linux") && defined(config.enable_rosen_backend) &&
@@ -692,10 +687,15 @@ template("ace_core_ng_source_set") {
       "pipeline/pipeline_base.cpp",
 
       # image
+      "image/animated_image_player.cpp",
       "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
       "image/image_compressor.cpp",
       "image/image_loader.cpp",
+      "image/image_object.cpp",
+      "image/image_object_animated.cpp",
+      "image/image_object_svg.cpp",
+      "image/image_provider.cpp",
       "image/image_source_info.cpp",
 
       # textfield
@@ -708,6 +708,7 @@ template("ace_core_ng_source_set") {
       "common/ime/text_input_type.cpp",
 
       # properties
+      "components/common/painter/rosen_decoration_painter.cpp",
       "components/common/properties/alignment.cpp",
       "components/common/properties/animatable_path.cpp",
       "components/common/properties/border.cpp",
@@ -793,18 +794,22 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
-
-    deps += [
-      "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-      "$ace_flutter_engine_root/skia:ace_skia_$platform",
-    ]
-
-    defines += uicast_configs.uicast_defines
-    sources += uicast_configs.uicast_core_sources
+    external_deps = []
+    if (ace_use_new_skia) {
+      configs += [ "$ace_flutter_engine_root:flutter_config" ]
+      deps += [
+        "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
+        "$skia_root_new:skia_$platform",
+      ]
+    } else {
+      deps += [
+        "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
+        "$ace_flutter_engine_root/skia:ace_skia_$platform",
+      ]
+    }
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
       sources += [ "gestures/gesture_info.cpp" ]
-      external_deps = [ "udmf:udmf_client" ]
     }
 
     if (defined(config.build_container_scope_lib) &&
@@ -813,10 +818,9 @@ template("ace_core_ng_source_set") {
       if (is_cross_platform_build) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        external_deps += [ "napi:ace_container_scope" ]
       }
     }
-
     deps += [
       "$ace_root/frameworks/core/components_ng/animation:ace_core_components_animation_ng_$platform",
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
@@ -826,12 +830,20 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
       "$ace_root/frameworks/core/components_ng/manager:ace_core_components_manager_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
-      "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
+
+    if (defined(config.use_components_lib) && config.use_components_lib) {
+      deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
+    } else {
+      deps += [
+        "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
+      ]
+    }
 
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
@@ -852,10 +864,14 @@ template("ace_core_ng_source_set") {
         "animation/native_curve_helper.cpp",
         "common/rosen/rosen_convert_helper.cpp",
       ]
+      if (is_ohos) {
+        external_deps += [ "graphic_standard:libtexgine" ]
+        defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
+      }
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+        external_deps += [ "graphic_standard:librender_service_client" ]
       }
     }
     cflags_cc = []

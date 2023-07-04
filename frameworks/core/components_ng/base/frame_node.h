@@ -44,6 +44,7 @@
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace::NG {
@@ -53,7 +54,7 @@ class StateModifyTask;
 class UITask;
 
 // FrameNode will display rendering region in the screen.
-class ACE_EXPORT FrameNode : public UINode {
+class ACE_FORCE_EXPORT FrameNode : public UINode {
     DECLARE_ACE_TYPE(FrameNode, UINode);
 
 public:
@@ -113,23 +114,34 @@ public:
 
     void SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty);
 
+    // Clear the user callback.
+    void ClearUserOnAreaChange();
+
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
+
     void TriggerOnAreaChangeCallback();
+
+    void OnConfigurationUpdate(const OnConfigurationChange& configurationChange);
+    
+    void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
 
     void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaUserCallbacks_[ratio] = callback;
     }
+
     void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaInnerCallbacks_[ratio] = callback;
     }
+
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
         return geometryNode_;
     }
+
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
     const RefPtr<RenderContext>& GetRenderContext() const
@@ -213,6 +225,12 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
+    void CheckSecurityComponentStatus(std::vector<RectF>& rect);
+
+    bool HaveSecurityComponent();
+
+    bool IsSecurityComponent();
+
     void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
@@ -271,6 +289,10 @@ public:
 
     OffsetF GetPaintRectOffsetToPage() const;
 
+    RectF GetPaintRectWithTransform() const;
+
+    VectorF GetTransformScale() const;
+
     void AdjustGridOffset();
 
     void SetActive(bool active) override;
@@ -316,7 +338,8 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
+    bool CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -371,6 +394,16 @@ public:
         return allowDrop_;
     }
 
+    void SetOverlayNode(const WeakPtr<FrameNode>& overlayNode)
+    {
+        overlayNode_ = overlayNode;
+    }
+
+    RefPtr<FrameNode> GetOverlayNode() const
+    {
+        return overlayNode_.Upgrade();
+    }
+
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
     void CreateAnimatablePropertyFloat(
@@ -380,12 +413,36 @@ public:
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
 
+    void SetHitTestMode(HitTestMode mode);
+    HitTestMode GetHitTestMode() const override;
+
     std::string ProvideRestoreInfo();
 
+    static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+
+    // called during LayoutWrapper creation, used for finding corresponding LayoutWrapper during RestoreGeoState
+    void RecordLayoutWrapper(WeakPtr<LayoutWrapper> layoutWrapper)
+    {
+        layoutWrapper_ = std::move(layoutWrapper);
+    }
+    const WeakPtr<LayoutWrapper>& GetLayoutWrapper() const
+    {
+        return layoutWrapper_;
+    }
+
+    void SetViewPort(RectF viewPort)
+    {
+        viewPort_ = viewPort;
+    }
+
+    std::optional<RectF> GetViewPort() const;
+
+    void SetDepth(int32_t depth);
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
     void UpdateLayoutPropertyFlag() override;
+    void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout);
@@ -410,14 +467,15 @@ private:
     // dump self info.
     void DumpInfo() override;
 
+    void DumpOverlayInfo();
+
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
-    HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
-    std::vector<RectF> GetResponseRegionList(const RectF& rect);
+    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(
@@ -449,10 +507,13 @@ private:
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
+    // only valid during layout task
+    WeakPtr<LayoutWrapper> layoutWrapper_;
 
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
+    std::optional<RectF> viewPort_;
 
     bool needSyncRenderTree_ = false;
 
@@ -465,6 +526,7 @@ private:
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
+    bool bypass_ = false;
 
     double lastVisibleRatio_ = 0.0;
 
@@ -480,6 +542,8 @@ private:
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
 
     bool isRestoreInfoUsed_ = false;
+
+    WeakPtr<FrameNode> overlayNode_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

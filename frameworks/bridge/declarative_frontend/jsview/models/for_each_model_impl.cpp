@@ -24,7 +24,6 @@
 #include "core/components_part_upd/foreach/foreach_component.h"
 #include "core/components_part_upd/foreach/foreach_element.h"
 #include "core/components_v2/common/element_proxy.h"
-#include "uicast_interface/uicast_impl.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -45,22 +44,13 @@ void ForEachModelImpl::Create(const std::string& compilerGenId, const OHOS::Ace:
     viewStack->Push(AceType::MakeRefPtr<ForEachComponent>(viewId, "ForEach"));
 
     std::vector<std::string> keys = ForEachFunc.idGenFunc_();
-    {
-        UICastImpl::CacheCmd("UICast::ForEach::start", viewId);
-    }
     for (size_t i = 0; i < keys.size(); i++) {
         keys[i].insert(0, "-");
         keys[i].insert(0, compilerGenId);
-        {
-            UICastImpl::CacheCmd("UICast::ForEachItem::start", keys[i]);
-        }
         viewStack->PushKey(keys[i]);
 
         viewStack->Push(AceType::MakeRefPtr<MultiComposedComponent>(viewStack->GetKey(), "ForEachItem"));
         ForEachFunc.itemGenFunc_(i);
-        {
-            UICastImpl::CacheCmd("UICast::ForEachItem::end");
-        }
         viewStack->PopContainer();
         viewStack->PopKey();
     }

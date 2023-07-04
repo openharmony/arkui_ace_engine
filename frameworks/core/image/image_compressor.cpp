@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,12 +85,20 @@ cl_program ImageCompressor::LoadShaderBin(cl_context context, cl_device_id devic
         LOGE("load cl shader failed");
         return nullptr;
     }
+#ifndef USE_ROSEN_DRAWING
     auto data = SkData::MakeFromFILE(file.get());
+#else
+    // TODO Drawing : SkData::MakeFromFILE()
+#endif
     if (!data) {
         return nullptr;
     }
     cl_int err;
+#ifndef USE_ROSEN_DRAWING
     size_t len = data->size();
+#else
+    size_t len = data->GetSize();
+#endif
     auto ptr = (const unsigned char*) data->data();
     cl_program p = clCreateProgramWithBinary(context, 1, &device_id, &len, &ptr, NULL, &err);
     if (err) {
@@ -154,7 +162,11 @@ void ImageCompressor::ReleaseResource()
 }
 #endif // ENABLE_OPENCL
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> ImageCompressor::GpuCompress(std::string key, SkPixmap& pixmap, int32_t width, int32_t height)
+#else
+    // TODO Drawing : SkPixmap
+#endif
 {
 #ifdef ENABLE_OPENCL
     std::lock_guard<std::mutex> lock(instanceMutex_);
@@ -215,7 +227,11 @@ sk_sp<SkData> ImageCompressor::GpuCompress(std::string key, SkPixmap& pixmap, in
         return nullptr;
     }
 
+#ifndef USE_ROSEN_DRAWING
     auto astc_data = SkData::MakeUninitialized(astc_size);
+#else
+    // TODO Drawing : SkData::MakeUninitialized();
+#endif
     clEnqueueReadBuffer(queue_, astcResult, CL_TRUE, 0, astc_size, astc_data->writable_data(), 0, NULL, NULL);
     clReleaseMemObject(astcResult);
     return astc_data;
@@ -251,7 +267,12 @@ std::function<void()> ImageCompressor::ScheduleReleaseTask()
     return task;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void ImageCompressor::WriteToFile(std::string srcKey, sk_sp<SkData> compressedData, Size imgSize)
+#else
+void ImageCompressor::WriteToFile(std::string srcKey, std::shared_ptr<RSData> compressedData,
+    Size imgSize)
+#endif
 {
     if (!compressedData || srcKey.empty()) {
         return;
@@ -282,7 +303,11 @@ void ImageCompressor::WriteToFile(std::string srcKey, sk_sp<SkData> compressedDa
                 srcKey.c_str(), xsize, ysize, imgSize.Width(), imgSize.Height());
 
             int32_t fileSize = compressedData->size() + sizeof(header);
+#ifndef USE_ROSEN_DRAWING
             sk_sp<SkData> toWrite = SkData::MakeUninitialized(fileSize);
+#else
+    // TODO Drawing : SkData::MakeUninitialized();
+#endif
             uint8_t* toWritePtr = (uint8_t*) toWrite->writable_data();
             if (memcpy_s(toWritePtr, fileSize, &header, sizeof(header)) != EOK) {
                 LOGE("astc write file failed");
@@ -299,6 +324,7 @@ void ImageCompressor::WriteToFile(std::string srcKey, sk_sp<SkData> compressedDa
 #endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> ImageCompressor::StripFileHeader(sk_sp<SkData> fileData)
 {
     if (fileData) {
@@ -309,6 +335,9 @@ sk_sp<SkData> ImageCompressor::StripFileHeader(sk_sp<SkData> fileData)
     }
     return nullptr;
 }
+#else
+    // TODO Drawing : SkData::MakeSubset();
+#endif
 
 /**
  * @brief Hash function used for procedural partition assignment.

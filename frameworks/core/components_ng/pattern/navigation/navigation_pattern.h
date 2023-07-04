@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -54,17 +55,15 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<NavigationLayoutAlgorithm>();
+        auto layoutAlgorithm = MakeRefPtr<NavigationLayoutAlgorithm>();
+        layoutAlgorithm->SetRealNavBarWidth(realNavBarWidth_);
+        layoutAlgorithm->SetIfNeedInit(ifNeedInit_);
+        return layoutAlgorithm;
     }
 
     void OnModifyDone() override;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
-    void SetNavigationMode(NavigationMode navigationMode)
-    {
-        navigationMode_ = navigationMode;
-    }
 
     FocusPattern GetFocusPattern() const override
     {
@@ -74,6 +73,16 @@ public:
     void SetNavDestination(std::function<void(std::string)>&& builder)
     {
         builder_ = std::move(builder);
+    }
+
+    NavigationMode GetNavigationMode() const
+    {
+        return navigationMode_;
+    }
+
+    void SetNavigationMode(NavigationMode navigationMode)
+    {
+        navigationMode_ = navigationMode;
     }
 
     void SetNavigationStack(RefPtr<NavigationStack>&& navigationStack)
@@ -113,9 +122,9 @@ public:
         return navigationStack_->Get();
     }
 
-    RefPtr<UINode> GetPreNavDestination(const std::string& current)
+    RefPtr<UINode> GetPreNavDestination(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
-        return navigationStack_->GetPre(current);
+        return navigationStack_->GetPre(name, navDestinationNode);
     }
 
     const std::vector<std::pair<std::string, RefPtr<UINode>>>& GetAllNavDestinationNodes()
@@ -146,17 +155,50 @@ public:
         navigationStack_->Remove();
     }
 
+    void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
+
+    void CleanStack()
+    {
+        navigationStack_->RemoveAll();
+    }
+
+    void SetNavigationStackProvided(bool provided)
+    {
+        navigationStackProvided_ = provided;
+    }
+
+    bool GetNavigationStackProvided() const
+    {
+        return navigationStackProvided_;
+    }
+
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode currentMode);
     bool CheckExistPreStack(const std::string& name);
     RefPtr<UINode> GetNodeAndRemoveByName(const std::string& name);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
+    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragStart();
+    void HandleDragUpdate(float xOffset);
+    void HandleDragEnd();
+    void OnHover(bool isHover);
+    void UpdateResponseRegion(float realDividerWidth, float realNavBarWidth,
+    float dragRegionHeight, OffsetF dragRectOffset);
+    void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
     NavPathList preNavPathList_;
     NavPathList navPathList_;
+    RefPtr<InputEvent> hoverEvent_;
+    RefPtr<DragEvent> dragEvent_;
+    RectF dragRect_;
+    bool ifNeedInit_ = true;
+    float preNavBarWidth_ = 0.0f;
+    float realNavBarWidth_ = 360.0f;
+    float realDividerWidth_ = 2.0f;
+    bool navigationStackProvided_ = false;
 };
 
 } // namespace OHOS::Ace::NG

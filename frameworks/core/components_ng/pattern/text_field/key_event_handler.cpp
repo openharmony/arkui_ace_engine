@@ -22,6 +22,9 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
+    if (!pattern->GetCursorVisible()) {
+        return false;
+    }
     if (keyEvent.action == KeyAction::DOWN) {
         std::string appendElement;
         if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||

@@ -63,7 +63,7 @@ void InputEventActuator::OnCollectHoverEvent(
         return;
     }
 
-    auto onHoverCallback = [weak = WeakClaim(this)](bool info) {
+    auto onHoverCallback = [weak = WeakClaim(this)](bool info, HoverInfo& hoverInfo) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         for (const auto& callback : actuator->inputEvents_) {
@@ -72,7 +72,7 @@ void InputEventActuator::OnCollectHoverEvent(
             }
         }
         if (actuator->userCallback_) {
-            (*actuator->userCallback_)(info);
+            (*actuator->userCallback_)(info, hoverInfo);
         }
     };
     hoverEventTarget_->SetCallback(onHoverCallback);

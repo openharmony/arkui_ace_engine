@@ -82,16 +82,16 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
 
     if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
       // code path for @(Local)StorageProp, the source is a ObservedPropertyObject<C> in a LocalStorage)
-      this.source_ = source as ObservedPropertyAbstractPU<C>;
+      this.source_ = source;
       this.sourceIsOwnObject = false;
-      
+
       // subscribe to receive value change updates from LocalStorage source property
-      this.source_.subscribeMe(this);
+      this.source_.addSubscriber(this);
     } else {
       // code path for 
-      // 1- source is of same type C in parent, not that the value(!) is provided, not the ObservedPropertyAbstract<C>
-      // 2- nested Object/Array inside observed another object/array in parent
-      if (!ObservedObject.IsObservedObject(source)) {
+      // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
+      // 2- nested Object/Array inside observed another object/array in parent, source is its value
+      if (!((source instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(source))) {
         stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class 
            lacks @Observed class decorator. Object property changes will not be observed.`);
       }
@@ -112,7 +112,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   */
   aboutToBeDeleted() {
     if (this.source_) {
-      this.source_.unlinkSuscriber(this.id__());
+      this.source_.removeSubscriber(this);
       if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers()==0){
         stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
         this.source_.aboutToBeDeleted();
@@ -202,9 +202,9 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   }
   
   /*
-    unsubscribe from previous wrappped ObjectObject
+    unsubscribe from previous wrapped ObjectObject
     take a shallow or (TODO) deep copy
-    copied Object might already be an ObservedObject (e.g. becuse of @Observed decroator) or might be raw
+    copied Object might already be an ObservedObject (e.g. becurse of @Observed decorator) or might be raw
     Therefore, conditionally wrap the object, then subscribe
     return value true only if localCopyObservedObject_ has been changed
   */
@@ -217,19 +217,29 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
         stateMgmtConsole.error(`SynchedPropertyOneWayObjectPU[${this.id__()}]: setLocalValue new value must be an Object.`)
       }
     
-      // unsubscribe from old wrappedValue ObservedOject  
-      ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
-    
+      // unsubscribe from old local copy 
+      if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
+        (this.localCopyObservedObject_ as SubscribableAbstract).removeOwningProperty(this);
+      } else {
+        ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
+      }
+
       // shallow/deep copy value 
       // needed whenever newObservedObjectValue comes from source
       // not needed on a local set (aka when called from set() method)
       let copy = needCopyObject ? this.copyObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
 
-      if (ObservedObject.IsObservedObject(copy)) {
+      if (copy instanceof SubscribableAbstract) {
+        this.localCopyObservedObject_ = copy;
+        // deep copy will copy Set of subscribers as well. But local copy only has its own subscribers 
+        // not those of its parent value.
+        (this.localCopyObservedObject_ as unknown as SubscribableAbstract).clearOwningProperties();
+        (this.localCopyObservedObject_ as unknown as SubscribableAbstract).addOwningProperty(this);
+      } else if (ObservedObject.IsObservedObject(copy)) {
         // case: new ObservedObject
         this.localCopyObservedObject_ = copy;
         ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
-      } else {
+      } else  {
         // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
         stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class \
             lacks @Observed class decorator. Object property changes will not be observed.`);
@@ -273,16 +283,16 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
       d.setTime((rawValue as Date).getTime());
       // subscribe, also Date gets wrapped / proxied by ObservedObject
       copy = ObservedObject.createNew(d as unknown as C, this);
-    } else if (rawValue instanceof SubscribaleAbstract) {
-      // case SubscriabableAbstract, no wrapping inside ObservedObject
+    } else if (rawValue instanceof SubscribableAbstract) {
+      // case SubscribableAbstract, no wrapping inside ObservedObject
       copy = { ...rawValue };
       Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
-      if (copy instanceof SubscribaleAbstract) {
+      if (copy instanceof SubscribableAbstract) {
         // subscribe
-        (copy as unknown as SubscribaleAbstract).addOwningProperty(this);
+        (copy as unknown as SubscribableAbstract).addOwningProperty(this);
       }
     } else if (typeof rawValue == "object") {
-      // case Object that is not Array, not Date, not SubscribaleAbstract
+      // case Object that is not Array, not Date, not SubscribableAbstract
       copy = ObservedObject.createNew({ ...rawValue }, this);
       Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
     } else {
@@ -300,9 +310,9 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
 
     // this subscribe to the top level object/array of the copy
     // same as shallowCopy does
-    if ((obj instanceof SubscribaleAbstract) &&
-      (copy instanceof SubscribaleAbstract)) {
-      (copy as unknown as SubscribaleAbstract).addOwningProperty(this);
+    if ((obj instanceof SubscribableAbstract) &&
+      (copy instanceof SubscribableAbstract)) {
+      (copy as unknown as SubscribableAbstract).addOwningProperty(this);
     } else if (ObservedObject.IsObservedObject(obj) && ObservedObject.IsObservedObject(copy)) {
       ObservedObject.addOwningProperty(copy, this);
     }

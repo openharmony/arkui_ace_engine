@@ -39,7 +39,7 @@ public:
         value->propBackgroundRightPadding_ = CloneBackgroundRightPadding();
         value->propBackgroundTopPadding_ = CloneBackgroundTopPadding();
         value->propBackgroundBottomPadding_ = CloneBackgroundBottomPadding();
-        value->propTextIconPadding_ = CloneTextIconPadding();
+        value->propTextIconSpace_ = CloneTextIconSpace();
         value->propSecurityComponentDescription_ = CloneSecurityComponentDescription();
         value->propIconStyle_ = CloneIconStyle();
         value->propBackgroundType_ = CloneBackgroundType();
@@ -55,7 +55,7 @@ public:
         ResetBackgroundRightPadding();
         ResetBackgroundTopPadding();
         ResetBackgroundBottomPadding();
-        ResetTextIconPadding();
+        ResetTextIconSpace();
         ResetSecurityComponentDescription();
         ResetIconStyle();
         ResetBackgroundType();
@@ -67,10 +67,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundRightPadding, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundTopPadding, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundBottomPadding, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextIconPadding, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextIconSpace, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecurityComponentDescription, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconStyle, int32_t, PROPERTY_UPDATE_NORMAL);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundType, SecurityComponentBackgroundType, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundType, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextIconLayoutDirection,
         SecurityComponentLayoutDirection, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LayoutOrder, SecSecurityComponentLayoutOrder, PROPERTY_UPDATE_MEASURE);

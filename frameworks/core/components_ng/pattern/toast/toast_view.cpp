@@ -25,6 +25,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
+#include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -47,22 +49,23 @@ float GetTextHeight(const RefPtr<FrameNode>& textNode)
     return textSize.Height();
 }
 } // namespace
-
 RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
+    auto toastTheme = context->GetTheme<ToastTheme>();
+    CHECK_NULL_RETURN(toastTheme, nullptr);
+
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
-    LOGI("begin to show toast, toast id is %{public}d, message is %{public}s", toastId, message.c_str());
     // make toast node
-    auto toastNode =
-        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto toastNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
     CHECK_NULL_RETURN(toastNode, nullptr);
-    auto toastProperty = toastNode->GetLayoutProperty<LinearLayoutProperty>();
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_RETURN(toastProperty, nullptr);
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, nullptr);
+
     auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
     toastAccessibilityProperty->SetText(message);
@@ -71,8 +74,6 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    auto toastTheme = context->GetTheme<ToastTheme>();
-    CHECK_NULL_RETURN(toastTheme, nullptr);
 
     // update toast props
     auto rootHeight = Dimension(context->GetRootHeight());
@@ -82,18 +83,20 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     if ((bottomPosition.Unit() == DimensionUnit::PERCENT)) {
         bottomPosition = rootHeight * bottomPosition.Value();
     }
-    auto toastBottom = Dimension(
-        GreatOrEqual(bottomPosition.Value(), 0.0) ? bottomPosition.Value() : toastTheme->GetBottom().ConvertToPx());
+    auto toastBottom =
+        Dimension(GreatOrEqual(bottomPosition.ConvertToPx(), 0.0) ? bottomPosition.ConvertToPx()
+                                                                  : toastTheme->GetBottom().ConvertToPx());
     UpdateTextLayoutProperty(textNode, message, isRightToLeft);
     UpdateTextContext(textNode);
-    toastNode->MarkModifyDone();
     auto textHeight = GetTextHeight(textNode);
     if (textHeight > toastTheme->GetMinHeight().ConvertToPx()) {
         textLayoutProperty->UpdateTextAlign(TextAlign::START);
         textHeight = GetTextHeight(textNode);
     }
-    toastContext->UpdateOffset(OffsetT<Dimension>(0.0_px, rootHeight - toastBottom - Dimension(textHeight)));
     textNode->MountToParent(toastNode);
+    toastProperty->UpdateBottom(toastBottom);
+    toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    toastNode->MarkModifyDone();
     return toastNode;
 }
 
@@ -150,5 +153,4 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
     textContext->UpdateBorderRadius(borderRadius);
     textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
 }
-
 } // namespace OHOS::Ace::NG

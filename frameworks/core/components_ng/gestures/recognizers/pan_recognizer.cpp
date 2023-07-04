@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t MAX_PAN_FINGERS = 10;
-constexpr double DISTANCE_PER_MOUSE_DEGREE = DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
+constexpr Dimension DISTANCE_PER_MOUSE_DEGREE = LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
 
 } // namespace
@@ -221,6 +221,9 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     touchPointsDistance_[event.id] += delta_;
     time_ = event.time;
 
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
@@ -265,17 +268,18 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
     globalPoint_ = Point(event.x, event.y);
+    auto distancePerMouseDegreePx = DISTANCE_PER_MOUSE_DEGREE.ConvertToPx();
     if (direction_.type == PanDirection::ALL || (direction_.type & PanDirection::HORIZONTAL) == 0) {
         // PanRecognizer Direction: Vertical or ALL
         delta_ =
-            Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+            Offset(-event.horizontalAxis * distancePerMouseDegreePx, -event.verticalAxis * distancePerMouseDegreePx);
     } else if ((direction_.type & PanDirection::VERTICAL) == 0) {
         // PanRecognizer Direction: Horizontal
         if (NearZero(event.horizontalAxis)) {
-            delta_ = Offset(-event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE, 0);
+            delta_ = Offset(-event.verticalAxis * distancePerMouseDegreePx, 0);
         } else {
             delta_ = Offset(
-                -event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+                -event.horizontalAxis * distancePerMouseDegreePx, -event.verticalAxis * distancePerMouseDegreePx);
         }
     }
 
@@ -331,22 +335,21 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& /*event*/)
     }
 }
 
-bool PanRecognizer::CalculateTruthFingers() const
+bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
 {
-    std::map<int32_t, int32_t> totalFingers{{0, 0}, {1, 0}};
-    std::map<int32_t, double> totalDistance{{0, 0.0}, {1, 0.0}};
+    int32_t totalFingers = 0;
+    float totalDistance = 0.0f;
     for (auto& element : touchPointsDistance_) {
         auto each_point_move = element.second.GetY();
-        if (each_point_move > 0) {
-            totalFingers[1]++;
-            totalDistance[1] += each_point_move;
-        } else {
-            totalFingers[0]++;
-            totalDistance[0] -= each_point_move;
+        if (GreatNotEqual(each_point_move, 0.0) && isDirectionUp) {
+            totalFingers++;
+            totalDistance += each_point_move;
+        } else if (LessNotEqual(each_point_move, 0.0) && !isDirectionUp) {
+            totalFingers++;
+            totalDistance -= each_point_move;
         }
     }
-    if ((totalDistance[1] > distance_ && totalFingers[1] >= fingers_) ||
-        (totalDistance[0] > distance_ && totalFingers[0] >= fingers_)) {
+    if (GreatNotEqual(totalDistance, distance_) && totalFingers >= fingers_) {
         return true;
     } else {
         return false;
@@ -384,12 +387,11 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
         if (fabs(offset) < distance_) {
             return GestureAcceptResult::DETECTING;
         }
+        if ((direction_.type & PanDirection::UP) == 0) {
+            return CalculateTruthFingers(true) ? GestureAcceptResult::ACCEPT : GestureAcceptResult::REJECT;
+        }
         if ((direction_.type & PanDirection::DOWN) == 0) {
-            if (CalculateTruthFingers()) {
-                return GestureAcceptResult::ACCEPT;
-            } else {
-                return GestureAcceptResult::REJECT;
-            }
+            return CalculateTruthFingers(false) ? GestureAcceptResult::ACCEPT : GestureAcceptResult::REJECT;
         }
         return GestureAcceptResult::ACCEPT;
     }
@@ -401,9 +403,7 @@ void PanRecognizer::OnResetStatus()
     MultiFingersRecognizer::OnResetStatus();
     touchPoints_.clear();
     averageDistance_.Reset();
-    for (auto& element : touchPointsDistance_) {
-        element.second.Reset();
-    }
+    touchPointsDistance_.clear();
 }
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
@@ -426,16 +426,24 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             .SetLocalLocation(Offset(globalPoint_.GetX(), globalPoint_.GetY()) - coordinateOffset_);
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
+        info.SetTargetDisplayId(touchPoint.targetDisplayId);
         info.SetDelta(delta_);
         info.SetMainDelta(mainDelta_);
         if (inputEventType_ == InputEventType::AXIS) {
+            info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
             info.SetVelocity(Velocity());
             info.SetMainVelocity(0.0);
+            info.SetSourceTool(lastAxisEvent_.sourceTool);
         } else {
+            info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
             info.SetVelocity(velocityTracker_.GetVelocity());
             info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
+            info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetInputEventType(inputEventType_);
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
@@ -444,7 +452,6 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
-        info.SetSourceTool(lastTouchEvent_.sourceTool);
         (*callback)(info);
     }
 }

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_MODIFIER_H
 
+#include <algorithm>
 #include <vector>
 
 #include "base/geometry/ng/offset_t.h"
@@ -34,7 +35,7 @@ class SwitchModifier : public ContentModifier {
     DECLARE_ACE_TYPE(SwitchModifier, ContentModifier);
 
 public:
-    SwitchModifier(bool isSelect, const Color& boardColor, float mainDelta);
+    SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX);
     ~SwitchModifier() override = default;
 
     void onDraw(DrawingContext& context) override
@@ -64,12 +65,30 @@ public:
             default:
                 break;
         }
-        AnimationOption option = AnimationOption();
-        option.SetDuration(colorAnimationDuration_);
-        option.SetCurve(Curves::FAST_OUT_SLOW_IN);
-        AnimationUtils::Animate(option, [&]() {
+        // Animation is not displayed when created for the first time.
+        if (isFirstCreated_) {
+            animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
+            pointOffset_->Set(isSelect_->Get() ? size_->Get().Width() - size_->Get().Height() : 0.0f);
+            isFirstCreated_ = false;
+        }
+        AnimationOption colorOption = AnimationOption();
+        colorOption.SetDuration(colorAnimationDuration_);
+        colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        AnimationUtils::Animate(colorOption, [&]() {
             animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
         });
+
+        AnimationOption pointOption = AnimationOption();
+        pointOption.SetDuration(pointAnimationDuration_);
+        pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        float newPointOffset = 0.0f;
+        if (!isDragEvent_) {
+            newPointOffset = isSelect_->Get() ? size_->Get().Width() - size_->Get().Height() : 0.0f;
+        } else {
+            newPointOffset = std::clamp(
+                dragOffsetX_->Get() - offset_->Get().GetX(), 0.0f, size_->Get().Width() - size_->Get().Height());
+        }
+        AnimationUtils::Animate(pointOption, [&]() { pointOffset_->Set(newPointOffset); });
     }
 
     void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
@@ -143,16 +162,28 @@ public:
         }
     }
 
-    void SetMainDelta(float mainDelta)
+    void SetDragOffsetX(float dragOffsetX)
     {
-        if (mainDelta_) {
-            mainDelta_->Set(mainDelta);
+        if (dragOffsetX_) {
+            dragOffsetX_->Set(dragOffsetX);
+        }
+    }
+
+    void SetPointOffset(float pointOffset)
+    {
+        if (pointOffset_) {
+            pointOffset_->Set(pointOffset);
         }
     }
 
     void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
     {
         touchHoverType_ = touchHoverType;
+    }
+
+    void SetIsDragEvent(bool isDragEvent)
+    {
+        isDragEvent_ = isDragEvent;
     }
 
 private:
@@ -170,6 +201,9 @@ private:
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
+    float pointAnimationDuration_ = 0.0f;
+    bool isDragEvent_ = false;
+    bool isFirstCreated_ = true;
 
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
@@ -178,7 +212,8 @@ private:
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;
     RefPtr<AnimatablePropertyColor> animatePointColor_;
-    RefPtr<PropertyFloat> mainDelta_;
+    RefPtr<AnimatablePropertyFloat> pointOffset_;
+    RefPtr<PropertyFloat> dragOffsetX_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;
     RefPtr<AnimatablePropertyOffsetF> offset_;

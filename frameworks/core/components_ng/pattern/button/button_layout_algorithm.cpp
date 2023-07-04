@@ -53,7 +53,7 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (buttonLayoutProperty->HasLabel()) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_VOID(childWrapper);
-        auto childConstraint = childWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+        auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
         childWrapper->Measure(childConstraint);
         childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
         if (buttonLayoutProperty->HasFontSize()) {
@@ -123,8 +123,12 @@ std::optional<SizeF> ButtonLayoutAlgorithm::HandleLabelCircleButtonConstraint(La
         auto minLength = std::min(minbuttonLength - left - right, layoutConstraint.maxSize.Height() - top - bottom);
         constraintSize.SetSizeT(SizeF(minLength, minLength));
     }
-    if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
-        auto radius = buttonLayoutProperty->GetBorderRadiusValue().ConvertToPx();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, constraintSize);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, constraintSize);
+    if (renderContext->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
+        auto radius = GetFirstValidRadius(renderContext->GetBorderRadius().value()).ConvertToPx();
         auto minLength = std::min(2 * radius - left - right, 2 * radius - top - bottom);
         constraintSize.SetSizeT(SizeF(minLength, minLength));
     }
@@ -171,22 +175,24 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         }
     }
     Dimension radius;
+    auto renderContext = host->GetRenderContext();
     if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         auto minSize = std::min(frameSize.Height(), frameSize.Width());
-        if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
-            minSize = buttonLayoutProperty->GetBorderRadiusValue().ConvertToPx() * 2;
+        if (renderContext->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
+            minSize = GetFirstValidRadius(renderContext->GetBorderRadius().value()).ConvertToPx() * 2;
         }
         radius.SetValue(minSize / 2.0);
         BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+        renderContext->UpdateBorderRadius(borderRadius);
         MeasureCircleButton(layoutWrapper);
     } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
         radius.SetValue(frameSize.Height() / 2.0);
+        renderContext->UpdateBorderRadius({ radius, radius, radius, radius });
     } else {
-        radius = buttonLayoutProperty->GetBorderRadiusValue(Dimension());
+        auto normalRadius =
+            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
+        renderContext->UpdateBorderRadius(normalRadius);
     }
-    BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-    host->GetRenderContext()->UpdateBorderRadius(borderRadius);
 }
 
 void ButtonLayoutAlgorithm::HandleLabelCircleButtonFrameSize(
@@ -229,5 +235,22 @@ void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
     }
     frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+}
+
+Dimension ButtonLayoutAlgorithm::GetFirstValidRadius(const BorderRadiusProperty& borderRadius)
+{
+    if (borderRadius.radiusTopLeft.has_value()) {
+        return borderRadius.radiusTopLeft.value();
+    }
+    if (borderRadius.radiusTopRight.has_value()) {
+        return borderRadius.radiusTopRight.value();
+    }
+    if (borderRadius.radiusBottomLeft.has_value()) {
+        return borderRadius.radiusBottomLeft.value();
+    }
+    if (borderRadius.radiusBottomRight.has_value()) {
+        return borderRadius.radiusBottomRight.value();
+    }
+    return 0.0_vp;
 }
 } // namespace OHOS::Ace::NG

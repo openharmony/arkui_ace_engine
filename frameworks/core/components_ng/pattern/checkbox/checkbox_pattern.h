@@ -114,6 +114,11 @@ public:
         return preGroup_;
     }
 
+    int32_t GetPrePageId() const
+    {
+        return prePageId_;
+    }
+
     void SetPreName(const std::string& name)
     {
         preName_ = name;
@@ -122,6 +127,11 @@ public:
     void SetPreGroup(const std::string& group)
     {
         preGroup_ = group;
+    }
+
+    void SetPrePageId(int32_t pageId)
+    {
+        prePageId_ = pageId;
     }
 
     void SetLastSelect(bool select)
@@ -148,6 +158,9 @@ public:
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
 
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -159,6 +172,7 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
+    void CheckPageNode();
     void UpdateState();
     void UpdateUnSelect();
     void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
@@ -173,6 +187,7 @@ private:
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
+    int32_t prePageId_ = 0;
     bool lastSelect_ = false;
 
     RefPtr<ClickEvent> clickListener_;

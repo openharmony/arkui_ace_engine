@@ -41,6 +41,22 @@ void TextModelNG::Create(const std::string& content)
     textPattern->InitSurfaceChangedCallback();
 }
 
+void TextModelNG::SetFont(const Font& value)
+{
+    if (value.fontSize.has_value()) {
+        SetFontSize(value.fontSize.value());
+    }
+    if (value.fontWeight.has_value()) {
+        SetFontWeight(value.fontWeight.value());
+    }
+    if (!value.fontFamilies.empty()) {
+        SetFontFamily(value.fontFamilies);
+    }
+    if (value.fontStyle.has_value()) {
+        SetItalicFontStyle(value.fontStyle.value());
+    }
+}
+
 void TextModelNG::SetFontSize(const Dimension& value)
 {
     if (!value.IsValid()) {
@@ -147,7 +163,21 @@ void TextModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
 
 void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
 {
-    LOGE("no support OnClick");
+    auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnClickEvent(std::move(clickFunc));
+}
+
+void TextModelNG::ClearOnClick()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnClickEvent(nullptr);
 }
 
 void TextModelNG::SetRemoteMessage(std::function<void()>&& event)

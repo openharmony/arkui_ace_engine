@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension MIN_MENU_WIDTH = Dimension(64.0, DimensionUnit::VP);
+constexpr uint32_t MIN_GRID_COUNTS = 2;
 } // namespace
 
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -34,8 +34,12 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // constraint max size minus padding
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, childConstraint.maxSize);
-    // constraint min width 64.0_vp
-    auto minWidth = static_cast<float>(MIN_MENU_WIDTH.ConvertToPx());
+    // constraint min width base on grid column
+    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_VOID(columnInfo);
+    CHECK_NULL_VOID(columnInfo->GetParent());
+    columnInfo->GetParent()->BuildColumnWidth();
+    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     childConstraint.minSize.SetWidth(minWidth);
     // Calculate max width of menu items
     UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
@@ -72,7 +76,7 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
-        translate.AddY(child->GetGeometryNode()->GetFrameSize().Height());
+        translate.AddY(child->GetGeometryNode()->GetMarginFrameSize().Height());
     }
 }
 

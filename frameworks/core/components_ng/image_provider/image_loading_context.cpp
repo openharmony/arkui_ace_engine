@@ -133,23 +133,19 @@ void ImageLoadingContext::OnMakeCanvasImage()
     if (autoResize_ && !isPixelMapResource) {
         targetSize =
             CalculateTargetSize(srcRect_.GetSize(), dstRect_.GetSize(), GetSourceSize().value_or(GetImageSize()));
+        // step3: do second [ApplyImageFit] to calculate real srcRect used for paint based on resized image size
+        ImagePainter::ApplyImageFit(imageFit_, targetSize, dstSize_, srcRect_, dstRect_);
     }
-
-    // step3: do second [ApplyImageFit] to calculate real srcRect used for paint based on resized image size
-    ImagePainter::ApplyImageFit(imageFit_, targetSize, dstSize_, srcRect_, dstRect_);
 
     // upscale targetSize if size level is mapped
     bool forceResize = GetSourceSize().has_value();
-    if (!forceResize && sizeLevel_ > 0) {
+    if (!forceResize && targetSize.IsPositive() && sizeLevel_ > targetSize.Width()) {
         targetSize.ApplyScale(sizeLevel_ / targetSize.Width());
     }
 
-    if (auto image = ImageProvider::QueryCanvasImageFromCache(src_, targetSize); image) {
-        SuccessCallback(image);
-        return;
-    }
-    LOGD("start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
-    // step4: [MakeCanvasImage] according to [resizeTarget]
+    LOGD("start MakeCanvasImage: %{public}s, size = %{public}s", imageObj_->GetSourceInfo().ToString().c_str(),
+        targetSize.ToString().c_str());
+    // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->MakeCanvasImage(Claim(this), targetSize, forceResize, syncLoad_);
 }

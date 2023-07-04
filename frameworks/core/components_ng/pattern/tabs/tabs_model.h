@@ -74,6 +74,7 @@ public:
     virtual void SetScrollable(bool scrollable) = 0;
     virtual void SetAnimationDuration(float duration) = 0;
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
+    virtual void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) = 0;
     virtual void SetDivider(const TabsItemDivider& divider) = 0;
     virtual void SetFadingEdge(bool fadingEdge) = 0;
     virtual void SetBarOverlap(bool barOverlap) = 0;

@@ -66,4 +66,28 @@ TextStyle CreateTextStyleUsingThemeWithText(const RefPtr<FrameNode> frameNode,
     }
     return textStyle;
 }
+std::string GetFontSizeInJson(const std::optional<Dimension>& value)
+{
+    return value.value_or(TEXT_DEFAULT_FONT_SIZE).ToString();
+}
+std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value)
+{
+    return value.value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic";
+}
+std::string GetFontWeightInJson(const std::optional<FontWeight>& value)
+{
+    return V2::ConvertWrapFontWeightToStirng(value.value_or(FontWeight::NORMAL));
+}
+std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value)
+{
+    std::vector<std::string> fontFamilyVector = value.value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+    if (fontFamilyVector.empty()) {
+        fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
+    }
+    std::string fontFamily = fontFamilyVector.at(0);
+    for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+        fontFamily += ',' + fontFamilyVector.at(i);
+    }
+    return fontFamily;
+}
 } // namespace OHOS::Ace::NG

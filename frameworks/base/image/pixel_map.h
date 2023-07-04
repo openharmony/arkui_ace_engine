@@ -28,8 +28,8 @@ namespace Ace {
 
 enum class PixelFormat : int32_t {
     UNKNOWN = 0,
-    ARGB_8888 = 1,  // Each pixel is stored on 4 bytes.
-    RGB_565 = 2,    // Each pixel is stored on 2 bytes
+    ARGB_8888 = 1, // Each pixel is stored on 4 bytes.
+    RGB_565 = 2,   // Each pixel is stored on 2 bytes
     RGBA_8888 = 3,
     BGRA_8888 = 4,
     RGB_888 = 5,
@@ -51,11 +51,15 @@ class ACE_EXPORT PixelMap : public AceType {
     DECLARE_ACE_TYPE(PixelMap, AceType)
 
 public:
+    static RefPtr<PixelMap> Create(std::unique_ptr<Media::PixelMap>&& pixmap);
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
+    /**
+     * @param ptr: drawable pointer of type Napi::DrawableDescriptor&
+     */
     static RefPtr<PixelMap> GetFromDrawable(void* ptr);
     static RefPtr<PixelMap> CreatePixelMapFromDataAbility(void* uniquePtr);
-    static RefPtr<PixelMap> ConvertSkImageToPixmap(const uint32_t *colors, uint32_t colorLength,
-        int32_t width, int32_t height);
+    static RefPtr<PixelMap> ConvertSkImageToPixmap(
+        const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height);
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
     virtual const uint8_t* GetPixels() const = 0;
@@ -67,10 +71,7 @@ public:
     virtual void* GetRawPixelMapPtr() const = 0;
     virtual std::string GetId() = 0;
     virtual std::string GetModifyId() = 0;
-    virtual std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr()
-    {
-        return nullptr;
-    }
+    virtual std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() = 0;
 
     static void* GetReleaseContext(const RefPtr<PixelMap>& pixelMap);
     // passed to SkImage to release PixelMap shared_ptr

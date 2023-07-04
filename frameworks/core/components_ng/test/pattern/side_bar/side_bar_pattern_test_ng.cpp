@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/extensions/extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -42,6 +44,7 @@ constexpr bool SHOW_CONTROL_BUTTON = true;
 constexpr Dimension SIDE_BAR_WIDTH = 50.0_vp;
 constexpr Dimension MIN_SIDE_BAR_WIDTH = 50.0_vp;
 constexpr Dimension MAX_SIDE_BAR_WIDTH = 50.0_vp;
+constexpr Dimension MIN_CONTENT_WIDTH = 50.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr bool AUTO_HIDE = true;
@@ -109,15 +112,16 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg002, TestSize.Level1)
     SideBarContainerModelInstance.SetSideBarWidth(SIDE_BAR_WIDTH);
     SideBarContainerModelInstance.SetMinSideBarWidth(MIN_SIDE_BAR_WIDTH);
     SideBarContainerModelInstance.SetMaxSideBarWidth(MAX_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMinContentWidth(MIN_CONTENT_WIDTH);
     SideBarContainerModelInstance.SetAutoHide(AUTO_HIDE);
     SideBarContainerModelInstance.SetSideBarPosition(SIDE_BAR_POSITION);
     SideBarContainerModelInstance.SetControlButtonWidth(WIDTH);
     SideBarContainerModelInstance.SetControlButtonHeight(HEIGHT);
     SideBarContainerModelInstance.SetControlButtonLeft(LEFT);
     SideBarContainerModelInstance.SetControlButtonTop(TOP);
-    SideBarContainerModelInstance.SetControlButtonShowIconStr(SHOW_ICON_STR);
-    SideBarContainerModelInstance.SetControlButtonHiddenIconStr(HIDDEN_ICON_STR);
-    SideBarContainerModelInstance.SetControlButtonSwitchingIconStr(SWITCHING_ICON_STR);
+    SideBarContainerModelInstance.SetControlButtonShowIconInfo(SHOW_ICON_STR, false, nullptr);
+    SideBarContainerModelInstance.SetControlButtonHiddenIconInfo(HIDDEN_ICON_STR, false, nullptr);
+    SideBarContainerModelInstance.SetControlButtonSwitchingIconInfo(SWITCHING_ICON_STR, false, nullptr);
     ChangeEvent eventOnChange = [](const bool) {};
     SideBarContainerModelInstance.SetOnChange(std::move(eventOnChange));
     SideBarContainerModelInstance.MarkNeedInitRealSideBarWidth();
@@ -136,15 +140,16 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg002, TestSize.Level1)
     EXPECT_EQ(sideBarLayoutProperty->GetSideBarWidth(), SIDE_BAR_WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetMinSideBarWidth(), MIN_SIDE_BAR_WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetMaxSideBarWidth(), MAX_SIDE_BAR_WIDTH);
+    EXPECT_EQ(sideBarLayoutProperty->GetMinContentWidth(), MIN_CONTENT_WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetAutoHide(), AUTO_HIDE);
     EXPECT_EQ(sideBarLayoutProperty->GetSideBarPosition(), SIDE_BAR_POSITION);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonWidth(), WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHeight(), HEIGHT);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonLeft(), LEFT);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonTop(), TOP);
-    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonShowIconStr(), SHOW_ICON_STR);
-    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHiddenIconStr(), HIDDEN_ICON_STR);
-    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonSwitchingIconStr(), SWITCHING_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonShowIconInfo()->GetSrc(), SHOW_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHiddenIconInfo()->GetSrc(), HIDDEN_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonSwitchingIconInfo()->GetSrc(), SWITCHING_ICON_STR);
 }
 
 /**
@@ -324,17 +329,56 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg010, TestSize.Level1)
  */
 HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg011, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create sideBarContainer,controlButton node,then mount controlButton node to its parent
+     * frameNode.
+     * @tc.expected: check whether the sideBarContainer node's children is not empty.
+     */
     SideBarContainerModelNG SideBarContainerModelInstance;
     auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    EXPECT_FALSE(pattern == nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+
     SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+
+    /**
+     * @tc.steps: step2. get the default color of controlButton from sidebar theme, then execute UpdateControlButtonIcon
+     * method.
+     * @tc.expected: check whether the controlButton's fillColor is same as the default color.
+     */
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    Color controlButtonColor = sideBarTheme->GetControlImageColor();
+
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
     pattern->UpdateControlButtonIcon();
-    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+    auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
+
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->UpdateControlButtonIcon();
+    imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
+
+    pattern->sideBarStatus_ = SideBarStatus::CHANGING;
+    pattern->UpdateControlButtonIcon();
+    imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
 }
 
 /**
@@ -868,5 +912,177 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg030, TestSize.Level1)
     pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
     pattern->DoSideBarAnimation();
     EXPECT_EQ(pattern->showSideBar_, true);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg031
+ * @tc.desc: Test SideBar CreateAndMountControlButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBarContainer node, and set the state of ShowSideBar to false.
+     * Then execute CreateAndMountControlButton method.
+     * @tc.expected: check whether the controlButton's fillColor is same as the default color.
+     */
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+
+    SideBarContainerModelInstance.SetShowSideBar(false);
+    SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    Color controlButtonColor = sideBarTheme->GetControlImageColor();
+
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg032
+ * @tc.desc: Test SideBar InitControlButtonMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar and controlbutton node,then register inputEvent to inputeEventHub.
+     * @tc.expected: check whether the controlButtonHoverEvent_ is not nullptr.
+     */
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imgNode = FrameNode::GetOrCreateFrameNode(
+        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imgNode, nullptr);
+    auto imgHub = imgNode->GetEventHub<EventHub>();
+    ASSERT_NE(imgHub, nullptr);
+    auto inputHub = imgHub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    pattern->SetHasControlButton(true);
+    EXPECT_EQ(pattern->controlButtonHoverEvent_, nullptr);
+    pattern->InitControlButtonMouseEvent(inputHub);
+    EXPECT_NE(pattern->controlButtonHoverEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg033
+ * @tc.desc: Test SideBar OnControlButtonHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBarContainer frameNode, then execute OnControlButtonHover method(hover is true).
+     * @tc.expected: check whether the isControlButtonHover_ is false.
+     */
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    pattern->OnControlButtonHover(true);
+    EXPECT_FALSE(pattern->isControlButtonHover_);
+
+    /**
+     * @tc.steps: step2. create controlButton node,and mount controlButton node to its parent frameNode.
+     * Then execute OnControlButtonHover method(hover is true).
+     * @tc.expected: check whether the isControlButtonHover_ is true.
+     */
+    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imgNode = FrameNode::GetOrCreateFrameNode(
+        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imgNode, nullptr);
+    imgNode->MountToParent(frameNode);
+    pattern->OnControlButtonHover(true);
+    EXPECT_TRUE(pattern->isControlButtonHover_);
+
+    /**
+     * @tc.steps: step3. remove hover from the controlButton.
+     * @tc.expected: check whether the isControlButtonHover_ is false.
+     */
+    pattern->OnControlButtonHover(false);
+    EXPECT_FALSE(pattern->isControlButtonHover_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg034
+ * @tc.desc: Test SideBar HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBarContainer frameNode,then execute HandleMouseEvent method.
+     * @tc.expected: check whether the isControlButtonHover_ is false.
+     */
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    MouseInfo info;
+    info.SetAction(MouseAction::PRESS);
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    pattern->HandleMouseEvent(info);
+    EXPECT_FALSE(pattern->isControlButtonHover_);
+
+    /**
+     * @tc.steps: step2. create controlButton frameNode, and mount it to its parent frameNode.
+     * Then execute HandleMouseEvent method.
+     * @tc.expected: check whether the isControlButtonHover_ is false.
+     */
+    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imgNode = FrameNode::GetOrCreateFrameNode(
+        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imgNode, nullptr);
+    imgNode->MountToParent(frameNode);
+
+    pattern->HandleMouseEvent(info);
+    EXPECT_FALSE(pattern->isControlButtonHover_);
+
+    /**
+     * @tc.steps: step3. execute OnControlButtonHover method(hover is true).
+     * @tc.expected: check whether the isControlButtonHover_ is true.
+     */
+    pattern->OnControlButtonHover(true);
+    pattern->HandleMouseEvent(info);
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEvent(info);
+    info.SetAction(MouseAction::HOVER_ENTER);
+    pattern->HandleMouseEvent(info);
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    pattern->HandleMouseEvent(info);
+    EXPECT_TRUE(pattern->isControlButtonHover_);
 }
 } // namespace OHOS::Ace::NG

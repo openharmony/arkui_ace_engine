@@ -59,16 +59,16 @@ void ScrollModelImpl::SetAxis(Axis axis)
     JSViewSetProperty(&ScrollComponent::SetAxisDirection, axis);
 }
 
-void ScrollModelImpl::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
+void ScrollModelImpl::SetOnScrollBegin(OnScrollBeginEvent&& event)
 {
     JSViewSetProperty(&ScrollComponent::SetOnScrollBegin, std::move(event));
 }
 
-void ScrollModelImpl::SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event)
+void ScrollModelImpl::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event)
 {
 }
 
-void ScrollModelImpl::SetOnScroll(NG::OnScrollEvent&& event)
+void ScrollModelImpl::SetOnScroll(NG::ScrollEvent&& event)
 {
     auto onScroll = EventMarker([scrollEvent = std::move(event)](const BaseEventInfo* info) {
         auto eventInfo = TypeInfoHelper::DynamicCast<ScrollEventInfo>(info);

@@ -347,7 +347,7 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
         selectStart_->Set(start - PointF());
     }
     CHECK_NULL_VOID(selectEnd_);
-    if (needAnimate_) {
+    if (needAnimate_ && isVisible_) {
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
@@ -362,7 +362,7 @@ void SliderContentModifier::SetCircleCenter(const PointF& center)
 {
     CHECK_NULL_VOID(blockCenterX_);
     CHECK_NULL_VOID(blockCenterY_);
-    if (needAnimate_) {
+    if (needAnimate_ && isVisible_) {
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
@@ -623,5 +623,30 @@ void SliderContentModifier::SetBlockShape(const RefPtr<BasicShape>& shape)
         rectBottomRightRadiusX_->Set(rect->GetBottomRightRadius().GetX().ConvertToPx());
         rectBottomRightRadiusY_->Set(rect->GetBottomRightRadius().GetY().ConvertToPx());
     }
+}
+
+void SliderContentModifier::UpdateContentDirtyRect(const SizeF& frameSize)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    auto hotShadowWidth = sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)
+                              ? theme->GetOutsetHotBlockShadowWidth().ConvertToPx()
+                              : theme->GetInsetHotBlockShadowWidth().ConvertToPx();
+    auto circleSize =
+        SizeF(blockSize_->Get().Width() + hotShadowWidth / HALF, blockSize_->Get().Height() + hotShadowWidth / HALF);
+    RectF rect;
+    if (directionAxis_->Get() == static_cast<int32_t>(Axis::HORIZONTAL)) {
+        auto maxWidth = std::max(circleSize.Height(), frameSize.Height()) * HALF;
+        rect.SetOffset(OffsetF(-circleSize.Width(), blockCenterY_->Get() - maxWidth));
+        rect.SetSize(SizeF(circleSize.Width() / HALF + frameSize.Width(), maxWidth / HALF));
+    } else {
+        auto maxWidth = std::max(circleSize.Width(), frameSize.Width()) * HALF;
+        rect.SetOffset(OffsetF(blockCenterX_->Get() - maxWidth, -circleSize.Height()));
+        rect.SetSize(SizeF(maxWidth / HALF, circleSize.Height() / HALF + frameSize.Height()));
+    }
+
+    SetBoundsRect(rect);
 }
 } // namespace OHOS::Ace::NG

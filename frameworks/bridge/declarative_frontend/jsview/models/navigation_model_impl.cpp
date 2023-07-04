@@ -247,6 +247,11 @@ void NavigationModelImpl::SetNavigationStack(RefPtr<NG::NavigationStack>&& navig
     return;
 }
 
+void NavigationModelImpl::SetNavigationStackProvided(bool provided)
+{
+    return;
+}
+
 void NavigationModelImpl::SetNavDestination(std::function<void(std::string)>&& builder)
 {
     return;

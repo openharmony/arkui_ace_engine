@@ -20,7 +20,6 @@
 #include <condition_variable>
 #include <mutex>
 #include <string>
-#include <uv.h>
 #include "core/components/plugin/plugin_component_callback.h"
 #include "js_plugin_data.h"
 

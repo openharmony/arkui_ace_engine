@@ -24,6 +24,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/gestures/gesture_info.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
@@ -158,6 +159,7 @@ public:
         VerticalAlign verticalAlign = VerticalAlign::BASELINE);
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    std::string GetFont() const;
 };
 
 struct ImageSpanItem : public SpanItem {
@@ -195,7 +197,7 @@ public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(int32_t nodeId);
 
     explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId) {}
-    ~SpanNode() override = default;
+    ~SpanNode() override;
 
     bool IsAtomicNode() const override
     {
@@ -232,7 +234,6 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
-
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -286,6 +287,7 @@ public:
                        inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
         return inheritPropertyInfo;
     }
+
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
     std::set<PropertyInfo> propertyInfo_;

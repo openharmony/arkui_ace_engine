@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <string>
 
 #include "base/utils/string_utils.h"
 
@@ -48,8 +49,10 @@ bool DrawableDescriptor::GetPixelMapFromBuffer()
     mediaData_.reset();
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
-    auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
-    pixelMap_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    if (imageSource) {
+        auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
+        pixelMap_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    }
     if (errorCode != 0 || !pixelMap_) {
         HILOG_ERROR("Get PixelMap from buffer failed");
         return false;
@@ -302,5 +305,14 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
 
     HILOG_ERROR("Failed to GetPixelMap!");
     return nullptr;
+}
+
+std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
+{
+    const std::string name = "ohos_drawable_descriptor_path";
+    std::string data;
+    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+    resMgr->GetStringByName(name.c_str(), data);
+    return data;
 }
 } // namespace OHOS::Ace::Napi

@@ -45,6 +45,7 @@ constexpr double SIDE_BAR_SIZE = 1.0;
 constexpr float SIZEF_WIDTH = 2.0f;
 constexpr float SIZEF_HEIGHT = 3.0f;
 constexpr float PARENT_WIDTH = 4.0f;
+constexpr float MIN_PARENT_WIDTH = 0.0f;
 } // namespace
 
 class SideBarLayoutTestNg : public testing::Test {
@@ -270,5 +271,80 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg007, TestSize.Level1)
     EXPECT_NE(layoutAlgorithm->realSideBarHeight_, 0);
     EXPECT_NE(layoutWrapper->layoutProperty_, nullptr);
     EXPECT_NE(layoutWrapper->geometryNode_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarLayoutTestNg008
+ * @tc.desc: Test SideBar AutoMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SideBar and frameNode.
+     */
+    auto sideBarFrameNode =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set parentWidth > (minSidebarWidth + minContentWidth)
+     * @tc.expected: SideBarContainerType == EMBED
+     */
+    float parentWidth = PARENT_WIDTH;
+    layoutAlgorithm->AutoMode(
+        AccessibilityManager::RawPtr(layoutWrapper), parentWidth, layoutAlgorithm->minContentWidth_, 0.0);
+    EXPECT_EQ(layoutAlgorithm->type_, SideBarContainerType::EMBED);
+
+    /**
+     * @tc.steps: step3. set parentWidth < (minSidebarWidth + minContentWidth)
+     * @tc.expected: SideBarContainerType == OVERLAY
+     */
+    parentWidth = MIN_PARENT_WIDTH;
+    layoutAlgorithm->minContentWidth_ = 1.0f;
+    layoutAlgorithm->AutoMode(
+        AccessibilityManager::RawPtr(layoutWrapper), parentWidth, layoutAlgorithm->minContentWidth_, 0.0);
+    EXPECT_EQ(layoutAlgorithm->type_, SideBarContainerType::OVERLAY);
+}
+
+/**
+ * @tc.name: SideBarLayoutTestNg009
+ * @tc.desc: Test SideBar AutoChangeSideBarWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SideBar and frameNode.
+     */
+    auto sideBarFrameNode =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    EXPECT_FALSE(sideBarFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(layoutWrapper == nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
+    EXPECT_FALSE(layoutAlgorithm == nullptr);
+
+    /**
+     * @tc.steps: step2. set parentWidth < (realSidebarWidth + minContentWidth)
+     * @tc.expected: realSidebarWidth change
+     */
+    auto parentWidth = MIN_PARENT_WIDTH;
+    layoutAlgorithm->minContentWidth_ = 2.0f;
+    layoutAlgorithm->realSideBarWidth_ = 2.0f;
+    layoutAlgorithm->AutoChangeSideBarWidth(AccessibilityManager::RawPtr(layoutWrapper), parentWidth, 1.0, 1.0);
+    EXPECT_NE(layoutAlgorithm->realSideBarWidth_, 2.0f);
 }
 } // namespace OHOS::Ace::NG

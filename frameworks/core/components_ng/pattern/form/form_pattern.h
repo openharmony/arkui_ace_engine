@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H
 
+#include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
@@ -63,6 +64,8 @@ public:
     void DispatchPointerEvent(
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
 
+    void OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
+
     RefPtr<RenderContext> GetExternalRenderContext()
     {
         return externalRenderContext_;
@@ -77,6 +80,7 @@ public:
     {
         isUnTrust_ = isUnTrust;
     }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -96,6 +100,17 @@ private:
 
     bool ISAllowUpdate() const;
     void EnableDrag();
+    void UpdateConfiguration();
+
+    void HandleSnapshot();
+    void TakeSurfaceCaptureForUI();
+    void UpdateStaticCard();
+    RefPtr<FrameNode> GetOrCreateImageNode();
+    void UpdateImageNode();
+    void RemoveFrsNode();
+    void ReleaseRenderer();
+    void HideImageNode();
+
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -106,6 +121,10 @@ private:
     bool isLoaded_ = false;
     bool isVisible_ = true;
     bool isUnTrust_ = false;
+    bool isDynamic_ = true;
+    RefPtr<PixelMap> pixelMap_ = nullptr;
+    int32_t scopeId_;
+    std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
 };
 
 } // namespace NG

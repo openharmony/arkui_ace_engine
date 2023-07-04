@@ -28,9 +28,9 @@ public:
     ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession) : screenSession_(screenSession) {}
     ~ScreenPattern() override = default;
 
-    bool UseExternalRSNode() const override
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return true;
+        return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
 protected:

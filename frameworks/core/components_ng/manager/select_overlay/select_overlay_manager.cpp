@@ -22,8 +22,10 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(const SelectOverlayInfo& info)
+RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
+    const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host)
 {
+    host_ = host;
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, nullptr);
     auto current = selectOverlayItem_.Upgrade();
@@ -32,6 +34,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(cons
             auto proxy = MakeRefPtr<SelectOverlayProxy>(current->GetId());
             return proxy;
         }
+        NotifyOverlayClosed(true);
         DestroySelectOverlay(current->GetId());
     }
     selectOverlayInfo_ = info;
@@ -53,14 +56,9 @@ void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>
 
 void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId)
 {
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
     auto current = selectOverlayItem_.Upgrade();
     if (current && (current->GetId() == overlayId)) {
-        rootNode->RemoveChild(current);
-        rootNode->MarkNeedSyncRenderTree();
-        rootNode->RebuildRenderContextTree();
-        selectOverlayItem_.Reset();
+        DestroyHelper(current);
     } else {
         LOGD("current overlay id %{public}d is already destroyed.", overlayId);
     }
@@ -68,16 +66,24 @@ void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId)
 
 void SelectOverlayManager::DestroySelectOverlay()
 {
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
     auto current = selectOverlayItem_.Upgrade();
     if (current) {
-        LOGD("destroy overlay, id is %{public}d.", current->GetId());
-        rootNode->RemoveChild(current);
-        rootNode->MarkNeedSyncRenderTree();
-        rootNode->RebuildRenderContextTree();
-        selectOverlayItem_.Reset();
+        DestroyHelper(current);
     }
+}
+
+void SelectOverlayManager::DestroyHelper(const RefPtr<FrameNode>& overlay)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    LOGD("destroy overlay, id is %{public}d.", overlay->GetId());
+    rootNode->RemoveChild(overlay);
+    rootNode->MarkNeedSyncRenderTree();
+    rootNode->RebuildRenderContextTree();
+    selectOverlayItem_.Reset();
+    host_.Reset();
+    touchDownPoints_.clear();
+    selectOverlayInfo_.callerFrameNode.Reset();
 }
 
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
@@ -89,18 +95,18 @@ bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 
 bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
 {
+    auto host = host_.Upgrade();
+    if (host && host->BetweenSelectedPosition(Offset { point.GetX(), point.GetY() })) {
+        return true;
+    }
     auto current = selectOverlayItem_.Upgrade();
     CHECK_NULL_RETURN_NOLOG(current, false);
     auto selectOverlayNode = DynamicCast<SelectOverlayNode>(current);
     if (selectOverlayNode) {
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
-    } else {
-        auto menuRect = current->GetGeometryNode()->GetFrameRect();
-        if (menuRect.IsInRegion(point)) {
-            return true;
-        }
     }
-    return false;
+    auto menuRect = current->GetGeometryNode()->GetFrameRect();
+    return menuRect.IsInRegion(point);
 }
 
 RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t overlayId)
@@ -124,5 +130,56 @@ bool SelectOverlayManager::IsSameSelectOverlayInfo(const SelectOverlayInfo& info
         return false;
     }
     return true;
+}
+
+void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset)
+{
+    CHECK_NULL_VOID(!selectOverlayItem_.Invalid());
+    NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
+    // handle global touch event.
+    if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::TOUCH) {
+        NG::PointF rootPoint { touchPoint.x, touchPoint.y };
+        if ((IsInCallerArea(rootPoint, rootOffset)) || IsInSelectedOrSelectOverlayArea(point)) {
+            return;
+        }
+        touchDownPoints_.push_back(point);
+        return;
+    }
+    bool acceptTouchUp = !touchDownPoints_.empty();
+    if (touchPoint.type == TouchType::UP && touchPoint.sourceType == SourceType::TOUCH && acceptTouchUp) {
+        auto lastTouchDownPoint = touchDownPoints_.back();
+        touchDownPoints_.pop_back();
+        point.SetX(lastTouchDownPoint.GetX());
+        point.SetY(lastTouchDownPoint.GetY());
+    }
+
+    // handle global mouse event.
+    if ((touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) && !acceptTouchUp) {
+        return;
+    }
+    if (!IsInSelectedOrSelectOverlayArea(point)) {
+        NotifyOverlayClosed(true);
+        DestroySelectOverlay();
+    }
+}
+
+bool SelectOverlayManager::IsInCallerArea(const PointF& point, const NG::OffsetF& rootOffset)
+{
+    auto frameNode = selectOverlayInfo_.callerFrameNode.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto parentOffset = frameNode->GetPaintRectOffset(true) - rootOffset;
+    auto localPoint = point - parentOffset;
+    auto paintRect = frameNode->GetPaintRectWithTransform();
+    return paintRect.IsInRegion(localPoint);
+}
+
+void SelectOverlayManager::NotifyOverlayClosed(bool closedByGlobalEvent)
+{
+    auto current = selectOverlayItem_.Upgrade();
+    if (current) {
+        auto selectOverlayNode = DynamicCast<SelectOverlayNode>(current);
+        CHECK_NULL_VOID(selectOverlayNode);
+        selectOverlayNode->SetClosedByGlobalEvent(closedByGlobalEvent);
+    }
 }
 } // namespace OHOS::Ace::NG

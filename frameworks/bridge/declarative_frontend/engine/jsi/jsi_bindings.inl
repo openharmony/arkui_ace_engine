@@ -17,7 +17,6 @@
 
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsi_bindings.h"
-#include "uicast_interface/uicast_jsi_impl.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -524,12 +523,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
     constexpr bool isVoid = std::is_void_v<R>;
     constexpr bool hasArguments = sizeof...(Args) != 0;
 
-    {
-        constexpr bool singleArg = sizeof...(Args) == 1;
-        std::string cmd = std::string(ThisJSClass::JSName()) + "::" + binding->Name();
-        UICastJsiImpl::CacheAceCmd(cmd, isVoid, hasArguments, singleArg, runtimeCallInfo, vm);
-    }
-
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     if constexpr (isVoid && hasArguments) {
         // void C::MemberFunction(Args...)
@@ -562,12 +555,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRu
     }
     auto fnPtr = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(runtimeCallInfo);
-
-    {
-        std::string cmd = std::string(ThisJSClass::JSName()) + "::" + binding->Name();
-        UICastJsiImpl::CacheAceCmd(cmd, info);
-    }
-
     fnPtr(info);
     std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal = info.GetReturnValue();
     auto jsVal = std::get_if<panda::CopyableGlobal<panda::JSValueRef>>(&retVal);

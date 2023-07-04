@@ -80,7 +80,7 @@ public:
             }
             auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
             paintMethod->SetAxis(swiperPattern->GetDirection());
-            paintMethod->SetCurrentIndex(swiperPattern->GetCurrentIndex());
+            paintMethod->SetCurrentIndex(swiperPattern->GetCurrentFirstIndex());
             paintMethod->SetItemCount(swiperPattern->TotalCount());
             paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
             paintMethod->SetIsHover(isHover_);
@@ -111,6 +111,7 @@ public:
         auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_RETURN(swiperTheme, FocusPattern());
         FocusPaintParam paintParam;
+        paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }

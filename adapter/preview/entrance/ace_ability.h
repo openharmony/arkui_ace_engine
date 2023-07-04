@@ -19,17 +19,23 @@
 #include <atomic>
 #include <thread>
 
-#ifdef ENABLE_ROSEN_BACKEND
-#include "glfw_render_context.h"
-#else
-#include "flutter/shell/platform/glfw/public/flutter_glfw.h"
-#endif
-
 #include "adapter/preview/entrance/ace_run_args.h"
-#include "adapter/preview/external/window/window.h"
-#include "base/utils/macros.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
+#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
+#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
+#include "adapter/preview/external/ability/context.h"
+#include "adapter/preview/external/ability/fa/fa_context.h"
+#include "adapter/preview/external/ability/stage/stage_context.h"
+#include "adapter/preview/external/multimodalinput/axis_event.h"
+#include "adapter/preview/external/multimodalinput/key_event.h"
+#include "adapter/preview/external/multimodalinput/pointer_event.h"
+#include "frameworks/base/utils/macros.h"
+
+#include <memory>
+#include <refbase.h>
+
+namespace OHOS::Rosen {
+    class Window;
+}
 
 namespace OHOS::Ace::Platform {
 
@@ -54,22 +60,21 @@ struct SystemParams {
     OHOS::Ace::DeviceOrientation orientation { DeviceOrientation::PORTRAIT };
 };
 
-#ifndef ENABLE_ROSEN_BACKEND
-using GlfwController = FlutterDesktopWindowControllerRef;
-#else
-using GlfwController = std::shared_ptr<OHOS::Rosen::GlfwRenderContext>;
-#endif
-
-class ACE_FORCE_EXPORT_WITH_PREVIEW AceAbility {
+class ACE_FORCE_EXPORT AceAbility {
 public:
     explicit AceAbility(const AceRunArgs& runArgs);
     ~AceAbility();
 
-    // Be called in Previewer frontend thread, which is not ACE platform thread.    
-    static std::unique_ptr<AceAbility> CreateInstance(AceRunArgs& runArgs);    
-    void InitEnv();    
-    void Start();
-    static void Stop();
+    // Be called in Previewer frontend thread, which is not ACE platform thread.
+    static std::unique_ptr<AceAbility> CreateInstance(AceRunArgs& runArgs);
+    void InitEnv();
+    void InitializeClipboard() const;
+    void OnBackPressed() const;
+    bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const;
+    bool OnInputMethodEvent(const unsigned int codePoint) const;
+
     void OnConfigurationChanged(const DeviceConfig& newConfig);
     void SurfaceChanged(
         const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height);
@@ -79,37 +84,24 @@ public:
     std::string GetJSONTree();
     std::string GetDefaultJSONTree();
     bool OperateComponent(const std::string& attrsJson);
-    GlfwController GetGlfwWindowController()
-    {
-        return controller_;
-    }
-
-    void SetWindow(sptr<OHOS::Rosen::Window> rsWindow)
-    {
-        rsWindow_ = rsWindow;
-    }
-
-    sptr<OHOS::Rosen::Window> GetWindow()
-    {
-        return rsWindow_;
-    }
+    void SetWindow(sptr<OHOS::Rosen::Window> rsWindow);
+    sptr<OHOS::Rosen::Window> GetWindow();
 
 private:
-    void RunEventLoop();
-
+    void InitializeAppInfo();
     void SetConfigChanges(const std::string& configChanges);
 
-    void SetGlfwWindowController(const GlfwController &controller)
-    {
-        controller_ = controller;
-    }
-
-    // flag indicating if the glfw message loop should be running.
-    static std::atomic<bool> loopRunning_;
     AceRunArgs runArgs_;
     ConfigChanges configChanges_;
-    GlfwController controller_ = nullptr;
     sptr<OHOS::Rosen::Window> rsWindow_;
+
+    std::string bundleName_;
+    std::string moduleName_;
+    std::string compileMode_;
+    int32_t compatibleVersion_ = 0;
+    bool installationFree_ = false;
+    uint32_t labelId_ = 0;
+    bool useNewPipeline_ = true;
 };
 
 } // namespace OHOS::Ace::Platform

@@ -252,7 +252,7 @@ public:
     {
         return border_;
     }
-
+#ifndef USE_ROSEN_DRAWING
     virtual void* GetSkImage() {
         return nullptr;
     }
@@ -261,6 +261,17 @@ public:
     {
         return nullptr;
     }
+#else
+    virtual void* GetDrawingImage()
+    {
+        return nullptr;
+    }
+
+    virtual RefPtr<PixelMap> GetPixmapFromDrawingImage()
+    {
+        return nullptr;
+    }
+#endif
 
     void OnPaintFinish() override;
     void OnLongPress(const LongPressInfo& longPressInfo);
@@ -389,7 +400,11 @@ protected:
     bool forceResize_ = false;
     bool forceReload_ = false;
     Size imageSizeForEvent_;
+#ifndef USE_ROSEN_DRAWING
     bool useSkiaSvg_ = true;
+#else
+    bool useDrawingSvg_ = true;
+#endif
     bool directPaint_ = false;
     int32_t retryCnt_ = 0;
     std::list<std::function<void()>> imageLayoutCallbacks_;

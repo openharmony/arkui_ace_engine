@@ -50,6 +50,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_TOAST,
     THEME_PATTERN_DIALOG,
     THEME_PATTERN_DRAG_BAR,
+    THEME_PATTERN_CLOSE_ICON,
     THEME_PATTERN_SEMI_MODAL,
     // append
     THEME_PATTERN_BADGE,
@@ -87,7 +88,8 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_APP_BAR,
     THEME_PATTERN_ADVANCED_PATTERN,
     THEME_PATTERN_SECURITY_COMPONENT,
-    THEME_PATTERN_FORM
+    THEME_PATTERN_FORM,
+    THEME_PATTERN_SIDE_BAR
 };
 
 bool IsDirExist(const std::string& path)
@@ -142,14 +144,6 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     }
     packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
     resConfig_ = resConfig;
-}
-
-void ResourceAdapterImpl::Reload()
-{
-    std::string resIndexPath = packagePathStr_ + "resources.index";
-    auto resRet = sysResourceManager_->AddResource(resIndexPath.c_str());
-    auto configRet = sysResourceManager_->UpdateResConfig(*resConfig_);
-    LOGI("UICast result=%{public}d, UpdateResConfig result=%{public}d", resRet, configRet);
 }
 
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)

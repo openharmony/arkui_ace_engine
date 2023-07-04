@@ -34,7 +34,7 @@ std::atomic<float> ImageCache::clearCacheFileRatio_ = 0.5f; // default clear rat
 bool ImageCache::hasSetCacheFileInfo_ = false;
 
 std::mutex ImageCache::cacheFileSizeMutex_;
-int32_t ImageCache::cacheFileSize_ = 0;
+int64_t ImageCache::cacheFileSize_ = 0;
 
 std::mutex ImageCache::cacheFileInfoMutex_;
 std::list<FileInfo> ImageCache::cacheFileInfo_;
@@ -117,25 +117,10 @@ void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<Cached
     CacheWithCountLimitLRU<std::shared_ptr<CachedImage>>(key, image, cacheList_, imageCache_, capacity_);
 }
 
-void ImageCache::CacheImageNG(const std::string& key, const std::shared_ptr<NG::CachedImage>& image)
-{
-    if (key.empty() || capacity_ == 0) {
-        return;
-    }
-    std::scoped_lock lock(imageCacheMutex_);
-    CacheWithCountLimitLRU<std::shared_ptr<NG::CachedImage>>(key, image, cacheListNG_, imageCacheNG_, capacity_);
-}
-
 std::shared_ptr<CachedImage> ImageCache::GetCacheImage(const std::string& key)
 {
     std::scoped_lock lock(imageCacheMutex_);
     return GetCacheObjWithCountLimitLRU<std::shared_ptr<CachedImage>>(key, cacheList_, imageCache_);
-}
-
-std::shared_ptr<NG::CachedImage> ImageCache::GetCacheImageNG(const std::string& key)
-{
-    std::scoped_lock lock(imageCacheMutex_);
-    return GetCacheObjWithCountLimitLRU<std::shared_ptr<NG::CachedImage>>(key, cacheListNG_, imageCacheNG_);
 }
 
 void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj)
@@ -306,7 +291,7 @@ void ImageCache::SetCacheFileInfo()
         LOGW("cache file path wrong! maybe it is not set.");
         return;
     }
-    int32_t cacheFileSize = 0;
+    int64_t cacheFileSize = 0;
     dirent* filePtr = readdir(dir.get());
     while (filePtr != nullptr) {
         // skip . or ..
@@ -318,7 +303,7 @@ void ImageCache::SetCacheFileInfo()
                 continue;
             }
             cacheFileInfo_.emplace_back(filePath, fileStatus.st_size, fileStatus.st_atime);
-            cacheFileSize += static_cast<int32_t>(fileStatus.st_size);
+            cacheFileSize += static_cast<int64_t>(fileStatus.st_size);
         }
         filePtr = readdir(dir.get());
     }

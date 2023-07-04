@@ -28,6 +28,27 @@ Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
     }
     return JSValueRef::Undefined(info->GetVM());
 }
+
+Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo = static_cast<TouchEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    std::list<TouchLocationInfo> history;
+    auto touches = eventInfo->GetTouches();
+    history = eventInfo->GetHistory();
+    Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
+    auto index = 0;
+    Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
+    for (auto const &point : history) {
+        objRef->Set(info->GetVM(), index, ToJSValue(point));
+        ArrayRef::SetValueAt(info->GetVM(), valueArray, index++, objRef);
+    }
+
+    return valueArray;
+}
 #endif
 
 } // namespace OHOS::Ace::Framework

@@ -358,7 +358,7 @@ double Color::ConvertGammaToLinear(uint8_t value)
 
 uint8_t Color::ConvertLinearToGamma(double value)
 {
-    return std::clamp(static_cast<int32_t>(std::pow(value, 1.0 / GAMMA_FACTOR)), 0, UINT8_MAX);
+    return std::clamp(static_cast<int32_t>(round(std::pow(value, 1.0 / GAMMA_FACTOR))), 0, UINT8_MAX);
 }
 
 void Color::ConvertGammaToLinear(const Color& gammaColor, double& linearRed, double& linearGreen, double& linearBlue)
@@ -373,7 +373,7 @@ Color Color::ConvertLinearToGamma(double alpha, double linearRed, double linearG
     uint8_t gammaRed = ConvertLinearToGamma(linearRed);
     uint8_t gammaGreen = ConvertLinearToGamma(linearGreen);
     uint8_t gammaBlue = ConvertLinearToGamma(linearBlue);
-    uint8_t gammaAlpha = std::clamp(static_cast<int32_t>(alpha), 0, UINT8_MAX);
+    uint8_t gammaAlpha = std::clamp(static_cast<int32_t>(round(alpha)), 0, UINT8_MAX);
 
     return FromARGB(gammaAlpha, gammaRed, gammaGreen, gammaBlue);
 }

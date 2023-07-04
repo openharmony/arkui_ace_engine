@@ -31,6 +31,8 @@ public:
     MOCK_METHOD1(GetPointWithTransform, void(PointF&));
     MOCK_METHOD2(AddChild, void(const RefPtr<RenderContext>& renderContext, int index));
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
+    MOCK_METHOD1(SetVisible, void(bool));
+    MOCK_METHOD1(BlendBgColor, void(const Color&));
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

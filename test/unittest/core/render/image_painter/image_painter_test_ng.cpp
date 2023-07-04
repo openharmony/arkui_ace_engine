@@ -18,6 +18,8 @@
 #include "base/utils/utils.h"
 #define protected public
 #define private public
+#include "base/geometry/ng/point_t.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -52,6 +54,8 @@ NG::SizeF srcSize {1, 1};
 
 NG::RectF srcRect_ {2, 1, 2, 1};
 NG::RectF dstRect_ {1, 1, 1, 1};
+
+NG::PointF pointF_ {10.0, 10.0};
 }
 
 class ImagePainterTestNg : public testing::Test {};
@@ -113,6 +117,58 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
     imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
     EXPECT_EQ(CONTENTRECT.Width(), 1);
     EXPECT_EQ(CONTENTRECT.Height(), 1);
+
+    /**
+     * @tc.steps7: callback DrawImage.
+     * @tc.expected: expect imagePainter.canvasImage_ is not null
+     */
+    ASSERT_NE(imagePainter.canvasImage_->paintConfig_, nullptr);
+    std::vector<ObscuredReasons> reasons;
+    reasons.emplace_back(static_cast<ObscuredReasons>(0));
+    imagePainter.canvasImage_->paintConfig_->obscuredReasons_ = reasons;
+    imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
+    EXPECT_NE(imagePainter.canvasImage_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_DrawObscuration001
+ * @tc.desc: Test DrawObscuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawObscuration001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create a imagePainter and imagePaintConfig object.
+     */
+    RefPtr<NG::CanvasImage> canvasImage;
+    NG::ImagePainter imagePainter(canvasImage);
+    NG::ImagePaintConfig imagePaintConfig;
+    /**
+     * @tc.steps2: build a pixelMapImage object.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    auto ptr = PixelMap::CreatePixelMap(voidPtr);
+    NG::PixelMapImage pixelMapImage(ptr);
+    imagePainter.canvasImage_ = pixelMapImage.Create(ptr);
+    imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>();
+    ASSERT_NE(imagePainter.canvasImage_, nullptr);
+    ASSERT_NE(imagePainter.canvasImage_->paintConfig_, nullptr);
+    /**
+     * @tc.steps3: call DrawObscuration.
+     * @tc.expected: expect canvasImage_.borderRadiusXY_ is null
+     */
+    imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
+    imagePainter.canvasImage_->paintConfig_->isSvg_ = true;
+    imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
+    EXPECT_EQ(imagePainter.canvasImage_->paintConfig_->borderRadiusXY_, nullptr);
+    /**
+     * @tc.steps4: set radiusXY to canvasImage_.borderRadiusXY_ and call DrawObscuration
+     * @tc.expected: expect canvasImage_.borderRadiusXY_ is not null
+     */
+    NG::BorderRadiusArray radiusXY = { pointF_, pointF_, pointF_, pointF_ };
+    imagePainter.canvasImage_->paintConfig_->borderRadiusXY_ = std::make_shared<NG::BorderRadiusArray>(radiusXY);
+    imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
+    EXPECT_NE(imagePainter.canvasImage_->paintConfig_->borderRadiusXY_, nullptr);
 }
 
 /**
@@ -633,7 +689,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit11, TestSize.Level1
     imagePainter.ApplyImageFit(ImageFit::CONTAIN, rawpicsize, dstsize, srcRect_, dstRect_);
     auto testSize4 = Alignment::GetAlignPosition(dstsize, dstRect_.GetSize(), Alignment::CENTER);
     EXPECT_EQ(testSize4.GetX(), 0);
-    EXPECT_EQ(testSize4.GetY(), 0.45);
+    EXPECT_FLOAT_EQ(testSize4.GetY(), 0.45);
 
     /**
      * @tc.steps6: callback ApplyImageFit when ImageFit::CONTAIN.

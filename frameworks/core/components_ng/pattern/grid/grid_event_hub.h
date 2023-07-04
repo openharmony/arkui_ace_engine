@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 
 using ScrollToIndexFunc = std::function<void(const BaseEventInfo*)>;
+using ScrollBarUpdateFunc = std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>;
 using ItemDragStartFunc = std::function<RefPtr<UINode>(const ItemDragInfo&, int32_t)>;
 using ItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
 using ItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
@@ -42,6 +43,11 @@ public:
     void SetOnScrollToIndex(ScrollToIndexFunc&& onScrollToIndex)
     {
         onScrollToIndex_ = std::move(onScrollToIndex);
+    }
+
+    void SetOnScrollBarUpdate(ScrollBarUpdateFunc&& onScrollBarUpdate)
+    {
+        onScrollBarUpdate_ = std::move(onScrollBarUpdate);
     }
 
     void SetOnItemDragStart(ItemDragStartFunc&& onItemDragStart)
@@ -75,6 +81,14 @@ public:
             V2::GridEventInfo info(param);
             onScrollToIndex_(&info);
         }
+    }
+
+    std::pair<std::optional<float>, std::optional<float>> FireOnScrollBarUpdate(int32_t index, const Dimension& offset)
+    {
+        if (onScrollBarUpdate_) {
+            return onScrollBarUpdate_(index, offset);
+        }
+        return std::pair<std::optional<float>, std::optional<float>>();
     }
 
     RefPtr<UINode> FireOnItemDragStart(const ItemDragInfo& dragInfo, int32_t itemIndex) const
@@ -113,6 +127,7 @@ private:
     void MoveItems(int32_t itemIndex, int32_t insertIndex) const;
 
     ScrollToIndexFunc onScrollToIndex_;
+    ScrollBarUpdateFunc onScrollBarUpdate_;
     ItemDragStartFunc onItemDragStart_;
     ItemDragEnterFunc onItemDragEnter_;
     ItemDragMoveFunc onItemDragMove_;

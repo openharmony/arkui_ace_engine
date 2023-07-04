@@ -23,6 +23,7 @@
 
 #include "parameter.h"
 #include "parameters.h"
+#include "scene_board_judgement.h"
 
 #include "base/log/log.h"
 #include "base/utils/utils.h"
@@ -499,6 +500,11 @@ bool SystemProperties::GetAllowWindowOpenMethodEnabled()
     return system::GetBoolParameter("persist.web.allowWindowOpenMethod.enabled", false);
 }
 
+bool SystemProperties::GetImageFrameworkEnabled()
+{
+    return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
+}
+
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
@@ -508,6 +514,11 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 bool SystemProperties::IsFormAnimationLimited()
 {
     return system::GetBoolParameter("persist.sys.arkui.formAnimationLimit", true);
+}
+
+bool SystemProperties::IsSceneBoardEnabled()
+{
+    return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
 }
 
 } // namespace OHOS::Ace

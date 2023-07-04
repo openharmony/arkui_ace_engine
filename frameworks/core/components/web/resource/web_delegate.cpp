@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "core/event/ace_event_helper.h"
@@ -86,9 +87,7 @@ const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 
-// web parameters
-const std::string MULTI_RENDER_PROCESS = "persist.web.multiple_render_processes_enable";
-const std::string BACKGROUMD_MEDIA_SUSPEND = "persist.web.background_media_should_suspend";
+constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 } // namespace
 
 #define EGLCONFIG_VERSION 3
@@ -562,6 +561,29 @@ int FaviconReceivedOhos::GetColorType()
 int FaviconReceivedOhos::GetAlphaType()
 {
     return static_cast<int>(alphaType_);
+}
+
+WebDelegateObserver::~WebDelegateObserver()
+{
+    LOGI("WebDelegateObserver::~WebDelegateObserver");
+}
+
+void WebDelegateObserver::NotifyDestory()
+{
+    LOGI("WebDelegateObserver::NotifyDestory");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto observer = weak.Upgrade();
+            CHECK_NULL_VOID(observer);
+            if (observer->delegate_) {
+                observer->delegate_.Reset();
+            }
+        },
+        TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS);
 }
 
 WebDelegate::~WebDelegate()
@@ -1454,6 +1476,7 @@ void WebDelegate::ShowWebView()
 
     LOGI("OnContinue webview");
     OnActive();
+    OnWebviewShow();
 }
 
 void WebDelegate::HideWebView()
@@ -1464,6 +1487,7 @@ void WebDelegate::HideWebView()
 
     LOGI("OnPause webview");
     OnInactive();
+    OnWebviewHide();
 }
 
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)
@@ -1717,7 +1741,7 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
         LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create due to context is null");
         return false;
     }
-    int32_t windowId = pipelineContext->GetWindowId();
+    uint32_t windowId = pipelineContext->GetWindowId();
     surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
     if (surfaceDelegate_ == nullptr) {
         LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceDelegate is null");
@@ -1814,6 +1838,10 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
         auto setWebIdCallback = pattern->GetSetWebIdCallback();
         CHECK_NULL_VOID(setWebIdCallback);
         setWebIdCallback(webId);
+        auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
+        if (onControllerAttachedCallback) {
+            onControllerAttachedCallback();
+        }
         if (!hapPath_.empty()) {
             auto setHapPathCallback = pattern->GetSetHapPathCallback();
             CHECK_NULL_VOID(setHapPathCallback);
@@ -2397,10 +2425,6 @@ void WebDelegate::InitWebViewWithSurface()
             }
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--init-background-color=").append(std::to_string(delegate->backgroundColor_)));
-            if (!system::GetBoolParameter(BACKGROUMD_MEDIA_SUSPEND, true)) {
-                initArgs.web_engine_args_to_add.emplace_back(std::string("--disable-background-media-suspend"));
-            }
-            initArgs.multi_renderer_process = system::GetBoolParameter(MULTI_RENDER_PROCESS, false);
             if (isEnhanceSurface) {
                 LOGI("Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
@@ -3311,6 +3335,44 @@ void WebDelegate::OnActive()
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::OnWebviewHide()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->OnWebviewHide();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnWebviewShow()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->OnWebviewShow();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
 {
     auto context = context_.Upgrade();
@@ -3325,6 +3387,25 @@ void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
             }
             if (delegate->nweb_) {
                 delegate->nweb_->SetShouldFrameSubmissionBeforeDraw(should);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::NotifyMemoryLevel(int32_t level)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), level]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->NotifyMemoryLevel(level);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -4286,6 +4367,40 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
     return webPattern->NotifyStartDragTask();
 }
 
+bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData)
+{
+    LOGI("DragDrop event OnDragAndDropDataUdmf");
+
+    const void *data = nullptr;
+    size_t len = 0;
+    int width = 0;
+    int height = 0;
+    dragData->GetPixelMapSetting(&data, len, width, height);
+    pixelMap_ = PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
+    if (pixelMap_ == nullptr) {
+        LOGE("convert drag image to pixel map failed");
+        return false;
+    }
+    isRefreshPixelMap_ = true;
+
+    dragData_ = dragData;
+    auto webPattern = webPattern_.Upgrade();
+    if (!webPattern) {
+        LOGE("web pattern is nullptr");
+        return false;
+    }
+    return webPattern->NotifyStartDragTask();
+}
+
+std::shared_ptr<OHOS::NWeb::NWebDragData> WebDelegate::GetOrCreateDragData()
+{
+    if (nweb_) {
+        dragData_ = nweb_->GetOrCreateDragData();
+        return dragData_;
+    }
+    return nullptr;
+}
+
 void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
     const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
 {
@@ -4413,12 +4528,7 @@ void WebDelegate::OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZon
 
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 {
-    if (isRefreshPixelMap_) {
-        isRefreshPixelMap_ = false;
-        return pixelMap_;
-    }
-
-    return nullptr;
+    return pixelMap_;
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -4485,7 +4595,7 @@ void WebDelegate::OnFocus()
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnFocus();
+        nweb_->OnFocus(OHOS::NWeb::FocusReason::EVENT_REQUEST);
     }
 }
 
@@ -4745,6 +4855,15 @@ WebDelegate::EventCallbackV2 WebDelegate::GetAudioStateChangedCallback(
 void WebDelegate::SetSurface(const sptr<Surface>& surface)
 {
     surface_ = surface;
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto host = webPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    rsNode_ = rosenRenderContext->GetRSNode();
 }
 #endif
 
@@ -4846,5 +4965,22 @@ void WebDelegate::OnResizeNotWork()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->OnResizeNotWork();
+}
+
+void WebDelegate::OnDateTimeChooserPopup(
+    const OHOS::NWeb::DateTimeChooser& chooser,
+    const std::vector<OHOS::NWeb::DateTimeSuggestion>& suggestions,
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnDateTimeChooserPopup(chooser, suggestions, callback);
+}
+
+void WebDelegate::OnDateTimeChooserClose()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnDateTimeChooserClose();
 }
 } // namespace OHOS::Ace

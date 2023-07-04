@@ -123,22 +123,28 @@ void XComponentPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
-    if (type_ == XComponentType::SURFACE) {
+    if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
         renderContext->SetClipToBounds(true);
         renderSurface_ = RenderSurface::Create();
-        renderContextForSurface_ = RenderContext::Create();
-        renderContextForSurface_->InitContext(false, id_ + "Surface");
-        renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
         scopeId_ = Container::CurrentId();
-        if (!SystemProperties::GetExtSurfaceEnabled()) {
-            renderSurface_->SetRenderContext(renderContextForSurface_);
-        } else {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->AddOnAreaChangeNode(host->GetId());
-            extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
-            renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
+        if (type_ == XComponentType::SURFACE) {
+            renderContextForSurface_ = RenderContext::Create();
+            static RenderContext::ContextParam param = { RenderContext::ContextType::SURFACE, id_ + "Surface" };
+            renderContextForSurface_->InitContext(false, param);
+            renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+            if (!SystemProperties::GetExtSurfaceEnabled()) {
+                renderSurface_->SetRenderContext(renderContextForSurface_);
+            } else {
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipelineContext);
+                pipelineContext->AddOnAreaChangeNode(host->GetId());
+                extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
+                renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
+            }
+        } else if (type_ == XComponentType::TEXTURE) {
+            renderSurface_->SetRenderContext(renderContext);
+            renderSurface_->SetIsTexture(true);
         }
         renderSurface_->InitSurface();
         renderSurface_->UpdateXComponentConfig();
@@ -166,7 +172,7 @@ void XComponentPattern::OnAreaChangedInner()
 
 void XComponentPattern::OnRebuildFrame()
 {
-    if (type_ == XComponentType::COMPONENT) {
+    if (type_ != XComponentType::SURFACE) {
         return;
     }
     if (!renderSurface_->IsSurfaceValid()) {
@@ -177,6 +183,7 @@ void XComponentPattern::OnRebuildFrame()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(renderContextForSurface_);
     renderContext->AddChild(renderContextForSurface_, 0);
 }
 
@@ -186,7 +193,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (!hasXComponentInit_) {
         return;
     }
-    if (type_ == XComponentType::SURFACE) {
+    if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         NativeXComponentDestroy();
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -257,7 +264,9 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             static_cast<int32_t>(transformRelativeOffset.GetY() + offset.GetY()),
             static_cast<int32_t>(drawSize.Width()), static_cast<int32_t>(drawSize.Height()));
     }
-    renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), drawSize.Width(), drawSize.Height());
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), drawSize.Width(), drawSize.Height());
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
@@ -329,7 +338,7 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (renderSurface_->IsSurfaceValid() && type_ == XComponentType::SURFACE) {
+    if (renderSurface_->IsSurfaceValid() && (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE)) {
         float viewScale = context->GetViewScale();
         renderSurface_->CreateNativeWindow();
         renderSurface_->AdjustNativeWindowSize(

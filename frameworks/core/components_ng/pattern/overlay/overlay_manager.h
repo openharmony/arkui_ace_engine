@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
+#include <functional>
 #include <unordered_map>
 #include <utility>
 
@@ -26,6 +27,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -57,11 +59,13 @@ public:
         popupMap_.clear();
     }
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
+    void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
+    void HideCustomPopups();
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
@@ -107,7 +111,7 @@ public:
      *
      *   @return    true if popup was removed, false if no overlay exists
      */
-    bool RemoveOverlay();
+    bool RemoveOverlay(bool isBackPressed);
     bool RemoveModalInOverlay();
     bool RemoveOverlayInSubwindow();
 
@@ -121,6 +125,11 @@ public:
         onShowMenuCallback_ = callback;
     }
 
+    void RegisterOnHideDialog(std::function<void()> callback)
+    {
+        onHideDialogCallback_ = callback;
+    }
+
     void CallOnShowMenuCallback()
     {
         if (onShowMenuCallback_) {
@@ -132,6 +141,13 @@ public:
     {
         if (onHideMenuCallback_) {
             onHideMenuCallback_();
+        }
+    }
+
+    void CallOnHideDialogCallback()
+    {
+        if (onHideDialogCallback_) {
+            onHideDialogCallback_();
         }
     }
 
@@ -157,6 +173,11 @@ public:
     void SetHasPixelMap(bool hasPixelMap)
     {
         hasPixelMap_ = hasPixelMap;
+    }
+
+    RefPtr<FrameNode> GetPixelMapNode()
+    {
+        return pixmapColumnNodeWeak_.Upgrade();
     }
 
     bool GetHasFilter()
@@ -194,7 +215,7 @@ public:
         filterColumnNodeWeak_ = columnNode;
     }
 
-    void MountPixelmapToRootNode(const RefPtr<FrameNode>& columnNode);
+    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
     void RemovePixelMapAnimation(bool startDrag, double x, double y);
@@ -203,12 +224,16 @@ public:
     void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, int32_t targetId);
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle, int32_t targetId);
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::SheetStyle& sheetStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, int32_t targetId);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
+
+    RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
 private:
     void PopToast(int32_t targetId);
@@ -231,23 +256,29 @@ private:
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
 
-    void AdaptToSafeArea(const RefPtr<FrameNode>& node);
-
     void SaveLastModalNode();
     void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void DefaultModalTransition(bool isTransitionIn);
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
+    void FireModalPageShow();
+    void FireModalPageHide();
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
     void ComputeSheetOffset(NG::SheetStyle& sheetStyle);
 
+    void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
+    void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
+    bool DialogInMapHoldingFocus();
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
+    std::unordered_map<int32_t, RefPtr<FrameNode>> dialogMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
+    std::list<WeakPtr<FrameNode>> modalList_;
     WeakPtr<FrameNode> lastModalNode_;
     float sheetHeight_ {0.0};
     WeakPtr<UINode> rootNodeWeak_;
@@ -256,15 +287,18 @@ private:
     bool hasFilter_ {false};
     bool hasEvent_ {false};
     bool isOnAnimation_ {false};
-    WeakPtr<FrameNode> pixelmapColumnNodeWeak_;
+    WeakPtr<FrameNode> pixmapColumnNodeWeak_;
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
 #endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> onHideMenuCallback_ = nullptr;
+    std::function<void()> onHideDialogCallback_ = nullptr;
     std::function<void()> onShowMenuCallback_;
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
+
+    std::list<WeakPtr<UINode>> windowSceneList_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };

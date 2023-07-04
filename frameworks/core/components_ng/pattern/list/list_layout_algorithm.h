@@ -30,15 +30,17 @@
 namespace OHOS::Ace::NG {
 class PipelineContext;
 
-enum class ScrollIndexAlignment {
-    ALIGN_TOP = 0,
-    ALIGN_BOTTOM = 1,
-};
-
 struct ListItemInfo {
     float startPos;
     float endPos;
     bool isGroup;
+    float crossSize = 0.0f;
+};
+
+enum class ScrollAutoType {
+    NOT_CHANGE = 0,
+    START,
+    END,
 };
 
 // TextLayoutAlgorithm acts as the underlying text layout.
@@ -80,14 +82,29 @@ public:
         jumpIndex_ = index;
     }
 
+    void SetTargetIndex(int32_t index)
+    {
+        targetIndex_ = index;
+    }
+
+    void SetPredictSnapOffset(float predictSnapOffset)
+    {
+        predictSnapOffset_ = predictSnapOffset;
+    }
+
+    std::optional<float> GetPredictSnapOffset() const
+    {
+        return predictSnapOffset_;
+    }
+
     void SetIndexInGroup(int32_t index)
     {
         jumpIndexInGroup_ = index;
     }
 
-    void SetIndexAlignment(ScrollIndexAlignment align)
+    void SetIndexAlignment(ScrollAlign align)
     {
-        scrollIndexAlignment_ = align;
+        scrollAlign_ = align;
     }
 
     void SetCurrentDelta(float offset)
@@ -99,6 +116,11 @@ public:
     float GetCurrentOffset() const
     {
         return currentOffset_;
+    }
+
+    void SetTotalOffset(float totalOffset)
+    {
+        totalOffset_ = totalOffset;
     }
 
     float GetContentMainSize() const
@@ -120,6 +142,8 @@ public:
     {
         return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
     }
+
+    int32_t GetMidIndex();
 
     int32_t GetMaxListItemIndex() const
     {
@@ -194,11 +218,41 @@ public:
     void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
         int32_t endIndex, float endPos);
 
+    void BeginLayoutForward(float startPos, LayoutWrapper* layoutWrapper,
+        const LayoutConstraintF& layoutConstraint, Axis axis);
+
+    void BeginLayoutBackward(float startPos, LayoutWrapper* layoutWrapper,
+        const LayoutConstraintF& layoutConstraint, Axis axis);
+
+    void HandleJumpAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& startIndex, int32_t& endIndex, float& startPos, float& endPos);
+
+    bool NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
+        int32_t startIndex, int32_t endIndex);
+
+    float GetCenterItemHeight(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+
     virtual int32_t GetLanes() const
     {
         return 1;
     }
 
+    void SetLaneGutter(float laneGutter)
+    {
+        laneGutter_ = laneGutter;
+    }
+
+    float GetLaneGutter() const
+    {
+        return laneGutter_;
+    }
+
+    void OffScreenLayoutDirection();
+
+    ScrollAutoType GetScrollAutoType() const
+    {
+        return scrollAutoType_;
+    }
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -216,7 +270,7 @@ protected:
 
     virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount);
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
-        const RefPtr<ListLayoutProperty>& layoutProperty);
+        const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout);
     static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
@@ -229,7 +283,7 @@ protected:
 private:
     void MeasureList(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
-    void CalculateEstimateOffset(bool isAlignTop);
+    void CalculateEstimateOffset(ScrollAlign align);
 
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
@@ -243,12 +297,22 @@ private:
     void CreateItemGroupList(LayoutWrapper* layoutWrapper);
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
+    void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    void FixPredictSnapOffsetAlignStart();
+    void FixPredictSnapOffsetAlignCenter();
+    void FixPredictSnapOffsetAlignEnd();
+    bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper);
+
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
-    ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
+    std::optional<int32_t> targetIndex_;
+    std::optional<float> predictSnapOffset_;
+    ScrollAlign scrollAlign_ = ScrollAlign::START;
+    ScrollAutoType scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
 
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;
+    float totalOffset_ = 0.0f;
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
@@ -256,6 +320,8 @@ private:
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;
+    bool forwardFeature_ = false;
+    bool backwardFeature_ = false;
 
     int32_t totalItemCount_ = 0;
 
@@ -269,6 +335,7 @@ private:
     float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
+    float laneGutter_ = 0.0f;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
     std::list<WeakPtr<FrameNode>> itemGroupList_;

@@ -24,6 +24,7 @@ public:
     void Create() override;
     void SetNavigationStack() override;
     void SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack) override;
+    void SetNavigationStackProvided(bool provided) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
@@ -48,6 +49,9 @@ public:
     void SetUsrNavigationMode(NG::NavigationMode mode) override;
     void SetNavBarPosition(NG::NavBarPosition mode) override;
     void SetNavBarWidth(const Dimension& value) override;
+    void SetMinNavBarWidth(const Dimension& value) override {}
+    void SetMaxNavBarWidth(const Dimension& value) override {}
+    void SetMinContentWidth(const Dimension& value) override {}
     void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) override;
     void SetNavigationMode(NG::NavigationMode mode) override;
     void SetNavDestination(std::function<void(std::string)>&& builder) override;

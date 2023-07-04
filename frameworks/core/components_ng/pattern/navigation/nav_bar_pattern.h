@@ -49,8 +49,25 @@ public:
     {
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
-
+    bool GetspringEffect()
+    {
+        return springEffect_;
+    }
+private:
     void OnModifyDone() override;
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleOnDragStart(float offset);
+    void HandleOnDragUpdate(float offset);
+    void HandleOnDragEnd();
+    void InitCoordinationEvent();
+    void OnCoordScrollStart();
+    void OnCoordScrollUpdate(float offset);
+    void OnCoordScrollEnd();
+    RefPtr<FrameNode> FindScrollableChild();
+    float offset_ = 0.0f;
+    bool springEffect_ = false;
+    RefPtr<PanEvent> panEvent_;
+    WeakPtr<FrameNode> scrollableNode_;
 };
 
 } // namespace OHOS::Ace::NG

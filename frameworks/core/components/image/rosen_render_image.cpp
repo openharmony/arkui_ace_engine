@@ -17,10 +17,12 @@
 
 #include "flutter/common/task_runners.h"
 #include "render_service_client/core/ui/rs_node.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkClipOp.h"
 #include "include/core/SkColorFilter.h"
 #include "include/core/SkRect.h"
 #include "include/core/SkShader.h"
+#endif
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
@@ -60,6 +62,7 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 } // namespace
 
+#ifndef USE_ROSEN_DRAWING
 union SkColorEx {
     struct {
         SkColor color : 32;
@@ -68,6 +71,16 @@ union SkColorEx {
     };
     uint64_t value = 0;
 };
+#else
+union DrawingColorEx {
+    struct {
+        RSColorQuad color : 32;
+        bool valid : 1;
+        uint32_t reserved : 31; // reserved
+    };
+    uint64_t value = 0;
+};
+#endif
 
 RosenRenderImage::RosenRenderImage()
 {
@@ -186,12 +199,21 @@ void RosenRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
     } else {
         LOGI("image is vectorgraph(svg) without absolute size, set svgDom_");
         image_ = nullptr;
+#ifndef USE_ROSEN_DRAWING
         if (useSkiaSvg_) {
             skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
         } else {
             CacheSvgImageObject();
             SyncCreateSvgNodes(false);
         }
+#else
+        if (useDrawingSvg_) {
+            drawingSvgDom_ = AceType::DynamicCast<SvgDrawingImageObject>(imageObj_)->GetSvgDom();
+        } else {
+            CacheSvgImageObject();
+            SyncCreateSvgNodes(false);
+        }
+#endif
         imageSizeForEvent_ = Measure();
         UpdateLoadSuccessState();
     }
@@ -210,7 +232,11 @@ void RosenRenderImage::ImageObjFailed(const std::string& errorMsg)
     image_ = nullptr;
     imageObj_ = nullptr;
     curSourceInfo_ = sourceInfo_;
+#ifndef USE_ROSEN_DRAWING
     skiaDom_ = nullptr;
+#else
+    drawingSvgDom_ = nullptr;
+#endif
     svgDom_ = nullptr;
     proceedPreviousLoading_ = false;
     imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
@@ -235,7 +261,11 @@ void RosenRenderImage::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& imag
     }
     UpdateLoadSuccessState();
     image_ = image;
+#ifndef USE_ROSEN_DRAWING
     skiaDom_ = nullptr;
+#else
+    drawingSvgDom_ = nullptr;
+#endif
     svgDom_ = nullptr;
     if (imageDataNotReady_) {
         LOGI("Paint image is ready, imageSrc is %{private}s", imageObj_->GetSourceInfo().ToString().c_str());
@@ -412,8 +442,13 @@ void RosenRenderImage::FetchImageObject()
             bool syncMode = (context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
                                 sourceInfo_.GetSrcType() != SrcType::NETWORK) ||
                             syncMode_;
+#ifndef USE_ROSEN_DRAWING
             ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_,
                 failedCallback_, GetContext(), syncMode, useSkiaSvg_, autoResize_, onPostBackgroundTask_);
+#else
+            ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_,
+                failedCallback_, GetContext(), syncMode, useDrawingSvg_, autoResize_, onPostBackgroundTask_);
+#endif
             break;
         }
     }
@@ -454,6 +489,7 @@ void RosenRenderImage::ProcessPixmapForPaint()
         LOGI("pixmap ref is null, may be released, paint directly");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     // Step1: Create SkPixmap
     auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
@@ -465,6 +501,9 @@ void RosenRenderImage::ProcessPixmapForPaint()
     if (!VerifySkImageDataFromPixmap(pixmap)) {
         LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
             rawImageSize_.ToString().c_str());
+#else
+    // TODO Drawing : SkPixmap
+#endif
         imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
         FireLoadEvent(Size(), "Image data from PixelMap is invalid, please check PixelMap data.");
         image_ = nullptr;
@@ -584,11 +623,19 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         }
         contentChanged_ = false;
     }
+#ifndef USE_ROSEN_DRAWING
     if (imageObj_ && imageObj_->IsSvg() && !useSkiaSvg_ && !directPaint_) {
+#else
+    if (imageObj_ && imageObj_->IsSvg() && !useDrawingSvg_ && !directPaint_) {
+#endif
         DrawSVGImageCustom(context, offset);
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     bool sourceDataEmpty = !image_ && !svgDom_ && !skiaDom_;
+#else
+    bool sourceDataEmpty = !image_ && !svgDom_ && !drawingSvgDom_;
+#endif
     if (renderAltImage_ && sourceDataEmpty) {
         renderAltImage_->SetDirectPaint(directPaint_);
         renderAltImage_->RenderWithContext(context, offset);
@@ -601,8 +648,11 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
-
+#ifndef USE_ROSEN_DRAWING
     SkAutoCanvasRestore acr(canvas, true);
+#else
+    RSAutoCanvasRestore acr(canvas, true);
+#endif
     if (!NearZero(rotate_)) {
         Offset center =
             offset + Offset(GetLayoutSize().Width() * SK_ScalarHalf, GetLayoutSize().Height() * SK_ScalarHalf);
@@ -610,8 +660,11 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
             canvas->rotate(rotate_, center.GetX(), center.GetY());
         }
     }
-
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
+#else
+    RSBrush brush;
+#endif
     Rect paintRect =
         ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) && !resizeCallLoadImage_) ? currentDstRect_ : dstRect_;
     ApplyBorderRadius(offset, paintRect, canvas);
@@ -626,6 +679,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
             return;
         }
         // to ensure forward compatibility, draw alt color only when it fails to load image
+#ifndef USE_ROSEN_DRAWING
         paint.setColor(ALT_COLOR_GREY);
 #ifdef OHOS_PLATFORM
         auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
@@ -641,17 +695,41 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
                              GetLayoutSize().Height() + offset.GetY() },
             paint);
 #endif
+#else
+        brush.SetColor(ALT_COLOR_GREY);
+#ifdef OHOS_PLATFORM
+        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+        recordingCanvas->AttachBrush(brush);
+        if (GetBackgroundImageFlag()) {
+            recordingCanvas->DrawRect({ offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
+                GetLayoutSize().Height() + offset.GetY() });
+        } else {
+            recordingCanvas->DrawAdaptiveRRect(0);
+        }
+        recordingCanvas->DetachBrush();
+#else
+        canvas->AttachBrush(brush);
+        canvas->DrawRect({ offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
+            GetLayoutSize().Height() + offset.GetY() });
+        canvas->DetachBrush();
+#endif
+#endif
         return;
     }
     if (sourceInfo_.IsSvg()) {
         if (svgDom_) {
+#ifndef USE_ROSEN_DRAWING
             canvas->translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
+#else
+            canvas->Translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
+#endif
             svgDom_->PaintDirectly(context, offset, imageFit_, GetLayoutSize());
             return;
         }
         DrawSVGImage(offset, canvas);
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     ApplyColorFilter(paint);
     ApplyInterpolation(paint);
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
@@ -664,14 +742,33 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
 #else
     paint.setColor(paint.getColor4f(), colorSpace.get());
 #endif
+
+#else
+    ApplyColorFilter(brush);
+    ApplyInterpolation(brush);
+    auto colorSpace = RSColorSpace::CreateSRGB();
+    auto drImage = std::make_shared<RSImage>(image_->image());
+    if (drImage) {
+        colorSpace = RSColorSpace::CreateRefImage(*drImage);
+    }
+    brush.SetColor(brush.GetColor4f(), colorSpace);
+#endif
     if (GetBackgroundImageFlag()) {
         PaintBgImage(static_cast<RosenRenderContext*>(&context)->GetRSNode());
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     CanvasDrawImageRect(paint, offset, canvas, paintRect);
+#else
+    CanvasDrawImageRect(brush, offset, canvas, paintRect);
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderImage::ApplyBorderRadius(const Offset& offset, const Rect& paintRect, SkCanvas* canvas)
+#else
+void RosenRenderImage::ApplyBorderRadius(const Offset& offset, const Rect& paintRect, RSCanvas* canvas)
+#endif
 {
     if (GetBackgroundImageFlag()) {
         return;
@@ -690,16 +787,31 @@ void RosenRenderImage::ApplyBorderRadius(const Offset& offset, const Rect& paint
                           (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
     Rect clipRect = clipLayoutSize ? Rect(offset, GetLayoutSize()) : paintRect + offset;
 
+#ifndef USE_ROSEN_DRAWING
     SkRRect rrect;
     rrect.setRectRadii(SkRect::MakeXYWH(clipRect.Left() - imageRenderPosition_.GetX(),
                            clipRect.Top() - imageRenderPosition_.GetY(), clipRect.Width(), clipRect.Height()),
         radii_);
     canvas->clipRRect(rrect, true);
+#else
+    RSRoundRect rrect;
+    rrect.SetRectRadii(
+        RSRect(clipRect.Left() - imageRenderPosition_.GetX(), clipRect.Top() - imageRenderPosition_.GetY(),
+            clipRect.Width() + clipRect.Left() - imageRenderPosition_.GetX(),
+            clipRect.Height() + clipRect.Top() - imageRenderPosition_.GetY()),
+        radii_);
+    canvas->ClipRoundRect(rrect, RSClipOp::INTERSECT, true);
+#endif
 #endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
+#else
+void RosenRenderImage::ApplyColorFilter(RSBrush& brush)
+#endif
 {
+#ifndef USE_ROSEN_DRAWING
 #ifdef USE_SYSTEM_SKIA
     if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
         float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = { 0 };
@@ -736,8 +848,36 @@ void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
     paint.setColorFilter(SkColorFilters::Blend(
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #endif
+#else
+    if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
+        float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = { 0 };
+        std::copy(colorfilter_.begin(), colorfilter_.end(), colorfiltermatrix);
+        RSFilter filter;
+        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorfiltermatrix));
+        brush.SetFilter(filter);
+        return;
+    }
+    if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
+        RSFilter filter;
+        RSColorMatrix m;
+        m.SetArray(GRAY_COLOR_MATRIX);
+        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(m));
+        brush.SetFilter(filter);
+        return;
+    }
+    if (!color_.has_value()) {
+        return;
+    }
+    Color color = color_.value();
+    RSFilter filter;
+    filter.SetColorFilter(RSColorFilter::CreateBlendModeColorFilter(
+        RSColor::ColorQuadSetARGB(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha()),
+        RSBlendMode::PLUS));
+    brush.SetFilter(filter);
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderImage::ApplyInterpolation(SkPaint& paint)
 {
 #ifndef NEW_SKIA
@@ -775,13 +915,42 @@ void RosenRenderImage::ApplyInterpolation(SkPaint& paint)
     }
 #endif
 }
+#else
+void RosenRenderImage::ApplyInterpolation(RSBrush& brush)
+{
+    auto filterQuality = RSFilter::FilterQuality::NONE;
+    switch (imageInterpolation_) {
+        case ImageInterpolation::LOW:
+            filterQuality = RSFilter::FilterQuality::LOW;
+            break;
+        case ImageInterpolation::MEDIUM:
+            filterQuality = RSFilter::FilterQuality::MEDIUM;
+            break;
+        case ImageInterpolation::HIGH:
+            filterQuality = RSFilter::FilterQuality::HIGH;
+            break;
+        case ImageInterpolation::NONE:
+        default:
+            break;
+    }
+    RSFilter filter;
+    filter.SetFilterQuality(filterQuality);
+    brush.SetFilter(filter);
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderImage::CanvasDrawImageRect(
     SkPaint& paint, const Offset& offset, SkCanvas* canvas, const Rect& paintRect)
+#else
+void RosenRenderImage::CanvasDrawImageRect(
+    RSBrush& brush, const Offset& offset, RSCanvas* canvas, const Rect& paintRect)
+#endif
 {
     if (GetBackgroundImageFlag()) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     if (!skImage || (!skImage->GetImage() && !skImage->GetCompressData())) {
         imageDataNotReady_ = true;
@@ -789,10 +958,21 @@ void RosenRenderImage::CanvasDrawImageRect(
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
         return;
     }
+#else
+    // TODO Drawing : There may be a question about AceType::DynamicCast<NG::SkiaImage>
+    auto drImage = std::make_shared<RSImage>(image_->image());
+    if (drImage) {
+        imageDataNotReady_ = true;
+        LOGD("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
+            rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
+        return;
+    }
+#endif
     int fitNum = static_cast<int>(imageFit_);
     int repeatNum = static_cast<int>(imageRepeat_);
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
+#ifndef USE_ROSEN_DRAWING
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
         Rosen::RsImageInfo rsImageInfo(
             fitNum, repeatNum, radii_, scale_, 0, skImage->GetCompressWidth(), skImage->GetCompressHeight());
@@ -803,6 +983,15 @@ void RosenRenderImage::CanvasDrawImageRect(
             skImage->GetImage(), skImage->GetCompressData(), rsImageInfo, options_, paint);
 #endif
         skImage->SetCompressData(nullptr, 0, 0);
+#else
+        recordingCanvas->Translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
+        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_, 0, drImage->GetWidth(), drImage->GetHeight());
+        recordingCanvas->AttachBrush(brush);
+        recordingCanvas->DrawImageWithParm(drImage, rsImageInfo);
+        recordingCanvas->DetachBrush();
+        drImage->SetWidth(0);
+        drImage->SetHeight(0);
+#endif
         return;
     }
     bool isLoading =
@@ -810,7 +999,11 @@ void RosenRenderImage::CanvasDrawImageRect(
     Rect scaledSrcRect = isLoading ? currentSrcRect_ : srcRect_;
 
     if (sourceInfo_.IsValid() && imageObj_ && (imageObj_->GetFrameCount() == 1)) {
+#ifndef USE_ROSEN_DRAWING
         Size sourceSize = (skImage ? Size(skImage->GetWidth(), skImage->GetHeight()) : Size());
+#else
+        Size sourceSize = (drImage ? Size(drImage->width(), drImage->height()) : Size());
+#endif
         // calculate srcRect that matches the real image source size
         // note that gif doesn't do resize, so gif does not need to recalculate
         scaledSrcRect = RecalculateSrcRect(sourceSize);
@@ -820,9 +1013,14 @@ void RosenRenderImage::CanvasDrawImageRect(
     Rect realDstRect = paintRect + offset;
 
     if (imageRepeat_ != ImageRepeat::NO_REPEAT) {
+#ifndef USE_ROSEN_DRAWING
         DrawImageOnCanvas(scaledSrcRect, realDstRect, paint, canvas);
+#else
+        DrawImageOnCanvas(scaledSrcRect, realDstRect, brush, canvas);
+#endif
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     auto skSrcRect = 
         SkRect::MakeXYWH(scaledSrcRect.Left(), scaledSrcRect.Top(), scaledSrcRect.Width(), scaledSrcRect.Height());
     auto skDstRect = SkRect::MakeXYWH(realDstRect.Left() - imageRenderPosition_.GetX(),
@@ -832,10 +1030,22 @@ void RosenRenderImage::CanvasDrawImageRect(
 #else
     canvas->drawImageRect(skImage->GetImage(), skSrcRect, skDstRect, options_, &paint, SkCanvas::kFast_SrcRectConstraint);
 #endif
+#else
+    auto srcRect = RSRect(
+        scaledSrcRect.Left(), scaledSrcRect.Top(), scaledSrcRect.Right(), scaledSrcRect.Bottom());
+    auto dstRect = RSRect(realDstRect.Left() - imageRenderPosition_.GetX(),
+        realDstRect.Top() - imageRenderPosition_.GetY(), ealDstRect.Right() - imageRenderPosition_.GetX(),
+        realDstRect.Bottom()) - imageRenderPosition_.GetY();
+    RSSamplingOptions sampling;
+    canvas->AttachBrush(brush);
+    canvas->DrawImageRect(RSImage(image_->image()), srcRect, dstRect, sampling);
+    canvas->DetachBrush();
+#endif
     LOGD("dstRect params: %{public}s", realDstRect.ToString().c_str());
     LOGD("scaledSrcRect params: %{public}s", scaledSrcRect.ToString().c_str());
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderImage::DrawImageOnCanvas(
     const Rect& srcRect, const Rect& dstRect, const SkPaint& paint, SkCanvas* canvas) const
 {
@@ -883,7 +1093,51 @@ void RosenRenderImage::DrawImageOnCanvas(
     recordingCanvas->restore();
 #endif
 }
+#else
+void RosenRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect,
+    const RSBrush& brush, RSCanvas* canvas) const
+{
+#ifdef OHOS_PLATFORM
+    auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+    auto drSrcRect = RSRect(
+        Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Right()), Round(srcRect.Bottom()));
+    // only transform one time, set skDstRect.top and skDstRect.left to 0.
+    auto drDstRect = RSRect(0, 0, dstRect.Width(), dstRect.Height());
 
+    // initialize a transform matrix
+    RSScalar scaleX = drDstRect.GetWidth() / drSrcRect.GetWidth();
+    RSScalar scaleY = drDstRect.GetHeight() / drSrcRect.GetHeight();
+    RSScalar transX = dstRect.Left() - imageRenderPosition_.GetX();
+    RSScalar transY = dstRect.Top() - imageRenderPosition_.GetY();
+    if (matchTextDirection_ && GetTextDirection() == TextDirection::RTL) {
+        // flip the image algin x direction.
+        scaleX = -1 * scaleX;
+        transX = drDstRect.GetLeft() + drDstRect.GetWidth();
+    }
+    RSScalar skewX = 0;
+    RSScalar skewY = 0;
+    RSScalar pers0 = 0;
+    RSScalar pers1 = 0;
+    RSScalar pers2 = 1;
+    RSMatrix sampleMatrix;
+    sampleMatrix.SetMatrix(
+        scaleX, skewX, transX,
+        skewY, scaleY, transY,
+        pers0, pers1, pers2);
+    RSSamplingOptions sampling;
+
+    recordingCanvas->Save();
+    recordingCanvas->ConcatMatrix(sampleMatrix);
+    recordingCanvas->AttachBrush(brush);
+    recordingCanvas->DrawImageRect(RSImage(image_->image()), drSrcRect, drDstRect, sampling,
+        RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+    recordingCanvas->DetachBrush();
+    recordingCanvas->Restore();
+#endif
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
 {
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
@@ -899,6 +1153,23 @@ bool RosenRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixma
     }
     return true;
 }
+#else
+bool RosenRenderImage::VerifyImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
+{
+    auto drImage = std::make_shared<RSImage>(image_->image());
+    if (!drImage) {
+        LOGE("image data made from pixmap is null");
+        return false;
+    }
+    if ((drImage->GetWidth() <= 0 || drImage->GetHeight() <= 0)) {
+        LOGE("image data made from pixmap is invalid, image data size: [%{public}d x %{public}d], pixmap size:"
+             " [%{public}d x %{public}d]",
+            drImage->GetWidth(), drImage->GetHeight(), pixmap->GetWidth(), pixmap->GetHeight());
+        return false;
+    }
+    return true;
+}
+#endif
 
 Rect RosenRenderImage::RecalculateSrcRect(const Size& realImageSize)
 {
@@ -919,17 +1190,28 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
     if (!GetBackgroundImageFlag()) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     if (currentDstRectList_.empty() || !skImage || !skImage->GetImage()) {
         return;
     }
 
+#else
+    auto drImage = std::make_shared<RSImage>(image_->image());
+    if (currentDstRectList_.empty() || !drImage) {
+        return;
+    }
+#endif
     if (!rsNode) {
         return;
     }
 #ifdef OHOS_PLATFORM
     auto rosenImage = std::make_shared<Rosen::RSImage>();
+#ifndef USE_ROSEN_DRAWING
     rosenImage->SetImage(skImage->GetImage());
+#else
+    rosenImage->SetImage(drImage);
+#endif
     rosenImage->SetImageRepeat(static_cast<int>(imageRepeat_));
     rsNode->SetBgImageWidth(imageRenderSize_.Width());
     rsNode->SetBgImageHeight(imageRenderSize_.Height());
@@ -978,6 +1260,7 @@ void RosenRenderImage::UploadImageObjToGpuForRender(const RefPtr<ImageObject>& i
 
 void RosenRenderImage::UpdateData(const std::string& uri, const std::vector<uint8_t>& memData)
 {
+#ifndef USE_ROSEN_DRAWING
     if (uri != sourceInfo_.GetSrc()) {
         return;
     }
@@ -1006,25 +1289,44 @@ void RosenRenderImage::UpdateData(const std::string& uri, const std::vector<uint
         return;
     }
     ImageObjReady(ImageObj);
+#else
+    // TODO Drawing : SkCodec
+#endif
 }
 
 void RosenRenderImage::SetClipRadius()
 {
+#ifndef USE_ROSEN_DRAWING
     SetSkRadii(topLeftRadius_, radii_[SkRRect::kUpperLeft_Corner]);
     SetSkRadii(topRightRadius_, radii_[SkRRect::kUpperRight_Corner]);
     SetSkRadii(bottomLeftRadius_, radii_[SkRRect::kLowerLeft_Corner]);
     SetSkRadii(bottomRightRadius_, radii_[SkRRect::kLowerRight_Corner]);
+#else
+    SetRadii(topLeftRadius_, radii_[RSRoundRect::CornerPos::TOP_LEFT_POS]);
+    SetRadii(topRightRadius_, radii_[RSRoundRect::CornerPos::TOP_RIGHT_POS]);
+    SetRadii(bottomLeftRadius_, radii_[RSRoundRect::CornerPos::BOTTOM_LEFT_POS]);
+    SetRadii(bottomRightRadius_, radii_[RSRoundRect::CornerPos::BOTTOM_RIGHT_POS]);
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderImage::SetSkRadii(const Radius& radius, SkVector& radii)
+#else
+void RosenRenderImage::SetRadii(const Radius& radius, RSVector& radii)
+#endif
 {
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
     double dipScale = context->GetDipScale();
+#ifndef USE_ROSEN_DRAWING
     radii.set(SkDoubleToScalar(std::max(radius.GetX().ConvertToPx(dipScale), 0.0)),
         SkDoubleToScalar(std::max(radius.GetY().ConvertToPx(dipScale), 0.0)));
+#else
+    radii.Set(DoubleToScalar(std::max(radius.GetX().ConvertToPx(dipScale), 0.0)),
+        DoubleToScalar(std::max(radius.GetY().ConvertToPx(dipScale), 0.0)));
+#endif
 }
 
 Size RosenRenderImage::MeasureForPixmap()
@@ -1099,15 +1401,28 @@ void RosenRenderImage::CancelBackgroundTasks()
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderImage::PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayoutSelf)
+#else
+void RosenRenderImage::PaintSVGImage(const std::shared_ptr<RSData> drawingData, bool onlyLayoutSelf)
+#endif
 {
     imageLoadingStatus_ = ImageLoadingStatus::LOADING;
+#ifndef USE_ROSEN_DRAWING
     auto successCallback = [svgImageWeak = AceType::WeakClaim(this), onlyLayoutSelf](const sk_sp<SkSVGDOM>& svgDom) {
+#else
+    auto successCallback = [svgImageWeak = AceType::WeakClaim(this), onlyLayoutSelf](
+                               const std::shared_ptr<RSSVGDOM>& svgDom) {
+#endif
         auto svgImage = svgImageWeak.Upgrade();
         if (!svgImage) {
             return;
         }
+#ifndef USE_ROSEN_DRAWING
         svgImage->skiaDom_ = svgDom;
+#else
+        svgImage->drawingSvgDom_ = svgDom;
+#endif
         svgImage->image_ = nullptr;
         svgImage->imageSizeForEvent_ = svgImage->Measure();
         svgImage->UpdateLoadSuccessState();
@@ -1121,6 +1436,7 @@ void RosenRenderImage::PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayou
             svgImage->ImageObjFailed("SVG data may be broken, please check the SVG file.");
         }
     };
+#ifndef USE_ROSEN_DRAWING
     SkColorEx skColor;
     auto fillColor = sourceInfo_.GetFillColor();
     if (fillColor.has_value()) {
@@ -1129,9 +1445,25 @@ void RosenRenderImage::PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayou
     }
     ImageProvider::GetSVGImageDOMAsyncFromData(
         skData, successCallback, failedCallback, GetContext(), skColor.value, onPostBackgroundTask_);
+#else
+    DrawingColorEx drawingColor;
+    auto fillColor = sourceInfo_.GetFillColor();
+    if (fillColor.has_value()) {
+        drawingColor.color = fillColor.value().GetValue();
+        drawingColor.valid = 1;
+    }
+    ImageProvider::GetSVGImageDOMAsyncFromData(
+        drawingData,
+        successCallback,
+        failedCallback,
+        GetContext(),
+        drawingColor.value,
+        onPostBackgroundTask_);
+#endif
     MarkNeedLayout();
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderImage::DrawSVGImage(const Offset& offset, SkCanvas* canvas)
 {
     if (!skiaDom_) {
@@ -1169,6 +1501,45 @@ void RosenRenderImage::DrawSVGImage(const Offset& offset, SkCanvas* canvas)
     }
     skiaDom_->render(canvas);
 }
+#else
+void RosenRenderImage::DrawSVGImage(const Offset& offset, RSCanvas* canvas)
+{
+    if (!drawingSvgDom_) {
+        return;
+    }
+    Size layoutSize = GetLayoutSize();
+    Size imageSize(drawingSvgDom_->ContainerSize().Width(), drawingSvgDom_->ContainerSize().Height());
+    if (layoutSize.IsInfinite() || !layoutSize.IsValid()) {
+        if (imageSize.IsInfinite() || !imageSize.IsValid()) {
+            LOGE("Invalid layout size: %{private}s, invalid svgContainerSize: %{private}s, stop draw svg. The max size"
+                 " of layout param is %{private}s",
+                GetLayoutSize().ToString().c_str(), layoutSize.ToString().c_str(),
+                GetLayoutParam().GetMaxSize().ToString().c_str());
+            return;
+        }
+        // when layout size is invalid, use svg's own size
+        layoutSize = imageSize;
+    }
+
+    canvas->Translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
+
+    auto width = static_cast<float>(layoutSize.Width());
+    auto height = static_cast<float>(layoutSize.Height());
+    if (matchTextDirection_ && GetTextDirection() == TextDirection::RTL) {
+        canvas->Translate(width, 0);
+        canvas->Scale(-1, 1);
+    }
+    canvas->ClipRect(RSRect(0, 0, width, height), RSClipOp::INTERSECT, true);
+    if (imageSize.IsValid() && !imageSize.IsInfinite()) {
+        // scale svg to layout size
+        float scale = std::min(width / imageSize.Width(), height / imageSize.Height());
+        canvas->Scale(scale, scale);
+    } else {
+        drawingSvgDom_->SetContainerSize({ width, height });
+    }
+    drawingSvgDom_->Render(canvas);
+}
+#endif
 
 void RosenRenderImage::DrawSVGImageCustom(RenderContext& context, const Offset& offset)
 {
@@ -1262,18 +1633,30 @@ void RosenRenderImage::ClearRenderObject()
     image_ = nullptr;
     formerRawImageSize_ = { 0.0, 0.0 };
     imageObj_ = nullptr;
+#ifndef USE_ROSEN_DRAWING
     skiaDom_ = nullptr;
+#else
+    drawingSvgDom_ = nullptr;
+#endif
     svgDom_ = nullptr;
     svgRenderTree_.ClearRenderObject();
 }
 
 bool RosenRenderImage::IsSourceWideGamut() const
 {
+#ifndef USE_ROSEN_DRAWING
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     if (sourceInfo_.IsSvg() || !skImage || !skImage->GetImage()) {
         return false;
     }
     return ImageProvider::IsWideGamut(skImage->GetImage()->refColorSpace());
+#else
+    auto drImage = std::make_shared<RSImage>(image_->image());
+    if (sourceInfo_.IsSvg() || !drImage) {
+        return false;
+    }
+    return ImageProvider::IsWideGamut(RSColorSpace::CreateRefImage(*drImage));
+#endif
 }
 
 bool RosenRenderImage::RetryLoading()
@@ -1311,13 +1694,19 @@ bool RosenRenderImage::RetryLoading()
     }
     bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
                     sourceInfo_.GetSrcType() != SrcType::NETWORK;
+#ifndef USE_ROSEN_DRAWING
     ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
         GetContext(), syncMode, useSkiaSvg_, autoResize_, onPostBackgroundTask_);
+#else
+ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
+        GetContext(), syncMode, useDrawingSvg_, autoResize_, onPostBackgroundTask_);
+#endif
     LOGW("Retry loading time: %{public}d, triggered by GetImageSize fail, imageSrc: %{private}s", retryCnt_,
         sourceInfo_.ToString().c_str());
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkImageInfo RosenRenderImage::MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
 {
     SkColorType ct = PixelFormatToSkColorType(pixmap);
@@ -1325,12 +1714,33 @@ SkImageInfo RosenRenderImage::MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>
     sk_sp<SkColorSpace> cs = ColorSpaceToSkColorSpace(pixmap);
     return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), ct, at, cs);
 }
+#else
+RSPixmapFormat RosenRenderImage::MakePixmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap)
+{
+    RSPixmapFormat format;
+    format.width = pixmap->GetWidth();
+    format.height = pixmap->GetHeight();
+    format.colorSpace = ColorSpaceToColorSpace(pixmap);
+    format.colorType = PixelFormatToColorType(pixmap);
+    format.alphaType = AlphaTypeToAlphaType(pixmap);
 
+    return format;
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkColorSpace> RosenRenderImage::ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
 {
     return SkColorSpace::MakeSRGB(); // Media::PixelMap has not support wide gamut yet.
 }
+#else
+std::shared_ptr<RSColorSpace> RosenRenderImage::ColorSpaceToColorSpace(const RefPtr<PixelMap>& pixmap)
+{
+    return RSColorSpace::CreateSRGB(); // Media::PixelMap has not support wide gamut yet.
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 SkAlphaType RosenRenderImage::AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap)
 {
     switch (pixmap->GetAlphaType()) {
@@ -1346,7 +1756,25 @@ SkAlphaType RosenRenderImage::AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pix
             return SkAlphaType::kUnknown_SkAlphaType;
     }
 }
+#else
+RSAlphaType RosenRenderImage::AlphaTypeToAlphaType(const RefPtr<PixelMap>& pixmap)
+{
+    switch (pixmap->GetAlphaType()) {
+        case AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN:
+            return RSAlphaType::ALPHATYPE_UNKNOWN;
+        case AlphaType::IMAGE_ALPHA_TYPE_OPAQUE:
+            return RSAlphaType::ALPHATYPE_OPAQUE;
+        case AlphaType::IMAGE_ALPHA_TYPE_PREMUL:
+            return RSAlphaType::ALPHATYPE_PREMUL;
+        case AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL:
+            return RSAlphaType::ALPHATYPE_UNPREMUL;
+        default:
+            return RSAlphaType::ALPHATYPE_UNKNOWN;
+    }
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 SkColorType RosenRenderImage::PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap)
 {
     switch (pixmap->GetPixelFormat()) {
@@ -1370,6 +1798,31 @@ SkColorType RosenRenderImage::PixelFormatToSkColorType(const RefPtr<PixelMap>& p
             return SkColorType::kUnknown_SkColorType;
     }
 }
+#else
+RSColorType RosenRenderImage::PixelFormatToColorType(const RefPtr<PixelMap>& pixmap)
+{
+    switch (pixmap->GetPixelFormat()) {
+        case PixelFormat::RGB_565:
+            return RSColorType::COLORTYPE_RGB_565;
+        case PixelFormat::RGBA_8888:
+            return RSColorType::COLORTYPE_RGBA_8888;
+        case PixelFormat::BGRA_8888:
+            return RSColorType::COLORTYPE_BGRA_8888;
+        case PixelFormat::ALPHA_8:
+            return RSColorType::COLORTYPE_ALPHA_8;
+        case PixelFormat::RGBA_F16:
+            return RSColorType::COLORTYPE_RGBA_F16;
+        case PixelFormat::UNKNOWN:
+        case PixelFormat::ARGB_8888:
+        case PixelFormat::RGB_888:
+        case PixelFormat::NV21:
+        case PixelFormat::NV12:
+        case PixelFormat::CMYK:
+        default:
+            return RSColorType::COLORTYPE_UNKNOWN;
+    }
+}
+#endif
 
 void RosenRenderImage::OnAppHide()
 {
@@ -1402,6 +1855,7 @@ void RosenRenderImage::OnVisibleChanged()
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 RefPtr<PixelMap> RosenRenderImage::GetPixmapFromSkImage()
 {
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
@@ -1438,5 +1892,7 @@ SkPixmap RosenRenderImage::CloneSkPixmap(SkPixmap& srcPixmap)
     }
     return dstPixmap;
 }
-
+#else
+    // TODO Drawing : SkPixmap
+#endif
 } // namespace OHOS::Ace

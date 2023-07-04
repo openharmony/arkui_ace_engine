@@ -20,8 +20,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
+#include "core/components_ng/image_provider/adapter/image_decoder.h"
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -30,7 +29,8 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
-#include "core/components_ng/render/adapter/svg_canvas_image.h"
+#include "core/components_ng/render/adapter/skia_image.h"
+#include "core/image/flutter_image_cache.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -127,7 +127,7 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
 
 void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync)
 {
-    CacheCanvasImage(canvasImage, key);
+    canvasImage->Cache(key);
     auto ctxs = EndTask(key);
     // when upload success, pass back canvasImage to LoadingContext
     auto notifyLoadSuccess = [ctxs, canvasImage] {
@@ -282,5 +282,46 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
         return MakeRefPtr<AnimatedImageObject>(src, size, data);
     }
     return MakeRefPtr<StaticImageObject>(src, size, data);
+}
+
+void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
+    const SizeF& size, bool forceResize, bool sync)
+{
+    auto obj = objWp.Upgrade();
+    CHECK_NULL_VOID(obj);
+    auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
+    // check if same task is already executing
+    if (!RegisterTask(key, ctxWp)) {
+        return;
+    }
+
+    if (sync) {
+        MakeCanvasImageHelper(objWp, size, key, forceResize, true);
+    } else {
+        std::scoped_lock<std::mutex> lock(taskMtx_);
+        // wrap with [CancelableCallback] and record in [tasks_] map
+        CancelableCallback<void()> task;
+        task.Reset([key, objWp, size, forceResize] { MakeCanvasImageHelper(objWp, size, key, forceResize); });
+        tasks_[key].bgTask_ = task;
+        ImageUtils::PostToBg(task);
+    }
+}
+
+void ImageProvider::MakeCanvasImageHelper(
+    const WeakPtr<ImageObject>& imageObjWp, const SizeF& size, const std::string& key, bool forceResize, bool sync)
+{
+    ImageDecoder decoder(imageObjWp.Upgrade(), size, forceResize);
+    RefPtr<CanvasImage> image;
+    if (SystemProperties::GetImageFrameworkEnabled()) {
+        image = decoder.MakePixmapImage();
+    } else {
+        image = decoder.MakeSkiaImage();
+    }
+
+    if (image) {
+        SuccessCallback(image, key, sync);
+    } else {
+        FailCallback(key, "Make CanvasImage failed.");
+    }
 }
 } // namespace OHOS::Ace::NG

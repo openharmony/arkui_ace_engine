@@ -250,7 +250,7 @@ void XComponentElement::CreateSurface()
 {
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto context = context_.Upgrade();
-        int32_t windowId = 0;
+        uint32_t windowId = 0;
         if (context) {
             windowId = context->GetWindowId();
         }

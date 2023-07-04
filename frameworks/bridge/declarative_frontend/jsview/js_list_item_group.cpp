@@ -34,7 +34,7 @@ ListItemGroupModel* ListItemGroupModel::GetInstance()
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ListItemModelNG());
+            instance_.reset(new NG::ListItemGroupModelNG());
 #else
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::ListItemGroupModelNG());
@@ -122,6 +122,9 @@ void JSListItemGroup::JSBind(BindingTarget globalObj)
 
     JSClass<JSListItemGroup>::StaticMethod("divider", &JSListItemGroup::SetDivider);
     JSClass<JSListItemGroup>::StaticMethod("aspectRatio", &JSListItemGroup::SetAspectRatio);
+    JSClass<JSListItemGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSListItemGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSListItemGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
 
     JSClass<JSListItemGroup>::Inherit<JSInteractableView>();
     JSClass<JSListItemGroup>::InheritAndBind<JSContainerBase>(globalObj);

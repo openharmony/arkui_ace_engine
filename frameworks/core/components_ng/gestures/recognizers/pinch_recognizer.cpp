@@ -137,15 +137,14 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
 
-    if (isPinchEnd_) {
-        return;
-    }
-
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     currentDev_ = ComputeAverageDeviation();
     time_ = event.time;
 
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     if (refereeState_ == RefereeState::DETECTING) {
         if (GreatOrEqual(fabs(currentDev_ - initialDev_), distance_)) {
             scale_ = currentDev_ / initialDev_;
@@ -298,6 +297,9 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
             info.SetTiltX(lastTouchEvent_.tiltX.value());

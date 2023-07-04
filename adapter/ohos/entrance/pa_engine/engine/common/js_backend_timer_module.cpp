@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,235 +15,190 @@
 
 #include "js_backend_timer_module.h"
 
-#include "base/log/log.h"
+#include <atomic>
+#include <string>
+#include <vector>
+
+#include "hilog_wrapper.h"
+#include "js_runtime.h"
+#include "js_runtime_utils.h"
+
+#ifdef SUPPORT_GRAPHICS
+#include "core/common/container_scope.h"
+#endif
+#ifdef ENABLE_HITRACE
+#include "hitrace/trace.h"
+#endif
+
+#ifdef SUPPORT_GRAPHICS
+using OHOS::Ace::ContainerScope;
+#endif
 
 namespace OHOS::Ace {
 namespace {
-template<class T>
-inline T* ConvertNativeValueTo(NativeValue* value)
-{
-    return (value != nullptr) ? static_cast<T*>(value->GetInterface(T::INTERFACE_ID)) : nullptr;
-}
+std::atomic<uint32_t> g_callbackId(1);
 
-void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name,
-    const char* moduleName, NativeCallback func)
-{
-    std::string fullName(moduleName);
-    fullName += ".";
-    fullName += name;
-    object.SetProperty(name, engine.CreateFunction(fullName.c_str(), fullName.length(), func, nullptr));
-}
-
-NativeValue* SetCallbackTimer(NativeEngine& engine, NativeCallbackInfo& info, bool isInterval)
-{
-    // Parameter check, must have at least 2 params
-    if (info.argc < 2 || info.argv[0]->TypeOf() != NATIVE_FUNCTION || info.argv[1]->TypeOf() != NATIVE_NUMBER) {
-        LOGE("Set callback timer failed with invalid parameter.");
-        return engine.CreateUndefined();
-    }
-
-    // Parse parameter
-    std::shared_ptr<NativeReference> func(engine.CreateReference(info.argv[0], 1));
-    int64_t delayTime = *ConvertNativeValueTo<NativeNumber>(info.argv[1]);
-    std::vector<std::shared_ptr<NativeReference>> params;
-    for (size_t index = 2; index < info.argc; ++index) {
-        params.emplace_back(std::shared_ptr<NativeReference>(engine.CreateReference(info.argv[index], 1)));
-    }
-
-    // Get callbackId
-    uint32_t callbackId = JsBackendTimerModule::GetInstance()->AddCallBack(func, params, &engine);
-
-    // Post task
-    JsBackendTimerModule::GetInstance()->PostTimerCallback(callbackId, delayTime, isInterval, true, &engine);
-
-    return engine.CreateNumber(callbackId);
-}
-
-NativeValue* ClearCallbackTimer(NativeEngine& engine, NativeCallbackInfo& info)
-{
-    // parameter check, must have at least 1 param
-    if (info.argc < 1 || info.argv[0]->TypeOf() != NATIVE_NUMBER) {
-        LOGE("Clear callback timer failed with invalid parameter.");
-        return engine.CreateUndefined();
-    }
-
-    uint32_t callbackId = *ConvertNativeValueTo<NativeNumber>(info.argv[0]);
-    JsBackendTimerModule::GetInstance()->RemoveTimerCallback(callbackId);
-    return engine.CreateUndefined();
-}
-
-NativeValue* SetTimeout(NativeEngine* engine, NativeCallbackInfo* info)
-{
-    if (engine == nullptr || info == nullptr) {
-        LOGE("Set timeout failed with engine or callback info is nullptr.");
-        return nullptr;
-    }
-
-    return SetCallbackTimer(*engine, *info, false);
-}
-
-NativeValue* SetInterval(NativeEngine* engine, NativeCallbackInfo* info)
-{
-    if (engine == nullptr || info == nullptr) {
-        LOGE("Set interval failed with engine or callback info is nullptr.");
-        return nullptr;
-    }
-
-    return SetCallbackTimer(*engine, *info, true);
-}
-
-NativeValue* ClearTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* info)
-{
-    if (engine == nullptr || info == nullptr) {
-        LOGE("Clear timer failed with engine or callback info is nullptr.");
-        return nullptr;
-    }
-
-    return ClearCallbackTimer(*engine, *info);
-}
-} // namespace
-
-void JsBackendTimerModule::TimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval)
-{
-    std::shared_ptr<NativeReference> func;
-    std::vector<std::shared_ptr<NativeReference>> params;
-    NativeEngine* engine = nullptr;
-    if (!GetCallBackById(callbackId, func, params, &engine)) {
-        return;
-    }
-
-    if (!engine) {
-        LOGE("engine is nullptr.");
-        return;
-    }
-
-    std::vector<NativeValue*> argc;
-    argc.reserve(params.size());
-    for (auto arg : params) {
-        argc.emplace_back(arg->Get());
-    }
-
-    engine->CallFunction(engine->CreateUndefined(), func->Get(), argc.data(), argc.size());
-
-    if (isInterval) {
-        PostTimerCallback(callbackId, delayTime, isInterval, false, engine);
-    } else {
-        RemoveTimerCallback(callbackId);
-    }
-}
-
-void JsBackendTimerModule::PostTimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval, bool isFirst,
-    NativeEngine* engine)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (!isFirst) {
-        auto taskNode = timeoutTaskMap_.find(callbackId);
-        if (taskNode == timeoutTaskMap_.end()) {
-            LOGE("Post timer callback failed, callbackId %{public}u not found.", callbackId);
-            return;
+class TraceIdScope final {
+public:
+    explicit TraceIdScope(const OHOS::HiviewDFX::HiTraceId& traceId) : valid_(traceId.IsValid())
+    {
+        if (valid_) {
+            OHOS::HiviewDFX::HiTraceChain::SetId(traceId);
         }
     }
 
-    // CancelableCallback class can only be executed once.
-    CancelableCallback<void()> cancelableTimer;
-    cancelableTimer.Reset([callbackId, delayTime, isInterval] {
-        JsBackendTimerModule::GetInstance()->TimerCallback(callbackId, delayTime, isInterval);
-    });
-    auto result = timeoutTaskMap_.try_emplace(callbackId, cancelableTimer);
-    if (!result.second) {
-        result.first->second = cancelableTimer;
+    ~TraceIdScope()
+    {
+        if (valid_) {
+            OHOS::HiviewDFX::HiTraceChain::ClearId();
+        }
     }
 
-    RefPtr<TaskExecutor> taskExecutor = GetTaskExecutorWithoutLock(engine);
+    TraceIdScope(const TraceIdScope&) = delete;
+    TraceIdScope(TraceIdScope&&) = delete;
+    TraceIdScope& operator=(const TraceIdScope&) = delete;
+    TraceIdScope& operator=(TraceIdScope&&) = delete;
 
-    if (taskExecutor) {
-        taskExecutor->PostDelayedTask(cancelableTimer, TaskExecutor::TaskType::JS, delayTime);
+private:
+    bool valid_ = false;
+};
+
+class JsTimer final {
+public:
+    JsTimer(AbilityRuntime::JsRuntime& jsRuntime, const std::shared_ptr<NativeReference>& jsFunction,
+        const std::string &name, int64_t interval, bool isInterval)
+        : jsRuntime_(jsRuntime), jsFunction_(jsFunction), name_(name), interval_(interval), isInterval_(isInterval)
+    {}
+
+    ~JsTimer() = default;
+
+    void operator()() const
+    {
+        if (isInterval_) {
+            jsRuntime_.PostTask(*this, name_, interval_);
+        }
+#ifdef SUPPORT_GRAPHICS
+        // call js function
+        ContainerScope containerScope(containerScopeId_);
+#endif
+        AbilityRuntime::HandleScope handleScope(jsRuntime_);
+
+        std::vector<NativeValue*> args_;
+        args_.reserve(jsArgs_.size());
+        for (auto arg : jsArgs_) {
+            args_.emplace_back(arg->Get());
+        }
+
+#ifdef ENABLE_HITRACE
+        TraceIdScope traceIdScope(traceId_);
+#endif
+        NativeEngine& engine = jsRuntime_.GetNativeEngine();
+        engine.CallFunction(engine.CreateUndefined(), jsFunction_->Get(), args_.data(), args_.size());
+        if (engine.HasPendingException()) {
+            HILOG_ERROR("Pending exception after CallFUnction in JsTimer. Handle uncaught exception here.");
+            engine.HandleUncaughtException();
+        }
     }
-}
 
-void JsBackendTimerModule::RemoveTimerCallback(uint32_t callbackId)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (callbackNodeMap_.find(callbackId) != callbackNodeMap_.end()) {
-        callbackNodeMap_.erase(callbackId);
+    void PushArgs(const std::shared_ptr<NativeReference>& ref)
+    {
+        jsArgs_.emplace_back(ref);
     }
 
-    auto timeoutNode = timeoutTaskMap_.find(callbackId);
-    if (timeoutNode != timeoutTaskMap_.end()) {
-        timeoutNode->second.Cancel();
-        timeoutTaskMap_.erase(callbackId);
-    }
-}
+private:
+    AbilityRuntime::JsRuntime& jsRuntime_;
+    std::shared_ptr<NativeReference> jsFunction_;
+    std::vector<std::shared_ptr<NativeReference>> jsArgs_;
+    std::string name_;
+    int64_t interval_ = 0;
+    bool isInterval_ = false;
+#ifdef SUPPORT_GRAPHICS
+    int32_t containerScopeId_ = ContainerScope::CurrentId();
+#endif
+#ifdef ENABLE_HITRACE
+    OHOS::HiviewDFX::HiTraceId traceId_ = OHOS::HiviewDFX::HiTraceChain::GetId();
+#endif
+};
 
-uint32_t JsBackendTimerModule::AddCallBack(const std::shared_ptr<NativeReference>& func,
-    const std::vector<std::shared_ptr<NativeReference>>& params, NativeEngine* engine)
+NativeValue* StartTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* info, bool isInterval)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ++callbackId_;
-    callbackNodeMap_[callbackId_].func = func;
-    callbackNodeMap_[callbackId_].params = params;
-    callbackNodeMap_[callbackId_].engine = engine;
-    return callbackId_;
-}
-
-bool JsBackendTimerModule::GetCallBackById(uint32_t callbackId, std::shared_ptr<NativeReference>& func,
-    std::vector<std::shared_ptr<NativeReference>>& params, NativeEngine** engine)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto taskNode = callbackNodeMap_.find(callbackId);
-    if (taskNode == callbackNodeMap_.end()) {
-        LOGE("Get callback failed, callbackId %{public}u not found.", callbackId);
-        return false;
-    }
-
-    func = taskNode->second.func;
-    params = taskNode->second.params;
-    *engine = taskNode->second.engine;
-    return true;
-}
-
-JsBackendTimerModule* JsBackendTimerModule::GetInstance()
-{
-    static JsBackendTimerModule instance;
-    return &instance;
-}
-
-RefPtr<TaskExecutor> JsBackendTimerModule::GetTaskExecutorWithoutLock(NativeEngine* engine)
-{
-    auto taskExecutorNode = taskExecutorMap_.find(engine);
-    if (taskExecutorNode == taskExecutorMap_.end()) {
-        LOGE("Get taskExecutorNode failed.");
+    if (engine == nullptr || info == nullptr) {
+        HILOG_ERROR("StartTimeoutOrInterval, engine or callback info is nullptr.");
         return nullptr;
     }
 
-    return taskExecutorNode->second;
+    // parameter check, must have at least 2 params
+    if (info->argc < 2 || info->argv[0]->TypeOf() != NATIVE_FUNCTION || info->argv[1]->TypeOf() != NATIVE_NUMBER) {
+        HILOG_ERROR("Set callback timer failed with invalid parameter.");
+        return engine->CreateUndefined();
+    }
+
+    // parse parameter
+    std::shared_ptr<NativeReference> jsFunction(engine->CreateReference(info->argv[0], 1));
+    int64_t delayTime = *AbilityRuntime::ConvertNativeValueTo<NativeNumber>(info->argv[1]);
+    uint32_t callbackId = g_callbackId.fetch_add(1, std::memory_order_relaxed);
+    std::string name = "JsRuntimeTimer_";
+    name.append(std::to_string(callbackId));
+
+    // create timer task
+    AbilityRuntime::JsRuntime& jsRuntime = *reinterpret_cast<AbilityRuntime::JsRuntime*>(engine->GetJsEngine());
+    JsTimer task(jsRuntime, jsFunction, name, delayTime, isInterval);
+    for (size_t index = 2; index < info->argc; ++index) {
+        task.PushArgs(std::shared_ptr<NativeReference>(engine->CreateReference(info->argv[index], 1)));
+    }
+
+    jsRuntime.PostTask(task, name, delayTime);
+    return engine->CreateNumber(callbackId);
 }
 
-void JsBackendTimerModule::AddTaskExecutor(NativeEngine* engine, const RefPtr<TaskExecutor>& taskExecutor)
+NativeValue* StartTimeout(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    taskExecutorMap_[engine] = taskExecutor;
+    return StartTimeoutOrInterval(engine, info, false);
 }
 
-void JsBackendTimerModule::InitTimerModule(NativeEngine* engine, const RefPtr<TaskExecutor>& taskExecutor)
+NativeValue* StartInterval(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    if (engine == nullptr || taskExecutor == nullptr) {
-        LOGE("InitTimerModule failed with engine or taskExecutor is nullptr.");
+    return StartTimeoutOrInterval(engine, info, true);
+}
+
+NativeValue* StopTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    if (engine == nullptr || info == nullptr) {
+        HILOG_ERROR("Stop timeout or interval failed with engine or callback info is nullptr.");
+        return nullptr;
+    }
+
+    // parameter check, must have at least 1 param
+    if (info->argc < 1 || info->argv[0]->TypeOf() != NATIVE_NUMBER) {
+        HILOG_ERROR("Clear callback timer failed with invalid parameter.");
+        return engine->CreateUndefined();
+    }
+
+    uint32_t callbackId = *AbilityRuntime::ConvertNativeValueTo<NativeNumber>(info->argv[0]);
+    std::string name = "JsRuntimeTimer_";
+    name.append(std::to_string(callbackId));
+
+    // event should be cancelable before executed
+    AbilityRuntime::JsRuntime& jsRuntime = *reinterpret_cast<AbilityRuntime::JsRuntime*>(engine->GetJsEngine());
+    jsRuntime.RemoveTask(name);
+    return engine->CreateUndefined();
+}
+}
+
+void InitTimerModule(NativeEngine& engine)
+{
+    HILOG_INFO("InitTimerModule begin.");
+    AbilityRuntime::HandleScope handleScope(engine);
+    NativeObject* globalObj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(engine.GetGlobal());
+    if (globalObj == nullptr) {
+        HILOG_ERROR("Global object is invalid.");
         return;
     }
 
-    AddTaskExecutor(engine, taskExecutor);
-
-    NativeObject* globalObject = ConvertNativeValueTo<NativeObject>(engine->GetGlobal());
-    if (!globalObject) {
-        LOGE("Failed to get global object.");
-        return;
-    }
-
-    const char *moduleName = "JsBackendTimer";
-    BindNativeFunction(*engine, *globalObject, "setTimeout", moduleName, SetTimeout);
-    BindNativeFunction(*engine, *globalObject, "setInterval", moduleName, SetInterval);
-    BindNativeFunction(*engine, *globalObject, "clearTimeout", moduleName, ClearTimeoutOrInterval);
-    BindNativeFunction(*engine, *globalObject, "clearInterval", moduleName, ClearTimeoutOrInterval);
+    const char *moduleName = "JsTimer";
+    AbilityRuntime::BindNativeFunction(engine, *globalObj, "setTimeout", moduleName, StartTimeout);
+    AbilityRuntime::BindNativeFunction(engine, *globalObj, "setInterval", moduleName, StartInterval);
+    AbilityRuntime::BindNativeFunction(engine, *globalObj, "clearTimeout", moduleName, StopTimeoutOrInterval);
+    AbilityRuntime::BindNativeFunction(engine, *globalObj, "clearInterval", moduleName, StopTimeoutOrInterval);
 }
 } // namespace OHOS::Ace

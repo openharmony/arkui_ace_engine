@@ -79,6 +79,9 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch move event");
     touchPoints_[event.id] = event;
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         currentAngle_ = ComputeAngle();
     }
@@ -153,6 +156,9 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         TouchEvent touchPoint = {};
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;

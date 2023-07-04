@@ -17,4 +17,5 @@
 
 namespace OHOS::Ace::NG {
 void PathPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset) {}
+void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& shapePaintProperty) {}
 } // namespace OHOS::Ace::NG

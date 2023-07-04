@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_ENGINE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_ENGINE_H
 
+#include <set>
 #include <string>
 #include <unordered_map>
 
@@ -25,9 +26,9 @@
 
 class NativeEngine;
 class NativeReference;
+class NativeValue;
 
 namespace OHOS::Ace::Framework {
-
 class JsAcePage;
 using PixelMapNapiEntry = void* (*)(void*, void*);
 struct JsModule {
@@ -59,6 +60,23 @@ protected:
     NativeEngine* nativeEngine_ = nullptr;
 };
 
+using InspectorFunc = std::function<void()>;
+class InspectorEvent : public virtual AceType {
+    DECLARE_ACE_TYPE(InspectorEvent, AceType)
+public:
+    explicit InspectorEvent(InspectorFunc&& callback) : callback_(std::move(callback)) {}
+    ~InspectorEvent() override = default;
+
+    void operator()() const
+    {
+        if (callback_) {
+            callback_();
+        }
+    }
+
+private:
+    InspectorFunc callback_;
+};
 class JsEngine : public AceType {
     DECLARE_ACE_TYPE(JsEngine, AceType);
 
@@ -95,8 +113,13 @@ public:
     }
 
     // Load the js file of the page in NG structure..
-    virtual bool LoadPageSource(const std::string& /*url*/,
+    virtual bool LoadPageSource(const std::string& /* url */,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
+    {
+        return false;
+    }
+
+    virtual bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
     {
         return false;
     }
@@ -169,6 +192,26 @@ public:
     {
         if (mediaUpdateCallback_) {
             mediaUpdateCallback_(this);
+        }
+    }
+
+    void LayoutInspectorCallback(const std::string& componentId)
+    {
+        auto iter = layoutEvents_.find(componentId);
+        if (iter != layoutEvents_.end()) {
+            for (auto&& observer : iter->second) {
+                (*observer)();
+            }
+        }
+    }
+
+    void DrawInspectorCallback(const std::string& componentId)
+    {
+        auto iter = drawEvents_.find(componentId);
+        if (iter != drawEvents_.end()) {
+            for (auto&& observer : iter->second) {
+                (*observer)();
+            }
         }
     }
 
@@ -265,6 +308,42 @@ public:
         mediaUpdateCallback_ = nullptr;
     }
 
+    void ACE_EXPORT RegisterLayoutInspectorCallback(
+        const RefPtr<InspectorEvent>& layoutEvent, const std::string& componentId)
+    {
+        layoutEvents_[componentId].emplace(layoutEvent);
+    }
+
+    void ACE_EXPORT UnregisterLayoutInspectorCallback(
+        const RefPtr<InspectorEvent>& layoutEvent, const std::string& componentId)
+    {
+        auto iter = layoutEvents_.find(componentId);
+        if (iter != layoutEvents_.end()) {
+            iter->second.erase(layoutEvent);
+            if (iter->second.empty()) {
+                layoutEvents_.erase(componentId);
+            }
+        }
+    }
+
+    void ACE_EXPORT RegisterDrawInspectorCallback(
+        const RefPtr<InspectorEvent>& drawEvent, const std::string& componentId)
+    {
+        drawEvents_[componentId].emplace(drawEvent);
+    }
+
+    void ACE_EXPORT UnregisterDrawInspectorCallback(
+        const RefPtr<InspectorEvent>& drawEvent, const std::string& componentId)
+    {
+        auto iter = drawEvents_.find(componentId);
+        if (iter != drawEvents_.end()) {
+            iter->second.erase(drawEvent);
+            if (iter->second.empty()) {
+                drawEvents_.erase(componentId);
+            }
+        }
+    }
+
     virtual void RunNativeEngineLoop();
 
     virtual void SetPluginBundleName(const std::string& pluginBundleName) {}
@@ -274,7 +353,6 @@ public:
 #if !defined(PREVIEW)
     static PixelMapNapiEntry GetPixelMapNapiEntry();
 #endif
-
 #if defined(PREVIEW)
     virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
     {
@@ -298,12 +376,17 @@ public:
         LOGE("Ark does not support InitializeModuleSearcher");
     }
 #endif
-
     virtual void FlushReload() {}
+    virtual NativeValue* GetContextValue()
+    {
+        return nullptr;
+    }
 
 protected:
     NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;
+    std::map<std::string, std::set<RefPtr<InspectorEvent>>> layoutEvents_;
+    std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawEvents_;
     bool needUpdate_ = false;
 
 private:
@@ -317,6 +400,5 @@ private:
 
     std::unordered_map<std::string, void*> extraNativeObject_;
 };
-
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_ENGINE_H

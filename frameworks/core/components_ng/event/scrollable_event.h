@@ -53,10 +53,10 @@ public:
 
     void SetScrollBeginCallback(ScrollBeginCallback&& scrollBeginCallback)
     {
-        if (!scrollBeginCallback) {
-            return;
-        }
         scrollBeginCallback_ = std::move(scrollBeginCallback);
+        if (scrollable_) {
+            scrollable_->SetOnScrollBegin(scrollBeginCallback_);
+        }
     }
 
     const ScrollBeginCallback& GetScrollBeginCallback() const
@@ -66,10 +66,10 @@ public:
 
     void SetScrollFrameBeginCallback(ScrollFrameBeginCallback&& scrollFrameBeginCallback)
     {
-        if (!scrollFrameBeginCallback) {
-            return;
-        }
         scrollFrameBeginCallback_ = std::move(scrollFrameBeginCallback);
+        if (scrollable_) {
+            scrollable_->SetOnScrollFrameBegin(scrollFrameBeginCallback_);
+        }
     }
 
     const ScrollFrameBeginCallback& GetScrollFrameBeginCallback() const
@@ -118,10 +118,10 @@ public:
 
     void SetMouseLeftButtonScroll(MouseLeftButtonScroll&& mouseLeftButtonScroll)
     {
-        if (!mouseLeftButtonScroll) {
-            return;
-        }
         mouseLeftButtonScroll_ = std::move(mouseLeftButtonScroll);
+        if (scrollable_) {
+            scrollable_->SetMouseLeftButtonScroll(mouseLeftButtonScroll_);
+        }
     }
 
     const MouseLeftButtonScroll& GetMouseLeftButtonScroll() const
@@ -170,6 +170,19 @@ public:
         return true;
     }
 
+    void SetFriction(double friction)
+    {
+        friction_ = friction;
+        if (scrollable_) {
+            scrollable_->SetUnstaticFriction(friction_);
+        }
+    }
+
+    double GetFriction() const
+    {
+        return friction_;
+    }
+
 private:
     ScrollPositionCallback callback_;
     OnScrollCallback onScrollCallback_;
@@ -182,6 +195,7 @@ private:
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
     RefPtr<Scrollable> scrollable_;
+    double friction_ = -1.0;
 };
 
 class ScrollableActuator : public GestureEventActuator {
@@ -193,28 +207,26 @@ public:
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
         scrollableEvents_[scrollableEvent->GetAxis()] = scrollableEvent;
-        initialized_ = false;
+        InitializeScrollable(scrollableEvent);
     }
 
     void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
         scrollableEvents_.erase(scrollableEvent->GetAxis());
-        initialized_ = false;
     }
 
-    void AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& effect);
+    void AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect);
     bool RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect);
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
 private:
-    void InitializeScrollable();
+    void InitializeScrollable(RefPtr<ScrollableEvent> event);
 
     std::unordered_map<Axis, RefPtr<ScrollableEvent>> scrollableEvents_;
     std::unordered_map<Axis, RefPtr<ScrollEdgeEffect>> scrollEffects_;
     WeakPtr<GestureEventHub> gestureEventHub_;
-    bool initialized_ = false;
 };
 
 } // namespace OHOS::Ace::NG

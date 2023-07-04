@@ -28,7 +28,6 @@ public:
     void SetSelected(uint32_t value) override;
     void SetRange(const std::vector<NG::RangeContent>& value) override;
     void SetValue(const std::string& value) override;
-    void SetOnChange(OHOS::Ace::TextChangeEvent&& onChange) override {};
     void SetDefaultPickerItemHeight(const Dimension& value) override;
     void SetCanLoop(const bool value) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
@@ -63,6 +62,7 @@ public:
     bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
     void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override;
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
+
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();
@@ -76,6 +76,14 @@ private:
     std::vector<NG::RangeContent> rangeValue_;
     std::vector<NG::TextCascadePickerOptions> options_;
     uint32_t maxCount_ = 0;
+};
+
+class ACE_EXPORT TextPickerDialogModelNG : public TextPickerDialogModel {
+public:
+    RefPtr<AceType> CreateObject() override;
+    void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
+        std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
+        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog) override;
 };
 } // namespace OHOS::Ace::NG
 

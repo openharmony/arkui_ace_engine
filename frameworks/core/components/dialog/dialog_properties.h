@@ -105,8 +105,8 @@ struct ActionSheetInfo {
 
 // Information of Button.
 struct ButtonInfo {
-    std::string text;      // text of button.
-    std::string textColor; // style of text in button.
+    std::string text;              // text of button.
+    std::string textColor;         // style of text in button.
     bool isBgColorSetted = false;
     Color bgColor;                 // background color of button.
     RefPtr<NG::ClickEvent> action; // NG button click action
@@ -128,17 +128,17 @@ struct DialogProperties {
     bool isMenu = false;
     bool isSelect = false;                // init checkbox state
     std::vector<ButtonInfo> buttons;
-    std::function<void()> onCancel;                         // NG cancel callback
-    std::function<void(int32_t, int32_t)> onSuccess;        // NG prompt success callback
-    std::function<void(const bool)> onChange;               // onChange success callback
-    DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
-    DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
+    std::function<void()> onCancel;       // NG cancel callback
+    std::function<void(int32_t, int32_t)> onSuccess;      // NG prompt success callback
+    std::function<void(const bool)> onChange;             // onChange success callback
+    DialogAlignment alignment = DialogAlignment::DEFAULT; // Alignment of dialog.
+    DimensionOffset offset;                               // Offset which base on alignment of Dialog.
     int32_t gridCount = -1;
     std::optional<Color> maskColor;
     std::optional<AnimationOption> openAnimation;
     std::optional<AnimationOption> closeAnimation;
     bool isShowInSubWindow = false;
-    
+
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
     // These ids is used for AlertDialog of declarative.
@@ -152,6 +152,8 @@ struct DialogProperties {
 
     // These attributes is used for ActionSheet.
     std::vector<ActionSheetInfo> sheetsInfo;
+
+    WeakPtr<NG::UINode> windowScene;
 };
 
 } // namespace OHOS::Ace

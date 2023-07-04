@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 
 using JsonObject = cJSON;
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW JsonValue : public SerializeableObject {
+class ACE_FORCE_EXPORT JsonValue : public SerializeableObject {
 public:
     JsonValue() = default;
     explicit JsonValue(JsonObject* object);
@@ -96,7 +96,7 @@ private:
     bool isRoot_ = false;
 };
 
-class ACE_EXPORT_WITH_PREVIEW JsonUtil final {
+class ACE_FORCE_EXPORT JsonUtil final {
 public:
     JsonUtil() = delete;
     ~JsonUtil() = delete;

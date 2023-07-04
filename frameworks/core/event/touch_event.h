@@ -23,6 +23,10 @@
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
 
+namespace OHOS::MMI {
+class PointerEvent;
+} // namespace OHOS::MMI
+
 namespace OHOS::Ace {
 
 static const int32_t TOUCH_TOOL_BASE_ID = 100;
@@ -76,11 +80,16 @@ struct TouchEvent final {
     std::optional<float> tiltX;
     std::optional<float> tiltY;
     int64_t deviceId = 0;
+    int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::vector<uint8_t> enhanceData_;
+    // historical points
+    std::vector<TouchEvent> history;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
@@ -154,8 +163,8 @@ struct TouchEvent final {
     TouchEvent CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, screenX, screenY, type, pullType, time, size, force, tiltX, tiltY, deviceId, sourceType,
-                sourceTool, pointers };
+            return { id, x, y, screenX, screenY, type, pullType, time, size, force, tiltX, tiltY, deviceId,
+                targetDisplayId, sourceType, sourceTool, pointers, pointerEvent, enhanceData_ };
         }
         auto temp = pointers;
         std::for_each(temp.begin(), temp.end(), [scale](auto&& point) {
@@ -164,8 +173,8 @@ struct TouchEvent final {
             point.screenX = point.screenX / scale;
             point.screenY = point.screenY / scale;
         });
-        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, pullType, time, size, force,
-            tiltX, tiltY, deviceId, sourceType, sourceTool, temp };
+        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, pullType, time, size, force, tiltX,
+            tiltY, deviceId, targetDisplayId, sourceType, sourceTool, temp, pointerEvent, enhanceData_ };
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
@@ -179,7 +188,8 @@ struct TouchEvent final {
                 point.screenY = point.screenY - offsetY;
             });
             return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, pullType, time,
-                size, force, tiltX, tiltY, deviceId, sourceType, sourceTool, temp };
+                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, temp, pointerEvent,
+                enhanceData_ };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -189,8 +199,8 @@ struct TouchEvent final {
             point.screenY = (point.screenY - offsetY) / scale;
         });
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
-            (screenY - offsetY) / scale, type, pullType, time, size, force, tiltX, tiltY, deviceId, sourceType,
-            sourceTool, temp };
+            (screenY - offsetY) / scale, type, pullType, time, size, force, tiltX, tiltY, deviceId, targetDisplayId,
+            sourceType, sourceTool, temp, pointerEvent, enhanceData_ };
     }
 
     TouchEvent UpdatePointers() const
@@ -214,7 +224,10 @@ struct TouchEvent final {
             .size = size,
             .force = force,
             .deviceId = deviceId,
-            .sourceType = sourceType };
+            .targetDisplayId = targetDisplayId,
+            .sourceType = sourceType,
+            .pointerEvent = pointerEvent,
+            .enhanceData_ = enhanceData_ };
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -530,6 +543,10 @@ public:
     {
         changedTouches_.emplace_back(info);
     }
+    void AddHistoryLocationInfo(TouchLocationInfo&& info)
+    {
+        history_.emplace_back(std::move(info));
+    }
 
     const std::list<TouchLocationInfo>& GetTouches() const
     {
@@ -539,10 +556,25 @@ public:
     {
         return changedTouches_;
     }
+    const std::list<TouchLocationInfo>& GetHistory() const
+    {
+        return history_;
+    }
+
+    void SetPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    {
+        pointerEvent_ = pointerEvent;
+    }
+    const std::shared_ptr<MMI::PointerEvent> GetPointerEvent() const
+    {
+        return pointerEvent_;
+    }
 
 private:
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     std::list<TouchLocationInfo> touches_;
     std::list<TouchLocationInfo> changedTouches_;
+    std::list<TouchLocationInfo> history_;
 };
 
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;

@@ -349,79 +349,9 @@ void SvgDom::FitViewPort(const Size& layout)
     }
 }
 
-void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
-{
-    switch (imageFit) {
-        case ImageFit::FILL:
-            ApplyFill(scaleX, scaleY);
-            break;
-        case ImageFit::NONE:
-            break;
-        case ImageFit::COVER:
-            ApplyCover(scaleX, scaleY);
-            break;
-        case ImageFit::CONTAIN:
-            ApplyContain(scaleX, scaleY);
-            break;
-        case ImageFit::SCALE_DOWN:
-            if (svgSize_ > layout_ || svgSize_ == layout_) {
-                ApplyContain(scaleX, scaleY);
-            }
-            break;
-        default:
-            break;
-    }
-}
-
-void SvgDom::ApplyFill(double& scaleX, double& scaleY)
-{
-    if (!svgSize_.IsValid()) {
-        return;
-    }
-    scaleX = layout_.Width() / svgSize_.Width();
-    scaleY = layout_.Height() / svgSize_.Height();
-}
-
-void SvgDom::ApplyContain(double& scaleX, double& scaleY)
-{
-    if (!svgSize_.IsValid()) {
-        return;
-    }
-    if (Size::CalcRatio(svgSize_) > Size::CalcRatio(layout_)) {
-        scaleX = layout_.Width() / svgSize_.Width();
-        scaleY = scaleX;
-    } else {
-        scaleX = layout_.Height() / svgSize_.Height();
-        scaleY = scaleX;
-    }
-}
-
-void SvgDom::ApplyCover(double& scaleX, double& scaleY)
-{
-    if (!svgSize_.IsValid()) {
-        return;
-    }
-    if (Size::CalcRatio(svgSize_) > Size::CalcRatio(layout_)) {
-        scaleX = layout_.Height() / svgSize_.Height();
-        scaleY = scaleX;
-    } else {
-        scaleX = layout_.Width() / svgSize_.Width();
-        scaleY = scaleX;
-    }
-}
-
 SizeF SvgDom::GetContainerSize() const
 {
     return { static_cast<float>(svgSize_.Width()), static_cast<float>(svgSize_.Height()) };
-}
-
-void SvgDom::SetRadius(const BorderRadiusArray& radiusXY)
-{
-    if (!radius_) {
-        radius_ = std::make_unique<BorderRadiusArray>(radiusXY);
-    } else {
-        *radius_ = radiusXY;
-    }
 }
 
 void SvgDom::SetFillColor(const std::optional<Color>& color)

@@ -89,7 +89,7 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(buttonWrapper);
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(buttonWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
-    if (buttonType_ == SecurityComponentBackgroundType::CIRCLE) {
+    if (buttonType_ == static_cast<int32_t>(ButtonType::CIRCLE)) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(NG::CalcLength(std::max(componentWidth_, componentHeight_)),
             NG::CalcLength(std::max(componentWidth_, componentHeight_))));
@@ -110,7 +110,7 @@ void SecurityComponentLayoutAlgorithm::FillPaddingParams(
     res.right = securityComponentProperty->GetBackgroundRightPadding().value().ConvertToPx();
     res.bottom = securityComponentProperty->GetBackgroundBottomPadding().value().ConvertToPx();
     res.left = securityComponentProperty->GetBackgroundLeftPadding().value().ConvertToPx();
-    res.textIconPadding = securityComponentProperty->GetTextIconPadding().value().ConvertToPx();
+    res.textIconSpace = securityComponentProperty->GetTextIconSpace().value().ConvertToPx();
     res.iconStart =
         (securityComponentProperty->GetLayoutOrder().value() == SecSecurityComponentLayoutOrder::ICON_FIRST);
 }
@@ -118,16 +118,16 @@ void SecurityComponentLayoutAlgorithm::FillPaddingParams(
 void SecurityComponentLayoutAlgorithm::UpdateVertical(OffsetT<Dimension>& offsetIcon,
     OffsetT<Dimension>& offsetText, const SecurityComponentLayoutPaddingParams& params)
 {
-    componentHeight_ = params.top + iconSizeF_.Height() + params.textIconPadding +
+    componentHeight_ = params.top + iconSizeF_.Height() + params.textIconSpace +
         textSizeF_.Height() + params.bottom;
     componentWidth_ = params.left +
         ((iconSizeF_.Width() > textSizeF_.Width()) ? iconSizeF_.Width() : textSizeF_.Width()) + params.right;
     if (params.iconStart) {
         offsetText = offsetIcon + OffsetT<Dimension>(Dimension(0.0F),
-            Dimension(iconSizeF_.Height() + params.textIconPadding));
+            Dimension(iconSizeF_.Height() + params.textIconSpace));
     } else {
         offsetIcon = offsetText + OffsetT<Dimension>(Dimension(0.0F),
-            Dimension(textSizeF_.Height() + params.textIconPadding));
+            Dimension(textSizeF_.Height() + params.textIconSpace));
     }
     if (iconSizeF_.Width() > textSizeF_.Width()) {
         offsetText += OffsetT<Dimension>(Dimension((iconSizeF_.Width() - textSizeF_.Width()) / HALF), Dimension(0.0F));
@@ -142,13 +142,13 @@ void SecurityComponentLayoutAlgorithm::UpdateHorizontal(OffsetT<Dimension>& offs
     componentHeight_ =
         params.top + ((iconSizeF_.Height() > textSizeF_.Height()) ? iconSizeF_.Height() : textSizeF_.Height()) +
         params.bottom;
-    componentWidth_ = params.left + iconSizeF_.Width() + params.textIconPadding + textSizeF_.Width() + params.right;
+    componentWidth_ = params.left + iconSizeF_.Width() + params.textIconSpace + textSizeF_.Width() + params.right;
     if (params.iconStart) {
         offsetText = offsetIcon +
-            OffsetT<Dimension>(Dimension(iconSizeF_.Width() + params.textIconPadding), Dimension(0.0F));
+            OffsetT<Dimension>(Dimension(iconSizeF_.Width() + params.textIconSpace), Dimension(0.0F));
     } else {
         offsetIcon = offsetText +
-            OffsetT<Dimension>(Dimension(textSizeF_.Width() + params.textIconPadding), Dimension(0.0F));
+            OffsetT<Dimension>(Dimension(textSizeF_.Width() + params.textIconSpace), Dimension(0.0F));
     }
     if (iconSizeF_.Height() > textSizeF_.Height()) {
         offsetText +=
@@ -190,7 +190,7 @@ void SecurityComponentLayoutAlgorithm::UpdateFrameMeasure(LayoutWrapper* layoutW
         UpdateHorizontal(offsetIcon, offsetText, params);
     }
 
-    if (buttonType_ == SecurityComponentBackgroundType::CIRCLE) {
+    if (buttonType_ == static_cast<int32_t>(ButtonType::CIRCLE)) {
         UpdateCircleBackground(offsetIcon, offsetText);
     }
     UpdateChildPosition(layoutWrapper, V2::IMAGE_ETS_TAG, offsetIcon);

@@ -70,6 +70,11 @@ public:
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
 
+    virtual void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+
+    // process offscreen process.
+    void ProcessOffscreenTask(bool recursive = false);
+
     int32_t TotalChildCount() const;
 
     // Returns index in the flatten tree structure
@@ -238,6 +243,8 @@ public:
     // of parent's layout wrapper
     virtual void UpdateLayoutPropertyFlag();
 
+    virtual void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) {}
+
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
     virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
@@ -270,6 +277,8 @@ public:
 
     virtual void SetActive(bool active);
 
+    virtual void SetJSViewActive(bool active);
+
     virtual void OnVisibleChange(bool isVisible);
 
     virtual bool MarkRemoving();
@@ -277,6 +286,11 @@ public:
     bool IsOnMainTree() const
     {
         return onMainTree_;
+    }
+
+    bool UseOffscreenProcess() const
+    {
+        return useOffscreenProcess_;
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
@@ -371,34 +385,63 @@ public:
     // --------------------------------------------------------------------------------
     // performance check get child count, depth, flex layout times and layout time
     void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
-    void AddFlexLayouts();
     void SetLayoutTime(int64_t time)
     {
-        nodeInfo_->layoutTime = time;
+        if (nodeInfo_) {
+            nodeInfo_->layoutTime = time;
+        }
     }
     int64_t GetLayoutTime()
     {
-        return nodeInfo_->layoutTime;
+        if (nodeInfo_) {
+            return nodeInfo_->layoutTime;
+        }
+        return 0;
     }
     int32_t GetFlexLayouts()
     {
-        return nodeInfo_->flexLayouts;
+        if (nodeInfo_) {
+            return nodeInfo_->flexLayouts;
+        }
+        return 0;
     }
     int32_t GetRow() const
     {
-        return nodeInfo_->codeRow;
+        if (nodeInfo_) {
+            return nodeInfo_->codeRow;
+        }
+        return 0;
     }
     int32_t GetCol() const
     {
-        return nodeInfo_->codeCol;
+        if (nodeInfo_) {
+            return nodeInfo_->codeCol;
+        }
+        return 0;
     }
     void SetRow(const int32_t row)
     {
-        nodeInfo_->codeRow = row;
+        if (nodeInfo_) {
+            nodeInfo_->codeRow = row;
+        }
     }
     void SetCol(const int32_t col)
     {
-        nodeInfo_->codeCol = col;
+        if (nodeInfo_) {
+            nodeInfo_->codeCol = col;
+        }
+    }
+    void SetForeachItem()
+    {
+        if (nodeInfo_) {
+            nodeInfo_->isForEachItem = true;
+        }
+    }
+    void AddFlexLayouts()
+    {
+        if (nodeInfo_) {
+            nodeInfo_->flexLayouts++;
+        }
     }
     virtual std::string GetCustomTag()
     {
@@ -407,10 +450,6 @@ public:
     void SetBuildByJs(bool isBuildByJS)
     {
         isBuildByJS_ = isBuildByJS;
-    }
-    void SetForeachItem()
-    {
-        nodeInfo_->isForEachItem = true;
     }
     // --------------------------------------------------------------------------------
 
@@ -445,6 +484,9 @@ protected:
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false);
 
+    // run offscreen process.
+    virtual void OnOffscreenProcess(bool recursive) {}
+
     bool isRemoving_ = false;
 
     // return value: true if the node can be removed immediately.
@@ -476,6 +518,8 @@ private:
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
     int32_t restoreId_ = -1;
+
+    bool useOffscreenProcess_ = false;
 
 #ifdef PREVIEW
     std::string debugLine_;

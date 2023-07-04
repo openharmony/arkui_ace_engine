@@ -25,7 +25,6 @@
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
-
 namespace OHOS::Ace {
 namespace {
 
@@ -392,6 +391,26 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->MediaQueryCallback(callbackId, args);
     };
 
+    const auto& layoutInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                              const std::string& componentId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        LOGI("DeclarativeFrontend jsEngine layoutInspectorCallback");
+        jsEngine->LayoutInspectorCallback(componentId);
+    };
+
+    const auto& drawInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                            const std::string& componentId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        LOGI("DeclarativeFrontend jsEngine drawInspectorCallback");
+        jsEngine->DrawInspectorCallback(componentId);
+    };
+
     const auto& requestAnimationCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                const std::string& callbackId, uint64_t timeStamp) {
         auto jsEngine = weakEngine.Upgrade();
@@ -470,20 +489,20 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         delegate_ = AceType::MakeRefPtr<Framework::FormFrontendDelegateDeclarative>(taskExecutor, loadCallback,
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
-            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback,
-            onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
-            onRestoreAbilityStateCallBack, onNewWantCallBack,
-            onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack,
-            onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+            timerCallback, mediaQueryCallback, layoutInspectorCallback, drawInspectorCallback, requestAnimationCallback,
+            jsCallback, onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
+            onRestoreAbilityStateCallBack, onNewWantCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
+            onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack,
+            externalEventCallback);
     } else {
         delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
-            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback,
-            onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
+            timerCallback, mediaQueryCallback, layoutInspectorCallback, drawInspectorCallback, requestAnimationCallback,
+            jsCallback, onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
             onRestoreAbilityStateCallBack, onNewWantCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
-            onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
-            onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+            onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack,
+            externalEventCallback);
     }
 
     if (disallowPopLastPage_) {
@@ -497,14 +516,22 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
     if (Container::IsCurrentUseNewPipeline()) {
         auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
-            const std::function<void(const std::string&, int32_t)>& errorCallback) {
+                                    const std::function<void(const std::string&, int32_t)>& errorCallback) {
             auto jsEngine = weakEngine.Upgrade();
             if (!jsEngine) {
                 return false;
             }
             return jsEngine->LoadPageSource(url, errorCallback);
         };
-        delegate_->InitializeRouterManager(std::move(loadPageCallback));
+        auto loadNamedRouterCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                           const std::string& namedRouter, bool isTriggeredByJs) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
+        };
+        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadNamedRouterCallback));
     }
 }
 
@@ -655,6 +682,11 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
     if (delegate_) {
         delegate_->TransferJsResponseData(callbackId, code, std::move(data));
     }
+}
+
+NativeValue* DeclarativeFrontend::GetContextValue()
+{
+    return jsEngine_->GetContextValue();
 }
 
 #if defined(PREVIEW)
@@ -881,6 +913,20 @@ void DeclarativeFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
     if (delegate_) {
         delegate_->OnSurfaceChanged();
+    }
+}
+
+void DeclarativeFrontend::OnLayoutCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnLayoutCompleted(componentId);
+    }
+}
+
+void DeclarativeFrontend::OnDrawCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnDrawCompleted(componentId);
     }
 }
 

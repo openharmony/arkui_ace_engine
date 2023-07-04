@@ -21,7 +21,6 @@
 namespace OHOS::Ace::Framework {
 
 class JSRadio : public JSViewAbstract {
-
 public:
     static void Checked(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
@@ -35,9 +34,8 @@ public:
     static void JsSize(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& args);
     static void OnChange(const JSCallbackInfo& info);
-    static void SetPadding(const CalcDimension& topDimen, const CalcDimension& leftDimen);
-    static void Checked(bool checked);
-
+    static NG::PaddingPropertyF GetOldPadding(const JSCallbackInfo& info);
+    static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

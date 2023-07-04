@@ -43,6 +43,14 @@ public:
         dragFrameNodes_.insert(dragFrameNode);
     }
 
+    void RemoveDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    {
+        dragFrameNodes_.erase(dragFrameNode);
+        gridDragFrameNodes_.erase(dragFrameNode);
+        listDragFrameNodes_.erase(dragFrameNode);
+        textFieldDragFrameNodes_.erase(dragFrameNode);
+    }
+
     void AddGridDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
     {
         gridDragFrameNodes_.insert(dragFrameNode);
@@ -59,9 +67,9 @@ public:
     }
 
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
-    void OnDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
-    void OnDragMove(float globalX, float globalY, const std::string& extraInfo);
-    void OnDragEnd(float globalX, float globalY, const std::string& extraInfo);
+    void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
+    void OnDragMove(const Point& point, const std::string& extraInfo);
+    void OnDragEnd(const Point& point, const std::string& extraInfo);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
@@ -86,13 +94,26 @@ public:
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
 #endif // ENABLE_DRAG_FRAMEWORK
-    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, float globalX, float globalY);
+    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
     bool CheckDragDropProxy(int64_t id) const;
 
     bool IsDragged() const
     {
         return isDragged_;
     }
+
+    void SetIsDragged(bool isDragged)
+    {
+        isDragged_ = isDragged;
+    }
+
+    void SetIsDragCancel(bool isDragCancel)
+    {
+        isDragCancel_ = isDragCancel;
+    }
+
+    RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
+        std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes);
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
@@ -124,6 +145,7 @@ private:
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
     std::string extraInfo_;
     std::unique_ptr<JsonValue> newData_ = nullptr;
+    bool isDragCancel_ = false;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::map<std::string, int64_t> summaryMap_;
 #endif // ENABLE_DRAG_FRAMEWORK

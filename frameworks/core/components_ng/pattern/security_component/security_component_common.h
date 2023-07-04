@@ -50,6 +50,8 @@ enum class SecSecurityComponentLayoutOrder : int32_t {
     ICON_FIRST = 0,
     TEXT_FIRST = 1,
 };
+
+static int32_t BUTTON_TYPE_NULL = -1;
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_COMMON_H

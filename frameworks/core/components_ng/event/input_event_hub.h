@@ -87,7 +87,7 @@ public:
     }
 
     // Set by user define, which will replace old one.
-    void SetHoverEvent(OnHoverEventFunc&& onHoverEventFunc)
+    void SetHoverEvent(OnHoverFunc&& onHoverEventFunc)
     {
         if (!hoverEventActuator_) {
             hoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
@@ -138,6 +138,20 @@ public:
 
     // register showMenu callback (always replace)
     void BindContextMenu(OnMouseEventFunc&& showMenu);
+
+    void ClearUserOnHover()
+    {
+        if (hoverEventActuator_) {
+            hoverEventActuator_->ClearUserCallback();
+        }
+    }
+
+    void ClearUserOnMouse()
+    {
+        if (mouseEventActuator_) {
+            mouseEventActuator_->ClearUserCallback();
+        }
+    }
 
 private:
     WeakPtr<EventHub> eventHub_;

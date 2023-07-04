@@ -53,7 +53,7 @@ public:
             GetSideLength().value_or(patternLockTheme->GetSideLength()).ToString().c_str());
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SideLength, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SideLength, Dimension, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(PatternLockLayoutProperty);

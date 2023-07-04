@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/animation/curves.h"
 #include "core/common/container.h"
@@ -52,6 +53,14 @@ const LinearMapNode<RefPtr<Curve>> CURVE_MAP[] = {
     { "linear", Curves::LINEAR },
 };
 
+constexpr double DEFAULT_DURATION = 1000.0;
+constexpr ScrollAlign ALIGN_TABLE[] = {
+    ScrollAlign::START,
+    ScrollAlign::CENTER,
+    ScrollAlign::END,
+    ScrollAlign::AUTO,
+};
+
 } // namespace
 
 void JSScroller::JSBind(BindingTarget globalObj)
@@ -63,6 +72,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::CustomMethod("currentOffset", &JSScroller::CurrentOffset);
     JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScroller::ScrollToIndex);
     JSClass<JSScroller>::CustomMethod("scrollBy", &JSScroller::ScrollBy);
+    JSClass<JSScroller>::CustomMethod("isAtEnd", &JSScroller::IsAtEnd);
     JSClass<JSScroller>::Bind(globalObj, JSScroller::Constructor, JSScroller::Destructor);
 }
 
@@ -97,26 +107,21 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
 
     double duration = 0.0;
+    bool smooth = false;
     RefPtr<Curve> curve = Curves::EASE;
     auto animationValue = obj->GetProperty("animation");
     if (animationValue->IsObject()) {
         auto animationObj = JSRef<JSObject>::Cast(animationValue);
-        ConvertFromJSValue(animationObj->GetProperty("duration"), duration);
-
-        std::string curveName;
-        auto curveArgs = animationObj->GetProperty("curve");
-        if (ConvertFromJSValue(curveArgs, curveName)) {
-            auto index = BinarySearchFindIndex(CURVE_MAP, ArraySize(CURVE_MAP), curveName.c_str());
-            if (index >= 0) {
-                curve = CURVE_MAP[index].value;
-            }
-        } else if (curveArgs->IsObject()) {
-            ParseCustomCurveParams(curve, curveArgs);
+        if (!ConvertFromJSValue(animationObj->GetProperty("duration"), duration) || NonPositive(duration)) {
+            LOGW("Failed to parse param 'duration' or it is not a positive number, set it as the default value");
+            duration = DEFAULT_DURATION;
         }
-    }
 
-    bool smooth = false;
-    ConvertFromJSValue(obj->GetProperty("smooth"), smooth);
+        auto curveArgs = animationObj->GetProperty("curve");
+        ParseCurveParams(curve, curveArgs);
+    } else if (animationValue->IsBoolean()) {
+        smooth = animationValue->ToBoolean();
+    }
 
     if (GreatNotEqual(duration, 0.0)) {
         LOGD("ScrollTo(%lf, %lf, %lf)", xOffset.Value(), yOffset.Value(), duration);
@@ -133,12 +138,20 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth);
 }
 
-void JSScroller::ParseCustomCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
+void JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
 {
-    auto icurveArgs = JsonUtil::ParseJsonString(jsValue->ToString());
-    if (icurveArgs->IsObject()) {
-        auto curveString = icurveArgs->GetValue("__curveString");
-        curve = CreateCurve(curveString->GetString());
+    std::string curveName;
+    if (ConvertFromJSValue(jsValue, curveName)) {
+        auto index = BinarySearchFindIndex(CURVE_MAP, ArraySize(CURVE_MAP), curveName.c_str());
+        if (index >= 0) {
+            curve = CURVE_MAP[index].value;
+        }
+    } else if (jsValue->IsObject()) {
+        auto icurveArgs = JsonUtil::ParseJsonString(jsValue->ToString());
+        if (icurveArgs->IsObject()) {
+            auto curveString = icurveArgs->GetValue("__curveString");
+            curve = CreateCurve(curveString->GetString());
+        }
     }
 }
 
@@ -162,6 +175,8 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
 void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 {
     int32_t index = 0;
+    bool smooth = false;
+    ScrollAlign align = ScrollAlign::START;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], index) || index < 0) {
         LOGW("Invalid params");
         return;
@@ -171,7 +186,15 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
         LOGE("controller_ is nullptr");
         return;
     }
-    scrollController->JumpTo(index, SCROLL_FROM_JUMP);
+    // 2：parameters count, 1: parameter index
+    if (args.Length() >= 2 && args[1]->IsBoolean()) {
+        smooth = args[1]->ToBoolean();
+    }
+    // 3：parameters count, 2: parameter index
+    if (args.Length() == 3 && !ConvertFromJSValue(args[2], ALIGN_TABLE, align)) {
+        LOGE("Invalid align params");
+    }
+    scrollController->JumpTo(index, smooth, align, SCROLL_FROM_JUMP);
 }
 
 void JSScroller::ScrollPage(const JSCallbackInfo& args)
@@ -235,8 +258,16 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
     if (container) {
         auto context = container->GetPipelineContext();
         if (context) {
-            deltaX = context->NormalizeToPx(xOffset);
-            deltaY = context->NormalizeToPx(yOffset);
+            if (xOffset.Unit() == DimensionUnit::PERCENT) {
+                deltaX = 0.0;
+            } else {
+                deltaX = context->NormalizeToPx(xOffset);
+            }
+            if (yOffset.Unit() == DimensionUnit::PERCENT) {
+                deltaY = 0.0;
+            } else {
+                deltaY = context->NormalizeToPx(yOffset);
+            }
         }
     }
     auto scrollController = controllerWeak_.Upgrade();
@@ -245,4 +276,15 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
     }
 }
 
+void JSScroller::IsAtEnd(const JSCallbackInfo& args)
+{
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
+    bool isAtEnd = scrollController->IsAtEnd();
+    auto retVal = JSRef<JSVal>::Make(ToJSValue(isAtEnd));
+    args.SetReturnValue(retVal);
+}
 } // namespace OHOS::Ace::Framework

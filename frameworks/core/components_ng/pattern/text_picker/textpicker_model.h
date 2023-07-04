@@ -17,11 +17,19 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_MODEL_H
 
 #include <functional>
+#include <mutex>
+
 #include "base/geometry/dimension.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace {
+struct TextPickerDialog {
+    CalcDimension height;
+    uint32_t selectedValue;
+    std::vector<std::string> getRangeVector;
+    bool isDefaultHeight;
+};
 using TextChangeEvent = std::function<void(const std::string&, double)>;
 using TextCascadeChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;
 using TextCascadeValueChangeEvent = std::function<void(const std::vector<std::string>&)>;
@@ -35,7 +43,6 @@ public:
     virtual void SetSelected(uint32_t value) = 0;
     virtual void SetRange(const std::vector<NG::RangeContent>& value) = 0;
     virtual void SetValue(const std::string& value) = 0;
-    virtual void SetOnChange(TextChangeEvent&& onChange) = 0;
     virtual void SetDefaultPickerItemHeight(const Dimension& value) = 0;
     virtual void SetCanLoop(const bool value) = 0;
     virtual void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) = 0;
@@ -58,8 +65,25 @@ public:
     virtual void SetHasSelectAttr(bool value) = 0;
     virtual void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) = 0;
     virtual void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) = 0;
+
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
+    static std::mutex mutex_;
+};
+
+class TextPickerDialogModel {
+public:
+    static TextPickerDialogModel* GetInstance();
+    virtual ~TextPickerDialogModel() = default;
+
+    virtual RefPtr<AceType> CreateObject() = 0;
+    virtual void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
+        std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
+        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog) = 0;
+
+private:
+    static std::unique_ptr<TextPickerDialogModel> textPickerDialogInstance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_MODEL_H

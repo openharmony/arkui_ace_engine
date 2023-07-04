@@ -32,6 +32,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo) {}
 
 void OverlayManager::HideAllPopups() {}
 
+void OverlayManager::HideCustomPopups() {};
+
 bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
     return true;
@@ -76,7 +78,12 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     removeOverlayFlag = (dialogNode != nullptr);
 }
 
-bool OverlayManager::RemoveOverlay()
+bool OverlayManager::RemoveOverlay(bool isBackPressed)
+{
+    return removeOverlayFlag;
+}
+
+bool OverlayManager::RemoveOverlayInSubwindow()
 {
     return removeOverlayFlag;
 }
@@ -86,4 +93,5 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     customPopupMap_[targetId] = customNode;
 }
 
+void OverlayManager::RemoveIndexerPopupById(int32_t targetId) {}
 } // namespace OHOS::Ace::NG

@@ -140,7 +140,8 @@ CodeInfo AceScopedPerformanceCheck::GetCodeInfo(int32_t row, int32_t col)
     CHECK_NULL_RETURN(frontend, {});
     auto sourceMap = frontend->GetCurrentPageSourceMap();
     CHECK_NULL_RETURN(sourceMap, {});
-    auto codeInfo = sourceMap->Find(row, col);
+    // There is no same row and column info of viewPU in sourcemap, but the row info is correct.
+    auto codeInfo = sourceMap->Find(row, col, false);
     LOGD("codeInfo=%{public}d, %{public}d, %{public}s", codeInfo.row, codeInfo.col, codeInfo.sources.c_str());
     return { codeInfo.row, codeInfo.col, codeInfo.sources };
 }

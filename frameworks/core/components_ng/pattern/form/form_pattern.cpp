@@ -22,36 +22,39 @@
 #include "core/components/form/sub_container.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
+#include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_theme.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "pointer_event.h"
+#include "transaction/rs_interfaces.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/common/unified_types.h"
-#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/data/system_defined_form.h"
-#include "foundation/distributeddatamgr/udmf/interfaces/innerkits/data/unified_data.h"
+#include "core/common/udmf/udmf_client.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
 namespace {
-void ShowPointEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-{
-    if (!pointerEvent) {
-        LOGE("Func: %{public}s, pointerEvent is null.", __func__);
-        return;
-    }
-    int32_t pointerID = pointerEvent->GetPointerId();
-    MMI::PointerEvent::PointerItem item;
-    bool ret = pointerEvent->GetPointerItem(pointerID, item);
-    if (!ret) {
-        LOGE("Func: %{public}s, get pointer item failed.", __func__);
-        return;
-    }
-}
-
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 5000;
+
+class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
+public:
+    explicit FormSnapshotCallback(const WeakPtr<FormPattern>& node) : weakFormPattern_(node) {}
+    ~FormSnapshotCallback() override = default;
+    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
+    {
+        auto formPattern_ = weakFormPattern_.Upgrade();
+        CHECK_NULL_VOID(formPattern_);
+        formPattern_->OnSnapshot(pixelMap);
+    }
+
+private:
+    WeakPtr<FormPattern> weakFormPattern_ = nullptr;
+};
 } // namespace
 
 FormPattern::FormPattern()
@@ -69,7 +72,9 @@ void FormPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToBounds(true);
     // Init the render context for RSSurfaceNode from FRS.
     externalRenderContext_ = RenderContext::Create();
-    externalRenderContext_->InitContext(false, "Form_" + std::to_string(host->GetId()) + "_Remote_Surface", true);
+    // for external RSNode, name is meaningless.
+    static RenderContext::ContextParam param = { RenderContext::ContextType::EXTERNAL, std::nullopt };
+    externalRenderContext_->InitContext(false, param);
     InitFormManagerDelegate();
     auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -93,6 +98,7 @@ void FormPattern::OnAttachToFrameNode()
             },
             DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
     });
+    scopeId_ = Container::CurrentId();
 }
 
 void FormPattern::HandleUnTrustForm()
@@ -142,8 +148,159 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
     host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
 }
 
+void FormPattern::HandleSnapshot()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto executor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    executor->PostDelayedTask(
+        [weak = WeakClaim(this)]() mutable {
+            auto form = weak.Upgrade();
+            CHECK_NULL_VOID(form);
+            form->TakeSurfaceCaptureForUI();
+        },
+        TaskExecutor::TaskType::UI, DELAY_TIME_FOR_FORM_SNAPSHOT);
+}
+
+void FormPattern::TakeSurfaceCaptureForUI()
+{
+    LOGI("TakeSurfaceCaptureForUI");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto externalContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(externalContext);
+    auto rsNode = externalContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<FormSnapshotCallback>(WeakClaim(this)));
+}
+
+void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    LOGI("OnSnapshot");
+    CHECK_NULL_VOID(pixelMap);
+    pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+    UpdateStaticCard();
+    isDynamic_ = false;
+}
+
+void FormPattern::UpdateStaticCard()
+{
+    LOGI("UpdateStaticCard");
+    // 1. Use imageNode to display pixelMap
+    UpdateImageNode();
+    // 2. Remove FrsNode from formNode
+    RemoveFrsNode();
+    // 3. Release renderer obj
+    ReleaseRenderer();
+}
+
+void FormPattern::HideImageNode()
+{
+    LOGI("HideImageNode");
+    ContainerScope scope(scopeId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto child = host->GetLastChild();
+    CHECK_NULL_VOID(child);
+    auto imageNode = DynamicCast<FrameNode>(child);
+    CHECK_NULL_VOID(imageNode);
+    auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
+    CHECK_NULL_VOID(externalContext);
+    externalContext->SetVisible(false);
+    imageNode->MarkModifyDone();
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+RefPtr<FrameNode> FormPattern::GetOrCreateImageNode()
+{
+    LOGI("GetOrCreateImageNode");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto child = host->GetLastChild();
+    if (!child) {
+        auto formNode = DynamicCast<FormNode>(host);
+        CHECK_NULL_RETURN(formNode, nullptr);
+        auto imageId = formNode->GetImageId();
+        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_RETURN(imageNode, nullptr);
+        host->AddChild(imageNode);
+        return imageNode;
+    }
+
+    if (child->GetTag() != V2::IMAGE_ETS_TAG) {
+        LOGE("child is not Image");
+        return nullptr;
+    }
+
+    auto imageNode = DynamicCast<FrameNode>(child);
+    return imageNode;
+}
+
+void FormPattern::UpdateImageNode()
+{
+    LOGI("UpdateImageNode");
+    ContainerScope scope(scopeId_);
+    CHECK_NULL_VOID(pixelMap_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto imageNode = GetOrCreateImageNode();
+    CHECK_NULL_VOID(imageNode);
+    auto pixelLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(pixelLayoutProperty);
+    auto pixelSourceInfo = ImageSourceInfo(pixelMap_);
+
+    auto width = static_cast<float>(cardInfo_.width.Value());
+    auto height = static_cast<float>(cardInfo_.height.Value());
+    CalcSize idealSize = { CalcLength(width), CalcLength(height) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    imageNode->UpdateLayoutConstraint(layoutConstraint);
+    pixelLayoutProperty->UpdateImageSourceInfo(pixelSourceInfo);
+    auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
+    CHECK_NULL_VOID(externalContext);
+    externalContext->SetVisible(true);
+
+    imageNode->MarkModifyDone();
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void FormPattern::RemoveFrsNode()
+{
+    LOGI("RemoveFrsNode");
+    ContainerScope scope(scopeId_);
+    CHECK_NULL_VOID(externalRenderContext_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(renderContext);
+    renderContext->RemoveChild(externalRenderContext_);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
+    host->GetRenderContext()->RequestNextFrame();
+}
+
+void FormPattern::ReleaseRenderer()
+{
+    LOGI("ReleaseRenderer");
+    ContainerScope scope(scopeId_);
+    CHECK_NULL_VOID(formManagerBridge_);
+    formManagerBridge_->ReleaseRenderer();
+}
+
 void FormPattern::OnRebuildFrame()
 {
+    if (!isDynamic_) {
+        LOGI("Do not need reAddChild");
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -213,6 +370,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
             layoutProperty->UpdateVisibility(visible);
         }
+        UpdateConfiguration();
         return false;
     }
     CreateCardContainer();
@@ -352,6 +510,7 @@ void FormPattern::InitFormManagerDelegate()
             formComponent->isLoaded_ = true;
 
             formComponent->SetIsUnTrust(false);
+            formComponent->HideImageNode();
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             auto parent = host->GetParent();
             CHECK_NULL_VOID(parent);
@@ -394,6 +553,15 @@ void FormPattern::InitFormManagerDelegate()
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleUnTrustForm();
+    });
+
+    formManagerBridge_->AddSnapshotCallback(
+        [weak = WeakClaim(this), instanceID]() {
+            ContainerScope scope(instanceID);
+            LOGI("HandleSnapshot");
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->HandleSnapshot();
     });
 }
 
@@ -565,6 +733,7 @@ void FormPattern::OnLoadEvent()
 {
     LOGI("OnLoadEvent");
     ACE_FUNCTION_TRACE();
+    isDynamic_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto uiTaskExecutor = SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -638,7 +807,6 @@ void FormPattern::DispatchPointerEvent(
         return;
     }
 
-    ShowPointEvent(pointerEvent);
     formManagerBridge_->DispatchPointerEvent(pointerEvent);
 }
 
@@ -667,16 +835,8 @@ void FormPattern::EnableDrag()
         auto subcontainer = form->GetSubContainer();
         CHECK_NULL_RETURN(subcontainer, info);
 
-        auto formRecord = std::make_shared<UDMF::SystemDefinedForm>();
-        formRecord->SetFormId(subcontainer->GetRunningCardId());
-        formRecord->SetFormName(form->cardInfo_.cardName);
-        formRecord->SetBundleName(form->cardInfo_.bundleName);
-        formRecord->SetAbilityName(form->cardInfo_.abilityName);
-        formRecord->SetModule(form->cardInfo_.moduleName);
-        formRecord->SetType(UDMF::UDType::SYSTEM_DEFINED_FORM);
-
-        auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-        unifiedData->AddRecord(formRecord);
+        RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+        UdmfClient::GetInstance()->AddFormRecord(unifiedData, subcontainer->GetRunningCardId(), form->cardInfo_);
         event->SetData(unifiedData);
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -686,5 +846,14 @@ void FormPattern::EnableDrag()
     auto eventHub = GetHost()->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(std::move(dragStart));
+}
+
+void FormPattern::UpdateConfiguration()
+{
+    auto localeTag = AceApplicationInfo::GetInstance().GetLocaleTag();
+    if (localeTag != localeTag_ && subContainer_) {
+        localeTag_ = localeTag;
+        subContainer_->UpdateConfiguration();
+    }
 }
 } // namespace OHOS::Ace::NG

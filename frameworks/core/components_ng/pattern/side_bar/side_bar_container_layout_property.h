@@ -21,6 +21,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,9 +30,9 @@ struct ControlButtonStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonHeight, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonLeft, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonTop, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonShowIconStr, std::string);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonHiddenIconStr, std::string);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonSwitchingIconStr, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonShowIconInfo, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonHiddenIconInfo, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonSwitchingIconInfo, ImageSourceInfo);
 };
 
 struct DividerStyle {
@@ -62,6 +63,7 @@ public:
         value->propSideBarPosition_ = CloneSideBarPosition();
         value->propControlButtonStyle_ = CloneControlButtonStyle();
         value->propDividerStyle_ = CloneDividerStyle();
+        value->propMinContentWidth_ = CloneMinContentWidth();
         return value;
     }
 
@@ -78,6 +80,7 @@ public:
         ResetSideBarPosition();
         ResetControlButtonStyle();
         ResetDividerStyle();
+        ResetMinContentWidth();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -94,6 +97,7 @@ public:
         constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
         constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
         constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
+        constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
         constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 
         auto type = propSideBarContainerType_.value_or(SideBarContainerType::EMBED);
@@ -101,6 +105,7 @@ public:
         auto minSideBarWidth = propMinSideBarWidth_.value_or(DEFAULT_MIN_SIDE_BAR_WIDTH);
         auto maxSideBarWidth = propMaxSideBarWidth_.value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
         auto sideBarPosition = propSideBarPosition_.value_or(SideBarPosition::START);
+        auto minContentWidth = propMinContentWidth_.value_or(DEFAULT_MIN_CONTENT_WIDTH);
         json->Put("type",
             type == SideBarContainerType::EMBED ? "SideBarContainerType.Embed" : "SideBarContainerType.OVERLAY");
         json->Put("showSideBar", propShowSideBar_.value_or(true) ? "true" : "false");
@@ -111,6 +116,7 @@ public:
         json->Put("autoHide", propAutoHide_.value_or(true) ? "true" : "false");
         json->Put("sideBarPosition",
             sideBarPosition == SideBarPosition::START ? "SideBarPosition.Start" : "SideBarPosition.End");
+        json->Put("minContentWidth", std::to_string(minContentWidth.Value()).c_str());
 
         // divider
         Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
@@ -147,9 +153,9 @@ public:
 
         auto jsonIcon = JsonUtil::Create(true);
         CHECK_NULL_VOID(jsonIcon);
-        jsonIcon->Put("shown", propControlButtonStyle_->propControlButtonShowIconStr->c_str());
-        jsonIcon->Put("hidden", propControlButtonStyle_->propControlButtonHiddenIconStr->c_str());
-        jsonIcon->Put("switching", propControlButtonStyle_->propControlButtonSwitchingIconStr->c_str());
+        jsonIcon->Put("shown", propControlButtonStyle_->propControlButtonShowIconInfo->GetSrc().c_str());
+        jsonIcon->Put("hidden", propControlButtonStyle_->propControlButtonHiddenIconInfo->GetSrc().c_str());
+        jsonIcon->Put("switching", propControlButtonStyle_->propControlButtonSwitchingIconInfo->GetSrc().c_str());
 
         jsonControl->Put("icon", jsonIcon);
         json->Put("controlButton", jsonControl->ToString().c_str());
@@ -163,6 +169,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxSideBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoHide, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SideBarPosition, SideBarPosition, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinContentWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(ControlButtonStyle, ControlButtonStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ControlButtonStyle, ControlButtonWidth, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -170,11 +177,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ControlButtonStyle, ControlButtonLeft, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ControlButtonStyle, ControlButtonTop, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        ControlButtonStyle, ControlButtonShowIconStr, std::string, PROPERTY_UPDATE_MEASURE);
+        ControlButtonStyle, ControlButtonShowIconInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        ControlButtonStyle, ControlButtonHiddenIconStr, std::string, PROPERTY_UPDATE_MEASURE);
+        ControlButtonStyle, ControlButtonHiddenIconInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        ControlButtonStyle, ControlButtonSwitchingIconStr, std::string, PROPERTY_UPDATE_MEASURE);
+        ControlButtonStyle, ControlButtonSwitchingIconInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(DividerStyle, DividerStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DividerStrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);

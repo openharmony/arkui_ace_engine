@@ -670,6 +670,24 @@ bool WebClientImpl::OnDragAndDropData(const void* data, size_t len, const NWeb::
     return delegate->OnDragAndDropData(data, len, opt.width, opt.height);
 }
 
+bool WebClientImpl::OnDragAndDropDataUdmf(std::shared_ptr<NWeb::NWebDragData> dragData)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->OnDragAndDropDataUdmf(dragData);
+}
+
+void WebClientImpl::UpdateDragCursor(NWeb::NWebDragData::DragOperation op)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->UpdateDragCursor(op);
+}
+
 void WebClientImpl::OnWindowNewByJS(
     const std::string& targetUrl,
     bool isAlert,
@@ -803,5 +821,24 @@ void WebClientImpl::OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone)
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnGetTouchHandleHotZone(hotZone);
+}
+
+void WebClientImpl::OnDateTimeChooserPopup(
+    const NWeb::DateTimeChooser& chooser,
+    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnDateTimeChooserPopup(chooser, suggestions, callback);
+}
+
+void WebClientImpl::OnDateTimeChooserClose()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnDateTimeChooserClose();
 }
 } // namespace OHOS::Ace

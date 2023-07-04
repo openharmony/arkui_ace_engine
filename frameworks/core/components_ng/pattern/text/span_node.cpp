@@ -27,6 +27,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,11 +41,22 @@ std::string GetDeclaration(const std::optional<Color>& color, const std::optiona
 }
 } // namespace
 
+std::string SpanItem::GetFont() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("style", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
+    jsonValue->Put("size", GetFontSizeInJson(fontStyle->GetFontSize()).c_str());
+    jsonValue->Put("weight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
+    jsonValue->Put("family", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
+    return jsonValue->ToString();
+}
+
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("content", content.c_str());
     if (fontStyle) {
-        json->Put("fontSize", fontStyle->GetFontSize().value_or(Dimension()).ToString().c_str());
+        json->Put("font", GetFont().c_str());
+        json->Put("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str());
         json->Put(
             "decoration", GetDeclaration(fontStyle->GetTextDecorationColor(), fontStyle->GetTextDecoration()).c_str());
         json->Put("letterSpacing", fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
@@ -52,24 +64,25 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
             "textCase", V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str());
         json->Put("fontColor", fontStyle->GetForegroundColor()
             .value_or(fontStyle->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
-        json->Put("fontStyle",
-            fontStyle->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-                                ? "FontStyle.Normal" : "FontStyle.Italic");
-        json->Put("fontWeight",
-            V2::ConvertWrapFontWeightToStirng(fontStyle->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-        std::vector<std::string> fontFamilyVector =
-            fontStyle->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
-        if (fontFamilyVector.empty()) {
-            fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
-        }
-        std::string fontFamily = fontFamilyVector.at(0);
-        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
-            fontFamily += ',' + fontFamilyVector.at(i);
-        }
-        json->Put("fontFamily", fontFamily.c_str());
+        json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
+        json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
+        json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
     }
     if (textLineStyle) {
         json->Put("lineHeight", textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str());
+    }
+}
+
+SpanNode::~SpanNode()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        context->RemoveFontNodeNG(AceType::WeakClaim(this));
+        auto fontManager = context->GetFontManager();
+        if (fontManager) {
+            fontManager->UnRegisterCallbackNG(AceType::WeakClaim(this));
+            fontManager->RemoveVariationNodeNG(AceType::WeakClaim(this));
+        }
     }
 }
 
@@ -156,7 +169,7 @@ int32_t SpanItem::UpdateParagraph(
 int32_t ImageSpanItem::UpdateParagraph(
     const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)
 {
-    LOGI("ImageSpanItem::UpdateParagraph imageWidth = %{public}f, imageHeight = %{public}f verticalAlign = "
+    LOGD("ImageSpanItem::UpdateParagraph imageWidth = %{public}f, imageHeight = %{public}f verticalAlign = "
          "%{public}d",
         width, height, verticalAlign);
     CHECK_NULL_RETURN(builder, -1);
@@ -181,7 +194,7 @@ int32_t ImageSpanItem::UpdateParagraph(
             run.alignment = PlaceholderAlignment::BOTTOM;
     }
     builder->PushStyle(textStyle);
-    LOGI("ImageSpan fontsize = %{public}f", textStyle.GetFontSize().Value());
+    LOGD("ImageSpan fontsize = %{public}f", textStyle.GetFontSize().Value());
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;

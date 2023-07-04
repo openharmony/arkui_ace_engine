@@ -55,20 +55,21 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
 } // namespace
 
-void SelectPattern::OnModifyDone()
+void SelectPattern::OnAttachToFrameNode()
 {
-    Pattern::OnModifyDone();
     RegisterOnClick();
     RegisterOnPress();
     RegisterOnHover();
+    RegisterOnKeyEvent();
+}
+
+void SelectPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
     CreateSelectedCallback();
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    RegisterOnKeyEvent(focusHub);
-
     auto eventHub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
@@ -226,7 +227,7 @@ void SelectPattern::CreateSelectedCallback()
         CHECK_NULL_VOID(pattern);
         pattern->SetSelected(index);
         pattern->UpdateText(index);
-
+        pattern->isSelected_ = true;
         auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
         // execute change event callback
@@ -256,8 +257,12 @@ void SelectPattern::CreateSelectedCallback()
     }
 }
 
-void SelectPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+void SelectPattern::RegisterOnKeyEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN_NOLOG(pattern, false);
@@ -320,6 +325,8 @@ void SelectPattern::SetSelected(int32_t index)
     }
     if (index >= options_.size() || index < 0) {
         LOGW("newly selected index invalid");
+        selected_ = -1;
+        ResetOptionProps();
         return;
     }
     UpdateLastSelectedProps(index);
@@ -450,6 +457,7 @@ void SelectPattern::SetFontColor(const Color& color)
 
 void SelectPattern::SetOptionBgColor(const Color& color)
 {
+    optionBgColor_ = color;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedBgColor_.has_value()) {
             continue;
@@ -462,6 +470,7 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 
 void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
+    optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontSize.has_value()) {
             continue;
@@ -474,6 +483,7 @@ void SelectPattern::SetOptionFontSize(const Dimension& value)
 
 void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
+    optionFont_.FontStyle = value;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontStyle.has_value()) {
             continue;
@@ -486,6 +496,7 @@ void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 
 void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 {
+    optionFont_.FontWeight = value;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontWeight.has_value()) {
             continue;
@@ -498,6 +509,7 @@ void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 
 void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 {
+    optionFont_.FontFamily = value;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontFamily.has_value()) {
             continue;
@@ -510,6 +522,7 @@ void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 
 void SelectPattern::SetOptionFontColor(const Color& color)
 {
+    optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontColor.has_value()) {
             continue;
@@ -584,6 +597,26 @@ void SelectPattern::SetSelectedOptionFontColor(const Color& color)
 const std::vector<RefPtr<FrameNode>>& SelectPattern::GetOptions()
 {
     return options_;
+}
+
+void SelectPattern::ResetOptionProps()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(selectTheme && textTheme);
+
+    for (const auto& option : options_) {
+        auto pattern = option->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetBgColor(optionBgColor_.value_or(selectTheme->GetBackgroundColor()));
+        pattern->SetFontSize(optionFont_.FontSize.value_or(selectTheme->GetMenuFontSize()));
+        pattern->SetItalicFontStyle(optionFont_.FontStyle.value_or(textTheme->GetTextStyle().GetFontStyle()));
+        pattern->SetFontWeight(optionFont_.FontWeight.value_or(textTheme->GetTextStyle().GetFontWeight()));
+        pattern->SetFontFamily(optionFont_.FontFamily.value_or(textTheme->GetTextStyle().GetFontFamilies()));
+        pattern->SetFontColor(optionFont_.FontColor.value_or(selectTheme->GetMenuFontColor()));
+    }
 }
 
 void SelectPattern::UpdateLastSelectedProps(int32_t index)
@@ -874,4 +907,27 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     menuLayoutProps->UpdateAlignType(menuAlign.alignType);
     menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
+
+std::string SelectPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("selected", selected_);
+    jsonObj->Put("isSelected", isSelected_);
+    return jsonObj->ToString();
+}
+
+void SelectPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("selected");
+    auto jsonIsSelect = info->GetValue("isSelected");
+    if (jsonIsSelect->GetBool()) {
+        SetSelected(jsonIsOn->GetInt());
+        UpdateText(jsonIsOn->GetInt());
+    }
+}
+
 } // namespace OHOS::Ace::NG

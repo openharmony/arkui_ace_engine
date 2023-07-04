@@ -236,12 +236,33 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pageEventHub->RemoveCheckBoxFromGroup(checkBoxEventHub->GetGroupName(), frameNode->GetId());
 }
 
+void CheckBoxPattern::CheckPageNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto prePageId = GetPrePageId();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetPageById(host->GetPageId());
+    CHECK_NULL_VOID(pageNode);
+    if (pageNode->GetId() != prePageId) {
+        auto eventHub = host->GetEventHub<CheckBoxEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
+        CHECK_NULL_VOID(pageEventHub);
+        auto group = eventHub->GetGroupName();
+
+        pageEventHub->AddCheckBoxToGroup(group, host->GetId());
+        SetPrePageId(pageNode->GetId());
+    }
+}
+
 void CheckBoxPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<CheckBoxPattern>();
-    CHECK_NULL_VOID(pattern);
     auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -255,13 +276,15 @@ void CheckBoxPattern::UpdateState()
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto checkBoxGroupMap = pageEventHub->GetCheckBoxGroupMap();
-    auto preGroup = pattern->GetPreGroup();
+    auto preGroup = GetPreGroup();
     auto group = eventHub->GetGroupName();
     if (!preGroup.has_value()) {
         pageEventHub->AddCheckBoxToGroup(group, host->GetId());
+        SetPrePageId(pageNode->GetId());
         auto callback = [weak = WeakClaim(this)]() {
             auto checkbox = weak.Upgrade();
             if (checkbox) {
+                checkbox->CheckPageNode();
                 checkbox->CheckBoxGroupIsTrue();
             }
         };
@@ -271,14 +294,15 @@ void CheckBoxPattern::UpdateState()
             SetLastSelect(isSelected);
         }
         isFirstCreated_ = false;
-        pattern->SetPreGroup(group);
+        SetPreGroup(group);
         return;
     }
     if (preGroup.has_value() && preGroup.value() != group) {
         pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
         pageEventHub->AddCheckBoxToGroup(group, host->GetId());
+        SetPrePageId(pageNode->GetId());
     }
-    pattern->SetPreGroup(group);
+    SetPreGroup(group);
     bool isSelected = false;
     if (paintProperty->HasCheckBoxSelect()) {
         isSelected = paintProperty->GetCheckBoxSelectValue();
@@ -560,4 +584,26 @@ void CheckBoxPattern::RemoveLastHotZoneRect() const
     CHECK_NULL_VOID(host);
     host->RemoveLastHotZoneRect();
 }
+
+std::string CheckBoxPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto checkBoxPaintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_RETURN(checkBoxPaintProperty, "");
+    jsonObj->Put("isOn", checkBoxPaintProperty->GetCheckBoxSelect().value_or(false));
+    return jsonObj->ToString();
+}
+
+void CheckBoxPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto checkBoxPaintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(checkBoxPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonCheckBoxSelect = info->GetValue("isOn");
+    checkBoxPaintProperty->UpdateCheckBoxSelect(jsonCheckBoxSelect->GetBool());
+}
+
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -84,6 +85,9 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
+    auto scrollNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID_NOLOG(scrollNode);
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -98,7 +102,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childSize = childGeometryNode->GetMarginFrameSize();
     scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);
     auto scrollEffect = layoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    if (scrollEffect != EdgeEffect::SPRING) {
+    if (scrollEffect != EdgeEffect::SPRING || scrollPattern->GetScrollState() == SCROLL_FROM_JUMP) {
         if (scrollableDistance_ > 0.0f) {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         } else {

@@ -90,13 +90,16 @@ public:
     void SetOpacity(double opacity, bool passThrough = false) override;
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override;
     void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override {};
-    void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
-        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override;
+    void SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY) override;
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
     void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
     void SetGeometryTransition(const std::string& id) override;
     void SetMotionPath(const MotionPathOption& option) override;
+    void SetRenderGroup(bool isRenderGroup) override {}
+    void SetRenderFit(RenderFit renderFit) override {}
 
     void SetFlexBasis(const Dimension& value) override;
     void SetAlignSelf(FlexAlign value) override;
@@ -114,6 +117,7 @@ public:
     void SetMask(const RefPtr<BasicShape>& shape) override;
 
     void SetBackdropBlur(const Dimension& radius) override;
+    void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
     void SetFrontBlur(const Dimension& radius) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetColorBlend(const Color& value) override;
@@ -125,12 +129,14 @@ public:
     void SetSepia(const Dimension& value) override;
     void SetInvert(const Dimension& value) override;
     void SetHueRotate(float value) override;
+    void SetUseEffect(bool) override {}
+
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
-    void SetOnHover(OnHoverEventFunc&& onHoverEventFunc) override;
+    void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;
@@ -168,16 +174,31 @@ public:
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
+
+    // Disable event.
+    void DisableOnClick() override {};
+    void DisableOnTouch() override {};
+    void DisableOnKeyEvent() override {};
+    void DisableOnHover() override {};
+    void DisableOnMouse() override {};
+    void DisableOnAppear() override {};
+    void DisableOnDisAppear() override {};
+    void DisableOnAreaChange() override {};
+    void DisableOnFocus() override {};
+    void DisableOnBlur() override {};
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) override;
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam) override;
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, int32_t type) override {}
+        std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear) override {}
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) override {}
+        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear) override {}
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -198,6 +219,7 @@ public:
         std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) override {};
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
+    void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
 };
 
 } // namespace OHOS::Ace::Framework

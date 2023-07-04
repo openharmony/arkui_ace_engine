@@ -50,6 +50,13 @@ enum class ScrollEdgeType : size_t {
     SCROLL_NONE,
 };
 
+enum class ScrollAlign {
+    START = 0,
+    CENTER,
+    END,
+    AUTO,
+};
+
 class ACE_EXPORT ScrollControllerBase : public AceType {
     DECLARE_ACE_TYPE(ScrollControllerBase, AceType);
 
@@ -57,7 +64,8 @@ public:
     ScrollControllerBase() = default;
     ~ScrollControllerBase() override = default;
 
-    virtual void JumpTo(int32_t index, int32_t source = 3) {}
+    virtual void JumpTo(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+        int32_t source = 3) {}
 
     virtual Axis GetScrollDirection() const
     {
@@ -74,6 +82,10 @@ public:
     virtual Offset GetCurrentOffset() const
     {
         return Offset();
+    }
+    virtual bool IsAtEnd() const
+    {
+        return true;
     }
 };
 } // namespace OHOS::Ace

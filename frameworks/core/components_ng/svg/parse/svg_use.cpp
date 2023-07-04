@@ -32,16 +32,28 @@ RefPtr<SvgNode> SvgUse::Create()
     return AceType::MakeRefPtr<SvgUse>();
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgUse::AsPath(const Size& viewPort) const
+#else
+RSRecordingPath SvgUse::AsPath(const Size& viewPort) const
+#endif
 {
     auto svgContext = svgContext_.Upgrade();
+#ifndef USE_ROSEN_DRAWING
     CHECK_NULL_RETURN(svgContext, SkPath());
+#else
+    CHECK_NULL_RETURN(svgContext, RSRecordingPath());
+#endif
     if (declaration_->GetHref().empty()) {
         LOGE("href is empty");
         return {};
     }
     auto refSvgNode = svgContext->GetSvgNodeById(declaration_->GetHref());
+#ifndef USE_ROSEN_DRAWING
     CHECK_NULL_RETURN(refSvgNode, SkPath());
+#else
+    CHECK_NULL_RETURN(refSvgNode, RSRecordingPath());
+#endif
 
     AttributeScope scope(refSvgNode);
     refSvgNode->Inherit(declaration_);

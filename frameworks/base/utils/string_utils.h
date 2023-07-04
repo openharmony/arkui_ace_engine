@@ -283,6 +283,71 @@ inline Dimension StringToDimensionWithThemeValue(const std::string& value, bool 
     return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
 }
 
+static bool StringToDimensionWithUnitNG(const std::string& value, Dimension& dimensionResult,
+    DimensionUnit defaultUnit = DimensionUnit::PX, float defaultValue = 0.0f, bool isCalc = false)
+{
+    errno = 0;
+    if (std::strcmp(value.c_str(), "auto") == 0) {
+        dimensionResult = Dimension(defaultValue, DimensionUnit::AUTO);
+        return true;
+    }
+    char* pEnd = nullptr;
+    double result = std::strtod(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        dimensionResult = Dimension(defaultValue, defaultUnit);
+        return false;
+    }
+    if (pEnd != nullptr) {
+        if (std::strcmp(pEnd, "%") == 0) {
+            // Parse percent, transfer from [0, 100] to [0, 1]
+            dimensionResult = Dimension(result / 100.0, DimensionUnit::PERCENT);
+            return true;
+        }
+        if (std::strcmp(pEnd, "px") == 0) {
+            dimensionResult = Dimension(result, DimensionUnit::PX);
+            return true;
+        }
+        if (std::strcmp(pEnd, "vp") == 0) {
+            dimensionResult = Dimension(result, DimensionUnit::VP);
+            return true;
+        }
+        if (std::strcmp(pEnd, "fp") == 0) {
+            dimensionResult = Dimension(result, DimensionUnit::FP);
+            return true;
+        }
+        if (std::strcmp(pEnd, "lpx") == 0) {
+            dimensionResult = Dimension(result, DimensionUnit::LPX);
+            return true;
+        }
+        if ((std::strcmp(pEnd, "\0") == 0) && isCalc) {
+            dimensionResult = Dimension(result, DimensionUnit::NONE);
+            return true;
+        }
+        if (isCalc) {
+            dimensionResult = Dimension(result, DimensionUnit::INVALID);
+            return true;
+        }
+        if ((std::strcmp(pEnd, "\0") != 0)) {
+            dimensionResult = Dimension(result, DimensionUnit::NONE);
+            return false;
+        }
+    }
+    dimensionResult = Dimension(result, defaultUnit);
+    return true;
+}
+
+inline bool StringToCalcDimensionNG(
+    const std::string& value, CalcDimension& result, bool useVp = false,
+    DimensionUnit defaultUnit = DimensionUnit::PX)
+{
+    if (value.find("calc") != std::string::npos) {
+        result = CalcDimension(value, DimensionUnit::CALC);
+        return true;
+    } else {
+        return StringToDimensionWithUnitNG(value, result, useVp ? DimensionUnit::VP : defaultUnit);
+    }
+}
+
 inline double StringToDegree(const std::string& value)
 {
     // https://developer.mozilla.org/zh-CN/docs/Web/CSS/angle
@@ -509,6 +574,7 @@ inline void TransformStrCase(std::string& str, int32_t textCase)
     }
 }
 
+bool IsAscii(const std::string& str);
 } // namespace OHOS::Ace::StringUtils
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_UTILS_H

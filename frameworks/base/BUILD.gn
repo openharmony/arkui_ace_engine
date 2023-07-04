@@ -33,7 +33,7 @@ template("ace_base_source_set") {
       "i18n:ace_base_i18n_$platform",
       "resource:ace_resource",
     ]
-
+    external_deps = []
     configs = [ "$ace_root:ace_config" ]
 
     # add base source file here
@@ -55,6 +55,7 @@ template("ace_base_source_set") {
       "log/ace_trace.cpp",
       "log/ace_tracker.cpp",
       "log/dump_log.cpp",
+      "log/jank_frame_report.cpp",
       "memory/memory_monitor.cpp",
       "ressched/ressched_report.cpp",
       "subwindow/subwindow_manager.cpp",
@@ -80,6 +81,12 @@ template("ace_base_source_set") {
     } else {
       defines -= [ "UNICODE" ]
       libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libshlwapi.a" ]
+    }
+
+    if (is_cross_platform_build) {
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+    } else {
+      external_deps += [ "graphic_standard:librender_service_client" ]
     }
 
     # curl download manager
@@ -128,7 +135,8 @@ foreach(item, ace_platforms) {
 
   ohos_source_set("ace_memory_monitor_" + item.name) {
     platform = item.name
-
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
     defines = []
     cflags_cc = []
     config = {
@@ -163,6 +171,7 @@ foreach(item, ace_platforms) {
       external_deps = [
         "init:libbeget_proxy",
         "init:libbegetutil",
+        "window_manager:libwsutils",
       ]
     }
   }

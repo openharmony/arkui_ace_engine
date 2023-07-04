@@ -44,11 +44,12 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     auto timePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TIME_PICKER_ETS_TAG, timeNodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
     ViewStackProcessor::GetInstance()->Push(timePickerNode);
-
     auto context = timePickerNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
+    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
 
@@ -60,6 +61,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetShowCount(showCount);
+    timePickerRowPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
@@ -101,6 +103,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         hourColumnNode->MountToParent(stackHourNode);
         auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
     }
     if (!hasMinuteNode) {
@@ -110,6 +113,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         minuteColumnNode->MountToParent(stackMinuteNode);
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
     }
     if (timePickerProperty.find("selected") != timePickerProperty.end()) {
@@ -121,7 +125,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     SetTextProperties(pickerTheme, settingData.properties);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(timePickerNode, std::move(changeEvent));
-    auto contentRow = CreateButtonNode(timePickerNode, dialogEvent, std::move(dialogCancelEvent));
+    auto contentRow = CreateButtonNode(timePickerNode, timePickerNode, dialogEvent, std::move(dialogCancelEvent));
     CHECK_NULL_RETURN(contentRow, nullptr);
     auto buttonTitleNode = CreateTitleButtonNode(timePickerNode);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
@@ -232,6 +236,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
 }
 
 RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<FrameNode>& timePickerNode,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto acceptEvent = dialogEvent["acceptId"];
@@ -244,16 +249,16 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(layoutProps, nullptr);
     layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-
-    auto buttonCancelNode = CreateCancelNode(cancelEvent);
-    auto buttonConfirmNode = CreateConfirmNode(frameNode, acceptEvent);
-
+    auto buttonCancelNode = CreateCancelNode(cancelEvent, timePickerNode);
+    auto buttonConfirmNode = CreateConfirmNode(frameNode, timePickerNode, acceptEvent);
     buttonCancelNode->MountToParent(contentRow);
     buttonConfirmNode->MountToParent(contentRow);
     return contentRow;
 }
 
-RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent)
+RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
+    const RefPtr<FrameNode>& timePickerNode,
+    DialogEvent& acceptEvent)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -272,6 +277,8 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    auto columnPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    columnPattern->SetConfirmNode(buttonConfirmNode);
     auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
@@ -309,7 +316,8 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     return buttonConfirmNode;
 }
 
-RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent)
+RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
+    const RefPtr<FrameNode>& timePickerNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -327,6 +335,8 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    auto columnPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    columnPattern->SetCancelNode(buttonCancelNode);
     textCancelNode->MountToParent(buttonCancelNode);
     auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
@@ -369,7 +379,9 @@ void TimePickerDialogView::SetDialogTitleDate(
 
 void TimePickerDialogView::SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime)
 {
-    timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    auto timePickerLayoutProperty = timePickerRowPattern->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(timePickerLayoutProperty);
+    timePickerLayoutProperty->UpdateIsUseMilitaryTime(isUseMilitaryTime);
 }
 
 void TimePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)

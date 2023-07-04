@@ -31,6 +31,8 @@
 
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
 
+class NativeValue;
+
 namespace OHOS::Ace {
 
 #ifndef WEARABLE_PRODUCT
@@ -212,6 +214,9 @@ public:
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height) = 0;
 
+    virtual void OnLayoutCompleted(const std::string& componentId) = 0;
+    virtual void OnDrawCompleted(const std::string& componentId) = 0;
+
     virtual void TriggerGarbageCollection() {}
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
@@ -241,6 +246,11 @@ public:
     }
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
+    
+    virtual NativeValue* GetContextValue()
+    {
+        return nullptr;
+    }
 #ifdef PREVIEW
     virtual void RunNativeEngineLoop() {}
 #endif

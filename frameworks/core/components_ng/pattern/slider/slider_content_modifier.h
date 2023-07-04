@@ -220,6 +220,14 @@ public:
         return blockSize_->Get();
     }
 
+    void SetVisible(bool isVisible)
+    {
+        CHECK_NULL_VOID(isVisible_ != isVisible);
+        isVisible_ = isVisible;
+        LOGD("SliderContentModifier SetVisible %d", isVisible_);
+    }
+
+    void UpdateContentDirtyRect(const SizeF& frameSize);
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
@@ -280,6 +288,7 @@ private:
         RSPath path;
     } markerPenAndPath;
 
+    bool isVisible_ = true;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
     bool reverse_ = false;

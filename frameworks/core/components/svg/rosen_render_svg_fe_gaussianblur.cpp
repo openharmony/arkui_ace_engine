@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace {
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
 {
 #ifndef NEW_SKIA
@@ -31,5 +32,11 @@ void RosenRenderSvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFi
     imageFilter = SkImageFilters::Blur(deviationX_, deviationY_, imageFilter, nullptr);
 #endif
 }
+#else
+void RosenRenderSvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const
+{
+    imageFilter = RSImageFilter::CreateBlurImageFilter(deviationX_, deviationY_, RSTileMode::DECAL, imageFilter);
+}
+#endif
 
 } // namespace OHOS::Ace

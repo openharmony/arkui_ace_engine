@@ -18,25 +18,23 @@
 
 #include <memory>
 
+#include "base/geometry/offset.h"
 #include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ImagePattern : public Pattern {
-    DECLARE_ACE_TYPE(ImagePattern, Pattern);
+class ACE_EXPORT ImagePattern : public Pattern, public SelectionHost {
+    DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
     ImagePattern() = default;
@@ -72,6 +70,7 @@ public:
         return { FocusType::NODE, false };
     }
 
+    void CreateObscuredImageIfNeed();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
@@ -79,12 +78,13 @@ public:
     void OnVisibleChange(bool isVisible) override;
 
     void EnableDrag();
+    bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
     bool DefaultSupportDrag() override
     {
         return true;
     }
-    
+
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -99,6 +99,20 @@ public:
     void DumpInfo() override;
 
 private:
+    class ObscuredImage : public CanvasImage {
+        void DrawToRSCanvas(
+            RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override
+        {}
+        int32_t GetWidth() const override
+        {
+            return 0;
+        }
+        int32_t GetHeight() const override
+        {
+            return 0;
+        }
+    };
+
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -113,8 +127,8 @@ private:
         const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
-    void PrepareAnimation();
-    void SetRedrawCallback();
+    void PrepareAnimation(const RefPtr<CanvasImage>& image);
+    void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void RegisterVisibleAreaChange();
 
     void InitCopy();
@@ -135,7 +149,6 @@ private:
     LoadSuccessNotifyTask CreateLoadSuccessCallbackForAlt();
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
-
     CopyOptions copyOption_ = CopyOptions::None;
     bool syncLoad_ = false;
     bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
@@ -144,7 +157,8 @@ private:
     RefPtr<CanvasImage> image_;
     RectF dstRect_;
     RectF srcRect_;
-    RefPtr<ImageModifier> imageModifier_;
+
+    RefPtr<CanvasImage> obscuredImage_;
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;

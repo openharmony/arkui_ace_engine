@@ -43,6 +43,11 @@ public:
     {
         return false;
     }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
 };
 } // namespace OHOS::Ace::NG
 

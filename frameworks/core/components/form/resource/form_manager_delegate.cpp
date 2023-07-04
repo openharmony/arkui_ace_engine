@@ -49,6 +49,32 @@ constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_for
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
+constexpr char IS_DYNAMIC[] = "isDynamic";
+
+bool GetFormInfo(
+    std::string& bundleName,
+    std::string& moduleName,
+    const std::string& cardName,
+    OHOS::AppExecFwk::FormInfo& formInfo)
+{
+    std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
+    auto result = OHOS::AppExecFwk::FormMgr::GetInstance()
+        .GetFormsInfoByModule(bundleName, moduleName, formInfos);
+    if (result != 0) {
+        LOGW("Query FormInfo failed.");
+        return false;
+    }
+
+    auto iter = formInfos.begin();
+    while (iter != formInfos.end()) {
+        if (cardName == iter->name) {
+            formInfo = *iter;
+            return true;
+        }
+        iter++;
+    }
+    return false;
+}
 } // namespace
 
 FormManagerDelegate::~FormManagerDelegate()
@@ -104,8 +130,9 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 #ifdef OHOS_STANDARD_SYSTEM
     // dynamic add new form should release the running form first.
     if (runningCardId_ > 0) {
-        LOGI("Add new form, delete old form:%{public}s.", std::to_string(runningCardId_).c_str());
-        AppExecFwk::FormMgr::GetInstance().DeleteForm(runningCardId_, AppExecFwk::FormHostClient::GetInstance());
+        LOGI("Add new form, release platform resource about old form:%{public}s.",
+            std::to_string(runningCardId_).c_str());
+        ReleaseForm();
         ResetForm();
     }
 
@@ -135,31 +162,21 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
 
-    std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
+    OHOS::AppExecFwk::FormInfo formInfo;
     AppExecFwk::FormType uiSyntax = AppExecFwk::FormType::JS;
     std::string bundleName(info.bundleName);
     std::string moduleName(info.moduleName);
-    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFormsInfoByModule(bundleName,
-                                                                                moduleName,
-                                                                                formInfos);
-    if (result != 0) {
+    auto result = GetFormInfo(bundleName, moduleName, info.cardName, formInfo);
+    if (!result) {
         LOGW("Query form uiSyntax failed.");
-    } else {
-        auto iter = formInfos.begin();
-        while (iter != formInfos.end()) {
-            auto formInfo = *iter;
-            if (info.cardName == formInfo.name) {
-                uiSyntax = formInfo.uiSyntax;
-                break;
-            }
-            iter++;
-        }
     }
 
+    uiSyntax = formInfo.uiSyntax;
     if (uiSyntax == AppExecFwk::FormType::ETS) {
         CHECK_NULL_VOID(renderDelegate_);
         wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
         wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
+        wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
     }
 
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
@@ -170,10 +187,11 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         OnFormError(std::to_string(ret), errorMsg);
         return;
     }
+
     LOGI("Add form success formId: %{public}s", std::to_string(formJsInfo.formId).c_str());
     LOGI("Add form success type: %{public}d", static_cast<int>(formJsInfo.type));
     LOGI("Add form success uiSyntax: %{public}d", static_cast<int>(formJsInfo.uiSyntax));
-
+    LOGI("Add form success isDynamic: %{public}d", isDynamic_);
     if (formCallbackClient_ == nullptr) {
         formCallbackClient_ = std::make_shared<FormCallbackClient>();
     }
@@ -202,30 +220,31 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
     const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want)
 {
+    LOGI("Form OnSurfaceCreate formId: %{public}s, isDynamic: %{public}d",
+        std::to_string(formInfo.formId).c_str(), formInfo.isDynamic);
     if (!rsSurfaceNode) {
         LOGE("Form OnSurfaceCreate rsSurfaceNode is null");
         return;
     }
-    LOGI("Form OnSurfaceCreate formId=%{public}s", std::to_string(formInfo.formId).c_str());
 
-    if (onFormSurfaceNodeCallback_) {
-        onFormSurfaceNodeCallback_(rsSurfaceNode);
-    } else {
-        LOGE("Form OnSurfaceCreate onFormSurfaceNodeCallback = nullptr");
-    }
-
-    if (formRendererDispatcher_) {
-        LOGW("Get formRendererDispatcher already exist.");
+    if (!onFormSurfaceNodeCallback_) {
+        LOGE("Form OnSurfaceCreate onFormSurfaceNodeCallback is nullptr");
         return;
     }
 
-    sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
-    formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
-    if (formRendererDispatcher_ == nullptr) {
-        LOGE("Get formRendererDispatcher failed.");
-        return;
+    onFormSurfaceNodeCallback_(rsSurfaceNode);
+    if (!formRendererDispatcher_) {
+        sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
+        formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+        if (formRendererDispatcher_ == nullptr) {
+            LOGE("Get formRendererDispatcher failed.");
+        }
     }
-    LOGI("Get success, formRendererDispatcher.");
+
+    isDynamic_ = formInfo.isDynamic;
+    if (!formInfo.isDynamic) {
+        HandleSnapshotCallback();
+    }
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
@@ -405,6 +424,16 @@ void FormManagerDelegate::AddUnTrustFormCallback(const UnTrustFormCallback& call
     unTrustFormCallback_ = callback;
 }
 
+void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        LOGE("callback is null or has released");
+        return;
+    }
+
+    snapshotCallback_ = std::move(callback);
+}
+
 bool FormManagerDelegate::ParseAction(const std::string &action, const std::string& type, AAFwk::Want &want)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
@@ -577,8 +606,8 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 void FormManagerDelegate::DispatchPointerEvent(
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (formRendererDispatcher_ == nullptr) {
-        LOGI("DispatchPointerEvent: is null");
+    if (!isDynamic_ || formRendererDispatcher_ == nullptr) {
+        LOGI("Is not dynamic or dispatchPointerEvent is null");
         return;
     }
 
@@ -666,6 +695,14 @@ void FormManagerDelegate::HandleUnTrustFormCallback()
     }
 }
 
+void FormManagerDelegate::HandleSnapshotCallback()
+{
+    LOGI("HandleSnapshotCallback.");
+    if (snapshotCallback_) {
+        snapshotCallback_();
+    }
+}
+
 void FormManagerDelegate::ReAddForm()
 {
     LOGI("ReAddForm.");
@@ -686,6 +723,7 @@ void FormManagerDelegate::ResetForm()
 {
     runningCardId_ = -1;
     runningCompId_.clear();
+    formRendererDispatcher_ = nullptr;
 }
 
 void FormManagerDelegate::ReleaseForm()
@@ -743,6 +781,18 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
         formJsInfo_ = formJsInfo;
         onFormUpdateCallback_(formJsInfo.formId, formJsInfo.formData, formJsInfo.imageDataMap);
     }
+}
+
+void FormManagerDelegate::ReleaseRenderer()
+{
+    LOGI("FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s",
+        runningCardId_, runningCompId_.c_str());
+    if (runningCardId_ <= 0) {
+        return;
+    }
+
+    OHOS::AppExecFwk::FormMgr::GetInstance().ReleaseRenderer(runningCardId_, runningCompId_);
+    formRendererDispatcher_ = nullptr;
 }
 
 void FormManagerDelegate::ProcessFormUninstall(const int64_t formId)

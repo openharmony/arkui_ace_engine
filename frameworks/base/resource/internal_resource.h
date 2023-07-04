@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,6 +84,15 @@ public:
         IC_MORE,
         IC_MORE_DARK,
         IC_MORE_TRANSPARENT,
+        IC_WINDOW_CLOSE,
+        IC_WINDOW_MAX,
+        IC_WINDOW_MENU_FULLSCREEN,
+        IC_WINDOW_MENU_MAXIMIZE,
+        IC_WINDOW_MENU_OK,
+        IC_WINDOW_MENU_SCREEN_L,
+        IC_WINDOW_MENU_SCREEN_N,
+        IC_WINDOW_MIN,
+        IC_WINDOW_RESTORES,
         TRANSLATE_C2E_SVG,
         SHARE_SVG,
         SIDE_BAR,
@@ -95,6 +104,9 @@ public:
         SPINNER_DISABLE,
         LOCATION_BUTTON_FILLED_SVG,
         LOCATION_BUTTON_LINE_SVG,
+        PASTE_BUTTON_LINE_SVG,
+        SAVE_BUTTON_FILLED_SVG,
+        SAVE_BUTTON_LINE_SVG,
         IC_PUBLIC_ARROW_LEFT_SVG,
         IC_PUBLIC_ARROW_RIGHT_SVG,
         IC_PUBLIC_ARROW_UP_SVG,
@@ -106,6 +118,7 @@ public:
         IC_SHARE_SVG,
         IC_TRANSLATE_SVG,
         IC_SEARCH_SVG,
+        IC_BOTTOMSHEET_CLOSE_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

@@ -23,10 +23,8 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/scroll_bar.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 
 namespace OHOS::Ace {
@@ -59,13 +57,23 @@ struct SwiperDigitalParameters {
 };
 
 struct SwiperArrowParameters {
-    std::optional<bool> isShowBoard;
-    std::optional<bool> isSiderMiddle;
-    std::optional<Dimension> boardSize;
-    std::optional<Color> boardColor;
+    std::optional<bool> isShowBackground;
+    std::optional<bool> isSidebarMiddle;
+    std::optional<Dimension> backgroundSize;
+    std::optional<Color> backgroundColor;
     std::optional<Dimension> arrowSize;
     std::optional<Color> arrowColor;
 };
+
+struct AnimationCallbackInfo {
+    std::optional<float> currentOffset;
+    std::optional<float> targetOffset;
+    std::optional<float> velocity;
+};
+
+using AnimationStartEvent = std::function<void(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)>;
+using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
+using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
 
 class ACE_EXPORT SwiperModel {
 public:
@@ -85,12 +93,17 @@ public:
     virtual void SetEdgeEffect(EdgeEffect EdgeEffect);
     virtual void SetDisplayMode(SwiperDisplayMode displayMode);
     virtual void SetDisplayCount(int32_t displayCount);
+    virtual void ResetDisplayCount() {}
+    virtual void SetMinSize(const Dimension& minSize);
     virtual void SetShowIndicator(bool showIndicator);
     virtual void SetItemSpace(const Dimension& itemSpace);
     virtual void SetCachedCount(int32_t cachedCount);
     virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
-    virtual void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart);
-    virtual void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd);
+    virtual void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart) {}
+    virtual void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd) {}
+    virtual void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) {}
+    virtual void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) {}
+    virtual void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) {}
 
     virtual void SetRemoteMessageEventId(RemoteCallback&& remoteCallback);
     virtual void SetOnClick(

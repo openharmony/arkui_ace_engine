@@ -85,12 +85,14 @@ public:
     void FireStateChange(int32_t value);
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
-    bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* changeConfig */) override;
     void OnActive() override {}
     void CheckCoordinationEvent();
     RefPtr<FrameNode> FindScrollableChild();
     void AddCustomBuilderNode(const RefPtr<NG::UINode>& builder) const;
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
 
 private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -120,8 +122,8 @@ private:
     bool ScrollComponentReactInMove();
     void CustomBuilderAppear();
     void CustomBuilderExit();
-    void CheckCustomBuilderDragUpdateStage();
-    void CheckCustomBuilderDragEndStage();
+    void HandleCustomBuilderDragUpdateStage();
+    void HandleCustomBuilderDragEndStage();
     void CustomBuilderReset();
     void UpdateCustomBuilderProperty(RefreshState state, float ratio);
     void CustomBuilderRefreshingAnimation();
@@ -129,11 +131,16 @@ private:
     void OnAppearAnimationFinish();
     void UpdateLoadingMarginTop(float top);
     void SetAccessibilityAction();
+    void InitOnKeyEvent();
+    void OnKeyEvent(const KeyEvent& event);
+    void QuickEndFresh();
+    void QuickStartFresh();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;
 
     bool isRefreshing_ = false;
+    bool isKeyEventRegisted_ = false;
     float triggerLoadingDistance_ = 0.0f;
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> customBuilder_;

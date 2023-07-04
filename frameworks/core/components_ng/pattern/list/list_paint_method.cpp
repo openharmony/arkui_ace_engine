@@ -60,7 +60,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     listContentModifier_->SetClipSize(frameSize);
     listContentModifier_->SetClip(clip);
     
-    if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0) {
+    if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
+        divider_.strokeWidth.Unit() == DimensionUnit::PERCENT) {
         listContentModifier_->ResetDividerInfo();
         return;
     }
@@ -76,7 +77,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         .isVertical = vertical_,
         .lanes = lanes_ > 1 ? lanes_ : 1,
         .totalItemCount = totalItemCount_,
-        .color = divider_.color
+        .color = divider_.color,
+        .laneGutter = laneGutter_
     };
     float checkMargin = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
     if (NearZero(checkMargin)) return;

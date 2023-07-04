@@ -32,6 +32,7 @@ public:
     virtual void Create() = 0;
     virtual void SetNavigationStack() = 0;
     virtual void SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack) = 0;
+    virtual void SetNavigationStackProvided(bool provided) = 0;
     virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle = false) = 0;
@@ -56,6 +57,9 @@ public:
     virtual void SetUsrNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavBarPosition(NG::NavBarPosition mode) = 0;
     virtual void SetNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMinNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMaxNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMinContentWidth(const Dimension& value) = 0;
     virtual void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) = 0;
     virtual void SetNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavDestination(std::function<void(std::string)>&& builder) = 0;

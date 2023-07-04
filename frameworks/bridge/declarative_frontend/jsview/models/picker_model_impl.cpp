@@ -14,9 +14,10 @@
  */
 
 #include "bridge/declarative_frontend/jsview/models/picker_model_impl.h"
+
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components/picker/picker_date_component.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/picker/picker_date_component.h"
 #include "core/components/picker/picker_time_component.h"
 
 namespace OHOS::Ace::Framework {
@@ -76,5 +77,81 @@ void DatePickerModelImpl::SetOnChange(DateChangeEvent&& onChange)
 {
     auto datePicker = EventMarker([func = std::move(onChange)](const BaseEventInfo* info) { func(info); });
     JSViewSetProperty(&PickerBaseComponent::SetOnChange, std::move(datePicker));
+}
+
+void DatePickerModelImpl::SetBackgroundColor(const Color& color)
+{
+    auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!pickerBase) {
+        LOGE("PickerBaseComponent is null");
+        return;
+    }
+
+    pickerBase->SetHasBackgroundColor(true);
+}
+
+void DatePickerDialogModelImpl::SetDatePickerDialogShow(PickerDialogInfo& pickerDialog,
+    NG::DatePickerSettingData& settingData, std::function<void()>&& onCancel,
+    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
+    DatePickerType pickerType)
+{
+    std::string name;
+    RefPtr<Component> component;
+    switch (pickerType) {
+        case DatePickerType::TIME: {
+            auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
+            if (pickerDialog.isSelectedDate == true) {
+                timePicker->SetSelectedTime(pickerDialog.pickerTime);
+            }
+            timePicker->SetIsDialog(true);
+            timePicker->SetIsCreateDialogComponent(true);
+            timePicker->SetHour24(settingData.useMilitary);
+            component = timePicker;
+            name = "TimePickerDialog";
+            break;
+        }
+        case DatePickerType::DATE: {
+            auto datePicker = AceType::MakeRefPtr<PickerDateComponent>();
+            auto startDays = pickerDialog.parseStartDate.ToDays();
+            auto endDays = pickerDialog.parseEndDate.ToDays();
+            auto selectedDays = pickerDialog.parseSelectedDate.ToDays();
+            if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
+                LOGE("date error");
+            }
+            if (pickerDialog.isStartDate == true) {
+                datePicker->SetStartDate(pickerDialog.parseStartDate);
+            }
+            if (pickerDialog.isEndDate == true) {
+                datePicker->SetEndDate(pickerDialog.parseEndDate);
+            }
+            if (pickerDialog.isSelectedDate) {
+                datePicker->SetSelectedDate(pickerDialog.parseSelectedDate);
+            }
+            datePicker->SetIsDialog(true);
+            datePicker->SetIsCreateDialogComponent(true);
+            datePicker->SetShowLunar(settingData.isLunar);
+
+            component = datePicker;
+            name = "DatePickerDialog";
+            break;
+        }
+        default: {
+            LOGE("Undefined date picker type.");
+            return;
+        }
+    }
+    auto datePicker = AceType::DynamicCast<PickerBaseComponent>(component);
+    DialogProperties properties {};
+    properties.alignment = DialogAlignment::CENTER;
+    properties.customComponent = datePicker;
+    properties.customStyle = true;
+    auto acceptId = EventMarker(std::move(onAccept));
+    datePicker->SetDialogAcceptEvent(acceptId);
+    auto cancelId = EventMarker(std::move(onCancel));
+    datePicker->SetDialogCancelEvent(cancelId);
+    auto changeId = EventMarker(std::move(onChange));
+    datePicker->SetDialogChangeEvent(changeId);
+    datePicker->SetDialogName(name);
+    datePicker->OpenDialog(properties);
 }
 } // namespace OHOS::Ace::Framework

@@ -17,6 +17,7 @@
 
 #include "transaction/rs_interfaces.h"
 
+#include "base/log/jank_frame_report.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -31,14 +32,12 @@ namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
 
+#ifdef PREVIEW
 float GetDisplayRefreshRate()
 {
-#ifdef PREVIEW
     return 30.0f;
-#else
-    return 60.0f;
-#endif
 }
+#endif
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -46,7 +45,11 @@ namespace OHOS::Ace::NG {
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
+#ifdef PREVIEW
     int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
+#else
+    int64_t refreshPeriod = window->GetVSyncPeriod();
+#endif
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();
@@ -61,6 +64,18 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID_NOLOG(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
+            do {
+                if (refreshPeriod <= 0) {
+                    break;
+                }
+                int64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    std::chrono::steady_clock::now().time_since_epoch()).count();
+                int64_t duration = now - timeStampNanos;
+                double jank = double(duration) / refreshPeriod;
+                if (jank > 1.0f) {
+                    JankFrameReport::JankFrameRecord(jank);
+                }
+            } while (false);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -176,7 +191,11 @@ void RosenWindow::FlushTasks()
 
 float RosenWindow::GetRefreshRate() const
 {
+#ifdef PREVIEW
     return GetDisplayRefreshRate();
+#else
+    return ONE_SECOND_IN_NANO / rsWindow_->GetVSyncPeriod();
+#endif
 }
 
 void RosenWindow::SetKeepScreenOn(bool keepScreenOn)

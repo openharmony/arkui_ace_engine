@@ -28,7 +28,7 @@ void RemoteWindowModelNG::Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsN
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::REMOTE_WINDOW_ETS_TAG, nodeId, [rsNode]() { return AceType::MakeRefPtr<RemoteWindowPattern>(); });
+        V2::REMOTE_WINDOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RemoteWindowPattern>(); });
     stack->Push(frameNode);
 #ifdef ENABLE_ROSEN_BACKEND
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());

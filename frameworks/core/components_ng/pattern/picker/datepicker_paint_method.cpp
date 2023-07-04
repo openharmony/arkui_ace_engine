@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -42,10 +43,16 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor,
-               enabled = enabled_](RSCanvas& canvas) {
+               enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
-        double upperLine = (frameRect.Height() - dividerSpacing) / 2.0;
-        double downLine = (frameRect.Height() + dividerSpacing) / 2.0;
+        auto datePickerPattern = DynamicCast<DatePickerPattern>(pattern.Upgrade());
+        CHECK_NULL_VOID_NOLOG(datePickerPattern);
+        auto height = dividerSpacing;
+        if (datePickerPattern->GetResizeFlag()) {
+            height = datePickerPattern->GetResizePickerItemHeight();
+        }
+        double upperLine = (frameRect.Height() - height) / 2.0;
+        double downLine = (frameRect.Height() + height) / 2.0;
 
         OffsetF offset = OffsetF(0.0f, upperLine);
         dividerPainter.DrawLine(canvas, offset);
@@ -73,7 +80,7 @@ void DatePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
 
     // Paint gradient rect over the picker content.
     RSBrush topBrush;
-    RSRect rect(0.0f, 0.0f, frameRect.Right(), frameRect.Bottom());
+    RSRect rect(0.0f, frameRect.Right(), 0.0f, frameRect.Bottom());
     RSPoint topStartPoint;
     topStartPoint.SetX(0.0f);
     topStartPoint.SetY(0.0f);

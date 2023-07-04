@@ -57,17 +57,23 @@ public:
     std::list<RefPtr<SpanItem>>&& GetSpanItemChildren();
 
     float GetBaselineOffset() const;
+    
+    size_t GetLineCount() const;
 
     std::optional<TextStyle> GetTextStyle() const;
     void ApplyIndents(const TextStyle& textStyle, double width);
 
 private:
+    void FontRegisterCallback(RefPtr<FrameNode> frameNode, const TextStyle& textStyle);
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper);
     bool DidExceedMaxLines(const SizeF& maxSize);
+    bool AddPropertiesAndAnimations(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
+        LayoutWrapper* layoutWrapper);
     static TextDirection GetTextDirection(const std::string& content);
     float GetTextWidth() const;
     SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const;

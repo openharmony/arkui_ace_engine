@@ -70,7 +70,7 @@ protected:
 private:
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
-    RefPtr<NG::CustomNode> BuildCustomNodeFromUINode(RefPtr<NG::UINode> node);
+    RefPtr<NG::UINode> GetNavDestinationNodeFromUINode(RefPtr<NG::UINode> node);
 };
 } // namespace OHOS::Ace::Framework
 

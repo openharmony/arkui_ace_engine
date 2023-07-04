@@ -19,6 +19,8 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPoint.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/components/button/render_button.h"
@@ -64,7 +66,7 @@ private:
     void DrawCircleProgress(RSCanvas* canvas, const Offset& offset);
     void DrawDownloadButton(RSCanvas* canvas, const Offset& offset);
     void DrawButton(RSCanvas* canvas, const Offset& offset);
-    void ConvertToVector(const std::array<Radius, 4>& radii, RSPoint* pRadii);
+    void ConvertToVector(const std::array<Radius, 4>& radii, std::vector<RSPoint>& pRadii);
 #endif
     void PaintFocus(RenderContext& context, const Offset& offset);
     void PaintPopupFocus(RenderContext& context);

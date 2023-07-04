@@ -344,49 +344,49 @@ HWTEST_F(SearchTestNg, SearchPatternMethodTest002, TestSize.Level1)
      */
     KeyEvent keyEventOne(KeyCode::KEY_ENTER, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH;
-    focusHub->onKeyEventInternal_(keyEventOne);
+    focusHub->ProcessOnKeyEventInternal(keyEventOne);
 
     /**
      * @tc.cases: case2.
      */
     KeyEvent keyEventTwo(KeyCode::KEY_ENTER, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH_BUTTON;
-    focusHub->onKeyEventInternal_(keyEventTwo);
+    focusHub->ProcessOnKeyEventInternal(keyEventTwo);
 
     /**
      * @tc.cases: case3.
      */
     KeyEvent keyEventThree(KeyCode::KEY_ENTER, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::CANCEL_BUTTON;
-    focusHub->onKeyEventInternal_(keyEventThree);
+    focusHub->ProcessOnKeyEventInternal(keyEventThree);
 
     /**
      * @tc.cases: case4.
      */
     KeyEvent keyEventFour(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::CANCEL_BUTTON;
-    focusHub->onKeyEventInternal_(keyEventFour);
+    focusHub->ProcessOnKeyEventInternal(keyEventFour);
 
     /**
      * @tc.cases: case5.
      */
     KeyEvent keyEventFive(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH_BUTTON;
-    focusHub->onKeyEventInternal_(keyEventFive);
+    focusHub->ProcessOnKeyEventInternal(keyEventFive);
 
     /**
      * @tc.cases: case6.
      */
     KeyEvent keyEventSix(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH;
-    focusHub->onKeyEventInternal_(keyEventSix);
+    focusHub->ProcessOnKeyEventInternal(keyEventSix);
 
     /**
      * @tc.cases: case7.
      */
     KeyEvent keyEventSeven(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::CANCEL_BUTTON;
-    focusHub->onKeyEventInternal_(keyEventSeven);
+    focusHub->ProcessOnKeyEventInternal(keyEventSeven);
 }
 
 /**

@@ -52,15 +52,14 @@ ohos_fuzztest("ArkResschedFuzzTest") {
   ]
 
   defines = [ "FUZZTEST" ]
-
+  external_deps = [ "window_manager:libwsutils" ]
   if (is_ohos_standard_system) {
-    external_deps = [
-      "hiviewdfx_hilog_native:libhilog",
+    external_deps += [
+      "hilog:libhilog",
       "init:libbegetutil",
     ]
-    #deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
   } else {
-    external_deps = [
+    external_deps += [
       "hilog:libhilog",
       "init_lite:libbegetutil",
     ]

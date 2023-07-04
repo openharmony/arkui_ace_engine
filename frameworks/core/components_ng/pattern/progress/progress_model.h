@@ -51,6 +51,9 @@ public:
     virtual void SetGradientColor(const NG::Gradient& value) = 0;
     virtual void SetPaintShadow(bool value) = 0;
     virtual void SetProgressStatus(NG::ProgressStatus value) = 0;
+    virtual void SetShowText(bool value) = 0;
+    virtual void SetRingSweepingEffect(bool value) = 0;
+    virtual void SetLinearSweepingEffect(bool value) = 0;
 
 private:
     static std::unique_ptr<ProgressModel> instance_;

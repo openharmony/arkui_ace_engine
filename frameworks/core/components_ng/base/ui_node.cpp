@@ -325,6 +325,20 @@ void UINode::DetachFromMainTree(bool recursive)
     }
 }
 
+void UINode::ProcessOffscreenTask(bool recursive)
+{
+    if (useOffscreenProcess_) {
+        return;
+    }
+    useOffscreenProcess_ = true;
+    OnOffscreenProcess(recursive);
+    // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
+    bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
+    for (const auto& child : children_) {
+        child->ProcessOffscreenTask(isRecursive);
+    }
+}
+
 void UINode::MovePosition(int32_t slot)
 {
     auto parentNode = parent_.Upgrade();
@@ -402,7 +416,10 @@ void UINode::RebuildRenderContextTree()
 }
 void UINode::OnDetachFromMainTree(bool) {}
 
-void UINode::OnAttachToMainTree(bool) {}
+void UINode::OnAttachToMainTree(bool)
+{
+    useOffscreenProcess_ = false;
+}
 
 void UINode::DumpTree(int32_t depth)
 {
@@ -568,6 +585,13 @@ void UINode::SetActive(bool active)
     }
 }
 
+void UINode::SetJSViewActive(bool active)
+{
+    for (const auto& child : children_) {
+        child->SetJSViewActive(active);
+    }
+}
+
 void UINode::OnVisibleChange(bool isVisible)
 {
     for (const auto& child : GetChildren()) {
@@ -690,7 +714,15 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
         // At this point, all of the children_
         // belong to the child nodes of syntaxItem
         for (const auto& child : GetChildren()) {
-            child->SetForeachItem();
+            if (child->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+                auto children = child->GetChildren();
+                if (!children.empty()) {
+                    auto begin = children.begin();
+                    (*begin)->SetForeachItem();
+                }
+            } else {
+                child->SetForeachItem();
+            }
         }
     }
 
@@ -712,10 +744,5 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
         // Recursively traverse the child nodes of each node
         child->GetPerformanceCheckData(nodeMap);
     }
-}
-
-void UINode::AddFlexLayouts()
-{
-    nodeInfo_->flexLayouts++;
 }
 } // namespace OHOS::Ace::NG

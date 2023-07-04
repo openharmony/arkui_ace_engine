@@ -21,6 +21,7 @@
 
 #include "base/geometry/animatable_float.h"
 #include "base/geometry/vec3.h"
+#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/custom/custom_render_descriptor.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/geometry.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/gltf_animation.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/light.h"
@@ -36,6 +37,7 @@ public:
         propModelLights_ = std::vector<RefPtr<OHOS::Render3D::SVLight>> {};
         propModelAnimations_ = std::vector<RefPtr<OHOS::Render3D::GLTFAnimation>> {};
         propModelGeometries_ = std::vector<RefPtr<OHOS::Render3D::SVGeometry>> {};
+        propModelCustomRenders_ = std::vector<RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>> {};
     };
     ~ModelPaintProperty() override = default;
 
@@ -55,10 +57,12 @@ public:
         paintProperty->propModelLights_ = CloneModelLights();
         paintProperty->propModelAnimations_ = CloneModelAnimations();
         paintProperty->propModelGeometries_ = CloneModelGeometries();
+        paintProperty->propModelCustomRenders_ = CloneModelCustomRenders();
         paintProperty->needsCameraSetup_ = CloneNeedsCameraSetup();
         paintProperty->needsLightsSetup_ = CloneNeedsLightsSetup();
         paintProperty->needsAnimationsSetup_ = CloneNeedsAnimationsSetup();
         paintProperty->needsGeometriesSetup_ = CloneNeedsGeometriesSetup();
+        paintProperty->needsCustomRendersSetup_ = CloneNeedsCustomRendersSetup();
         return paintProperty;
     }
 
@@ -68,6 +72,7 @@ public:
         UpdateNeedsGeometriesSetup(false);
         UpdateNeedsCameraSetup(false);
         UpdateNeedsLightsSetup(false);
+        UpdateNeedsCustomRendersSetup(false);
     }
 
     void Reset() override
@@ -88,6 +93,8 @@ public:
         ResetModelSingleAnimation();
         ResetModelGeometries();
         ResetModelSingleGeometry();
+        ResetModelCustomRenders();
+        ResetModelSingleCustomRender();
         ResetFlagProperties();
     }
 
@@ -101,7 +108,7 @@ public:
     void OnModelSingleLightUpdate(const RefPtr<OHOS::Render3D::SVLight>& light)
     {
         propModelLights_.value().push_back(light);
-        LOGD("MODEL_NG: propModelLights_.size() -> %u", GetModelLightsValue().size());
+        LOGD("MODEL_NG: propModelLights_.size() -> %zu", GetModelLightsValue().size());
         ResetModelSingleLight();
         UpdateNeedsLightsSetup(true);
     }
@@ -109,7 +116,7 @@ public:
     void OnModelSingleAnimationUpdate(const RefPtr<OHOS::Render3D::GLTFAnimation>& animation)
     {
         propModelAnimations_.value().push_back(animation);
-        LOGD("MODEL_NG: propModelAnimations_.size() -> %u", GetModelAnimationsValue().size());
+        LOGD("MODEL_NG: propModelAnimations_.size() -> %zu", GetModelAnimationsValue().size());
         ResetModelSingleAnimation();
         UpdateNeedsAnimationsSetup(true);
     }
@@ -117,9 +124,17 @@ public:
     void OnModelSingleGeometryUpdate(const RefPtr<OHOS::Render3D::SVGeometry>& geometry)
     {
         propModelGeometries_.value().push_back(geometry);
-        LOGD("MODEL_NG: propModelGeometries_.size() -> %u", GetModelGeometriesValue().size());
+        LOGD("MODEL_NG: propModelGeometries_.size() -> %zu", GetModelGeometriesValue().size());
         ResetModelSingleGeometry();
         UpdateNeedsGeometriesSetup(true);
+    }
+
+    void OnModelSingleCustomRenderUpdate(const RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>& customRender)
+    {
+        propModelCustomRenders_.value().push_back(customRender);
+        LOGD("MODEL_NG: propModelCustomRenders_.size() -> %zu", GetModelCustomRendersValue().size());
+        ResetModelSingleCustomRender();
+        UpdateNeedsCustomRendersSetup(true);
     }
 
     DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
@@ -156,10 +171,16 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(
         ModelSingleGeometry, RefPtr<OHOS::Render3D::SVGeometry>, PROPERTY_UPDATE_RENDER);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
+        ModelCustomRenders, std::vector<RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(
+        ModelSingleCustomRender, RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>, PROPERTY_UPDATE_RENDER);
+
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(Camera, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(Lights, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(Animations, false, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_PROPERTY(Geometries, false, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_PROPERTY(CustomRenders, false, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ModelPaintProperty);

@@ -42,6 +42,7 @@ ohos_unittest("AnimationTest") {
     "$ace_root/frameworks/core/animation/spring_animation.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/core/common/ace_application_info.cpp",
@@ -220,7 +221,7 @@ ohos_unittest("AnimationTest") {
       "resmgr:resourcemanager",
     ]
   } else {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
     deps +=
         [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
   }

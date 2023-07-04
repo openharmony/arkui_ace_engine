@@ -51,7 +51,7 @@ enum class ForegroundColorStrategy : uint32_t {
 };
 
 // A color value present by 32 bit.
-class ACE_EXPORT Color {
+class ACE_FORCE_EXPORT Color {
 public:
     Color() = default;
     constexpr explicit Color(uint32_t value) : colorValue_(ColorParam { .value = value }) {}
@@ -207,8 +207,9 @@ public:
 
     LinearColor operator*(double value) const
     {
-        return LinearColor(GetAlpha() * value, GetRed() * value,
-            GetGreen() * value, GetBlue() * value);
+        return LinearColor(static_cast<int16_t>(round(GetAlpha() * value)),
+            static_cast<int16_t>(round(GetRed() * value)), static_cast<int16_t>(round(GetGreen() * value)),
+            static_cast<int16_t>(round(GetBlue() * value)));
     }
 
     bool operator==(const LinearColor& color) const

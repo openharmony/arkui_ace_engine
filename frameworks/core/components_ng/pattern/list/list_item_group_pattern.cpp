@@ -28,7 +28,6 @@ void ListItemGroupPattern::OnAttachToFrameNode()
     if (listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
         SetListItemGroupDefaultAttributes(host);
     }
-    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)
@@ -73,7 +72,8 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     V2::ItemDivider itemDivider;
     auto divider = layoutProperty->GetDivider().value_or(itemDivider);
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
-    return MakeRefPtr<ListItemGroupPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
+    ListItemGroupPaintInfo listItemGroupPaintInfo { drawVertical, lanes_, spaceWidth_, laneGutter_, childCrossSize_ };
+    return MakeRefPtr<ListItemGroupPaintMethod>(divider, listItemGroupPaintInfo, itemPosition_);
 }
 
 bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -89,6 +89,8 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
     lanes_ = layoutAlgorithm->GetLanes();
     axis_ = layoutAlgorithm->GetAxis();
+    laneGutter_ = layoutAlgorithm->GetLaneGutter();
+    childCrossSize_ = layoutAlgorithm->GetChildCrossSize();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto accessibilityProperty = host->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();

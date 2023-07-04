@@ -53,7 +53,6 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
 
 void JSWaterFlow::Create(const JSCallbackInfo& args)
 {
-    LOGI("Create component: WaterFLow");
     if (args.Length() > 1) {
         LOGW("Arg is wrong, it is supposed to have at most one argument");
         return;
@@ -104,8 +103,11 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("columnsTemplate", &JSWaterFlow::SetColumnsTemplate, opt);
     JSClass<JSWaterFlow>::StaticMethod("itemConstraintSize", &JSWaterFlow::SetItemConstraintSize, opt);
     JSClass<JSWaterFlow>::StaticMethod("rowsTemplate", &JSWaterFlow::SetRowsTemplate, opt);
+    JSClass<JSWaterFlow>::StaticMethod("nestedScroll", &JSWaterFlow::SetNestedScroll);
+    JSClass<JSWaterFlow>::StaticMethod("enableScrollInteraction", &JSWaterFlow::SetScrollEnabled);
     JSClass<JSWaterFlow>::StaticMethod("onReachStart", &JSWaterFlow::ReachStartCallback);
     JSClass<JSWaterFlow>::StaticMethod("onReachEnd", &JSWaterFlow::ReachEndCallback);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollFrameBegin", &JSWaterFlow::ScrollFrameBeginCallback);
     JSClass<JSWaterFlow>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSWaterFlow>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSWaterFlow>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -114,6 +116,7 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSWaterFlow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSWaterFlow>::StaticMethod("friction", &JSWaterFlow::SetFriction);
 
     JSClass<JSWaterFlow>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -206,6 +209,53 @@ void JSWaterFlow::SetRowsTemplate(const std::string& value)
     WaterFlowModel::GetInstance()->SetRowsTemplate(value);
 }
 
+void JSWaterFlow::SetNestedScroll(const JSCallbackInfo& args)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        WaterFlowModel::GetInstance()->SetNestedScroll(nestedOpt);
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t froward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
+    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        froward = 0;
+    }
+    int32_t backward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
+    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        backward = 0;
+    }
+    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
+    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
+    WaterFlowModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::SetScrollEnabled(bool scrollEnabled)
+{
+    WaterFlowModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+}
+
+void JSWaterFlow::SetFriction(const JSCallbackInfo& info)
+{
+    double friction = -1.0;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+        LOGW("Friction params invalid,can not convert to double");
+        friction = -1.0;
+    }
+    WaterFlowModel::GetInstance()->SetFriction(friction);
+}
+
 void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -228,5 +278,35 @@ void JSWaterFlow::ReachEndCallback(const JSCallbackInfo& args)
         WaterFlowModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
     }
     args.ReturnSelf();
+}
+
+void JSWaterFlow::ScrollFrameBeginCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
+            ScrollFrameResult scrollRes { .offset = offset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(offset, state);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                LOGE("Error calling onScrollFrameBegin, result is empty.");
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                LOGE("Error calling onScrollFrameBegin, result is not object.");
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
+    }
 }
 } // namespace OHOS::Ace::Framework

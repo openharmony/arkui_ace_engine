@@ -22,22 +22,32 @@ ohos_unittest("CardFrontendTest") {
   sources = [
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_view_stack_model.cpp",
     "../card_test_factory.cpp",
     "card_frontend_declarative_test.cpp",
     "card_frontend_delegate_test.cpp",
     "card_frontend_test.cpp",
   ]
 
-  configs = [ "$ace_root:ace_test_config" ]
+  configs = [
+    ":config_domnode_test",
+    "$ace_root:ace_test_config",
+  ]
 
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_ark_ohos",
     "$ace_root/frameworks/bridge/js_frontend/engine/jsi:js_engine_bridge_ark_ohos",
-    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "//third_party/googletest:gmock_main",
   ]
+  sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
 
   part_name = ace_engine_part
+}
+
+config("config_domnode_test") {
+  visibility = [ ":*" ]
+  include_dirs = [ "$ace_root" ]
 }
 
 group("unittest") {

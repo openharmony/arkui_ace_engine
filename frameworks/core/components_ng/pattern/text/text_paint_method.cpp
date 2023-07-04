@@ -50,6 +50,10 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
 
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
@@ -63,6 +67,20 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
 
     textContentModifier_->ContentChange();
+
+    auto reasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+    textContentModifier_->SetObscured(reasons);
+    auto spanItemChildren = pattern->GetSpanItemChildren();
+    textContentModifier_->SetIfHaveSpanItemChildren(!spanItemChildren.empty());
+    auto wideTextLength = pattern->GetDisplayWideTextLength();
+    std::vector<Rect> drawObscuredRects;
+    if (wideTextLength != 0) {
+        paragraph_->GetRectsForRange(0, wideTextLength, drawObscuredRects);
+    }
+    textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
+    if (renderContext->GetClipEdge().has_value()) {
+        textContentModifier_->SetClip(renderContext->GetClipEdge().value());
+    }
 
     PropertyChangeFlag flag = 0;
     if (textContentModifier_->NeedMeasureUpdate(flag)) {

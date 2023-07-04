@@ -132,6 +132,11 @@ void SkPainter::SetBrush(SkPaint& skPaint, const ShapePaintProperty& shapePaintP
         curOpacity = shapePaintProperty.GetFillOpacityValue();
     }
     skPaint.setColor(fillColor.BlendOpacity(curOpacity).GetValue());
+    if (shapePaintProperty.HasAntiAlias()) {
+        skPaint.setAntiAlias(shapePaintProperty.GetAntiAliasValue());
+    } else {
+        skPaint.setAntiAlias(shapePaintProperty.ANTIALIAS_DEFAULT);
+    }
 }
 
 void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset)

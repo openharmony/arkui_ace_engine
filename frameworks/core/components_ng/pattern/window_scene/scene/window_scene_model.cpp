@@ -18,6 +18,7 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -25,19 +26,30 @@
 namespace OHOS::Ace::NG {
 void WindowSceneModel::Create(uint64_t persistentId)
 {
-    auto session = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
-    if (session == nullptr) {
+    auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
         LOGE("scene session is nullptr");
+        return;
+    }
+
+    if (sceneSession->GetSessionInfo().isSystem_) {
+        auto stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        auto node = FrameNode::GetOrCreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
+            [sceneSession]() { return AceType::MakeRefPtr<SystemWindowScene>(sceneSession); });
+        stack->Push(node);
         return;
     }
 
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
-        [&session]() { return AceType::MakeRefPtr<WindowScene>(session); });
+        [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
+    if (windowNode->GetHitTestMode() != HitTestMode::HTMDEFAULT) {
+        windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);
+    }
     stack->Push(windowNode);
-
-    auto pattern = windowNode->GetPattern<WindowScene>();
-    pattern->UpdateSession(session);
+    auto windowScene = windowNode->GetPattern<WindowScene>();
+    windowScene->UpdateSession(sceneSession);
 }
 } // namespace OHOS::Ace::NG

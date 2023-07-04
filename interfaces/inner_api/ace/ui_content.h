@@ -68,7 +68,7 @@ class NativeValue;
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW UIContent {
+class ACE_FORCE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(
         OHOS::AbilityRuntime::Context* context, NativeEngine* runtime, bool isFormRender);
@@ -98,6 +98,7 @@ public:
     virtual bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) = 0;
     virtual bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) = 0;
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
+    virtual void SetIsFocusActive(bool isFocusActive) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
@@ -108,6 +109,9 @@ public:
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
+
+    // focus window id
+    virtual void SetFocusWindowId(uint32_t focusWindowId) = 0;
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 
@@ -130,7 +134,7 @@ public:
     virtual void SetFormHeight(const float height) = 0;
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
-    virtual void ReloadForm() {};
+    virtual void ReloadForm(const std::string& url) {};
     virtual void OnFormSurfaceChange(float width, float height) {}
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) = 0;
@@ -154,6 +158,11 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) {};
     virtual void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) {};
+
+    virtual NativeValue* GetUIContext()
+    {
+        return nullptr;
+    };
 };
 
 } // namespace OHOS::Ace

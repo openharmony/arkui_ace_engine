@@ -788,6 +788,20 @@ void JSTextField::SetOnChange(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnChange(std::move(callback));
 }
 
+void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
+void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(float, float)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnContentScroll(std::move(callback));
+}
+
 void JSTextField::SetOnCopy(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
@@ -863,39 +877,42 @@ void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> showVal = jsObj->GetProperty("onIconSrc");
     JSRef<JSVal> hideVal = jsObj->GetProperty("offIconSrc");
-    PasswordIcon passwordicon;
+    PasswordIcon passwordIcon;
     if (showVal->IsString()) {
-        passwordicon.showResult = showVal->ToString();
+        passwordIcon.showResult = showVal->ToString();
     }
     if (hideVal->IsString()) {
-        passwordicon.hideResult = hideVal->ToString();
+        passwordIcon.hideResult = hideVal->ToString();
     }
     if (showVal->IsObject()) {
         JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(showVal)->GetProperty("bundleName");
         JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(showVal)->GetProperty("moduleName");
         if (bundleName->IsString()) {
-            passwordicon.showBundleName = bundleName->ToString();
+            passwordIcon.showBundleName = bundleName->ToString();
         }
         if (moduleName->IsString()) {
-            passwordicon.showModuleName = moduleName->ToString();
+            passwordIcon.showModuleName = moduleName->ToString();
         }
-        ParseJsMedia(JSRef<JSObject>::Cast(showVal), passwordicon.showResult);
+        ParseJsMedia(JSRef<JSObject>::Cast(showVal), passwordIcon.showResult);
     }
     if (hideVal->IsObject()) {
         JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("bundleName");
         JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("moduleName");
         if (bundleName->IsString()) {
-            passwordicon.hideBundleName = bundleName->ToString();
+            passwordIcon.hideBundleName = bundleName->ToString();
         }
         if (moduleName->IsString()) {
-            passwordicon.hideModuleName = moduleName->ToString();
+            passwordIcon.hideModuleName = moduleName->ToString();
         }
-        ParseJsMedia(JSRef<JSObject>::Cast(hideVal), passwordicon.hideResult);
+        ParseJsMedia(JSRef<JSObject>::Cast(hideVal), passwordIcon.hideResult);
     }
-    if (passwordicon.showResult.empty() && passwordicon.hideResult.empty()) {
-        return;
+    if (!showVal->IsString() && !showVal->IsObject()) {
+        passwordIcon.showResult = "";
     }
-    TextFieldModel::GetInstance()->SetPasswordIcon(passwordicon);
+    if (!hideVal->IsString() && !hideVal->IsObject()) {
+        passwordIcon.hideResult = "";
+    }
+    TextFieldModel::GetInstance()->SetPasswordIcon(passwordIcon);
 }
 
 void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
@@ -972,6 +989,25 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
 }
 
+void JSTextField::SetBarState(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        LOGI("SetBarState create error, info is not number or non-valid");
+        return;
+    }
+    DisplayMode displayMode = static_cast<DisplayMode>(info[0]->ToNumber<int32_t>());
+    TextFieldModel::GetInstance()->SetBarState(displayMode);
+}
+
+void JSTextField::SetMaxLines(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        LOGI("SetMaxLines create error, info is not number or non-valid");
+        return;
+    }
+    TextFieldModel::GetInstance()->SetMaxViewLines(info[0]->ToNumber<uint32_t>());
+}
+
 void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -986,4 +1022,17 @@ void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
+void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("SelectionMenuHidden should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetSelectionMenuHidden is not correct, using default");
+        TextFieldModel::GetInstance()->SetSelectionMenuHidden(false);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
+}
 } // namespace OHOS::Ace::Framework

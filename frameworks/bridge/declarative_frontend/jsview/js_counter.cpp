@@ -66,6 +66,9 @@ void JSCounter::JSBind(BindingTarget globalObj)
     JSClass<JSCounter>::StaticMethod("controlWidth", &JSCounter::JSControlWidth);
     JSClass<JSCounter>::StaticMethod("state", &JSCounter::JSStateChange);
     JSClass<JSCounter>::StaticMethod("backgroundColor", &JSCounter::JsBackgroundColor);
+    JSClass<JSCounter>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSCounter>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCounter>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCounter>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -169,7 +172,7 @@ void JSCounter::SetSize(const JSCallbackInfo& args)
         Dimension height;
         if (ConvertFromJSValue(obj->GetProperty("height"), height) && height.IsValid()) {
             if (GreatOrEqual(height.Value(), 0.0)) {
-                CounterModel::GetInstance()->SetWidth(height);
+                CounterModel::GetInstance()->SetHeight(height);
             }
         }
 

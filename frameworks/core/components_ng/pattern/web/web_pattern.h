@@ -20,9 +20,12 @@
 #include <string>
 #include <utility>
 
+#include "base/thread/cancelable_callback.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -34,7 +37,12 @@
 #include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/render/render_surface.h"
+
+namespace OHOS::Ace {
+class WebDelegateObserver;
+}
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -63,19 +71,19 @@ enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
 } // namespace
 
-class WebPattern : public Pattern {
-    DECLARE_ACE_TYPE(WebPattern, Pattern);
+class WebPattern : public Pattern, public SelectionHost {
+    DECLARE_ACE_TYPE(WebPattern, Pattern, SelectionHost);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
-
+    using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
     WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
 
-    ~WebPattern() override = default;
+    ~WebPattern() override;
 
     enum class VkState {
         VK_NONE,
@@ -83,9 +91,9 @@ public:
         VK_HIDE
     };
 
-    std::optional<std::string> GetSurfaceNodeName() const override
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return "RosenWeb";
+        return RenderContext::ContextParam { RenderContext::ContextType::SURFACE, "RosenWeb" };
     }
 
     bool IsAtomicNode() const override
@@ -178,6 +186,16 @@ public:
         return setWebIdCallback_;
     }
 
+    void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
+    {
+        onControllerAttachedCallback_ = std::move(callback);
+    }
+
+    OnControllerAttachedCallback GetOnControllerAttachedCallback()
+    {
+        return onControllerAttachedCallback_;
+    }
+
     void SetSetHapPathCallback(SetHapPathCallback&& callback)
     {
         setHapPathCallback_ = std::move(callback);
@@ -224,6 +242,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<WebLayoutAlgorithm>();
+    }
+
+    bool BetweenSelectedPosition(const Offset& globalOffset) override
+    {
+        return false;
     }
 
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
@@ -282,6 +305,11 @@ public:
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+    void OnDateTimeChooserPopup(
+        const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    void OnDateTimeChooserClose();
     void UpdateTouchHandleForOverlay();
     bool IsSelectOverlayDragging()
     {
@@ -301,6 +329,8 @@ public:
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
+    DragRet GetDragAcceptableStatus();
+
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -316,6 +346,7 @@ private:
     void OnActive() override;
     void OnVisibleChange(bool isVisible) override;
     void OnAreaChangedInner() override;
+    void OnNotifyMemoryLevel(int32_t level) override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
@@ -362,13 +393,15 @@ private:
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
+    void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart(const GestureEvent& info);
-    void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragStart(int32_t x, int32_t y);
+    void HandleDragEnd(int32_t x, int32_t y);
     void HandleDragCancel();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
@@ -381,6 +414,22 @@ private:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
+    void ResetDragAction();
+
+    NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragLeave(int32_t x, int32_t y);
+    void HandleOnDragEnd(int32_t x, int32_t y);
+    int onDragMoveCnt = 0;
+    std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
+    std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
+    std::chrono::time_point<std::chrono::system_clock> curMoveInTime;
+    CancelableCallback<void()> timer_;
+    int32_t duration_ = 100; // 100: 100ms
+    void DoRepeat();
+    void StartRepeatTimer();
 
     void HandleTouchDown(const TouchEventInfo& info, bool fromOverlay);
 
@@ -406,7 +455,8 @@ private:
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     std::optional<OffsetF> GetCoordinatePoint();
     void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
-        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
 
     struct TouchInfo {
@@ -418,6 +468,16 @@ private:
     void InitEnhanceSurfaceFlag();
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
+    DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
+    bool ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    bool ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
+    bool ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
+        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -426,10 +486,11 @@ private:
     SetWebIdCallback setWebIdCallback_ = nullptr;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
-    RefPtr<WebDelegate> delegate_;
+    OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_ = nullptr;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_ = nullptr;
     RefPtr<WebPaintProperty> webPaintProperty_ = nullptr;
@@ -464,6 +525,9 @@ private:
     bool isWaiting_ = false;
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
+    bool isVisible_ = true;
+    RefPtr<WebDelegate> delegate_;
+    RefPtr<WebDelegateObserver> observer_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

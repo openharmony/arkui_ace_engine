@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextModelNG : public TextModel {
 public:
     void Create(const std::string& content) override;
+    void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
     void SetTextShadow(const Shadow& value) override;
@@ -47,6 +48,7 @@ public:
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     // TODO: add extra event for text.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
+    void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;

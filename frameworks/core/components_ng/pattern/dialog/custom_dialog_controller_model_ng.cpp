@@ -26,17 +26,21 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
+    CHECK_NULL_VOID(container);
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
     }
     ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
 
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
-
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     CHECK_NULL_VOID(customNode);
 

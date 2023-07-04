@@ -51,17 +51,28 @@ ohos_source_set("preview_entrance_source") {
       "editing/text_input_impl.cpp",
       "event_dispatcher.cpp",
       "subwindow_preview.cpp",
+      "ui_content_impl.cpp",
     ]
 
     deps = [
       "$ace_napi:ace_napi",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
+      "$ace_root/interfaces/inner_api/ace:ace_uicontent",
+    ]
+    external_deps = []
+    include_dirs = [
+      "$flutter_root/engine",
+      "//foundation/window/window_manager",
+      "//foundation/ability/ability_runtime",
+      "//ide/tools/previewer",
     ]
 
-    include_dirs = [ "$flutter_root/engine" ]
-
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+      external_deps += [
+        "graphic_standard:librender_service_client",
+        "previewer:ide_util",
+        "window_manager:previewer_window",
+      ]
     } else {
       deps += [
         "$ace_flutter_engine_root/glfw:flutter_glfw_preview_$platform",

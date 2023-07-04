@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/pipeline/pipeline_base.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -74,7 +76,7 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonConfirmLayoutProperty->UpdateBorderRadius(PRESS_RADIUS);
+        buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(heigth - PRESS_INTERVAL)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
@@ -124,6 +126,27 @@ void DatePickerPattern::InitDisabled()
     auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+
+void DatePickerPattern::OnLanguageConfigurationUpdate()
+{
+    auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
+    CHECK_NULL_VOID(buttonConfirmNode);
+    auto confirmNode = buttonConfirmNode->GetFirstChild();
+    auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
+    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+
+    auto buttonCancelNode = weakButtonCancel_.Upgrade();
+    CHECK_NULL_VOID(buttonCancelNode);
+    auto cancelNode = buttonCancelNode->GetFirstChild();
+    auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
+    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+}
+
+bool DatePickerPattern::NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
+{
+    return false;
 }
 
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
@@ -216,8 +239,11 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childSize = static_cast<float>(host->GetChildren().size());
-    auto pickerChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    CHECK_NULL_VOID(stackChild);
+    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
+    auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -231,10 +257,13 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
                    PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
         (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
-
-    paintRect.SetRect(RectF(centerX, centerY, (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2,
-        dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2));
-
+    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
+    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
+    if (piantRectWidth > columnWidth) {
+        piantRectWidth = columnWidth;
+        centerX = focusKeyID_ * columnWidth;
+    }
+    paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),

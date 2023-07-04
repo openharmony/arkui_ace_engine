@@ -26,9 +26,7 @@
 #include "js_native_api_types.h"
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
-#include "unified_data_napi.h"
-#include "summary_napi.h"
-#include "unified_data.h"
+#include "core/common/udmf/udmf_client.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -106,6 +104,10 @@ public:
     {
         JSClass<JsDragEvent>::Declare("DragEvent");
         JSClass<JsDragEvent>::CustomMethod("getPasteData", &JsDragEvent::GetJsPasteData);
+        JSClass<JsDragEvent>::CustomMethod("getDisplayX", &JsDragEvent::GetScreenX);
+        JSClass<JsDragEvent>::CustomMethod("getDisplayY", &JsDragEvent::GetScreenY);
+        JSClass<JsDragEvent>::CustomMethod("getWindowX", &JsDragEvent::GetX);
+        JSClass<JsDragEvent>::CustomMethod("getWindowY", &JsDragEvent::GetY);
         JSClass<JsDragEvent>::CustomMethod("getX", &JsDragEvent::GetX);
         JSClass<JsDragEvent>::CustomMethod("getY", &JsDragEvent::GetY);
         JSClass<JsDragEvent>::CustomMethod("getDescription", &JsDragEvent::GetDescription);
@@ -135,16 +137,30 @@ public:
         args.SetReturnValue(jsPasteData_);
     }
 
+    void GetScreenX(const JSCallbackInfo& args)
+    {
+        auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenX())));
+        auto xValueRef = JSRef<JSVal>::Make(xValue);
+        args.SetReturnValue(xValueRef);
+    }
+
+    void GetScreenY(const JSCallbackInfo& args)
+    {
+        auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenY())));
+        auto yValueRef = JSRef<JSVal>::Make(yValue);
+        args.SetReturnValue(yValueRef);
+    }
+
     void GetX(const JSCallbackInfo& args)
     {
-        auto xValue = JSVal(ToJSValue(dragEvent_->GetX()));
+        auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetX())));
         auto xValueRef = JSRef<JSVal>::Make(xValue);
         args.SetReturnValue(xValueRef);
     }
 
     void GetY(const JSCallbackInfo& args)
     {
-        auto yValue = JSVal(ToJSValue(dragEvent_->GetY()));
+        auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetY())));
         auto yValueRef = JSRef<JSVal>::Make(yValue);
         args.SetReturnValue(yValueRef);
     }
@@ -172,31 +188,21 @@ public:
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
-        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
         JSValueWrapper valueWrapper = value;
         ScopeRAII scope(nativeEngine->GetScopeManager());
         NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-        void* native = nullptr;
-        napi_unwrap(env, reinterpret_cast<napi_value>(nativeValue), &native);
-        auto* unifiedData = reinterpret_cast<UDMF::UnifiedDataNapi*>(native);
-        CHECK_NULL_VOID(unifiedData);
-        CHECK_NULL_VOID(unifiedData->value_);
-        dragEvent_->SetData(unifiedData->value_);
+        RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
+        CHECK_NULL_VOID(udData);
+        dragEvent_->SetData(udData);
     }
 
     void GetData(const JSCallbackInfo& args)
     {
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         auto dragData = dragEvent_->GetData();
-        napi_value dataVal = nullptr;
         CHECK_NULL_VOID(dragData);
-        UDMF::UnifiedDataNapi::NewInstance(env, dragData, dataVal);
-        CHECK_NULL_VOID(dataVal);
-        NativeValue* nativeValue = reinterpret_cast<NativeValue*>(dataVal);
+        NativeValue* nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
+        CHECK_NULL_VOID(nativeValue);
         auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
         args.SetReturnValue(jsValue);
     }
@@ -205,14 +211,9 @@ public:
     {
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         auto summary = dragEvent_->GetSummary();
-        CHECK_NULL_VOID(summary);
-        napi_value dataVal = nullptr;
-        UDMF::SummaryNapi::NewInstance(env, summary, dataVal);
-        CHECK_NULL_VOID(dataVal);
-        NativeValue* nativeValue = reinterpret_cast<NativeValue*>(dataVal);
+        NativeValue* nativeValue = UdmfClient::GetInstance()->TransformSummary(summary);
+        CHECK_NULL_VOID(nativeValue);
         auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
         args.SetReturnValue(jsValue);
     }
@@ -255,31 +256,21 @@ public:
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
-        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
         JSValueWrapper valueWrapper = value;
         ScopeRAII scope(nativeEngine->GetScopeManager());
         NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-        void* native = nullptr;
-        napi_unwrap(env, reinterpret_cast<napi_value>(nativeValue), &native);
-        auto* unifiedData = reinterpret_cast<UDMF::UnifiedDataNapi*>(native);
-        CHECK_NULL_VOID(unifiedData);
-        CHECK_NULL_VOID(unifiedData->value_);
-        dragEvent_->SetDragInfo(unifiedData->value_);
+        RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
+        CHECK_NULL_VOID(udData);
+        dragEvent_->SetData(udData);
     }
 
     void GetDragInfo(const JSCallbackInfo& args)
     {
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         auto dragData = dragEvent_->GetDragInfo();
         CHECK_NULL_VOID(dragData);
-        napi_value dataVal = nullptr;
-        UDMF::UnifiedDataNapi::NewInstance(env, dragData, dataVal);
-        NativeValue* nativeValue = reinterpret_cast<NativeValue*>(dataVal);
-        CHECK_NULL_VOID(dataVal);
+        NativeValue* nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
+        CHECK_NULL_VOID(nativeValue);
         auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
         args.SetReturnValue(jsValue);
     }

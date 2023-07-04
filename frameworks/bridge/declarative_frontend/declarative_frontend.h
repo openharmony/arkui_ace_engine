@@ -87,6 +87,7 @@ public:
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const override;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
+    NativeValue* GetContextValue() override;
 #if defined(PREVIEW)
     void SetPagePath(const std::string& pagePath)
     {
@@ -139,6 +140,8 @@ public:
     void OnMemoryLevel(const int32_t level) override;
     void CallRouterBack() override;
     void OnSurfaceChanged(int32_t width, int32_t height) override;
+    void OnLayoutCompleted(const std::string& componentId) override;
+    void OnDrawCompleted(const std::string& componentId) override;
 
     void DumpFrontend() const override;
     std::string GetPagePath() const override;

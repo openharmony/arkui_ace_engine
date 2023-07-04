@@ -41,7 +41,7 @@ public:
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
-    void ReloadForm();
+    void ReloadForm(const std::string& url);
     void Destroy();
     void ResetRenderDelegate();
     void SetAllowUpdate(bool allowUpdate);

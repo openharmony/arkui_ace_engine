@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -351,6 +353,10 @@ public:
 
     void SetAspectRatio(float ratio) override
     {
+        if (LessOrEqual(ratio, 0.0)) {
+            LOGW("the %{public}f value is illegal, use default", ratio);
+            ratio = 1.0;
+        }
         ViewAbstract::SetAspectRatio(ratio);
     }
 
@@ -430,9 +436,42 @@ public:
         ViewAbstract::SetChainedTransition(effect);
     }
 
-    void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
-        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override
+    void SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY) override
     {
+        if (buildFunc) {
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto overlayNode = frameNode->GetOverlayNode();
+            if (!overlayNode) {
+                auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+                    ScopedViewStackProcessor builderViewStackProcessor;
+                    buildFunc();
+                    auto customNode = ViewStackProcessor::GetInstance()->Finish();
+                    return customNode;
+                };
+                overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+                CHECK_NULL_VOID(overlayNode);
+                frameNode->AddChild(overlayNode);
+                frameNode->SetOverlayNode(AceType::WeakClaim(AceType::RawPtr(overlayNode)));
+            } else {
+                overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+            auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->SetIsOverlayNode(true);
+            layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+            layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
+            layoutProperty->SetOverlayOffset(offsetX, offsetY);
+            auto renderContext = overlayNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateZIndex(INT32_MAX);
+            auto focusHub = overlayNode->GetOrCreateFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetFocusable(false);
+            return;
+        }
         NG::OverlayOptions overlay;
         overlay.content = text;
         overlay.align = align.value_or(Alignment::TOP_LEFT);
@@ -463,6 +502,16 @@ public:
     void SetMotionPath(const MotionPathOption& option) override
     {
         ViewAbstract::SetMotionPath(option);
+    }
+
+    void SetRenderGroup(bool isRenderGroup) override
+    {
+        ViewAbstract::SetRenderGroup(isRenderGroup);
+    }
+
+    void SetRenderFit(RenderFit renderFit) override
+    {
+        ViewAbstract::SetRenderFit(renderFit);
     }
 
     void SetFlexBasis(const Dimension& value) override
@@ -535,6 +584,11 @@ public:
         ViewAbstract::SetBackdropBlur(radius);
     }
 
+    void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override
+    {
+        ViewAbstract::SetLinearGradientBlur(blurPara);
+    }
+
     void SetFrontBlur(const Dimension& radius) override
     {
         ViewAbstract::SetFrontBlur(radius);
@@ -589,6 +643,11 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
+    void SetUseEffect(bool useEffect) override
+    {
+        ViewAbstract::SetUseEffect(useEffect);
+    }
+
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
     {
         ViewAbstract::SetClickEffectLevel(level, scaleValue);
@@ -614,7 +673,7 @@ public:
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
     }
 
-    void SetOnHover(OnHoverEventFunc&& onHoverEventFunc) override
+    void SetOnHover(OnHoverFunc&& onHoverEventFunc) override
     {
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     }
@@ -719,6 +778,11 @@ public:
         ViewAbstract::SetResponseRegion(responseRegion);
     }
 
+    void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) override
+    {
+        ViewAbstract::SetMouseResponseRegion(responseRegion);
+    }
+
     void SetEnabled(bool enabled) override
     {
         ViewAbstract::SetEnabled(enabled);
@@ -787,30 +851,34 @@ public:
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
     }
 
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override
+    {
+        ViewAbstract::SetObscured(reasons);
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-#ifdef ENABLE_DRAG_FRAMEWORK
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-#endif // ENABLE_DRAG_FRAMEWORK
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam) override;
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, int32_t type) override;
+        std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear) override;
 
-    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) override;
+    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear) override;
 
-    void SetAccessibilityGroup(bool accessible) override {}
-    void SetAccessibilityText(const std::string& text) override {}
-    void SetAccessibilityDescription(const std::string& description) override {}
-    void SetAccessibilityImportance(const std::string& importance) override {}
+    void SetAccessibilityGroup(bool accessible) override;
+    void SetAccessibilityText(const std::string& text) override;
+    void SetAccessibilityDescription(const std::string& description) override;
+    void SetAccessibilityImportance(const std::string& importance) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -822,12 +890,64 @@ public:
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
 
+    void DisableOnClick() override
+    {
+        ViewAbstract::DisableOnClick();
+    }
+
+    void DisableOnTouch() override
+    {
+        ViewAbstract::DisableOnTouch();
+    }
+
+    void DisableOnKeyEvent() override
+    {
+        ViewAbstract::DisableOnKeyEvent();
+    }
+
+    void DisableOnHover() override
+    {
+        ViewAbstract::DisableOnHover();
+    }
+
+    void DisableOnMouse() override
+    {
+        ViewAbstract::DisableOnMouse();
+    }
+
+    void DisableOnAppear() override
+    {
+        ViewAbstract::DisableOnAppear();
+    }
+
+    void DisableOnDisAppear() override
+    {
+        ViewAbstract::DisableOnDisAppear();
+    }
+
+    void DisableOnAreaChange() override
+    {
+        ViewAbstract::DisableOnAreaChange();
+    }
+
+    void DisableOnFocus() override
+    {
+        ViewAbstract::DisableOnFocus();
+    }
+
+    void DisableOnBlur() override
+    {
+        ViewAbstract::DisableOnBlur();
+    }
+
 private:
     void RegisterMenuAppearCallback(
         std::vector<NG::OptionParam>& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
     void RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam);
     void RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam);
     void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
+    void RegisterContextMenuKeyEvent(
+        const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent) override
@@ -850,6 +970,11 @@ private:
         RefPtr<CustomAnimatableArithmetic>& value) override
     {
         ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
+    }
+
+    void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts) override
+    {
+        ViewAbstract::UpdateSafeAreaExpandOpts(opts);
     }
 };
 } // namespace OHOS::Ace::NG

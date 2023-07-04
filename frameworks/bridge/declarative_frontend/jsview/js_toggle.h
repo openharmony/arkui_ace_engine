@@ -40,6 +40,8 @@ public:
     static void SelectedColor(const JSCallbackInfo& info);
     static void SwitchPointColor(const JSCallbackInfo& info);
     static void SetBackgroundColor(const JSCallbackInfo& info);
+    static NG::PaddingPropertyF GetOldPadding(const JSCallbackInfo& info);
+    static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

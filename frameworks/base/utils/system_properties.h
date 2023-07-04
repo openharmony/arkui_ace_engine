@@ -209,6 +209,8 @@ public:
 
     static int32_t GetSvgMode();
 
+    static bool GetImageFrameworkEnabled();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
@@ -375,6 +377,8 @@ public:
     static int32_t GetPerformanceParameterWithType(PerformanceParameterType type);
 
     static bool IsFormAnimationLimited();
+
+    static bool IsSceneBoardEnabled();
 
 private:
     static bool traceEnabled_;

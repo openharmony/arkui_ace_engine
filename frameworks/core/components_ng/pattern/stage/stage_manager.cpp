@@ -72,6 +72,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(pattern);
                 pattern->SetPageInTransition(false);
                 pattern->ProcessHideState();
+                context->MarkNeedFlushMouseEvent();
             });
         return;
     }
@@ -92,6 +93,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             pageFocusHub->RequestFocus();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
+            context->MarkNeedFlushMouseEvent();
         });
 }
 } // namespace
@@ -201,6 +203,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
 void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout)
 {
+    CHECK_NULL_VOID_NOLOG(pageNode);
     PerformanceCheckNodeMap nodeMap;
     pageNode->GetPerformanceCheckData(nodeMap);
     AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout);
@@ -385,6 +388,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
+    context->MarkNeedFlushMouseEvent();
 }
 
 void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
@@ -392,16 +396,6 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
     auto layoutProperty = pageNode->GetLayoutProperty();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (pipeline) {
-        LOGI("FirePageShow MinPlatformVersion:%{public}d, IgnoreViewSafeArea:%{public}u",
-            pipeline->GetMinPlatformVersion(), pipeline->GetIgnoreViewSafeArea());
-        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !pipeline->GetIgnoreViewSafeArea() &&
-            layoutProperty) {
-            layoutProperty->SetSafeArea(pipeline->GetCurrentViewSafeArea());
-        }
-    }
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
     pageFocusHub->SetParentFocusable(true);
@@ -415,6 +409,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
+    context->MarkNeedFlushMouseEvent();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();

@@ -230,7 +230,7 @@ std::string NodeObject::ToString()
 void NodeObject::FromString(const std::string& buffer)
 {
     CHECK_NULL_VOID_NOLOG(uobject_);
-    uobject_->Deserialize((char*)buffer.data(), buffer.size());
+    uobject_->Deserialize(buffer.data(), buffer.size());
 }
 
 size_t NodeObject::Hash()

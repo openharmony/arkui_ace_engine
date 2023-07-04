@@ -13,20 +13,13 @@
 
 import("//build/ohos.gni")
 
-check_file_script = "//build/ohos/file_exists.py"
-
-check_uicast_file_args = [
-  "--filename",
-  rebase_path(
-      "../../../../vendor/${product_company}/foundation/HMconnect/CastEngine/Tongtu/uicast/BUILD.gn"),
-]
-
 uicast_configs = {
-  import("../uicast_interface/config.gni")
+  uicast_defines = []
+  uicast_enable = false
 }
 
-if (exec_script(check_file_script, check_uicast_file_args, "string") ==
-    "True" && product_name != "ohos-sdk") {
+if (defined(global_parts_info) &&
+    defined(global_parts_info.castplus_cast_engine)) {
   uicast_configs.uicast_defines = [ "UICAST_COMPONENT_SUPPORTED" ]
   uicast_configs.uicast_enable = true
 }

@@ -15,10 +15,9 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-action_sheet_test_output_path = "ace_engine/action_sheet"
 pattern_test_output_path = "ace_engine/components"
 gestures_test_output_path = "ace_engine/gestures"
-event_test_output_path = "ace_engine/evnets"
+event_test_output_path = "ace_engine/events"
 base_test_output_path = "ace_engine/base"
 syntax_test_output_path = "ace_engine/syntaxs"
 image_test_output_path = "ace_engine/image"
@@ -41,21 +40,23 @@ template("ace_unittest") {
   ace_unittest_out_path = "ace_engine/$type"
   ace_unittest_name = target_name
   ace_unittest_config = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  ace_external_deps = []
   flutter_sources = []
   flutter_external_deps = []
   ace_unittest_deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gmock",
   ]
+
+  # temporary support
+  if (defined(invoker.external_deps)) {
+    ace_external_deps += external_deps
+  }
 
   if (defined(invoker.render)) {
     render = invoker.render
-  }
-
-  if (defined(invoker.ace_log)) {
-    ace_log = invoker.ace_log
   }
 
   if (defined(invoker.type)) {
@@ -67,16 +68,16 @@ template("ace_unittest") {
     ace_animation = invoker.ace_animation
   }
 
+  if (defined(invoker.flutter_skia)) {
+    flutter_skia = invoker.flutter_skia
+  }
+
   if (ace_animation) {
     ace_unittest_deps += [ "$ace_root/test/unittest:ace_core_animation" ]
   }
 
   if (render) {
     ace_unittest_deps += [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
-  }
-
-  if (defined(invoker.flutter_skia)) {
-    flutter_skia = invoker.flutter_skia
   }
 
   if (flutter_skia) {
@@ -98,35 +99,11 @@ template("ace_unittest") {
     }
   }
 
-  if (defined(invoker.extra_deps)) {
-    ace_unittest_deps += invoker.extra_deps
-  }
-
   if (type == "components") {
     ohos_unittest(ace_unittest_name) {
       module_out_path = ace_unittest_out_path
+
       sources = []
-      sources += [
-        "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
-        "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
-        "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
-        "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
-        "$ace_root/frameworks/core/components_ng/test/event/scrollable_event/mock_scrollable.cpp",
-        "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
-        "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
-        "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
-        "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
-        "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
-        "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
-        "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
-        "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_surface_creator.cpp",
-        "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_layout_adapter.cpp",
-        "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
-        "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
-        "$ace_root/test/mock/core/common/mock_container.cpp",
-        "$ace_root/test/mock/core/render/mock_font_collection.cpp",
-        "$ace_root/test/mock/core/render/mock_paragraph.cpp",
-      ]
       sources += invoker.sources
       sources += flutter_sources
 
@@ -139,20 +116,18 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_components_extra",
         "$ace_root/test/unittest:ace_components_gestures",
         "$ace_root/test/unittest:ace_components_layout",
+        "$ace_root/test/unittest:ace_components_mock",
         "$ace_root/test/unittest:ace_components_property",
         "$ace_root/test/unittest:ace_components_render",
         "$ace_root/test/unittest:ace_components_syntax",
       ]
 
-      configs = ace_unittest_config
+      configs = []
+      configs += ace_unittest_config
 
-      if (defined(invoker.configs)) {
-        configs += invoker.configs
-      }
-      external_deps = flutter_external_deps
-      if (defined(invoker.external_deps)) {
-        external_deps += invoker.external_deps
-      }
+      external_deps = []
+      external_deps += ace_external_deps
+      external_deps += flutter_external_deps
     }
   } else if (type == "basic/common") {
     ohos_unittest(ace_unittest_name) {
@@ -160,19 +135,16 @@ template("ace_unittest") {
       sources = []
       sources += invoker.sources
       sources += flutter_sources
+
       deps = ace_unittest_deps
       deps += [ "$ace_root/test/unittest:ace_base" ]
 
+      configs = []
       configs = ace_unittest_config
 
-      if (defined(invoker.configs)) {
-        configs += invoker.configs
-      }
-      external_deps = flutter_external_deps
-      if (defined(invoker.external_deps)) {
-        external_deps = []
-        external_deps += invoker.external_deps
-      }
+      external_deps = []
+      external_deps += ace_external_deps
+      external_deps += flutter_external_deps
     }
   } else {
     assert(false)

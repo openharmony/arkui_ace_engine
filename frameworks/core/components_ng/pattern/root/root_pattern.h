@@ -43,6 +43,11 @@ public:
         return false;
     }
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<BoxLayoutAlgorithm>();
+    }
+
     void OnAttachToFrameNode() override
     {
         auto host = GetHost();

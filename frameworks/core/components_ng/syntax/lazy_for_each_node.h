@@ -66,19 +66,44 @@ public:
     void OnDataChanged(size_t index) override;
     void OnDataMoved(size_t from, size_t to) override;
 
-    void PostIdleTask(std::list<int32_t>&& items);
+    void PostIdleTask(std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt,
+        bool longPredictTask = false);
+
+    void SetRequestLongPredict(bool requestLongPredict)
+    {
+        requestLongPredict_ = requestLongPredict;
+    }
+
+    void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
+    {
+        builder_->SetFlagForGeneratedItem(propertyChangeFlag);
+    }
 
 private:
     void OnAttachToMainTree(bool recursive) override
     {
+        UINode::OnAttachToMainTree(recursive);
         CHECK_NULL_VOID(builder_);
-        builder_->RegisterDataChangeListener(Claim(this));
+        if (!isRegisterListener_) {
+            builder_->RegisterDataChangeListener(Claim(this));
+            isRegisterListener_ = true;
+        }
     }
 
     void OnDetachFromMainTree(bool recursive) override
     {
         CHECK_NULL_VOID(builder_);
         builder_->UnregisterDataChangeListener(Claim(this));
+    }
+
+    void OnOffscreenProcess(bool recursive) override
+    {
+        UINode::OnOffscreenProcess(recursive);
+        CHECK_NULL_VOID(builder_);
+        if (!isRegisterListener_) {
+            builder_->RegisterDataChangeListener(Claim(this));
+            isRegisterListener_ = true;
+        }
     }
 
     void NotifyDataCountChanged(int32_t index);
@@ -88,7 +113,11 @@ private:
     int32_t endIndex_ = -1;
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
+    std::optional<LayoutConstraintF> itemConstraint_;
     bool needPredict = false;
+    bool requestLongPredict_ = false;
+    bool useLongPredictTask_ = false;
+    bool isRegisterListener_ = false;
 
     RefPtr<LazyForEachBuilder> builder_;
 

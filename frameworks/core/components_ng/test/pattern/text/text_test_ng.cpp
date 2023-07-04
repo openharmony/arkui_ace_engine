@@ -121,6 +121,15 @@ constexpr int32_t NODE_ID = 143;
 const Color FOREGROUND_COLOR_VALUE = Color::FOREGROUND;
 const RectF CONTENT_RECT(3.0, 3.0, TEXT_WIDTH, TEXT_HEIGHT);
 constexpr int32_t ROOT_NODE_ID = 113;
+const std::string EMPTY_TEXT = "";
+constexpr int32_t UNKNOWN_REASON = 1;
+constexpr float TEXT_RECT_WIDTH = 10.0f;
+constexpr float TEXT_RECT_TOP_ONE = 10.0f;
+constexpr float TEXT_RECT_TOP_TWO = 20.0f;
+const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
+                                       "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
+const std::string TEXT_EQUALS_VALUE =
+    R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
 
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -539,7 +548,7 @@ HWTEST_F(TextTestNg, OnDetachFromFrameNode002, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     pattern->OnDetachFromFrameNode(nullptr);
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
@@ -568,7 +577,7 @@ HWTEST_F(TextTestNg, OnDetachFromFrameNode003, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     proxy->selectOverlayId_ = 1;
     pattern->OnDetachFromFrameNode(nullptr);
@@ -609,7 +618,7 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
      * @tc.steps: step4. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 
@@ -645,7 +654,7 @@ HWTEST_F(TextTestNg, ShowSelectOverlay001, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     auto current = selectOverlayManager->selectOverlayItem_.Upgrade();
     ASSERT_NE(current, nullptr);
     proxy->selectOverlayId_ = current->GetId();
@@ -654,7 +663,7 @@ HWTEST_F(TextTestNg, ShowSelectOverlay001, TestSize.Level1)
     RectF firstHandle = CONTENT_RECT;
     RectF secondHandle = CONTENT_RECT;
     pattern->ShowSelectOverlay(firstHandle, secondHandle);
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+    EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
 
 /**
@@ -979,7 +988,7 @@ HWTEST_F(TextTestNg, OnHandleMove001, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
@@ -2874,6 +2883,8 @@ HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::Distributed;
     pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
     host->draggable_ = true;
+    host->eventHub_->SetOnDragStart(
+        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
 
     /**
      * @tc.steps: step1. set selected rect to [0, 0] - [20, 20]
@@ -3356,6 +3367,8 @@ HWTEST_F(TextTestNg, HandleLongPress002, TestSize.Level1)
     auto [frameNode, pattern] = Init();
 
     frameNode->draggable_ = true;
+    frameNode->eventHub_->SetOnDragStart(
+        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->textSelector_.Update(0, 3);
@@ -3487,7 +3500,7 @@ HWTEST_F(TextTestNg, HandleOnSelectAll002, TestSize.Level1)
      * @tc.steps: step3. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     pattern->textForDisplay_ = "TestHandleOnSelectAll";
 
@@ -3593,5 +3606,281 @@ HWTEST_F(TextTestNg, TextSelectorTest001, TestSize.Level1)
     textPattern->textSelector_.Update(0, TEXT_SIZE_INT);
     EXPECT_EQ(textPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(textPattern->textSelector_.destinationOffset, TEXT_SIZE_INT);
+}
+
+/**
+ * @tc.name: TextPaintMethodTest003
+ * @tc.desc: test text_paint_method.cpp UpdateContentModifier function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and geometryNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto renderContext = textFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProperty = textPattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textForDisplay_ to EMPTY_TEXT.
+     */
+    textPattern->textForDisplay_ = EMPTY_TEXT;
+
+    /**
+     * @tc.steps: step3. create textPaintMethod and call UpdateContentModifier function.
+     * @tc.expected: The drawObscuredRects_ of textContentModifier is empty.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(
+        textPattern, paragraph, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+    textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(textContentModifier->drawObscuredRects_, std::vector<Rect>());
+
+    /**
+     * @tc.steps: step4. set textForDisplay_ to CREATE_VALUE.
+     */
+    textPattern->textForDisplay_ = CREATE_VALUE;
+
+    /**
+     * @tc.steps: step5. call UpdateContentModifier function.
+     * @tc.expected: The drawObscuredRects_ of textContentModifier is not empty.
+     */
+    textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_NE(textContentModifier->drawObscuredRects_, std::vector<Rect>());
+}
+
+/**
+ * @tc.name: TextContentModifier003
+ * @tc.desc: test text_content_modifier.cpp onDraw function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifier003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and geometryNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. set context.
+     */
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+
+    /**
+     * @tc.steps: step3. call onDraw function of textContentModifier.
+     * @tc.expected: The obscuredReasons_ of textContentModifier is empty.
+     *               The ifHaveSpanItemChildren_ of textContentModifier is false.
+     */
+    textContentModifier->onDraw(context);
+    EXPECT_EQ(textContentModifier->obscuredReasons_, std::vector<ObscuredReasons>());
+    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, false);
+
+    /**
+     * @tc.steps: step4. set ifHaveSpanItemChildren_ to true.
+     */
+    textContentModifier->SetIfHaveSpanItemChildren(true);
+
+    /**
+     * @tc.steps: step5. call onDraw function of textContentModifier.
+     * @tc.expected: The obscuredReasons_ of textContentModifier is empty.
+     *               The ifHaveSpanItemChildren_ of textContentModifier is true.
+     */
+    textContentModifier->onDraw(context);
+    EXPECT_EQ(textContentModifier->obscuredReasons_, std::vector<ObscuredReasons>());
+    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, true);
+
+    /**
+     * @tc.steps: step6. push UNKNOWN_REASON and PLACEHOLDER to reasons.
+     *                   set obscuredReasons_ to reasons.
+     */
+    std::vector<ObscuredReasons> reasons;
+    reasons.push_back((ObscuredReasons)UNKNOWN_REASON);
+    reasons.push_back(ObscuredReasons::PLACEHOLDER);
+    textContentModifier->SetObscured(reasons);
+
+    /**
+     * @tc.steps: step7. call onDraw function of textContentModifier.
+     * @tc.expected: The obscuredReasons_ of textContentModifier is reasons.
+     *               The ifHaveSpanItemChildren_ of textContentModifier is true.
+     */
+    textContentModifier->onDraw(context);
+    EXPECT_EQ(textContentModifier->obscuredReasons_, reasons);
+    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, true);
+
+    /**
+     * @tc.steps: step8. set ifHaveSpanItemChildren_ to false.
+     */
+    textContentModifier->SetIfHaveSpanItemChildren(false);
+
+    /**
+     * @tc.steps: step9. call onDraw function of textContentModifier.
+     * @tc.expected: The obscuredReasons_ of textContentModifier is reasons.
+     *               The ifHaveSpanItemChildren_ of textContentModifier is false.
+     */
+    textContentModifier->onDraw(context);
+    EXPECT_EQ(textContentModifier->obscuredReasons_, reasons);
+    EXPECT_EQ(textContentModifier->ifHaveSpanItemChildren_, false);
+}
+
+/**
+ * @tc.name: TextContentModifier004
+ * @tc.desc: test text_content_modifier.cpp DrawObscuration function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. set context and paragraph.
+     *                   set defaultFontSize and defaultTextColor of textContentModifier.
+     *                   push one rect to drawObscuredRects and set drawObscuredRects_ to drawObscuredRects.
+     */
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textContentModifier->SetParagraph(paragraph);
+    TextStyle textStyle;
+    textStyle.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    textStyle.SetTextColor(TEXT_COLOR_VALUE);
+    textContentModifier->SetDefaultFontSize(textStyle);
+    textContentModifier->SetDefaultTextColor(textStyle);
+    std::vector<Rect> drawObscuredRects;
+    Rect textRect;
+    textRect.SetWidth(TEXT_RECT_WIDTH);
+    textRect.SetTop(TEXT_RECT_TOP_ONE);
+    drawObscuredRects.push_back(textRect);
+    textContentModifier->SetDrawObscuredRects(drawObscuredRects);
+
+    /**
+     * @tc.steps: step3. call DrawObscuration function of textContentModifier.
+     * @tc.expected: The drawObscuredRects_ of textContentModifier is drawObscuredRects.
+     */
+    textContentModifier->DrawObscuration(context);
+    EXPECT_EQ(textContentModifier->drawObscuredRects_, drawObscuredRects);
+
+    /**
+     * @tc.steps: step4. push two rect to drawObscuredRects and set drawObscuredRects_ to drawObscuredRects.
+     */
+    drawObscuredRects.push_back(textRect);
+    textRect.SetTop(TEXT_RECT_TOP_TWO);
+    drawObscuredRects.push_back(textRect);
+    textContentModifier->SetDrawObscuredRects(drawObscuredRects);
+
+    /**
+     * @tc.steps: step5. call DrawObscuration function of textContentModifier.
+     * @tc.expected: The drawObscuredRects_ of textContentModifier is drawObscuredRects.
+     */
+    textContentModifier->DrawObscuration(context);
+    EXPECT_EQ(textContentModifier->drawObscuredRects_, drawObscuredRects);
+}
+
+/*
+ * @tc.name: TextModelSetFont001
+ * @tc.desc: Test if SetFont is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextModelSetFont001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG and FrameNode
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    Font font;
+    font.fontSize = FONT_SIZE_VALUE;
+    font.fontWeight = FontWeight::BOLD;
+    font.fontFamilies = FONT_FAMILY_VALUE;
+    font.fontStyle = ITALIC_FONT_STYLE_VALUE;
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetFont and Gets the relevant properties of the Font
+     * @tc.expected: step2. Check the font value
+     */
+    textModelNG.SetFont(font);
+    EXPECT_EQ(textLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    EXPECT_EQ(textLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+}
+
+/**
+ * @tc.name: TextModelGetFont001
+ * @tc.desc: Test if GetFont is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextModelGetFont001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG and FrameNode
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. not set and Gets the relevant properties of the Font
+     * @tc.expected: step2. Check the font value
+     */
+    EXPECT_EQ(textLayoutProperty->GetFont(), TEXT_DEFAULT_VALUE);
+
+    /**
+     * @tc.steps: step2. call SetFont and Gets the relevant properties of the Font
+     * @tc.expected: step2. Check the font value
+     */
+    Font font;
+    font.fontSize = FONT_SIZE_VALUE;
+    font.fontWeight = FontWeight::BOLD;
+    font.fontFamilies = FONT_FAMILY_VALUE;
+    font.fontStyle = ITALIC_FONT_STYLE_VALUE;
+    textModelNG.SetFont(font);
+    EXPECT_EQ(textLayoutProperty->GetFont(), TEXT_EQUALS_VALUE);
 }
 } // namespace OHOS::Ace::NG

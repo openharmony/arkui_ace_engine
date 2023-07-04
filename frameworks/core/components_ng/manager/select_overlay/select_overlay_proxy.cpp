@@ -73,6 +73,13 @@ void SelectOverlayProxy::UpdateShowArea(const RectF& area) const
     pattern->UpdateShowArea(area);
 }
 
+void SelectOverlayProxy::SetHandleReverse(bool reverse)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHandleReverse(reverse);
+}
+
 bool SelectOverlayProxy::IsClosed() const
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -105,4 +112,10 @@ void SelectOverlayProxy::ShowOrHiddenMenu(bool isHidden)
     pattern->ShowOrHiddenMenu(isHidden);
 }
 
+void SelectOverlayProxy::DisableMenu(bool isDisabled)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->DisableMenu(isDisabled);
+}
 } // namespace OHOS::Ace::NG

@@ -22,18 +22,17 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void XComponentModelNG::Create(const std::string& id, const std::string& type, const std::string& libraryname,
+void XComponentModelNG::Create(const std::string& id, XComponentType type, const std::string& libraryname,
     const RefPtr<XComponentController>& xcomponentController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto xcomponentType = type == "component" ? XComponentType::COMPONENT : XComponentType::SURFACE;
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, [id, xcomponentType, libraryname, xcomponentController]() {
-            return AceType::MakeRefPtr<XComponentPattern>(id, xcomponentType, libraryname, xcomponentController);
+        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController]() {
+            return AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, xcomponentController);
         });
     stack->Push(frameNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, xcomponentType);
+    ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
 }
 void XComponentModelNG::SetSoPath(const std::string& soPath)
 {
@@ -69,5 +68,14 @@ void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestroy(std::move(onDestroy));
+}
+
+bool XComponentModelNG::IsTexture()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetXComponentTypeValue() == XComponentType::TEXTURE;
 }
 } // namespace OHOS::Ace::NG

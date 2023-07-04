@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
@@ -33,6 +34,7 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -424,6 +426,7 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
     }
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
+    borderRadius.multiValued = false;
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
 }
 
@@ -503,6 +506,88 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
     ACE_UPDATE_RENDER_CONTEXT(BorderStyle, value);
 }
 
+void ViewAbstract::DisableOnClick()
+{
+    LOGD("Disable OnClick event");
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnClick();
+}
+
+void ViewAbstract::DisableOnTouch()
+{
+    LOGD("Disable OnTouch event");
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnTouch();
+}
+
+void ViewAbstract::DisableOnKeyEvent()
+{
+    LOGD("Disable OnKey event");
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnKey();
+}
+
+void ViewAbstract::DisableOnHover()
+{
+    LOGD("Disable OnHover event");
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnHover();
+}
+
+void ViewAbstract::DisableOnMouse()
+{
+    LOGD("Disable OnMouse event");
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnMouse();
+}
+
+void ViewAbstract::DisableOnAppear()
+{
+    LOGD("Disable OnAppear event");
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAppear();
+}
+
+void ViewAbstract::DisableOnDisAppear()
+{
+    LOGD("Disable OnDisAppear event");
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnDisAppear();
+}
+
+void ViewAbstract::DisableOnAreaChange()
+{
+    LOGD("Disable OnAreaChange event");
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->ClearUserOnAreaChange();
+}
+
+void ViewAbstract::DisableOnFocus()
+{
+    LOGD("Disable OnFocus event");
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnFocus();
+}
+
+void ViewAbstract::DisableOnBlur()
+{
+    LOGD("Disable OnBlur event");
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnBlur();
+}
+
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -524,7 +609,7 @@ void ViewAbstract::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
 }
 
-void ViewAbstract::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
+void ViewAbstract::SetOnHover(OnHoverFunc&& onHoverEventFunc)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
@@ -660,6 +745,14 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseR
     CHECK_NULL_VOID(gestureHub);
     gestureHub->MarkResponseRegion(true);
     gestureHub->SetResponseRegion(responseRegion);
+}
+
+void ViewAbstract::SetMouseResponseRegion(const std::vector<DimensionRect>& mouseRegion)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->MarkResponseRegion(true);
+    gestureHub->SetMouseResponseRegion(mouseRegion);
 }
 
 void ViewAbstract::SetTouchable(bool touchable)
@@ -910,6 +1003,10 @@ void ViewAbstract::BindPopup(
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
+    // windowScene will not use subwindow
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        param->SetShowInSubWindow(false);
+    }
     auto showInSubWindow = param->IsShowInSubWindow();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
@@ -1051,6 +1148,10 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     // unable to use the subWindow in the Previewer.
     isContextMenu = false;
 #endif
+    // windowScene will not use subwindow
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        isContextMenu = false;
+    }
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
@@ -1094,6 +1195,15 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
             target->UpdateBackBlurStyle(std::nullopt);
         }
     }
+}
+
+void ViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LinearGradientBlur, blurPara);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius)
@@ -1410,6 +1520,15 @@ void ViewAbstract::SetSharedTransition(
     }
 }
 
+void ViewAbstract::SetUseEffect(bool useEffect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
+}
+
 void ViewAbstract::SetForegroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1491,5 +1610,44 @@ void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propert
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->UpdateAnimatableArithmeticProperty(propertyName, value);
+}
+
+void ViewAbstract::SetObscured(const std::vector<ObscuredReasons>& reasons)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Obscured, reasons);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaExpandOpts, opts);
+}
+
+void ViewAbstract::SetRenderGroup(bool isRenderGroup)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(RenderGroup, isRenderGroup);
+}
+
+void ViewAbstract::SetRenderFit(RenderFit renderFit)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
 }
 } // namespace OHOS::Ace::NG

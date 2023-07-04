@@ -68,7 +68,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             // If width is not set, select the maximum value of minWidth and maxWidth to layoutConstraint
             if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
                 calcLayoutConstraint->maxSize.value().Width().has_value()) {
-                frameSize.SetWidth(std::max(layoutConstraint->maxSize.Width(), layoutConstraint->minSize.Width()));
+                frameSize.SetHeight(std::min(layoutConstraint->maxSize.Width(),
+                    contentWidth + pattern->GetHorizontalPaddingSum()));
             } else if (!calcLayoutConstraint) {
             // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
                 frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
@@ -81,7 +82,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             // Like width
             if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
                 calcLayoutConstraint->maxSize.value().Height().has_value()) {
-                frameSize.SetHeight(std::max(layoutConstraint->maxSize.Height(), layoutConstraint->minSize.Height()));
+                frameSize.SetHeight(std::min(layoutConstraint->maxSize.Height(),
+                    contentHeight + pattern->GetVerticalPaddingSum()));
             } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
             // calcLayoutConstraint initialized once when setting width, set minHeight=0,
             // so add "minHeight=0" to the constraint.
@@ -172,11 +174,22 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     bool showPlaceHolder = false;
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+    auto idealSize = SizeF { idealWidth, idealHeight };
+    idealSize.UpdateSizeWhenSmaller(contentConstraint.maxSize);
+    idealWidth = idealSize.Width();
+    idealHeight = idealSize.Height();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, std::nullopt);
+    auto isInlineStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE;
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
+        if (isInlineStyle && !pattern->IsTextArea()) {
+            textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+            pattern->SetTextInputFlag(true);
+        }
     } else {
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
@@ -189,7 +202,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
     auto disableTextAlign = !pattern->IsTextArea() && textFieldLayoutProperty->GetWidthAutoValue(false);
-    if (pattern->IsDragging()) {
+    if (pattern->IsDragging() && !showPlaceHolder) {
         TextStyle dragTextStyle = textStyle;
         Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
         dragTextStyle.SetTextColor(color);
@@ -200,7 +213,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         CreateParagraph(textStyle, textContent,
             isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
     }
-    if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
+    if (textStyle.GetMaxLines() == 1 && !showPlaceHolder && !isInlineStyle) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
@@ -222,7 +235,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         }
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
-    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea() && !showPlaceHolder) {
+    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea() && !showPlaceHolder &&
+        !isInlineStyle) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
         if (counterParagraph_) {
             counterParagraph_->Layout(std::ceil(paragraphNewWidth));
@@ -232,27 +246,25 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
+    if (isInlineStyle && pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
+        pattern->SetSingleLineHeight(preferredHeight);
+    }
     if (pattern->IsTextArea()) {
         auto paragraphHeight =
-            (textContent.empty() || showPlaceHolder) ? preferredHeight : static_cast<float>(paragraph_->GetHeight());
+            (textContent.empty() || !showPlaceHolder) ? preferredHeight : static_cast<float>(paragraph_->GetHeight());
         auto useHeight =
             static_cast<float>(paragraphHeight + (counterParagraph_ ? counterParagraph_->GetHeight() : 0.0f));
-        const auto& calcLayoutConstraint = textFieldLayoutProperty->GetCalcLayoutConstraint();
-        if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
-            calcLayoutConstraint->maxSize.value().Height().has_value()) {
-            auto maxHeightSize = calcLayoutConstraint->maxSize.value().Height().value().GetDimension();
-            if (maxHeightSize.Unit() == DimensionUnit::PERCENT) {
-                idealHeight = maxHeightSize.ConvertToPxWithSize(contentConstraint.percentReference.Height());
-            } else {
-                idealHeight = maxHeightSize.ConvertToPx();
-            }
+        if (isInlineStyle && pattern->GetTextInputFlag()) {
+            idealHeight = pattern->GetSingleLineHeight() *
+                layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+            idealWidth = paragraph_->GetLongestLine();
         }
         textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
             paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
-    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     // check password image size.
+    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.Reset();
@@ -287,6 +299,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), idealHeight);
     textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), static_cast<float>(preferredHeight)));
     auto imageHotZoneWidth = imageSize + pattern->GetIconRightOffset();
+    paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx()
+        - imageHotZoneWidth);
     return SizeF(idealWidth - imageHotZoneWidth, std::min(idealHeight, preferredHeight));
 }
 
@@ -335,7 +349,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                           pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE;
     auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::DEL ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED;
+                          pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED ||
+                          layoutProperty->GetTextAlignChangedValue(false);
     auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
                               pattern->GetIsMousePressed();
     if (needToKeepTextRect) {
@@ -380,20 +395,6 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         (frameBottom < ERROR_TEXT_CAPSULE_MARGIN)) {
         errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
         frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
-    }
-    if (layoutProperty->GetShowUnderlineValue(false)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(textFieldTheme);
-        if (!layoutProperty->GetShowErrorTextValue(false) && layoutWrapper->IsActive()) {
-            pattern->SetUnderlineWidth(ACTIVED_UNDERLINE_WIDTH);
-            pattern->SetUnderlineColor(textFieldTheme->GetUnderlineActivedColor());
-        }
-        if (!layoutProperty->GetShowErrorTextValue(false) && !layoutWrapper->IsActive()) {
-            pattern->SetUnderlineWidth(UNDERLINE_WIDTH);
-            pattern->SetUnderlineColor(textFieldTheme->GetUnderlineColor());
-        }
     }
     UpdateUnitLayout(layoutWrapper);
 }

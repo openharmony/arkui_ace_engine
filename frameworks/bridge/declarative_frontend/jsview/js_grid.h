@@ -36,23 +36,27 @@ public:
     static void SetScrollBarColor(const std::string& color);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
     static void JsOnScrollIndex(const JSCallbackInfo& info);
+    static void JsOnScrollBarUpdate(const JSCallbackInfo& info);
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetEditMode(const JSCallbackInfo& info);
     static void SetMultiSelectable(bool multiSelectable);
-    static void SetMaxCount(double maxCount);
-    static void SetMinCount(double minCount);
+    static void SetMaxCount(const JSCallbackInfo& info);
+    static void SetMinCount(const JSCallbackInfo& info);
     static void CellLength(int32_t cellLength);
     static void SetLayoutDirection(int32_t value);
     static void SetDirection(const std::string& dir);
     static void SetSupportAnimation(bool supportAnimation);
     static void SetDragAnimation(bool value);
-    static void SetEdgeEffect(int32_t value);
+    static void SetEdgeEffect(const JSCallbackInfo& info);
     static void JsOnGridDragEnter(const JSCallbackInfo& info);
     static void JsOnGridDragMove(const JSCallbackInfo& info);
     static void JsOnGridDragLeave(const JSCallbackInfo& info);
     static void JsOnGridDragStart(const JSCallbackInfo& info);
     static void JsOnGridDrop(const JSCallbackInfo& info);
     static void JsGridHeight(const JSCallbackInfo& info);
+    static void SetNestedScroll(const JSCallbackInfo& args);
+    static void SetScrollEnabled(bool scrollEnabled);
+    static void SetFriction(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

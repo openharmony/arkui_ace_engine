@@ -32,6 +32,7 @@ const char THEME_PATTERN_TOGGLE[] = "toggle_pattern";
 const char THEME_PATTERN_TOAST[] = "toast_pattern";
 const char THEME_PATTERN_DIALOG[] = "dialog_pattern";
 const char THEME_PATTERN_DRAG_BAR[] = "drag_bar_pattern";
+const char THEME_PATTERN_CLOSE_ICON[] = "close_icon_pattern";
 const char THEME_PATTERN_SEMI_MODAL[] = "semi_modal_pattern";
 const char THEME_PATTERN_BADGE[] = "badge_pattern";
 const char THEME_PATTERN_CALENDAR[] = "calendar_pattern";
@@ -69,6 +70,7 @@ const char THEME_PATTERN_APP_BAR[] = "app_bar_pattern";
 const char THEME_PATTERN_ADVANCED_PATTERN[] = "advanced_pattern";
 const char THEME_PATTERN_SECURITY_COMPONENT[] = "security_component_pattern";
 const char THEME_PATTERN_FORM[] = "form_pattern";
+const char THEME_PATTERN_SIDE_BAR[] = "side_bar_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
@@ -162,6 +164,13 @@ const char DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH[] = "dialog_divider_between_butto
 // pattern attributes for drag bar
 const char DRAG_BAR_COLOR[] = "drag_bar_color";
 
+// pattern attributes for close icon
+const char CLOSE_ICON_WIDTH[] = "close_icon_width";
+const char CLOSE_ICON_Height[] = "close_icon_height";
+const char CLOSE_ICON_MARGIN_TOP[] = "close_icon_margin_top";
+const char CLOSE_ICON_MARGIN_RIGHT[] = "close_icon_margin_right";
+const char CLOSE_ICON_RADIUS[] = "close_icon_radius";
+
 // pattern attributes for popup
 const char POPUP_BORDER_RADIUS[] = "popup_border_radius";
 const char POPUP_HORIZONTAL_PADDING[] = "popup_horizontal_padding";
@@ -202,4 +211,11 @@ const char ERROR_PASSWORD_TEXT_COLOR[] = "error_password_text_color";
 const char OVER_COUNT_TEXT_COLOR[] = "over_count_text_color";
 const char OVER_COUNT_TEXT_FONT_SIZE[] = "over_count_text_font_size";
 const char OVER_COUNT_BORDER_COLOR[] = "over_count_border_color";
+const char ERROR_PASSWORD_BORDER_ALPHA[] = "error_password_border_alpha";
+const char OVER_COUNT_BORDER_COLOR_ALPHA[] = "over_count_border_color_alpha";
+const char UNDERLINE_COLOR_ALPHA[] = "underline_color_alpha";
+const char INLINE_TEXT_COLOR[] = "inline_text_color";
+const char INLINE_RADIUS_SIZE[] = "inline_radius_size";
+const char INLINE_BG_COLOR[] = "inline_bg_color";
+const char INLINE_BORDER_COLOR[] = "inline_border_color";
 } // namespace OHOS::Ace

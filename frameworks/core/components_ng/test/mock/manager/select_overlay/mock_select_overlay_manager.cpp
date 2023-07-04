@@ -21,7 +21,8 @@ namespace {
 constexpr int32_t SELECT_OVERLAY_ID = 143;
 } // namespace
 
-RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(const SelectOverlayInfo& info)
+RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
+    const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host)
 {
     return MakeRefPtr<SelectOverlayProxy>(0);
 }
@@ -50,4 +51,6 @@ RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t ove
     auto selectOverlayNode = DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
     return selectOverlayNode;
 }
+
+void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset) {}
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,9 @@
 
 #include "core/components_ng/render/render_property.h"
 
+#include "core/common/ace_application_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 std::string ImageRepeatToString(ImageRepeat type)
@@ -51,7 +54,18 @@ std::string BasicShapeTypeToString(BasicShapeType type)
 }
 } // namespace
 
-#define ACE_OFFSET_TO_JSON(name)                                     \
+#define ACE_OFFSET_API_NINE_TO_JSON(name)                            \
+    auto json##name = JsonUtil::Create(true);                        \
+    if (prop##name.has_value()) {                                    \
+        json##name->Put("x", prop##name->GetX().ToString().c_str()); \
+        json##name->Put("y", prop##name->GetY().ToString().c_str()); \
+    } else {                                                         \
+        json##name->Put("x", "0.0px");                               \
+        json##name->Put("y", "0.0px");                               \
+    }                                                                \
+
+
+#define ACE_OFFSET_API_TEN_TO_JSON(name)                             \
     auto json##name = JsonUtil::Create(true);                        \
     if (prop##name.has_value()) {                                    \
         json##name->Put("x", prop##name->GetX().ToString().c_str()); \
@@ -59,18 +73,28 @@ std::string BasicShapeTypeToString(BasicShapeType type)
     } else {                                                         \
         json##name->Put("x", "");                                    \
         json##name->Put("y", "");                                    \
-    }
+    }                                                                \
 
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    ACE_OFFSET_TO_JSON(Position);
+    ACE_OFFSET_API_TEN_TO_JSON(Position);
     json->Put("position", jsonPosition);
 
-    ACE_OFFSET_TO_JSON(Offset);
-    json->Put("offset", jsonOffset);
+    auto context = PipelineContext::GetCurrentContext();
+    // add version protection, null as default start from API 10 or higher
+    if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
+        ACE_OFFSET_API_TEN_TO_JSON(Offset);
+        json->Put("offset", jsonOffset);
 
-    ACE_OFFSET_TO_JSON(Anchor);
-    json->Put("markAnchor", jsonAnchor);
+        ACE_OFFSET_API_TEN_TO_JSON(Anchor);
+        json->Put("markAnchor", jsonAnchor);
+    } else {
+        ACE_OFFSET_API_NINE_TO_JSON(Offset);
+        json->Put("offset", jsonOffset);
+
+        ACE_OFFSET_API_NINE_TO_JSON(Anchor);
+        json->Put("markAnchor", jsonAnchor);
+    }
 }
 
 void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const

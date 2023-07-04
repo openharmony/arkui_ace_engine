@@ -33,4 +33,12 @@ void SwiperArrowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(layoutConstraint);
     }
 }
+
+void SwiperArrowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Layout();
+    }
+}
 } // namespace OHOS::Ace::NG

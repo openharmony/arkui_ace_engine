@@ -272,7 +272,7 @@ JSRef<JSObject> JSOffscreenCanvas::CreateContext2d(double width, double height)
     offscreenCanvasContext_ = Referenced::Claim(contextObj->Unwrap<JSOffscreenRenderingContext>());
     offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
         static_cast<int32_t>(width), static_cast<int32_t>(height));
-    offscreenCanvasContext_->SetOffscreenCanvasPattern(offscreenCanvasPattern_);
+    offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
     CHECK_NULL_RETURN(offscreenCanvasSettings_, contextObj);
     bool anti = offscreenCanvasSettings_->GetAntialias();

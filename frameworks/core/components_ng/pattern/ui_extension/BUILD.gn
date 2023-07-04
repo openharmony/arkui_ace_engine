@@ -16,14 +16,19 @@ import("$ace_root/frameworks/core/components_ng/components.gni")
 
 build_component_ng("ui_extension_pattern_ng") {
   sources = [
-    "ui_extension_layout_algorithm.cpp",
     "ui_extension_model_ng.cpp",
-    "ui_extension_node.cpp",
     "ui_extension_pattern.cpp",
   ]
 
-  external_deps = [
-    "input:libmmi-client",
-    "window_manager:scene_session",
-  ]
+  if (is_ohos_standard_system) {
+    external_deps = [
+      "ability_runtime:abilitykit_native",
+      "graphic_standard:librender_service_client",
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "window_manager:libwm",
+      "window_manager:scene_session",
+      "window_manager:scene_session_manager",
+    ]
+  }
 }

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
-
 #include <algorithm>
+
+#include "gtest/gtest.h"
 
 #define protected public
 #define private public
@@ -25,16 +25,17 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
+#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 #undef private
 #undef protected
@@ -54,18 +55,18 @@ constexpr int32_t NODE_ID_3 = 3;
 constexpr int32_t CACHE_COUNT = 1;
 constexpr int32_t HOST_DEPTH = 0;
 constexpr int32_t ERROR_HOST_DEPTH = -1;
-const std::pair<int32_t, int32_t> RANGE {-1, 0};
-const std::pair<int32_t, int32_t> RANGE_0 {0, 0};
+const std::pair<int32_t, int32_t> RANGE { -1, 0 };
+const std::pair<int32_t, int32_t> RANGE_0 { 0, 0 };
 
 constexpr float RK356_WIDTH = 720.0f;
 constexpr float RK356_HEIGHT = 1136.0f;
 constexpr float ROW_HEIGHT = 120.0f;
 
-const SizeF CONTAINER_SIZE {RK356_WIDTH, RK356_HEIGHT};
-SizeF SELF_IDEAL_SIZE {RK356_WIDTH, ROW_HEIGHT};
-SizeF FRAME_SIZE {0, 0};
-const SizeF TEST_FRAME_SIZE {0, 0};
-OptionalSize IDEAL_SIZE {0, 0};
+const SizeF CONTAINER_SIZE { RK356_WIDTH, RK356_HEIGHT };
+SizeF SELF_IDEAL_SIZE { RK356_WIDTH, ROW_HEIGHT };
+SizeF FRAME_SIZE { 0, 0 };
+const SizeF TEST_FRAME_SIZE { 0, 0 };
+OptionalSize IDEAL_SIZE { 0, 0 };
 
 const std::string TEST_TAG = "";
 const std::string ROW_FRAME_NODE = "rowFrameNode";
@@ -77,10 +78,19 @@ const std::string THIRD_CHILD_FRAME_NODE = "thirdChildFrameNode";
 constexpr bool TEST_TRUE = true;
 constexpr bool TEST_FALSE = false;
 
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateNodeAndWrapper(const std::string& tag, int32_t nodeId)
+{
+    auto node = FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(node, geometryNode, node->GetLayoutProperty());
+
+    return std::make_pair(node, layoutWrapper);
+}
+
 RefPtr<LayoutWrapper> CreateLayoutWrapper(const std::string& tag, int32_t nodeId)
 {
-    auto rowFrameNode =
-        FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rowFrameNode = FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
@@ -90,8 +100,7 @@ RefPtr<LayoutWrapper> CreateLayoutWrapper(const std::string& tag, int32_t nodeId
 
 RefPtr<LayoutWrapper> CreateChildLayoutWrapper(const std::string& tag, int32_t nodeId)
 {
-    auto frameNode =
-        FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
@@ -118,9 +127,23 @@ void UpdateParentConstraint(RefPtr<LayoutWrapper> layoutWrapper, LayoutConstrain
 
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentConstraint);
 }
+} // namespace
+
+class LayoutWrapperTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+};
+
+void LayoutWrapperTestNg::SetUpTestSuite()
+{
+    MockPipelineBase::SetUp();
 }
 
-class LayoutWrapperTestNg : public testing::Test {};
+void LayoutWrapperTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: LayoutWrapperTest001
@@ -135,9 +158,9 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest001, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, NODE_ID_0);
 
     /**
-    * @tc.steps: step2. call GetOrCreateChildByIndex and set input index is INDEX_NUM_0.
-    * @tc.expected: the return value is null.
-    */
+     * @tc.steps: step2. call GetOrCreateChildByIndex and set input index is INDEX_NUM_0.
+     * @tc.expected: the return value is null.
+     */
     RefPtr<LayoutWrapper> testWrapper = layoutWrapper->GetOrCreateChildByIndex(INDEX_NUM_0, TEST_FALSE);
     EXPECT_EQ(testWrapper, nullptr);
 
@@ -208,7 +231,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest002, TestSize.Level1)
      * @tc.expected: the return value is not null.
      */
     layoutWrapper->layoutWrapperBuilder_->startIndex_ = -1;
-    layoutWrapper->layoutWrapperBuilder_->wrapperMap_ = {{1, layoutWrapper}};
+    layoutWrapper->layoutWrapperBuilder_->wrapperMap_ = { { 1, layoutWrapper } };
     testWrapper = layoutWrapper->GetOrCreateChildByIndex(INDEX_NUM_0, TEST_FALSE);
     ASSERT_NE(testWrapper, nullptr);
 
@@ -535,9 +558,9 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest011, TestSize.Level1)
  */
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest012, TestSize.Level1)
 {
-      /**
-      * @tc.steps: step1. create layoutwrapper.
-      */
+    /**
+     * @tc.steps: step1. create layoutwrapper.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -567,8 +590,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest012, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest013, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create layoutwrapper.
-    */
+     * @tc.steps: step1. create layoutwrapper.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -599,8 +622,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest013, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest014, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create layoutwrapper.
-    */
+     * @tc.steps: step1. create layoutwrapper.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -636,8 +659,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest015, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, NODE_ID_0);
 
     /**
-    * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -648,9 +671,9 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest015, TestSize.Level1)
     layoutWrapper->Measure(parentLayoutConstraint);
 
     /**
-    * @tc.expected: FRAME_SIZE is the same as TEST_FRAME_SIZE.
-    */
-    FRAME_SIZE.width_= layoutWrapper->geometryNode_->GetFrameSize().Width();
+     * @tc.expected: FRAME_SIZE is the same as TEST_FRAME_SIZE.
+     */
+    FRAME_SIZE.width_ = layoutWrapper->geometryNode_->GetFrameSize().Width();
     FRAME_SIZE.height_ = layoutWrapper->geometryNode_->GetFrameSize().Height();
     EXPECT_EQ(FRAME_SIZE, TEST_FRAME_SIZE);
 }
@@ -668,8 +691,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest016, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, NODE_ID_0);
 
     /**
-    * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -695,8 +718,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest017, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, NODE_ID_0);
 
     /**
-    * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -718,8 +741,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest017, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest018, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create layoutwrapper.
-    */
+     * @tc.steps: step1. create layoutwrapper.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -727,8 +750,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest018, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -749,8 +772,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest018, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest019, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create layoutwrapper.
-    */
+     * @tc.steps: step1. create layoutwrapper.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -758,15 +781,15 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest019, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
-    */
+     * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
+     */
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
 
     /**
-    * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -789,8 +812,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest019, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest020, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create layoutwrapper.
-    */
+     * @tc.steps: step1. create layoutwrapper.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -798,15 +821,15 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest020, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
-    */
+     * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
+     */
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
 
     /**
-    * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -828,8 +851,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest020, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest021, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create a layoutwrapper pointer.
-    */
+     * @tc.steps: step1. create a layoutwrapper pointer.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -837,15 +860,15 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest021, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
-    */
+     * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
+     */
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
 
     /**
-    * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -859,8 +882,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest021, TestSize.Level1)
     EXPECT_EQ(FRAME_SIZE.height_, ROW_HEIGHT);
 
     /**
-    * @tc.steps: step4. UpdateAspectRatio and UpdateLayoutWeight.
-    */
+     * @tc.steps: step4. UpdateAspectRatio and UpdateLayoutWeight.
+     */
     MagicItemProperty magicItemProperty;
     magicItemProperty.UpdateAspectRatio(0.5);
     magicItemProperty.UpdateLayoutWeight(0.5);
@@ -896,8 +919,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest021, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest022, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create a layoutwrapper pointer.
-    */
+     * @tc.steps: step1. create a layoutwrapper pointer.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -905,15 +928,15 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest022, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
-    */
+     * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
+     */
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
 
     /**
-    * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -939,8 +962,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest023, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, NODE_ID_0);
 
     /**
-    * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -967,8 +990,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest024, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, NODE_ID_0);
 
     /**
-    * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -994,8 +1017,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest025, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, NODE_ID_0);
 
     /**
-    * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step2. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -1017,8 +1040,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest025, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest026, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create a layoutwrapper pointer.
-    */
+     * @tc.steps: step1. create a layoutwrapper pointer.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1026,8 +1049,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest026, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -1048,8 +1071,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest026, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest027, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create a layoutwrapper pointer.
-    */
+     * @tc.steps: step1. create a layoutwrapper pointer.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1057,15 +1080,15 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest027, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
-    */
+     * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
+     */
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
 
     /**
-    * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -1087,8 +1110,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest027, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest028, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create a layoutwrapper pointer.
-    */
+     * @tc.steps: step1. create a layoutwrapper pointer.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1096,15 +1119,15 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest028, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
-    */
+     * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
+     */
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
 
     /**
-    * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -1134,8 +1157,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest028, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest029, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create a layoutwrapper pointer.
-    */
+     * @tc.steps: step1. create a layoutwrapper pointer.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1143,15 +1166,15 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest029, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
-    */
+     * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
+     */
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
 
     /**
-    * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
-    */
+     * @tc.steps: step3. call UpdateParentConstraint update parentLayoutConstraint.
+     */
     LayoutConstraintF parentLayoutConstraint;
     UpdateParentConstraint(layoutWrapper, parentLayoutConstraint);
 
@@ -1172,8 +1195,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest029, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest030, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create a layoutwrapper pointer.
-    */
+     * @tc.steps: step1. create a layoutwrapper pointer.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1181,8 +1204,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest030, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     /**
-    * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
-    */
+     * @tc.steps: step2. set layoutWrapper->layoutAlgorithm_ is not null.
+     */
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
@@ -1305,10 +1328,9 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest034, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->layoutWrapperBuilder_, nullptr);
 
     /**
-    * @tc.steps: step4. create a testLayoutWrapper pointer and set tag is FIRST_CHILD_FRAME_NODE.
-    */
-    auto frameNode =
-        FrameNode::CreateFrameNode(FIRST_CHILD_FRAME_NODE, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
+     * @tc.steps: step4. create a testLayoutWrapper pointer and set tag is FIRST_CHILD_FRAME_NODE.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(FIRST_CHILD_FRAME_NODE, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> testLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
@@ -1329,8 +1351,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest034, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest035, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create a layoutwrapper pointer.
-    */
+     * @tc.steps: step1. create a layoutwrapper pointer.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1340,8 +1362,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest035, TestSize.Level1)
     /**
      * @tc.steps: step2. create firstChildLayoutWrapper and append it to layoutWrapper.
      */
-    auto frameNode =
-        FrameNode::CreateFrameNode(FIRST_CHILD_FRAME_NODE, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(FIRST_CHILD_FRAME_NODE, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
     RefPtr<LayoutWrapper> firstChildLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
@@ -1364,8 +1385,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest035, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest036, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create a layoutwrapper pointer.
-    */
+     * @tc.steps: step1. create a layoutwrapper pointer.
+     */
     auto rowFrameNode =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1375,8 +1396,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest036, TestSize.Level1)
     /**
      * @tc.steps: step2. create firstChildLayoutWrapper and append it to layoutWrapper.
      */
-    auto frameNode =
-        FrameNode::CreateFrameNode(FIRST_CHILD_FRAME_NODE, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(FIRST_CHILD_FRAME_NODE, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
     RefPtr<LayoutWrapper> firstChildLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
@@ -1419,11 +1439,9 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest037, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, NODE_ID_0);
 
     /**
-    * @tc.steps: step2. set layoutWrapper->lazyBuildFunction_ is not null.
-    */
-    auto lazyBuildFunction = [] (RefPtr<LayoutWrapper> testLayoutWrapper) {
-        testLayoutWrapper = nullptr;
-    };
+     * @tc.steps: step2. set layoutWrapper->lazyBuildFunction_ is not null.
+     */
+    auto lazyBuildFunction = [](RefPtr<LayoutWrapper> testLayoutWrapper) { testLayoutWrapper = nullptr; };
     layoutWrapper->lazyBuildFunction_ = lazyBuildFunction;
 
     /**
@@ -1465,5 +1483,60 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest038, TestSize.Level1)
      */
     retRange = layoutWrapper->GetLazyBuildRange();
     EXPECT_EQ(retRange, RANGE_0);
+}
+
+/**
+ * @tc.name: LayoutWrapperTest039
+ * @tc.desc: Test Apply SafeArea constraint for Popup nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest039, TestSize.Level1)
+{
+    auto [parentHost, parent] = CreateNodeAndWrapper(V2::ROOT_ETS_TAG, 0);
+    auto [stageHost, stage] = CreateNodeAndWrapper(V2::STAGE_ETS_TAG, 1);
+    auto [popupHost, popup] = CreateNodeAndWrapper(V2::MENU_WRAPPER_ETS_TAG, 2);
+    parentHost->AddChild(stageHost);
+    parentHost->AddChild(popupHost);
+    popupHost->layoutProperty_->UpdateSafeAreaInsets(SafeAreaInsets({}, { 0, 1 }, {}, {}));
+
+        LayoutConstraintF constraint;
+    UpdateParentConstraint(parent, constraint);
+    stage->ApplyConstraint(constraint);
+    popup->ApplyConstraint(constraint);
+
+    EXPECT_EQ(stage->geometryNode_->parentLayoutConstraint_, constraint);
+    // popup is restricted by safeArea
+    EXPECT_TRUE(popup->geometryNode_->parentLayoutConstraint_);
+    EXPECT_NE(popup->geometryNode_->parentLayoutConstraint_, constraint);
+}
+
+/**
+ * @tc.name: LayoutWrapperTest040
+ * @tc.desc: Test SaveGeoState and RestoreGeoState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest040, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+    auto [host, wrapper] = CreateNodeAndWrapper(V2::ROOT_ETS_TAG, 0);
+
+    auto manager = pipeline->GetSafeAreaManager();
+    manager->AddWrapper(wrapper);
+
+    LayoutWrapper::SaveGeoState();
+    EXPECT_EQ(wrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(manager->GetGeoRestoreNodes().size(), 1UL);
+    EXPECT_TRUE(wrapper->geometryNode_->previousState_);
+
+    // change frame offset after save
+    wrapper->geometryNode_->SetFrameOffset({ RK356_WIDTH, RK356_HEIGHT });
+
+    // recreate wrapper to simulate next layout
+    wrapper = AceType::MakeRefPtr<LayoutWrapper>(host, wrapper->geometryNode_, host->GetLayoutProperty());
+    wrapper->RestoreGeoState();
+    EXPECT_EQ(manager->GetGeoRestoreNodes().size(), 0UL);
+    EXPECT_FALSE(wrapper->geometryNode_->previousState_);
+    EXPECT_EQ(wrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
 }
 } // namespace OHOS::Ace::NG

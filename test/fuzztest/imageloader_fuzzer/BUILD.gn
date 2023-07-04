@@ -62,6 +62,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -78,7 +79,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
 
     # mock
-    #"$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_skia_image.cpp",
 
     #fuzz
     "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
@@ -130,7 +131,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
 
   if (is_ohos_standard_system) {
     external_deps = [
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "init:libbegetutil",
     ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
@@ -140,7 +141,10 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
       "init_lite:libbegetutil",
     ]
   }
-  external_deps += [ "c_utils:utils" ]
+  external_deps += [
+    "c_utils:utils",
+    "window_manager:libwsutils",
+  ]
   sources += [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",

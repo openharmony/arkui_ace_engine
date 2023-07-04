@@ -22,6 +22,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+
+#define private public
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -60,6 +62,9 @@ constexpr float HALF = 2.0f;
 const SizeF LARGE_ITEM_SIZE(LARGE_ITEM_WIDTH, LARGE_ITEM_HEIGHT);
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::string EMPTY_STRING;
+const std::string EMPTY_TAG;
+constexpr Dimension SPACE_NEGATIVE(-1);
+constexpr Dimension SPACE_ONE(1);
 } // namespace
 class LinearLayoutTestNg : public testing::Test {
 public:
@@ -947,5 +952,120 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest006, TestSize.Level1)
     EXPECT_EQ(secondChildLayoutWrapper->GetGeometryNode()->GetFrameSize(), LARGE_ITEM_SIZE);
     EXPECT_EQ(secondChildLayoutWrapper->GetGeometryNode()->GetFrameOffset(),
         OffsetF(ZERO, COLUMN_HEIGHT - spaceBetween - LARGE_ITEM_HEIGHT));
+}
+
+/**
+ * @tc.name: LinearRowCreatorTest001
+ * @tc.desc: Test create row without space
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutTestNg, LinearRowCreatorTest001, TestSize.Level1)
+{
+    RowModelNG instance;
+    instance.Create(SPACE_NEGATIVE, nullptr, EMPTY_TAG);
+    instance.SetAlignItems(FlexAlign::FLEX_START);
+    instance.SetJustifyContent(FlexAlign::FLEX_END);
+    auto rowFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(rowFrameNode, nullptr);
+    EXPECT_EQ(rowFrameNode->GetTag(), V2::ROW_ETS_TAG);
+    auto layoutProperty = rowFrameNode->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto direction = layoutProperty->GetFlexDirection();
+    EXPECT_EQ(direction.has_value(), true);
+    EXPECT_EQ(direction.value(), FlexDirection::ROW);
+    auto space = layoutProperty->GetSpace();
+    EXPECT_EQ(space.has_value(), false);
+    EXPECT_EQ(space->ConvertToPx(), 0);
+    EXPECT_EQ(layoutProperty->GetCrossAxisAlign(), FlexAlign::FLEX_START);
+    EXPECT_EQ(layoutProperty->GetMainAxisAlign(), FlexAlign::FLEX_END);
+}
+
+/**
+ * @tc.name: LinearRowCreatorTest002
+ * @tc.desc: Test create row with space
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutTestNg, LinearRowCreatorTest002, TestSize.Level1)
+{
+    RowModelNG instance;
+    instance.Create(SPACE_ONE, nullptr, EMPTY_TAG);
+    auto rowFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(rowFrameNode, nullptr);
+    EXPECT_EQ(rowFrameNode->GetTag(), V2::ROW_ETS_TAG);
+    auto layoutProperty = rowFrameNode->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto direction = layoutProperty->GetFlexDirection();
+    EXPECT_EQ(direction.has_value(), true);
+    EXPECT_EQ(direction.value(), FlexDirection::ROW);
+    auto space = layoutProperty->GetSpace();
+    EXPECT_EQ(space.has_value(), true);
+    EXPECT_EQ(space.value(), SPACE_ONE);
+}
+
+/**
+ * @tc.name: LinearColumnCreatorTest001
+ * @tc.desc: Test create column without space
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutTestNg, LinearColumnCreatorTest001, TestSize.Level1)
+{
+    ColumnModelNG instance;
+    instance.Create(SPACE_NEGATIVE, nullptr, EMPTY_TAG);
+    instance.SetAlignItems(FlexAlign::FLEX_END);
+    instance.SetJustifyContent(FlexAlign::FLEX_START);
+    auto columnFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(columnFrameNode, nullptr);
+    EXPECT_EQ(columnFrameNode->GetTag(), V2::COLUMN_ETS_TAG);
+    auto layoutProperty = columnFrameNode->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto direction = layoutProperty->GetFlexDirection();
+    EXPECT_EQ(direction.has_value(), true);
+    EXPECT_EQ(direction.value(), FlexDirection::COLUMN);
+    auto space = layoutProperty->GetSpace();
+    EXPECT_EQ(space.has_value(), false);
+    EXPECT_EQ(space->ConvertToPx(), 0);
+    EXPECT_EQ(layoutProperty->GetCrossAxisAlign(), FlexAlign::FLEX_END);
+    EXPECT_EQ(layoutProperty->GetMainAxisAlign(), FlexAlign::FLEX_START);
+}
+
+/**
+ * @tc.name: LinearColumnCreatorTest002
+ * @tc.desc: Test create column with space
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutTestNg, LinearColumnCreatorTest002, TestSize.Level1)
+{
+    ColumnModelNG instance;
+    instance.Create(SPACE_ONE, nullptr, EMPTY_TAG);
+    auto columnFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(columnFrameNode, nullptr);
+    EXPECT_EQ(columnFrameNode->GetTag(), V2::COLUMN_ETS_TAG);
+    auto layoutProperty = columnFrameNode->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto direction = layoutProperty->GetFlexDirection();
+    EXPECT_EQ(direction.has_value(), true);
+    EXPECT_EQ(direction.value(), FlexDirection::COLUMN);
+    auto space = layoutProperty->GetSpace();
+    EXPECT_EQ(space.has_value(), true);
+    EXPECT_EQ(space.value(), SPACE_ONE);
+}
+
+/**
+ * @tc.name: LinearLayoutPatternTest001
+ * @tc.desc: Verify whether the layout property, layoutAlgorithm are created.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutTestNg, LinearLayoutPatternTest001, TestSize.Level1)
+{
+    RowModelNG instance;
+    instance.Create(SPACE_ONE, nullptr, EMPTY_TAG);
+    auto rowFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(rowFrameNode, nullptr);
+
+    auto rowPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
+    EXPECT_NE(rowPattern, nullptr);
+    auto rowLayoutProperty = rowPattern->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_NE(rowLayoutProperty, nullptr);
+    EXPECT_EQ(rowPattern->isVertical_, false);
 }
 } // namespace OHOS::Ace::NG

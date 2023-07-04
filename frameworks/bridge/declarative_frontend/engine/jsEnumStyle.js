@@ -31,7 +31,7 @@ var Color;
 })(Color || (Color = {}));
 
 var ColoringStrategy;
-(function (ColoringStrategy){
+(function (ColoringStrategy) {
   ColoringStrategy["INVERT"] = "Invert";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
@@ -498,6 +498,14 @@ var StickyStyle;
   StickyStyle[StickyStyle["Footer"] = 2] = "Footer";
 })(StickyStyle || (StickyStyle = {}));
 
+var ScrollSnapAlign;
+(function (ScrollSnapAlign) {
+  ScrollSnapAlign[ScrollSnapAlign["NONE"] = 0] = "NONE";
+  ScrollSnapAlign[ScrollSnapAlign["START"] = 1] = "START";
+  ScrollSnapAlign[ScrollSnapAlign["CENTER"] = 2] = "CENTER";
+  ScrollSnapAlign[ScrollSnapAlign["END"] = 3] = "END";
+})(ScrollSnapAlign || (ScrollSnapAlign = {}));
+
 var ChainEdgeEffect;
 (function (ChainEdgeEffect) {
   ChainEdgeEffect[ChainEdgeEffect["DEFAULT"] = 0] = "DEFAULT";
@@ -833,6 +841,7 @@ var SeekMode;
 
 var SideBarContainerType;
 (function (SideBarContainerType) {
+  SideBarContainerType[SideBarContainerType["AUTO"] = 2] = "AUTO";
   SideBarContainerType[SideBarContainerType["Overlay"] = 1] = "Overlay";
   SideBarContainerType[SideBarContainerType["Embed"] = 0] = "Embed";
 })(SideBarContainerType || (SideBarContainerType = {}));
@@ -1186,19 +1195,19 @@ class BottomTabBarStyle {
 
 class Indicator {
   top(value) {
-    this.top = value;
+    this.topValue = value;
     return this;
   }
   left(value) {
-    this.left = value;
+    this.leftValue = value;
     return this;
   }
   right(value) {
-    this.right = value;
+    this.rightValue = value;
     return this;
   }
   bottom(value) {
-    this.bottom = value;
+    this.bottomValue = value;
     return this;
   }
   static dot() {
@@ -1215,31 +1224,31 @@ class DotIndicator extends Indicator {
     this.type = 'DotIndicator';
   }
   itemWidth(value) {
-    this.itemWidth = value;
+    this.itemWidthValue = value;
     return this;
   }
   itemHeight(value) {
-    this.itemHeight = value;
+    this.itemHeightValue = value;
     return this;
   }
   selectedItemWidth(value) {
-    this.selectedItemWidth = value;
+    this.selectedItemWidthValue = value;
     return this;
   }
   selectedItemHeight(value) {
-    this.selectedItemHeight = value;
+    this.selectedItemHeightValue = value;
     return this;
   }
   mask(value) {
-    this.mask = value;
+    this.maskValue = value;
     return this;
   }
   color(value) {
-    this.color = value;
+    this.colorValue = value;
     return this;
   }
   selectedColor(value) {
-    this.selectedColor = value;
+    this.selectedColorValue = value;
     return this;
   }
 }
@@ -1250,19 +1259,19 @@ class DigitIndicator extends Indicator {
     this.type = 'DigitIndicator';
   }
   fontColor(value) {
-    this.fontColor = value;
+    this.fontColorValue = value;
     return this;
   }
   selectedFontColor(value) {
-    this.selectedFontColor = value;
+    this.selectedFontColorValue = value;
     return this;
   }
   digitFont(value) {
-    this.digitFont = value;
+    this.digitFontValue = value;
     return this;
   }
   selectedDigitFont(value) {
-    this.selectedDigitFont = value;
+    this.selectedDigitFontValue = value;
     return this;
   }
 }
@@ -1542,11 +1551,29 @@ var ToolbarItemStatus;
   ToolbarItemStatus[ToolbarItemStatus["ACTIVATE_TOOLBAR_ITEM"] = 2] = "ACTIVATE_TOOLBAR_ITEM";
 })(ToolbarItemStatus || (ToolbarItemStatus = {}));
 
-var LocationIconStyle;
-(function (LocationIconStyle) {
-  LocationIconStyle[LocationIconStyle["FULL_FILLED"] = 0] = "FULL_FILLED";
-  LocationIconStyle[LocationIconStyle["LINES"] = 1] = "LINES";
-})(LocationIconStyle || (LocationIconStyle = {}));
+var SecurityComponentLayoutDirection;
+(function (SecurityComponentLayoutDirection) {
+  SecurityComponentLayoutDirection[SecurityComponentLayoutDirection["HORIZONTAL"] = 0] = "HORIZONTAL";
+  SecurityComponentLayoutDirection[SecurityComponentLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
+})(SecurityComponentLayoutDirection || (SecurityComponentLayoutDirection = {}));
+
+var SecurityComponentLayoutOrder;
+(function (SecurityComponentLayoutOrder) {
+  SecurityComponentLayoutOrder[SecurityComponentLayoutOrder["ICON_FIRST"] = 0] = "ICON_FIRST";
+  SecurityComponentLayoutOrder[SecurityComponentLayoutOrder["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
+})(SecurityComponentLayoutOrder || (SecurityComponentLayoutOrder = {}));
+
+var SecLocationButtonLayoutDirection;
+(function (SecLocationButtonLayoutDirection) {
+  SecLocationButtonLayoutDirection[SecLocationButtonLayoutDirection["HORIZONTAL"] = 0] = "HORIZONTAL";
+  SecLocationButtonLayoutDirection[SecLocationButtonLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
+})(SecLocationButtonLayoutDirection || (SecLocationButtonLayoutDirection = {}));
+
+var SecLocationButtonLayoutOrder;
+(function (SecLocationButtonLayoutOrder) {
+  SecLocationButtonLayoutOrder[SecLocationButtonLayoutOrder["ICON_FIRST"] = 0] = "ICON_FIRST";
+  SecLocationButtonLayoutOrder[SecLocationButtonLayoutOrder["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
+})(SecLocationButtonLayoutOrder || (SecLocationButtonLayoutOrder = {}));
 
 var BackgroundButtonType;
 (function (BackgroundButtonType) {
@@ -1554,6 +1581,12 @@ var BackgroundButtonType;
   BackgroundButtonType[BackgroundButtonType["CIRCLE_BACKGROUND"] = 1] = "CIRCLE_BACKGROUND";
   BackgroundButtonType[BackgroundButtonType["NORMAL_BACKGROUND"] = 2] = "NORMAL_BACKGROUND";
 })(BackgroundButtonType || (BackgroundButtonType = {}));
+
+var LocationIconStyle;
+(function (LocationIconStyle) {
+  LocationIconStyle[LocationIconStyle["FULL_FILLED"] = 0] = "FULL_FILLED";
+  LocationIconStyle[LocationIconStyle["LINES"] = 1] = "LINES";
+})(LocationIconStyle || (LocationIconStyle = {}));
 
 var LocationDescription;
 (function (LocationDescription) {
@@ -1570,18 +1603,6 @@ var LocationDescription;
   LocationDescription[LocationDescription["CURRENT_POSITION"] = 10] = "CURRENT_POSITION";
 })(LocationDescription || (LocationDescription = {}));
 
-var SecLocationButtonLayoutDirection;
-(function (SecLocationButtonLayoutDirection) {
-  SecLocationButtonLayoutDirection[SecLocationButtonLayoutDirection["HORIZONTAL"] = 0] = "HORIZONTAL";
-  SecLocationButtonLayoutDirection[SecLocationButtonLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
-})(SecLocationButtonLayoutDirection || (SecLocationButtonLayoutDirection = {}));
-
-var SecLocationButtonLayoutOrder;
-(function (SecLocationButtonLayoutOrder) {
-  SecLocationButtonLayoutOrder[SecLocationButtonLayoutOrder["ICON_FIRST"] = 0] = "ICON_FIRST";
-  SecLocationButtonLayoutOrder[SecLocationButtonLayoutOrder["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
-})(SecLocationButtonLayoutOrder || (SecLocationButtonLayoutOrder = {}));
-
 var SecLocationButtonOnClickResult;
 (function (SecLocationButtonOnClickResult) {
   SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_SUCCESS"] = 0] =
@@ -1589,6 +1610,55 @@ var SecLocationButtonOnClickResult;
   SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_GRANT_FAILED"] = 1] =
     "LOCATION_BUTTON_CLICK_GRANT_FAILED ";
 })(SecLocationButtonOnClickResult || (SecLocationButtonOnClickResult = {}));
+
+var PasteIconStyle;
+(function (PasteIconStyle) {
+  PasteIconStyle[PasteIconStyle["LINES"] = 0] = "LINES";
+})(PasteIconStyle || (PasteIconStyle = {}));
+
+var PasteDescription;
+(function (PasteDescription) {
+  PasteDescription[PasteDescription["PASTE"] = 0] = "PASTE";
+})(PasteDescription || (PasteDescription = {}));
+
+var SecPasteButtonOnClickResult;
+(function (SecPasteButtonOnClickResult) {
+  SecPasteButtonOnClickResult[SecPasteButtonOnClickResult["SUCCESS"] = 0] =
+    "SUCCESS";
+  SecPasteButtonOnClickResult[SecPasteButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
+    "TEMPORARY_AUTHORIZATION_FAILED ";
+})(SecPasteButtonOnClickResult || (SecPasteButtonOnClickResult = {}));
+
+var SaveIconStyle;
+(function (SaveIconStyle) {
+  SaveIconStyle[SaveIconStyle["FULL_FILLED"] = 0] = "FULL_FILLED";
+  SaveIconStyle[SaveIconStyle["LINES"] = 1] = "LINES";
+})(SaveIconStyle || (SaveIconStyle = {}));
+
+var SaveDescription;
+(function (SaveDescription) {
+  SaveDescription[SaveDescription["DOWNLOAD"] = 0] = "DOWNLOAD";
+  SaveDescription[SaveDescription["DOWNLOAD_FILES"] = 1] = "DOWNLOAD_FILES";
+  SaveDescription[SaveDescription["SAVE"] = 2] = "SAVE";
+  SaveDescription[SaveDescription["SAVE_IMAGES"] = 3] = "SAVE_IMAGES";
+  SaveDescription[SaveDescription["SAVE_FILES"] = 4] = "SAVE_FILES";
+  SaveDescription[SaveDescription["DOWNLOAD_AND_SHARE"] = 5] = "DOWNLOAD_AND_SHARE";
+  SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
+  SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
+})(SaveDescription || (SaveDescription = {}));
+
+var SecSaveButtonOnClickResult;
+(function (SecSaveButtonOnClickResult) {
+  SecSaveButtonOnClickResult[SecSaveButtonOnClickResult["SUCCESS"] = 0] =
+    "SUCCESS";
+  SecSaveButtonOnClickResult[SecSaveButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
+    "TEMPORARY_AUTHORIZATION_FAILED ";
+})(SecSaveButtonOnClickResult || (SecSaveButtonOnClickResult = {}));
+
+var ObscuredReasons;
+(function (ObscuredReasons) {
+  ObscuredReasons[ObscuredReasons["PLACEHOLDER"] = 0] = "PLACEHOLDER";
+})(ObscuredReasons || (ObscuredReasons = {}));
 
 var ListItemStyle;
 (function (ListItemStyle) {
@@ -1609,4 +1679,62 @@ var DragRet;
   DragRet[DragRet["DRAG_CANCELED"] = 2] = "DRAG_CANCELED";
   DragRet[DragRet["DROP_ENABLED"] = 3] = "DROP_ENABLED";
   DragRet[DragRet["DROP_DISABLED"] = 4] = "DROP_DISABLED";
-})
+})(DragRet || (DragRet = {}));
+
+var XComponentType;
+(function (XComponentType) {
+  XComponentType[XComponentType["SURFACE"] = 0] = "SURFACE";
+  XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
+  XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
+})(XComponentType || (XComponentType = {}));
+
+var NestedScrollMode;
+(function (NestedScrollMode) {
+  NestedScrollMode[NestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";
+  NestedScrollMode[NestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
+  NestedScrollMode[NestedScrollMode["PARENT_FIRST"] = 2] = "PARENT_FIRST";
+  NestedScrollMode[NestedScrollMode["PARALLEL"] = 3] = "PARALLEL";
+})(NestedScrollMode || (NestedScrollMode = {}));
+
+var ScrollAlign;
+(function (ScrollAlign) {
+  ScrollAlign[ScrollAlign["START"] = 0] = "START";
+  ScrollAlign[ScrollAlign["CENTER"] = 1] = "CENTER";
+  ScrollAlign[ScrollAlign["END"] = 2] = "END";
+  ScrollAlign[ScrollAlign["AUTO"] = 3] = "AUTO";
+})(ScrollAlign || (ScrollAlign = {}));
+
+var SafeAreaType;
+(function (SafeAreaType) {
+  SafeAreaType[SafeAreaType["SYSTEM"] = 0] = "SYSTEM";
+  SafeAreaType[SafeAreaType["CUTOUT"] = 1] = "CUTOUT";
+  SafeAreaType[SafeAreaType["KEYBOARD"] = 2] = "KEYBOARD";
+})(SafeAreaType || (SafeAreaType = {}));
+
+var SafeAreaEdge;
+(function (SafeAreaEdge) {
+  SafeAreaEdge[SafeAreaEdge["TOP"] = 0] = "TOP";
+  SafeAreaEdge[SafeAreaEdge["BOTTOM"] = 1] = "BOTTOM";
+  SafeAreaEdge[SafeAreaEdge["START"] = 2] = "START";
+  SafeAreaEdge[SafeAreaEdge["END"] = 3] = "END";
+})(SafeAreaEdge || (SafeAreaEdge = {}));
+
+var RenderFit;
+(function (RenderFit) {
+  RenderFit[RenderFit["CENTER"] = 0] = "CENTER";
+  RenderFit[RenderFit["TOP"] = 1] = "TOP";
+  RenderFit[RenderFit["BOTTOM"] = 2] = "BOTTOM";
+  RenderFit[RenderFit["LEFT"] = 3] = "LEFT";
+  RenderFit[RenderFit["RIGHT"] = 4] = "RIGHT";
+  RenderFit[RenderFit["TOP_LEFT"] = 5] = "TOP_LEFT";
+  RenderFit[RenderFit["TOP_RIGHT"] = 6] = "TOP_RIGHT";
+  RenderFit[RenderFit["BOTTOM_LEFT"] = 7] = "BOTTOM_LEFT";
+  RenderFit[RenderFit["BOTTOM_RIGHT"] = 8] = "BOTTOM_RIGHT";
+  RenderFit[RenderFit["RESIZE_FILL"] = 9] = "RESIZE_FILL";
+  RenderFit[RenderFit["RESIZE_CONTAIN"] = 10] = "RESIZE_CONTAIN";
+  RenderFit[RenderFit["RESIZE_CONTAIN_TOP_LEFT"] = 11] = "RESIZE_CONTAIN_TOP_LEFT";
+  RenderFit[RenderFit["RESIZE_CONTAIN_BOTTOM_RIGHT"] = 12] = "RESIZE_CONTAIN_BOTTOM_RIGHT";
+  RenderFit[RenderFit["RESIZE_COVER"] = 13] = "RESIZE_COVER";
+  RenderFit[RenderFit["RESIZE_COVER_TOP_LEFT"] = 14] = "RESIZE_COVER_TOP_LEFT";
+  RenderFit[RenderFit["RESIZE_COVER_BOTTOM_RIGHT"] = 15] = "RESIZE_COVER_BOTTOM_RIGHT";
+})(RenderFit || (RenderFit = {}));

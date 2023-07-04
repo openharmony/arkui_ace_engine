@@ -17,7 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/models/rect_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/shape/rect_model.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
@@ -69,10 +69,10 @@ void JSRect::Create(const JSCallbackInfo& info)
 
         JSRef<JSVal> radius = obj->GetProperty("radius");
         if (radius->IsNumber() || radius->IsString()) {
-            SetRadiusWithJsVal<ShapeComponent>(nullptr, radius);
+            SetRadiusWithJsVal(nullptr, radius);
         }
         if (radius->IsArray()) {
-            SetRadiusWithArrayValue<ShapeComponent>(nullptr, radius);
+            SetRadiusWithArrayValue(nullptr, radius);
         }
         info.SetReturnValue(info.This());
     }
@@ -116,35 +116,34 @@ void JSRect::SetRadius(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsArray()) {
-        SetRadiusWithArrayValue<ShapeComponent>(nullptr, info[0]);
+        SetRadiusWithArrayValue(nullptr, info[0]);
         info.SetReturnValue(info.This());
         return;
     }
     if (info[0]->IsNumber() || info[0]->IsString() || info[0]->IsObject()) {
-        SetRadiusWithJsVal<ShapeComponent>(nullptr, info[0]);
+        SetRadiusWithJsVal(nullptr, info[0]);
         info.SetReturnValue(info.This());
     }
 }
 
-template<class T>
-void JSRect::SetRadiusWithJsVal(const RefPtr<T>& component, const JSRef<JSVal>& jsVal)
+
+void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal)
 {
     CalcDimension value;
     if (!ParseJsDimensionVp(jsVal, value)) {
         return;
     }
-    if (component) {
-        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        component->SetRadiusWidth(value, option);
-        component->SetRadiusHeight(value, option);
+    if (shapeRect) {
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        shapeRect->SetRadiusWidth(value, option);
+        shapeRect->SetRadiusHeight(value, option);
         return;
     }
     RectModel::GetInstance()->SetRadiusWidth(value);
     RectModel::GetInstance()->SetRadiusHeight(value);
 }
 
-template<class T>
-void JSRect::SetRadiusWithArrayValue(const RefPtr<T>& component, const JSRef<JSVal>& jsVal)
+void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal)
 {
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsVal);
     int32_t length = static_cast<int32_t>(array->Length());
@@ -167,17 +166,16 @@ void JSRect::SetRadiusWithArrayValue(const RefPtr<T>& component, const JSRef<JSV
         CalcDimension radiusXValue;
         CalcDimension radiusYValue;
         if (ParseJsDimensionVp(radiusX, radiusXValue) && ParseJsDimensionVp(radiusY, radiusYValue)) {
-            SetRadiusValue<T>(component, radiusXValue, radiusYValue, i);
+            SetRadiusValue(shapeRect, radiusXValue, radiusYValue, i);
         }
     }
 }
 
-template<class T>
 void JSRect::SetRadiusValue(
-    const RefPtr<T>& component, const CalcDimension& radiusX, const CalcDimension& radiusY, int32_t index)
+    const RefPtr<ShapeRect>& shapeRect, const CalcDimension& radiusX, const CalcDimension& radiusY, int32_t index)
 {
-    if (component) {
-        RectModel::GetInstance()->SetCallbackRadius(component, radiusX, radiusY, index);
+    if (shapeRect) {
+        RectModel::GetInstance()->SetShapeRectRadius(shapeRect, radiusX, radiusY, index);
     } else {
         RectModel::GetInstance()->SetRadiusValue(radiusX, radiusY, index);
     }
@@ -238,10 +236,10 @@ void JSRect::ObjectRadius(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsNumber() || info[0]->IsString()) {
-        SetRadiusWithJsVal<ShapeRect>(rect, info[0]);
+        SetRadiusWithJsVal(rect, info[0]);
     }
     if (info[0]->IsArray()) {
-        SetRadiusWithArrayValue<ShapeRect>(rect, info[0]);
+        SetRadiusWithArrayValue(rect, info[0]);
     }
 }
 
@@ -269,10 +267,10 @@ void JSRect::ConstructorCallback(const JSCallbackInfo& info)
         }
         JSRef<JSVal> radius = obj->GetProperty("radius");
         if (radius->IsNumber() || radius->IsString()) {
-            SetRadiusWithJsVal<ShapeRect>(rect, radius);
+            SetRadiusWithJsVal(rect, radius);
         }
         if (radius->IsArray()) {
-            SetRadiusWithArrayValue<ShapeRect>(rect, radius);
+            SetRadiusWithArrayValue(rect, radius);
         }
         info.SetReturnValue(info.This());
     }

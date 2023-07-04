@@ -29,6 +29,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT TextModel {
@@ -37,6 +38,7 @@ public:
     virtual ~TextModel() = default;
 
     virtual void Create(const std::string& content) = 0;
+    virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
     virtual void SetTextShadow(const Shadow& value) = 0;
@@ -60,6 +62,7 @@ public:
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
     virtual void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) = 0;
+    virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
 

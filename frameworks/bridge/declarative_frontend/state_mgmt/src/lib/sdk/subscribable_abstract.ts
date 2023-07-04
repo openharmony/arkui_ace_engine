@@ -15,30 +15,30 @@
 
 /**
  * 
- * SubscriableAbstract
+ * SubscribableAbstract
  * 
  * This class is part of the SDK.
- * @since 9
+ * @since 10
  * 
- * SubscriableAbstract is an abstract class that manages subscribers 
+ * SubscribableAbstract is an abstract class that manages subscribers 
  * to value changes. These subscribers are the implementation of 
  * @State, @Link, @Provide, @Consume decorated variables inside the 
- * framework. Each using @State, @Link, etc., decorated varibale in 
+ * framework. Each using @State, @Link, etc., decorated variable in 
  * a @Component will make its own subscription. When the component 
  * is created the subscription is added, and before the component 
  * is deleted it unsubscribes
  * 
- * An application may extend SubscriableAbstract for a custom class 
+ * An application may extend SubscribableAbstract for a custom class 
  * that manages state data. @State, @Link, @Provide, @Consume 
  * decorated variables can hold an Object that is instance of 
- * SubscribaleAbstract.
+ * SubscribableAbstract.
  * 
  * About lifecycle: It is legal use for two @Components with two @State
- * decorated variables to share the same SubscribaleAbstract object.
+ * decorated variables to share the same SubscribableAbstract object.
  * Each such decorated variable implementation makes its own
- * subscription to the SubscribaleAbstract object. Hence, when both variables
- * have unsubscribed the SubscribaleAbstract custom class may do its own 
- * de-initilialization, e.g. release held external resources.
+ * subscription to the SubscribableAbstract object. Hence, when both variables
+ * have unsubscribed the SubscribableAbstract custom class may do its own 
+ * de-initialization, e.g. release held external resources.
  *
  * How to extend:
  * A subclass manages the get and set to one or several properties on its own.
@@ -64,7 +64,7 @@
  *
  */
 
-abstract class SubscribaleAbstract {
+abstract class SubscribableAbstract {
 
   // keeps track of all subscribing properties
   private owningProperties_: Set<number>;
@@ -72,11 +72,11 @@ abstract class SubscribaleAbstract {
   /**
    * make sure to call super() from subclass constructor!
    * 
-   * @since 9
+   * @since 10
    */
   constructor() {
     this.owningProperties_ = new Set<number>();
-    stateMgmtConsole.debug(`SubscribaleAbstract: construcstor done`);
+    stateMgmtConsole.debug(`SubscribableAbstract: construcstor done`);
   }
 
   /**
@@ -85,10 +85,10 @@ abstract class SubscribaleAbstract {
    * @param propName name of the change property
    * @param newValue the property value after the change
    * 
-   * @since 9
+   * @since 10
    */
   protected notifyPropertyHasChanged(propName: string, newValue: any) {
-    stateMgmtConsole.debug(`SubscribaleAbstract: notifyPropertyHasChanged '${propName}'.`)
+    stateMgmtConsole.debug(`SubscribableAbstract: notifyPropertyHasChanged '${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (owningProperty) {
@@ -105,9 +105,20 @@ abstract class SubscribaleAbstract {
           (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
         }
       } else {
-        stateMgmtConsole.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+        stateMgmtConsole.error(`SubscribableAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
       }
     });
+  }
+
+  /**
+   * Provides the current number of subscribers.
+   * Application may use this function to determine a shared object has no more remaining subscribers and can be deleted.
+   * @returns number of current subscribers
+   * 
+   * @since 10
+   */
+  public numberOfSubscribers(): number {
+    return this.owningProperties_.size;
   }
 
   /**
@@ -117,22 +128,22 @@ abstract class SubscribaleAbstract {
    * @param subscriber new subscriber that implements ISinglePropertyChangeSubscriber
    * and/or IMultiPropertiesChangeSubscriber interfaces
    * 
-   * @since 9
+   * @since 10
    */
 
   public addOwningProperty(subscriber: IPropertySubscriber): void {
-    stateMgmtConsole.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`)
+    stateMgmtConsole.debug(`SubscribableAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`)
     this.owningProperties_.add(subscriber.id__());
   }
 
   /**
-   * Method used by the framework to ubsubscribing decorated variables
+   * Method used by the framework to unsubscribing decorated variables
    * Subclass may overwrite this function but must call the function of the base
    * class from its own implementation.
    * @param subscriber subscriber that implements ISinglePropertyChangeSubscriber
    * and/or IMultiPropertiesChangeSubscriber interfaces
    * 
-   * @since 9
+   * @since 10
    */
   public removeOwningProperty(property: IPropertySubscriber): void {
     return this.removeOwningPropertyById(property.id__());
@@ -142,10 +153,30 @@ abstract class SubscribaleAbstract {
    * Same as @see removeOwningProperty() but by Subscriber id.
    * @param subscriberId 
   * 
-  * @since 9
+   * framework internal function, not to be used by applications.
    */
   public removeOwningPropertyById(subscriberId: number): void {
-    stateMgmtConsole.debug(`SubscribaleAbstract: removeOwningProperty '${subscriberId}'.`)
+    stateMgmtConsole.debug(`SubscribableAbstract: removeOwningProperty '${subscriberId}'.`)
     this.owningProperties_.delete(subscriberId);
   }
+
+  /**
+   * flush all subscribers / owning properties
+   * This is needed when copying a SubscribableAbstract object to the localObject or @prop / SynchedPropertyObjectOneWay
+   * - shallowCopy: copies the _reference to original_ Set. Hence, we must not modify this Set but assign a new Set
+   * - deepCopy also (deep-) copies this class' owningProperties_ Set, incl. the numbers it includes. Assigning a new Set fixes.
+   * 
+   */
+  public clearOwningProperties() {
+    this.owningProperties_ = new Set<number>();
+  }
+}
+
+/**
+ *  SubscribaleAbstract class with typo in its nam,e
+ * 
+ * @depreciated, use SubscribableAbstract
+ */
+
+abstract class SubscribaleAbstract extends SubscribableAbstract {
 }

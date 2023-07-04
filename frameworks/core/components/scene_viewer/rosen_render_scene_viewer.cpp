@@ -27,7 +27,8 @@
 
 namespace OHOS::Ace {
 
-RosenRenderSceneViewer::RosenRenderSceneViewer(uint32_t key) : RenderSceneViewer(key)
+RosenRenderSceneViewer::RosenRenderSceneViewer(uint32_t key) : RenderSceneViewer(key),
+    textureLayer_(std::make_shared<OHOS::Render3D::TextureLayer>())
 {
     auto pipelineContext = GetContext().Upgrade();
     if (pipelineContext == nullptr) {
@@ -42,11 +43,16 @@ RosenRenderSceneViewer::RosenRenderSceneViewer(uint32_t key) : RenderSceneViewer
     }
 }
 
+OHOS::Render3D::TextureInfo RosenRenderSceneViewer::CreateRenderTarget(uint32_t width, uint32_t height)
+{
+    auto info = textureLayer_->CreateRenderTarget(width, height);
+    return info;
+}
+
 void RosenRenderSceneViewer::PrepareTextureLayer(const OHOS::Render3D::TextureInfo& info)
 {
     width_ = static_cast<uint32_t>(GetLayoutSize().Width());
     height_ = static_cast<uint32_t>(GetLayoutSize().Height());
-    textureLayer_ = std::make_shared<OHOS::Render3D::TextureLayer>(info);
     textureLayer_->SetWH(width_, height_);
 }
 
@@ -70,7 +76,7 @@ void RosenRenderSceneViewer::PaintTextureLayer(RenderContext& context, const Off
         return;
     }
 
-    skCanvas->drawDrawable(textureLayer_.get());
+    textureLayer_->OnDraw(skCanvas);
     (void)(context);
 }
 

@@ -37,6 +37,7 @@ common_module_files = [
   "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
 
   # animation
+  "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
   "$ace_root/frameworks/core/animation/animatable_data.cpp",
   "$ace_root/frameworks/core/animation/animatable_properties.cpp",
   "$ace_root/frameworks/core/animation/animator.cpp",
@@ -238,15 +239,15 @@ ohos_unittest("TransitionElementTest") {
   if (is_ohos_standard_system) {
     external_deps = [
       "eventhandler:libeventhandler",
-      "hitrace_native:hitrace_meter",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
       "init:libbegetutil",
       "ipc:ipc_core",
     ]
   } else {
     external_deps = [
       "hilog:libhilog",
-      "hitrace_native:hitrace_meter",
+      "hitrace:hitrace_meter",
       "init_lite:libbegetutil",
     ]
   }
@@ -295,15 +296,15 @@ ohos_unittest("SharedTransitionElementTest") {
   if (is_ohos_standard_system) {
     external_deps = [
       "eventhandler:libeventhandler",
-      "hitrace_native:hitrace_meter",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
       "init:libbegetutil",
       "ipc:ipc_core",
     ]
   } else {
     external_deps = [
       "hilog:libhilog",
-      "hitrace_native:hitrace_meter",
+      "hitrace:hitrace_meter",
       "init_lite:libbegetutil",
     ]
   }
@@ -353,8 +354,8 @@ ohos_unittest("TransitionPropertyElementTest") {
   if (is_ohos_standard_system) {
     external_deps = [
       "eventhandler:libeventhandler",
-      "hitrace_native:hitrace_meter",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
       "init:libbegetutil",
       "ipc:ipc_core",
     ]
@@ -363,7 +364,7 @@ ohos_unittest("TransitionPropertyElementTest") {
   } else {
     external_deps = [
       "hilog:libhilog",
-      "hitrace_native:hitrace_meter",
+      "hitrace:hitrace_meter",
       "init_lite:libbegetutil",
     ]
   }

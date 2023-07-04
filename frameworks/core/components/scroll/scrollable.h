@@ -23,6 +23,7 @@
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/pan_recognizer.h"
@@ -32,41 +33,6 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
-
-enum class ScrollState {
-    IDLE = 0,
-    SCROLL,
-    FLING,
-};
-
-struct ScrollInfo {
-    Dimension dx;
-    Dimension dy;
-
-    bool operator==(const ScrollInfo& scrollInfo) const
-    {
-        return dx == scrollInfo.dx && dy == scrollInfo.dy;
-    }
-};
-
-struct ScrollFrameInfo {
-    Dimension offset;
-    ScrollState state;
-
-    bool operator==(const ScrollFrameInfo& scrollInfo) const
-    {
-        return offset == scrollInfo.offset && state == scrollInfo.state;
-    }
-};
-
-struct ScrollFrameResult {
-    Dimension offset;
-
-    bool operator==(const ScrollFrameResult& scrollRes) const
-    {
-        return offset == scrollRes.offset;
-    }
-};
 
 constexpr int32_t SCROLL_FROM_NONE = 0;
 constexpr int32_t SCROLL_FROM_UPDATE = 1;
@@ -81,6 +47,22 @@ constexpr int32_t SCROLL_FROM_INDEXER = 9;
 constexpr int32_t SCROLL_FROM_START = 10; // from drag start
 constexpr int32_t SCROLL_FROM_AXIS = 11;
 
+enum class NestedState {
+    GESTURE = 0,
+    CHILD_SCROLL,
+    CHILD_OVER_SCROLL,
+};
+
+struct OverScrollOffset {
+    double start;
+    double end;
+};
+
+struct ScrollResult {
+    double remain;
+    bool reachEdge;
+};
+
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEventCallback = std::function<void()>;
 using OutBoundaryCallback = std::function<bool()>;
@@ -91,6 +73,8 @@ using ScrollFrameBeginCallback = std::function<ScrollFrameResult(Dimension, Scro
 using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
+using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
+using ContinuousSlidingCallback= std::function<double()>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -190,12 +174,24 @@ public:
         scrollTouchUpCallback_ = scrollTouchUpCallback;
     }
 
+    void SetUnstaticFriction(double friction)
+    {
+        friction_ = friction;
+    }
+
     void HandleTouchDown();
     void HandleTouchUp();
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
+    void HandleScrollEnd();
+    bool HandleOverScroll(double velocity);
+    ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollParentFirst(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollSelfFirst(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollSelfOnly(double& offset, int32_t source, NestedState state);
+    ScrollResult HandleScrollParallel(double& offset, int32_t source, NestedState state);
 
     void ProcessScrollMotionStop();
 
@@ -295,6 +291,8 @@ public:
     void StartSpringMotion(
         double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent);
 
+    void StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity);
+
     bool IsAnimationNotRunning() const;
 
     bool Idle() const;
@@ -358,16 +356,71 @@ public:
         scrollFrameBeginCallback_ = scrollFrameBeginCallback;
     }
 
+    void SetOnContinuousSliding(const ContinuousSlidingCallback& continuousSlidingCallback)
+    {
+        continuousSlidingCallback_ = continuousSlidingCallback;
+    }
+
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
+    void SetNestedScrollOptions(NestedScrollOptions opt)
+    {
+        nestedOpt_ = opt;
+    }
+    void SetOverScrollOffsetCallback(std::function<OverScrollOffset(double)>&& overScroll)
+    {
+        overScrollOffsetCallback_ = std::move(overScroll);
+    }
+    void SetParent(RefPtr<Scrollable> parent)
+    {
+        parent_ = AceType::WeakClaim(AceType::RawPtr(parent));
+    }
+    void SetEdgeEffect(EdgeEffect effect)
+    {
+        edgeEffect_ = effect;
+    }
+
+    void SetOnScrollSnapCallback(const ScrollSnapCallback& scrollSnapCallback)
+    {
+        scrollSnapCallback_ = scrollSnapCallback;
+    }
+    void SetContinuousDragStatus(bool status)
+    {
+        continuousDragStatus_ = status;
+    }
+    void IncreaseContinueDragCount()
+    {
+        dragCount_++;
+    }
+    void ResetContinueDragCount()
+    {
+        dragCount_ = 1;
+    }
+    void SetDragStartPosition(double position)
+    {
+        dragStartPosition_ = position;
+    }
+    void SetDragEndPosition(double position)
+    {
+        dragEndPosition_ = position;
+    }
+    double GetDragOffset()
+    {
+        return dragEndPosition_ - dragStartPosition_;
+    }
+    
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position);
+    void ProcessScrollSnapMotion(double position);
     void FixScrollMotion(double position);
     void ExecuteScrollBegin(double& mainDelta);
     void ExecuteScrollFrameBegin(double& mainDelta, ScrollState state);
+    double ComputeCap(int dragCount);
+    double GetGain(double delta);
+    void SetDelayedTask();
 
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEnd_;
@@ -380,8 +433,10 @@ private:
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     ScrollFrameBeginCallback scrollFrameBeginCallback_;
+    ScrollSnapCallback scrollSnapCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
+    ContinuousSlidingCallback continuousSlidingCallback_;
     MouseLeftButtonScroll mouseLeftButtonScroll_;
     Axis axis_;
     RefPtr<PanRecognizer> panRecognizer_;
@@ -392,8 +447,10 @@ private:
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> controller_;
     RefPtr<Animator> springController_;
+    RefPtr<Animator> scrollSnapController_;
     RefPtr<FrictionMotion> motion_;
     RefPtr<ScrollMotion> scrollMotion_;
+    RefPtr<SpringMotion> scrollSnapMotion_;
     RefPtr<SpringProperty> spring_;
     WeakPtr<PipelineBase> context_;
     WeakPtr<RenderNode> scrollableNode_;
@@ -410,9 +467,24 @@ private:
     double slipFactor_ = 0.0;
     static double sFriction_;
     static double sVelocityScale_;
+    bool continuousDragStatus_ = false;
+    CancelableCallback<void()> task_;
+    int32_t dragCount_ = 0;
+    double lastPos_ = 0.0;
+    double dragStartPosition_ = 0.0;
+    double dragEndPosition_ = 0.0;
+    double lastVelocity_ = 0.0;
+    double friction_ = -1.0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif
+
+    // nested scroll
+    WeakPtr<Scrollable> parent_;
+    NestedScrollOptions nestedOpt_ = { NestedScrollMode::SELF_ONLY, NestedScrollMode::SELF_ONLY };
+    std::function<OverScrollOffset(double)> overScrollOffsetCallback_;
+    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
+    bool canOverScroll_ = true;
 };
 
 } // namespace OHOS::Ace

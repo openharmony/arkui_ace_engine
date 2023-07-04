@@ -63,6 +63,7 @@ void SliderPattern::OnModifyDone()
     CancelExceptionValue(min, max, step);
     valueRatio_ = (value_ - min) / (max - min);
     stepRatio_ = step / (max - min);
+    UpdateCircleCenterOffset();
     UpdateBlock();
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
@@ -262,6 +263,16 @@ void SliderPattern::InitializeBubble()
     sliderPaintProperty->UpdateContent(content);
 }
 
+void SliderPattern::HandlingGestureStart(const GestureEvent& info)
+{
+    if (info.GetInputEventType() != InputEventType::AXIS) {
+        UpdateValueByLocalLocation(info.GetLocalLocation());
+        UpdateBubble();
+    }
+    panMoveFlag_ = true;
+    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 {
     if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -364,7 +375,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandlingGestureEvent(info);
+        pattern->HandlingGestureStart(info);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -592,6 +603,7 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     value_ = nextValue;
     sliderPaintProperty->UpdateValue(value_);
     valueRatio_ = (value_ - min) / (max - min);
+    FireChangeEvent(SliderChangeMode::Begin);
     FireChangeEvent(SliderChangeMode::End);
     LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -806,6 +818,28 @@ void SliderPattern::UpdateBlock()
     }
 }
 
+std::string SliderPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, "");
+    jsonObj->Put("value", sliderPaintProperty->GetValue().value_or(0.0f));
+    return jsonObj->ToString();
+}
+
+void SliderPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonValue = info->GetValue("value");
+    sliderPaintProperty->UpdateValue(jsonValue->GetDouble());
+    OnModifyDone();
+}
+
 void SliderPattern::LayoutImageNode()
 {
     auto host = GetHost();
@@ -886,5 +920,83 @@ void SliderPattern::UpdateValue(float value)
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     sliderPaintProperty->UpdateValue(value);
+}
+
+void SliderPattern::OnAttachToFrameNode()
+{
+    RegisterVisibleAreaChange();
+}
+
+void SliderPattern::OnVisibleChange(bool isVisible)
+{
+    isVisible_ = isVisible;
+    LOGD("Slider OnVisibleChange: isVisible = %d", isVisible_);
+    isVisible_ ? StartAnimation() : StopAnimation();
+}
+
+void SliderPattern::StartAnimation()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    LOGD("Slider StartAnimation: isVisibleArea_ = %d, isVisible_ = %d, isShow_ = %d", isVisibleArea_, isVisible_,
+        isShow_);
+    if (IsSliderVisible()) {
+        sliderContentModifier_->SetVisible(true);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void SliderPattern::StopAnimation()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    LOGD("Slider StopAnimation");
+    sliderContentModifier_->SetVisible(false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SliderPattern::RegisterVisibleAreaChange()
+{
+    if (hasVisibleChangeRegistered_) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        LOGD("Slider VisibleAreaChange CallBack: visible = %d", visible);
+        pattern->isVisibleArea_  = visible;
+        visible ? pattern->StartAnimation() : pattern->StopAnimation();
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+    hasVisibleChangeRegistered_ = true;
+}
+
+void SliderPattern::OnWindowHide()
+{
+    isShow_ = false;
+    LOGD("Slider OnWindowHide");
+    StopAnimation();
+}
+
+void SliderPattern::OnWindowShow()
+{
+    isShow_ = true;
+    LOGD("Slider OnWindowShow");
+    StartAnimation();
+}
+
+bool SliderPattern::IsSliderVisible()
+{
+    return isVisibleArea_ && isVisible_ && isShow_;
 }
 } // namespace OHOS::Ace::NG
