@@ -38,4 +38,10 @@ void SystemWindowScene::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
 }
+
+void SystemWindowScene::OnSetDepth(const int32_t depth)
+{
+    CHECK_NULL_VOID(session_);
+    session_->SetZOrder(static_cast<uint32_t>(depth));
+}
 } // namespace OHOS::Ace::NG
