@@ -27,16 +27,22 @@ class WindowEventProcess {
     DECLARE_DELAYED_SINGLETON(WindowEventProcess);
 public:
     DISALLOW_COPY_AND_MOVE(WindowEventProcess);
-    void ProcessWindowEvent(const RefPtr<WindowNode>& windowNode,
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent, bool isDrag);
+    void ProcessWindowMouseEvent(const RefPtr<WindowNode>& windowNode,
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void ProcessWindowDragEvent(const RefPtr<WindowNode>& windowNode,
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void CleanWindowDragEvent();
 
 private:
     void DispatchPointerEvent(const RefPtr<WindowNode>& windowNode,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
 private:
-    WeakPtr<WindowNode> lastWeakWindowNode_ {nullptr};
-    std::shared_ptr<MMI::PointerEvent> lastPointEvent_;
+    WeakPtr<WindowNode> lastWindowNode_ { nullptr };
+    std::shared_ptr<MMI::PointerEvent> lastPointEvent_ { nullptr };
+
+    WeakPtr<WindowNode> lastDragWindowNode_  { nullptr };
+    std::shared_ptr<MMI::PointerEvent> lastDragPointEvent_ { nullptr };
 };
 } // namespace OHOS::Ace::NG
 #endif // OHOS_ACE_NG_WINDOW_SCENE_WINDOW_EVENT_PROCESS_H
