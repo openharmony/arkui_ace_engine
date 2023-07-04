@@ -422,6 +422,32 @@ HWTEST_F(WaterFlowTestNg, Property008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Property009
+ * @tc.desc: Test enableScrollInteraction of WaterFlow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property009, TestSize.Level1)
+{
+    WaterFlowModelNG waterFlowModelNG;
+    waterFlowModelNG.Create();
+
+    /**
+     * @tc.steps: step1. Test set value: true
+     */
+    waterFlowModelNG.SetScrollEnabled(true);
+    CreateWaterFlowItem(10);
+    GetInstance();
+    RunMeasureAndLayout();
+    EXPECT_EQ(layoutProperty_->GetScrollEnabled(), true);
+
+    /**
+     * @tc.steps: step2. Test set value: false
+     */
+    layoutProperty_->UpdateScrollEnabled(false);
+    EXPECT_EQ(layoutProperty_->GetScrollEnabled(), false);
+}
+
+/**
  * @tc.name: WaterFlowTest001
  * @tc.desc: Fill all items to waterFlow with fixed row and column
  * @tc.type: FUNC

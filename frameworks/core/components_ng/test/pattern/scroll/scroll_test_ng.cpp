@@ -82,6 +82,7 @@ public:
     RefPtr<LayoutWrapper> CreateScroll(Axis axis, NG::ScrollEvent&& event);
     RefPtr<LayoutWrapper> CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event);
     RefPtr<LayoutWrapper> CreateScroll(Axis axis, OnScrollStartEvent&& event);
+    RefPtr<LayoutWrapper> CreateScroll(bool isScrollEnabled);
     void CreateContent(Axis axis = Axis::VERTICAL);
     RefPtr<LayoutWrapper> RunMeasureAndLayout(float width = ROOT_WIDTH, float height = ROOT_HEIGHT);
     RefPtr<FrameNode> GetContentChild(int32_t index);
@@ -237,6 +238,16 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Axis axis, OnScrollStartEvent&&
     scrollModel.SetOnScrollStop(std::move(event));
     scrollModel.SetOnScrollEnd(std::move(event));
     CreateContent(axis);
+    GetInstance();
+    return RunMeasureAndLayout();
+}
+
+RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(bool isScrollEnabled)
+{
+    ScrollModelNG scrollModel;
+    scrollModel.Create();
+    scrollModel.SetScrollEnabled(isScrollEnabled);
+    CreateContent();
     GetInstance();
     return RunMeasureAndLayout();
 }
@@ -486,6 +497,33 @@ HWTEST_F(ScrollTestNg, AttrEdgeEffect001, TestSize.Level1)
      */
     CreateScroll(EdgeEffect::FADE);
     EXPECT_EQ(layoutProperty_->GetEdgeEffectValue(), EdgeEffect::FADE);
+}
+
+/**
+ * @tc.name: AttrEnableScrollInteraction001
+ * @tc.desc: Test attribute about enableScrollInteraction,
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test set value: true
+     */
+    CreateScroll(true);
+    EXPECT_EQ(layoutProperty_->GetScrollEnabled(), true);
+
+    const float delta = -100.f;
+    UpdateCurrentOffset(delta);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, delta)));
+
+    /**
+     * @tc.steps: step2. Test set value: false
+     */
+    CreateScroll(false);
+    EXPECT_EQ(layoutProperty_->GetScrollEnabled(), false);
+
+    UpdateCurrentOffset(delta);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, delta)));
 }
 
 /**
