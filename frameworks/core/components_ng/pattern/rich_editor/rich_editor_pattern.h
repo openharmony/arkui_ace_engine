@@ -148,7 +148,6 @@ private:
     void StopTwinkling();
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, TextStyle textStyle);
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpanAttribute imageStyle);
-
     void InitTouchEvent();
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
@@ -160,9 +159,6 @@ private:
     TextStyleResult GetTextStyleObject(RefPtr<SpanNode> node);
     ResultObject GetTextResultObject(RefPtr<SpanItem> item, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<SpanItem> item, int32_t index, int32_t start, int32_t end);
-
-    bool clickEventInitialized_ = false;
-    bool focusEventInitialized_ = false;
     void OnHover(bool isHover);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
 #if defined(ENABLE_STANDARD_INPUT)
@@ -183,16 +179,6 @@ private:
     bool BeforeIMEInsertValue(const std::string& insertValue);
     void AfterIMEInsertValue(
         const RefPtr<SpanNode>& spanNode, int32_t moveLength, RichEditorAbstractSpanResult& retInfo);
-    RefPtr<RichEditorContentModifier> richEditorContentModifier_;
-    RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
-    bool isRichEditorInit_ = false;
-    RefPtr<RichEditorController> richEditorController_;
-    int32_t caretPosition_ = 0;
-    int32_t instanceId_ = -1;
-    bool caretVisible_ = false;
-    CancelableCallback<void()> caretTwinklingTask_;
-    struct UpdateSpanStyle updateSpanStyle_;
-    RefPtr<TouchEventImpl> touchListener_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -204,8 +190,20 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-    bool isTextChange_ = false;
     int32_t moveLength_ = 0;
+    int32_t instanceId_ = -1;
+    int32_t caretPosition_ = 0;
+    bool isTextChange_ = false;
+    bool caretVisible_ = false;
+    bool isRichEditorInit_ = false;
+    bool clickEventInitialized_ = false;
+    bool focusEventInitialized_ = false;
+    RefPtr<TouchEventImpl> touchListener_;
+    struct UpdateSpanStyle updateSpanStyle_;
+    CancelableCallback<void()> caretTwinklingTask_;
+    RefPtr<RichEditorController> richEditorController_;
+    RefPtr<RichEditorContentModifier> richEditorContentModifier_;
+    RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

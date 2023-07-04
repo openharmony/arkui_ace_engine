@@ -764,6 +764,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (isMousePressed_) {
         return;
     }
+    copyOption_ = CopyOptions::Local;
     TextPattern::HandleLongPress(info);
 }
 
@@ -1406,7 +1407,6 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
         CHECK_NULL_VOID(paragraph_);
-
         if (!isFirstmouseSelect_) {
             int32_t extend = paragraph_->GetHandlePositionForClick(textOffset);
             int32_t extendEnd = extend + GetGraphemeClusterLength(extend);
@@ -1416,7 +1416,6 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
             int32_t extend = paragraph_->GetHandlePositionForClick(textOffset);
             textSelector_.Update(textSelector_.baseOffset, extend);
         }
-
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
