@@ -105,7 +105,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 #ifdef ENABLE_DRAG_FRAMEWORK
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
-        if (gestureHub->GetTextDraggable()) {
+        if (info.GetSourceDevice() == SourceType::MOUSE) {
+            LOGD("User use default no animation");
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto dragDropManager = pipeline->GetDragDropManager();
+            CHECK_NULL_VOID(dragDropManager);
+            dragDropManager->SetIsDragged(true);
+        } else if (gestureHub->GetTextDraggable()) {
             HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
         } else {
             HideEventColumn();
@@ -129,6 +136,59 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     };
     actionStart_ = actionStart;
     panRecognizer_->SetOnActionStart(actionStart);
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (touchRestrict.sourceType == SourceType::MOUSE) {
+        auto&& callback = [weakPtr = gestureEventHub_, weak = WeakClaim(this)]() {
+            auto gestureHub = weakPtr.Upgrade();
+            CHECK_NULL_VOID(gestureHub);
+            if (gestureHub->GetTextDraggable()) {
+                auto actuator = weak.Upgrade();
+                CHECK_NULL_VOID(actuator);
+                actuator->GetTextPixelMap(true);
+                return;
+            }
+            auto frameNode = gestureHub->GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto context = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            std::shared_ptr<Media::PixelMap> pixelMap = context->GetThumbnailPixelMap()->GetPixelMapSharedPtr();
+            CHECK_NULL_VOID(pixelMap);
+            auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
+            if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
+                    pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) ||
+                (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
+                    pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE &&
+                    pixelMap->GetWidth() > minDeviceLength)) {
+                float scale =
+                    static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
+                pixelMap->scale(scale, scale);
+            }
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto dragDropManager = pipeline->GetDragDropManager();
+            CHECK_NULL_VOID(dragDropManager);
+            if (!dragDropManager->IsDragged()) {
+                return;
+            }
+            int32_t width = pixelMap->GetWidth();
+            int32_t height = pixelMap->GetHeight();
+            Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, width * PIXELMAP_WIDTH_RATE,
+                height * PIXELMAP_HEIGHT_RATE };
+            int ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateShadowPic(shadowInfo);
+            if (ret != 0) {
+                LOGE("InteractionManager: UpdateShadowPic error");
+                return;
+            }
+            Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        };
+        auto gestureHub = gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        if (!gestureHub->HasThumbnailCallback()) {
+            gestureHub->SetThumbnailPixelMapCallback(callback);
+        }
+    };
+#endif // ENABLE_DRAG_FRAMEWORK
 
     auto actionUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
@@ -203,8 +263,20 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     panRecognizer_->SetIsForDrag(true);
     actionCancel_ = actionCancel;
     panRecognizer_->SetOnActionCancel(actionCancel);
-
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
 #ifdef ENABLE_DRAG_FRAMEWORK
+    if (touchRestrict.sourceType == SourceType::MOUSE && !gestureHub->GetTextDraggable()) {
+        std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
+        if (!SequencedRecognizer_) {
+            SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+            SequencedRecognizer_->RemainChildOnResetStatus();
+        }
+        SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+        result.emplace_back(SequencedRecognizer_);
+        return;
+    }
     auto longPressUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -228,8 +300,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     longPressRecognizer_->SetOnActionUpdate(longPressUpdate);
 #endif // ENABLE_DRAG_FRAMEWORK
     longPressRecognizer_->SetGestureHub(gestureEventHub_);
-    auto gestureHub = gestureEventHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -435,6 +505,56 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
 void DragEventActuator::SetThumbnailCallback(std::function<void(Offset)>&& callback)
 {
     longPressRecognizer_->SetThumbnailCallback(std::move(callback));
+}
+
+void DragEventActuator::GetTextPixelMap(bool startDrag)
+{
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    bool isAllowedDrag = IsAllowedDrag();
+    if (!gestureHub->GetTextDraggable() || !isAllowedDrag) {
+        return;
+    }
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextDragBase>();
+    CHECK_NULL_VOID(pattern);
+    auto pixelMap = gestureHub->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->RemovePixelMap();
+    if (!startDrag) {
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateHandles();
+    }
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (!dragDropManager->IsDragged()) {
+        return;
+    }
+    std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
+    auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
+    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) ||
+        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
+            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE &&
+            pixelMap->GetWidth() > minDeviceLength)) {
+        float scale = static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
+        mediaPixelMap->scale(scale, scale);
+    }
+    int32_t width = mediaPixelMap->GetWidth();
+    int32_t height = mediaPixelMap->GetHeight();
+    Msdp::DeviceStatus::ShadowInfo shadowInfo { mediaPixelMap, width * PIXELMAP_WIDTH_RATE,
+        height * PIXELMAP_HEIGHT_RATE };
+    int ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateShadowPic(shadowInfo);
+    if (ret != 0) {
+        LOGE("InteractionManager: UpdateShadowPic error");
+        return;
+    }
+    Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
 }
 
 void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation)

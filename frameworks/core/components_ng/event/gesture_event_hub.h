@@ -393,6 +393,17 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
+
+    void SetThumbnailPixelMapCallback(std::function<void()>&& callback)
+    {
+        callback_ = std::move(callback);
+    }
+
+    bool HasThumbnailCallback() const
+    {
+        return static_cast<bool>(callback_);
+    }
+
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -454,6 +465,7 @@ private:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;
+    std::function<void()> callback_;
 #endif
 };
 

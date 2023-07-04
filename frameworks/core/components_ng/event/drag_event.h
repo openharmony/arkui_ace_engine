@@ -107,6 +107,7 @@ public:
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
+    void GetTextPixelMap(bool startDrag);
 #endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const
     {
