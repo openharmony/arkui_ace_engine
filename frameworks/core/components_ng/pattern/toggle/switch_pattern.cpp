@@ -468,4 +468,20 @@ void SwitchPattern::OnRestoreInfo(const std::string& restoreInfo)
     switchPaintProperty->UpdateIsOn(jsonIsOn->GetBool());
     OnModifyDone();
 }
+
+void SwitchPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(switchPaintProperty);
+    switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
+
+    host->MarkDirtyNode();
+    host->SetNeedCallChildrenUpdate(false);
+}
 } // namespace OHOS::Ace::NG

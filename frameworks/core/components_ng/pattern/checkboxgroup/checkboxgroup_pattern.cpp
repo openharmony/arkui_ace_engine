@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
-
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
@@ -542,4 +540,23 @@ void CheckBoxGroupPattern::UpdateModifierParam(CheckBoxGroupModifier::Parameters
             static_cast<float>(paintProperty->GetCheckBoxGroupCheckMarkWidthValue().ConvertToPx());
     }
 }
+
+void CheckBoxGroupPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto renderContext = host->GetRenderContext();
+    auto checkBoxGroupPaintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(checkBoxGroupPaintProperty);
+    checkBoxGroupPaintProperty->UpdateCheckBoxGroupSelectedColor(checkBoxTheme->GetActiveColor());
+    checkBoxGroupPaintProperty->UpdateCheckBoxGroupUnSelectedColor(checkBoxTheme->GetInactiveColor());
+    checkBoxGroupPaintProperty->UpdateCheckBoxGroupCheckMarkColor(checkBoxTheme->GetPointColor());
+    host->MarkModifyDone();
+    host->MarkDirtyNode();
+}
+
 } // namespace OHOS::Ace::NG

@@ -918,4 +918,32 @@ void SelectPattern::OnRestoreInfo(const std::string& restoreInfo)
     }
 }
 
+void SelectPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+
+    auto pattern = host->GetPattern<SelectPattern>();
+    auto menuNode = pattern->GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+
+    auto renderContext = menuNode->GetRenderContext();
+    renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
+
+    auto optionNode = menuPattern->GetOptions();
+    for (auto child : optionNode) {
+        auto optionsPattern = child->GetPattern<OptionPattern>();
+        optionsPattern->SetFontColor(selectTheme->GetFontColor());
+
+        child->MarkModifyDone();
+        child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    SetOptionBgColor(selectTheme->GetBackgroundColor());
+    host->SetNeedCallChildrenUpdate(false);
+}
 } // namespace OHOS::Ace::NG

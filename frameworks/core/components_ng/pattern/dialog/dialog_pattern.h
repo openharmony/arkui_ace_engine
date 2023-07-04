@@ -116,6 +116,8 @@ public:
     {
         return dialogProperties_;
     }
+	
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnModifyDone() override;

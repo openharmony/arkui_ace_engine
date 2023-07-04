@@ -92,4 +92,6 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
 void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
 }
+
+void DialogPattern::OnColorConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG

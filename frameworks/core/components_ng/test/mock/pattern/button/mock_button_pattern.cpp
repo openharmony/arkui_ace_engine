@@ -19,4 +19,6 @@ namespace OHOS::Ace::NG {
 void ButtonPattern::OnAttachToFrameNode() {}
 
 void ButtonPattern::OnModifyDone() {}
+
+void ButtonPattern::OnColorConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG

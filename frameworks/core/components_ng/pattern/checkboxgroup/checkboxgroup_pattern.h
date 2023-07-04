@@ -134,6 +134,7 @@ public:
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
     void UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnAttachToFrameNode() override;

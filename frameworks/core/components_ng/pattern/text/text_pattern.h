@@ -215,6 +215,7 @@ public:
         onClick_ = std::move(onClick);
     }
     void OnColorConfigurationUpdate() override;
+
 protected:
     void HandleOnCopy();
     void InitMouseEvent();
@@ -247,7 +248,7 @@ protected:
     bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
-    
+
 private:
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnDetachFromFrameNode(FrameNode* node) override;

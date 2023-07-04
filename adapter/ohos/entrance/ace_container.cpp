@@ -1444,8 +1444,8 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
     NotifyConfigurationChange(!deviceAccess.empty(), configurationChange);
 }
 
-void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const OnConfigurationChange&
-    configurationChange)
+void AceContainer::NotifyConfigurationChange(
+    bool needReloadTransition, const OnConfigurationChange& configurationChange)
 {
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

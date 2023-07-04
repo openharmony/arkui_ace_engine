@@ -657,4 +657,29 @@ void InnerMenuPattern::ApplyMultiMenuTheme()
     host->GetRenderContext()->UpdateBackShadow(ShadowConfig::NoneShadow);
 }
 
+void MenuPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+
+    auto renderContext = host->GetRenderContext();
+    renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
+
+    auto optionNode = menuPattern->GetOptions();
+    for (const auto& child : optionNode) {
+        auto optionsPattern = child->GetPattern<OptionPattern>();
+        optionsPattern->SetFontColor(menuTheme->GetFontColor());
+
+        child->MarkModifyDone();
+        child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    host->SetNeedCallChildrenUpdate(false);
+}
 } // namespace OHOS::Ace::NG

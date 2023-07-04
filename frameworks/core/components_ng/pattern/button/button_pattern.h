@@ -202,6 +202,13 @@ public:
         return isInHover_;
     }
 
+    void OnColorConfigurationUpdate() override;
+
+    void SetSkipColorConfigurationUpdate()
+    {
+        isColorUpdateFlag_ = true;
+    }
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -231,7 +238,7 @@ private:
 
     bool isInHover_ = false;
     Offset localLocation_;
-
+    bool isColorUpdateFlag_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };
 } // namespace OHOS::Ace::NG
