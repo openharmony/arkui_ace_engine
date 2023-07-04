@@ -55,7 +55,7 @@ group("pattern_unittest") {
     "overlay:overlay_manager_test_ng",
     "panel:panel_test_ng",
     "patternlock:patternlock_pattern_test_ng",
-    "picker:picker_test_ng",
+    "picker:date_picker_test_ng",
     "plugin:plugin_pattern_test_ng",
     "progress:progress_test_ng",
     "qrcode:qrcode_pattern_test_ng",

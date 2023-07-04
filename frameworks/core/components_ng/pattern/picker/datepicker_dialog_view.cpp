@@ -16,12 +16,14 @@
 
 #include <utility>
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -41,6 +43,11 @@ constexpr double MONTHDAYS_WIDTH_PERCENT_ONE = 0.4285;
 constexpr double TIME_WIDTH_PERCENT_ONE = 0.5714;
 constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
 constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
+constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
+constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
+constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
+constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
+constexpr Dimension LUNARSWITCH_MARGIN_TO_BUTTON = 8.0_vp;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
 
@@ -66,6 +73,14 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     auto buttonTitleNode = CreateTitleButtonNode(dateNode);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
     buttonTitleNode->MountToParent(contentColumn);
+    std::function<void(bool)> lunarChangeEvent = [weak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
+        auto datePicker = weak.Upgrade();
+        CHECK_NULL_VOID(datePicker);
+        auto layoutProp = datePicker->GetLayoutProperty<DataPickerRowLayoutProperty>();
+        CHECK_NULL_VOID(layoutProp);
+        layoutProp->UpdateLunar(selected);
+        datePicker->MarkModifyDone();
+    };
     RefPtr<FrameNode> acceptNode = dateNode;
     if (settingData.showTime) {
         switchFlag_ = false;
@@ -77,6 +92,17 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
         auto monthDaysNode = CreateDateNode(
             monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+        lunarChangeEvent = [monthDaysNodeWeak = AceType::WeakClaim(AceType::RawPtr(monthDaysNode)),
+                               dateNodeWeak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
+            auto monthDaysNode = monthDaysNodeWeak.Upgrade();
+            auto dateNode = dateNodeWeak.Upgrade();
+            CHECK_NULL_VOID(monthDaysNode);
+            CHECK_NULL_VOID(dateNode);
+            SetShowLunar(monthDaysNode, selected);
+            SetShowLunar(dateNode, selected);
+            monthDaysNode->MarkModifyDone();
+            dateNode->MarkModifyDone();
+        };
         auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_RETURN(monthDaysPickerPattern, nullptr);
         monthDaysPickerPattern->SetTitleId(pickerPattern->GetTitleId());
@@ -101,7 +127,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         buttonTitleNode->MarkModifyDone();
         RefPtr<DateTimeAnimationController> animationController = AceType::MakeRefPtr<DateTimeAnimationController>();
         auto titleSwitchEvent = [contentColumn, pickerStack, animationController]() {
-            // switch  picker page.
+            // switch picker page.
             auto pickerRow = pickerStack->GetLastChild();
             CHECK_NULL_VOID(pickerRow);
             auto dateNode = AceType::DynamicCast<FrameNode>(pickerStack->GetChildAtIndex(0));
@@ -158,7 +184,10 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(Dimension(1,
         DimensionUnit::PERCENT)), std::nullopt));
     pickerStack->MountToParent(contentColumn);
-
+    // build lunarswitch Node
+    if (settingData.lunarswitch) {
+        CreateLunarswitchNode(contentColumn, std::move(lunarChangeEvent), settingData.isLunar);
+    }
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
 
@@ -358,8 +387,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
 
     MarginProperty margin;
     margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
+    margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 
     textConfirmNode->MountToParent(buttonConfirmNode);
@@ -628,8 +657,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
 
     MarginProperty margin;
     margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
+    margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -643,6 +672,58 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonCancelNode->MarkModifyDone();
     return buttonCancelNode;
+}
+
+void DatePickerDialogView::CreateLunarswitchNode(
+    const RefPtr<FrameNode>& contentColumn, std::function<void(const bool)>&& changeEvent, bool isLunar)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto contentRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_VOID(contentRow);
+    auto layoutProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    MarginProperty margin;
+    margin.bottom = CalcLength(LUNARSWITCH_MARGIN_TO_BUTTON);
+    layoutProps->UpdateMargin(margin);
+    layoutProps->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(LUNARSWITCH_HEIGHT)));
+
+    auto checkbox = FrameNode::CreateFrameNode(
+        V2::CHECK_BOX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CheckBoxPattern>());
+    CHECK_NULL_VOID(checkbox);
+    auto eventHub = checkbox->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(changeEvent));
+    auto checkboxPaintProps = checkbox->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(checkboxPaintProps);
+    checkboxPaintProps->UpdateCheckBoxSelect(isLunar);
+    auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(checkboxLayoutProps);
+    MarginProperty marginCheckbox;
+    marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    marginCheckbox.right = CalcLength(LUNARSWITCH_MARGIN_TO_BUTTON);
+    checkboxLayoutProps->UpdateMargin(marginCheckbox);
+    checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CHECKBOX_SIZE), CalcLength(CHECKBOX_SIZE)));
+    checkbox->MarkModifyDone();
+    checkbox->MountToParent(contentRow);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    // the unicode encoding of chinese string of lunarSwitch.
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
+    textLayoutProperty->UpdateFontSize(pickerTheme->GetLunarSwitchTextSize());
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
+    textNode->MarkModifyDone();
+    textNode->MountToParent(contentRow);
+
+    contentRow->MountToParent(contentColumn);
 }
 
 void DatePickerDialogView::SetStartDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value)

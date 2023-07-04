@@ -60,9 +60,12 @@ public:
         const PickerTextProperties& properties, bool useMilitaryTime);
 
     static bool switchFlag_;
+
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();
+    static void CreateLunarswitchNode(
+        const RefPtr<FrameNode>& contentColumn, std::function<void(const bool)>&& changeEvent, bool isLunar);
 };
 } // namespace OHOS::Ace::NG
 
