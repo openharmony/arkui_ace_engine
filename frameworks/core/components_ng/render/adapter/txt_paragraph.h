@@ -19,6 +19,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/paragraph.h"
 #include "rosen_text/typography_create.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,7 +28,7 @@ class TxtParagraph : public Paragraph {
     DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph)
 
 public:
-    TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<Rosen::FontCollection> fontCollection)
+    TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
     ~TxtParagraph() override = default;
@@ -70,9 +71,9 @@ public:
 private:
     void CreateBuilder();
     ParagraphStyle paraStyle_;
-    std::unique_ptr<Rosen::Typography> paragraph_;
-    std::unique_ptr<Rosen::TypographyCreate> builder_;
-    std::shared_ptr<Rosen::FontCollection> fontCollection_;
+    std::unique_ptr<RSParagraph> paragraph_;
+    std::unique_ptr<RSParagraphBuilder> builder_;
+    std::shared_ptr<RSFontCollection> fontCollection_;
     std::u16string text_;
     int32_t placeHolderIndex_ = -1;
 
