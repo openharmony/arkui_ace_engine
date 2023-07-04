@@ -88,7 +88,7 @@ RichEditorSelection RichEditorController::GetSpansInfo(int32_t start, int32_t en
     RichEditorSelection value;
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     if (richEditorPattern) {
-        value = richEditorPattern->GetSpansInfo(start, end);
+        value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
     }
     return value;
 }

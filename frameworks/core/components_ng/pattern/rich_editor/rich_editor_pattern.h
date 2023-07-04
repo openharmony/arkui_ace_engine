@@ -132,7 +132,7 @@ public:
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options);
     int32_t AddTextSpan(const TextSpanOptions& options);
-    RichEditorSelection GetSpansInfo(int32_t start, int32_t end);
+    RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
 
 private:
