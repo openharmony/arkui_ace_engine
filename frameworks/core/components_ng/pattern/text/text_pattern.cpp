@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
+#include "core/common/font_manager.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
@@ -42,6 +43,21 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 };
+
+TextPattern::~TextPattern()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        context->RemoveFontNodeNG(frameNode);
+        auto fontManager = context->GetFontManager();
+        if (fontManager) {
+            fontManager->UnRegisterCallbackNG(frameNode);
+            fontManager->RemoveVariationNodeNG(frameNode);
+        }
+    }
+}
 
 void TextPattern::OnAttachToFrameNode()
 {
@@ -847,6 +863,19 @@ void TextPattern::BeforeCreateLayoutWrapper()
     }
 
     bool isSpanHasClick = false;
+    CollectSpanNodes(nodes, isSpanHasClick);
+
+    if (textCache != textForDisplay_) {
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
+    }
+    if (isSpanHasClick) {
+        auto gestureEventHub = host->GetOrCreateGestureEventHub();
+        InitClickEvent(gestureEventHub);
+    }
+}
+
+void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick)
+{
     while (!nodes.empty()) {
         auto current = nodes.top();
         nodes.pop();
@@ -863,6 +892,9 @@ void TextPattern::BeforeCreateLayoutWrapper()
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
+            
+            // Register callback for fonts.
+            FontRegisterCallback(spanNode);
         } else if (current->GetTag() == V2::IMAGE_ETS_TAG) {
             AddChildSpanItem(current);
         }
@@ -871,12 +903,25 @@ void TextPattern::BeforeCreateLayoutWrapper()
             nodes.push(*iter);
         }
     }
-    if (textCache != textForDisplay_) {
-        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
-    }
-    if (isSpanHasClick) {
-        auto gestureEventHub = host->GetOrCreateGestureEventHub();
-        InitClickEvent(gestureEventHub);
+}
+
+void TextPattern::FontRegisterCallback(RefPtr<SpanNode> spanNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto callback = [span = AceType::WeakClaim(AceType::RawPtr(spanNode))] {
+        auto node = span.Upgrade();
+        if (node) {
+            node->RequestTextFlushDirty();
+        }
+    };
+    auto fontManager = pipelineContext->GetFontManager();
+    if (fontManager && spanNode->GetFontFamily()) {
+        for (const auto& familyName : spanNode->GetFontFamily().value()) {
+            fontManager->RegisterCallbackNG(spanNode, familyName, callback);
+        }
     }
 }
 
@@ -909,7 +954,8 @@ void TextPattern::InitSurfaceChangedCallback()
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+                WindowSizeChangeReason type) {
                 auto pattern = weak.Upgrade();
                 if (pattern) {
                     pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
@@ -1063,5 +1109,13 @@ void TextPattern::SetAccessibilityAction()
             pattern->ResetSelection();
         }
     });
+}
+
+void TextPattern::OnColorConfigurationUpdate()
+{
+    auto context = GetHost()->GetContext();
+    auto theme = context->GetTheme<TextTheme>();
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
 }
 } // namespace OHOS::Ace::NG

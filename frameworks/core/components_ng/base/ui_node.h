@@ -70,6 +70,8 @@ public:
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
 
+    virtual void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
@@ -240,6 +242,8 @@ public:
     // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation
     // of parent's layout wrapper
     virtual void UpdateLayoutPropertyFlag();
+
+    virtual void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) {}
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 

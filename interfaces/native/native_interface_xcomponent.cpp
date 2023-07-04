@@ -85,6 +85,15 @@ int32_t OH_NativeXComponent_GetTouchPointTiltY(OH_NativeXComponent* component, u
     return component->GetTiltY(pointIndex, tiltY);
 }
 
+int32_t OH_NativeXComponent_GetHistoricalPoints(OH_NativeXComponent* component, const void* window,
+    std::vector<OH_NativeXComponent_HistoricalPoint>& historicalPoints)
+{
+    if ((component == nullptr) || (window == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->GetHistoryPoints(window, historicalPoints);
+}
+
 int32_t OH_NativeXComponent_GetMouseEvent(
     OH_NativeXComponent* component, const void* window, OH_NativeXComponent_MouseEvent* mouseEvent)
 {

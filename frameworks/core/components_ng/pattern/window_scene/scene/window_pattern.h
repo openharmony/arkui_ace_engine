@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 
+#include "key_event.h"
+#include "pointer_event.h"
 #include "session/host/include/session.h"
 
 #include "core/components_ng/pattern/pattern.h"
@@ -34,7 +36,7 @@ public:
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DisPatchFocusActiveEvent(bool isFocusActive);
-
+    void TransferFocusWindowId(uint32_t focusWindowId);
 protected:
     void OnAttachToFrameNode() override;
 
@@ -72,7 +74,7 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     bool IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    
+
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

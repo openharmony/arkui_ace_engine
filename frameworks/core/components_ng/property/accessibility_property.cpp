@@ -57,4 +57,51 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
     }
     return supportActions;
 }
+
+void GetFrameNodeChildren(const RefPtr<UINode>& uiNode, std::list<RefPtr<FrameNode>>& children)
+{
+    if (AceType::InstanceOf<FrameNode>(uiNode)) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        if (!frameNode->IsInternal()) {
+            children.emplace_back(frameNode);
+            return;
+        }
+    } else {
+        for (const auto& frameChild : uiNode->GetChildren()) {
+            GetFrameNodeChildren(frameChild, children);
+        }
+    }
+}
+
+std::string AccessibilityProperty::GetAccessibilityText(bool isParentGroup)
+{
+    std::string text = "";
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, "");
+    if (accessibilityText_.has_value()) {
+        text = accessibilityText_.value();
+    } else {
+        text = GetText();
+    }
+    std::list<RefPtr<FrameNode>> children;
+    if ((text.empty() && isParentGroup) || (IsAccessibilityGroup() && text.empty())) {
+        for (const auto& item : frameNode->GetChildren()) {
+            GetFrameNodeChildren(item, children);
+        }
+        for (const auto& iter : children) {
+            auto frameChild = AceType::DynamicCast<FrameNode>(iter);
+            if (frameChild) {
+                auto childText =
+                    frameChild->GetAccessibilityProperty<AccessibilityProperty>()->GetAccessibilityText(true);
+                if (!text.empty() && !childText.empty()) {
+                    text += ", ";
+                }
+                if (!childText.empty()) {
+                    text += childText;
+                }
+            }
+        }
+    }
+    return text;
+}
 } // namespace OHOS::Ace::NG

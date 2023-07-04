@@ -69,7 +69,7 @@ public:
     ACE_DEFINE_COMPONENT_PROP(ContentEndOffset, float, 0.0f);
 
     ACE_DEFINE_COMPONENT_EVENT(OnScroll, void(Dimension, ScrollState));
-    ACE_DEFINE_COMPONENT_EVENT(OnScrollIndex, void(int32_t, int32_t));
+    ACE_DEFINE_COMPONENT_EVENT(OnScrollIndex, void(int32_t, int32_t, int32_t));
     ACE_DEFINE_COMPONENT_EVENT(OnReachStart, void());
     ACE_DEFINE_COMPONENT_EVENT(OnReachEnd, void());
     ACE_DEFINE_COMPONENT_EVENT(OnScrollStop, void());

@@ -57,6 +57,9 @@ public:
     virtual void SetUsrNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavBarPosition(NG::NavBarPosition mode) = 0;
     virtual void SetNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMinNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMaxNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMinContentWidth(const Dimension& value) = 0;
     virtual void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) = 0;
     virtual void SetNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavDestination(std::function<void(std::string)>&& builder) = 0;

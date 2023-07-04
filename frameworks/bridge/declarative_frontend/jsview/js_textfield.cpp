@@ -788,6 +788,20 @@ void JSTextField::SetOnChange(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnChange(std::move(callback));
 }
 
+void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
+void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(float, float)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnContentScroll(std::move(callback));
+}
+
 void JSTextField::SetOnCopy(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
@@ -975,6 +989,25 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
 }
 
+void JSTextField::SetBarState(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        LOGI("SetBarState create error, info is not number or non-valid");
+        return;
+    }
+    DisplayMode displayMode = static_cast<DisplayMode>(info[0]->ToNumber<int32_t>());
+    TextFieldModel::GetInstance()->SetBarState(displayMode);
+}
+
+void JSTextField::SetMaxLines(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        LOGI("SetMaxLines create error, info is not number or non-valid");
+        return;
+    }
+    TextFieldModel::GetInstance()->SetMaxViewLines(info[0]->ToNumber<uint32_t>());
+}
+
 void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -989,4 +1022,17 @@ void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
+void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("SelectionMenuHidden should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetSelectionMenuHidden is not correct, using default");
+        TextFieldModel::GetInstance()->SetSelectionMenuHidden(false);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
+}
 } // namespace OHOS::Ace::Framework

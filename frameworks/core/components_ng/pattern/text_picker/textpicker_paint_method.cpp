@@ -17,6 +17,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -39,12 +40,18 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
     return [weak = WeakClaim(this), dividerLineWidth, frameRect, dividerColor, dividerSpacing,
-               pressColor, enabled = enabled_](RSCanvas& canvas) {
+               pressColor, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(picker);
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
-        double upperLine = (frameRect.Height() - picker->defaultPickerItemHeight_) / 2.0;
-        double downLine = (frameRect.Height() + picker->defaultPickerItemHeight_) / 2.0;
+        auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern.Upgrade());
+        CHECK_NULL_VOID_NOLOG(textPickerPattern);
+        auto height = picker->defaultPickerItemHeight_;
+        if (textPickerPattern->GetResizeFlag()) {
+            height = textPickerPattern->GetResizePickerItemHeight();
+        }
+        double upperLine = (frameRect.Height() - height) / 2.0;
+        double downLine = (frameRect.Height() + height) / 2.0;
         OffsetF offset = OffsetF(0.0f, upperLine);
         dividerPainter.DrawLine(canvas, offset);
         OffsetF offsetY = OffsetF(0.0f, downLine);

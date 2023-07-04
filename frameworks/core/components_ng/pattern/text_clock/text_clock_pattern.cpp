@@ -28,7 +28,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
@@ -37,11 +36,16 @@ const std::string DEFAULT_FORMAT = "hms";
 
 int32_t GetSystemTimeZone()
 {
-    struct timeval currentTime {};
-    struct timezone timeZone {};
-    gettimeofday(&currentTime, &timeZone);
-    int32_t hoursWest = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
-    return hoursWest;
+    return timezone / TOTAL_SECONDS_OF_HOUR;
+}
+
+/**
+ *  The East time zone is usually represented by a positive number
+ *  and the west by a negative number.
+ */
+int32_t GetGMT(int32_t hoursWest)
+{
+    return -hoursWest;
 }
 } // namespace
 
@@ -193,10 +197,14 @@ void TextClockPattern::UpdateTimeTextCallBack()
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
 {
-    time_t utc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    time_t localTime = (hourWest_ == GetSystemTimeZone()) ? utc : utc - (hourWest_ * TOTAL_SECONDS_OF_HOUR);
-
-    auto* timeZoneTime = std::localtime(&localTime);
+    auto offset = GetGMT(hourWest_);
+    time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    // Convert to UTC time.
+    auto utcTime = std::gmtime(&current);
+    auto utcTimeSecond = std::mktime(utcTime);
+    // UTC time(timezone is GMT 0) add time zone offset.
+    time_t targetTimeZoneTime = utcTimeSecond + offset * TOTAL_SECONDS_OF_HOUR;
+    auto* timeZoneTime = std::localtime(&targetTimeZoneTime);
     CHECK_NULL_RETURN(timeZoneTime, "");
     // This is for i18n date time.
     DateTime dateTime;
@@ -228,13 +236,14 @@ std::string TextClockPattern::GetFormat() const
 int32_t TextClockPattern::GetHoursWest() const
 {
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
-    CHECK_NULL_RETURN(textClockLayoutProperty, GetSystemTimeZone());
+    auto tz = GetSystemTimeZone();
+    CHECK_NULL_RETURN(textClockLayoutProperty, tz);
     if (textClockLayoutProperty->GetHoursWest().has_value()) {
         return NearEqual(textClockLayoutProperty->GetHoursWest().value(), INT_MAX)
-                   ? GetSystemTimeZone()
+                   ? tz
                    : textClockLayoutProperty->GetHoursWest().value();
     }
-    return GetSystemTimeZone();
+    return tz;
 }
 
 RefPtr<FrameNode> TextClockPattern::GetTextNode()

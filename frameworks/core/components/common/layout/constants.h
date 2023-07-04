@@ -609,6 +609,25 @@ enum class MaximizeMode : uint32_t {
     MODE_RECOVER,
 };
 
+enum class RenderFit : int32_t {
+    CENTER = 0,
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT,
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT,
+    RESIZE_FILL,
+    RESIZE_CONTAIN,
+    RESIZE_CONTAIN_TOP_LEFT,
+    RESIZE_CONTAIN_BOTTOM_RIGHT,
+    RESIZE_COVER,
+    RESIZE_COVER_TOP_LEFT,
+    RESIZE_COVER_BOTTOM_RIGHT,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

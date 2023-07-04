@@ -1305,10 +1305,6 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
-    controller_->AddStopListener([weak]() {
-        auto tabBarPattern = weak.Upgrade();
-        tabBarPattern->isAnimating_ = false;
-    });
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -1689,7 +1685,7 @@ void TabBarPattern::AdjustFocusPosition()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (focusIndicator_ < 0 || focusIndicator_ + 1 >= tabItemOffsets_.size() ||
+    if (focusIndicator_ < 0 || static_cast<uint32_t>(focusIndicator_ + 1) >= tabItemOffsets_.size() ||
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) != TabBarMode::SCROLLABLE) {
         return;
     }

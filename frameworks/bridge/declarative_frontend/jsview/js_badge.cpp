@@ -167,7 +167,7 @@ void JSBadge::JSBind(BindingTarget globalObj)
     JSClass<JSBadge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSBadge>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSBadge>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    
+
     JSClass<JSBadge>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

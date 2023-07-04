@@ -92,12 +92,12 @@ public:
     void Mount(int32_t slot);
     void AddOffsetForChildren(const Offset& offset);
 
-    void SetWindowId(int32_t windowId)
+    void SetWindowId(uint32_t windowId)
     {
         windowId_ = windowId;
     }
 
-    int32_t GetWindowId() const
+    uint32_t GetWindowId() const
     {
         return windowId_;
     }
@@ -872,7 +872,7 @@ protected:
     // inner use, don't need to barrierfree
     NodeId nodeId_ = -1;
     int32_t pageId_ = -1;
-    int32_t windowId_ = 0;
+    uint32_t windowId_ = 0;
     bool isRootNode_ = false;
     std::string inputType_;
     WeakPtr<AccessibilityNode> parentNode_;

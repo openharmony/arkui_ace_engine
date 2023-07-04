@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/pipeline/pipeline_base.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -124,6 +126,27 @@ void DatePickerPattern::InitDisabled()
     auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+
+void DatePickerPattern::OnLanguageConfigurationUpdate()
+{
+    auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
+    CHECK_NULL_VOID(buttonConfirmNode);
+    auto confirmNode = buttonConfirmNode->GetFirstChild();
+    auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
+    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+
+    auto buttonCancelNode = weakButtonCancel_.Upgrade();
+    CHECK_NULL_VOID(buttonCancelNode);
+    auto cancelNode = buttonCancelNode->GetFirstChild();
+    auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
+    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+}
+
+bool DatePickerPattern::NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
+{
+    return false;
 }
 
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)

@@ -31,6 +31,7 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -130,14 +131,16 @@ public:
     virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
     virtual void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) = 0;
-    virtual void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
-        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) = 0;
+    virtual void SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY) = 0;
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
     virtual void SetGeometryTransition(const std::string& id) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
+    virtual void SetRenderFit(RenderFit renderFit) = 0;
 
     // flex props
     virtual void SetFlexBasis(const Dimension& value) = 0;
@@ -217,6 +220,7 @@ public:
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
+    virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
@@ -241,11 +245,13 @@ public:
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(
-        ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
+        ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, int32_t type) = 0;
+        std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear) = 0;
     virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle) = 0;
+        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear) = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;

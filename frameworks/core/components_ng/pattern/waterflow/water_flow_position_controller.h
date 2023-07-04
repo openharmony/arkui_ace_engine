@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_POSITION_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_POSITION_CONTROLLER_H
 
-#include "core/components_ng/pattern/scroll/scroll_controller.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT WaterFlowPositionController : public ScrollController {
-    DECLARE_ACE_TYPE(WaterFlowPositionController, ScrollController);
+class ACE_EXPORT WaterFlowPositionController : public ScrollableController {
+    DECLARE_ACE_TYPE(WaterFlowPositionController, ScrollableController);
 
 public:
     void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;

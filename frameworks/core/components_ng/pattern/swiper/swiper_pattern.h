@@ -47,6 +47,11 @@ public:
         return false;
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<SwiperLayoutProperty>();
@@ -378,6 +383,16 @@ public:
         return isAtHotRegion_;
     }
 
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -394,6 +409,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
@@ -449,6 +465,7 @@ private:
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
     float GetRemainingOffset() const;
     float MainSize() const;
+    float GetMainContentSize() const;
     void FireChangeEvent() const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
@@ -461,6 +478,10 @@ private:
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t CurrentIndex() const;
     int32_t GetDisplayCount() const;
+    int32_t CalculateDisplayCount() const;
+    int32_t CalculateCount(
+        float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
+    bool IsAutoFill() const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
@@ -580,6 +601,7 @@ private:
     bool mainSizeIsMeasured_ = false;
 
     bool usePropertyAnimation_ = false;
+    std::optional<int32_t> surfaceChangedCallbackId_;
 };
 } // namespace OHOS::Ace::NG
 

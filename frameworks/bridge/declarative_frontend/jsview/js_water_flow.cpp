@@ -116,6 +116,7 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSWaterFlow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSWaterFlow>::StaticMethod("friction", &JSWaterFlow::SetFriction);
 
     JSClass<JSWaterFlow>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -243,6 +244,16 @@ void JSWaterFlow::SetNestedScroll(const JSCallbackInfo& args)
 void JSWaterFlow::SetScrollEnabled(bool scrollEnabled)
 {
     WaterFlowModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+}
+
+void JSWaterFlow::SetFriction(const JSCallbackInfo& info)
+{
+    double friction = -1.0;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+        LOGW("Friction params invalid,can not convert to double");
+        friction = -1.0;
+    }
+    WaterFlowModel::GetInstance()->SetFriction(friction);
 }
 
 void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)

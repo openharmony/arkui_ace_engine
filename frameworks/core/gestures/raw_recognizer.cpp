@@ -146,6 +146,29 @@ TouchEventInfo RawRecognizer::CreateTouchEventInfo(
             touchLocationInfo.SetSourceTool(touchPoint.sourceTool);
             info.AddTouchLocationInfo(std::move(touchLocationInfo));
         }
+        for (const auto& item : point.history) {
+            float globalX = item.x;
+            float globalY = item.y;
+            float screenX = item.screenX;
+            float screenY = item.screenY;
+            auto localX = static_cast<float>(item.x - coordinateOffset_.GetX());
+            auto localY = static_cast<float>(item.y - coordinateOffset_.GetY());
+            TouchLocationInfo historyInfo("onTouch", item.id);
+            historyInfo.SetTimeStamp(item.time);
+            historyInfo.SetGlobalLocation(Offset(globalX, globalY));
+            historyInfo.SetLocalLocation(Offset(localX, localY));
+            historyInfo.SetScreenLocation(Offset(screenX, screenY));
+            historyInfo.SetTouchType(item.type);
+            historyInfo.SetForce(item.force);
+            if (item.tiltX.has_value()) {
+                historyInfo.SetTiltX(item.tiltX.value());
+            }
+            if (item.tiltY.has_value()) {
+                historyInfo.SetTiltY(item.tiltY.value());
+            }
+            historyInfo.SetSourceTool(item.sourceTool);
+            info.AddHistoryLocationInfo(std::move(historyInfo));
+        }
         info.SetTimeStamp(point.time);
         info.SetDeviceId(point.deviceId);
         info.SetForce(point.force);

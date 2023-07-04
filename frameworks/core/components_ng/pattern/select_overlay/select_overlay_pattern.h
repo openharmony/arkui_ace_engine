@@ -27,11 +27,12 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT SelectOverlayPattern : public Pattern {
-    DECLARE_ACE_TYPE(SelectOverlayPattern, Pattern);
+class ACE_EXPORT SelectOverlayPattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(SelectOverlayPattern, PopupBasePattern);
 
 public:
     explicit SelectOverlayPattern(std::shared_ptr<SelectOverlayInfo> info) : info_(std::move(info)) {}
@@ -58,7 +59,7 @@ public:
             selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
         }
         return MakeRefPtr<SelectOverlayPaintMethod>(
-            selectOverlayModifier_, info_, defaultMenuEndOffset_, hasExtensitonMenu_);
+            selectOverlayModifier_, *info_, defaultMenuEndOffset_, hasExtensionMenu_);
     }
 
     const std::shared_ptr<SelectOverlayInfo>& GetSelectOverlayInfo() const
@@ -100,7 +101,7 @@ public:
 
     float GetMenuWidth() const
     {
-        return meanuWidth_;
+        return menuWidth_;
     }
 
     const RectF& GetHandleRegion(bool isFirst) const
@@ -113,6 +114,7 @@ public:
     }
 
     void ShowOrHiddenMenu(bool isHidden);
+    void DisableMenu(bool isDisabled);
 
     void SetClosedByGlobalTouchEvent(bool closedByGlobalTouch)
     {
@@ -147,10 +149,10 @@ private:
     bool secondHandleDrag_ = false;
     // Used to record the original menu display status when the handle is moved.
     bool orignMenuIsShow_ = false;
-    bool hasExtensitonMenu_ = false;
+    bool hasExtensionMenu_ = false;
 
     int32_t greatThanMaxWidthIndex_ = -1;
-    float meanuWidth_ = 0.0f;
+    float menuWidth_ = 0.0f;
 
     std::string selectInfo_;
 

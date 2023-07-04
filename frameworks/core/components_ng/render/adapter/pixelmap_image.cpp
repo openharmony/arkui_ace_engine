@@ -63,20 +63,11 @@ void PixelMapImage::DrawToRSCanvas(
 #ifdef ENABLE_ROSEN_BACKEND
 #ifndef USE_ROSEN_DRAWING
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    if (rsCanvas == nullptr) {
-        LOGE("rsCanvas is nullptr.");
-        return;
-    }
+    CHECK_NULL_VOID(rsCanvas);
     auto skCanvas = rsCanvas->ExportSkCanvas();
-    if (skCanvas == nullptr) {
-        LOGE("skCanvas is nullptr.");
-        return;
-    }
+    CHECK_NULL_VOID(skCanvas);
     auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    if (recordingCanvas == nullptr) {
-        LOGE("recordingCanvas is nullptr.");
-        return;
-    }
+    CHECK_NULL_VOID(recordingCanvas);
     SkPaint paint;
     auto config = GetPaintConfig();
 #ifndef NEW_SKIA
@@ -89,7 +80,8 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas->ClipAdaptiveRRect(radii.get());
     recordingCanvas->scale(config.scaleX_, config.scaleY_);
 
-    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
+    Rosen::RsImageInfo rsImageInfo(
+        static_cast<int>(config.imageFit_), static_cast<int>(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
 
 #ifndef NEW_SKIA
     recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, paint);

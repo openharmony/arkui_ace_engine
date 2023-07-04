@@ -28,11 +28,11 @@
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-class DialogPattern : public Pattern {
-    DECLARE_ACE_TYPE(DialogPattern, Pattern);
+class DialogPattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -84,6 +84,11 @@ public:
         return message_;
     }
 
+    const RefPtr<UINode>& GetCustomNode()
+    {
+        return customNode_;
+    }
+
     void SetOpenAnimation(const std::optional<AnimationOption>& openAnimation)
     {
         openAnimation_ = openAnimation;
@@ -100,6 +105,16 @@ public:
     std::optional<AnimationOption> GetCloseAnimation() const
     {
         return closeAnimation_;
+    }
+
+    void SetDialogProperties(const DialogProperties& param)
+    {
+        dialogProperties_ = param;
+    }
+
+    const DialogProperties& GetDialogProperties() const
+    {
+        return dialogProperties_;
     }
 
 private:
@@ -148,6 +163,8 @@ private:
     // XTS inspector values
     std::string message_;
     std::string title_;
+
+    DialogProperties dialogProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };

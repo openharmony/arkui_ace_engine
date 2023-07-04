@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
@@ -746,6 +747,14 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseR
     gestureHub->SetResponseRegion(responseRegion);
 }
 
+void ViewAbstract::SetMouseResponseRegion(const std::vector<DimensionRect>& mouseRegion)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->MarkResponseRegion(true);
+    gestureHub->SetMouseResponseRegion(mouseRegion);
+}
+
 void ViewAbstract::SetTouchable(bool touchable)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -994,6 +1003,10 @@ void ViewAbstract::BindPopup(
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
+    // windowScene will not use subwindow
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        param->SetShowInSubWindow(false);
+    }
     auto showInSubWindow = param->IsShowInSubWindow();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
@@ -1135,6 +1148,10 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     // unable to use the subWindow in the Previewer.
     isContextMenu = false;
 #endif
+    // windowScene will not use subwindow
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        isContextMenu = false;
+    }
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
@@ -1623,5 +1640,14 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderGroup, isRenderGroup);
+}
+
+void ViewAbstract::SetRenderFit(RenderFit renderFit)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
 }
 } // namespace OHOS::Ace::NG

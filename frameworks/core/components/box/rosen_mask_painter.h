@@ -80,11 +80,7 @@ protected:
     double dipScale_ = 1.0f;
 
     // svg image draw object
-#ifndef USE_ROSEN_DRAWING
     sk_sp<SkSVGDOM> skiaDom_;
-#else
-    std::shared_ptr<RSSVGDOM> svgDom_;
-#endif
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
 };

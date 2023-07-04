@@ -193,22 +193,22 @@ void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
     }
 
     auto onScrollBarUpdate = [execCtx = info.GetExecutionContext(),
-                                 func = AceType::MakeRefPtr<JsFunction>(
-                                     JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]))](int32_t index, float offset) {
+                                 func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+                                     JSRef<JSFunc>::Cast(info[0]))](int32_t index, const Dimension& offset) {
         JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
-        JSRef<JSVal> itemOffset = JSRef<JSVal>::Make(ToJSValue(offset));
+        JSRef<JSVal> itemOffset = ConvertToJSValue(offset);
         JSRef<JSVal> params[2] = { itemIndex, itemOffset };
         auto result = func->ExecuteJS(2, params);
         if (result->IsObject()) {
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
-            JSRef<JSVal> totalOffset = obj->GetProperty("totalOffset");
-            JSRef<JSVal> totalLength = obj->GetProperty("totalLength");
-            if (totalOffset->IsNumber() && totalLength->IsNumber()) {
-                float totalOffset_ = totalOffset->ToNumber<float>();
-                float totalLength_ = totalLength->ToNumber<float>();
-                return std::pair<float, float>(totalOffset_, totalLength_);
-            } else {
+
+            Dimension totalOffset_;
+            Dimension totalLength_;
+            if (!ConvertFromJSValue(obj->GetProperty("totalOffset"), totalOffset_) ||
+                !ConvertFromJSValue(obj->GetProperty("totalLength"), totalLength_)) {
                 return std::pair<float, float>(0, 0);
+            } else {
+                return std::pair<float, float>(totalOffset_.ConvertToPx(), totalLength_.ConvertToPx());
             }
         }
         return std::pair<float, float>(0, 0);
@@ -266,6 +266,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
     JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
+    JSClass<JSGrid>::StaticMethod("friction", &JSGrid::SetFriction);
     JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -536,5 +537,15 @@ void JSGrid::SetNestedScroll(const JSCallbackInfo& args)
     nestedOpt.backward = static_cast<NestedScrollMode>(backward);
     GridModel::GetInstance()->SetNestedScroll(nestedOpt);
     args.ReturnSelf();
+}
+
+void JSGrid::SetFriction(const JSCallbackInfo& info)
+{
+    double friction = -1.0;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+        LOGW("Friction params invalid,can not convert to double");
+        friction = -1.0;
+    }
+    GridModel::GetInstance()->SetFriction(friction);
 }
 } // namespace OHOS::Ace::Framework

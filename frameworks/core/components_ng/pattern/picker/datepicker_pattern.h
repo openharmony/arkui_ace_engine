@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -67,7 +68,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paintMethod = MakeRefPtr<DatePickerPaintMethod>();
+        auto paintMethod = MakeRefPtr<DatePickerPaintMethod>(WeakClaim(this));
         paintMethod->SetEnabled(enabled_);
         paintMethod->SetBackgroundColor(backgroundColor_);
         return paintMethod;
@@ -78,6 +79,20 @@ public:
         return MakeRefPtr<DatePickerAccessibilityProperty>();
     }
 
+    void SetConfirmNode(WeakPtr<FrameNode> buttonConfirmNode)
+    {
+        weakButtonConfirm_ = buttonConfirmNode;
+    }
+
+    void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
+    {
+        weakButtonCancel_ = buttonCancelNode;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
+
+    bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange) override;
+    
     void SetChangeCallback(ColumnChangeCallback&& value);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
@@ -202,6 +217,36 @@ public:
     void SetDialogChangeEvent(const EventMarker& value)
     {
         OnDialogChange_ = value;
+    }
+
+    void SetResizePickerItemHeight(double resizePickerItemHeight)
+    {
+        resizePickerItemHeight_ = resizePickerItemHeight;
+    }
+
+    double GetResizePickerItemHeight() const
+    {
+        return resizePickerItemHeight_;
+    }
+
+    void SetResizeFlag(bool resizeFlag)
+    {
+        resizeFlag_ = resizeFlag;
+    }
+
+    bool GetResizeFlag() const
+    {
+        return resizeFlag_;
+    }
+
+    void SetIsShowInDialog(bool isShowInDialog)
+    {
+        isShowInDialog_ = isShowInDialog;
+    }
+
+    bool GetIsShowInDialog() const
+    {
+        return isShowInDialog_;
     }
 
     uint32_t GetOptionCount(RefPtr<FrameNode>& frmeNode)
@@ -550,10 +595,16 @@ private:
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;
     std::optional<int32_t> DividerId_;
+    double resizePickerItemHeight_;
+    bool resizeFlag_ = false;
+    bool isShowInDialog_ = false;
 
     EventMarker OnDialogAccept_;
     EventMarker OnDialogCancel_;
     EventMarker OnDialogChange_;
+
+    WeakPtr<FrameNode> weakButtonConfirm_;
+    WeakPtr<FrameNode> weakButtonCancel_;
 
     PickerDate startDateSolar_ = PickerDate(1970, 1, 1); // default start date is 1970-1-1 from FA document.
     LunarDate startDateLunar_;

@@ -116,8 +116,7 @@ void SetTextStyle(RSCanvas* canvas, const RenderRingInfo& trackInfo, const std::
 #ifndef USE_ROSEN_DRAWING
     paragraph->Paint(canvas, pathStartVertexX - txtStyle.font_size, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
 #else
-    paragraph->Paint(canvas->GetCanvasData()->ExportSkCanvas(), pathStartVertexX - txtStyle.font_size,
-        pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
+    LOGE("Drawing is not supported");
 #endif
 }
 

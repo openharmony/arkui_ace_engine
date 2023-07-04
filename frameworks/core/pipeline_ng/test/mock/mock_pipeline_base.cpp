@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
+#include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -252,6 +253,8 @@ void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
+
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -263,7 +266,11 @@ void PipelineContext::DumpPipelineInfo() const {}
 
 void PipelineContext::AddVisibleAreaChangeNode(
     const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
-{}
+{
+    CHECK_NULL_VOID(callback);
+    callback(false, 0.0);
+    callback(true, ratio);
+}
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
@@ -309,8 +316,13 @@ void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSc
 
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
-    return {};
+    // top inset = 1
+    return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
+
+void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+
+void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

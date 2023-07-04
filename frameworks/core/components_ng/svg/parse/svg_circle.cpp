@@ -32,6 +32,7 @@ RefPtr<SvgNode> SvgCircle::Create()
     return AceType::MakeRefPtr<SvgCircle>();
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgCircle::AsPath(const Size& viewPort) const
 {
     SkPath path;
@@ -42,5 +43,17 @@ SkPath SvgCircle::AsPath(const Size& viewPort) const
         ConvertDimensionToPx(declaration->GetR(), viewPort, SvgLengthType::OTHER));
     return path;
 }
+#else
+RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
+{
+    RSRecordingPath path;
+    auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
+    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    path.AddCircle(ConvertDimensionToPx(declaration->GetCx(), viewPort, SvgLengthType::HORIZONTAL),
+        ConvertDimensionToPx(declaration->GetCy(), viewPort, SvgLengthType::VERTICAL),
+        ConvertDimensionToPx(declaration->GetR(), viewPort, SvgLengthType::OTHER));
+    return path;
+}
+#endif
 
 } // namespace OHOS::Ace::NG

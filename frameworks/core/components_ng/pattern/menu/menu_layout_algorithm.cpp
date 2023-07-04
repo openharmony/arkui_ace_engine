@@ -408,7 +408,9 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
         auto rect = Rect(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
         rects.emplace_back(rect);
-        SubwindowManager::GetInstance()->SetHotAreas(rects);
+        if (menuNode->GetParent()) {
+            SubwindowManager::GetInstance()->SetHotAreas(rects, menuNode->GetParent()->GetId());
+        }
     }
 }
 

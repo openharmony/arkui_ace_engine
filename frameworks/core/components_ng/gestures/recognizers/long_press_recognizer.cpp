@@ -15,7 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
-#include "base/ressched/ressched_report.h"
+#include "base/perf/socperf_client.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -33,7 +33,8 @@ constexpr int32_t MAX_FINGERS = 10;
 
 void LongPressRecognizer::OnAccepted()
 {
-    ResSchedReport::GetInstance().ResSchedDataReport("click");
+    constexpr int32_t ACTION_LONG_PRESS_BOOST_CMDID = 10051;
+    SocPerfClient::GetInstance().PerfRequest(ACTION_LONG_PRESS_BOOST_CMDID, "");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }

@@ -30,9 +30,9 @@ class ACE_EXPORT SelectOverlayPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SelectOverlayPaintMethod, NodePaintMethod)
 public:
     SelectOverlayPaintMethod(const RefPtr<SelectOverlayModifier>& selectOverlayModifier,
-        std::shared_ptr<SelectOverlayInfo> info, const OffsetF& offset, bool hasExtensitonMenu)
+        SelectOverlayInfo info, const OffsetF& offset, bool hasExtensionMenu)
         : selectOverlayModifier_(selectOverlayModifier), info_(std::move(info)), defaultMenuEndOffset_(offset),
-          hasExtensitonMenu_(hasExtensitonMenu)
+          hasExtensionMenu_(hasExtensionMenu)
     {}
     ~SelectOverlayPaintMethod() override = default;
 
@@ -47,17 +47,17 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    static void DrawHandles(const std::shared_ptr<SelectOverlayInfo>& info, RSCanvas& canvas, const RectF& frameRect);
+    void DrawHandles(RSCanvas& canvas, const RectF& frameRect);
 
     static void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop);
 
     RefPtr<SelectOverlayModifier> selectOverlayModifier_;
 
-    std::shared_ptr<SelectOverlayInfo> info_;
+    SelectOverlayInfo info_;
 
     OffsetF defaultMenuEndOffset_;
 
-    bool hasExtensitonMenu_ = false;
+    bool hasExtensionMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPaintMethod);
 };

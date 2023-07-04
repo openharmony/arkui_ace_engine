@@ -141,7 +141,6 @@
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
 #include "bridge/declarative_frontend/jsview/js_touch_handler.h"
-#include "bridge/declarative_frontend/jsview/js_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_measure_layout.h"
@@ -211,9 +210,10 @@
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
+#include "bridge/declarative_frontend/jsview/js_ui_extension.h"
+#include "bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
+#include "bridge/declarative_frontend/jsview/window_scene/js_screen.h"
+#include "bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -524,9 +524,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
     { "FormLink", JSFormLink::JSBind },
-#ifdef WINDOW_SCENE_SUPPORTED
-    { "UIExtensionComponent", JSUIExtension::JSBind },
-#endif
     { "SecLocationButton", JSSecLocationButton::JSBind },
     { "SecPasteButton", JSSecPasteButton::JSBind },
     { "SecSaveButton", JSSecSaveButton::JSBind },
@@ -636,7 +633,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Video", JSVideo::JSBind },
     { "VideoController", JSVideoController::JSBind },
     { "PluginComponent", JSPlugin::JSBind },
-
+    { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     { "Model", JSSceneView::JSBind },
@@ -644,6 +641,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #if defined(WINDOW_SCENE_SUPPORTED)
     { "RootScene", JSRootScene::JSBind },
     { "Screen", JSScreen::JSBind },
+    { "UIExtensionComponent", JSUIExtension::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
 #endif
     { "RichEditor", JSRichEditor::JSBind },

@@ -45,6 +45,9 @@ enum class MouseAction : int32_t {
     HOVER_ENTER,
     HOVER_MOVE,
     HOVER_EXIT,
+    PULL_DOWN,
+    PULL_MOVE,
+    PULL_UP
 };
 
 enum class MouseState : int32_t {

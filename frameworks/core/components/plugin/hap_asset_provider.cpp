@@ -45,7 +45,7 @@ std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& 
 {
     ACE_SCOPED_TRACE("GetAsMapping");
     std::lock_guard<std::mutex> lock(mutex_);
-
+    CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, nullptr);
     for (const auto& basePath : assetBasePaths_) {
         std::string fileName = basePath + assetName;
         bool hasFile = runtimeExtractor_->HasEntry(fileName);
@@ -65,6 +65,7 @@ std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& 
 std::string HapAssetProvider::GetAssetPath(const std::string& assetName, bool isAddHapPath)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, "");
     for (const auto& basePath : assetBasePaths_) {
         std::string fileName = basePath + assetName;
         bool hasFile = runtimeExtractor_->HasEntry(fileName);
@@ -79,6 +80,10 @@ std::string HapAssetProvider::GetAssetPath(const std::string& assetName, bool is
 void HapAssetProvider::GetAssetList(const std::string& path, std::vector<std::string>& assetList)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    if (!runtimeExtractor_) {
+        LOGW("RuntimeExtractor null:%{public}s", hapPath_.c_str());
+        return;
+    }
     for (const auto& basePath : assetBasePaths_) {
         std::string assetPath = basePath + path;
         bool res = runtimeExtractor_->IsDirExist(assetPath);

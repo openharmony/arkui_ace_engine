@@ -87,5 +87,10 @@ std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
     return std::optional<TextStyle>(TextStyle());
 }
 
+size_t TextLayoutAlgorithm::GetLineCount() const
+{
+    return size_t();
+}
+
 void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper) {}
 } // namespace OHOS::Ace::NG

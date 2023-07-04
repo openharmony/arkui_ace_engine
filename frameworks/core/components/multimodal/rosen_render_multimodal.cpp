@@ -68,9 +68,9 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
     paint.setAntiAlias(true);
     paint.setColor(Color::FromARGB(230, 0, 0, 0).GetValue());
 #else
-    RSPen pen;
-    pen.SetAntiAlias(true);
-    pen.SetColor(Color::FromARGB(230, 0, 0, 0).GetValue());
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(Color::FromARGB(230, 0, 0, 0).GetValue());
 #endif
 
     UpdateParagraph(offset, subscript_.GetVoiceContent());
@@ -87,8 +87,9 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
     std::vector<RSPoint> radii = { { corner, corner }, { 0, 0 }, { corner, corner }, { 0, 0 } };
     RSRoundRect rrect(
         RSRect(offset.GetX(), offset.GetY(), offset.GetX() + width, offset.GetY() + height), radii);
-    canvas->AttachPen(paint);
+    canvas->AttachBrush(brush);
     canvas->DrawRoundRect(rrect);
+    canvas->DetachBrush();
 #endif
 
     auto leftOffset = paragraph_->GetLongestLine() / 2;
@@ -97,8 +98,7 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
 #ifndef USE_ROSEN_DRAWING
     paragraph_->Paint(canvas, centerX - leftOffset, centerY - paragraph_->GetHeight() / 2);
 #else
-    paragraph_->Paint(canvas->GetCanvasData()->ExportSkCanvas(),
-        centerX - leftOffset, centerY - paragraph_->GetHeight() / 2);
+    LOGE("Drawing is not supported");
 #endif
 }
 

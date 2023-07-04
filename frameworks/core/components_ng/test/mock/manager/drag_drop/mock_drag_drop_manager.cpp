@@ -51,18 +51,18 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 
 void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY) {}
 
-void DragDropManager::OnDragStart(float /* globalX */, float /* globalY */, const RefPtr<FrameNode>& frameNode)
+void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode)
 {
     GTEST_LOG_(INFO) << "OnDragStart has called";
     frameNode->SetNodeName(ON_DRAG_START);
 }
 
-void DragDropManager::OnDragMove(float /* globalX */, float /* globalY */, const std::string& /* extraInfo */)
+void DragDropManager::OnDragMove(const Point& point, const std::string& /* extraInfo */)
 {
     GTEST_LOG_(INFO) << "OnDragMove has called";
 }
 
-void DragDropManager::OnDragEnd(float /* globalX */, float /* globalY */, const std::string& /* extraInfo */)
+void DragDropManager::OnDragEnd(const Point& point, const std::string& /* extraInfo */)
 {
     GTEST_LOG_(INFO) << "OnDragEnd has called";
 }

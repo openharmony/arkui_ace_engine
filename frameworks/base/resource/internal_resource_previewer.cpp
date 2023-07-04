@@ -360,6 +360,12 @@ extern uint8_t* _binary_container_modal_window_defocus_recover_png_end;
 extern uint8_t _binary_container_modal_window_defocus_split_left_png_start[];
 extern uint8_t* _binary_container_modal_window_defocus_split_left_png_end;
 
+// binary/ic_bottomsheet_close.svg
+// Use objcopy transform to compiled object file.
+// The following parameters represent the beginning and end of the file.
+extern uint8_t _binary_ic_bottomsheet_close_svg_start[];
+extern uint8_t* _binary_ic_bottomsheet_close_svg_end;
+
 namespace OHOS::Ace {
 namespace {
 
@@ -585,6 +591,9 @@ const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) 
             ResourceData(_binary_container_modal_window_defocus_split_left_png_start,
                 static_cast<size_t>(_binary_container_modal_window_defocus_split_left_png_end -
                                     _binary_container_modal_window_defocus_split_left_png_start)) },
+        { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG,
+            ResourceData(_binary_ic_bottomsheet_close_svg_start,
+                static_cast<size_t>(_binary_ic_bottomsheet_close_svg_end - _binary_ic_bottomsheet_close_svg_start)) },
     };
     auto iter = RESOURCE_MAP.find(id);
     if (iter != RESOURCE_MAP.end()) {

@@ -744,9 +744,13 @@ void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitio
     }
 }
 
-void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optional<Alignment>& align,
-    const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY)
+void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
 {
+    if (buildFunc) {
+        return;
+    }
     auto coverageComponent = ViewStackProcessor::GetInstance()->GetCoverageComponent();
     coverageComponent->SetTextVal(text);
     coverageComponent->SetIsOverLay(true);
@@ -1525,7 +1529,7 @@ void ViewAbstractModelImpl::BindMenu(
     click->SetOnClick(tapGesture);
 }
 
-void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam&)
+void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);

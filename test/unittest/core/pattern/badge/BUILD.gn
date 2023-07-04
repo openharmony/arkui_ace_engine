@@ -37,6 +37,7 @@ ace_unittest("badge_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_proxy.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "badge_test_ng.cpp",
   ]
 }

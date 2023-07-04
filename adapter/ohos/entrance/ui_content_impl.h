@@ -86,7 +86,7 @@ public:
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
     void UpdateFormData(const std::string& data) override;
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
-    void ReloadForm() override;
+    void ReloadForm(const std::string& url) override;
 
     void SetFormWidth(float width) override
     {
@@ -148,6 +148,7 @@ public:
         const std::vector<std::string>& assetBasePaths) override;
     NativeValue* GetUIContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
+    void SetFocusWindowId(uint32_t focusWindowId) override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

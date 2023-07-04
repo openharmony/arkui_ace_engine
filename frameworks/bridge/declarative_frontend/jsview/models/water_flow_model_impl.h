@@ -45,6 +45,7 @@ public:
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin) override {};
+    void SetFriction(double friction) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WATER_FLOW_MODEL_IMPL_H

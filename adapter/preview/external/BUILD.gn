@@ -47,19 +47,21 @@ ohos_source_set("preview_external_source") {
     # for rosen backend
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       # for event loop
-      include_dirs = [ "//third_party/flutter/engine" ]
+      include_dirs = [
+        "//third_party/flutter/engine",
+        "//ide/tools/previewer",
+      ]
 
       # for window
-      external_deps = [ "graphic_standard:librender_service_client" ]
+      external_deps = [
+        "graphic_standard:librender_service_client",
+        "previewer:ide_extension",
+      ]
 
       sources += [
         # for event loop
-        "flutter/main_event_loop.cpp",
         "flutter/platform_task_runner.cpp",
         "flutter/platform_task_runner_adapter.cpp",
-
-        # for window
-        "window/window_impl.cpp",
       ]
     }
   }

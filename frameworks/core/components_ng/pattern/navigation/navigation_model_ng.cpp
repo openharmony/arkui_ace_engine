@@ -591,6 +591,11 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         backButtonNode->MountToParent(navigator);
         backButtonNode->MarkModifyDone();
 
+        auto hasBackButton = navBarNode->GetBackButton();
+        if (hasBackButton) {
+            hasBackButton->Clean();
+        }
+
         navBarNode->SetBackButton(navigator);
         navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
         return;
@@ -742,6 +747,7 @@ void NavigationModelNG::SetCustomToolBar(const RefPtr<AceType>& customNode)
     navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     auto toolBarNode = navBarNode->GetToolBarNode();
     CHECK_NULL_VOID(toolBarNode);
+    toolBarNode->Clean();
     customToolBar->MountToParent(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(true);
 }
@@ -958,6 +964,21 @@ void NavigationModelNG::SetNavBarPosition(NG::NavBarPosition mode)
 void NavigationModelNG::SetNavBarWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value);
+}
+
+void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value);
+}
+
+void NavigationModelNG::SetMaxNavBarWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value);
+}
+
+void NavigationModelNG::SetMinContentWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinContentWidth, value);
 }
 
 void NavigationModelNG::SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange)

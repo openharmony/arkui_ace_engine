@@ -14,8 +14,10 @@
  */
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+#include <optional>
 
 #include "base/mousestyle/mouse_style.h"
+#include "base/resource/internal_resource.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
@@ -24,6 +26,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -324,11 +327,24 @@ void SideBarContainerPattern::DoAnimation()
             }
         }
     });
-    if (animDir_ == SideBarAnimationDirection::LTR) {
-        currentOffset_ = 0.0f + realDividerWidth_;
+
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
+    if (sideBarPosition == SideBarPosition::START) {
+        if (animDir_ == SideBarAnimationDirection::LTR) {
+            currentOffset_ = 0.0f;
+        } else {
+            currentOffset_ = -realSideBarWidth_ - realDividerWidth_;
+        }
     } else {
-        currentOffset_ = -realSideBarWidth_ - realDividerWidth_;
+        if (animDir_ == SideBarAnimationDirection::LTR) {
+            currentOffset_ = 0.0f + realDividerWidth_;
+        } else {
+            currentOffset_ = -realSideBarWidth_;
+        }
     }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
     context->CloseImplicitAnimation();
@@ -432,7 +448,7 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
     auto imgRenderContext = imgFrameNode->GetRenderContext();
     auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    std::optional<ImageSourceInfo> imgSourceInfo = std::nullopt;
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -442,34 +458,24 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
 
     switch (sideBarStatus_) {
         case SideBarStatus::SHOW:
-            if (layoutProperty->GetControlButtonShowIconStr().has_value()) {
-                imgSourceInfo.SetSrc(layoutProperty->GetControlButtonShowIconStr().value());
-            } else {
-                imgSourceInfo.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-                imgSourceInfo.SetFillColor(controlButtonColor);
-            }
+            imgSourceInfo = layoutProperty->GetControlButtonShowIconInfo();
             break;
         case SideBarStatus::HIDDEN:
-            if (layoutProperty->GetControlButtonHiddenIconStr().has_value()) {
-                imgSourceInfo.SetSrc(layoutProperty->GetControlButtonHiddenIconStr().value());
-            } else {
-                imgSourceInfo.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-                imgSourceInfo.SetFillColor(controlButtonColor);
-            }
+            imgSourceInfo = layoutProperty->GetControlButtonHiddenIconInfo();
             break;
         case SideBarStatus::CHANGING:
-            if (layoutProperty->GetControlButtonSwitchingIconStr().has_value()) {
-                imgSourceInfo.SetSrc(layoutProperty->GetControlButtonSwitchingIconStr().value());
-            } else {
-                imgSourceInfo.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-                imgSourceInfo.SetFillColor(controlButtonColor);
-            }
+            imgSourceInfo = layoutProperty->GetControlButtonSwitchingIconInfo();
             break;
         default:
             break;
     }
 
-    imageLayoutProperty->UpdateImageSourceInfo(imgSourceInfo);
+    if (!imgSourceInfo.has_value()) {
+        imgSourceInfo = std::make_optional<ImageSourceInfo>();
+        imgSourceInfo->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        imgSourceInfo->SetFillColor(controlButtonColor);
+    }
+    imageLayoutProperty->UpdateImageSourceInfo(imgSourceInfo.value());
     imgFrameNode->MarkModifyDone();
 }
 

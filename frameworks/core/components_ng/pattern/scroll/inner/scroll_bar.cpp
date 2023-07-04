@@ -335,7 +335,8 @@ void ScrollBar::SetGestureEvent()
                 }
                 scrollBar->MarkNeedRender();
             }
-            if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+                info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayShrinkAnimation();
                 }
@@ -511,7 +512,7 @@ void ScrollBar::CalcReservedHeight()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(pipelineContext);
     const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (pipelineContext->GetMinPlatformVersion() <= PLATFORM_VERSION_TEN) {
+    if (pipelineContext->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
         auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
         CHECK_NULL_VOID_NOLOG(theme);
         startReservedHeight_ = Dimension(0.0, DimensionUnit::PX);

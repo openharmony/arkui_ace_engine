@@ -36,7 +36,10 @@ public:
     explicit SyntaxItem(const std::string& key)
         : UINode(V2::JS_SYNTAX_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId()), key_(key)
     {}
-    ~SyntaxItem() override = default;
+    ~SyntaxItem() override
+    {
+        SetRemoveSilently(true);
+    }
 
     bool IsAtomicNode() const override
     {

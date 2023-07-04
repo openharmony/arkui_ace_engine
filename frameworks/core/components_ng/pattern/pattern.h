@@ -220,6 +220,11 @@ public:
         return false;
     }
 
+    virtual bool UsResRegion()
+    {
+        return true;
+    }
+
     std::optional<SizeF> GetHostFrameSize() const
     {
         auto frameNode = frameNode_.Upgrade();
@@ -357,6 +362,19 @@ public:
 
     virtual void OnTouchTestHit(SourceType hitTestType) {}
 
+    virtual int32_t GetDragRecordSize()
+    {
+        return -1;
+    }
+    
+    virtual void OnLanguageConfigurationUpdate() {}
+    virtual void OnColorConfigurationUpdate() {}
+    virtual bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
+    {
+        return true;
+    }
+
+    virtual void OnSetDepth(const int32_t depth) {}
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

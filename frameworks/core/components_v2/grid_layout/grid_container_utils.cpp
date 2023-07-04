@@ -44,12 +44,16 @@ RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
 
 } // namespace
 
-GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size)
+GridSizeType GridContainerUtils::ProcessGridSizeType(
+    const V2::BreakPoints& breakpoints, const Size& size, const WindowMode& mode)
 {
     auto threshold = ParseBreakpoints(breakpoints);
     double windowWidth = 0.0;
     if (breakpoints.reference == BreakPointsReference::WindowSize) {
         windowWidth = GridSystemManager::GetInstance().GetScreenWidth();
+        if (mode == WindowMode::WINDOW_MODE_FLOATING) {
+            windowWidth -= static_cast<int32_t>(2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
+        }
     } else {
         windowWidth = size.Width();
     }

@@ -184,6 +184,7 @@ public:
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         auto safeArea = ConvertAvoidArea(avoidArea);
+        ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
             [pipeline, safeArea, type] {
                 if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
@@ -1283,8 +1284,9 @@ void UIContentImpl::Background()
     Platform::AceContainer::OnHide(instanceId_);
 }
 
-void UIContentImpl::ReloadForm()
+void UIContentImpl::ReloadForm(const std::string& url)
 {
+    startUrl_ = url;
     LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
@@ -1752,6 +1754,22 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
             auto pipelineContext =  AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetIsFocusActive(isFocusActive);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetFocusWindowId(uint32_t focusWindowId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, focusWindowId]() {
+            auto pipelineContext =  AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetFocusWindowId(focusWindowId);
         },
         TaskExecutor::TaskType::UI);
 }

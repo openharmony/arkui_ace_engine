@@ -82,4 +82,15 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
 {
     return { 0, 0 };
 }
+
+float GridPattern::EstimateHeight() const
+{
+    return 0.0f;
+}
+
+void GridPattern::OnAnimateStop() {}
+
+void GridPattern::ScrollTo(float position) {}
+
+void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) {}
 } // namespace OHOS::Ace::NG

@@ -77,9 +77,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // calculate main size.
     auto contentConstraint = swiperLayoutProperty->GetContentLayoutConstraint().value();
+    bool hasMinSize = swiperLayoutProperty->GetMinSize().has_value() &&
+                      !LessOrEqual(swiperLayoutProperty->GetMinSizeValue().Value(), 0);
+
     auto isSingleCase =
-        (swiperLayoutProperty->GetDisplayCount().has_value() && swiperLayoutProperty->GetDisplayCountValue() == 1) ||
-        (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty));
+        !hasMinSize &&
+        ((swiperLayoutProperty->GetDisplayCount().has_value() && swiperLayoutProperty->GetDisplayCountValue() == 1) ||
+            (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
 
     OptionalSizeF contentIdealSize;
     if (isSingleCase) {
@@ -258,8 +262,8 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         }
         OffScreenLayoutDirection();
         itemPosition_.clear();
-        layoutWrapper->RemoveAllChildInRenderTree();
     }
+    layoutWrapper->RemoveAllChildInRenderTree();
     if (jumpIndex_) {
         LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
@@ -400,10 +404,13 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         if (!result) {
             break;
         }
+        bool hasMinSize = swiperLayoutProperty->GetMinSize().has_value() &&
+                          !LessOrEqual(swiperLayoutProperty->GetMinSizeValue().Value(), 0);
         auto isSingleCase =
-            (swiperLayoutProperty->GetDisplayCount().has_value() &&
-                swiperLayoutProperty->GetDisplayCountValue() == 1) ||
-            (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty));
+            !hasMinSize &&
+            ((swiperLayoutProperty->GetDisplayCount().has_value() &&
+                 swiperLayoutProperty->GetDisplayCountValue() == 1) ||
+                (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
         if (isSingleCase && jumpIndex_) {
             if (!mainSizeIsDefined_) {
                 endMainPos = startPos + itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
@@ -840,8 +847,8 @@ void SwiperLayoutAlgorithm::ArrowLayout(
                       swiperIndicatorTheme->GetArrowScale().ConvertToPx() + indicatorPadding)
                 : (indicatorFrameRect.Right() + swiperIndicatorTheme->GetArrowScale().ConvertToPx() - indicatorPadding);
         arrowOffset.SetX(startPoint);
-        if (isLeftArrow && !NonNegative(arrowOffset.GetX() + padding.left.value_or(0.0f))) {
-            arrowOffset.SetX(0.0f + padding.left.value_or(0.0f));
+        if (isLeftArrow && !NonNegative(arrowOffset.GetX() - padding.left.value_or(0.0f))) {
+            arrowOffset.SetX(padding.left.value_or(0.0f));
         }
         if (GreatOrEqual(
                 arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width() - padding.right.value_or(0.0f))) {
@@ -868,8 +875,8 @@ void SwiperLayoutAlgorithm::ArrowLayout(
                                        swiperIndicatorTheme->GetArrowScale().ConvertToPx() - indicatorPadding);
         arrowOffset.SetX(indicatorFrameRect.Left() + (indicatorFrameSize.Width() - arrowFrameSize.Width()) * 0.5f);
         arrowOffset.SetY(startPoint);
-        if (isLeftArrow && !NonNegative(arrowOffset.GetY() + padding.top.value_or(0.0f))) {
-            arrowOffset.SetY(0.0f + padding.top.value_or(0.0f));
+        if (isLeftArrow && !NonNegative(arrowOffset.GetY() - padding.top.value_or(0.0f))) {
+            arrowOffset.SetY(padding.top.value_or(0.0f));
         }
         if (GreatOrEqual(arrowOffset.GetY() + arrowFrameSize.Height(),
                 swiperFrameSize.Height() - padding.bottom.value_or(0.0f))) {

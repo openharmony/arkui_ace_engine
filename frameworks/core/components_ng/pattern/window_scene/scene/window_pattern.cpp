@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -92,7 +93,7 @@ void WindowPattern::InitContent()
     contentNode_ = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
+    contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
@@ -136,6 +137,7 @@ void WindowPattern::CreateStartingNode()
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->AddChild(startingNode_);
 
+    startingNode_->SetHitTestMode(HitTestMode::HTMNONE);
     std::string startPagePath;
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     auto sessionInfo = session_->GetSessionInfo();
@@ -223,19 +225,22 @@ void WindowPattern::OnAttachToFrameNode()
 
 bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
     CHECK_NULL_RETURN(dirty, false);
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
     auto geometryNode = dirty->GetGeometryNode();
-    auto windowRect = geometryNode->GetFrameRect();
-    Rosen::WSRect rect = { .posX_ = std::round(windowRect.GetX()),
-        .posY_ = std::round(windowRect.GetY()),
-        .width_ = std::round(windowRect.Width()),
-        .height_ = std::round(windowRect.Height()) };
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameRect = geometryNode->GetFrameRect();
+    Rosen::WSRect windowRect {
+        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
+        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
+        .width_ = std::round(frameRect.Width()),
+        .height_ = std::round(frameRect.Height())
+    };
 
     CHECK_NULL_RETURN(session_, false);
-    session_->UpdateRect(rect, Rosen::SizeChangeReason::UNDEFINED);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
     return false;
 }
 
@@ -395,8 +400,10 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
 bool WindowPattern::IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     return pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-    (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
-        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE);
+        ((pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) ||
+        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) ||
+        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_UP) ||
+        (pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE));
 }
 
 void WindowPattern::HandleMouseEvent(const MouseInfo& info)
@@ -412,15 +419,27 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) {
+        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
+            AceType::DynamicCast<WindowNode>(host), pointerEvent);
+    }
+    if (action == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
+        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowDragEvent(
+            AceType::DynamicCast<WindowNode>(host), pointerEvent);
+    }
     DispatchPointerEvent(pointerEvent);
 }
 
 bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) &&
+        (pointerAction != MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) &&
+        (pointerAction != MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
         return true;
     }
-    int32_t pointerAction = pointerEvent->GetPointerAction();
     return pointerEvent->GetButtonId() != MMI::PointerEvent::BUTTON_NONE &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
@@ -439,5 +458,11 @@ void WindowPattern::OnModifyDone()
     auto inputHub = hub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
+}
+
+void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusWindowIdEvent(focusWindowId);
 }
 } // namespace OHOS::Ace::NG

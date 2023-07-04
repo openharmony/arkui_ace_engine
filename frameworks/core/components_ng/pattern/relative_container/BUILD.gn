@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,19 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
-import("//foundation/arkui/ace_engine/build/ace_lib.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("$ace_root/frameworks/core/components_ng/components_plugin.gni")
 
-# build for preview shared library
-ohos_shared_library("libace") {
-  if (use_mingw_win) {
-    deps = [ "$ace_root/build:libace_static_windows" ]
-  } else if (use_mac) {
-    deps = [ "$ace_root/build:libace_static_mac" ]
-  } else if (use_linux) {
-    deps = [ "$ace_root/build:libace_static_linux" ]
-  }
-
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
+build_component_plugin("relative_container_source") {
+  js_source = "arkui_relative_container"
+  sources = [
+    "relative_container_layout_algorithm.cpp",
+    "relative_container_napi.cpp",
+    "relative_container_view.cpp",
+  ]
 }

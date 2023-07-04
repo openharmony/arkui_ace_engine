@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_STYLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_STYLE_H
 
+#include <optional>
+
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
 const Dimension SHEET_RADIUS = 32.0_vp;
@@ -34,14 +37,12 @@ struct SheetStyle {
     std::optional<Dimension> height;
     std::optional<SheetMode> sheetMode;
     std::optional<bool> showDragBar;
+    std::optional<Color> backgroundColor;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
-        if (height != sheetStyle.height || sheetMode != sheetStyle.sheetMode 
-            || showDragBar != sheetStyle.showDragBar) {
-            return false;
-        }
-        return true;
+        return !(height != sheetStyle.height || sheetMode != sheetStyle.sheetMode ||
+                 showDragBar != sheetStyle.showDragBar || backgroundColor != sheetStyle.backgroundColor);
     }
 };
 } // namespace OHOS::Ace::NG

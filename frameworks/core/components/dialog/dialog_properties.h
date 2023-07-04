@@ -152,6 +152,8 @@ struct DialogProperties {
 
     // These attributes is used for ActionSheet.
     std::vector<ActionSheetInfo> sheetsInfo;
+
+    WeakPtr<NG::UINode> windowScene;
 };
 
 } // namespace OHOS::Ace

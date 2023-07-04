@@ -62,7 +62,7 @@ public:
         }
 
         surfaceChangeCallbackId_ = pipelineContext->RegisterSurfaceChangedCallback(
-            [&](int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight) {
+            [&](int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight, WindowSizeChangeReason type) {
             OnSurfaceChanged();
         });
 
@@ -75,6 +75,7 @@ protected:
     RenderSceneViewer();
     virtual void PaintTextureLayer(RenderContext& context, const Offset& offset) = 0;
     virtual void PrepareTextureLayer(const OHOS::Render3D::TextureInfo& info) = 0;
+    virtual OHOS::Render3D::TextureInfo CreateRenderTarget(uint32_t width, uint32_t height) = 0;
     virtual void ClearRenderObject() override;
     virtual EGLContext GetRenderContext() = 0;
     void OnTouchTestHit(

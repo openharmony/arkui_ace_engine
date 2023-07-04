@@ -49,7 +49,7 @@ class ACE_EXPORT PipelineContext : public PipelineBase {
 
 public:
     using SurfaceChangedCallbackMap =
-        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -195,6 +195,8 @@ public:
 
     void AddAfterLayoutTask(std::function<void()>&& task);
 
+    void AddAfterRenderTask(std::function<void()>&& task);
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -306,7 +308,8 @@ public:
 
     void FlushReload() override;
 
-    int32_t RegisterSurfaceChangedCallback(std::function<void(int32_t, int32_t, int32_t, int32_t)>&& callback)
+    int32_t RegisterSurfaceChangedCallback(
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
     {
         if (callback) {
             surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
@@ -352,6 +355,10 @@ public:
         isNeedFlushMouseEvent_ = true;
     }
 
+    // font
+    void AddFontNodeNG(const WeakPtr<UINode>& node);
+    void RemoveFontNodeNG(const WeakPtr<UINode>& node);
+
     // restore
     void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo) override;
     std::unique_ptr<JsonValue> GetStoredNodeInfo() override;
@@ -384,7 +391,7 @@ protected:
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
 private:
-    void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight);
+    void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
 
     void FlushWindowStateChangedCallback(bool isShow);
 
@@ -403,6 +410,8 @@ private:
     void RegisterRootEvent();
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
+
+    void SyncSafeArea();
 
     template<typename T>
     struct NodeCompare {

@@ -40,4 +40,10 @@ bool ScrollablePattern::HandleEdgeEffect(float, int32_t, const SizeF&)
 }
 
 void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset) {}
+
+void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) {}
+
+void ScrollablePattern::ScrollTo(float position) {}
+
+void ScrollablePattern::StopAnimate() {}
 } // namespace OHOS::Ace::NG

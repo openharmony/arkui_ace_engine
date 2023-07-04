@@ -308,16 +308,20 @@ bool Animator::GetAllowRunningAsynchronously()
 // return false, the animation is played forward
 bool Animator::GetInitAnimationDirection()
 {
-    if (repeatTimes_ == ANIMATION_REPEAT_INFINITE) {
+    if (direction_ == AnimationDirection::NORMAL) {
         return isReverse_;
     }
-    if (direction_ == AnimationDirection::ALTERNATE_REVERSE || direction_ == AnimationDirection::REVERSE) {
-        isReverse_ = true;
+    if (direction_ == AnimationDirection::REVERSE) {
+        return !isReverse_;
     }
-    if (direction_ != AnimationDirection::ALTERNATE) {
-        return isReverse_;
+    // for Alternate and Alternate_Reverse
+    bool isOddRound = ((repeatTimes_ - repeatTimesLeft_ + 1) % 2) == 1;
+    bool oddRoundDirectionNormal = direction_ == AnimationDirection::ALTERNATE;
+    if (isOddRound ^ oddRoundDirectionNormal) {
+        // if isOddRound is different from oddRoundDirectionNormal, same with AnimationDirection::REVERSE
+        return !isReverse_;
     }
-    return isReverse_ ? (repeatTimesLeft_ % 2) == 0 : false;
+    return isReverse_;
 }
 
 void Animator::UpdatePlayedTime(int32_t playedTime, bool checkReverse)
@@ -748,13 +752,13 @@ AnimationOption Animator::GetAnimationOption()
                 direction = AnimationDirection::REVERSE;
                 break;
             case AnimationDirection::ALTERNATE:
-                direction_ = AnimationDirection::ALTERNATE_REVERSE;
+                direction = AnimationDirection::ALTERNATE_REVERSE;
                 break;
             case AnimationDirection::REVERSE:
                 direction = AnimationDirection::NORMAL;
                 break;
             case AnimationDirection::ALTERNATE_REVERSE:
-                direction_ = AnimationDirection::ALTERNATE;
+                direction = AnimationDirection::ALTERNATE;
                 break;
             default:
                 direction = AnimationDirection::NORMAL;
@@ -900,13 +904,13 @@ void Animator::ToggleDirection()
         return;
     }
     if (repeatTimes_ == ANIMATION_REPEAT_INFINITE) {
-        elapsedTime_ = scaledDuration_ - elapsedTime_;
+        elapsedTime_ = (scaledStartDelay_ + scaledDuration_ - elapsedTime_) + scaledStartDelay_;
         LOGI("duration is infinite, can not reverse time related params. id: %{public}d", controllerId_);
         return;
     }
     repeatTimesLeft_ = repeatTimes_ - repeatTimesLeft_;
     LOGD("change left repeat times: %{public}d. id: %{public}d", repeatTimesLeft_, controllerId_);
-    elapsedTime_ = scaledDuration_ - elapsedTime_;
+    elapsedTime_ = (scaledStartDelay_ + scaledDuration_ - elapsedTime_) + scaledStartDelay_;
 }
 
 float Animator::GetNormalizedTime(float playedTime, bool needStop) const

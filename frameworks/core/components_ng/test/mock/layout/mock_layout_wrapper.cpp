@@ -77,7 +77,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 // Called to perform layout children.
 void LayoutWrapper::Layout() {}
 
-void LayoutWrapper::RestoreGeoState(int32_t rootDepth) {}
+void LayoutWrapper::RestoreGeoState() {}
 
 void LayoutWrapper::AvoidKeyboard() {}
 
@@ -117,4 +117,6 @@ std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
 void LayoutWrapper::AddNodeFlexLayouts() {}
 
 void LayoutWrapper::AddNodeLayoutTime(int64_t time) {}
+
+void LayoutWrapper::AppendChild(const RefPtr<LayoutWrapper>& child, bool isOverlayNode) {}
 } // namespace OHOS::Ace::NG

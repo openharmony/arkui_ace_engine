@@ -44,6 +44,7 @@
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
@@ -275,6 +276,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isNeedFlushMouseEvent_ = false;
     }
     needRenderNode_.clear();
+    taskScheduler_.FlushAfterRenderTask();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
 }
@@ -549,7 +551,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         TryCallNextFrameLayoutCallback();
         return;
     }
-    ExecuteSurfaceChangedCallbacks(width, height);
+    ExecuteSurfaceChangedCallbacks(width, height, type);
     // TODO: add adjust for textFieldManager when ime is show.
     auto callback = [weakFrontend = weakFrontend_, width, height]() {
         auto frontend = weakFrontend.Upgrade();
@@ -595,11 +597,11 @@ void PipelineContext::OnDrawCompleted(const std::string& componentId)
     }
 }
 
-void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight)
+void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type)
 {
     for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
         if (callback) {
-            callback(newWidth, newHeight, rootWidth_, rootHeight_);
+            callback(newWidth, newHeight, rootWidth_, rootHeight_, type);
         }
     }
 }
@@ -698,21 +700,31 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 SafeAreaInsets PipelineContext::GetSystemSafeArea() const
 {
     CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
+    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
     return safeAreaManager_->GetSystemSafeArea();
 }
 
 SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
 {
     CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
+    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
     return safeAreaManager_->GetCutoutSafeArea();
+}
+
+SafeAreaInsets PipelineContext::GetSafeArea() const
+{
+    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
+    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
+    auto systemAvoidArea = safeAreaManager_->GetSystemSafeArea();
+    auto cutoutAvoidArea = safeAreaManager_->GetCutoutSafeArea();
+    return systemAvoidArea.Combine(cutoutAvoidArea);
 }
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
-        CHECK_NULL_VOID_NOLOG(rootNode_);
-        rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        SyncSafeArea();
     }
 }
 
@@ -720,17 +732,16 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
-        CHECK_NULL_VOID_NOLOG(rootNode_);
-        rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        SyncSafeArea();
     }
 }
 
-SafeAreaInsets PipelineContext::GetSafeArea() const
+void PipelineContext::SyncSafeArea()
 {
-    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
-    auto systemAvoidArea = safeAreaManager_->GetSystemSafeArea();
-    auto cutoutAvoidArea = safeAreaManager_->GetCutoutSafeArea();
-    return systemAvoidArea.Combine(cutoutAvoidArea);
+    CHECK_NULL_VOID_NOLOG(rootNode_);
+    CHECK_NULL_VOID_NOLOG(!ignoreViewSafeArea_);
+    CHECK_NULL_VOID_NOLOG(isLayoutFullScreen_);
+    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
@@ -744,7 +755,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         rsTransaction->Begin();
     }
 #endif
-
+    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+    if (keyboardHeight > 0) {
+        // add height of navigation bar
+        keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+    }
     auto func = [this, keyboardHeight]() {
         float positionY = 0.0f;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
@@ -1125,13 +1140,17 @@ void PipelineContext::FlushTouchEvents()
         }
         canUseLongPredictTask_ = false;
         eventManager_->FlushTouchEventsBegin(touchEvents_);
-        std::list<TouchEvent> touchPoints;
+        std::unordered_map<int, TouchEvent> idToTouchPoints;
         for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
             auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
-            auto result = moveEventIds.emplace(scalePoint.id);
-            if (result.second) {
-                touchPoints.emplace_front(scalePoint);
+            auto result = idToTouchPoints.emplace(scalePoint.id, scalePoint);
+            if (!result.second) {
+                idToTouchPoints[scalePoint.id].history.emplace_back(scalePoint);
             }
+        }
+        std::list<TouchEvent> touchPoints;
+        for (auto& [_, item] : idToTouchPoints) {
+            touchPoints.emplace_back(std::move(item));
         }
         auto maxSize = touchPoints.size();
         for (auto iter = touchPoints.rbegin(); iter != touchPoints.rend(); ++iter) {
@@ -1230,6 +1249,13 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     CHECK_NULL_RETURN(eventManager_, false);
     if (event.action == KeyAction::DOWN) {
         eventManager_->DispatchKeyboardShortcut(event);
+    }
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        auto manager = GetDragDropManager();
+        if (manager) {
+            manager->SetIsDragCancel(true);
+            manager->OnDragEnd({ 0.0f, 0.0f }, "");
+        }
     }
     // TAB key set focus state from inactive to active.
     // If return success. This tab key will just trigger onKeyEvent process.
@@ -1699,11 +1725,11 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
             manager->SetExtraInfo(extraInfo);
         }
 #endif // ENABLE_DRAG_FRAMEWORK
-        manager->OnDragEnd(static_cast<float>(x), static_cast<float>(y), extraInfo);
+        manager->OnDragEnd(Point(x, y, x, y), extraInfo);
         manager->RestoreClipboardData();
         return;
     }
-    manager->OnDragMove(static_cast<float>(x), static_cast<float>(y), extraInfo);
+    manager->OnDragMove(Point(x, y, x, y), extraInfo);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)
@@ -1768,6 +1794,11 @@ void PipelineContext::Finish(bool /*autoFinish*/) const
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_.AddAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
+{
+    taskScheduler_.AddAfterRenderTask(std::move(task));
 }
 
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
@@ -1871,6 +1902,20 @@ void PipelineContext::HandleWindowSceneTouchEvent(const TouchEvent& point)
 
     if (iter->second) {
         iter->second(point.pointerEvent);
+    }
+}
+
+void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node)
+{
+    if (fontManager_) {
+        fontManager_->AddFontNodeNG(node);
+    }
+}
+
+void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node)
+{
+    if (fontManager_) {
+        fontManager_->RemoveFontNodeNG(node);
     }
 }
 // ----------------------------------------------------------------------------------

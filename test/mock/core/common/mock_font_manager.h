@@ -26,6 +26,7 @@ class MockFontManager : public FontManager {
 
 public:
     MOCK_METHOD0(VaryFontCollectionWithFontWeightScale, void());
+    MOCK_METHOD0(VaryFontCollectionWithFontWeightScaleNG, void());
     MOCK_METHOD0(LoadSystemFont, void());
 };
 } // namespace OHOS::Ace

@@ -40,8 +40,20 @@ std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
     return fontCollection_;
 }
 
+sk_sp<txt::DynamicFontManager> RosenFontCollection::GetDynamicFontManager()
+{
+    return dynamicFontManager_;
+}
+
 void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName)
 {
+    std::call_once(fontFlag_, [this]() {
+        fontCollection_ = std::make_shared<txt::FontCollection>();
+        fontCollection_->SetupDefaultFontManager();
+        dynamicFontManager_ = sk_make_sp<txt::DynamicFontManager>();
+        fontCollection_->SetDynamicFontManager(dynamicFontManager_);
+    });
+    
     auto it = std::find(families_.begin(), families_.end(), familyName);
     if (it != families_.end()) {
         return;

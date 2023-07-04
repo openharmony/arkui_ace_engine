@@ -312,10 +312,23 @@ public:
         return responseRegion_;
     }
 
+    const std::vector<DimensionRect>& GetMouseResponseRegion() const
+    {
+        return mouseResponseRegion_;
+    }
+
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
     {
         responseRegion_ = responseRegion;
         if (!responseRegion_.empty()) {
+            isResponseRegion_ = true;
+        }
+    }
+
+    void SetMouseResponseRegion(const std::vector<DimensionRect>& mouseResponseRegion)
+    {
+        mouseResponseRegion_ = mouseResponseRegion;
+        if (!mouseResponseRegion_.empty()) {
             isResponseRegion_ = true;
         }
     }
@@ -380,6 +393,17 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
+
+    void SetThumbnailPixelMapCallback(std::function<void()>&& callback)
+    {
+        callback_ = std::move(callback);
+    }
+
+    bool HasThumbnailCallback() const
+    {
+        return static_cast<bool>(callback_);
+    }
+
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -434,12 +458,14 @@ private:
     bool recreateGesture_ = true;
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
+    std::vector<DimensionRect> mouseResponseRegion_;
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
     GestureEvent gestureInfoForWeb_;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;
+    std::function<void()> callback_;
 #endif
 };
 

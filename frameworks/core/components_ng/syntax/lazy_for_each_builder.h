@@ -131,6 +131,13 @@ public:
         OnExpandChildrenOnInitialInNG();
     }
 
+    void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
+    {
+        for (const auto& item : generatedItem_) {
+            item.second->ForceUpdateLayoutPropertyFlag(propertyChangeFlag);
+        }
+    }
+
     virtual void ReleaseChildGroupById(const std::string& id) = 0;
     virtual void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
     virtual void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;

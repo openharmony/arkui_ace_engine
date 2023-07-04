@@ -43,6 +43,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void SetNestedScroll(const JSCallbackInfo& args);
     static void SetScrollEnabled(bool scrollEnabled);
+    static void SetFriction(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

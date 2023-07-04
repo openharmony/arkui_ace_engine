@@ -92,6 +92,30 @@ constexpr float ANIMATION_CURVE_DAMPING_MIDDLE = 35.0f;
 constexpr float ANIMATION_CURVE_DAMPING_HEAVY = 28.0f;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
+constexpr int32_t DEFAULT_OPTION_DURATION = 100;
+Rosen::Gravity GetRosenGravity(RenderFit renderFit)
+{
+    static const LinearEnumMapNode<RenderFit, Rosen::Gravity> gravityMap[] = {
+        { RenderFit::CENTER, Rosen::Gravity::CENTER },
+        { RenderFit::TOP, Rosen::Gravity::TOP },
+        { RenderFit::BOTTOM, Rosen::Gravity::BOTTOM },
+        { RenderFit::LEFT, Rosen::Gravity::LEFT },
+        { RenderFit::RIGHT, Rosen::Gravity::RIGHT },
+        { RenderFit::TOP_LEFT, Rosen::Gravity::TOP_LEFT },
+        { RenderFit::TOP_RIGHT, Rosen::Gravity::TOP_RIGHT },
+        { RenderFit::BOTTOM_LEFT, Rosen::Gravity::BOTTOM_LEFT },
+        { RenderFit::BOTTOM_RIGHT, Rosen::Gravity::BOTTOM_RIGHT },
+        { RenderFit::RESIZE_FILL, Rosen::Gravity::RESIZE },
+        { RenderFit::RESIZE_CONTAIN, Rosen::Gravity::RESIZE_ASPECT },
+        { RenderFit::RESIZE_CONTAIN_TOP_LEFT, Rosen::Gravity::RESIZE_ASPECT_TOP_LEFT },
+        { RenderFit::RESIZE_CONTAIN_BOTTOM_RIGHT, Rosen::Gravity::RESIZE_ASPECT_BOTTOM_RIGHT },
+        { RenderFit::RESIZE_COVER, Rosen::Gravity::RESIZE_ASPECT_FILL },
+        { RenderFit::RESIZE_COVER_TOP_LEFT, Rosen::Gravity::RESIZE_ASPECT_FILL_TOP_LEFT },
+        { RenderFit::RESIZE_COVER_BOTTOM_RIGHT, Rosen::Gravity::RESIZE_ASPECT_FILL_BOTTOM_RIGHT },
+    };
+    int64_t idx = BinarySearchFindIndex(gravityMap, ArraySize(gravityMap), renderFit);
+    return idx != -1 ? gravityMap[idx].value : Rosen::Gravity::DEFAULT;
+}
 } // namespace
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
@@ -781,7 +805,7 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     const float pi = 3.14159265;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto translate = GetTranslateXY();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
     // calculate new pos.
@@ -821,7 +845,7 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
     RectF rect;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto translate = GetTranslateXY();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
     return rect;
 }
@@ -829,9 +853,23 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
     // TODO: add rotation and center support
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto translate = GetTranslateXY();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
+}
+
+Rosen::Vector2f RosenRenderContext::GetTranslateXY() const
+{
+    Rosen::Vector2f translate = { 0.0, 0.0 };
+    if (translateXY_) {
+        translate = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty())->Get();
+    }
+    if (transformMatrixModifier_.has_value() && transformMatrixModifier_->translateXY) {
+        translate += std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(
+            transformMatrixModifier_->translateXY->GetProperty())
+                         ->Get();
+    }
+    return translate;
 }
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
@@ -2847,6 +2885,7 @@ void RosenRenderContext::ClickEffectPlayAnimation(const TouchType& touchType)
 
     AnimationOption option;
     option.SetCurve(springCurve);
+    option.SetDuration(DEFAULT_OPTION_DURATION);
 
     if (touchType == TouchType::DOWN && level != ClickEffectLevel::UNDEFINED) {
         if (isTouchUpFinished_) {
@@ -2977,6 +3016,12 @@ void RosenRenderContext::OnRenderGroupUpdate(bool isRenderGroup)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkNodeGroup(isRenderGroup);
+}
+
+void RosenRenderContext::OnRenderFitUpdate(RenderFit renderFit)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFrameGravity(GetRosenGravity(renderFit));
 }
 
 } // namespace OHOS::Ace::NG

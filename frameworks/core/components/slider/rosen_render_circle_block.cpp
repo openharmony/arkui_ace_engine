@@ -106,7 +106,7 @@ void RosenRenderCircleBlock::SyncGeometryProperties()
     spotRect.SetLeft(spotRect.GetLeft() - transRatio * LIGHT_RADIUS);
     spotRect.SetTop(spotRect.GetTop() - transRatio * LIGHT_RADIUS);
     spotRect.SetRight(spotRect.GetRight() + transRatio * LIGHT_RADIUS);
-    spotRect.SetBottom(shadspotRectowRect.GetBottom() + transRatio * LIGHT_RADIUS);
+    spotRect.SetBottom(spotRect.GetBottom() + transRatio * LIGHT_RADIUS);
 
     RSRect shadowRect(rect);
     float ambientBlur = 2.0f;

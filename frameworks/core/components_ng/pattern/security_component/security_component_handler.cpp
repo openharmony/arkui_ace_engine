@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 
+#include <securec.h>
+
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
@@ -26,15 +28,18 @@ namespace OHOS::Ace::NG {
 #ifdef SECURITY_COMPONENT_ENABLE
 using namespace OHOS::Security;
 using namespace OHOS::Security::SecurityComponent;
+namespace {
+constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
+}
 
 static std::vector<uintptr_t> g_callList = {
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::RegisterSecurityComponent),
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::UpdateSecurityComponent),
-    reinterpret_cast<uintptr_t>(SecurityComponentHandler::UnregisterSecurityComponent),
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::ReportSecurityComponentClickEvent)
 };
 
-SecurityComponent::SecCompUiRegister uiRegister(g_callList);
+SecurityComponentProbe SecurityComponentHandler::probe;
+SecurityComponent::SecCompUiRegister uiRegister(g_callList, &SecurityComponentHandler::probe);
 
 bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
 {
@@ -281,6 +286,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     CHECK_NULL_RETURN(node, false);
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
+    buttonInfo.nodeId_ = node->GetId();
     buttonInfo.padding_.top = layoutProperty->GetBackgroundTopPadding().value().ConvertToVp();
     buttonInfo.padding_.right = layoutProperty->GetBackgroundRightPadding().value().ConvertToVp();
     buttonInfo.padding_.bottom = layoutProperty->GetBackgroundBottomPadding().value().ConvertToVp();
@@ -395,6 +401,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
 
 int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
 {
+    SecurityComponentHandler::probe.InitProbeTask();
     std::string componentInfo;
     if (!InitButtonInfo(componentInfo, node)) {
         return -1;
@@ -436,7 +443,12 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId
     SecCompClickEvent secEvent;
     secEvent.touchX = event.GetDisplayX();
     secEvent.touchY = event.GetDisplayY();
-    secEvent.timestamp = static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count());
+    secEvent.timestamp = static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+    auto data = event.GetEnhanceData();
+    if (data.size() > 0) {
+        secEvent.extraInfo.data = data.data();
+        secEvent.extraInfo.dataSize = data.size();
+    }
     return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, secEvent);
 }
 #else

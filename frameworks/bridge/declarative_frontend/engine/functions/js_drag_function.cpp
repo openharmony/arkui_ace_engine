@@ -104,6 +104,10 @@ public:
     {
         JSClass<JsDragEvent>::Declare("DragEvent");
         JSClass<JsDragEvent>::CustomMethod("getPasteData", &JsDragEvent::GetJsPasteData);
+        JSClass<JsDragEvent>::CustomMethod("getDisplayX", &JsDragEvent::GetScreenX);
+        JSClass<JsDragEvent>::CustomMethod("getDisplayY", &JsDragEvent::GetScreenY);
+        JSClass<JsDragEvent>::CustomMethod("getWindowX", &JsDragEvent::GetX);
+        JSClass<JsDragEvent>::CustomMethod("getWindowY", &JsDragEvent::GetY);
         JSClass<JsDragEvent>::CustomMethod("getX", &JsDragEvent::GetX);
         JSClass<JsDragEvent>::CustomMethod("getY", &JsDragEvent::GetY);
         JSClass<JsDragEvent>::CustomMethod("getDescription", &JsDragEvent::GetDescription);
@@ -133,16 +137,30 @@ public:
         args.SetReturnValue(jsPasteData_);
     }
 
+    void GetScreenX(const JSCallbackInfo& args)
+    {
+        auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenX())));
+        auto xValueRef = JSRef<JSVal>::Make(xValue);
+        args.SetReturnValue(xValueRef);
+    }
+
+    void GetScreenY(const JSCallbackInfo& args)
+    {
+        auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenY())));
+        auto yValueRef = JSRef<JSVal>::Make(yValue);
+        args.SetReturnValue(yValueRef);
+    }
+
     void GetX(const JSCallbackInfo& args)
     {
-        auto xValue = JSVal(ToJSValue(dragEvent_->GetX()));
+        auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetX())));
         auto xValueRef = JSRef<JSVal>::Make(xValue);
         args.SetReturnValue(xValueRef);
     }
 
     void GetY(const JSCallbackInfo& args)
     {
-        auto yValue = JSVal(ToJSValue(dragEvent_->GetY()));
+        auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetY())));
         auto yValueRef = JSRef<JSVal>::Make(yValue);
         args.SetReturnValue(yValueRef);
     }

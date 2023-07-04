@@ -18,19 +18,17 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern {
-    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern);
+class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern, public PopupBasePattern {
+    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern);
 
 public:
     SheetPresentationPattern(int32_t targetId, std::function<void(const std::string&)>&& callback)
@@ -85,7 +83,8 @@ public:
 
     void SheetTransition(bool isTransitionIn);
 
-    void SetIsAnimating(bool isOnAnmation) {
+    void SetIsAnimating(bool isOnAnmation)
+    {
         isAnimating_ = isOnAnmation;
     }
 
@@ -96,7 +95,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return {FocusType::SCOPE, true};
+        return { FocusType::SCOPE, true };
     }
 
 private:

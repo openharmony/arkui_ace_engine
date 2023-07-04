@@ -73,6 +73,7 @@ void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Fr
 void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout) {}
 void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
 void FrameNode::UpdateLayoutPropertyFlag() {}
+void FrameNode::ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) {}
 void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag) {}
 void FrameNode::MarkResponseRegion(bool isResponseRegion) {}
 
@@ -168,6 +169,12 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame() const
     return nullptr;
 }
 
+bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint,
+    int32_t sourceType)
+{
+    return true;
+}
+
 bool FrameNode::IsMeasureBoundary()
 {
     return false;
@@ -209,7 +216,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return HitTestResult::BUBBLING;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect)
+std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
 {
     return std::vector<RectF>();
 }
@@ -256,8 +263,11 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return nullptr;
 }
 
-bool FrameNode::IsContentRoot()
+void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
 {
-    return false;
+}
+
+void FrameNode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
+{
 }
 } // namespace OHOS::Ace::NG

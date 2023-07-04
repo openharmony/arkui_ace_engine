@@ -142,5 +142,6 @@ bool TextFieldPattern::IsTextArea() const
     return {};
 }
 void TextFieldPattern::CreateHandles() {}
+void TextFieldPattern::StopEditing() {}
 
 } // namespace OHOS::Ace::NG

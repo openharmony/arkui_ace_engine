@@ -125,6 +125,8 @@ void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
             backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
             break;
         }
+        titleBarNode->SetBackButton(navBarNode->GetBackButton());
+        titleBarNode->AddChild(titleBarNode->GetBackButton());
         if (titleBarNode->GetBackButton() && !titleBarLayoutProperty->GetHideBackButtonValue(false)) {
             auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
             CHECK_NULL_VOID(backButtonNode);
@@ -133,8 +135,6 @@ void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
             backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             break;
         }
-        titleBarNode->SetBackButton(navBarNode->GetBackButton());
-        titleBarNode->AddChild(titleBarNode->GetBackButton());
     } while (false);
     BuildTitle(navBarNode, titleBarNode);
     BuildSubtitle(navBarNode, titleBarNode);

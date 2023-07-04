@@ -153,6 +153,7 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toast/toast_view.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
@@ -161,6 +162,7 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
 
     # self
     "$ace_root/adapter/ohos/osal/ace_engine_ext.cpp",
@@ -169,12 +171,15 @@ ohos_unittest("view_abstract_test_ng") {
     "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/core/animation/animator.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/frameworks/core/animation/spring_model.cpp",
+    "$ace_root/frameworks/core/animation/spring_motion.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/ace_engine_ext.cpp",
     "$ace_root/frameworks/core/common/anr_thread.cpp",

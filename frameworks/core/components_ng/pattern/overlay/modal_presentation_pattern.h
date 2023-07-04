@@ -18,18 +18,12 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-enum ModalTransition {
-    DEFAULT,
-    NONE,
-    ALPHA,
-};
-
-class ACE_EXPORT ModalPresentationPattern : public Pattern {
-    DECLARE_ACE_TYPE(ModalPresentationPattern, Pattern);
+class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern);
 
 public:
     ModalPresentationPattern(int32_t targetId, ModalTransition type, std::function<void(const std::string&)>&& callback)
@@ -71,7 +65,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return {FocusType::SCOPE, true};
+        return { FocusType::SCOPE, true };
     }
 
 private:

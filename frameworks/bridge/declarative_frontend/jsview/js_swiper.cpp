@@ -70,6 +70,8 @@ const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH
 const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::DOT, SwiperIndicatorType::DIGIT };
 const static int32_t DEFAULT_INTERVAL = 3000;
 const static int32_t DEFAULT_DURATION = 400;
+const static int32_t DEFAULT_DISPLAY_COUNT = 1;
+const static int32_t PLATFORM_VERSION_TEN = 10;
 
 JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 {
@@ -194,6 +196,34 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
         return;
     }
 
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (info[0]->IsString() && info[0]->ToString() == "auto") {
+            SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+            SwiperModel::GetInstance()->ResetDisplayCount();
+        } else if (info[0]->IsNumber() && info[0]->ToNumber<int32_t>() > 0) {
+            SwiperModel::GetInstance()->SetDisplayCount(info[0]->ToNumber<int32_t>());
+        } else if (info[0]->IsObject()) {
+            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+            auto minSizeParam = jsObj->GetProperty("minSize");
+            if (minSizeParam->IsNull()) {
+                LOGW("minSize param is invalid");
+                return;
+            }
+            CalcDimension minSizeValue;
+            if (!ParseJsDimensionVp(minSizeParam, minSizeValue)) {
+                SwiperModel::GetInstance()->SetMinSize(0.0_vp);
+                return;
+            }
+            SwiperModel::GetInstance()->SetMinSize(minSizeValue);
+        } else {
+            SwiperModel::GetInstance()->SetDisplayCount(DEFAULT_DISPLAY_COUNT);
+        }
+
+        return;
+    }
+
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
         SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
     } else if (info[0]->IsNumber()) {
@@ -256,6 +286,13 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsNumber()) {
         index = info[0]->ToNumber<int32_t>();
     }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        index = index < 0 ? 0 : index;
+    }
+
     if (index < 0) {
         LOGE("index is not valid: %{public}d", index);
         return;
@@ -357,17 +394,17 @@ void JSSwiper::SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parse
 
 SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
-    JSRef<JSVal> leftValue = obj->GetProperty("left");
-    JSRef<JSVal> topValue = obj->GetProperty("top");
-    JSRef<JSVal> rightValue = obj->GetProperty("right");
-    JSRef<JSVal> bottomValue = obj->GetProperty("bottom");
-    JSRef<JSVal> itemWidthValue = obj->GetProperty("itemWidth");
-    JSRef<JSVal> itemHeightValue = obj->GetProperty("itemHeight");
-    JSRef<JSVal> selectedItemWidthValue = obj->GetProperty("selectedItemWidth");
-    JSRef<JSVal> selectedItemHeightValue = obj->GetProperty("selectedItemHeight");
-    JSRef<JSVal> maskValue = obj->GetProperty("mask");
-    JSRef<JSVal> colorValue = obj->GetProperty("color");
-    JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
+    JSRef<JSVal> leftValue = obj->GetProperty("leftValue");
+    JSRef<JSVal> topValue = obj->GetProperty("topValue");
+    JSRef<JSVal> rightValue = obj->GetProperty("rightValue");
+    JSRef<JSVal> bottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> itemWidthValue = obj->GetProperty("itemWidthValue");
+    JSRef<JSVal> itemHeightValue = obj->GetProperty("itemHeightValue");
+    JSRef<JSVal> selectedItemWidthValue = obj->GetProperty("selectedItemWidthValue");
+    JSRef<JSVal> selectedItemHeightValue = obj->GetProperty("selectedItemHeightValue");
+    JSRef<JSVal> maskValue = obj->GetProperty("maskValue");
+    JSRef<JSVal> colorValue = obj->GetProperty("colorValue");
+    JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColorValue");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -376,7 +413,14 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     SwiperParameters swiperParameters;
     CalcDimension dimPosition;
     parseOk = ParseJsDimensionPx(leftValue, dimPosition);
-    swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
+    if (parseOk) {
+        if (dimPosition.ConvertToPx() < 0.0f) {
+            dimPosition = 0.0_vp;
+        }
+    } else {
+        dimPosition = 0.0_vp;
+    }
+    swiperParameters.dimLeft = dimPosition;
     parseOk = ParseJsDimensionPx(topValue, dimPosition);
     swiperParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(rightValue, dimPosition);
@@ -410,14 +454,14 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 
 SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& obj)
 {
-    JSRef<JSVal> dotLeftValue = obj->GetProperty("left");
-    JSRef<JSVal> dotTopValue = obj->GetProperty("top");
-    JSRef<JSVal> dotRightValue = obj->GetProperty("right");
-    JSRef<JSVal> dotBottomValue = obj->GetProperty("bottom");
-    JSRef<JSVal> fontColorValue = obj->GetProperty("fontColor");
-    JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColor");
-    JSRef<JSVal> digitFontValue = obj->GetProperty("digitFont");
-    JSRef<JSVal> selectedDigitFontValue = obj->GetProperty("selectedDigitFont");
+    JSRef<JSVal> dotLeftValue = obj->GetProperty("leftValue");
+    JSRef<JSVal> dotTopValue = obj->GetProperty("topValue");
+    JSRef<JSVal> dotRightValue = obj->GetProperty("rightValue");
+    JSRef<JSVal> dotBottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> fontColorValue = obj->GetProperty("fontColorValue");
+    JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColorValue");
+    JSRef<JSVal> digitFontValue = obj->GetProperty("digitFontValue");
+    JSRef<JSVal> selectedDigitFontValue = obj->GetProperty("selectedDigitFontValue");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -426,7 +470,14 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     SwiperDigitalParameters digitalParameters;
     CalcDimension dimPosition;
     parseOk = ParseJsDimensionVp(dotLeftValue, dimPosition);
-    digitalParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
+    if (parseOk) {
+        if (dimPosition.ConvertToPx() < 0.0f) {
+            dimPosition = 0.0_vp;
+        }
+    } else {
+        dimPosition = 0.0_vp;
+    }
+    digitalParameters.dimLeft = dimPosition;
     parseOk = ParseJsDimensionVp(dotTopValue, dimPosition);
     digitalParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionVp(dotRightValue, dimPosition);
@@ -736,11 +787,11 @@ void JSSwiper::SetCurve(const JSCallbackInfo& info)
             };
         }
         auto jsCurveString = object->GetProperty("__curveString");
-        if (jsCurveString->IsString() && customCallBack) {
+        if (jsCurveString->IsString()) {
             auto aniTimFunc = jsCurveString->ToString();
-            if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
+            if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM && customCallBack) {
                 curve = CreateCurve(customCallBack);
-            } else {
+            } else if (aniTimFunc != DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
                 curve = CreateCurve(aniTimFunc);
             }
         }

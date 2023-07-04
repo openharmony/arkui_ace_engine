@@ -16,7 +16,6 @@
 #include "prompt_action.h"
 
 #include <string>
-#include <uv.h>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "napi/native_api.h"
@@ -27,6 +26,7 @@
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -201,7 +201,6 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 
 struct PromptAsyncContext {
     napi_env env = nullptr;
-    napi_async_work work = nullptr;
     napi_value titleNApi = nullptr;
     napi_value messageNApi = nullptr;
     napi_value buttonsNApi = nullptr;
@@ -222,6 +221,7 @@ struct PromptAsyncContext {
     int32_t callbackType = -1;
     int32_t successType = -1;
     bool valid = true;
+    int32_t instanceId = -1;
 };
 
 void DeleteContextAndThrowError(napi_env env, PromptAsyncContext* context, const std::string& errorMessage)
@@ -310,6 +310,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
     auto asyncContext = new PromptAsyncContext();
     asyncContext->env = env;
+    asyncContext->instanceId = Container::CurrentId();
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -353,28 +354,27 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     asyncContext->callbacks.emplace("cancel");
 
     auto callBack = [asyncContext](int32_t callbackType, int32_t successType) {
-        uv_loop_s* loop = nullptr;
         if (asyncContext == nullptr) {
             return;
         }
 
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
-        napi_get_uv_event_loop(asyncContext->env, &loop);
-        uv_work_t* work = new uv_work_t;
-        work->data = (void*)asyncContext;
-        int rev = uv_queue_work(
-            loop, work, [](uv_work_t* work) {},
-            [](uv_work_t* work, int status) {
-                if (work == nullptr) {
-                    return;
-                }
+        auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
+        if (!container) {
+            LOGW("container is null. %{public}d", asyncContext->instanceId);
+            return;
+        }
 
-                PromptAsyncContext* asyncContext = (PromptAsyncContext*)work->data;
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGW("taskExecutor is null.");
+            return;
+        }
+        taskExecutor->PostTask(
+            [asyncContext]() mutable {
                 if (asyncContext == nullptr) {
                     LOGE("%{public}s, asyncContext is nullptr.", __func__);
-                    delete work;
-                    work = nullptr;
                     return;
                 }
 
@@ -382,8 +382,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     LOGE("%{public}s, module exported object is invalid.", __func__);
                     delete asyncContext;
                     asyncContext = nullptr;
-                    delete work;
-                    work = nullptr;
                     return;
                 }
 
@@ -393,8 +391,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     LOGE("%{public}s, open handle scope failed.", __func__);
                     delete asyncContext;
                     asyncContext = nullptr;
-                    delete work;
-                    work = nullptr;
                     return;
                 }
 
@@ -433,19 +429,11 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                         asyncContext->env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
-                napi_delete_async_work(asyncContext->env, asyncContext->work);
                 napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
                 asyncContext = nullptr;
-                delete work;
-                work = nullptr;
-            });
-        if (rev != 0) {
-            if (work != nullptr) {
-                delete work;
-                work = nullptr;
-            }
-        }
+            },
+            TaskExecutor::TaskType::JS);
     };
 
     napi_wrap(
@@ -548,6 +536,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
     auto* asyncContext = new PromptAsyncContext();
     asyncContext->env = env;
+    asyncContext->instanceId = Container::CurrentId();
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -589,28 +578,27 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     }
 
     auto callBack = [asyncContext](int32_t callbackType, int32_t successType) {
-        uv_loop_s* loop = nullptr;
         if (asyncContext == nullptr) {
             return;
         }
 
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
-        napi_get_uv_event_loop(asyncContext->env, &loop);
-        uv_work_t* work = new uv_work_t;
-        work->data = (void*)asyncContext;
-        int rev = uv_queue_work(
-            loop, work, [](uv_work_t* work) {},
-            [](uv_work_t* work, int status) {
-                if (work == nullptr) {
-                    return;
-                }
+        auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
+        if (!container) {
+            LOGW("container is null. %{public}d", asyncContext->instanceId);
+            return;
+        }
 
-                auto* asyncContext = static_cast<PromptAsyncContext*>(work->data);
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGW("taskExecutor is null.");
+            return;
+        }
+        taskExecutor->PostTask(
+            [asyncContext]() mutable {
                 if (asyncContext == nullptr) {
                     LOGE("%{public}s, asyncContext is nullptr.", __func__);
-                    delete work;
-                    work = nullptr;
                     return;
                 }
 
@@ -618,8 +606,6 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     LOGE("%{public}s, module exported object is invalid.", __func__);
                     delete asyncContext;
                     asyncContext = nullptr;
-                    delete work;
-                    work = nullptr;
                     return;
                 }
 
@@ -629,8 +615,6 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     LOGE("%{public}s, open handle scope failed.", __func__);
                     delete asyncContext;
                     asyncContext = nullptr;
-                    delete work;
-                    work = nullptr;
                     return;
                 }
 
@@ -669,19 +653,11 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         asyncContext->env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
-                napi_delete_async_work(asyncContext->env, asyncContext->work);
                 napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
                 asyncContext = nullptr;
-                delete work;
-                work = nullptr;
-            });
-        if (rev != 0) {
-            if (work != nullptr) {
-                delete work;
-                work = nullptr;
-            }
-        }
+            },
+            TaskExecutor::TaskType::JS);
     };
 
     napi_wrap(

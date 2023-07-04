@@ -18,6 +18,7 @@
 #include "session/host/include/extension_session.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -25,20 +26,22 @@ namespace OHOS::Ace::NG {
 
 void AbilityComponentPattern::OnModifyDone()
 {
-    Pattern::OnModifyDone();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    InitTouchEvent(gestureHub);
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        Pattern::OnModifyDone();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitTouchEvent(gestureHub);
+    }
     if (adapter_) {
         UpdateWindowRect();
     } else {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        int32_t windowId = pipelineContext->GetWindowId();
+        auto windowId = pipelineContext->GetWindowId();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
@@ -81,7 +84,7 @@ bool AbilityComponentPattern::OnDirtyLayoutWrapperSwap(
 void AbilityComponentPattern::UpdateWindowRect()
 {
     if (!hasConnectionToAbility_) {
-        LOGW("AbilityComponent has not be connected");
+        LOGD("AbilityComponent has not be connected");
         return;
     }
     auto host = GetHost();
