@@ -217,6 +217,13 @@ void SwiperPattern::OnModifyDone()
         mainSizeIsMeasured_ = false;
         itemPosition_.clear();
         jumpIndex_ = currentIndex_;
+        for (const auto& child: host->GetChildren()) {
+            if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
+                auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
+                CHECK_NULL_VOID(lazyForEachNode);
+                lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
+            }
+        }
     }
 }
 

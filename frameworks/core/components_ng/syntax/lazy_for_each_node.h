@@ -74,6 +74,11 @@ public:
         requestLongPredict_ = requestLongPredict;
     }
 
+    void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
+    {
+        builder_->SetFlagForGeneratedItem(propertyChangeFlag);
+    }
+
 private:
     void OnAttachToMainTree(bool recursive) override
     {
