@@ -71,7 +71,8 @@
                 "imf",
                 "device_status",
                 "soc_perf",
-                "security_component"
+                "security_component",
+                "previewer"
             ],
             "third_party": [
                 "json",
@@ -138,6 +139,16 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor:drawable_descriptor"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_files": [
+                            "adapter/preview/entrance/ace_ability.h",
+                            "adapter/preview/entrance/ace_run_args.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/build:libace"
                 }
             ],
             "test": [

@@ -145,7 +145,7 @@ common_bin = [
     part_name = "hilog"
   },
   {
-    label = "//foundation/arkui/ace_engine/adapter/preview/build:libace"
+    label = "//foundation/arkui/ace_engine/build:libace"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -186,7 +186,7 @@ napi_modules = [
         label = "//base/hiviewdfx/hilog/interfaces/js/kits/napi:libhilognapi"
         subsystem_name = "hiviewdfx"
         part_name = "hilog"
-        lib_names = [ "hilog" ]
+        lib_names = [ "hilog_napi" ]
       },
       {
         label = "//commonlibrary/ets_utils/js_api_module/buffer:buffer_packages"

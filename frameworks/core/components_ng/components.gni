@@ -157,8 +157,10 @@ template("build_component_ng") {
           external_deps += [ "graphic_standard:librender_service_client" ]
         }
 
-        include_dirs +=
-            [ "//foundation/window/window_manager/interfaces/innerkits" ]
+        include_dirs += [
+          "//foundation/window/window_manager",
+          "//foundation/window/window_manager/interfaces/innerkits",
+        ]
       }
 
       if (defined(config.enable_standard_input) &&
