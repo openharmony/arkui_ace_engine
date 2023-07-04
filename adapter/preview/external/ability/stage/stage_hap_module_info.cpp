@@ -24,6 +24,7 @@ void StageHapModuleInfo::Parse(const std::unique_ptr<JsonValue>& root)
     }
     compileMode_ = root->GetString("compileMode");
     moduleName_ = root->GetString("name");
+    pageProfile_ = root->GetString("pages");
     auto metaData = root->GetValue("metadata");
     if (metaData && metaData->IsArray()) {
         for (auto index = 0; index < metaData->GetArraySize(); ++index) {
@@ -50,6 +51,11 @@ const std::string& StageHapModuleInfo::GetCompileMode() const
 const std::string& StageHapModuleInfo::GetModuleName() const
 {
     return moduleName_;
+}
+
+const std::string& StageHapModuleInfo::GetPageProfile() const
+{
+    return pageProfile_;
 }
 
 bool StageHapModuleInfo::GetPartialUpdateFlag() const
