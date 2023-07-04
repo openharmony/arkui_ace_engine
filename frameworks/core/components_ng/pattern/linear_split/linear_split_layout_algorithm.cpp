@@ -20,9 +20,9 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "linear_split_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {

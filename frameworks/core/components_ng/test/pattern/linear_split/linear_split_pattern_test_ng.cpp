@@ -379,9 +379,9 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     ASSERT_NE(linearSplitLayoutProperty, nullptr);
     LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, linearSplitLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
-    std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos;
     RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
-        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::COLUMN_SPLIT, dragSplitOffset, false);
+        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::COLUMN_SPLIT, childrenDragPos, false);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
@@ -483,7 +483,6 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     Offset globalLocation2(10, 543);
     info.SetGlobalLocation(globalLocation2);
     info.SetOffsetY(2);
-    linearSplitPattern->dragSplitOffset_ = { ZERO, ZERO, ZERO, ZERO, ZERO };
 
     /**
      * @tc.steps: step8. Set IsOverParent and Call HandlePanEvent function.
@@ -528,7 +527,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
         info.SetOffsetY(-3);
         linearSplitPattern->HandlePanUpdate(info);
-        EXPECT_EQ(linearSplitPattern->dragSplitOffset_[1], 0.0f);
+        EXPECT_EQ(linearSplitPattern->childrenDragPos_[1], 0.0f);
 
         /**
          * @tc.steps: step11. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
@@ -653,7 +652,6 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     Offset globalLocation(335, 10);
     info.SetGlobalLocation(globalLocation);
     info.SetOffsetX(2);
-    linearSplitPattern->dragSplitOffset_ = { ZERO, ZERO, ZERO, ZERO, ZERO };
     /**
      * @tc.steps: step6. Set IsOverParent and Call HandlePanEvent function.
      * @tc.expected: PanStart and PanUpdate return normally when IsOverParent is true
@@ -697,7 +695,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
         info.SetOffsetX(-3);
         linearSplitPattern->HandlePanUpdate(info);
-        EXPECT_EQ(linearSplitPattern->dragSplitOffset_[1], 0.0f);
+        EXPECT_EQ(linearSplitPattern->childrenDragPos_[1], 0.0f);
 
         /**
          * @tc.steps: step9. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
