@@ -29,6 +29,7 @@ RenderingContext2DModifier::RenderingContext2DModifier()
 
 void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
 {
+    ACE_SCOPED_TRACE("RenderingContext2DModifier::onDraw");
     auto skCanvas = drawingContext.canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
 
     auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);

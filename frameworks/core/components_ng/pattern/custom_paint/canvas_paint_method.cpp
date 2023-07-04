@@ -91,6 +91,7 @@ double GetQuality(const std::string& args)
 
 void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
+    ACE_SCOPED_TRACE("CanvasPaintMethod::UpdateContentModifier");
     CHECK_NULL_VOID(paintWrapper);
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
