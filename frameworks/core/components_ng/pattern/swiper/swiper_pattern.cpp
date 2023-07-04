@@ -150,12 +150,12 @@ void SwiperPattern::OnModifyDone()
     if (CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
         layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
-        jumpIndex_ = currentIndex_;
-        currentFirstIndex_ = jumpIndex_.value_or(0);
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
     }
     if (oldIndex_ != currentIndex_) {
+        jumpIndex_ = currentIndex_;
+        currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
     }
 
