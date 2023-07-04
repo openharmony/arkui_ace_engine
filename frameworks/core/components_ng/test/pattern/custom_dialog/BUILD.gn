@@ -48,6 +48,7 @@ ohos_unittest("custom_dialog_test_ng") {
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",

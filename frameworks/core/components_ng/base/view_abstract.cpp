@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
@@ -1002,6 +1003,10 @@ void ViewAbstract::BindPopup(
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
+    // windowScene will not use subwindow
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        param->SetShowInSubWindow(false);
+    }
     auto showInSubWindow = param->IsShowInSubWindow();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
@@ -1143,6 +1148,10 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     // unable to use the subWindow in the Previewer.
     isContextMenu = false;
 #endif
+    // windowScene will not use subwindow
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        isContextMenu = false;
+    }
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {

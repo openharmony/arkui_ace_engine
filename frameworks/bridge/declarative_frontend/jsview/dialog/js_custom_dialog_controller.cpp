@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
@@ -175,6 +176,9 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.isShowInSubWindow = showInSubWindowValue->ToBoolean();
 #endif
         }
+        if (SystemProperties::IsSceneBoardEnabled()) {
+            instance->dialogProperties_.isShowInSubWindow = false;
+        }
 
         info.SetReturnValue(instance);
     } else {
@@ -221,6 +225,20 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
             cancelCallback->Execute();
         }
     });
+
+    if (SystemProperties::IsSceneBoardEnabled() && !dialogProperties_.windowScene.Upgrade()) {
+        auto viewNode = this->ownerView_->GetViewNode();
+        CHECK_NULL_VOID(viewNode);
+        auto parentCustom = AceType::DynamicCast<NG::CustomNode>(viewNode);
+        CHECK_NULL_VOID(parentCustom);
+        auto parent = parentCustom->GetParent();
+        while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+            parent = parent->GetParent();
+        }
+        if (parent) {
+            dialogProperties_.windowScene = parent;
+        }
+    }
 
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, dialogs_, pending_, isShown_,
         std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
