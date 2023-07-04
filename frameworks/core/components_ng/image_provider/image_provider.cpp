@@ -136,7 +136,7 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
             if (!ctx) {
                 continue;
             }
-            ctx->SuccessCallback(canvasImage);
+            ctx->SuccessCallback(canvasImage->Clone());
         }
     };
     if (sync) {
