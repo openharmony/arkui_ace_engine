@@ -332,7 +332,7 @@ HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps001, TestSize.Level1)
     selectPattern->SetSelected(0);
     EXPECT_EQ(selectPattern->GetSelected(), 0);
     selectPattern->SetSelected(4);
-    EXPECT_EQ(selectPattern->GetSelected(), 0);
+    EXPECT_EQ(selectPattern->GetSelected(), -1);
 }
 /**
  * @tc.name: UpdateSelectedProps002
