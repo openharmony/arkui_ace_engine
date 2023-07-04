@@ -130,8 +130,9 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 #ifdef OHOS_STANDARD_SYSTEM
     // dynamic add new form should release the running form first.
     if (runningCardId_ > 0) {
-        LOGI("Add new form, delete old form:%{public}s.", std::to_string(runningCardId_).c_str());
-        AppExecFwk::FormMgr::GetInstance().DeleteForm(runningCardId_, AppExecFwk::FormHostClient::GetInstance());
+        LOGI("Add new form, release platform resource about old form:%{public}s.",
+            std::to_string(runningCardId_).c_str());
+        ReleasePlatformResource();
         ResetForm();
     }
 
