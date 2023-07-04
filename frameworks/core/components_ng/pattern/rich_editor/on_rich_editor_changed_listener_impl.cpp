@@ -26,22 +26,6 @@ void OnRichEditorChangedListenerImpl::InsertText(const std::u16string& text)
         auto client = richEditorPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        if (!StringUtils::Str16ToStr8(text).compare("KEYCODE_DPAD_UP")) {
-            client->CursorMoveUp();
-            return;
-        }
-        if (!StringUtils::Str16ToStr8(text).compare("KEYCODE_DPAD_DOWN")) {
-            client->CursorMoveDown();
-            return;
-        }
-        if (!StringUtils::Str16ToStr8(text).compare("KEYCODE_DPAD_LEFT")) {
-            client->CursorMoveLeft();
-            return;
-        }
-        if (!StringUtils::Str16ToStr8(text).compare("KEYCODE_DPAD_RIGHT")) {
-            client->CursorMoveRight();
-            return;
-        }
         client->InsertValue(StringUtils::Str16ToStr8(text));
     };
     PostTaskToUI(task);
@@ -157,6 +141,7 @@ void OnRichEditorChangedListenerImpl::MoveCursor(MiscServices::Direction directi
                 break;
         }
     };
+    PostTaskToUI(task);
 }
 
 void OnRichEditorChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end) {}
