@@ -482,50 +482,61 @@ OffsetF GridScrollLayoutAlgorithm::CalculateLargeItemOffset(
     return offset;
 }
 
+bool GridScrollLayoutAlgorithm::NeedAdjust(const RefPtr<GridItemLayoutProperty>& itemLayoutProperty)
+{
+    if (itemLayoutProperty->GetRowStart().has_value()) {
+        currentItemRowStart_ = itemLayoutProperty->GetRowStart().value_or(-1);
+        if ((currentItemRowStart_ < 0) || (currentItemRowStart_ >= static_cast<int32_t>(mainCount_))) {
+            return true;
+        }
+    }
+    if (itemLayoutProperty->GetRowEnd().has_value()) {
+        currentItemRowEnd_ = itemLayoutProperty->GetRowEnd().value_or(-1);
+        if ((currentItemRowEnd_ < 0) || (currentItemRowEnd_ >= static_cast<int32_t>(mainCount_))) {
+            return true;
+        }
+    }
+    if (itemLayoutProperty->GetColumnStart().has_value()) {
+        currentItemColStart_ = itemLayoutProperty->GetColumnStart().value_or(-1);
+        if ((currentItemColStart_ < 0) || (currentItemColStart_ >= static_cast<int32_t>(crossCount_))) {
+            return true;
+        }
+    }
+    if (itemLayoutProperty->GetColumnEnd().has_value()) {
+        currentItemColEnd_ = itemLayoutProperty->GetColumnEnd().value_or(-1);
+        if ((currentItemColEnd_ < 0) || (currentItemColEnd_ >= static_cast<int32_t>(crossCount_))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void GridScrollLayoutAlgorithm::AdjustRowColSpan(const RefPtr<LayoutWrapper>& itemLayoutWrapper)
 {
     auto itemLayoutProperty = DynamicCast<GridItemLayoutProperty>(itemLayoutWrapper->GetLayoutProperty());
-    bool needAdjust = false;
-
+    CHECK_NULL_VOID(itemLayoutProperty);
     currentItemRowSpan_ = 1;
     currentItemColSpan_ = 1;
     currentItemRowStart_ = -1;
     currentItemColStart_ = -1;
     currentItemColEnd_ = -1;
     currentItemRowEnd_ = -1;
-
-    if (itemLayoutProperty->GetRowStart().has_value()) {
-        currentItemRowStart_ = itemLayoutProperty->GetRowStart().value_or(-1);
-        if ((currentItemRowStart_ < 0) || (currentItemRowStart_ >= static_cast<int32_t>(mainCount_))) {
-            needAdjust = true;
-        }
-    }
-
-    if (itemLayoutProperty->GetColumnStart().has_value()) {
-        currentItemColStart_ = itemLayoutProperty->GetColumnStart().value_or(-1);
-        if ((currentItemColStart_ < 0) || (currentItemColStart_ >= static_cast<int32_t>(crossCount_))) {
-            needAdjust = true;
-        }
-    }
-
-    if (itemLayoutProperty->GetRowEnd().has_value()) {
-        currentItemRowEnd_ = itemLayoutProperty->GetRowEnd().value_or(-1);
-        if ((currentItemRowEnd_ < 0) || (currentItemRowEnd_ >= static_cast<int32_t>(mainCount_))) {
-            needAdjust = true;
-        }
-    }
-
-    if (itemLayoutProperty->GetColumnEnd().has_value()) {
-        currentItemColEnd_ = itemLayoutProperty->GetColumnEnd().value_or(-1);
-        if ((currentItemColEnd_ < 0) || (currentItemColEnd_ >= static_cast<int32_t>(crossCount_))) {
-            needAdjust = true;
-        }
-    }
-
+    auto needAdjust = NeedAdjust(itemLayoutProperty);
     if (!needAdjust) {
         currentItemRowSpan_ = std::max(currentItemRowEnd_ - currentItemRowStart_ + 1, 1);
         currentItemColSpan_ = std::max(currentItemColEnd_ - currentItemColStart_ + 1, 1);
     } else {
+        currentItemRowStart_ = -1;
+        currentItemColStart_ = -1;
+        currentItemColEnd_ = -1;
+        currentItemRowEnd_ = -1;
+    }
+    if ((currentItemRowStart_ == -1 && currentItemRowEnd_ != -1) ||
+        (currentItemRowEnd_ == -1 && currentItemRowStart_ != -1) ||
+        (currentItemColStart_ == -1 && currentItemColEnd_ != -1) ||
+        (currentItemColEnd_ == -1 && currentItemColStart_ != -1)) {
+        currentItemRowSpan_ = 1;
+        currentItemColSpan_ = 1;
         currentItemRowStart_ = -1;
         currentItemColStart_ = -1;
         currentItemColEnd_ = -1;
@@ -1153,7 +1164,7 @@ int32_t GridScrollLayoutAlgorithm::MeasureNewChild(const SizeF& frameSize, int32
             crossCount, crossSpan);
         return crossSpan;
     }
-    int32_t mainIndex = currentMainLineIndex_;
+    int32_t mainIndex = gridLayoutInfo_.endMainLineIndex_ + 1;
     if (crossStart >= 0 && crossStart < crossCount) {
         if (crossStart < lastCross_) {
             return -1;

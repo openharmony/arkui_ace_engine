@@ -1108,13 +1108,14 @@ void GridPattern::UpdateScrollBarOffset()
         } else {
             estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight;
         }
-    }
-    auto viewSize = geometryNode->GetFrameSize();
-    if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
-        for (int32_t lineIndex = info.startMainLineIndex_ - 1; lineIndex >= 0; lineIndex--) {
-            offset += info.lineHeightMap_.find(lineIndex)->second;
+        if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
+            for (int32_t lineIndex = info.startMainLineIndex_ - 1; lineIndex >= 0; lineIndex--) {
+                offset += info.lineHeightMap_.find(lineIndex)->second;
+            }
         }
     }
+    auto viewSize = geometryNode->GetFrameSize();
+
     UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0, 0.0));
 }
 
