@@ -90,6 +90,7 @@ public:
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
     static void JsLightUpEffect(const JSCallbackInfo& info);
+    static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBindContentCover(const JSCallbackInfo& info);

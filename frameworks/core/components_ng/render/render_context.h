@@ -139,6 +139,8 @@ public:
 
     virtual void ClearFocusState() {}
 
+    virtual void CreateBackgroundPixelMap(const RefPtr<FrameNode>& value) {}
+
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
     // clip node without padding
@@ -355,6 +357,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
 
+    // CustomBackground
+    ACE_DEFINE_PROPERTY_GROUP(CustomBackground, CustomBackgroundProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundPixelMap, RefPtr<PixelMap>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundAlign, Alignment);
+
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBrightness, Dimension);
@@ -442,6 +449,9 @@ protected:
 
     virtual void OnForegroundColorUpdate(const Color& value) {}
     virtual void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) {}
+
+    virtual void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) {}
+    virtual void OnBackgroundAlignUpdate(const Alignment& align) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}

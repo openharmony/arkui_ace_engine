@@ -173,6 +173,19 @@ void ViewAbstractModelNG::BindContextMenu(
     targetNode->PushDestroyCallback(destructor);
 }
 
+void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, const Alignment& align)
+{
+    auto buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    targetNode->SetBackgroundFunction(std::move(buildNodeFunc));
+    NG::ViewAbstract::SetBackgroundAlign(align);
+}
+
 void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const Dimension& z)
 {
     DimensionOffset center(x, y);

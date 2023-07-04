@@ -123,6 +123,9 @@ public:
     static void SetHasBorderImageRepeat(bool tag);
     static void SetBorderImageGradient(const NG::Gradient& gradient);
 
+    // customBackground
+    static void SetBackgroundAlign(const Alignment& align);
+    
     // decoration
     static void SetBackdropBlur(const Dimension& radius);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);

@@ -1435,6 +1435,8 @@ RefPtr<SelectTheme> GetSelectTheme()
     return context->GetTheme<SelectTheme>();
 }
 
+void ViewAbstractModelImpl::BindBackground(std::function<void()>&& buildFunc, const Alignment& align) {}
+
 GestureEventFunc CreateMenuEventWithParams(
     const WeakPtr<OHOS::Ace::MenuComponent>& weak, std::vector<NG::OptionParam>&& params)
 {

@@ -32,6 +32,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -531,6 +532,17 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         }
     }
 
+    // update background
+    if (builderFunc_) {
+        auto builderNode = builderFunc_();
+        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        builderNode->MountToParent(columnNode);
+        SetBackgroundLayoutConstraint(columnNode);
+        renderContext_->CreateBackgroundPixelMap(columnNode);
+        builderFunc_ = nullptr;
+    }
+
     // update focus state
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
@@ -540,6 +552,18 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     // rebuild child render node.
     RebuildRenderContextTree();
+}
+
+void FrameNode::SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    layoutConstraint.percentReference.SetWidth(geometryNode_->GetFrameSize().Width());
+    layoutConstraint.percentReference.SetHeight(geometryNode_->GetFrameSize().Height());
+    layoutConstraint.maxSize.SetWidth(geometryNode_->GetFrameSize().Width());
+    layoutConstraint.maxSize.SetHeight(geometryNode_->GetFrameSize().Height());
+    customNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
 }
 
 void FrameNode::AdjustGridOffset()

@@ -53,7 +53,9 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/adapter/background_modifier.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/gradient_style_modifier.h"
@@ -1166,6 +1168,59 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
             ctx->RequestNextFrame();
         }
     };
+}
+
+void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (!backgroundModifier_) {
+        backgroundModifier_ = std::make_shared<BackgroundModifier>();
+        rsNode_->AddModifier(backgroundModifier_);
+    }
+    backgroundModifier_->SetAlign(align);
+    backgroundModifier_->Modify();
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixelMap)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (!backgroundModifier_) {
+        backgroundModifier_ = std::make_shared<BackgroundModifier>();
+        rsNode_->AddModifier(backgroundModifier_);
+    }
+    auto node = GetHost();
+    auto nodeWidth = node->GetGeometryNode()->GetFrameSize().Width();
+    auto nodeHeight = node->GetGeometryNode()->GetFrameSize().Height();
+    backgroundModifier_->SetInitialNodeSize(nodeWidth, nodeHeight);
+    backgroundModifier_->SetPixelMap(pixelMap);
+    backgroundModifier_->Modify();
+    RequestNextFrame();
+}
+
+void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)
+{
+    NG::ComponentSnapshot::JsCallback callback = [weak = WeakClaim(RawPtr(GetHost())),
+                                                     containerId = Container::CurrentId()](
+                                                     std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode) {
+        CHECK_NULL_VOID(pixmap);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ContainerScope scope(containerId);
+        std::shared_ptr<Media::PixelMap> pmap = std::move(pixmap);
+        auto pixelmap = PixelMap::CreatePixelMap(&pmap);
+        auto task = [pixelmap, containerId = containerId, frameNode]() {
+            auto context = frameNode->GetRenderContext();
+            if (context) {
+                context->UpdateBackgroundPixelMap(pixelmap);
+                context->RequestNextFrame();
+            }
+        };
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    };
+    NG::ComponentSnapshot::Create(customNode, std::move(callback));
 }
 
 void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& /*borderImage*/)

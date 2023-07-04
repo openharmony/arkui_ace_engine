@@ -188,6 +188,7 @@ public:
     void DisableOnFocus() override {};
     void DisableOnBlur() override {};
 
+    void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;

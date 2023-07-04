@@ -62,6 +62,12 @@ struct BackgroundProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
+struct CustomBackgroundProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundPixelMap, RefPtr<PixelMap>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundAlign, Alignment);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+};
+
 struct ForegroundProperty {
     bool CheckBlurStyleOption(const std::optional<BlurStyleOption>& option) const
     {
