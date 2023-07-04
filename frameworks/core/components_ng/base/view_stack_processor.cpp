@@ -174,6 +174,9 @@ void ViewStackProcessor::SetVisualState(VisualState state)
         case VisualState::PRESSED:
             visualState_ = UI_STATE_PRESSED;
             break;
+        case VisualState::SELECTED:
+            visualState_ = UI_STATE_SELECTED;
+            break;
         case VisualState::NORMAL:
         default:
             visualState_ = UI_STATE_NORMAL;

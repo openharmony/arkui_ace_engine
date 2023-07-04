@@ -46,6 +46,14 @@ void EventHub::SetSupportedStates(UIState state)
     stateStyleMgr_->SetSupportedStates(state);
 }
 
+void EventHub::SetCurrentUIState(UIState state, bool flag)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->SetCurrentUIState(state, flag);
+}
+
 bool EventHub::IsCurrentStateOn(UIState state)
 {
     if (!stateStyleMgr_) {

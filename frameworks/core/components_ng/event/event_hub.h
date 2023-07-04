@@ -306,6 +306,8 @@ public:
 
     void MarkModifyDone();
 
+    void SetCurrentUIState(UIState state, bool flag);
+
     void UpdateCurrentUIState(UIState state)
     {
         if (stateStyleMgr_) {
