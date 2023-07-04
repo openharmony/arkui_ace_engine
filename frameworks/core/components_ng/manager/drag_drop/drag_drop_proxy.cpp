@@ -41,8 +41,9 @@ void DragDropProxy::OnDragStart(
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
-    manager->OnDragStart(
-        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), frameNode);
+    manager->OnDragStart(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+                             info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
+        frameNode);
     manager->AddDataToClipboard(extraInfo);
 }
 
@@ -61,8 +62,9 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
 
-    manager->OnDragMove(
-        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
+    manager->OnDragMove(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+                            info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
+        extraInfo);
 }
 
 void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
@@ -82,8 +84,9 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
         manager->OnTextDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
             static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
     } else {
-        manager->OnDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
-            static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
+        manager->OnDragEnd(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+                               info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
+            extraInfo);
     }
 #ifndef ENABLE_DRAG_FRAMEWORK
     manager->RestoreClipboardData();

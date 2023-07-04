@@ -265,6 +265,26 @@ public:
         return pasteData_;
     }
 
+    double GetScreenX() const
+    {
+        return screenX_;
+    }
+
+    double GetScreenY() const
+    {
+        return screenY_;
+    }
+
+    void SetScreenX(double x)
+    {
+        screenX_ = x;
+    }
+
+    void SetScreenY(double y)
+    {
+        screenY_ = y;
+    }
+
     double GetX() const
     {
         return x_;
@@ -337,6 +357,8 @@ public:
 
 private:
     RefPtr<PasteData> pasteData_;
+    double screenX_ = 0.0;
+    double screenY_ = 0.0;
     double x_ = 0.0;
     double y_ = 0.0;
     std::string description_;
