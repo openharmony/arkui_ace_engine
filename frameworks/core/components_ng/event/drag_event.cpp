@@ -15,6 +15,7 @@
 
 #include "core/components_ng/event/drag_event.h"
 
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
@@ -111,7 +112,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             HideEventColumn();
             HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
             HideFilter();
-            SubwindowManager::GetInstance()->HideMenuNG();
+            if (SystemProperties::IsSceneBoardEnabled()) {
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto manager = pipelineContext->GetOverlayManager();
+                manager->HideAllMenus();
+            } else {
+                SubwindowManager::GetInstance()->HideMenuNG();
+            }
         }
 #endif // ENABLE_DRAG_FRAMEWORK
        // Trigger drag start event set by user.
@@ -219,7 +227,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (gestureHub->GetTextDraggable()) {
             actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
         } else {
-            actuator->SetFilter(actuator);
+            if (!SystemProperties::IsSceneBoardEnabled()) {
+                actuator->SetFilter(actuator);
+            }
             actuator->SetPixelMap(actuator);
             actuator->SetEventColumn();
         }

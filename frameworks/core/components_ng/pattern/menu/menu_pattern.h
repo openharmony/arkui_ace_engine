@@ -139,6 +139,11 @@ public:
         return targetId_;
     }
 
+    const std::string& GetTargetTag() const
+    {
+        return targetTag_;
+    }
+
     void SetIsSelectMenu(bool isSelectMenu)
     {
         isSelectMenu_ = isSelectMenu;

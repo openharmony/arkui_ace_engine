@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
@@ -119,13 +120,18 @@ void OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 
 void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 {
+    CHECK_NULL_VOID(node);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
 
     auto root = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(root && node);
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        root = dialogPattern->GetDialogProperties().windowScene.Upgrade();
+    }
+    CHECK_NULL_VOID(root);
     node->MountToParent(root);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FocusOverlayNode(node);
@@ -136,7 +142,6 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     option.SetDuration(theme->GetOpacityAnimationDurIn());
     option.SetFillMode(FillMode::FORWARDS);
 
-    auto dialogPattern = node->GetPattern<DialogPattern>();
     option = dialogPattern->GetOpenAnimation().value_or(option);
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
@@ -298,7 +303,18 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
                 auto menu = menuWK.Upgrade();
                 auto root = rootWeak.Upgrade();
                 auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(menu && root && overlayManager);
+                CHECK_NULL_VOID_NOLOG(menu && overlayManager);
+                if (SystemProperties::IsSceneBoardEnabled()) {
+                    auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
+                    CHECK_NULL_VOID(wrapperPattern);
+                    auto menuChild = wrapperPattern->GetMenu();
+                    CHECK_NULL_VOID(menuChild);
+                    auto menuPattern = AceType::DynamicCast<MenuPattern>(menuChild->GetPattern());
+                    CHECK_NULL_VOID(menuPattern);
+                    root = overlayManager->FindWindowScene(
+                        FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId()));
+                }
+                CHECK_NULL_VOID(root);
                 ContainerScope scope(id);
                 overlayManager->CallOnHideMenuCallback();
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
@@ -468,6 +484,9 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
 {
     popupMap_[targetId] = popupInfo;
     auto rootNode = rootNodeWeak_.Upgrade();
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        rootNode = FindWindowScene(popupInfo.target.Upgrade());
+    }
     CHECK_NULL_VOID(rootNode);
     CHECK_NULL_VOID_NOLOG(popupInfo.markNeedUpdate);
     CHECK_NULL_VOID_NOLOG(popupInfo.popupNode);
@@ -565,6 +584,9 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
 
     auto rootNode = rootNodeWeak_.Upgrade();
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        rootNode = FindWindowScene(popupInfo.target.Upgrade());
+    }
     CHECK_NULL_VOID(rootNode);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
@@ -682,6 +704,15 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
+        CHECK_NULL_VOID(wrapperPattern);
+        auto menuChild = wrapperPattern->GetMenu();
+        CHECK_NULL_VOID(menuChild);
+        auto menuPattern = AceType::DynamicCast<MenuPattern>(menuChild->GetPattern());
+        CHECK_NULL_VOID(menuPattern);
+        rootNode = FindWindowScene(FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId()));
+    }
     CHECK_NULL_VOID(rootNode);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), menu);
@@ -765,6 +796,22 @@ void OverlayManager::HideMenu(int32_t targetId)
 void OverlayManager::HideAllMenus()
 {
     LOGD("OverlayManager::HideAllMenus");
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        for (const auto& windowScene : windowSceneList_) {
+            if (!windowScene.Upgrade()) {
+                continue;
+            }
+            for (const auto& child : windowScene.Upgrade()->GetChildren()) {
+                auto node = DynamicCast<FrameNode>(child);
+                if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+                    PopMenuAnimation(node);
+                    BlurOverlayNode();
+                }
+            }
+        }
+        return;
+    }
+
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     for (const auto& child : rootNode->GetChildren()) {
@@ -1539,6 +1586,22 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
     modalList_.pop_back();
     FireModalPageHide();
     SaveLastModalNode();
+}
+
+RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
+{
+    if (!SystemProperties::IsSceneBoardEnabled()) {
+        return rootNodeWeak_.Upgrade();
+    }
+    LOGI("FindWindowScene start");
+    auto parent = targetNode->GetParent();
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, nullptr);
+    LOGI("FindWindowScene success");
+    windowSceneList_.push_back(parent);
+    return parent;
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK

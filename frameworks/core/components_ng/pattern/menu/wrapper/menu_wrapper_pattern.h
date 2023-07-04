@@ -94,11 +94,6 @@ public:
 
     void HideSubMenu();
 
-private:
-    void OnModifyDone() override;
-
-    void HideMenu(const RefPtr<FrameNode>& menu);
-
     RefPtr<FrameNode> GetMenu() const
     {
         auto host = GetHost();
@@ -107,6 +102,11 @@ private:
         CHECK_NULL_RETURN(menu, nullptr);
         return menu;
     }
+
+private:
+    void OnModifyDone() override;
+
+    void HideMenu(const RefPtr<FrameNode>& menu);
 
     RefPtr<TouchEventImpl> onTouch_;
     // menuId in OverlayManager's map

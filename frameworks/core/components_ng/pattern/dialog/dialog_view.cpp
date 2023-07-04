@@ -85,6 +85,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     pattern->SetOpenAnimation(param.openAnimation);
     pattern->SetCloseAnimation(param.closeAnimation);
 
+    pattern->SetDialogProperties(param);
+
     dialog->MarkModifyDone();
     return dialog;
 }

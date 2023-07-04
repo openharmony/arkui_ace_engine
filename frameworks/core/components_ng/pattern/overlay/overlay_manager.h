@@ -233,6 +233,8 @@ public:
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
 
+    RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
+
 private:
     void PopToast(int32_t targetId);
 
@@ -295,6 +297,8 @@ private:
     std::function<void()> onShowMenuCallback_;
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
+
+    std::list<WeakPtr<UINode>> windowSceneList_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };

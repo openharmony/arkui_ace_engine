@@ -107,6 +107,16 @@ public:
         return closeAnimation_;
     }
 
+    void SetDialogProperties(const DialogProperties& param)
+    {
+        dialogProperties_ = param;
+    }
+
+    const DialogProperties& GetDialogProperties() const
+    {
+        return dialogProperties_;
+    }
+
 private:
     void OnModifyDone() override;
 
@@ -153,6 +163,8 @@ private:
     // XTS inspector values
     std::string message_;
     std::string title_;
+
+    DialogProperties dialogProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };
