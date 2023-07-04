@@ -555,6 +555,9 @@ void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationC
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 {
     LOGD("Swipe to index: %{public}d without animation", index);
+    if (IsChildrenSizeLessThanSwiper()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     jumpIndex_ = index;
@@ -564,6 +567,9 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 void SwiperPattern::SwipeTo(int32_t index)
 {
     LOGD("Swipe to index: %{public}d with animation, duration: %{public}d", index, GetDuration());
+    if (IsChildrenSizeLessThanSwiper()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto targetIndex = (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
@@ -596,6 +602,9 @@ void SwiperPattern::SwipeTo(int32_t index)
 void SwiperPattern::ShowNext()
 {
     LOGI("SwiperPattern::ShowNext");
+    if (IsChildrenSizeLessThanSwiper()) {
+        return;
+    }
     indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -645,6 +654,9 @@ void SwiperPattern::ShowNext()
 
 void SwiperPattern::ShowPrevious()
 {
+    if (IsChildrenSizeLessThanSwiper()) {
+        return;
+    }
     indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1227,6 +1239,9 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
+    if (IsChildrenSizeLessThanSwiper()) {
+        return;
+    }
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
     if (addEventCallback) {
         addEventCallback();
@@ -2061,7 +2076,7 @@ void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorN
     paintProperty->UpdateIsCustomSize(IsCustomSize_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
