@@ -280,6 +280,11 @@ public:
         isFirstFocus_ = isFirstFocus;
     }
 
+    void SetIsAnimating(bool isAnimating)
+    {
+        isAnimating_ = isAnimating;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
