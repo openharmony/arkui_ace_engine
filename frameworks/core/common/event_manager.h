@@ -173,6 +173,8 @@ public:
 
     uint8_t GetKeyboardShortcutKeys(const std::vector<ModifierKey>& keys);
 
+    void DoMouseActionRelease();
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;

@@ -608,7 +608,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
             if (event.action == MouseAction::PRESS) {
                 pressMouseTestResults_ = currMouseTestResults_;
             } else if (event.action == MouseAction::RELEASE) {
-                pressMouseTestResults_.clear();
+                DoMouseActionRelease();
             }
         }
         for (const auto& mouseTarget : currMouseTestResults_) {
@@ -621,6 +621,11 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         }
     }
     return false;
+}
+
+void EventManager::DoMouseActionRelease()
+{
+    pressMouseTestResults_.clear();
 }
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)

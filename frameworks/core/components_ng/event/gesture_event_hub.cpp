@@ -880,8 +880,10 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
     CHECK_NULL_RETURN(taskScheduler, ret);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, ret);
+    auto eventManager = pipeline->GetEventManager();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager](const DragNotifyMsg& notifyMessage) {
+    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
+                        const DragNotifyMsg& notifyMessage) {
         DragRet result = DragRet::DRAG_FAIL;
         switch (notifyMessage.result) {
             case DragResult::DRAG_SUCCESS:
@@ -895,8 +897,11 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
         }
         dragEvent->SetResult(result);
         taskScheduler->PostTask(
-            [eventHub, dragEvent, dragDropManager]() {
+            [eventHub, dragEvent, dragDropManager, eventManager]() {
                 dragDropManager->SetIsDragged(false);
+                if (eventManager) {
+                    eventManager->DoMouseActionRelease();
+                }
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
