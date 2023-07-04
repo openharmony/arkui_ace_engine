@@ -132,7 +132,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (runningCardId_ > 0) {
         LOGI("Add new form, release platform resource about old form:%{public}s.",
             std::to_string(runningCardId_).c_str());
-        ReleasePlatformResource();
+        ReleaseForm();
         ResetForm();
     }
 
