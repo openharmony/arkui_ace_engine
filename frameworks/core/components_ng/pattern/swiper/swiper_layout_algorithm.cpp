@@ -262,8 +262,8 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         }
         OffScreenLayoutDirection();
         itemPosition_.clear();
-        layoutWrapper->RemoveAllChildInRenderTree();
     }
+    layoutWrapper->RemoveAllChildInRenderTree();
     if (jumpIndex_) {
         LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
