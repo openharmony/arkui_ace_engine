@@ -1225,6 +1225,32 @@ HWTEST_F(GridTestNg, AttrGridItem003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrEnableScrollInteraction001
+ * @tc.desc: Test property about enableScrollInteraction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
+{
+    GridModelNG gridModelNG;
+    gridModelNG.Create(nullptr, nullptr);
+
+    /**
+     * @tc.steps: step1. Test set value: true
+     */
+    gridModelNG.SetScrollEnabled(true);
+    CreateGridItem(10, -1, ITEM_HEIGHT);
+    GetInstance();
+    RunMeasureAndLayout();
+    EXPECT_EQ(layoutProperty_->GetScrollEnabled(), true);
+
+    /**
+     * @tc.steps: step2. Test set value: false
+     */
+    layoutProperty_->UpdateScrollEnabled(false);
+    EXPECT_EQ(layoutProperty_->GetScrollEnabled(), false);
+}
+
+/**
  * @tc.name: KeyEvent001
  * @tc.desc: Test OnKeyEvent func.
  * @tc.type: FUNC

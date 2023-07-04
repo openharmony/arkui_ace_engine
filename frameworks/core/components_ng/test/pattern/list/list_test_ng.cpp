@@ -1279,6 +1279,32 @@ HWTEST_F(ListTestNg, AttrSLECM001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrEnableScrollInteraction001
+ * @tc.desc: Test property about enableScrollInteraction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+
+    /**
+     * @tc.steps: step1. Test set value: true
+     */
+    listModelNG.SetScrollEnabled(true);
+    CreateListItem(TOTAL_NUMBER);
+    GetInstance();
+    RunMeasureAndLayout();
+    EXPECT_EQ(layoutProperty_->GetScrollEnabled(), true);
+
+    /**
+     * @tc.steps: step2. Test set value: false
+     */
+    layoutProperty_->UpdateScrollEnabled(false);
+    EXPECT_EQ(layoutProperty_->GetScrollEnabled(), false);
+}
+
+/**
  * @tc.name: SwiperItem001
  * @tc.desc: Set startNode and SwipeEdgeEffect::None, List cannot swiper Left but can swiper right.
  * @tc.type: FUNC
