@@ -116,6 +116,26 @@ public:
         return indexInList_;
     }
 
+    int32_t GetDisplayEndIndexInGroup() const
+    {
+        return itemDisplayEndIndex_;
+    }
+
+    int32_t GetDiasplayStartIndexInGroup() const
+    {
+        return itemDiasplayStartIndex_;
+    }
+
+    int32_t GetEndIndexInGroup() const
+    {
+        return (itemTotalCount_ - 1);
+    }
+
+    int32_t GetLanesInGroup() const
+    {
+        return lanes_;
+    }
+
     V2::ListItemGroupStyle GetListItemGroupStyle()
     {
         return listItemGroupStyle_;
@@ -133,6 +153,9 @@ private:
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
     int32_t itemStartIndex_ = 0;
+    int32_t itemTotalCount_ = -1;
+    int32_t itemDisplayEndIndex_ = -1;
+    int32_t itemDiasplayStartIndex_ = -1;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;

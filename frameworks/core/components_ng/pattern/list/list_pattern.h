@@ -35,6 +35,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+struct ListItemGroupPara {
+    int32_t lanes = -1;
+    int32_t itemEndIndex = -1;
+    int32_t displayStartIndex = -1;
+    int32_t displayEndIndex = -1;
+};
+
 class ListPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 
@@ -210,6 +217,11 @@ private:
     bool HandleDirectionKey(const KeyEvent& event);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex);
+    WeakPtr<FocusHub> ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
+        int32_t curIndexInGroup, int32_t moveStep, FocusStep step);
+    bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
+    bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
+        int32_t moveStep, FocusStep step, bool isScrollIndex);
 
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
@@ -244,6 +256,8 @@ private:
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetAccessibilityAction();
+    ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
+    bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
 
     RefPtr<ListContentModifier> listContentModifier_;
 

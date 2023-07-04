@@ -3018,6 +3018,87 @@ HWTEST_F(ListTestNg, FocusStep005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusStep006
+ * @tc.desc: Test List focusing ability with lanes mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, FocusStep006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list and focusable ListItem.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    CreateListItem(10, Axis::VERTICAL, true);
+    listModelNG.SetLanes(3);
+    GetInstance();
+    auto layoutWrapper = RunMeasureAndLayout();
+
+    /**
+     * @tc.steps: step2. Obtain nodes for items in the list and set focusable itme parameter.
+     */
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>();
+    auto ListItem = frameNode_->GetChildAtIndex(4);
+    auto ListItemNode = AceType::DynamicCast<FrameNode>(ListItem);
+    auto Item = ListItemNode->GetFocusHub();
+    auto childPattern = AceType::DynamicCast<ListItemPattern>(ListItemNode->GetPattern());
+
+    /**
+     * @tc.steps: step3. Call GetNextFocusNodeForLanes func.
+     * @tc.expected Call success and not return nullptr
+     */
+    auto FocusNode = pattern_->GetNextFocusNode(FocusStep::DOWN, Item);
+    ASSERT_NE(FocusNode.Upgrade(), nullptr);
+    FocusNode = pattern_->GetNextFocusNode(FocusStep::UP, Item);
+    ASSERT_NE(FocusNode.Upgrade(), nullptr);
+    FocusNode = pattern_->GetNextFocusNode(FocusStep::RIGHT, Item);
+    ASSERT_NE(FocusNode.Upgrade(), nullptr);
+    FocusNode = pattern_->GetNextFocusNode(FocusStep::LEFT, Item);
+    ASSERT_NE(FocusNode.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: FocusStep007
+ * @tc.desc: Test GetListItemGroupParameter function with focus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, FocusStep007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list and card style ListItemGroup.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetMultiSelectable(true);
+    ListItemGroupModelNG listItemGroupModel;
+    listItemGroupModel.Create(V2::ListItemGroupStyle::CARD);
+    CreateListItemGroup();
+    ViewStackProcessor::GetInstance()->Pop();
+    GetInstance();
+    RunMeasureAndLayout();
+    ASSERT_NE(frameNode_, nullptr);
+
+    /**
+     * @tc.steps: step2. Obtain nodes for items in the group.
+     */
+    auto group = frameNode_->GetChildAtIndex(0);
+    auto groupFrameNode = AceType::DynamicCast<FrameNode>(group);
+    auto groupItem = group->GetChildAtIndex(0);
+    auto groupItemNode = AceType::DynamicCast<FrameNode>(groupItem);
+
+    /**
+     * @tc.steps: step3. Call IsListItemGroup and GetListItemGroupParameter func.
+     * @tc.expected listItemGroupPara value is equal to expected
+     */
+    pattern_->IsListItemGroup(0, frameNode_);
+    ListItemGroupPara listItemGroupPara;
+    listItemGroupPara = pattern_->GetListItemGroupParameter(groupItemNode);
+    EXPECT_EQ(listItemGroupPara.itemEndIndex, GROUP_ITEM_NUMBER);
+    EXPECT_EQ(listItemGroupPara.displayStartIndex, 0);
+    EXPECT_EQ(listItemGroupPara.displayEndIndex, GROUP_ITEM_NUMBER);
+}
+
+/**
  * @tc.name: KeyEvent001
  * @tc.desc: Test list_pattern OnKeyEvent function
  * @tc.type: FUNC
