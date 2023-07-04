@@ -1305,10 +1305,6 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
-    controller_->AddStopListener([weak]() {
-        auto tabBarPattern = weak.Upgrade();
-        tabBarPattern->isAnimating_ = false;
-    });
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
