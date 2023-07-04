@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/form/form_pattern.h"
 
+#include "pointer_event.h"
+#include "transaction/rs_interfaces.h"
+
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/common/form_manager.h"
@@ -29,8 +32,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "pointer_event.h"
-#include "transaction/rs_interfaces.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
@@ -91,8 +92,8 @@ void FormPattern::OnAttachToFrameNode()
         FormManager::GetInstance().AddSubContainer(id, subContainer);
         uiTaskExecutor.PostDelayedTask(
             [id, nodeId = subContainer->GetNodeId()] {
-                auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
-                if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == nodeId) {
+                auto cachedSubContainer = FormManager::GetInstance().GetSubContainer(id);
+                if (cachedSubContainer != nullptr && cachedSubContainer->GetNodeId() == nodeId) {
                     FormManager::GetInstance().RemoveSubContainer(id);
                 }
             },
@@ -143,8 +144,7 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
     auto formTheme = pipelineContext->GetTheme<FormTheme>();
     CHECK_NULL_VOID(formTheme);
     Color unTrustBackgroundColor = formTheme->GetUnTrustBackgroundColor();
-    LOGI("UpdateBackgroundColor: %{public}s when isUnTrust.",
-        unTrustBackgroundColor.ColorToString().c_str());
+    LOGI("UpdateBackgroundColor: %{public}s when isUnTrust.", unTrustBackgroundColor.ColorToString().c_str());
     host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
 }
 
@@ -161,6 +161,36 @@ void FormPattern::HandleSnapshot()
             form->TakeSurfaceCaptureForUI();
         },
         TaskExecutor::TaskType::UI, DELAY_TIME_FOR_FORM_SNAPSHOT);
+
+    // Init click event for static form.
+    auto gestureEventHub = GetHost()->GetOrCreateGestureEventHub();
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto formPattern = weak.Upgrade();
+        CHECK_NULL_VOID(formPattern);
+        formPattern->HandleStaticFormEvent({ info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY() });
+    };
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureEventHub->AddClickEvent(clickEvent);
+}
+
+void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
+{
+    if (formLinkInfos_.empty()) {
+        LOGE("formLinkInfos is empty, do not handle event.");
+        return;
+    }
+    for (auto info : formLinkInfos_) {
+        auto linkInfo = JsonUtil::ParseJsonString(info);
+        auto action = linkInfo->GetValue("action")->GetString();
+        auto rectStr = linkInfo->GetValue("formLinkRect")->GetString();
+        RectF linkRect = RectF::FromString(rectStr);
+        LOGI("touchPoint: %{public}s, action: %{public}s, linkRect: %{public}s",
+            touchPoint.ToString().c_str() action.c_str(), linkRect.ToString().c_str());
+        if (linkRect.IsInRegion(touchPoint)) {
+            OnActionEvent(action);
+            break;
+        }
+    }
 }
 
 void FormPattern::TakeSurfaceCaptureForUI()
@@ -407,8 +437,7 @@ void FormPattern::InitFormManagerDelegate()
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
                                                        imageDataMap,
                                                    const AppExecFwk::FormJsInfo& formJsInfo,
-                                                   const FrontendType& frontendType,
-                                                   const FrontendType& uiSyntax) {
+                                                   const FrontendType& frontendType, const FrontendType& uiSyntax) {
         ContainerScope scope(instanceID);
         auto form = weak.Upgrade();
         CHECK_NULL_VOID(form);
@@ -416,8 +445,8 @@ void FormPattern::InitFormManagerDelegate()
         CHECK_NULL_VOID(host);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak,
-                                 instanceID, frontendType, uiSyntax] {
+        uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType,
+                                    uiSyntax] {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
@@ -518,7 +547,7 @@ void FormPattern::InitFormManagerDelegate()
             parent->RebuildRenderContextTree();
             host->GetRenderContext()->RequestNextFrame();
             formComponent->OnLoadEvent();
-    });
+        });
 
     formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height) {
         auto formComponent = weak.Upgrade();
@@ -537,32 +566,37 @@ void FormPattern::InitFormManagerDelegate()
         host->GetRenderContext()->RequestNextFrame();
     });
 
-    formManagerBridge_->AddActionEventHandle(
-        [weak = WeakClaim(this), instanceID](const std::string& action) {
-            ContainerScope scope(instanceID);
-            LOGI("OnActionEvent action: %{public}s", action.c_str());
-            auto formPattern = weak.Upgrade();
-            CHECK_NULL_VOID(formPattern);
-            formPattern->OnActionEvent(action);
+    formManagerBridge_->AddActionEventHandle([weak = WeakClaim(this), instanceID](const std::string& action) {
+        ContainerScope scope(instanceID);
+        LOGI("OnActionEvent action: %{public}s", action.c_str());
+        auto formPattern = weak.Upgrade();
+        CHECK_NULL_VOID(formPattern);
+        formPattern->OnActionEvent(action);
     });
 
-    formManagerBridge_->AddUnTrustFormCallback(
-        [weak = WeakClaim(this), instanceID]() {
-            ContainerScope scope(instanceID);
-            LOGI("HandleUnTrustForm");
-            auto formPattern = weak.Upgrade();
-            CHECK_NULL_VOID(formPattern);
-            formPattern->HandleUnTrustForm();
+    formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID]() {
+        ContainerScope scope(instanceID);
+        LOGI("HandleUnTrustForm");
+        auto formPattern = weak.Upgrade();
+        CHECK_NULL_VOID(formPattern);
+        formPattern->HandleUnTrustForm();
     });
 
-    formManagerBridge_->AddSnapshotCallback(
-        [weak = WeakClaim(this), instanceID]() {
+    formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID]() {
+        ContainerScope scope(instanceID);
+        LOGI("HandleSnapshot");
+        auto formPattern = weak.Upgrade();
+        CHECK_NULL_VOID(formPattern);
+        formPattern->HandleSnapshot();
+    });
+
+    formManagerBridge_->AddFormLinkInfoUpdateCallback(
+        [weak = WeakClaim(this), instanceID](const std::vector<std::string>& infos) {
             ContainerScope scope(instanceID);
-            LOGI("HandleSnapshot");
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
-            formPattern->HandleSnapshot();
-    });
+            formPattern->SetFormLinkInfos(infos);
+        });
 }
 
 void FormPattern::CreateCardContainer()
@@ -787,8 +821,7 @@ const RefPtr<SubContainer>& FormPattern::GetSubContainer() const
     return subContainer_;
 }
 
-void FormPattern::DispatchPointerEvent(
-    const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
     if (!pointerEvent || !formManagerBridge_) {
         LOGE("Func: %{public}s, pointerEvent or formManagerBridge is null", __func__);

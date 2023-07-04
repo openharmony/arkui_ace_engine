@@ -139,6 +139,7 @@ public:
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) = 0;
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
+    virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) = 0;
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()

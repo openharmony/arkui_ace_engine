@@ -327,9 +327,9 @@ void PipelineBase::NotifyDestroyEventDismiss() const
 void PipelineBase::NotifyDispatchTouchEventDismiss(const TouchEvent& event) const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
-        if (iterDispatchTouchEventHander) {
-            iterDispatchTouchEventHander(event);
+    for (auto& iterDispatchTouchEventHandler : dispatchTouchEventHandler_) {
+        if (iterDispatchTouchEventHandler) {
+            iterDispatchTouchEventHandler(event);
         }
     }
 }

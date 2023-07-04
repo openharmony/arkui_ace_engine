@@ -20,12 +20,11 @@
 namespace OHOS {
 namespace Ace {
 FormRendererDelegateProxy::FormRendererDelegateProxy(const sptr<IRemoteObject>& impl)
-    : IRemoteProxy<IFormRendererDelegate>(impl) {}
+    : IRemoteProxy<IFormRendererDelegate>(impl)
+{}
 
-int32_t FormRendererDelegateProxy::OnSurfaceCreate(
-    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-    const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
-    const AAFwk::Want& want)
+int32_t FormRendererDelegateProxy::OnSurfaceCreate(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+    const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -67,8 +66,8 @@ int32_t FormRendererDelegateProxy::OnSurfaceCreate(
     return reply.ReadInt32();
 }
 
-int32_t FormRendererDelegateProxy::OnSurfaceReuse(uint64_t surfaceId,
-    const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want)
+int32_t FormRendererDelegateProxy::OnSurfaceReuse(
+    uint64_t surfaceId, const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -175,8 +174,8 @@ int32_t FormRendererDelegateProxy::OnError(const std::string& code, const std::s
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(
-        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR), data, reply, option);
+    int32_t error =
+        Remote()->SendRequest(static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
         return error;
@@ -213,7 +212,32 @@ int32_t FormRendererDelegateProxy::OnSurfaceChange(float width, float height)
     return reply.ReadInt32();
 }
 
-bool FormRendererDelegateProxy::WriteInterfaceToken(MessageParcel &data)
+int32_t FormRendererDelegateProxy::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteStringVector(formLinkInfos)) {
+        HILOG_ERROR("%{public}s, write formLinkInfos error", __func__);
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORM_LINK_INFO_UPDATE), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+bool FormRendererDelegateProxy::WriteInterfaceToken(MessageParcel& data)
 {
     if (!data.WriteInterfaceToken(FormRendererDelegateProxy::GetDescriptor())) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);

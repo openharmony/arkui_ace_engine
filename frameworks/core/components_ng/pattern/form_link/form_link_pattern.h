@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_LINK_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_LINK_PATTERN_H
 
+#include "core/components_ng/pattern/form_link/form_link_infos.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -26,6 +27,31 @@ class FormLinkPattern : public Pattern {
 public:
     FormLinkPattern() = default;
     ~FormLinkPattern() override = default;
+
+    void OnModifyDone() override;
+
+    bool IsMeasureBoundary() const override
+    {
+        return true;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    void SetAction(const std::string& action)
+    {
+        formLinkInfo_.SetAction(action);
+    }
+
+private:
+    void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    void UpdateFormLinkHotZone();
+
+    FormLinkInfo formLinkInfo_;
 };
 
 } // namespace OHOS::Ace::NG
