@@ -62,12 +62,13 @@ void SelectOverlayPaintMethod::DrawHandles(RSCanvas& canvas, const RectF& frameR
     }
 
     canvas.Save();
-    auto frameNode = info_.callerFrameNode.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    auto viewPortOption = frameNode->GetViewPort();
     RectF viewPort = frameRect;
-    if (viewPortOption.has_value()) {
-        viewPort = viewPortOption.value();
+    auto frameNode = info_.callerFrameNode.Upgrade();
+    if (frameNode) {
+        auto viewPortOption = frameNode->GetViewPort();
+        if (viewPortOption.has_value()) {
+            viewPort = viewPortOption.value();
+        }
     }
     LOGD("select_overlay ClipRect viewPort: %{public}s ", viewPort.ToString().c_str());
     RSRect clipInnerRect = RSRect(
