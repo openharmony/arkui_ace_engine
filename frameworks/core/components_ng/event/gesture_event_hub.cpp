@@ -874,7 +874,8 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
     CHECK_NULL_RETURN(dragDropManager, ret);
     auto eventManager = pipeline->GetEventManager();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](const DragNotifyMsg& notifyMessage) {
+    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
+                        const DragNotifyMsg& notifyMessage) {
         DragRet result = DragRet::DRAG_FAIL;
         switch (notifyMessage.result) {
             case DragResult::DRAG_SUCCESS:
