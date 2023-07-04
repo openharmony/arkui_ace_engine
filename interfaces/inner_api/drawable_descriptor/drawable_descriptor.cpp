@@ -121,16 +121,18 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         }
         Media::DecodeOptions decodeOpts;
         decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
-        auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
-        if (errorCode != 0) {
-            HILOG_ERROR("Get PixelMap from json buffer failed");
-            return false;
-        }
+        if (imageSource) {
+            auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
+            if (errorCode != 0) {
+                HILOG_ERROR("Get PixelMap from json buffer failed");
+                return false;
+            }
 
-        if (isBackground) {
-            background_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
-        } else {
-            foreground_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+            if (isBackground) {
+                background_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+            } else {
+                foreground_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+            }
         }
     } else {
         HILOG_ERROR("Get background from json buffer failed");
@@ -151,8 +153,10 @@ bool LayeredDrawableDescriptor::GetDefaultMask()
         Media::ImageSource::CreateImageSource(data.get(), len, opts, errorCode);
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
-    auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
-    mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    if (imageSource) {
+        auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
+        mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    }
     if (errorCode != 0 || !mask_) {
         HILOG_ERROR("Get mask failed");
         return false;
@@ -171,8 +175,10 @@ bool LayeredDrawableDescriptor::GetMaskByName(const std::string& name)
         Media::ImageSource::CreateImageSource(data.get(), len, opts, errorCode);
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
-    auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
-    mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    if (imageSource) {
+        auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
+        mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    }
     if (errorCode != 0 || !mask_) {
         HILOG_ERROR("Get mask failed");
         return false;
