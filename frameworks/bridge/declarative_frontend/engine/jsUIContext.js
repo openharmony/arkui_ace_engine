@@ -30,20 +30,20 @@ class Font {
     }
 }
 
-class Mediaquery {
+class MediaQuery {
     /**
-     * Construct new instance of Mediaquery.
+     * Construct new instance of MediaQuery.
      * initialzie with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
     constructor(instanceId) {
         this.instanceId_ = instanceId;
-        this.ohos_mediaquery = globalThis.requireNapi('mediaquery');
+        this.ohos_mediaQuery = globalThis.requireNapi('mediaquery');
     }
     matchMediaSync(condition) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let mediaQueryListener = this.ohos_mediaquery.matchMediaSync(condition);
+        let mediaQueryListener = this.ohos_mediaQuery.matchMediaSync(condition);
         __JSScopeUtil__.restoreInstanceId();
         return mediaQueryListener;
     }
@@ -102,9 +102,9 @@ class UIContext {
         return this.promptAction_;
     }
 
-    getMediaquery() {
-        this.mediaquery_ = new Mediaquery(this.instanceId_);
-        return this.mediaquery_;
+    getMediaQuery() {
+        this.mediaQuery_ = new MediaQuery(this.instanceId_);
+        return this.mediaQuery_;
     }
 
     getUIInspector(){
