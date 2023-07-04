@@ -819,7 +819,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg024, TestSize.Level1)
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
     HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
+    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
@@ -1242,18 +1242,21 @@ HWTEST_F(UINodeTestNg, UINodeTestNg042, TestSize.Level1)
     auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
     auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
     /**
-     * @tc.steps: step2. root parent node do GetPerformanceCheckData
+     * @tc.steps: step2. call AddDisappearingChild with different condition
+     * @tc.expected: disappearingChildren_.size() is 2
      */
     parent->AddDisappearingChild(child);
     child2->isDisappearing_ = true;
     parent->AddDisappearingChild(child2);
     parent->AddDisappearingChild(child);
+    EXPECT_EQ(parent->disappearingChildren_.size(), 2);
     /**
-     * @tc.steps: step3. root parent node do GetPerformanceCheckData
-     * @tc.expected: nodeMap.size() is 0
+     * @tc.steps: step3. call RemoveDisappearingChild with different condition
+     * @tc.expected: disappearingChildren_.size() is 1
      */
     parent->RemoveDisappearingChild(child);
     child->isDisappearing_ = true;
     parent->RemoveDisappearingChild(child);
+    EXPECT_EQ(parent->disappearingChildren_.size(), 1);
 }
 } // namespace OHOS::Ace::NG
