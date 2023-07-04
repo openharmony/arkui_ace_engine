@@ -325,9 +325,6 @@ void JsBindViews(BindingTarget globalObj)
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
 #endif
-#ifdef WINDOW_SCENE_SUPPORTED
-    JSUIExtension::JSBind(globalObj);
-#endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponent::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
@@ -355,6 +352,7 @@ void JsBindViews(BindingTarget globalObj)
     JSWindowScene::JSBind(globalObj);
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);
+    JSUIExtension::JSBind(globalObj);
 #endif
     JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);

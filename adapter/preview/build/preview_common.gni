@@ -111,4 +111,8 @@ if (defined(enable_rosen_backend) && enable_rosen_backend) {
   defines += [ "ENABLE_ROSEN_BACKEND" ]
 }
 
+if (defined(window_scene_support) && window_scene_support) {
+  defines += [ "WINDOW_SCENE_SUPPORTED" ]
+}
+
 libace_target = "//foundation/arkui/ace_engine/adapter/preview/build:libace"

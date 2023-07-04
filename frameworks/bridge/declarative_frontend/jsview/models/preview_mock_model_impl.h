@@ -44,7 +44,7 @@ public:
             "This component is not supported on PC preview.", Offset(0, DEFAULT_OFFSET));
         if (content == "Video") {
             mockComponent->SetInspectorTag(content + "ComponentV2");
-        } else if (content == "PluginComponent") {
+        } else if (content == "PluginComponent" || content == "UIExtensionComponent") {
             mockComponent->SetInspectorTag(content);
         } else {
             mockComponent->SetInspectorTag(content + "Component");
