@@ -121,9 +121,7 @@ public:
 
     void TriggerOnAreaChangeCallback();
 
-    void OnConfigurationUpdate(const OnConfigurationChange& configurationChange);
-    
-    void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
+    void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
 
     void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
     {

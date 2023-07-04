@@ -303,10 +303,6 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
 }
 
-bool TimePickerRowPattern::NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
-{
-    return false;
-}
 
 void TimePickerRowPattern::SetChangeCallback(ColumnChangeCallback&& value)
 {

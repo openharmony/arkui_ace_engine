@@ -144,11 +144,6 @@ void DatePickerPattern::OnLanguageConfigurationUpdate()
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
 }
 
-bool DatePickerPattern::NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
-{
-    return false;
-}
-
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
 {
     CHECK_NULL_VOID(GetHost());

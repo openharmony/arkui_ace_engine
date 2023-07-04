@@ -409,35 +409,18 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     hasPendingRequest_ = false;
 }
 
-void FrameNode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
-{
-    OnConfigurationUpdate(configurationChange);
-    auto updateFlag = pattern_->NeedCallChildrenUpdate(configurationChange);
-    if (updateFlag) {
-        auto children = GetChildren();
-        if (children.empty()) {
-            return;
-        }
-        for (const auto& child : children) {
-            if (!child) {
-                continue;
-            }
-            child->UpdateConfigurationUpdate(configurationChange);
-        }
-    }
-}
-
 void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
 {
-    CHECK_NULL_VOID(pattern_);
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    MarkModifyDone();
-    MarkDirtyNode();
 }
 
 void FrameNode::OnVisibleChange(bool isVisible)

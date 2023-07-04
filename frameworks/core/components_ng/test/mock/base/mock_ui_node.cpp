@@ -150,5 +150,7 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
     return false;
 }
 
+void UINode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+
 void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t) {}
 } // namespace OHOS::Ace::NG

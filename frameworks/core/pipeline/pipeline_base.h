@@ -718,7 +718,7 @@ public:
         configChangedCallback_.push_back(std::move(listener));
     }
 
-    void NotifyConfigurationChange()
+    virtual void NotifyConfigurationChange(const OnConfigurationChange& configurationChange)
     {
         for (const auto& callback : configChangedCallback_) {
             if (callback) {
