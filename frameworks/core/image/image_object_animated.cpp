@@ -15,6 +15,10 @@
 
 #include "image_object.h"
 
+#ifdef USE_ROSEN_DRAWING
+#include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#endif
+
 namespace OHOS::Ace {
 class AnimatedImageObject : public ImageObject {
     DECLARE_ACE_TYPE(AnimatedImageObject, ImageObject);
@@ -65,12 +69,20 @@ public:
 
     void ClearData() override
     {
+#ifndef USE_ROSEN_DRAWING
         skData_ = nullptr;
+#else
+        drawingData_ = nullptr;
+#endif
     }
 
     RefPtr<ImageObject> Clone() override
     {
+#ifndef USE_ROSEN_DRAWING
         return MakeRefPtr<AnimatedImageObject>(imageSource_, imageSize_, frameCount_, skData_);
+#else
+        return MakeRefPtr<AnimatedImageObject>(imageSource_, imageSize_, frameCount_, drawingData_);
+#endif
     }
 
 private:
@@ -91,11 +103,13 @@ void AnimatedImageObject::UploadToGpuForRender(
     bool syncMode)
 {
     constexpr float SizeOffset = 0.5f;
-    if (!animatedPlayer_ && skData_) {
 #ifndef USE_ROSEN_DRAWING
+    if (!animatedPlayer_ && skData_) {
         auto codec = SkCodec::MakeFromData(skData_);
 #else
-    // TODO Drawing : SkCodec
+    if (!animatedPlayer_ && drawingData_) {
+        auto skData = drawingData_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+        auto codec = SkCodec::MakeFromData(skData);
 #endif
         int32_t dstWidth = -1;
         int32_t dstHeight = -1;
@@ -116,7 +130,11 @@ void AnimatedImageObject::UploadToGpuForRender(
         int32_t dstWidth = static_cast<int32_t>(imageSize.Width() + SizeOffset);
         int32_t dstHeight = static_cast<int32_t>(imageSize.Height() + SizeOffset);
         animatedPlayer_->SetTargetSize(dstWidth, dstHeight);
+#ifndef USE_ROSEN_DRAWING
     } else if (!animatedPlayer_ && !skData_) {
+#else
+    } else if (!animatedPlayer_ && !drawingData_) {
+#endif
         LOGE("animated player is not constructed and image data is null, can not construct animated player!");
     } else if (animatedPlayer_ && !forceResize) {
         LOGI("animated player has been constructed, do nothing!");
