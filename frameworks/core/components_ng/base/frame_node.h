@@ -445,6 +445,7 @@ private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
     void UpdateLayoutPropertyFlag() override;
+    void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout);

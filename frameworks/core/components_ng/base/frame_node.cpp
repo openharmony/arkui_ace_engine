@@ -855,6 +855,11 @@ void FrameNode::UpdateLayoutPropertyFlag()
     }
 }
 
+void FrameNode::ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag)
+{
+    layoutProperty_->UpdatePropertyChangeFlag(propertyChangeFlag);
+}
+
 void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 {
     flag = flag | layoutProperty_->GetPropertyChangeFlag();

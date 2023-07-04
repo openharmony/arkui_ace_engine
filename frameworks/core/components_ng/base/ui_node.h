@@ -243,6 +243,8 @@ public:
     // of parent's layout wrapper
     virtual void UpdateLayoutPropertyFlag();
 
+    virtual void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) {}
+
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
     virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
