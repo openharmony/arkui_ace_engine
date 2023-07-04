@@ -590,6 +590,8 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
      * @tc.expected: remove successfully
      */
+    overlayManager->UpdatePopupNode(targetId1, popups[0]);
+    overlayManager->UpdatePopupNode(targetId2, popups[1]);
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
 }
 /**
