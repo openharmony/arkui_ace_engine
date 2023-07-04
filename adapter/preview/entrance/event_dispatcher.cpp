@@ -71,23 +71,54 @@ const std::map<MMI::KeyCode, wchar_t> SHIFT_PRINTABEL_SYMBOLS = {
 
 void ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& event)
 {
-    event.time = pointerEvent->time;
     event.id = pointerEvent->id;
     event.x = pointerEvent->x;
     event.y = pointerEvent->y;
+    event.screenX = pointerEvent->screenX;
+    event.screenY = pointerEvent->screenY;
     event.type = static_cast<TouchType>(static_cast<size_t>(pointerEvent->type));
-    event.size = sizeof(TouchEvent);
+    event.pullType = static_cast<TouchType>(static_cast<size_t>(pointerEvent->pullType));
+    event.time = pointerEvent->time;
+    event.size = pointerEvent->size;
+    event.force = pointerEvent->force;
+    event.tiltX = pointerEvent->tiltX;
+    event.tiltY = pointerEvent->tiltY;
+    event.deviceId = pointerEvent->deviceId;
+    event.sourceType = static_cast<SourceType>(static_cast<int32_t>(pointerEvent->sourceType));
+    event.sourceTool = static_cast<SourceTool>(static_cast<int32_t>(pointerEvent->sourceTool));
+    event.pointerEvent = pointerEvent;
+    for (auto& item : pointerEvent->pointers) {
+        TouchPoint pointer;
+        pointer.id = item.id;
+        pointer.x = item.x;
+        pointer.y = item.y;
+        pointer.screenX = item.screenX;
+        pointer.screenY = item.screenY;
+        pointer.downTime = item.downTime;
+        pointer.size = item.size;
+        pointer.force = item.force;
+        pointer.tiltX = item.tiltX;
+        pointer.tiltY = item.tiltY;
+        pointer.sourceTool = static_cast<SourceTool>(static_cast<int32_t>(item.sourceTool));
+        pointer.isPressed = item.isPressed;
+        event.pointers.emplace_back(pointer);
+    }
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
 {
     event.code = static_cast<KeyCode>(static_cast<int32_t>(keyEvent->code));
+    event.key = keyEvent->key;
     event.action = static_cast<KeyAction>(static_cast<int32_t>(keyEvent->action));
     for (auto& item : keyEvent->pressedCodes) {
         event.pressedCodes.push_back(static_cast<KeyCode>(static_cast<int32_t>(item)));
     }
+    event.repeatTime = keyEvent->repeatTime;
     event.timeStamp = keyEvent->timeStamp;
-    event.key = keyEvent->key;
+    event.metaKey = keyEvent->metaKey;
+    event.deviceId = keyEvent->deviceId;
+    event.sourceType = static_cast<SourceType>(static_cast<int32_t>(keyEvent->sourceType));
+    event.rawKeyEvent = keyEvent;
 }
 
 } // namespace
