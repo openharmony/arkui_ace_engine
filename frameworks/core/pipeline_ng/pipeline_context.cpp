@@ -723,17 +723,37 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
-        SyncSafeArea();
-    }
+    AnimationOption option;
+    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
+    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), systemSafeArea]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID_NOLOG(safeAreaManager);
+        if (safeAreaManager->UpdateSystemSafeArea(systemSafeArea)) {
+            pipeline->SyncSafeArea();
+            pipeline->FlushUITasks();
+        }
+    });
 }
 
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
-        SyncSafeArea();
-    }
+    AnimationOption option;
+    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
+    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), cutoutSafeArea]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID_NOLOG(safeAreaManager);
+        if (safeAreaManager->UpdateCutoutSafeArea(cutoutSafeArea)) {
+            pipeline->SyncSafeArea();
+            pipeline->FlushUITasks();
+        }
+    });
 }
 
 void PipelineContext::SyncSafeArea()
