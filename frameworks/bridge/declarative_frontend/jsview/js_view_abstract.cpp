@@ -3059,8 +3059,7 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
         return true;
     }
     if (jsValue->IsString()) {
-        result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
-        return true;
+        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -3090,20 +3089,19 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
-        result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
-        return true;
+        return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
-        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         return true;
     }
 
     if (!type->IsNull() && type->IsNumber() &&
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         auto value = std::to_string(themeConstants->GetDouble(resId->ToNumber<uint32_t>()));
-        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         return true;
     }
 
