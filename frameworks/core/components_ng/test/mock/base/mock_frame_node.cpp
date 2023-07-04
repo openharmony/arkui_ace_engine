@@ -262,11 +262,6 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return nullptr;
 }
 
-bool FrameNode::IsContentRoot()
-{
-    return false;
-}
-
 void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
 {
 }

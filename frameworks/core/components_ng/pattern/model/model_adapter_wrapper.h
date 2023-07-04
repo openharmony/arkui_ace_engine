@@ -52,10 +52,10 @@ struct SceneViewerAdapterProperties {
     Quaternion cameraRotation_ = Quaternion(MAX_INVALID,
         MAX_INVALID, MAX_INVALID, MAX_INVALID);
 
-    // Lights
     std::vector<RefPtr<OHOS::Render3D::SVLight>> lights_;
     std::vector<RefPtr<OHOS::Render3D::GLTFAnimation>> animations_;
     std::vector<RefPtr<OHOS::Render3D::SVGeometry>> geometries_;
+    std::vector<RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>> customRenders_;
 };
 
 class ModelAdapterWrapper : public virtual AceType {
@@ -94,6 +94,7 @@ private:
     void UpdateGLTFAnimations(const SceneViewerAdapterProperties& properties);
     void UpdateGeometries(const SceneViewerAdapterProperties& properties);
     void HandleCameraMove(const OHOS::Render3D::SceneViewerTouchEvent& event);
+    void UpdateCustomRenders(const SceneViewerAdapterProperties& properties);
 
 private:
     uint32_t key_ = -1;

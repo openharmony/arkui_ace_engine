@@ -23,13 +23,14 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_algorithm.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::NG {
-class ToastPattern : public Pattern {
-    DECLARE_ACE_TYPE(ToastPattern, Pattern);
+class ToastPattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(ToastPattern, PopupBasePattern);
 
 public:
     ToastPattern() = default;

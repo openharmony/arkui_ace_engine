@@ -59,6 +59,9 @@ void ModelAdapterWrapper::OnPaint(const RefPtr<ModelPaintProperty>& modelPaintPr
     if (modelPaintProperty->NeedsGeometriesSetup()) {
         UpdateGeometries(properties);
     }
+    if (modelPaintProperty->NeedsCustomRendersSetup()) {
+        UpdateCustomRenders(properties);
+    }
     DrawFrame();
 }
 
@@ -264,9 +267,6 @@ void ModelAdapterWrapper::CreateTextureLayer(const EGLContext& eglContext)
         auto info = adapter->textureLayer_->CreateRenderTarget(adapter->size_.Width(), adapter->size_.Height());
         adapter->textureInfo_ = std::make_shared<OHOS::Render3D::TextureInfo>(std::move(info));
         adapter->textureLayer_->SetTextureInfo(info);
-        const OHOS::Render3D::TextureInfo& obj = *(adapter->textureInfo_);
-        LOGD("MODEL_NG: ModelAdapterWrapper::CreateTextureLayer() key_ = %d, texture_id = %d",
-            adapter->GetKey(), obj.textureId_);
     });
 }
 
@@ -323,6 +323,7 @@ SceneViewerAdapterProperties ModelAdapterWrapper::ExtractPaintProperties(
     properties.lights_ = modelPaintProperty->GetModelLights().value_or(properties.lights_);
     properties.animations_ = modelPaintProperty->GetModelAnimations().value_or(properties.animations_);
     properties.geometries_ = modelPaintProperty->GetModelGeometries().value_or(properties.geometries_);
+    properties.customRenders_ = modelPaintProperty->GetModelCustomRenders().value_or(properties.customRenders_);
     return properties;
 }
 
@@ -387,4 +388,21 @@ void ModelAdapterWrapper::HandleCameraMove(const OHOS::Render3D::SceneViewerTouc
         adapter->sceneViewerAdapter_->OnTouchEvent(event);
     });
 }
+
+void ModelAdapterWrapper::UpdateCustomRenders(const SceneViewerAdapterProperties& properties)
+{
+    LOGD("MODEL_NG: ModelAdapterWrapper::UpdateCustomRenders() size: %zu", properties.customRenders_.size());
+    if (!properties.customRenders_.empty()) {
+#if MULTI_ECS_UPDATE_AT_ONCE
+        OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
+#else
+        OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &properties] {
+#endif
+            auto adapter = weak.Upgrade();
+            CHECK_NULL_VOID(adapter);
+            adapter->sceneViewerAdapter_->AddCustomRenders(properties.customRenders_);
+        });
+    }
+}
+
 } // namespace OHOS::Ace::NG

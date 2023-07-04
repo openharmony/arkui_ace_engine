@@ -202,7 +202,7 @@ public:
 
     void SetIsOverlayNode(bool isOverlayNode)
     {
-        isOverylayNode_ = isOverlayNode;
+        isOverlayNode_ = isOverlayNode;
     }
 
     // ------------------------------------------------------------------------
@@ -240,6 +240,7 @@ private:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
 
+    void OffsetNodeToSafeArea();
     void ExpandSafeAreaInner();
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
     void ExpandIntoKeyboard();
@@ -268,7 +269,7 @@ private:
     bool isActive_ = false;
     bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;
-    bool isOverylayNode_ = false;
+    bool isOverlayNode_ = false;
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
 
