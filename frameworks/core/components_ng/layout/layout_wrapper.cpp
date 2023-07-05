@@ -245,6 +245,15 @@ void LayoutWrapper::OffsetNodeToSafeArea()
     if (offset.GetY() < insets->top_.end) {
         offset.SetY(insets->top_.end);
     }
+
+    auto right = offset.GetX() + geometryNode_->GetMarginFrameSize().Width();
+    if (insets->right_.IsValid() && right > insets->right_.start) {
+        offset.SetX(insets->right_.start - geometryNode_->GetMarginFrameSize().Width());
+    }
+    auto bottom = offset.GetY() + geometryNode_->GetMarginFrameSize().Height();
+    if (insets->bottom_.IsValid() && bottom > insets->bottom_.start) {
+        offset.SetY(insets->bottom_.start - geometryNode_->GetMarginFrameSize().Height());
+    }
     geometryNode_->SetMarginFrameOffset(offset);
 }
 
