@@ -1446,6 +1446,12 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         }
         modalStack_.push(WeakClaim(RawPtr(sheetNode)));
         SaveLastModalNode();
+        // create backgroundmask node
+        auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_MASK_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        maskNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundMask.value());
+        maskNode->MountToParent(rootNode);
         sheetNode->MountToParent(rootNode);
         modalList_.emplace_back(WeakClaim(RawPtr(sheetNode)));
         FireModalPageShow();
@@ -1531,6 +1537,7 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
                 auto root = rootWeak.Upgrade();
                 CHECK_NULL_VOID_NOLOG(sheet && root);
                 ContainerScope scope(id);
+                OverlayManager::DestroySheetMask(sheet);
                 root->RemoveChild(sheet);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 }, TaskExecutor::TaskType::UI);
@@ -1594,12 +1601,30 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto root = DynamicCast<FrameNode>(rootNode);
+    OverlayManager::DestroySheetMask(sheetNode);
     root->RemoveChild(sheetNode);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     modalStack_.pop();
     modalList_.pop_back();
     FireModalPageHide();
     SaveLastModalNode();
+}
+
+void OverlayManager::DestroySheetMask(const RefPtr<FrameNode>& sheetNode)
+{
+    // destory bindsheet masknode
+    auto rootNode = sheetNode->GetParent();
+    CHECK_NULL_VOID(rootNode);
+    auto root = DynamicCast<FrameNode>(rootNode);
+    auto sheetChild = std::find(root->GetChildren().begin(), root->GetChildren().end(), sheetNode);
+    if (sheetChild == root->GetChildren().end()) {
+        return;
+    }
+    --sheetChild;
+    if (DynamicCast<FrameNode>(*sheetChild)->GetTag() != V2::SHEET_MASK_TAG) {
+        return;
+    }
+    root->RemoveChild(*sheetChild);
 }
 
 RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)

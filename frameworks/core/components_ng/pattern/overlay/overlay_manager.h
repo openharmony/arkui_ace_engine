@@ -233,6 +233,8 @@ public:
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
 
+    static void DestroySheetMask(const RefPtr<FrameNode>& sheetNode);
+
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
 private:

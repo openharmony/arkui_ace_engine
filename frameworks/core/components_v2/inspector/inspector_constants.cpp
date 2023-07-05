@@ -335,6 +335,7 @@ const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 // sheet
 const char SHEET_COMPONENT_TAG[] = "SheetComponent";
 const char SHEET_ETS_TAG[] = "Sheet";
+const char SHEET_MASK_TAG[] = "SheetMask";
 
 // hyperlink
 const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";
