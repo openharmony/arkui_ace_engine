@@ -282,10 +282,12 @@ void JSBindLibs(const std::string moduleName, const std::string exportModuleName
     }
     std::vector<std::shared_ptr<JsValue>> argv = { runtime->NewString(moduleName) };
     std::shared_ptr<JsValue> napiObj = requireNapiFunc->Call(runtime, global, argv, argv.size());
-    if (isController && napiObj) {
-        global->SetProperty(runtime, exportModuleName, napiObj->GetProperty(runtime, exportModuleName));
-    } else {
-        global->SetProperty(runtime, exportModuleName, napiObj);
+    if (napiObj && !napiObj->IsUndefined(runtime)) {
+        if (isController) {
+            global->SetProperty(runtime, exportModuleName, napiObj->GetProperty(runtime, exportModuleName));
+        } else {
+            global->SetProperty(runtime, exportModuleName, napiObj);
+        }
     }
 }
 #endif
