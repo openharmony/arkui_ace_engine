@@ -600,7 +600,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
 
 void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (!GreatOrEqual(gridLayoutInfo_.currentOffset_, mainSize)) {
+    if (!GreatOrEqual(gridLayoutInfo_.currentOffset_ - gridLayoutInfo_.prevOffset_, mainSize)) {
         return;
     }
 
@@ -641,7 +641,7 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
 
 void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (!GreatOrEqual(-gridLayoutInfo_.currentOffset_, mainSize)) {
+    if (!GreatOrEqual(gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, mainSize)) {
         return;
     }
 
