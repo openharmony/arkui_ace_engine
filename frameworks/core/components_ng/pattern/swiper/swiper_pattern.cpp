@@ -84,12 +84,14 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto swiperPaintProperty = host->GetPaintProperty<SwiperPaintProperty>();
+    auto swiperLayoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
     auto swiperLayoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>();
     if (jumpIndex_) {
         if (jumpIndex_.value() < 0 || jumpIndex_.value() >= TotalCount()) {
             jumpIndex_ = 0;
             currentIndex_ = 0;
             currentFirstIndex_ = 0;
+            swiperLayoutProperty->UpdateIndexWithoutMeasure(0);
         }
         swiperLayoutAlgorithm->SetJumpIndex(jumpIndex_.value());
     } else if (targetIndex_) {
