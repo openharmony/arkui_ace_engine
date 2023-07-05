@@ -364,7 +364,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(menuPattern->IsContextMenu());
+        InitTargetSizeAndPosition(menuPattern->IsContextMenu(), layoutWrapper);
     }
 
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
@@ -813,7 +813,15 @@ OffsetF MenuLayoutAlgorithm::GetArrowPositionWithPlacement(const SizeF& menuSize
     return childPosition;
 }
 
-void MenuLayoutAlgorithm::InitTargetSizeAndPosition(bool isContextMenu)
+OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, OffsetF());
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(menuNode, OffsetF());
+    return menuNode->GetParentGlobalOffsetDuringLayout();
+}
+
+void MenuLayoutAlgorithm::InitTargetSizeAndPosition(bool isContextMenu, const LayoutWrapper* layoutWrapper)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
@@ -833,6 +841,9 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(bool isContextMenu)
                           static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
         targetOffset_.SetX(newOffsetX);
         targetOffset_.SetY(newOffsetY);
+    } else {
+        OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
+        targetOffset_ -= offset;
     }
 
     if (isContextMenu) {
