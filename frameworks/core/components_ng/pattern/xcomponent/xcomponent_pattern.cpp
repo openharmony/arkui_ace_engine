@@ -530,6 +530,9 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 #endif
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 
+    if (nativeXComponent_ && nativeXComponentImpl_) {
+        nativeXComponentImpl_->SetHistoricalPoint(SetHistoryPoint(info.GetHistory()));
+    }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 }
 
@@ -647,6 +650,30 @@ void XComponentPattern::SetTouchPoint(
         ohTouchPoint.isPressed = false;
         touchEventPoint_.touchPoints[index++] = ohTouchPoint;
     }
+}
+
+std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPoint(
+    const std::list<TouchLocationInfo>& touchInfoList)
+{
+    std::vector<OH_NativeXComponent_HistoricalPoint> historicalPoints;
+    for (auto&& item : touchInfoList) {
+        OH_NativeXComponent_HistoricalPoint point;
+        point.id = item.GetFingerId();
+        point.x = item.GetLocalLocation().GetX();
+        point.y = item.GetLocalLocation().GetY();
+        point.screenX = item.GetScreenLocation().GetX();
+        point.screenY = item.GetScreenLocation().GetY();
+        point.type = static_cast<OH_NativeXComponent_TouchEventType>(item.GetTouchType());
+        point.size = item.GetSize();
+        point.force = item.GetForce();
+        point.timeStamp = item.GetTimeStamp().time_since_epoch().count();
+        point.titlX = item.GetTiltX().value_or(0.0f);
+        point.titlY = item.GetTiltY().value_or(0.0f);
+        point.sourceTool = static_cast<OH_NativeXComponent_TouchEvent_SourceTool>(item.GetSourceTool());
+
+        historicalPoints.push_back(point);
+    }
+    return historicalPoints;
 }
 
 ExternalEvent XComponentPattern::CreateExternalEvent()

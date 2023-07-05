@@ -160,9 +160,16 @@ public:
         return touchEvent_;
     }
 
-    const std::vector<OH_NativeXComponent_HistoricalPoint>& GetHistoryPoints() const
+    void GetHistoryPoints(int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints)
     {
-        return historicalPoints_;
+        int32_t historicalPointsSize = (int32_t)(historicalPoints_.size());
+        *size = historicalPointsSize;
+        *historicalPoints = &(historicalPoints_[0]);
+    }
+
+    void GetHistoryPointsSize(int32_t* size) const
+    {
+        *size = (int32_t)(historicalPoints_.size());
     }
 
     const OH_NativeXComponent_MouseEvent GetMouseEvent() const
@@ -266,7 +273,7 @@ struct OH_NativeXComponent {
     int32_t GetXComponentOffset(const void* window, double* x, double* y);
     int32_t GetTouchEvent(const void* window, OH_NativeXComponent_TouchEvent* touchEvent);
     int32_t GetMouseEvent(const void* window, OH_NativeXComponent_MouseEvent* mouseEvent);
-    int32_t GetHistoryPoints(const void* window, std::vector<OH_NativeXComponent_HistoricalPoint>& historicalPoints);
+    int32_t GetHistoryPoints(const void* window, int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints);
     int32_t RegisterCallback(OH_NativeXComponent_Callback* callback);
     int32_t RegisterMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback);
     int32_t GetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType);

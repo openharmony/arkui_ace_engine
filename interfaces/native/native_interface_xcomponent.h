@@ -160,6 +160,25 @@ typedef enum {
     OH_NATIVEXCOMPONENT_FORWARD_BUTTON = 0x10,
 } OH_NativeXComponent_MouseEventButton;
 
+/**
+ * @brief Represents the source tool type of TouchEvent
+ *
+ * @since 10
+ * @version 1.0
+ */
+typedef enum {
+    OH_NATIVEXCOMPONENT_SOURCETOOL_UNKNOWN = 0,
+    OH_NATIVEXCOMPONENT_SOURCETOOL_FINGER = 1,
+    OH_NATIVEXCOMPONENT_SOURCETOOL_PEN = 2,
+    OH_NATIVEXCOMPONENT_SOURCETOOL_RUBBER = 3,
+    OH_NATIVEXCOMPONENT_SOURCETOOL_BRUSH = 4,
+    OH_NATIVEXCOMPONENT_SOURCETOOL_PENCIL = 5,
+    OH_NATIVEXCOMPONENT_SOURCETOOL_AIRBRUSH = 6,
+    OH_NATIVEXCOMPONENT_SOURCETOOL_MOUSE = 7,
+    OH_NATIVEXCOMPONENT_SOURCETOOL_LENS = 8,
+    OH_NATIVEXCOMPONENT_SOURCETOOL_TOUCHPAD = 9,
+} OH_NativeXComponent_TouchEvent_SourceTool;
+
 typedef struct {
     /** Unique identifier of a finger. */
     int32_t id;
@@ -179,6 +198,12 @@ typedef struct {
     float force;
     /** Timestamp of the current touch event. */
     int64_t timeStamp;
+    /** The angle betweenprojection on plane-X-Y and axis-Z of the current touch event. */
+    float titlX;
+    /** The angle betweenprojection on plane-Y-Z and axis-Z of the current touch event. */
+    float titlY;
+    /** The sourceTool of the current touch event. */
+    OH_NativeXComponent_TouchEvent_SourceTool sourceTool;
 } OH_NativeXComponent_HistoricalPoint;
 
 typedef struct {
@@ -406,7 +431,7 @@ int32_t OH_NativeXComponent_GetTouchPointTiltY(OH_NativeXComponent* component, u
  * @version 1.0
  */
 int32_t OH_NativeXComponent_GetHistoricalPoints(OH_NativeXComponent* component, const void* window,
-    std::vector<OH_NativeXComponent_HistoricalPoint>& historicalPoints);
+    int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints);
 
 /**
  * @brief Obtains the mouse event dispatched by the ArkUI XComponent.
