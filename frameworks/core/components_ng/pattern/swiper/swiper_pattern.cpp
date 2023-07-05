@@ -2346,6 +2346,7 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
         CHECK_NULL_VOID(indicatorNode);
         if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
             indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     }
 
