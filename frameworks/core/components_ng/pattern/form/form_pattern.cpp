@@ -163,11 +163,14 @@ void FormPattern::HandleSnapshot()
         TaskExecutor::TaskType::UI, DELAY_TIME_FOR_FORM_SNAPSHOT);
 
     // Init click event for static form.
-    auto gestureEventHub = GetHost()->GetOrCreateGestureEventHub();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        formPattern->HandleStaticFormEvent({ info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY() });
+        formPattern->HandleStaticFormEvent(
+            { static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()) });
     };
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gestureEventHub->AddClickEvent(clickEvent);
@@ -179,13 +182,14 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
         LOGE("formLinkInfos is empty, do not handle event.");
         return;
     }
-    for (auto info : formLinkInfos_) {
+    for (const auto& info : formLinkInfos_) {
         auto linkInfo = JsonUtil::ParseJsonString(info);
+        CHECK_NULL_VOID(linkInfo);
         auto action = linkInfo->GetValue("action")->GetString();
         auto rectStr = linkInfo->GetValue("formLinkRect")->GetString();
         RectF linkRect = RectF::FromString(rectStr);
-        LOGI("touchPoint: %{public}s, action: %{public}s, linkRect: %{public}s",
-            touchPoint.ToString().c_str() action.c_str(), linkRect.ToString().c_str());
+        LOGD("touchPoint: %{public}s, action: %{public}s, linkRect: %{public}s", touchPoint.ToString().c_str(),
+            action.c_str(), linkRect.ToString().c_str());
         if (linkRect.IsInRegion(touchPoint)) {
             OnActionEvent(action);
             break;

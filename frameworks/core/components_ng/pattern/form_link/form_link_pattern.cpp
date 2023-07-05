@@ -23,8 +23,6 @@ void FormLinkPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
 }
 
@@ -37,7 +35,6 @@ bool FormLinkPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     pipeline->AddFormLinkInfo(formLinkInfo_.ToString());
-    LOGI("formLinkInfo is %{public}s", formLinkInfo_.ToString().c_str());
     return false;
 }
 

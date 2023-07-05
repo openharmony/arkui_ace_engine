@@ -64,6 +64,7 @@ private:
     bool allowUpdate_ = true;
     float width_ = 0.0f;
     float height_ = 0.0f;
+    std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     sptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;

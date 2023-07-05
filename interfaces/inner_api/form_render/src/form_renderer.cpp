@@ -67,13 +67,15 @@ void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     };
     uiContent_->SetErrorEventHandler(errorEventHandler);
 
-    auto formLinkInfoUpdateHandler = [weak = weak_from_this()](const std::vector<std::string>& formLinkInfos) {
-        auto formRenderer = weak.lock();
-        if (formRenderer) {
-            formRenderer->OnFormLinkInfoUpdate(formLinkInfos);
-        }
-    };
-    uiContent_->SetFormLinkInfoUpdateHandler(formLinkInfoUpdateHandler);
+    if (!formJsInfo.isDynamic) {
+        auto formLinkInfoUpdateHandler = [weak = weak_from_this()](const std::vector<std::string>& formLinkInfos) {
+            auto formRenderer = weak.lock();
+            if (formRenderer) {
+                formRenderer->OnFormLinkInfoUpdate(formLinkInfos);
+            }
+        };
+        uiContent_->SetFormLinkInfoUpdateHandler(formLinkInfoUpdateHandler);
+    }
 
     auto rsSurfaceNode = uiContent_->GetFormRootNode();
     if (rsSurfaceNode == nullptr) {
@@ -218,6 +220,7 @@ void FormRenderer::OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
     HILOG_INFO("Form OnSurfaceReuse.");
     formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), formJsInfo, newWant);
+    formRendererDelegate_->OnFormLinkInfoUpdate(cachedInfos_);
 }
 
 void FormRenderer::OnActionEvent(const std::string& action)
@@ -246,7 +249,7 @@ void FormRenderer::OnFormLinkInfoUpdate(const std::vector<std::string>& formLink
         HILOG_ERROR("formRendererDelegate is null!");
         return;
     }
-
+    cachedInfos_ = formLinkInfos;
     formRendererDelegate_->OnFormLinkInfoUpdate(formLinkInfos);
 }
 

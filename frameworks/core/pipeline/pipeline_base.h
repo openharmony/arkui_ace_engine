@@ -917,6 +917,7 @@ protected:
             nextFrameLayoutCallback_();
             LOGI("nextFrameLayoutCallback called");
         }
+        // Update FormLinkInfo after layout. (For static form use only)
         if (formLinkInfoUpdateHandler_) {
             formLinkInfoUpdateHandler_(formLinkInfos_);
         }

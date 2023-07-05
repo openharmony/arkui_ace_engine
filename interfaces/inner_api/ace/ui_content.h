@@ -137,9 +137,9 @@ public:
     virtual void ReloadForm(const std::string& url) {};
     virtual void OnFormSurfaceChange(float width, float height) {}
 
-    virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) = 0;
-    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
-    virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) = 0;
+    virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
+    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
+    virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) {};
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
