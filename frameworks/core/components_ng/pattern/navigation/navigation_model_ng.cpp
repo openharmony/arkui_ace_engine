@@ -372,7 +372,9 @@ void NavigationModelNG::Create()
 
     stack->Push(navigationGroupNode);
     auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
-    navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
+    if (!navigationLayoutProperty->HasNavigationMode()) {
+        navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
+    }
     navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 }
 

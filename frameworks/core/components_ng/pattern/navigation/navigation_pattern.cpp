@@ -247,6 +247,17 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(hostNode, false);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
+    if (config.frameSizeChange) {
+        if (navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
+            auto currentMode = navigationLayoutAlgorithm->GetNavigationMode();
+            if (navigationMode_ != NavigationMode::AUTO && navigationMode_ != currentMode) {
+                hostNode->SetIsModeChange(true);
+                DoAnimation(currentMode);
+            }
+            navigationMode_ = currentMode;
+        }
+    }
+    navigationLayoutProperty->UpdateNavigationMode(navigationLayoutAlgorithm->GetNavigationMode());
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_RETURN(navBarNode, false);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
