@@ -70,7 +70,7 @@ void TimePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     }
     // Paint gradient rect over the picker content.
     RSBrush topBrush;
-    RSRect rect(0.0f, frameRect.Right(), 0.0f, frameRect.Bottom());
+    RSRect rect(0.0f, 0.0f, frameRect.Right() - frameRect.Left(), frameRect.Bottom() - frameRect.Top());
     RSPoint topStartPoint;
     topStartPoint.SetX(0.0f);
     topStartPoint.SetY(0.0f);
