@@ -448,6 +448,8 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (isInit_) {
         isNotInit = false;
         isInit_ = false;
+        // first load Swiper to preload page.
+        SetLazyLoadFeature(true);
     } else {
         OnIndexChange();
     }
