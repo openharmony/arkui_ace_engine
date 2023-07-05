@@ -277,6 +277,7 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     }
     auto thisObj = thisVal.Get().GetLocalHandle();
     auto result = GetHandle()->Call(vm, thisObj, arguments.data(), argc);
+    JSNApi::ExecutePendingJob(vm);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (result.IsEmpty() || runtime->HasPendingException()) {
         runtime->HandleUncaughtException();
