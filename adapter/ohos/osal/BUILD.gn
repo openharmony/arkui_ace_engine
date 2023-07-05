@@ -89,6 +89,7 @@ template("ace_osal_ohos_source_set") {
       if (defined(global_parts_info) &&
           defined(global_parts_info.resourceschedule_soc_perf)) {
         external_deps += [ "soc_perf:socperf_client" ]
+        defines += [ "SOC_PERF_ENABLE" ]
       }
 
       external_deps += [

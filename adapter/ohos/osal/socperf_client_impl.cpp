@@ -15,7 +15,9 @@
 
 #include "adapter/ohos/osal/socperf_client_impl.h"
 
+#ifdef SOC_PERF_ENABLE
 #include "socperf_client.h"
+#endif
 
 namespace OHOS::Ace {
 SocPerfClient& SocPerfClient::GetInstance()
@@ -26,6 +28,8 @@ SocPerfClient& SocPerfClient::GetInstance()
 
 void SocPerfClientImpl::PerfRequest(int32_t cmdId, const std::string& msg)
 {
+#ifdef SOC_PERF_ENABLE
     OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(cmdId, msg);
+#endif
 };
 } // namespace OHOS::Ace
