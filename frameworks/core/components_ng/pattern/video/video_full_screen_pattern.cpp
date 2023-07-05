@@ -27,7 +27,6 @@ void VideoFullScreenPattern::InitFullScreenParam(const RefPtr<VideoPattern>& vid
     UpdateMediaParam(mediaPlayer, renderSurface, context);
     videoPattern->ResetMediaParam();
     videoPattern_ = AceType::WeakClaim(AceType::RawPtr(videoPattern));
-    RecoverState(videoPattern);
     auto video = videoPattern->GetHost();
     CHECK_NULL_VOID(video);
     SetEventHub(video->GetEventHub<EventHub>());
@@ -42,7 +41,6 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     int32_t rootId = videoNode->GetRootId();
     auto rootNode = FrameNode::GetFrameNode(V2::ROOT_ETS_TAG, rootId);
     CHECK_NULL_VOID(rootNode);
-    
     fullScreenNode->MountToParent(rootNode);
     // set video size all window
     LayoutConstraintF parentConstraint;
@@ -53,11 +51,14 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     auto geometryNode = fullScreenNode->GetGeometryNode();
     geometryNode->SetParentLayoutConstraint(parentConstraint);
     geometryNode->SetMarginFrameOffset(OffsetF {0.0f, 0.0f});
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(videoNode->GetPattern());
+    RecoverState(videoPattern);
     fullScreenNode->MarkModifyDone();
     fullScreenNode->RebuildRenderContextTree();
     fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     rootNode->RebuildRenderContextTree();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    OnFullScreenChange(true);
 }
 
 void VideoFullScreenPattern::ExitFullScreen()
@@ -102,6 +103,7 @@ void VideoFullScreenPattern::UpdateState()
     bool isChanged = false;
     if (videoLayout->HasObjectFit() &&
         (fullScreenLayout->GetObjectFit() != videoLayout->GetObjectFit())) {
+        isChanged = true;
         fullScreenLayout->UpdateObjectFit(videoLayout->GetObjectFit().value());
     }
     if (videoLayout->HasVideoSource() &&
@@ -120,8 +122,8 @@ void VideoFullScreenPattern::UpdateState()
         fullScreenLayout->UpdateControls(videoLayout->GetControls().value());
     }
     if (isChanged) {
+        fullScreenNode->MarkModifyDone();
         fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
-    fullScreenNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG
