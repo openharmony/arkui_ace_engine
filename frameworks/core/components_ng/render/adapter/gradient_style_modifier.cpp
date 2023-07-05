@@ -59,6 +59,10 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
     if (borderRadius_.has_value()) {
         RSRoundRect rRect(
             RSRect(0, 0, frameSize.Width(), frameSize.Height()), borderRadius_.value().x_, borderRadius_.value().y_);
+        rRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, borderRadius_.value().x_, borderRadius_.value().x_);
+        rRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, borderRadius_.value().y_, borderRadius_.value().y_);
+        rRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, borderRadius_.value().z_, borderRadius_.value().z_);
+        rRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, borderRadius_.value().w_, borderRadius_.value().w_);
         canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
     }
     canvas.DrawImageRect(
