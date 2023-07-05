@@ -42,6 +42,12 @@ int64_t GetSystemTimestamp()
     return duration_cast<T>(system_clock::now().time_since_epoch()).count();
 }
 
+template<class T>
+int64_t GetSteadyTimestamp()
+{
+    return duration_cast<T>(steady_clock::now().time_since_epoch()).count();
+}
+
 class SteadyTimeRecorder {
 public:
     static steady_clock::time_point begin;
@@ -62,12 +68,20 @@ steady_clock::time_point SteadyTimeRecorder::begin {};
 std::vector<uint16_t> JankFrameReport::frameJankRecord_(JANK_SIZE, 0);
 JankFrameFlag JankFrameReport::recordStatus_ = JANK_IDLE;
 int64_t JankFrameReport::startTime_ = 0;
+int64_t JankFrameReport::prevEndTimeStamp_ = 0;
+int64_t JankFrameReport::refreshPeriod_ = 0;
 std::string JankFrameReport::pageUrl_;
 bool JankFrameReport::needReport_ = false;
 
-void JankFrameReport::JankFrameRecord(double jank)
+void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
 {
-    if (recordStatus_ == JANK_IDLE) {
+    if (refreshPeriod_ <= 0) {
+        return;
+    }
+    int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
+    int64_t duration = now - std::max(timeStampNanos, prevEndTimeStamp_);
+    double jank = double(duration) / refreshPeriod_;
+    if (jank <= 1.0f || recordStatus_ == JANK_IDLE) {
         return;
     }
     needReport_ = true;
@@ -100,6 +114,16 @@ void JankFrameReport::JankFrameRecord(double jank)
         return;
     }
     frameJankRecord_[JANK_FRAME_180_FREQ]++;
+}
+
+void JankFrameReport::SetRefreshPeriod(int64_t refreshPeriod)
+{
+    refreshPeriod_ = refreshPeriod;
+}
+
+void JankFrameReport::RecordPreviousEnd()
+{
+    prevEndTimeStamp_ = GetSteadyTimestamp<std::chrono::nanoseconds>();
 }
 
 void JankFrameReport::ClearFrameJankRecord()
