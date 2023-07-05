@@ -393,6 +393,8 @@ void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskT
 
 void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
 
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;

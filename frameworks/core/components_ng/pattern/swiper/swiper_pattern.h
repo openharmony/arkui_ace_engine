@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
@@ -464,7 +465,7 @@ private:
     void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f);
     void StopPropertyTranslateAnimation();
     void UpdateOffsetAfterPropertyAnimation(float offset);
-    void OnPropertyTranslateAnimationFinish(int32_t nextIndex, const OffsetF& offset);
+    void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     RefPtr<Curve> GetCurveIncludeMotion(float velocity = 0.0f) const;
     void PlayIndicatorTranslateAnimation(float translate);
 
@@ -515,7 +516,7 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool forceStop = false);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -529,7 +530,7 @@ private:
     float GetCustomPropertyOffset() const;
     float GetCurrentFirstIndexStartPos() const;
     void UpdateAnimationProperty(float velocity);
-    void TriggerAnimationEndOnTouchDown();
+    void TriggerAnimationEndOnForceStop();
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
@@ -617,6 +618,8 @@ private:
     bool mainSizeIsMeasured_ = false;
 
     bool usePropertyAnimation_ = false;
+    int32_t propertyAnimationIndex_ = -1;
+
     std::optional<int32_t> surfaceChangedCallbackId_;
 };
 } // namespace OHOS::Ace::NG
