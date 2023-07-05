@@ -29,18 +29,17 @@ namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
+constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
-
+constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 constexpr static int INDEX_CONTRON_BUTTON = 1;
 constexpr static int INDEX_DIVIDER = 2;
 constexpr static int INDEX_SIDE_BAR = 3;
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
-static Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
-static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
-static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 static Dimension WINDOW_WIDTH = 520.0_vp;
@@ -120,9 +119,6 @@ void SideBarContainerLayoutAlgorithm::UpdateDefaultValueByVersion()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
-        DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
-        DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
         DEFAULT_CONTROL_BUTTON_WIDTH = 24.0_vp;
         DEFAULT_CONTROL_BUTTON_HEIGHT = 24.0_vp;
     }
