@@ -443,7 +443,7 @@ public:
         END,
     };
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
-    void AddFRCSceneInfo(const std::string& name name, float speed, SceneStatus status);
+    void AddFRCSceneInfo(const std::string& name, float speed, SceneStatus status);
 
     void SetDepth(int32_t depth);
 private:
