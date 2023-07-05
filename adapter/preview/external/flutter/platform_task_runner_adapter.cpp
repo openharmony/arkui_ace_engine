@@ -24,22 +24,22 @@ PlatformTaskRunnerAdapter::PlatformTaskRunnerAdapter(bool useCurrentEventRunner)
 
 void PlatformTaskRunnerAdapter::PostTask(fml::closure task)
 {
-    OHOS::AppExecFwk::EventHandler::Current().PostTask(std::move(task));
+    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task));
 }
 
 void PlatformTaskRunnerAdapter::PostTaskForTime(fml::closure task, fml::TimePoint target_time)
 {
-    OHOS::AppExecFwk::EventHandler::Current().PostTask(std::move(task), target_time.ToEpochDelta().ToMilliseconds());
+    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), target_time.ToEpochDelta().ToMilliseconds());
 }
 
 void PlatformTaskRunnerAdapter::PostDelayedTask(fml::closure task, fml::TimeDelta delay)
 {
-    OHOS::AppExecFwk::EventHandler::Current().PostTask(std::move(task), delay.ToMilliseconds());
+    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), delay.ToMilliseconds());
 }
 
 bool PlatformTaskRunnerAdapter::RunsTasksOnCurrentThread()
 {
-    return OHOS::AppExecFwk::EventHandler::Current().IsCurrentRunnerThread();
+    return OHOS::AppExecFwk::EventHandler::IsCurrentRunnerThread();
 }
 
 fml::TaskQueueId PlatformTaskRunnerAdapter::GetTaskQueueId()
