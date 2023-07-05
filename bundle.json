@@ -67,6 +67,7 @@
                 "device_status",
                 "soc_perf",
                 "security_component",
+                "camera_framework",
                 "previewer"
             ],
             "third_party": [
@@ -89,7 +90,7 @@
                 "libuv",
                 "egl",
                 "opengles",
-                "thirdparty_googletest"
+                "googletest"
             ]
         },
         "build": {
