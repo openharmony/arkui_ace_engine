@@ -614,6 +614,7 @@ void SwiperPattern::ShowNext()
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
     std::optional<int32_t> preIndex;
+    std::optional<int32_t> newTargetIndex;
     if (preTargetIndex_.has_value()) {
         if (GetLoopIndex(preTargetIndex_.value()) >= childrenSize - GetDisplayCount() && !IsLoop()) {
             LOGW("already last one, can't show next");
@@ -623,6 +624,19 @@ void SwiperPattern::ShowNext()
     } else if (currentIndex_ >= childrenSize - GetDisplayCount() && !IsLoop()) {
         LOGW("already last one, can't show next");
         return;
+    }
+    if (childrenSize <= 0 || GetDisplayCount() == 0) {
+        return;
+    }
+    if (isVisible_) {
+        if (preIndex.has_value()) {
+            newTargetIndex = preIndex.value() + 1;
+        } else {
+            newTargetIndex = itemPosition_.begin()->first + 1;
+        }
+        if (GetLoopIndex(newTargetIndex.value()) == currentIndex_) {
+            return;
+        }
     }
     StopAutoPlay();
     StopTranslateAnimation();
@@ -634,22 +648,16 @@ void SwiperPattern::ShowNext()
         StopPropertyTranslateAnimation();
     }
 
-    if (childrenSize > 0 && GetDisplayCount() != 0) {
-        if (isVisible_) {
-            if (preIndex.has_value()) {
-                targetIndex_ = preIndex.value() + 1;
-            } else {
-                targetIndex_ = itemPosition_.begin()->first + 1;
-            }
-            preTargetIndex_ = targetIndex_;
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            if (pipeline) {
-                pipeline->FlushUITasks();
-            }
-        } else {
-            SwipeToWithoutAnimation((currentIndex_ + 1) % childrenSize);
+    if (isVisible_) {
+        targetIndex_ = newTargetIndex;
+        preTargetIndex_ = targetIndex_;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
         }
+    } else {
+        SwipeToWithoutAnimation((currentIndex_ + 1) % childrenSize);
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -666,6 +674,7 @@ void SwiperPattern::ShowPrevious()
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
     std::optional<int32_t> preIndex;
+    std::optional<int32_t> newTargetIndex;
     if (preTargetIndex_.has_value()) {
         if (GetLoopIndex(preTargetIndex_.value()) <= 0 && !IsLoop()) {
             LOGW("already last one, can't show next");
@@ -675,6 +684,19 @@ void SwiperPattern::ShowPrevious()
     } else if (currentIndex_ <= 0 && !IsLoop()) {
         LOGW("already last one, can't show next");
         return;
+    }
+    if (childrenSize <= 0 || GetDisplayCount() == 0) {
+        return;
+    }
+    if (isVisible_) {
+        if (preIndex.has_value()) {
+            newTargetIndex = preIndex.value() - 1;
+        } else {
+            newTargetIndex = itemPosition_.begin()->first - 1;
+        }
+        if (GetLoopIndex(newTargetIndex.value()) == currentIndex_) {
+            return;
+        }
     }
     StopAutoPlay();
     StopTranslateAnimation();
@@ -686,22 +708,16 @@ void SwiperPattern::ShowPrevious()
         StopPropertyTranslateAnimation();
     }
 
-    if (childrenSize > 0 && GetDisplayCount() != 0) {
-        if (isVisible_) {
-            if (preIndex.has_value()) {
-                targetIndex_ = preIndex.value() - 1;
-            } else {
-                targetIndex_ = itemPosition_.begin()->first - 1;
-            }
-            preTargetIndex_ = targetIndex_;
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            if (pipeline) {
-                pipeline->FlushUITasks();
-            }
-        } else {
-            SwipeToWithoutAnimation((currentIndex_ + childrenSize - 1) % childrenSize);
+    if (isVisible_) {
+        targetIndex_ = newTargetIndex;
+        preTargetIndex_ = targetIndex_;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
         }
+    } else {
+        SwipeToWithoutAnimation((currentIndex_ + childrenSize - 1) % childrenSize);
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
