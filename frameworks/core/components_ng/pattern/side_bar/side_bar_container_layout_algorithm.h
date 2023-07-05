@@ -80,7 +80,7 @@ public:
         return sideBarOffset_;
     }
 
-    SideBarContainerType SetSideBarContainerType() const
+    SideBarContainerType GetSideBarContainerType() const
     {
         return type_;
     }
