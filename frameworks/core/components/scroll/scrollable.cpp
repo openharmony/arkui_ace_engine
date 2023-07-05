@@ -1018,12 +1018,18 @@ bool Scrollable::HandleOverScroll(double velocity)
             ProcessScrollOverCallback(velocity);
             return true;
         }
+        if (scrollEndCallback_) {
+            scrollEndCallback_();
+        }
         return false;
     }
     // parent handle over scroll first
     if ((velocity < 0 && (nestedOpt_.forward == NestedScrollMode::SELF_FIRST)) ||
         (velocity > 0 && (nestedOpt_.backward == NestedScrollMode::SELF_FIRST))) {
         if (parent->HandleOverScroll(velocity)) {
+            if (scrollEndCallback_) {
+                scrollEndCallback_();
+            }
             return true;
         }
         if (edgeEffect_ != EdgeEffect::NONE) {
@@ -1036,6 +1042,9 @@ bool Scrollable::HandleOverScroll(double velocity)
     if (edgeEffect_ != EdgeEffect::NONE) {
         ProcessScrollOverCallback(velocity);
         return true;
+    }
+    if (scrollEndCallback_) {
+        scrollEndCallback_();
     }
     return parent->HandleOverScroll(velocity);
 }
