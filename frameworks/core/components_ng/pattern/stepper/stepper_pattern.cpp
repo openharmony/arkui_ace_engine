@@ -580,7 +580,7 @@ void StepperPattern::HandlingLeftButtonClickEvent()
     auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
     stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
     stepperHub->FirePreviousEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
-    swiperController->ShowPrevious();
+    swiperController->SwipeTo(std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
 }
 
 void StepperPattern::HandlingRightButtonClickEvent()
@@ -608,7 +608,7 @@ void StepperPattern::HandlingRightButtonClickEvent()
             stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
             stepperHub->FireNextEvent(index_, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
             auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
-            swiperController->ShowNext();
+            swiperController->SwipeTo(std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
         }
     }
 }
