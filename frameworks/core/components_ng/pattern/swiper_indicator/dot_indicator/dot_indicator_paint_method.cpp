@@ -410,21 +410,23 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
         float padding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
         float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
         float newRectWidth = rectWidth * (1.225f - 0.0125f * itemCount_);
+        auto changeValue = (newRectWidth - rectWidth) * touchBottomRate_;
+
         float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
         if (itemCount_ > 1) {
-            space = (newRectWidth - padding * 2 - allPointDiameterSum) / (itemCount_ - 1);
+            space = (rectWidth + changeValue - padding * 2 - allPointDiameterSum) / (itemCount_ - 1);
         }
         CalculatePointCenterX(itemHalfSizes, 0, padding, space, currentIndex_);
         if (touchBottomType_ == TouchBottomType::START) {
-            float distance = newRectWidth - rectWidth;
             for (size_t index = 0; index < vectorBlackPointCenterX_.size(); index++) {
-                vectorBlackPointCenterX_[index] = vectorBlackPointCenterX_[index] - distance;
+                vectorBlackPointCenterX_[index] = vectorBlackPointCenterX_[index] - changeValue;
             }
-            longPointCenterX_.first = longPointCenterX_.first - distance;
-            longPointCenterX_.second = longPointCenterX_.second - distance;
+            longPointCenterX_.first = longPointCenterX_.first - changeValue;
+            longPointCenterX_.second = longPointCenterX_.second - changeValue;
         }
     }
-    dotIndicatorModifier_->UpdateTouchBottomAnimation(touchBottomType_, vectorBlackPointCenterX_, longPointCenterX_);
+    dotIndicatorModifier_->UpdateTouchBottomAnimation(
+        touchBottomType_, vectorBlackPointCenterX_, longPointCenterX_, touchBottomRate_);
 }
 } // namespace OHOS::Ace::NG
 

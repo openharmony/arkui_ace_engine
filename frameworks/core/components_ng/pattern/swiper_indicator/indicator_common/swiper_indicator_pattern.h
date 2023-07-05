@@ -88,6 +88,7 @@ public:
             paintMethod->SetHoverPoint(hoverPoint_);
             paintMethod->SetMouseClickIndex(mouseClickIndex_);
             paintMethod->SetIsTouchBottom(touchBottomType_);
+            paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
             mouseClickIndex_ = std::nullopt;
             return paintMethod;
         } else {
@@ -154,7 +155,6 @@ private:
     PointF dragStartPoint_;
     bool isTouchBottomAnimationPlay_ = false;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
-    std::optional<PointF> touchBottomStartPosition_ = std::nullopt;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
