@@ -1889,7 +1889,7 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
-void FrameNode::AddFRCSceneInfo(std::string name, float speed, SceneStatus status)
+void FrameNode::AddFRCSceneInfo(const std::string& name, float speed, SceneStatus status)
 {
     // [PLANNING]: Frame Rate Controller(FRC):
     // Based on scene, speed and scene status, FrameRateRange will be sent to RSNode.
