@@ -43,7 +43,7 @@ static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-static Dimension WINDOE_WIDTH = 520.0_vp;
+static Dimension WINDOW_WIDTH = 520.0_vp;
 } // namespace
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -69,6 +69,10 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         InitRealSideBarWidth(layoutWrapper, parentWidth);
     }
 
+    if (parentWidth >= WINDOW_WIDTH.ConvertToPx()) {
+        type_ = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
+    }
+
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
     auto minSideBarWidthPx = ConvertToPx(adjustMinSideBarWidth_, scaleProperty, parentWidth).value_or(0);
     auto dividerStrokeWidthPx = ConvertToPx(dividerStrokeWidth, scaleProperty, parentWidth).value_or(1);
@@ -78,7 +82,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         AutoMode(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
     }
 
-    if ((parentWidth <  WINDOE_WIDTH.ConvertToPx()) &&
+    if ((parentWidth < WINDOW_WIDTH.ConvertToPx()) &&
         (!layoutProperty->GetShowSideBar().has_value()) &&
         (type_ != SideBarContainerType::OVERLAY)) {
         if (isControlButtonClick_) {
