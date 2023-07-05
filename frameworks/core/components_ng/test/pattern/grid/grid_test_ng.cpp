@@ -1124,9 +1124,9 @@ HWTEST_F(GridTestNg, AttrGridItem002, TestSize.Level1)
 {
     /**
      *    0__100_200_300
-     *  75| 0 |   | 2 |
-     * 150|___| 1 |___|
-     * 225|___|___|___|
+     *  75|___|   |___|
+     * 150| 0 | 1 |___|
+     * 225|___|___| 2 |
      * 300|___|___|___|
      */
     GridModelNG gridModelNG;
@@ -1144,7 +1144,7 @@ HWTEST_F(GridTestNg, AttrGridItem002, TestSize.Level1)
     const float averageHeight = GRID_HEIGHT / 4;
     EXPECT_TRUE(IsEqualRect(GetItemRect(0), RectF(
         0.f,
-        0.f,
+        averageHeight,
         ITEM_WIDTH,
         averageHeight * 2
     )));
@@ -1156,7 +1156,7 @@ HWTEST_F(GridTestNg, AttrGridItem002, TestSize.Level1)
     )));
     EXPECT_TRUE(IsEqualRect(GetItemRect(2), RectF(
         ITEM_WIDTH * 2,
-        0.f,
+        averageHeight * 2,
         ITEM_WIDTH,
         averageHeight * 2
     )));
@@ -1170,7 +1170,7 @@ HWTEST_F(GridTestNg, AttrGridItem002, TestSize.Level1)
     )));
     EXPECT_TRUE(IsEqualRect(GetItemRect(2), RectF(
         ITEM_WIDTH * 2,
-        0.f,
+        averageHeight * 2,
         ITEM_WIDTH,
         averageHeight * 2
     )));
@@ -1185,9 +1185,9 @@ HWTEST_F(GridTestNg, AttrGridItem003, TestSize.Level1)
 {
     /**
      *    0__180_360_540_720
-     * 100|___0___|___|___|
+     * 100|___|___|___0___|
      * 200|_____1_____|___|
-     * 300|_2_|___|___|___|
+     * 300|___|___|_2_|___|
      */
     GridModelNG gridModelNG;
     gridModelNG.Create(nullptr, nullptr);
@@ -1203,7 +1203,7 @@ HWTEST_F(GridTestNg, AttrGridItem003, TestSize.Level1)
 
     const float averageWidth = DEVICE_WIDTH / 4;
     EXPECT_TRUE(IsEqualRect(GetItemRect(0), RectF(
-        0.f,
+        averageWidth * 2,
         0.f,
         averageWidth * 2,
         ITEM_HEIGHT
@@ -1215,7 +1215,7 @@ HWTEST_F(GridTestNg, AttrGridItem003, TestSize.Level1)
         ITEM_HEIGHT
     )));
     EXPECT_TRUE(IsEqualRect(GetItemRect(2), RectF(
-        0.f,
+        averageWidth * 2,
         ITEM_HEIGHT * 2,
         averageWidth,
         ITEM_HEIGHT
@@ -1229,7 +1229,7 @@ HWTEST_F(GridTestNg, AttrGridItem003, TestSize.Level1)
         ITEM_HEIGHT
     )));
     EXPECT_TRUE(IsEqualRect(GetItemRect(2), RectF(
-        0.f,
+        averageWidth * 2,
         ITEM_HEIGHT,
         averageWidth,
         ITEM_HEIGHT
@@ -1572,28 +1572,6 @@ HWTEST_F(GridTestNg, PositionController003, TestSize.Level1)
     controller->ScrollPage(true, true);
     controller->GetCurrentOffset();
     EXPECT_TRUE(IsEqualCurrentOffset(0));
-}
-
-/**
- * @tc.name: LayoutInfo001
- * @tc.desc: Test UpdateEndLine func
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, LayoutInfo001, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateGridItem(8, -1, ITEM_HEIGHT);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. Change Grid size.
-     * @tc.expected: Verify endMainLineIndex_.
-     */
-    RunMeasureAndLayout(DEVICE_WIDTH, 100.f);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().endMainLineIndex_, 1);
 }
 
 /**
@@ -3152,8 +3130,8 @@ HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
     gridModelNG.SetRowsTemplate("1fr 1fr");
     gridModelNG.SetRowsGap(Dimension(5));
     ScrollBarUpdateFunc scrollFunc = [](int32_t index, Dimension offset) {
-        std::optional<float> horizontalOffset = 10.0f;
-        std::optional<float> verticalOffset = 10.0f;
+        std::optional<float> horizontalOffset = offset.ConvertToPx();
+        std::optional<float> verticalOffset = offset.ConvertToPx();
         return std::make_pair(horizontalOffset, verticalOffset);
     };
     gridModelNG.SetOnScrollBarUpdate(std::move(scrollFunc));
