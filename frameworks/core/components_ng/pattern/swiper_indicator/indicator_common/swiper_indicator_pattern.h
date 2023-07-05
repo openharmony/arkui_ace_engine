@@ -153,7 +153,6 @@ private:
     bool isPressed_ = false;
     PointF hoverPoint_;
     PointF dragStartPoint_;
-    bool isTouchBottomAnimationPlay_ = false;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;

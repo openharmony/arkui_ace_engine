@@ -445,7 +445,14 @@ void SwiperIndicatorPattern::InitPanEvent(const RefPtr<GestureEventHub>& gesture
 
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    if (swiperPattern->GetDirection() == Axis::VERTICAL) {
+        panDirection = { .type = PanDirection::VERTICAL };
+    }
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
@@ -460,27 +467,20 @@ void SwiperIndicatorPattern::HandleDragUpdate(const GestureEvent& info)
     if (CheckIsTouchBottom(info)) {
         return;
     }
-
-    auto dragPoint =
-        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
-    auto offset = dragPoint - dragStartPoint_;
-
-    if (LessNotEqual(std::abs(offset.GetX()), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
-        return;
-    }
-    auto moveDistance = std::abs(std::fmod(offset.GetX(), INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx()));
-    if (isTouchBottomAnimationPlay_ && LessNotEqual(moveDistance, INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
-        isTouchBottomAnimationPlay_ = false;
-    }
-
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    auto offset = dragPoint - dragStartPoint_;
+    auto turnPageRateOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
+        return;
+    }
 
-    auto turnPageRate = -(offset.GetX() / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
+    auto turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
     swiperPattern->SetTurnPageRate(turnPageRate);
-
     if (std::abs(turnPageRate) >= 1) {
         if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + 1);
@@ -522,10 +522,10 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     auto isLoop = swiperPaintProperty->GetLoop().value_or(true);
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
-    auto offset = dragPoint - dragStartPoint_ ;
-
-    auto touchBottomRate = LessOrEqual(std::abs(offset.GetX()), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
-                               ? offset.GetX() / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx()
+    auto offset = dragPoint - dragStartPoint_;
+    auto touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    auto touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
+                               ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx()
                                : 1;
 
     swiperPattern->SetTurnPageRate(0);
@@ -533,15 +533,13 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     TouchBottomType touchBottomType = TouchBottomType::NONE;
 
     if ((currentIndex <= 0) && !isLoop) {
-        auto offset = dragPoint - dragStartPoint_ ;
-        if (Negative(info.GetMainDelta()) || NonPositive(offset.GetX())) {
+        if (Negative(info.GetMainDelta()) || NonPositive(touchOffset)) {
             touchBottomType = TouchBottomType::START;
         }
     }
 
     if ((currentIndex >= childrenSize - displayCount) && !isLoop) {
-        auto offset = dragPoint - dragStartPoint_ ;
-        if (Positive(info.GetMainDelta()) || NonNegative(offset.GetX())) {
+        if (Positive(info.GetMainDelta()) || NonNegative(touchOffset)) {
             touchBottomType = TouchBottomType::END;
         }
     }

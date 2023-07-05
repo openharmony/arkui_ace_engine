@@ -90,9 +90,10 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
         rectHeight = contentProperty.indicatorPadding + selectedItemHeight + contentProperty.indicatorPadding;
     }
 
-    auto widthChangeValue = (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth;
-    auto heightChangeValue = (1.0f - backgroundHeightDilateRatio_->Get()) * rectHeight;
-
+    auto widthChangeValue = axis_ == Axis::HORIZONTAL ? (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth
+                                                      : (1.0f - backgroundHeightDilateRatio_->Get()) * rectHeight;
+    auto heightChangeValue = axis_ == Axis::HORIZONTAL ? (1.0f - backgroundHeightDilateRatio_->Get()) * rectHeight
+                                                       : (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth;
     // Property to get the rectangle offset
     float rectLeft =
         axis_ == Axis::HORIZONTAL ? contentProperty.indicatorMargin.GetX() : contentProperty.indicatorMargin.GetY();
@@ -101,15 +102,27 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     // Adapter circle and rect
     float rectRight = rectLeft + (axis_ == Axis::HORIZONTAL ? rectWidth : rectHeight);
     float rectBottom = rectTop + (axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth);
-    if (touchBottomType_ == TouchBottomType::START) {
-        rectLeft -= widthChangeValue;
+    if (axis_ == Axis::HORIZONTAL) {
+        if (touchBottomType_ == TouchBottomType::START) {
+            rectLeft -= widthChangeValue;
+        }
+        if (touchBottomType_ == TouchBottomType::END) {
+            rectRight += widthChangeValue;
+        }
+        rectTop = rectTop + heightChangeValue * 0.5f;
+        rectBottom = rectBottom - heightChangeValue * 0.5f;
+        rectHeight -= heightChangeValue;
+    } else {
+        if (touchBottomType_ == TouchBottomType::START) {
+            rectTop += heightChangeValue;
+        }
+        if (touchBottomType_ == TouchBottomType::END) {
+            rectBottom -= heightChangeValue;
+        }
+        rectLeft = rectLeft - widthChangeValue * 0.5f;
+        rectRight = rectRight + widthChangeValue * 0.5f;
+        rectWidth -= widthChangeValue;
     }
-    if (touchBottomType_ == TouchBottomType::END) {
-        rectRight += widthChangeValue;
-    }
-    rectTop = rectTop + heightChangeValue * 0.5f;
-    rectBottom = rectBottom - heightChangeValue * 0.5f;
-    rectHeight -= heightChangeValue;
     // Paint background
     RSCanvas canvas = context.canvas;
     RSBrush brush;
@@ -460,8 +473,10 @@ void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBotto
     auto backgroundHeightDilateRatio = 1.0f;
 
     if (touchBottomType != TouchBottomType::NONE) {
-        backgroundWidthDilateRatio = 1.225f - 0.0125f * vectorBlackPointCenterX_->Get().size();
-        backgroundHeightDilateRatio = 0.8f;
+        backgroundWidthDilateRatio =
+            axis_ == Axis::HORIZONTAL ? 1.225f - 0.0125f * vectorBlackPointCenterX_->Get().size() : 0.8f;
+        backgroundHeightDilateRatio =
+            axis_ == Axis::HORIZONTAL ? 0.8f : 1.225f - 0.0125f * vectorBlackPointCenterX_->Get().size();
         backgroundWidthDilateRatio = (backgroundWidthDilateRatio - 1.0f) * touchBottomRate + 1.0f;
         backgroundHeightDilateRatio = (backgroundHeightDilateRatio - 1.0f) * touchBottomRate + 1.0f;
     }
