@@ -51,6 +51,7 @@ void ListContentModifier::onDraw(DrawingContext& context)
 void ListContentModifier::PaintDivider(
     const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas)
 {
+    float laneLen = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
     float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
     DividerPainter dividerPainter(dividerInfo.constrainStrokeWidth, crossLen,
         dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
@@ -67,8 +68,7 @@ void ListContentModifier::PaintDivider(
             float mainPos = child.second.startPos - divOffset + dividerInfo.mainPadding;
             float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
-                crossPos += laneIdx * (child.second.crossSize + dividerInfo.laneGutter);
-                float laneLen = child.second.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
+                crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
                 dividerPainter.SetDividerLength(laneLen);
             } else {
                 dividerPainter.SetDividerLength(crossLen);
@@ -94,8 +94,7 @@ void ListContentModifier::PaintDivider(
             float mainPos = itemPosition.at(index).endPos + divOffset + dividerInfo.mainPadding;
             float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !itemPosition.at(index).isGroup) {
-                crossPos += laneIdx * (itemPosition.at(index).crossSize + dividerInfo.laneGutter);
-                float laneLen = itemPosition.at(index).crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
+                crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
                 dividerPainter.SetDividerLength(laneLen);
             } else {
                 dividerPainter.SetDividerLength(crossLen);
