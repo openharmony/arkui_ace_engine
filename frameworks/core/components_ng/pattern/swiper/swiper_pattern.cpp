@@ -219,7 +219,7 @@ void SwiperPattern::OnModifyDone()
         mainSizeIsMeasured_ = false;
         itemPosition_.clear();
         jumpIndex_ = currentIndex_;
-        for (const auto& child: host->GetChildren()) {
+        for (const auto& child : host->GetChildren()) {
             if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
                 auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
                 CHECK_NULL_VOID(lazyForEachNode);
@@ -710,23 +710,23 @@ void SwiperPattern::ShowPrevious()
 
 void SwiperPattern::FinishAnimation()
 {
-    LOGI("SwiperPattern::FinishAnimation");
-    isFinishAnimation_ = true;
     StopTranslateAnimation();
-    if (swiperController_ && swiperController_->GetFinishCallback()) {
-        swiperController_->GetFinishCallback()();
-    }
     if (indicatorController_) {
         indicatorController_->Stop();
     }
     if (usePropertyAnimation_) {
+        isFinishAnimation_ = true;
         StopPropertyTranslateAnimation();
+    }
+    if (swiperController_ && swiperController_->GetFinishCallback()) {
+        swiperController_->GetFinishCallback()();
     }
 }
 
 void SwiperPattern::StopTranslateAnimation()
 {
     if (controller_ && !controller_->IsStopped()) {
+        isFinishAnimation_ = true;
         controller_->Stop();
     }
 }
@@ -1310,11 +1310,16 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
     } else {
         offset.AddY(translate);
     }
-    auto finishCallback = [id = Container::CurrentId(), weak = WeakClaim(this), nextIndex, offset]() {
+    auto finishCallback = [id = Container::CurrentId(), weak = WeakClaim(this), offset]() {
         ContainerScope scope(id);
-        auto swiper = weak.Upgrade();
-        CHECK_NULL_VOID(swiper);
-        swiper->OnPropertyTranslateAnimationFinish(nextIndex, offset);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto task = [weak, offset]() {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            swiper->OnPropertyTranslateAnimationFinish(offset);
+        };
+        context->PostSyncEvent(task);
     };
     // initial translate info.
     for (auto& item : itemPosition_) {
@@ -1334,6 +1339,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
         }
     };
     usePropertyAnimation_ = true;
+    propertyAnimationIndex_ = nextIndex;
     AnimationUtils::Animate(option, propertyUpdateCallback, finishCallback);
     AnimationCallbackInfo info;
     info.velocity = Dimension(velocity, DimensionUnit::PX).ConvertToVp();
@@ -1362,10 +1368,10 @@ void SwiperPattern::UpdateOffsetAfterPropertyAnimation(float offset)
     }
 }
 
-void SwiperPattern::OnPropertyTranslateAnimationFinish(int32_t nextIndex, const OffsetF& offset)
+void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
 {
     if (!usePropertyAnimation_) {
-        // stop by gesture.
+        // force stop.
         return;
     }
     usePropertyAnimation_ = false;
@@ -1378,7 +1384,7 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(int32_t nextIndex, const 
     }
     // update postion info.
     UpdateOffsetAfterPropertyAnimation(offset.GetMainOffset(GetDirection()));
-    OnTranslateFinish(nextIndex, false);
+    OnTranslateFinish(propertyAnimationIndex_, false);
 }
 
 void SwiperPattern::StopPropertyTranslateAnimation()
@@ -1399,7 +1405,7 @@ void SwiperPattern::StopPropertyTranslateAnimation()
         item.second.finialOffset = OffsetF();
     }
     UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
-    OnTranslateFinish(-1, false);
+    OnTranslateFinish(propertyAnimationIndex_, false, true);
 }
 
 RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion(float velocity) const
@@ -1947,8 +1953,11 @@ int32_t SwiperPattern::TotalCount() const
     if (IsShowIndicator()) {
         num += 1;
     }
-    if (HasLeftButtonNode() && HasRightButtonNode()) {
-        num += 2;
+    if (HasLeftButtonNode()) {
+        num += 1;
+    }
+    if (HasRightButtonNode()) {
+        num += 1;
     }
 
     return host->TotalChildCount() - num;
@@ -2236,7 +2245,7 @@ void SwiperPattern::TriggerAnimationEndOnSwipeToRight()
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
 }
 
-void SwiperPattern::TriggerAnimationEndOnTouchDown()
+void SwiperPattern::TriggerAnimationEndOnForceStop()
 {
     auto pauseTargetIndex = pauseTargetIndex_.has_value() ? pauseTargetIndex_.value() : currentIndex_;
     if (GetLoopIndex(currentIndex_) == GetLoopIndex(pauseTargetIndex)) {
@@ -2269,9 +2278,6 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
     }
     if (currentIndex_ != nextIndex) {
         if (isFinishAnimation_) {
-            if (nextIndex == -1) {
-                return;
-            }
             jumpIndex_ = nextIndex;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             auto pipeline = PipelineContext::GetCurrentContext();
@@ -2353,16 +2359,12 @@ bool SwiperPattern::IsChildrenSizeLessThanSwiper()
     return false;
 }
 
-void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
+void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool forceStop)
 {
-    if (isTouchDown_) {
-        TriggerAnimationEndOnTouchDown();
+    if (forceStop && !isFinishAnimation_) {
+        TriggerAnimationEndOnForceStop();
     } else {
         TriggerEventOnFinish(nextIndex);
-    }
-
-    if (restartAutoPlay) {
-        StartAutoPlay();
     }
 
     auto host = GetHost();
