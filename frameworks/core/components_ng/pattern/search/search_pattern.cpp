@@ -292,17 +292,15 @@ Rect SearchPattern::HandleTextContentRect()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, Rect(0, 0, 0, 0));
     RectF rect = textFieldPattern->GetTextRect();
-    auto y = rect.GetY();
-    if (rect.GetY() == 0) {
-        y = textFieldPattern->GetPaddingTop();
-    }
+    RectF frameRect = textFieldPattern->GetFrameRect();
+    auto y = rect.GetY() + frameRect.GetY();
     if (!textFieldPattern->IsOperation()) {
-        return Rect(rect.GetX(), y, 0, 0);
+        return Rect(rect.GetX() + frameRect.GetX(), y, 0, 0);
     }
     if (NearEqual(rect.GetX(), -Infinity<float>())) {
-        return Rect(textFieldPattern->GetPaddingLeft(), y, 0, 0);
+        return Rect(frameRect.GetX(), y, 0, 0);
     }
-    return Rect(rect.GetX(), y, rect.Width(), rect.Height());
+    return Rect(rect.GetX() + frameRect.GetX(), y, rect.Width(), rect.Height());
 }
 
 int32_t SearchPattern::HandleTextContentLines()
