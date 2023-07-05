@@ -91,6 +91,27 @@ void GridItemModelNG::SetSelectable(bool value)
     pattern->SetSelectable(value);
 }
 
+void GridItemModelNG::SetSelected(bool selected)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(selected);
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
+}
+
+void GridItemModelNG::SetSelectChangeEvent(std::function<void(bool)>&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetSelectChangeEvent(std::move(changeEvent));
+}
+
 void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
