@@ -355,6 +355,16 @@ public:
     bool IsCopy();
 #endif
 
+    void SetVelocity(const Velocity& velocity)
+    {
+        velocity_ = velocity;
+    }
+
+    const Velocity& GetVelocity() const
+    {
+        return velocity_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -372,6 +382,7 @@ private:
     RefPtr<UnifiedData> dragInfo_;
     bool copy_ = true;
 #endif
+    Velocity velocity_;
 };
 
 struct FingerInfo {

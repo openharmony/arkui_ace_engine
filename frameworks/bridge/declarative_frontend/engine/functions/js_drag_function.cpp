@@ -124,6 +124,9 @@ public:
         JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
         JSClass<JsDragEvent>::CustomMethod("copy", &JsDragEvent::Copy);
 #endif
+        JSClass<JsDragEvent>::CustomMethod("getVelocityX", &JsDragEvent::GetVelocityX);
+        JSClass<JsDragEvent>::CustomMethod("getVelocityY", &JsDragEvent::GetVelocityY);
+        JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
         JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
     }
 
@@ -290,6 +293,27 @@ public:
     RefPtr<DragEvent> GetDragEvent() const
     {
         return dragEvent_;
+    }
+
+    void GetVelocityX(const JSCallbackInfo& args)
+    {
+        auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityX())));
+        auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+        args.SetReturnValue(jsValueRef);
+    }
+
+    void GetVelocityY(const JSCallbackInfo& args)
+    {
+        auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityY())));
+        auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+        args.SetReturnValue(jsValueRef);
+    }
+
+    void GetVelocity(const JSCallbackInfo& args)
+    {
+        auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityValue())));
+        auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+        args.SetReturnValue(jsValueRef);
     }
 
 private:
