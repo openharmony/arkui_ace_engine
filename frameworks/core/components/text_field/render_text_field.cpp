@@ -2813,6 +2813,28 @@ void RenderTextField::Delete(int32_t start, int32_t end)
     }
 }
 
+std::u16string RenderTextField::GetLeftTextOfCursor(int32_t number)
+{
+    if (number > cursorPositionForShow_) {
+        number = cursorPositionForShow_;
+    }
+    auto stringText =
+        GetEditingValue().GetSelectedText(TextSelection(cursorPositionForShow_ - number, cursorPositionForShow_));
+    return StringUtils::Str8ToStr16(stringText);
+}
+
+std::u16string RenderTextField::GetRightTextOfCursor(int32_t number)
+{
+    auto stringText =
+        GetEditingValue().GetSelectedText(TextSelection(cursorPositionForShow_, cursorPositionForShow_ + number));
+    return StringUtils::Str8ToStr16(stringText);
+}
+
+int32_t RenderTextField::GetTextIndexAtCursor()
+{
+    return cursorPositionForShow_;
+}
+
 std::string RenderTextField::ProvideRestoreInfo()
 {
     auto value = GetEditingValue();

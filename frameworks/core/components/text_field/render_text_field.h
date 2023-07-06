@@ -140,6 +140,9 @@ public:
     void HandleSetSelection(int32_t start, int32_t end);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
+    std::u16string GetLeftTextOfCursor(int32_t number);
+    std::u16string GetRightTextOfCursor(int32_t number);
+    int32_t GetTextIndexAtCursor();
 
     void SetInputFilter(const std::string& inputFilter)
     {

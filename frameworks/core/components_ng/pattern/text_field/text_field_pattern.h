@@ -490,6 +490,9 @@ public:
         imeShown_ = keyboardShown;
 #endif
     }
+    std::u16string GetLeftTextOfCursor(int32_t number);
+    std::u16string GetRightTextOfCursor(int32_t number);
+    int32_t GetTextIndexAtCursor();
 
     bool HasConnection() const
     {

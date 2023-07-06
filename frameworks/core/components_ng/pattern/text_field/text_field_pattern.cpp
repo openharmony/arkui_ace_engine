@@ -3883,6 +3883,23 @@ void TextFieldPattern::DeleteForward(int32_t length)
                                                                                       : PROPERTY_UPDATE_MEASURE);
 }
 
+std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)
+{
+    auto stringText = textEditingValue_.GetValueBeforeCursor(number);
+    return StringUtils::Str8ToStr16(stringText);
+}
+
+std::u16string TextFieldPattern::GetRightTextOfCursor(int32_t number)
+{
+    auto stringText = textEditingValue_.GetValueAfterCursor(number);
+    return StringUtils::Str8ToStr16(stringText);
+}
+
+int32_t TextFieldPattern::GetTextIndexAtCursor()
+{
+    return textEditingValue_.caretPosition;
+}
+
 void TextFieldPattern::AfterSelection()
 {
     LOGI("Selection %{public}s, caret position %{public}d", textSelector_.ToString().c_str(),
