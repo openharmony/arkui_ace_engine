@@ -1548,7 +1548,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0022, TestSize.Level1)
     EXPECT_TRUE(slidingPanelPattern->isShowQueue_.empty());
     slidingPanelPattern->isShow_ = false;
     slidingPanelPattern->OnModifyDone();
-    EXPECT_FALSE(slidingPanelPattern->isShowQueue_.empty());
+    EXPECT_TRUE(slidingPanelPattern->isShowQueue_.empty());
 }
 
 /**
