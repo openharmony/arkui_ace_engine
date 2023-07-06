@@ -137,6 +137,8 @@ public:
     std::u16string GetLeftTextOfCursor(int32_t number);
     std::u16string GetRightTextOfCursor(int32_t number);
     int32_t GetTextIndexAtCursor();
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
+    void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
