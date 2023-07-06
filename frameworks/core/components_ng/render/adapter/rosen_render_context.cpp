@@ -891,17 +891,17 @@ OffsetF RosenRenderContext::GetShowingTranslateProperty()
 {
     OffsetF offset;
     CHECK_NULL_RETURN(rsNode_, offset);
-    auto offsetInfo = rsNode_->GetShowingProperties().GetTranslate();
-    if (std::get<1>(offsetInfo)) {
-        const auto& translate = std::get<0>(offsetInfo);
-        offset.SetX(translate[0]);
-        offset.SetY(translate[1]);
-    } else {
-        LOGW("fail to stop current property animation, use current paint rect");
-        const auto& translate = rsNode_->GetStagingProperties().GetTranslate();
-        offset.SetX(translate[0]);
-        offset.SetY(translate[1]);
-    }
+    std::optional<Vector2f> offsetInfo = rsNode_->GetShowingProperties().GetTranslate();
+//    if (std::get<1>(offsetInfo)) {
+//        const auto& translate = std::get<0>(offsetInfo);
+//        offset.SetX(translate[0]);
+//        offset.SetY(translate[1]);
+//    } else {
+//        LOGW("fail to stop current property animation, use current paint rect");
+//        const auto& translate = rsNode_->GetStagingProperties().GetTranslate();
+//        offset.SetX(translate[0]);
+//        offset.SetY(translate[1]);
+//    }
     return offset;
 }
 
