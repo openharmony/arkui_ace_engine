@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -95,7 +96,7 @@ std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const 
     if (options.moduleName.has_value()) {
         moduleName = options.moduleName.value();
     }
-    auto createSourceInfoFunc = [&src, noPixMap = !options.imagePixelMap.has_value(), &pixMap, &bundleName,
+    auto createSourceInfoFunc = [&src, noPixMap = !options.imagePixelMap.has_value(), pixMap, &bundleName,
                                     &moduleName]() -> ImageSourceInfo {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (noPixMap) {
