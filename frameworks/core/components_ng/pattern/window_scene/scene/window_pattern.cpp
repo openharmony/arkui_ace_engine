@@ -429,6 +429,13 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
         DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowDragEvent(
             AceType::DynamicCast<WindowNode>(host), pointerEvent);
     }
+    if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
+        (action == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW)) {
+        DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowMouseRecord();
+    }
+    if (action == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowDragEvent();
+    }
     DispatchPointerEvent(pointerEvent);
 }
 
