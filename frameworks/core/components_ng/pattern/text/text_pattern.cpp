@@ -346,7 +346,6 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     } else {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        selectInfo.callerFrameNode = GetHost();
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
         CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);

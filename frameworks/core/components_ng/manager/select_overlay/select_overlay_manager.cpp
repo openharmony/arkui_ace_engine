@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -38,7 +39,11 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
         DestroySelectOverlay(current->GetId());
     }
     selectOverlayInfo_ = info;
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
+    SelectOverlayInfo selectInfo = info;
+    if (selectInfo.callerFrameNode.Invalid()) {
+        selectInfo.callerFrameNode = GetCallerHost();
+    }
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     // mount to parent
     selectOverlayNode->MountToParent(rootNode);
@@ -96,7 +101,7 @@ bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
 {
     auto host = host_.Upgrade();
-    if (host && host->BetweenSelectedPosition(Offset { point.GetX(), point.GetY() })) {
+    if (host && host->IsTouchTestPointInArea(Offset { point.GetX(), point.GetY() }, IsTouchInCallerArea())) {
         return true;
     }
     auto current = selectOverlayItem_.Upgrade();
@@ -134,15 +139,17 @@ bool SelectOverlayManager::IsSameSelectOverlayInfo(const SelectOverlayInfo& info
 
 void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset)
 {
-    CHECK_NULL_VOID(!selectOverlayItem_.Invalid());
+    CHECK_NULL_VOID_NOLOG(!selectOverlayItem_.Invalid());
     NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     // handle global touch event.
     if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::TOUCH) {
-        NG::PointF rootPoint { touchPoint.x, touchPoint.y };
-        if ((IsInCallerArea(rootPoint, rootOffset)) || IsInSelectedOrSelectOverlayArea(point)) {
-            return;
+        if (!IsTouchInCallerArea() && !IsInSelectedOrSelectOverlayArea(point)) {
+            touchDownPoints_.push_back(point);
         }
-        touchDownPoints_.push_back(point);
+        return;
+    }
+    if (touchPoint.type == TouchType::MOVE && touchPoint.sourceType == SourceType::TOUCH) {
+        touchDownPoints_.clear();
         return;
     }
     bool acceptTouchUp = !touchDownPoints_.empty();
@@ -163,14 +170,29 @@ void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const
     }
 }
 
-bool SelectOverlayManager::IsInCallerArea(const PointF& point, const NG::OffsetF& rootOffset)
+bool SelectOverlayManager::IsTouchInCallerArea() const
 {
-    auto frameNode = selectOverlayInfo_.callerFrameNode.Upgrade();
+    if (touchTestResults_.empty()) {
+        return false;
+    }
+    auto frameNode = GetCallerHost();
     CHECK_NULL_RETURN(frameNode, false);
-    auto parentOffset = frameNode->GetPaintRectOffset(true) - rootOffset;
-    auto localPoint = point - parentOffset;
-    auto paintRect = frameNode->GetPaintRectWithTransform();
-    return paintRect.IsInRegion(localPoint);
+    auto id = std::to_string(frameNode->GetId());
+    for (auto testId : touchTestResults_) {
+        if (testId == id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+RefPtr<FrameNode> SelectOverlayManager::GetCallerHost() const
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pattern = DynamicCast<Pattern>(host);
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetHost();
 }
 
 void SelectOverlayManager::NotifyOverlayClosed(bool closedByGlobalEvent)

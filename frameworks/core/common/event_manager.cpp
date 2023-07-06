@@ -163,6 +163,18 @@ void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
     CHECK_NULL_VOID_NOLOG(selectOverlayManager);
+    if (touchPoint.type == TouchType::DOWN &&
+        touchTestResults_.find(touchPoint.id) != touchTestResults_.end()) {
+        std::vector<std::string> touchTestIds;
+        const auto& resultList = touchTestResults_[touchPoint.id];
+        for (const auto& result : resultList) {
+            auto eventTarget = result->GetEventTarget();
+            if (eventTarget.has_value()) {
+                touchTestIds.emplace_back(eventTarget.value().id);
+            }
+        }
+        selectOverlayManager->SetOnTouchTestResults(touchTestIds);
+    }
     selectOverlayManager->HandleGlobalEvent(touchPoint, rootOffset);
 }
 

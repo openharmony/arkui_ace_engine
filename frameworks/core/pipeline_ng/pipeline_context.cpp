@@ -993,11 +993,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
-    if (scalePoint.type == TouchType::DOWN || scalePoint.type == TouchType::UP) {
-        // Remove the select overlay node when mouse down or touch up.
-        auto rootOffset = GetRootRect().GetOffset();
-        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
-    }
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false);
@@ -1006,7 +1001,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
-
         for (const auto& weakContext : touchPluginPipelineContext_) {
             auto pipelineContext = DynamicCast<OHOS::Ace::PipelineBase>(weakContext.Upgrade());
             if (!pipelineContext) {
@@ -1022,6 +1016,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // restore instance Id.
         eventManager_->SetInstanceId(GetInstanceId());
     }
+
+    auto rootOffset = GetRootRect().GetOffset();
+    eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
+
     if (isSubPipe) {
         return;
     }
