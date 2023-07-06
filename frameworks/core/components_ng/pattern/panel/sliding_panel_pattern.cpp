@@ -790,7 +790,7 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("fullHeight", layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str());
     json->Put(
         "backgroundMask", layoutProperty->GetBackgroundColor().value_or(Color::TRANSPARENT).ColorToString().c_str());
-    json->Put("showCloseIcon", layoutProperty->GetShowCloseIcon().value_or(false) ? "false" : "true");
+    json->Put("showCloseIcon", layoutProperty->GetShowCloseIcon().value_or(false) ? "true" : "false");
 }
 
 RefPtr<UINode> SlidingPanelPattern::GetChildNodeByTag(const std::string& tagName) const

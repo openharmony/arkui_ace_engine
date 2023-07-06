@@ -88,6 +88,7 @@ private:
     RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
     void MeasureCloseIcon(
         const RefPtr<LayoutWrapper>& closeIconWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
+    float GetMaxWidthByScreenSizeType(const SizeF& maxSize, const SizeF& idealSize) const;
 
     float currentOffset_ = 0.0f;
     bool isFirstLayout_ = true;
