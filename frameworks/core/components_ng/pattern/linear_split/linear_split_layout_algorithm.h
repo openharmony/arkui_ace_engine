@@ -77,6 +77,7 @@ private:
     void ColumnSplitChildConstrain(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& item,
         const int32_t index);
     static std::pair<float, float> GetDividerMargin(LayoutWrapper* layoutWrapper);
+    static float GetLinearSplitChildMinSize(LayoutWrapper* layoutWrapper);
 
     SplitType splitType_;
     std::set<RefPtr<LayoutWrapper>> displayNodes_;

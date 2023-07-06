@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -27,7 +28,6 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr double SPLIT_HEIGHT_RATE = 2.0;
-    constexpr float DEFAULT_MIN_CHILD_SIZE = 20.f;
 } // namespace
 
 void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -219,7 +219,7 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(LayoutWrapper* layoutWrapper, fl
         if (item->GetLayoutProperty()->GetCalcLayoutConstraint()->minSize.has_value()) {
             childrenConstrains_[index] = item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Width();
         } else {
-            childrenConstrains_[index] = DEFAULT_MIN_CHILD_SIZE;
+            childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper);
         }
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
         childOffsetMain += item->GetGeometryNode()->GetFrameSize().Width();
@@ -298,7 +298,7 @@ void LinearSplitLayoutAlgorithm::ColumnSplitChildConstrain(LayoutWrapper* layout
     if (item->GetLayoutProperty()->GetCalcLayoutConstraint()->minSize.has_value()) {
         childrenConstrains_[index] = item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Height();
     } else {
-        childrenConstrains_[index] = DEFAULT_MIN_CHILD_SIZE;
+        childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper);
     }
     if (index == 0) {
         childrenConstrains_[index] += startMargin;
@@ -319,6 +319,19 @@ std::pair<float, float> LinearSplitLayoutAlgorithm::GetDividerMargin(LayoutWrapp
     auto startMargin = static_cast<float>(divider.startMargin.ConvertToPx());
     auto endMargin = static_cast<float>(divider.endMargin.ConvertToPx());
     return {startMargin, endMargin};
+}
+
+float LinearSplitLayoutAlgorithm::GetLinearSplitChildMinSize(LayoutWrapper* layoutWrapper)
+{
+    constexpr float DEFAULT_MIN_CHILD_SIZE = 20.f;
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, DEFAULT_MIN_CHILD_SIZE);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, DEFAULT_MIN_CHILD_SIZE);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, DEFAULT_MIN_CHILD_SIZE);
+    auto size = static_cast<float>(theme->GetLinearSplitChildMinSize());
+    return size;
 }
 
 } // namespace OHOS::Ace::NG
