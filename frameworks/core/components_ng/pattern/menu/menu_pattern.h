@@ -198,6 +198,7 @@ public:
 
     // acquire first menu node in wrapper node by submenu node
     RefPtr<MenuPattern> GetMainMenuPattern() const;
+    uint32_t GetInnerMenuCount() const;
 
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
@@ -216,7 +217,6 @@ private:
     void UpdateMenuHotArea();
     void UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty);
 
-    uint32_t GetInnerMenuCount() const;
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
