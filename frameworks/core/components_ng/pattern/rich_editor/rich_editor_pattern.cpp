@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -1432,7 +1433,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         CHECK_NULL_VOID(eventHub);
         auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
         auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-        auto textSelectInfo = GetSpansInfo(selectStart, selectEnd);
+        auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
         if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
             eventHub->FireOnSelect(&textSelectInfo);
         }
@@ -1447,7 +1448,7 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
     CHECK_NULL_VOID(eventHub);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd);
+    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
         eventHub->FireOnSelect(&textSelectInfo);
     }
@@ -1522,31 +1523,25 @@ ResultObject RichEditorPattern::GetTextResultObject(RefPtr<SpanItem> item, int32
         selectFlag = true;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
-        resultObject.valueString = GetSelectedSpanText(StringUtils::ToWstring(item->content), 0, itemLength);
     } else if (startPosition < start && endPosition <= end && endPosition > start) {
         selectFlag = true;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
-        resultObject.valueString =
-            GetSelectedSpanText(StringUtils::ToWstring(item->content), start - startPosition, itemLength);
     } else if (startPosition >= start && startPosition < end && endPosition >= end) {
         selectFlag = true;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
-        resultObject.valueString = GetSelectedSpanText(StringUtils::ToWstring(item->content), 0, end - startPosition);
     } else if (startPosition <= start && endPosition >= end) {
         selectFlag = true;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
-        resultObject.valueString =
-            GetSelectedSpanText(StringUtils::ToWstring(item->content), start - startPosition, end - startPosition);
     }
     if (selectFlag == true) {
         resultObject.spanPosition.spanIndex = index;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = RichEditorSpanType::TYPESPAN;
-
+        resultObject.valueString = item->content;
         auto node = DynamicCast<SpanNode>(GetChildByIndex(index));
         resultObject.textStyle = GetTextStyleObject(node);
     }
@@ -1586,7 +1581,7 @@ ResultObject RichEditorPattern::GetImageResultObject(RefPtr<SpanItem> item, int3
     return resultObject;
 }
 
-RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end)
+RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method)
 {
     int32_t index = 0;
     std::int32_t realEnd = 0;
@@ -1594,22 +1589,21 @@ RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end)
     RichEditorSelection selection;
     std::list<ResultObject> resultObjects;
     auto length = GetTextContentLength();
-    realStart = (start == -1) ? 0 : start;
-    realEnd = (end == -1) ? length : end;
-    if (realStart > realEnd) {
-        auto temp = realStart;
-        realStart = realEnd;
-        realEnd = temp;
+    if (method == GetSpansMethod::GETSPANS) {
+        realStart = (start == -1) ? 0 : start;
+        realEnd = (end == -1) ? length : end;
+        if (realStart > realEnd) {
+            std::swap(realStart, realEnd);
+        }
+        realStart = std::max(0, realStart);
+        realEnd = std::min(length, realEnd);
+    } else if (method == GetSpansMethod::ONSELECT) {
+        realEnd = end;
+        realStart = start;
     }
-    realStart = std::max(0, realStart);
-    realEnd = std::min(length, realEnd);
     selection.SetSelectionEnd(realEnd);
     selection.SetSelectionStart(realStart);
-    if (realStart > length || realEnd < 0) {
-        selection.SetResultObjectList(resultObjects);
-        return selection;
-    }
-    if (spanItemChildren_.empty()) {
+    if (realStart > length || realEnd < 0 || spanItemChildren_.empty()) {
         selection.SetResultObjectList(resultObjects);
         return selection;
     }
