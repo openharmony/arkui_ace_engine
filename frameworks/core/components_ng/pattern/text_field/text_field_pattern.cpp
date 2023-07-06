@@ -4696,9 +4696,7 @@ void TextFieldPattern::ApplyInlineStates()
     margin.top = CalcLength(inlineState_.padding.top->GetDimension() + inlineState_.margin.top->GetDimension());
     layoutProperty->UpdateMargin(margin);
     CalcSize idealSize;
-    std::optional<CalcLength> width(
-        paragraph_->GetLongestLine() + GetScrollBarWidth() + SCROLL_BAR_LEFT_WIDTH.ConvertToPx() +
-        INLINE_BORDER_WIDTH.ConvertToPx() + INLINE_BORDER_WIDTH.ConvertToPx() + 0.5f);
+    std::optional<CalcLength> width(paragraph_->GetLongestLine());
     idealSize.SetWidth(width);
     layoutProperty->UpdateUserDefinedIdealSize(idealSize);
     auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();

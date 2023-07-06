@@ -447,6 +447,11 @@ public:
         return inlineBorderColor_;
     }
 
+    const Dimension& GetInlineBorderWidth() const
+    {
+        return inlineBorderWidth_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -511,6 +516,7 @@ private:
     // UX::icon size = 24, hotZoneSize = 36
     Dimension iconSize_;
     Dimension iconHotZoneSize_;
+    Dimension inlineBorderWidth_ = 2.0_vp;
 
     bool showEllipsis_ = true;
 };
