@@ -1029,7 +1029,7 @@ void RichEditorPattern::AfterIMEInsertValue(
 {
     isTextChange_ = true;
     moveDirection_ = MoveDirection::FORWARD;
-    moveLength_ = insertValueLength;
+    moveLength_ += insertValueLength;
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     retInfo.SetSpanRangeStart(spanNode->GetSpanItem()->position - insertValueLength);
@@ -1369,6 +1369,7 @@ void RichEditorPattern::MoveCaretAfterTextChange()
         default:
             break;
     }
+    moveLength_ = 0;
 }
 
 void RichEditorPattern::InitTouchEvent()
