@@ -32,6 +32,7 @@
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "core/event/ace_event_helper.h"
@@ -4532,6 +4533,15 @@ Size WebDelegate::GetEnhanceSurfaceSize(const Size& drawSize)
 void WebDelegate::SetSurface(const sptr<Surface>& surface)
 {
     surface_ = surface;
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto host = webPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    rsNode_ = rosenRenderContext->GetRSNode();
 }
 #endif
 } // namespace OHOS::Ace

@@ -694,6 +694,7 @@ private:
     int32_t parentNWebId_ = -1;
     bool needResizeAtFirst_ = false;
     RefPtr<WebDelegateObserver> observer_;
+    std::shared_ptr<Rosen::RSNode> rsNode_;
 #endif
 };
 
