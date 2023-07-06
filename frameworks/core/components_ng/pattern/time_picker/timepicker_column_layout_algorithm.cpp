@@ -24,7 +24,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t DIVIDER_SIZE = 2;
-const int32_t CHILD_SIZE = 3;
 } // namespace
 void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -36,12 +35,6 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto height = static_cast<float>(
         pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
-    auto columnNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(columnNode);
-    if (columnNode->GetChildren().size() == CHILD_SIZE) {
-        height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (CHILD_SIZE - 1) +
-                                    pickerTheme->GetDividerSpacing().ConvertToPx());
-    }
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
     auto width = layoutConstraint->parentIdealSize.Width();
