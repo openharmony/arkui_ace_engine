@@ -1177,7 +1177,6 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     if (softKeyboardEnabled_) {
         LOGI("Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
-        UpdateConfiguration();
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this), context_);
         }
@@ -1186,6 +1185,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
             LOGE("Request open soft keyboard failed because input method is null.");
             return false;
         }
+        MiscServices::TextConfig textConfig;
         auto context = context_.Upgrade();
         if (context) {
             LOGI("RequestKeyboard set calling window id is : %{public}u", context->GetFocusWindowId());
@@ -1194,7 +1194,8 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         MiscServices::InputAttribute inputAttribute;
         inputAttribute.inputPattern = (int32_t)keyboard_;
         inputAttribute.enterKeyType = (int32_t)action_;
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
+        textConfig.inputAttribute = inputAttribute;
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
             AttachIme();

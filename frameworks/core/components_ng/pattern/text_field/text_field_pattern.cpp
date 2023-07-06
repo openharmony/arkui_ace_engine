@@ -2956,7 +2956,6 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     if (needShowSoftKeyboard) {
         LOGI("Start to request keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
-        UpdateConfiguration();
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
         }
@@ -2965,14 +2964,16 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             LOGE("Request open soft keyboard failed because input method is null.");
             return false;
         }
+        MiscServices::TextConfig textConfig;
         MiscServices::InputAttribute inputAttribute;
         inputAttribute.inputPattern = (int32_t)keyboard_;
         inputAttribute.enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE);
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
+        textConfig.inputAttribute = inputAttribute;
         if (context) {
             LOGI("RequestKeyboard set calling window id is : %{public}u", context->GetFocusWindowId());
-            inputMethod->SetCallingWindow(context->GetFocusWindowId());
+            textConfig.windowId = context->GetFocusWindowId();
         }
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeAttached_ = true;
 #endif
