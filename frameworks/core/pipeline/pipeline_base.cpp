@@ -600,7 +600,9 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
 void PipelineBase::OnVirtualKeyboardAreaChange(
     Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+    auto currentContainer = Container::Current();
+    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        !currentContainer->IsSubContainer()) {
         return;
     }
     double keyboardHeight = keyboardArea.Height();
