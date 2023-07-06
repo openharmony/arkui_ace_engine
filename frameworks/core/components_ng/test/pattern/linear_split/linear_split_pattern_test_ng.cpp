@@ -446,7 +446,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 
-    auto verticalRemaining = RK356_HEIGHT - SMALL_ITEM_HEIGHT * FIVE_ITEM_SIZE;
+    auto verticalRemaining = RK356_HEIGHT - SMALL_ITEM_HEIGHT * FIVE_ITEM_SIZE
+                             - DEFAULT_SPLIT_HEIGHT * (FIVE_ITEM_SIZE - 1);
     for (int32_t i = 0; i < FIVE_ITEM_SIZE; i++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
@@ -455,6 +456,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         EXPECT_EQ(childOffset, OffsetF(ZERO, verticalRemaining / 2 + i * (SMALL_ITEM_HEIGHT + DEFAULT_SPLIT_HEIGHT)));
     }
     linearSplitPattern->splitRects_ = linearLayoutAlgorithm->GetSplitRects();
+    linearSplitPattern->childrenDragPos_ = linearLayoutAlgorithm->GetChildrenDragPos();
+    linearSplitPattern->childrenConstrains_ = linearLayoutAlgorithm->GetChildrenConstrains();
 
     /**
      * @tc.steps: step5. Construct GestureEvent and Call HandlePanEvent function.
@@ -480,8 +483,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step7. Update GestureEvent info and Start dragging.
      */
-    Offset globalLocation2(10, 543);
-    info.SetGlobalLocation(globalLocation2);
+    Offset localLocation2(10, 541);
+    info.SetLocalLocation(localLocation2);
     info.SetOffsetY(2);
 
     /**
@@ -507,7 +510,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         EXPECT_FALSE(linearSplitPattern->isDraged_);
         EXPECT_TRUE(linearSplitPattern->isDragedMoving_);
         MouseInfo mouseInfo2;
-        mouseInfo2.SetGlobalLocation(globalLocation2);
+        mouseInfo2.SetLocalLocation(localLocation2);
         linearSplitPattern->HandleMouseEvent(mouseInfo2);
         EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
         mouseInfo2.SetButton(MouseButton::LEFT_BUTTON);
@@ -527,7 +530,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
         info.SetOffsetY(-3);
         linearSplitPattern->HandlePanUpdate(info);
-        EXPECT_EQ(linearSplitPattern->childrenDragPos_[1], 0.0f);
+        EXPECT_EQ(linearSplitPattern->childrenDragPos_[1], 491.0f);
 
         /**
          * @tc.steps: step11. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
@@ -536,7 +539,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         linearSplitPattern->HandlePanEnd(info);
         EXPECT_FALSE(linearSplitPattern->isDraged_);
         MouseInfo mouseInfo2;
-        mouseInfo2.SetGlobalLocation(globalLocation2);
+        mouseInfo2.SetLocalLocation(localLocation2);
         linearSplitPattern->HandleMouseEvent(mouseInfo2);
         EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
     }
@@ -635,7 +638,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 
-    auto horizontalRemaining = RK356_WIDTH - FIVE_ITEM_SIZE * SMALL_ITEM_WIDTH;
+    auto horizontalRemaining = RK356_WIDTH - FIVE_ITEM_SIZE * SMALL_ITEM_WIDTH
+                               - DEFAULT_SPLIT_HEIGHT * (FIVE_ITEM_SIZE - 1);
     for (int32_t i = 0; i < FIVE_ITEM_SIZE; i++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
@@ -645,12 +649,14 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     }
 
     linearSplitPattern->splitRects_ = linearLayoutAlgorithm->GetSplitRects();
+    linearSplitPattern->childrenDragPos_ = linearLayoutAlgorithm->GetChildrenDragPos();
+    linearSplitPattern->childrenConstrains_ = linearLayoutAlgorithm->GetChildrenConstrains();
     /**
      * @tc.steps: step5. Construct GestureEvent info and Start dragging.
      */
     GestureEvent info;
-    Offset globalLocation(335, 10);
-    info.SetGlobalLocation(globalLocation);
+    Offset localLocation(333, 10);
+    info.SetLocalLocation(localLocation);
     info.SetOffsetX(2);
     /**
      * @tc.steps: step6. Set IsOverParent and Call HandlePanEvent function.
@@ -675,7 +681,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         EXPECT_FALSE(linearSplitPattern->isDraged_);
         EXPECT_TRUE(linearSplitPattern->isDragedMoving_);
         MouseInfo mouseInfo2;
-        mouseInfo2.SetGlobalLocation(globalLocation);
+        mouseInfo2.SetLocalLocation(localLocation);
         linearSplitPattern->HandleMouseEvent(mouseInfo2);
         EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
         mouseInfo2.SetButton(MouseButton::LEFT_BUTTON);
@@ -695,7 +701,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
         info.SetOffsetX(-3);
         linearSplitPattern->HandlePanUpdate(info);
-        EXPECT_EQ(linearSplitPattern->childrenDragPos_[1], 0.0f);
+        EXPECT_EQ(linearSplitPattern->childrenDragPos_[1], 283.0f);
 
         /**
          * @tc.steps: step9. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
@@ -704,7 +710,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         linearSplitPattern->HandlePanEnd(info);
         EXPECT_FALSE(linearSplitPattern->isDraged_);
         MouseInfo mouseInfo2;
-        mouseInfo2.SetGlobalLocation(globalLocation);
+        mouseInfo2.SetLocalLocation(localLocation);
         linearSplitPattern->HandleMouseEvent(mouseInfo2);
         EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
     }
