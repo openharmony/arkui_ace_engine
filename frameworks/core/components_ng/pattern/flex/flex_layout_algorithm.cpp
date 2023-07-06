@@ -475,7 +475,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 }
                 secondaryMeasureList_.emplace_back(child);
             }
-            if (allocatedSize_ - space_ > mainAxisSize_) {
+            if (!LessOrEqual(allocatedSize_ - space_, mainAxisSize_)) {
                 outOfDisplay = true;
                 for (auto& child : childList) {
                     allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper);
