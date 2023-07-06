@@ -452,6 +452,7 @@ public:
         }
         return false;
     }
+
     bool CursorMoveLeft();
     bool CursorMoveLeftWord();
     bool CursorMoveLineBegin();
