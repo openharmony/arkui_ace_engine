@@ -286,8 +286,9 @@ bool Scrollable::IsAnimationNotRunning() const
 
 bool Scrollable::Idle() const
 {
-    return !isTouching_ && controller_->IsStopped() && springController_->IsStopped() &&
-        scrollSnapController_->IsStopped();
+    return !isTouching_ && (controller_->IsStopped() || controller_->GetStatus() == Animator::Status::IDLE) &&
+        (springController_->IsStopped() || springController_->GetStatus() == Animator::Status::IDLE) &&
+        (scrollSnapController_->IsStopped() || scrollSnapController_->GetStatus() == Animator::Status::IDLE);
 }
 
 bool Scrollable::IsStopped() const

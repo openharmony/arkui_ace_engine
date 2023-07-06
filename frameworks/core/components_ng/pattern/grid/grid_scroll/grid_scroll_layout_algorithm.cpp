@@ -741,7 +741,7 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
     }
 
     // skip lines not in matrix
-    if (GreatOrEqual(gridLayoutInfo_.currentOffset_, mainSize)) {
+    if (GreatOrEqual(gridLayoutInfo_.currentOffset_, mainSize) && gridLayoutInfo_.startIndex_ > 0) {
         auto grid = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(grid);
         auto pattern = grid->GetPattern<GridPattern>();
