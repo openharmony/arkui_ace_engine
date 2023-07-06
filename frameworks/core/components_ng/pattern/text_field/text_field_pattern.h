@@ -1081,6 +1081,7 @@ private:
     int32_t drawOverlayFlag_ = 0;
     bool isTextInput_ = false;
     bool inlineSelectAllFlag_ = false;
+    bool inlineFocusState_ = false;
     float inlineSingleLineHeight_ = 0.0f;
 
     uint32_t twinklingInterval_ = 0;
