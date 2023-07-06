@@ -46,6 +46,7 @@ constexpr int32_t SCROLL_FROM_ROTATE = 8;
 constexpr int32_t SCROLL_FROM_INDEXER = 9;
 constexpr int32_t SCROLL_FROM_START = 10; // from drag start
 constexpr int32_t SCROLL_FROM_AXIS = 11;
+constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 
 enum class NestedState {
     GESTURE = 0,

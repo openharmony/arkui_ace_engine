@@ -246,14 +246,14 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     // check edgeEffect is not springEffect
-    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && source != SCROLL_FROM_BAR &&
-        source != SCROLL_FROM_AXIS) {    // handle edge effect
+    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && (source == SCROLL_FROM_UPDATE ||
+        source == SCROLL_FROM_ANIMATION)) {    // handle edge effect
         if ((IsAtTop() && Positive(offset)) || (IsAtBottom() && Negative(offset))) {
             scrollEffect_->HandleOverScroll(GetAxis(), -offset, size);
         }
     }
-    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect()) || source == SCROLL_FROM_BAR ||
-        source == SCROLL_FROM_AXIS || source == SCROLL_FROM_JUMP) {
+    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect() && (source == SCROLL_FROM_UPDATE ||
+        source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING))) {
         if (IsAtTop() && Positive(offset)) {
             return false;
         }
@@ -491,7 +491,9 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
             auto pattern = weakScroll.Upgrade();
             CHECK_NULL_VOID_NOLOG(pattern);
-            pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - value, SCROLL_FROM_JUMP);
+            if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - value, SCROLL_FROM_ANIMATION_CONTROLLER)) {
+                pattern->animator_->Stop();
+            }
         });
         animator_->AddInterpolator(animation);
         animator_->SetDuration(static_cast<int32_t>(duration));
@@ -516,7 +518,9 @@ void ScrollablePattern::PlaySpringAnimation(
     springMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
         auto pattern = weakScroll.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - position, SCROLL_FROM_JUMP);
+        if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - position, SCROLL_FROM_ANIMATION_CONTROLLER)) {
+            pattern->animator_->Stop();
+        }
     });
     animator_->PlayMotion(springMotion_);
 }

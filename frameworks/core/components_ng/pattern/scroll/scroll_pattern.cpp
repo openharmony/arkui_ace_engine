@@ -270,6 +270,11 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
     return offset;
 }
 
+bool ScrollPattern::IsOutOfBoundary() const
+{
+    return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
+}
+
 bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
 {
     return true;
@@ -412,6 +417,9 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     // TODO: ignore handle refresh
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewPort_)) {
+        if (IsOutOfBoundary()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
         return false;
     }
     // TODO: scrollBar effect!!
