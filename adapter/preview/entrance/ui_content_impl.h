@@ -118,7 +118,6 @@ private:
     std::string systemResourcesPath_;
     std::string appResourcesPath_;
     std::string containerSdkPath_;
-    std::string startUrl_;
     std::string language_;
     std::string region_;
     std::string script_;
