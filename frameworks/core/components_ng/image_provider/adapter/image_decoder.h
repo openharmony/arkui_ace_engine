@@ -19,14 +19,22 @@
 #include "include/core/SkImage.h"
 
 #include "core/components_ng/image_provider/image_object.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 
 namespace OHOS::Ace::NG {
 class ImageDecoder : public virtual AceType {
 public:
     ImageDecoder(const RefPtr<ImageObject>& obj, const SizeF& size, bool forceResize);
     // decode image using Skia, return true if process is successful.
+#ifndef USE_ROSEN_DRAWING
     RefPtr<CanvasImage> MakeSkiaImage();
+#else
+    RefPtr<CanvasImage> MakeDrawingImage();
+#endif
 
     // decode image using ImageFramework, return true if process is successful.
     RefPtr<CanvasImage> MakePixmapImage();
@@ -36,10 +44,18 @@ private:
     sk_sp<SkImage> ResizeSkImage();
 
     RefPtr<CanvasImage> QueryCompressedCache();
+#ifndef USE_ROSEN_DRAWING
     void TryCompress(const RefPtr<SkiaImage>& image);
+#else
+    void TryCompress(const RefPtr<DrawingImage>& image);
+#endif
 
     const RefPtr<ImageObject> obj_;
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkData> data_;
+#else
+    std::shared_ptr<RSData> data_;
+#endif
     const SizeF desiredSize_;
     const bool forceResize_ = false;
 };
