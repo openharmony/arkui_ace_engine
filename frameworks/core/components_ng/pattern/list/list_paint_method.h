@@ -64,23 +64,12 @@ public:
         listContentModifier_ = modify;
     }
 
-    void SetLaneGutter(float laneGutter)
-    {
-        laneGutter_ = laneGutter;
-    }
-
-    float GetLaneGutter()
-    {
-        return laneGutter_;
-    }
-
 private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
     int32_t lanes_ = 1;
     int32_t totalItemCount_;
     float space_;
-    float laneGutter_ = 0.0f;
 
     RefPtr<ListContentModifier> listContentModifier_;
 

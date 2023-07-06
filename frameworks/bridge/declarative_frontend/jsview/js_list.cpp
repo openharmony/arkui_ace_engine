@@ -192,14 +192,6 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         return;
     }
 
-    if (info.Length() >= 2 && !(info[1]->IsNull())) { /* 2: parameter count */
-        CalcDimension laneGutter;
-        if (!JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
-            ListModel::GetInstance()->SetLaneGutter(0.0_vp);
-        }
-        ListModel::GetInstance()->SetLaneGutter(laneGutter);
-    }
-
     int32_t laneNum = 1;
     if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt

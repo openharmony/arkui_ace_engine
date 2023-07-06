@@ -64,7 +64,6 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("lanes", std::to_string(propLanes_.value_or(0)).c_str());
     json->Put("laneMinLength", propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
     json->Put("laneMaxLength", propLaneMaxLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("laneGutter", propLaneGutter_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
     if (propListItemAlign_.value_or(V2::ListItemAlign::START) == V2::ListItemAlign::START) {
         json->Put("alignListItem", "ListItemAlign.Start");
     } else if (propListItemAlign_.value_or(V2::ListItemAlign::START) == V2::ListItemAlign::CENTER) {
