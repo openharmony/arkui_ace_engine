@@ -35,6 +35,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
+#include "parameters.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -140,6 +141,9 @@ constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5;
 constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
+// web feature params
+const std::string VISIBLE_ACTIVE_ENABLE = "persist.web.visible_active_enable";
+const std::string MEMORY_LEVEL_ENABEL = "persist.web.memory_level_enable";
 
 WebPattern::WebPattern() = default;
 
@@ -221,6 +225,12 @@ void WebPattern::InitEvent()
         WebPattern->UpdateLocale();
     };
     context->SetConfigChangedCallback(std::move(langTask));
+}
+
+void WebPattern::InitFeatureParam()
+{
+    isVisibleActiveEnable_ = system::GetBoolParameter(VISIBLE_ACTIVE_ENABLE, true);
+    isMemoryLevelEnable_ = system::GetBoolParameter(MEMORY_LEVEL_ENABEL, true);
 }
 
 void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1375,6 +1385,8 @@ void WebPattern::OnModifyDone()
 
     // Initialize events such as keyboard, focus, etc.
     InitEvent();
+    // Initialize web params.
+    InitFeatureParam();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -2229,10 +2241,14 @@ void WebPattern::OnVisibleChange(bool isVisible)
     if (!isVisible_) {
         LOGI("web is not visible");
         CloseSelectOverlay();
-        OnInActive();
+        if (isVisibleActiveEnable_) {
+            OnInActive();
+        }
     } else {
         LOGI("web is visible");
-        OnActive();
+        if (isVisibleActiveEnable_) {
+            OnActive();
+        }
     }
 }
 
@@ -2247,6 +2263,9 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
 
 void WebPattern::OnNotifyMemoryLevel(int32_t level)
 {
+    if (!isMemoryLevelEnable_) {
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
     delegate_->NotifyMemoryLevel(level);
 }
