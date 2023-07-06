@@ -728,9 +728,6 @@ void FrameNode::SetActive(bool active)
             parent->MarkNeedSyncRenderTree();
         }
     }
-    if (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG) {
-        SetJSViewActive(active);
-    }
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
