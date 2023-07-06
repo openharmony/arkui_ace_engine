@@ -1629,6 +1629,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
         onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
+        onOverScrollV2_ = useNewPipe ? eventHub->GetOnOverScrollEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetOverScrollId(), oldContext);
     }
     return true;
 }
@@ -4982,5 +4985,21 @@ void WebDelegate::OnDateTimeChooserClose()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->OnDateTimeChooserClose();
+}
+
+void WebDelegate::OnOverScroll(float xOffset, float yOffset)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), xOffset, yOffset]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onOverScrollV2 = delegate->onOverScrollV2_;
+            if (onOverScrollV2) {
+                onOverScrollV2(std::make_shared<WebOnOverScrollEvent>(xOffset, yOffset));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 } // namespace OHOS::Ace

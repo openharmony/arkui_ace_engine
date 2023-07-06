@@ -841,4 +841,12 @@ void WebClientImpl::OnDateTimeChooserClose()
     CHECK_NULL_VOID(delegate);
     delegate->OnDateTimeChooserClose();
 }
+
+void WebClientImpl::OnOverScroll(float xOffset, float yOffset)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnOverScroll(xOffset, yOffset);
+}
 } // namespace OHOS::Ace
