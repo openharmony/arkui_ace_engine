@@ -39,35 +39,7 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     touchInfoObj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalLocation.GetY()));
     touchInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(localLocation.GetX()));
     touchInfoObj->SetProperty<double>("y", SystemProperties::Px2Vp(localLocation.GetY()));
-    touchInfoObj->SetPropertyObject(
-        "getHistoricalPoints", JSRef<JSFunc>::New<FunctionCallback>(JsGetHistoricalPoints));
     touchInfoObj->Wrap<TouchEventInfo>(&info);
-    return touchInfoObj;
-    
-}
-
-JSRef<JSObject> JsTouchFunction::CreateHistoricalPoint(const TouchLocationInfo& touchInfo, TouchEventInfo& info)
-{
-    JSRef<JSObject> touchInfoObj = JSRef<JSObject>::New();
-    const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
-    const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
-    const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
-    touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
-    touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
-    touchInfoObj->SetProperty<double>("displayX", SystemProperties::Px2Vp(screenLocation.GetX()));
-    touchInfoObj->SetProperty<double>("displayY", SystemProperties::Px2Vp(screenLocation.GetY()));
-    touchInfoObj->SetProperty<double>("windowX", SystemProperties::Px2Vp(globalLocation.GetX()));
-    touchInfoObj->SetProperty<double>("windowY", SystemProperties::Px2Vp(globalLocation.GetY()));
-    touchInfoObj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalLocation.GetX()));
-    touchInfoObj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalLocation.GetY()));
-    touchInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(localLocation.GetX()));
-    touchInfoObj->SetProperty<double>("y", SystemProperties::Px2Vp(localLocation.GetY()));
-    touchInfoObj->SetProperty<double>("tiltX", touchInfo.GetTiltX().value());
-    touchInfoObj->SetProperty<double>("tiltY", touchInfo.GetTiltY().value());
-    touchInfoObj->SetProperty<double>("size", touchInfo.GetSize());
-    touchInfoObj->SetProperty<double>("force", static_cast<int32_t>(touchInfo.GetForce()));
-    touchInfoObj->SetProperty<double>("timestamp",
-        static_cast<double>(touchInfo.GetTimeStamp().time_since_epoch().count()));
     return touchInfoObj;
 }
 
@@ -111,6 +83,8 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     eventObj->SetPropertyObject("changedTouches", changeTouchArr);
     eventObj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
+    eventObj->SetPropertyObject(
+        "getHistoricalPoints", JSRef<JSFunc>::New<FunctionCallback>(JsGetHistoricalPoints));
     eventObj->Wrap<TouchEventInfo>(&info);
     return eventObj;
 }
