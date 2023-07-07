@@ -45,8 +45,13 @@ class Border;
 class Offset;
 class Size;
 
+#ifndef USE_ROSEN_DRAWING
 class RosenDecorationPainter : public virtual NG::SkiaDecorationPainter {
     DECLARE_ACE_TYPE(RosenDecorationPainter, NG::SkiaDecorationPainter);
+#else
+class RosenDecorationPainter : public virtual NG::DrawingDecorationPainter {
+    DECLARE_ACE_TYPE(RosenDecorationPainter, NG::DrawingDecorationPainter);
+#endif
 
 public:
     RosenDecorationPainter(
@@ -104,9 +109,8 @@ public:
     void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context,
         const std::shared_ptr<RSImage>& image);
     void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context);
-    static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize,
-        const Offset& position, const Offset& extraOffset, RSCanvas* canvas,
-        const std::shared_ptr<RSImage>& image, double dipScale);
+    static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize, const Offset& position,
+        RSCanvas* canvas, const std::shared_ptr<RSImage>& image, double dipScale);
 #endif
 
     static void PaintBoxShadows(const std::vector<Shadow>& shadows, const std::shared_ptr<RSNode>& rsNode);
