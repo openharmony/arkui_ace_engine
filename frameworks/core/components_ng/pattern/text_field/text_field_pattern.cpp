@@ -674,11 +674,16 @@ void TextFieldPattern::UpdateCaretPositionByPressOffset()
     }
     UpdateCaretOffsetByLastTouchOffset();
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED && !textEditingValue_.CaretAtLast()) {
-        UpdateSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition + 1);
+        int32_t oneWord = GetGraphemeClusterLength(GetEditingValue().GetWideText(), 1);
+        textSelector_.Update(textEditingValue_.caretPosition, textEditingValue_.caretPosition + oneWord);
     } else {
         UpdateSelection(textEditingValue_.caretPosition);
     }
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED && !textEditingValue_.CaretAtLast()) {
+        FireOnSelectionChange(textSelector_.GetStart(), textSelector_.GetEnd());
+    }
+
     selectionMode_ = SelectionMode::NONE;
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1607,20 +1612,25 @@ void TextFieldPattern::UpdateSelection(int32_t both)
 void TextFieldPattern::UpdateSelection(int32_t start, int32_t end)
 {
     if (start != textSelector_.GetStart() || end != textSelector_.GetEnd()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        // If the parent node is a Search, the Search callback is executed.
-        if (IsSearchParentNode()) {
-            auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-            auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-            eventHub->FireOnSelectionChange(start, end);
-            textSelector_.Update(start, end);
-            return;
-        }
-        auto eventHub = host->GetEventHub<TextFieldEventHub>();
-        eventHub->FireOnSelectionChange(start, end);
+        FireOnSelectionChange(start, end);
         textSelector_.Update(start, end);
     }
+}
+
+void TextFieldPattern::FireOnSelectionChange(int32_t start, int32_t end)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the parent node is a Search, the Search callback is executed.
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+        eventHub->FireOnSelectionChange(start, end);
+        textSelector_.Update(start, end);
+        return;
+    }
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    eventHub->FireOnSelectionChange(start, end);
 }
 
 void TextFieldPattern::FireEventHubOnChange(const std::string& text)
@@ -4406,8 +4416,8 @@ void TextFieldPattern::UpdateScrollBarOffset()
     }
     auto paddingHeight = GetPaddingTop() + GetPaddingBottom();
     Size size(contentRect_.Width() + GetPaddingRight(), contentRect_.Height() + paddingHeight);
-    UpdateScrollBarRegion(contentRect_.GetY() - textRect_.GetY(),
-        textRect_.Height() + paddingHeight, size, Offset(0.0, 0.0));
+    UpdateScrollBarRegion(
+        contentRect_.GetY() - textRect_.GetY(), textRect_.Height() + paddingHeight, size, Offset(0.0, 0.0));
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -4683,7 +4693,7 @@ void TextFieldPattern::ApplyInlineStates()
     BorderColorProperty inlineBorderColor;
     inlineBorderColor.SetColor(theme->GetInlineBorderColor());
     renderContext->UpdateBorderColor(inlineBorderColor);
-    layoutProperty->UpdatePadding({ CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp)});
+    layoutProperty->UpdatePadding({ CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp) });
     ProcessInnerPadding();
     textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     MarginProperty margin;
@@ -4921,14 +4931,14 @@ void TextFieldPattern::CheckHandles(std::optional<RectF>& firstHandle, std::opti
     float firstHandleSize, float secondHandleSize)
 {
     auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
-    if (!contentRect_.IsInRegion({ firstHandleOffset.GetX(),
-        firstHandleOffset.GetY() + BOX_EPSILON + firstHandleSize })) {
+    if (!contentRect_.IsInRegion(
+            { firstHandleOffset.GetX(), firstHandleOffset.GetY() + BOX_EPSILON + firstHandleSize })) {
         // hide firstHandle when it's out of content region
         firstHandle = std::nullopt;
     }
     auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
-    if (!contentRect_.IsInRegion({ secondHandleOffset.GetX(),
-        secondHandleOffset.GetY() + BOX_EPSILON + secondHandleSize })) {
+    if (!contentRect_.IsInRegion(
+            { secondHandleOffset.GetX(), secondHandleOffset.GetY() + BOX_EPSILON + secondHandleSize })) {
         // hide secondHandle when it's out of content region
         secondHandle = std::nullopt;
     }
