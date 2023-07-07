@@ -39,16 +39,5 @@ std::optional<SizeF> CustomPaintLayoutAlgorithm::MeasureContent(
 void CustomPaintLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::Layout(layoutWrapper);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
-    if (contentRect.IsValid()) {
-        renderContext->SetOverrideContentRect(contentRect);
-    } else {
-        contentRect.SetSize({ 0.0f, 0.0f });
-        renderContext->SetOverrideContentRect(contentRect);
-    }
 }
 } // namespace OHOS::Ace::NG

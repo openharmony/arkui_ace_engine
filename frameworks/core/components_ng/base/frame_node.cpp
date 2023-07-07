@@ -483,11 +483,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
-        if (pattern_->NeedOverridePaintRect()) {
-            renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
-        } else {
-            renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
-        }
+        renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
     }
 
     // clean layout flag.

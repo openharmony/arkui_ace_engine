@@ -494,7 +494,9 @@ void ImagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(false);
+    auto renderCtx = host->GetRenderContext();
+    renderCtx->SetClipToBounds(false);
+    renderCtx->SetUsingContentRectForRenderFrame(true);
 
     // register image frame node to pipeline context to receive memory level notification and window state change
     // notification

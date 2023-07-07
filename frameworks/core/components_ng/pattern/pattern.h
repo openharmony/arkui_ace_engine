@@ -104,11 +104,6 @@ public:
         return nullptr;
     }
 
-    virtual bool NeedOverridePaintRect()
-    {
-        return false;
-    }
-
     virtual std::optional<RectF> GetOverridePaintRect() const
     {
         return std::nullopt;
