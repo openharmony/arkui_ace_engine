@@ -75,6 +75,7 @@ ohos_source_set("preview_osal_source") {
       "stage_card_parser.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",
+      "ui_extension_helper_impl.cpp",
     ]
 
     cflags_cc = [

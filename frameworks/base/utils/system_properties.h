@@ -350,6 +350,8 @@ public:
 
     static bool IsSceneBoardEnabled();
 
+    static void GetAppBarInfo(std::string& bundleName, std::string& abilityName);
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_WANT_WRAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_WANT_WRAP_H
 
+#include <map>
+
 #include "base/memory/ace_type.h"
 
 class NativeEngine;
@@ -43,6 +45,7 @@ public:
     static RefPtr<WantWrap> CreateWantWrap(const std::string& bundleName, const std::string& abilityName);
 
     virtual void SetWantParamsFromWantWrap(void* want) = 0;
+    virtual void SetWantParam(const std::map<std::string, std::string>& params) = 0;
     virtual std::string ToString() const = 0;
 };
 
