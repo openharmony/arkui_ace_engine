@@ -126,11 +126,9 @@ protected:
 private:
     void SetTouchPoint(
         const std::list<TouchLocationInfo>& touchInfoList, const int64_t timeStamp, const TouchType& touchType);
-    void SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType);
     OH_NativeXComponent_TouchEvent touchEventPoint_;
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
-    std::vector<OH_NativeXComponent_HistoricalPoint> historicalPoints_;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif
