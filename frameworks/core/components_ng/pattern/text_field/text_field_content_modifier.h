@@ -41,6 +41,7 @@ public:
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
     void SetContentOffset(OffsetF& value);
+    float GetContentOffsetY();
     void SetContentSize(SizeF& value);
     void SetTextValue(std::string& value);
     void SetErrorTextValue(const std::string& value);
