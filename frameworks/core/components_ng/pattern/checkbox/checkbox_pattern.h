@@ -177,6 +177,8 @@ private:
     void UpdateUnSelect();
     void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool isSelected);
+    void UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* frameNode,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap);
     void CheckBoxGroupIsTrue();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
