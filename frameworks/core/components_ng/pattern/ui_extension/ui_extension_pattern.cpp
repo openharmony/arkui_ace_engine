@@ -123,8 +123,8 @@ void UIExtensionPattern::OnResult(int32_t code, const AAFwk::Want& want)
     taskExecutor->PostTask([weak = WeakClaim(this), code, want]() {
         auto extensionPattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(extensionPattern);
-        if (extensionPattern->OnResultCallback_) {
-            extensionPattern->OnResultCallback_(code, want);
+        if (extensionPattern->onResultCallback_) {
+            extensionPattern->onResultCallback_(code, want);
         }
     }, TaskExecutor::TaskType::UI);
 }
@@ -140,8 +140,8 @@ void UIExtensionPattern::OnReceive(const AAFwk::WantParams& wantParams)
     taskExecutor->PostTask([weak = WeakClaim(this), wantParams]() {
         auto extensionPattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(extensionPattern);
-        if (extensionPattern->OnReceiveCallback_) {
-            extensionPattern->OnReceiveCallback_(wantParams);
+        if (extensionPattern->onReceiveCallback_) {
+            extensionPattern->onReceiveCallback_(wantParams);
         }
     }, TaskExecutor::TaskType::UI);
 }
@@ -160,21 +160,48 @@ void UIExtensionPattern::RequestExtensionSessionActivation()
 {
     CHECK_NULL_VOID(session_);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(extensionSession);
+    auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(extensionSession);
+    if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        int32_t code = static_cast<int32_t>(errcode);
+        std::string name = "start_ability_fail";
+        std::string message = "Start ui extension ability failed, please check the want of UIextensionAbility.";
+        lastError_ = { code, name, message };
+        if (onErrorCallback_) {
+            ErrorMsg error;
+            std::swap(lastError_, error);
+            onErrorCallback_(error.code, error.name, error.message);
+        }
+    }
 }
 
 void UIExtensionPattern::RequestExtensionSessionBackground()
 {
     CHECK_NULL_VOID(session_);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession);
+    auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession);
+    if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        if (onErrorCallback_) {
+            int32_t code = static_cast<int32_t>(errcode);
+            std::string name = "background_fail";
+            std::string message = "background ui extension ability failed, please check AMS log.";
+            onErrorCallback_(code, name, message);
+        }
+    }
 }
 
 void UIExtensionPattern::RequestExtensionSessionDestruction()
 {
     CHECK_NULL_VOID(session_);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession);
+    auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession);
+    if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        if (onErrorCallback_) {
+            int32_t code = static_cast<int32_t>(errcode);
+            std::string name = "terminate_fail";
+            std::string message = "terminate ui extension ability failed, please check AMS log.";
+            onErrorCallback_(code, name, message);
+        }
+    }
 }
 
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
@@ -351,19 +378,30 @@ void UIExtensionPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
 }
 
-void UIExtensionPattern::SetOnReleaseCallback(std::function<void(int32_t)>&& callback)
-{
-    onReleaseCallback_ = std::move(callback);
-}
-
 void UIExtensionPattern::UnregisterAbilityResultListener()
 {
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
 }
 
+void UIExtensionPattern::SetOnReleaseCallback(std::function<void(int32_t)>&& callback)
+{
+    onReleaseCallback_ = std::move(callback);
+}
+
+void UIExtensionPattern::SetOnErrorCallback(
+        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback)
+{
+    onErrorCallback_ = std::move(callback);
+    if (lastError_.code != 0) {
+        ErrorMsg error;
+        std::swap(lastError_, error);
+        onErrorCallback_(error.code, error.name, error.message);
+    }
+}
+
 void UIExtensionPattern::SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback)
 {
-    OnResultCallback_ = std::move(callback);
+    onResultCallback_ = std::move(callback);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferAbilityResultFunc_ =
@@ -377,7 +415,7 @@ void UIExtensionPattern::SetOnResultCallback(std::function<void(int32_t, const A
 
 void UIExtensionPattern::SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback)
 {
-    OnReceiveCallback_ = std::move(callback);
+    onReceiveCallback_ = std::move(callback);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferExtensionDataFunc_ =
