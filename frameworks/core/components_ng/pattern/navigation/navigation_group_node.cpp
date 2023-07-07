@@ -819,12 +819,10 @@ void NavigationGroupNode::SetOnStateChangeFalse(
         auto eventHub = preNavDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireChangeEvent(true);
-        eventHub->FireOnShownEvent();
     }
 
     auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireChangeEvent(false);
-    eventHub->FireOnHiddenEvent();
 }
 } // namespace OHOS::Ace::NG

@@ -99,11 +99,22 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    void SetIsOnShow(bool isOnShow)
+    {
+        isOnShow_ = isOnShow;
+    }
+
+    bool GetIsOnShow()
+    {
+        return isOnShow_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
     RefPtr<RouteInfo> routeInfo_;
     RefPtr<UINode> navDestinationNode_;
+    bool isOnShow_ = false;
 };
 
 } // namespace OHOS::Ace::NG

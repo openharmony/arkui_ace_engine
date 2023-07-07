@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -115,6 +116,23 @@ void NavigationPattern::DoAnimation(NavigationMode currentMode)
     layoutProperty->UpdateNavigationMode(usrNavigationMode);
 }
 
+void NavigationPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowStateChangedCallback(host->GetId());
+}
+
+void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto id = frameNode->GetId();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
+}
+
 void NavigationPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -154,28 +172,40 @@ void NavigationPattern::OnModifyDone()
 
     auto newTopNavPath = GetTopNavPath();
     if (preTopNavPath != newTopNavPath) {
-        // fire onHidden event
+        // fire onHidden and lostFocus event
         if (preTopNavPath.second != nullptr) {
             auto preTop = preTopNavPath.second;
             auto preTopNavDestination =
                 AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(preTop));
-            auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireOnHiddenEvent();
+            auto navDestinationPattern =
+                AceType::DynamicCast<NavDestinationPattern>(preTopNavDestination->GetPattern());
+            CHECK_NULL_VOID(navDestinationPattern);
+            if (navDestinationPattern->GetIsOnShow()) {
+                auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireOnHiddenEvent();
+                navDestinationPattern->SetIsOnShow(false);
+            }
             auto focusHub = AceType::DynamicCast<FrameNode>(preTopNavDestination)->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(false);
             focusHub->LostFocus();
         }
 
-        // fire onShown event
+        // fire onShown and requestFocus event
         if (newTopNavPath.second != nullptr) {
             auto newTop = newTopNavPath.second;
             auto newTopNavDestination =
                 AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(newTop));
-            auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireOnShownEvent();
+            auto navDestinationPattern =
+                AceType::DynamicCast<NavDestinationPattern>(newTopNavDestination->GetPattern());
+            CHECK_NULL_VOID(navDestinationPattern);
+            if (!navDestinationPattern->GetIsOnShow()) {
+                auto eventHub = newTopNavDestination->GetEventHub<NavDestinationEventHub>();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireOnShownEvent();
+                navDestinationPattern->SetIsOnShow(true);
+            }
             auto focusHub = AceType::DynamicCast<FrameNode>(newTopNavDestination)->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(true);
@@ -508,4 +538,32 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
     }
 }
 
+void NavigationPattern::OnWindowHide()
+{
+    auto curTopNavPath = GetTopNavPath();
+    CHECK_NULL_VOID(curTopNavPath.second);
+    auto curTopNavDestination =
+        AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(curTopNavPath.second));
+    auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(curTopNavDestination->GetPattern());
+    CHECK_NULL_VOID(navDestinationPattern);
+    CHECK_NULL_VOID_NOLOG(navDestinationPattern->GetIsOnShow());
+    auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnHiddenEvent();
+    navDestinationPattern->SetIsOnShow(false);
+}
+
+void NavigationPattern::OnWindowShow()
+{
+    auto curTopNavPath = GetTopNavPath();
+    CHECK_NULL_VOID(curTopNavPath.second);
+    auto curTopNavDestination =
+        AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(curTopNavPath.second));
+    auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(curTopNavDestination->GetPattern());
+    CHECK_NULL_VOID(navDestinationPattern);
+    CHECK_NULL_VOID_NOLOG(!(navDestinationPattern->GetIsOnShow()));
+    auto eventHub = curTopNavDestination->GetEventHub<NavDestinationEventHub>();
+    eventHub->FireOnShownEvent();
+    navDestinationPattern->SetIsOnShow(true);
+}
 } // namespace OHOS::Ace::NG
