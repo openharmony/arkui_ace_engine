@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -141,6 +142,30 @@ void JSListItem::SetEditable(const JSCallbackInfo& args)
 void JSListItem::SetSelectable(bool selectable)
 {
     ListItemModel::GetInstance()->SetSelectable(selectable);
+}
+
+void JSListItem::SetSelected(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+    bool select = false;
+    if (info[0]->IsBoolean()) {
+        select = info[0]->ToBoolean();
+    }
+    ListItemModel::GetInstance()->SetSelected(select);
+
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("ListItem.ChangeEvent");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ListItemModel::GetInstance()->SetSelectChangeEvent(std::move(changeEvent));
+    }
 }
 
 void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, bool isStartArea)
@@ -307,6 +332,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("onSelect", &JSListItem::SelectCallback);
     JSClass<JSListItem>::StaticMethod("borderRadius", &JSListItem::JsBorderRadius);
     JSClass<JSListItem>::StaticMethod("swipeAction", &JSListItem::SetSwiperAction);
+    JSClass<JSListItem>::StaticMethod("selected", &JSListItem::SetSelected);
 
     JSClass<JSListItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSListItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

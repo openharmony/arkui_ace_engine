@@ -188,20 +188,16 @@ void SearchModelNG::SetSearchSrcPath(const std::string& src)
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-
-    auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    auto color = imageRenderProperty->GetSvgFillColor();
 
     if (src.empty()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::SEARCH_SVG);
-        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
+        auto iconPath = pipeline->GetTheme<IconTheme>()->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
+        auto color = pipeline->GetTheme<SearchTheme>()->GetSearchIconColor();
         imageSourceInfo.SetSrc(iconPath, color);
     } else {
-        imageSourceInfo.SetSrc(src, color);
+        imageSourceInfo.SetSrc(src);
     }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageFrameNode->MarkModifyDone();
@@ -217,20 +213,16 @@ void SearchModelNG::SetRightIconSrcPath(const std::string& src)
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-
-    auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    auto color = imageRenderProperty->GetSvgFillColor();
 
     if (src.empty()) {
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
-        auto iconTheme = pipeline->GetTheme<IconTheme>();
-        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto iconPath = pipeline->GetTheme<IconTheme>()->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
+        auto color = pipeline->GetTheme<SearchTheme>()->GetSearchIconColor();
         imageSourceInfo.SetSrc(iconPath, color);
     } else {
-        imageSourceInfo.SetSrc(src, color);
+        imageSourceInfo.SetSrc(src);
     }
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageFrameNode->MarkModifyDone();

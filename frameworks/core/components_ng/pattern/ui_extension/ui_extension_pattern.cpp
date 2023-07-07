@@ -50,6 +50,10 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     RegisterLifecycleListener();
     RequestExtensionSessionActivation();
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
+        new(std::nothrow) Rosen::ExtensionSession::ExtensionSessionEventCallback();
+    extensionSession->RegisterExtensionSessionEventCallback(extSessionEventCallback);
 }
 
 UIExtensionPattern::~UIExtensionPattern()
@@ -121,6 +125,23 @@ void UIExtensionPattern::OnResult(int32_t code, const AAFwk::Want& want)
         CHECK_NULL_VOID_NOLOG(extensionPattern);
         if (extensionPattern->OnResultCallback_) {
             extensionPattern->OnResultCallback_(code, want);
+        }
+    }, TaskExecutor::TaskType::UI);
+}
+
+void UIExtensionPattern::OnReceive(const AAFwk::WantParams& wantParams)
+{
+    LOGI("UIExtensionPattern OnReceive called");
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    taskExecutor->PostTask([weak = WeakClaim(this), wantParams]() {
+        auto extensionPattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(extensionPattern);
+        if (extensionPattern->OnReceiveCallback_) {
+            extensionPattern->OnReceiveCallback_(wantParams);
         }
     }, TaskExecutor::TaskType::UI);
 }
@@ -344,12 +365,7 @@ void UIExtensionPattern::SetOnResultCallback(std::function<void(int32_t, const A
 {
     OnResultCallback_ = std::move(callback);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
-        new(std::nothrow) Rosen::ExtensionSession::ExtensionSessionEventCallback();
-    if (extSessionEventCallback == nullptr) {
-        LOGE("extSessionEventCallback init failed");
-        return;
-    }
+    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferAbilityResultFunc_ =
         [weak = WeakClaim(this)](int32_t code, const AAFwk::Want& want) {
             auto pattern = weak.Upgrade();
@@ -357,6 +373,19 @@ void UIExtensionPattern::SetOnResultCallback(std::function<void(int32_t, const A
                 pattern->OnResult(code, want);
             }
         };
-    extensionSession->RegisterExtensionSessionEventCallback(extSessionEventCallback);
+}
+
+void UIExtensionPattern::SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback)
+{
+    OnReceiveCallback_ = std::move(callback);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
+    extSessionEventCallback->transferExtensionDataFunc_ =
+        [weak = WeakClaim(this)](const AAFwk::WantParams& params) {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->OnReceive(params);
+            }
+        };
 }
 } // namespace OHOS::Ace::NG

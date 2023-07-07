@@ -701,34 +701,9 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
         xValue = translate.x.ConvertToPx();
         yValue = translate.y.ConvertToPx();
     }
-
-    if (translateXY_) {
-        auto propertyXY = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty());
-        if (propertyXY) {
-            propertyXY->Set({xValue, yValue});
-        } else {
-            LOGE("fail to get translateXY property");
-        }
-    } else {
-        auto propertyXY = std::make_shared<RSAnimatableProperty<Vector2f>>(Vector2f(xValue, yValue));
-        translateXY_ = std::make_shared<Rosen::RSTranslateModifier>(propertyXY);
-        rsNode_->AddModifier(translateXY_);
-    }
-
     // translateZ doesn't support percentage
     float zValue = translate.z.ConvertToPx();
-    if (translateZ_) {
-        auto propertyZ = std::static_pointer_cast<RSAnimatableProperty<float>>(translateZ_->GetProperty());
-        if (propertyZ) {
-            propertyZ->Set(zValue);
-        } else {
-            LOGE("fail to get translateZ property");
-        }
-    } else {
-        auto propertyZ = std::make_shared<RSAnimatableProperty<float>>(zValue);
-        translateZ_ = std::make_shared<Rosen::RSTranslateZModifier>(propertyZ);
-        rsNode_->AddModifier(translateZ_);
-    }
+    rsNode_->SetTranslate(xValue, yValue, zValue);
     RequestNextFrame();
 }
 
@@ -805,7 +780,7 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     const float pi = 3.14159265;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    auto translate = GetTranslateXY();
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
     // calculate new pos.
@@ -845,7 +820,7 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
     RectF rect;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    auto translate = GetTranslateXY();
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
     return rect;
 }
@@ -853,23 +828,9 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
     // TODO: add rotation and center support
-    auto translate = GetTranslateXY();
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
-}
-
-Rosen::Vector2f RosenRenderContext::GetTranslateXY() const
-{
-    Rosen::Vector2f translate = { 0.0, 0.0 };
-    if (translateXY_) {
-        translate = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty())->Get();
-    }
-    if (transformMatrixModifier_.has_value() && transformMatrixModifier_->translateXY) {
-        translate += std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(
-            transformMatrixModifier_->translateXY->GetProperty())
-                         ->Get();
-    }
-    return translate;
 }
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
@@ -884,24 +845,36 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
 void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetTranslate({ offset.GetX(), offset.GetY() });
+    auto xValue = offset.GetX();
+    auto yValue = offset.GetY();
+    if (translateXY_) {
+        auto propertyXY = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty());
+        if (propertyXY) {
+            propertyXY->Set({xValue, yValue});
+        } else {
+            LOGE("fail to get translateXY property");
+        }
+    } else {
+        auto propertyXY = std::make_shared<RSAnimatableProperty<Vector2f>>(Vector2f(xValue, yValue));
+        translateXY_ = std::make_shared<Rosen::RSTranslateModifier>(propertyXY);
+        rsNode_->AddModifier(translateXY_);
+    }
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
 {
     OffsetF offset;
-    CHECK_NULL_RETURN(rsNode_, offset);
-    auto offsetInfo = rsNode_->GetShowingProperties().GetTranslate();
-    if (std::get<1>(offsetInfo)) {
-        const auto& translate = std::get<0>(offsetInfo);
-        offset.SetX(translate[0]);
-        offset.SetY(translate[1]);
-    } else {
-        LOGW("fail to stop current property animation, use current paint rect");
-        const auto& translate = rsNode_->GetStagingProperties().GetTranslate();
-        offset.SetX(translate[0]);
-        offset.SetY(translate[1]);
+    CHECK_NULL_RETURN(translateXY_, offset);
+    auto property = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty());
+    CHECK_NULL_RETURN(property, offset);
+    auto result = property->GetShowingValueAndCancelAnimation();
+    if (!result) {
+        LOGW("fail to stop current property animation");
+        return offset;
     }
+    auto translate = property->Get();
+    offset.SetX(translate[0]);
+    offset.SetY(translate[1]);
     return offset;
 }
 

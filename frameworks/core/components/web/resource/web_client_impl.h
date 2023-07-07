@@ -186,6 +186,7 @@ public:
         const std::vector<NWeb::DateTimeSuggestion>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback) override;
     void OnDateTimeChooserClose() override;
+    void OnOverScroll(float xOffset, float yOffset) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

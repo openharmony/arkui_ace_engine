@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include <string>
-
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
+
+#include <string>
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
@@ -497,20 +497,11 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         return;
     }
     ImageSpanOptions options;
-    std::string image;
-    std::string bundleName;
-    std::string moduleName;
-    if (!args[0]->IsNull()) {
-        if (!JSContainerBase::ParseJsMedia(args[0], image)) {
-#if defined(PIXEL_MAP_SUPPORTED)
-            options.imagePixelMap = CreatePixelMapFromNapiValue(args[0]);
-#endif
-        } else {
-            JSImage::GetJsMediaBundleInfo(args[0], bundleName, moduleName);
-            options.image = image;
-            options.bundleName = bundleName;
-            options.moduleName = moduleName;
-        }
+    if (!args[0]->IsEmpty() && args[0]->ToString() != "") {
+        options = CreateJsImageOptions(args);
+    } else {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+        return;
     }
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> imageObject = JSRef<JSObject>::Cast(args[1]);
@@ -535,6 +526,54 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
 
+ImageSpanOptions JSRichEditorController::CreateJsImageOptions(const JSCallbackInfo& args)
+{
+    ImageSpanOptions options;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, options);
+    bool isCard = context->IsFormRender();
+    std::string image;
+    std::string bundleName;
+    std::string moduleName;
+    bool srcValid = JSContainerBase::ParseJsMedia(args[0], image);
+    if (isCard && args[0]->IsString()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(image);
+        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            image.clear();
+        }
+    }
+    JSImage::GetJsMediaBundleInfo(args[0], bundleName, moduleName);
+    options.image = image;
+    options.bundleName = bundleName;
+    options.moduleName = moduleName;
+    if (!srcValid) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (!isCard) {
+            if (IsDrawable(args[0])) {
+                options.imagePixelMap = GetDrawablePixmap(args[0]);
+            } else {
+                options.imagePixelMap = CreatePixelMapFromNapiValue(args[0]);
+            }
+        }
+#endif
+    }
+    return options;
+}
+
+bool JSRichEditorController::IsDrawable(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (jsObj->IsUndefined()) {
+        return false;
+    }
+    JSRef<JSVal> func = jsObj->GetProperty("getPixelMap");
+    return (!func->IsNull() && func->IsFunction());
+}
+
 void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
@@ -542,8 +581,11 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     }
     TextSpanOptions options;
     std::string spanValue;
-    if (!args[0]->IsNull() && JSContainerBase::ParseJsString(args[0], spanValue)) {
+    if (!args[0]->IsEmpty() && args[0]->ToString() != "" && JSContainerBase::ParseJsString(args[0], spanValue)) {
         options.value = spanValue;
+    } else {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+        return;
     }
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[1]);

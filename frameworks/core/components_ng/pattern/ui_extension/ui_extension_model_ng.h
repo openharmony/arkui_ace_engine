@@ -27,6 +27,7 @@ public:
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;
+    void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_NG_H

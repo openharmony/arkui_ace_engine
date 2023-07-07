@@ -56,8 +56,7 @@ public:
         layoutAlgorithm->SetControlButtonClick(isControlButtonClick_);
         auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
         if (layoutProperty) {
-            layoutAlgorithm->SetSideBarContainerType(
-                layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED));
+            layoutAlgorithm->SetSideBarContainerType(type_);
         }
         return layoutAlgorithm;
     }
@@ -162,6 +161,7 @@ private:
 
     Dimension adjustMaxSideBarWidth_;
     Dimension adjustMinSideBarWidth_;
+    SideBarContainerType type_ = SideBarContainerType::EMBED;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
 };

@@ -199,6 +199,7 @@ void SideBarContainerPattern::InitSideBar()
 
     auto showSideBar = layoutProperty->GetShowSideBar().value_or(true);
     sideBarStatus_ = showSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN;
+    type_ = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
 }
 
 void SideBarContainerPattern::CreateAnimation()
@@ -500,6 +501,7 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
 
     adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();
     adjustMinSideBarWidth_ = layoutAlgorithm->GetAdjustMinSideBarWidth();
+    type_ = layoutAlgorithm->GetSideBarContainerType();
 
     return false;
 }

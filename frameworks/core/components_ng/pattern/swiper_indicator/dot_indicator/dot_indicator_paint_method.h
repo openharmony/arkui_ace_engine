@@ -91,6 +91,11 @@ public:
         turnPageRate_ = turnPageRate;
     }
 
+    void SetTouchBottomRate(float touchBottomRate)
+    {
+        touchBottomRate_ = touchBottomRate;
+    }
+
     void SetMouseClickIndex(const std::optional<int32_t>& mouseClickIndex)
     {
         mouseClickIndex_ = mouseClickIndex;
@@ -126,6 +131,7 @@ private:
     int32_t currentIndex_ = 0;
     int32_t itemCount_ = 0;
     float turnPageRate_ = 0.0f;
+    float touchBottomRate_ = 0.0f;
     bool isHover_ = false;
     bool isPressed_ = false;
     bool longPointIsHover_ = false;

@@ -100,12 +100,28 @@ public:
         return onExitEndDeleteAreaEvent_;
     }
 
+    void SetSelectChangeEvent(OnSelectFunc&& changeEvent)
+    {
+        selectChangeEvent_ = std::move(changeEvent);
+    }
+
+    void FireSelectChangeEvent(bool select) const
+    {
+        if (selectChangeEvent_) {
+            selectChangeEvent_(select);
+        }
+        if (onSelectEvent_) {
+            onSelectEvent_(select);
+        }
+    }
+
     int32_t GetIndex(const Point& point) const;
 
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType drag) override;
 
 private:
     OnSelectFunc onSelectEvent_;
+    OnSelectFunc selectChangeEvent_;
     OnDeleteEvent startOnDeleteEvent_;
     OnDeleteEvent endOnDeleteEvent_;
     OnEnterDeleteAreaEvent onEnterStartDeleteAreaEvent_;

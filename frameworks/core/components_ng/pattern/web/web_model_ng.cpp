@@ -807,4 +807,13 @@ void WebModelNG::SetAudioExclusive(bool audioExclusive)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateAudioExclusive(audioExclusive);
 }
+
+void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnOverScrollEvent(std::move(uiCallback));
+}
 } // namespace OHOS::Ace::NG

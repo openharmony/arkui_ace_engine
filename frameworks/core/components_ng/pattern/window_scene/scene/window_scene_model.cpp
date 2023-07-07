@@ -45,7 +45,7 @@ void WindowSceneModel::Create(uint64_t persistentId)
     auto nodeId = stack->ClaimNodeId();
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
-    if (windowNode->GetHitTestMode() != HitTestMode::HTMDEFAULT) {
+    if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);
     }
     stack->Push(windowNode);

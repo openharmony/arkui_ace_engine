@@ -34,7 +34,6 @@ struct ListItemInfo {
     float startPos;
     float endPos;
     bool isGroup;
-    float crossSize = 0.0f;
 };
 
 enum class ScrollAutoType {
@@ -256,17 +255,7 @@ public:
     {
         return 1;
     }
-
-    void SetLaneGutter(float laneGutter)
-    {
-        laneGutter_ = laneGutter;
-    }
-
-    float GetLaneGutter() const
-    {
-        return laneGutter_;
-    }
-
+    
     void OffScreenLayoutDirection();
 
     ScrollAutoType GetScrollAutoType() const
@@ -356,7 +345,6 @@ private:
     float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
-    float laneGutter_ = 0.0f;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
     std::list<WeakPtr<FrameNode>> itemGroupList_;

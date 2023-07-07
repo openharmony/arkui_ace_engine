@@ -1404,7 +1404,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.L
     pattern->isSingleHandle_ = true;
     float oldCaretRectY = pattern->caretRect_.GetY();
     pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
-    EXPECT_EQ(pattern->caretRect_.GetY(), oldCaretRectY + TEXT_AREA_SCROLL_OFFSET);
+    EXPECT_EQ(pattern->caretRect_.GetY(), oldCaretRectY);
     EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->textRect_.GetX(), pattern->currentOffset_));
 }
 

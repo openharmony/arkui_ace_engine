@@ -800,6 +800,7 @@ HWTEST_F(SearchTestNg, SetSearchSrcPath001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     SetIconTheme();
+    SetSearchTheme();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetSearchSrcPath("");
@@ -834,6 +835,7 @@ HWTEST_F(SearchTestNg, SetRightIconSrcPath001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     SetIconTheme();
+    SetSearchTheme();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetRightIconSrcPath("");

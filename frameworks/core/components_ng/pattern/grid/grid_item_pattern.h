@@ -110,6 +110,11 @@ public:
         return isSelected_;
     }
 
+    void SetSelected(bool selected)
+    {
+        isSelected_ = selected;
+    }
+
 protected:
     void OnModifyDone() override;
 private:

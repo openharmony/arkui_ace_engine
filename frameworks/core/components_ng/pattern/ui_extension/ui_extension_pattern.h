@@ -25,6 +25,7 @@
 
 namespace OHOS::AAFwk {
 class Want;
+class WantParams;
 }
 
 namespace OHOS::Ace::NG {
@@ -45,11 +46,10 @@ public:
 
     void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
+    void SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback);
 
     void OnConnect() override;
     void OnDisconnect() override;
-
-    void OnResult(int32_t code, const AAFwk::Want& want);
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
@@ -81,10 +81,14 @@ private:
     void UnregisterAbilityResultListener();
     void OnConnectInner();
 
+    void OnResult(int32_t code, const AAFwk::Want& want);
+    void OnReceive(const AAFwk::WantParams& wantParams);
+
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> OnResultCallback_;
+    std::function<void(const AAFwk::WantParams&)> OnReceiveCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

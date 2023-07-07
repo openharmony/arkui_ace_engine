@@ -728,9 +728,6 @@ void FrameNode::SetActive(bool active)
             parent->MarkNeedSyncRenderTree();
         }
     }
-    if (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG) {
-        SetJSViewActive(active);
-    }
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -1409,8 +1406,8 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
             auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
             auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
             auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
-            RectF mouseRegion(rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(),
-                 width.value(), height.value());
+            RectF mouseRegion(rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(),
+                height.value());
             responseRegionList.emplace_back(mouseRegion);
         }
         return responseRegionList;
@@ -1631,6 +1628,22 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return offset;
+}
+
+OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
+{
+    OffsetF offset {};
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto wrapper = parent->layoutWrapper_.Upgrade();
+        if (wrapper) {
+            offset += wrapper->GetGeometryNode()->GetFrameOffset();
+        } else {
+            offset += parent->geometryNode_->GetFrameOffset();
+        }
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;
@@ -1892,6 +1905,12 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
         }
     }
     return nodes;
+}
+
+void FrameNode::AddFRCSceneInfo(const std::string& name, float speed, SceneStatus status)
+{
+    // [PLANNING]: Frame Rate Controller(FRC):
+    // Based on scene, speed and scene status, FrameRateRange will be sent to RSNode.
 }
 
 void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)

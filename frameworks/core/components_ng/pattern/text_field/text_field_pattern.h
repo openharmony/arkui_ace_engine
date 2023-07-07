@@ -302,6 +302,13 @@ public:
         return cursorVisible_;
     }
 
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    bool GetImeAttached() const
+    {
+        return imeAttached_;
+    }
+#endif
+
     bool DisplayPlaceHolder();
 
     const Offset& GetLastTouchOffset()

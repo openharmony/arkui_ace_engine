@@ -28,6 +28,7 @@ constexpr float ANIMATION_END = 1.0f; // The image animation end with 1.0
 constexpr uint32_t TWICE = 2;         // use to calculate image new width and height
 constexpr double EPSILON = 0.0001;    // use to judge the end of action
 
+// not in use, causes performance issues
 class ImageModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ImageModifier, ContentModifier);
 

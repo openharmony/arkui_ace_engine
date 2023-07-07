@@ -80,8 +80,8 @@ int32_t OH_NativeXComponent::GetXComponentOffset(const void* window, double* x, 
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
-int32_t OH_NativeXComponent::GetHistoryPoints(
-    const void* window, std::vector<OH_NativeXComponent_HistoricalPoint>& historicalPoints)
+int32_t OH_NativeXComponent::GetHistoryPoints(const void* window,
+    int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints)
 {
     if (xcomponentImpl_ == nullptr) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
@@ -90,7 +90,7 @@ int32_t OH_NativeXComponent::GetHistoryPoints(
     if (window != surfaceWindow) {
         return OH_NATIVEXCOMPONENT_RESULT_FAILED;
     }
-    historicalPoints = xcomponentImpl_->GetHistoryPoints();
+    xcomponentImpl_->GetHistoryPoints(size, historicalPoints);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 

@@ -51,11 +51,10 @@ void BlankModelNG::SetBlankMin(const Dimension& blankMin)
     if (blankMin.IsNegative()) {
         result = Dimension();
     }
+    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result);
     if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
         ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexBasis, result);
-        return;
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result);
 }
 
 void BlankModelNG::SetHeight(const Dimension& height)

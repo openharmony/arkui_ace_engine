@@ -181,7 +181,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
         lanes_ = lanesLayoutAlgorithm->GetLanes();
-        laneGutter_ = lanesLayoutAlgorithm->GetLaneGutter();
     }
     CheckScrollable();
 
@@ -249,7 +248,6 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     if (!listContentModifier_) {
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>();
     }
-    paint->SetLaneGutter(laneGutter_);
     listContentModifier_->SetItemsPosition(itemPosition_);
     paint->SetContentModifier(listContentModifier_);
     return paint;
@@ -868,6 +866,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto isVertical = listProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
     auto curIndex = curItemPattern->GetIndexInList();
     auto curIndexInGroup = curItemPattern->GetIndexInListItemGroup();
+    auto curListItemGroupPara = GetListItemGroupParameter(curFrame);
     if (curIndex < 0 || curIndex > maxListItemIndex_) {
         LOGE("can't find focused child.");
         return nullptr;
@@ -875,45 +874,95 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
 
     auto moveStep = 0;
     auto nextIndex = curIndex;
-    if ((isVertical && step == FocusStep::UP_END) || (!isVertical && step == FocusStep::LEFT_END)) {
-        moveStep = 1;
-        nextIndex = 0;
-    } else if ((isVertical && step == FocusStep::DOWN_END) || (!isVertical && step == FocusStep::RIGHT_END)) {
-        moveStep = -1;
-        nextIndex = maxListItemIndex_;
-    } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT)) {
-        moveStep = 1;
-        nextIndex = curIndex + moveStep;
-    } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
-        moveStep = -1;
-        nextIndex = curIndex + moveStep;
+    auto nextIndexInGroup = curIndexInGroup;
+    if (lanes_ <= 1) {
+        if ((isVertical && step == FocusStep::UP_END) || (!isVertical && step == FocusStep::LEFT_END)) {
+            moveStep = 1;
+            nextIndex = 0;
+            nextIndexInGroup = -1;
+        } else if ((isVertical && step == FocusStep::DOWN_END) || (!isVertical && step == FocusStep::RIGHT_END)) {
+            moveStep = -1;
+            nextIndex = maxListItemIndex_;
+            nextIndexInGroup = -1;
+        } else if ((isVertical && step == FocusStep::DOWN) || (!isVertical && step == FocusStep::RIGHT)) {
+            moveStep = 1;
+            if ((curIndexInGroup == -1) || (curIndexInGroup >= curListItemGroupPara.itemEndIndex)) {
+                nextIndex = curIndex + moveStep;
+                nextIndexInGroup = -1;
+            } else {
+                nextIndexInGroup = curIndexInGroup + moveStep;
+            }
+        } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
+            moveStep = -1;
+            if ((curIndexInGroup == -1) || (curIndexInGroup <= 0)) {
+                nextIndex = curIndex + moveStep;
+                nextIndexInGroup = -1;
+            } else {
+                nextIndexInGroup = curIndexInGroup + moveStep;
+            }
+        }
+    } else {
+        if ((step == FocusStep::UP_END) || (step == FocusStep::LEFT_END)) {
+            moveStep = 1;
+            nextIndex = 0;
+            nextIndexInGroup = -1;
+        } else if ((step == FocusStep::DOWN_END) || (step == FocusStep::RIGHT_END)) {
+            moveStep = -1;
+            nextIndex = maxListItemIndex_;
+            nextIndexInGroup = -1;
+        } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT)) {
+            if (curIndexInGroup == -1) {
+                moveStep = lanes_;
+                nextIndex = curIndex + moveStep;
+                nextIndexInGroup = -1;
+            } else {
+                moveStep = curListItemGroupPara.lanes;
+                nextIndexInGroup = curIndexInGroup + moveStep;
+            }
+        } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
+            if (curIndexInGroup == -1) {
+                moveStep = -lanes_;
+                nextIndex = curIndex + moveStep;
+                nextIndexInGroup = -1;
+            } else {
+                moveStep = -curListItemGroupPara.lanes;
+                nextIndexInGroup = curIndexInGroup + moveStep;
+            }
+        } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN)) {
+            moveStep = 1;
+            if (((curIndexInGroup == -1) && ((curIndex - (lanes_ - 1)) % lanes_ != 0)) || ((curIndexInGroup != -1) &&
+                ((curIndexInGroup - (curListItemGroupPara.lanes - 1)) % curListItemGroupPara.lanes == 0))) {
+                nextIndex = curIndex + moveStep;
+                nextIndexInGroup = -1;
+            } else if ((curIndexInGroup != -1) &&
+                ((curIndexInGroup - (curListItemGroupPara.lanes - 1)) % curListItemGroupPara.lanes != 0)) {
+                nextIndexInGroup = curIndexInGroup + moveStep;
+            }
+        } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP)) {
+            moveStep = -1;
+            if (((curIndexInGroup == -1) && (curIndex % lanes_ != 0)) || ((curIndexInGroup != -1) &&
+                (curIndexInGroup % curListItemGroupPara.lanes == 0))) {
+                nextIndex = curIndex + moveStep;
+                nextIndexInGroup = -1;
+            } else if ((curIndexInGroup != -1) && (curIndexInGroup % curListItemGroupPara.lanes != 0)) {
+                nextIndexInGroup = curIndexInGroup + moveStep;
+            }
+        }
     }
-
     while (nextIndex >= 0 && nextIndex <= maxListItemIndex_) {
-        // Need update here. ListItemGroup.
-        if (nextIndex == curIndex) {
+        if ((nextIndex == curIndex) && (curIndexInGroup == nextIndexInGroup)) {
             return nullptr;
         }
-
-        if (nextIndex < curIndex && nextIndex < startIndex_) {
-            ScrollToIndex(nextIndex, smooth_, ScrollAlign::START);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            if (pipeline) {
-                pipeline->FlushUITasks();
-            }
-        } else if (nextIndex > curIndex && nextIndex > endIndex_) {
-            ScrollToIndex(nextIndex, smooth_, ScrollAlign::END);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            if (pipeline) {
-                pipeline->FlushUITasks();
-            }
-        }
-
-        auto nextFocusNode = GetChildFocusNodeByIndex(nextIndex, curIndexInGroup);
+        auto nextFocusNode = ScrollAndFindFocusNode(nextIndex, curIndex, nextIndexInGroup, curIndexInGroup, moveStep,
+            step);
         if (nextFocusNode.Upgrade()) {
             return nextFocusNode;
         }
-        nextIndex += moveStep;
+        if (nextIndexInGroup > -1) {
+            nextIndexInGroup += moveStep;
+        } else {
+            nextIndex += moveStep;
+        }
     }
     return nullptr;
 }
@@ -952,6 +1001,86 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
     return nullptr;
 }
 
+WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
+    int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
+{
+    auto isScrollIndex = ScrollListForFocus(nextIndex, curIndex, nextIndexInGroup);
+    auto groupIndexInGroup = ScrollListItemGroupForFocus(nextIndex, nextIndexInGroup,
+        curIndexInGroup, moveStep, step, isScrollIndex);
+    
+    return groupIndexInGroup ? GetChildFocusNodeByIndex(nextIndex, nextIndexInGroup) : nullptr;
+}
+
+bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup)
+{
+    auto isScrollIndex = false;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, isScrollIndex);
+    if (nextIndex < curIndex && nextIndex < startIndex_) {
+        if (nextIndexInGroup == -1) {
+            isScrollIndex = true;
+            ScrollToIndex(nextIndex, smooth_, ScrollAlign::START);
+            pipeline->FlushUITasks();
+        } else {
+            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::START);
+            pipeline->FlushUITasks();
+        }
+    } else if (nextIndex > curIndex && nextIndex > endIndex_) {
+        if (nextIndexInGroup == -1) {
+            isScrollIndex = true;
+            ScrollToIndex(nextIndex, smooth_, ScrollAlign::END);
+            pipeline->FlushUITasks();
+        } else {
+            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::END);
+            pipeline->FlushUITasks();
+        }
+    }
+    return isScrollIndex;
+}
+bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
+    int32_t moveStep, FocusStep step, bool isScrollIndex)
+{
+    auto groupIndexInGroup = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, groupIndexInGroup);
+    RefPtr<FrameNode> nextIndexNode;
+    auto isNextInGroup = IsListItemGroup(nextIndex, nextIndexNode);
+    CHECK_NULL_RETURN(nextIndexNode, groupIndexInGroup);
+    if (!isNextInGroup) {
+        nextIndexInGroup = -1;
+        return groupIndexInGroup;
+    }
+    auto nextListItemGroupPara = GetListItemGroupParameter(nextIndexNode);
+    if (nextIndexInGroup == -1) {
+        auto scrollAlign = ScrollAlign::END;
+        nextIndexInGroup = moveStep < 0 ? nextListItemGroupPara.itemEndIndex : 0;
+        if ((step == FocusStep::UP_END) || (step == FocusStep::LEFT_END) ||
+            (step == FocusStep::DOWN_END) || (step == FocusStep::RIGHT_END)) {
+            scrollAlign = moveStep < 0 ? ScrollAlign::END : ScrollAlign::START;
+        } else {
+            scrollAlign = moveStep < 0 ? ScrollAlign::START : ScrollAlign::END;
+        }
+        if ((nextIndexInGroup < nextListItemGroupPara.displayStartIndex) ||
+            (nextIndexInGroup > nextListItemGroupPara.displayEndIndex) || (isScrollIndex)) {
+            ScrollToIndex(nextIndex, nextIndexInGroup, scrollAlign);
+            pipeline->FlushUITasks();
+        }
+    } else if (nextIndexInGroup > nextListItemGroupPara.itemEndIndex) {
+        nextIndexInGroup = -1;
+        groupIndexInGroup = false;
+    } else {
+        if ((nextIndexInGroup < curIndexInGroup) && (nextIndexInGroup < nextListItemGroupPara.displayStartIndex)) {
+            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::START);
+            pipeline->FlushUITasks();
+        } else if ((nextIndexInGroup > curIndexInGroup) &&
+            (nextIndexInGroup > nextListItemGroupPara.displayEndIndex)) {
+            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::END);
+            pipeline->FlushUITasks();
+        }
+    }
+    return groupIndexInGroup;
+}
+
 void ListPattern::OnAnimateStop()
 {
     scrollStop_ = true;
@@ -973,7 +1102,7 @@ void ListPattern::ScrollTo(float position)
 
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
-    LOGI("ScrollToIndex:%{public}d", index);
+    LOGI("ScrollToIndex:%{public}d, align:%{public}d.", index, align);
     StopAnimate();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1000,7 +1129,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 
 void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align)
 {
-    LOGI("ScrollToIndex:%{public}d, %{public}d", index, indexInGroup);
+    LOGI("ScrollToIndex:%{public}d, %{public}d, align:%{public}d.", index, indexInGroup, align);
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         currentDelta_ = 0;
@@ -1471,5 +1600,53 @@ void ListPattern::SetAccessibilityAction()
         }
         pattern->ScrollPage(true);
     });
+}
+
+ListItemGroupPara ListPattern::GetListItemGroupParameter(const RefPtr<FrameNode>& node)
+{
+    ListItemGroupPara listItemGroupPara = {-1, -1, -1, -1};
+    auto curFrameParent = node->GetParent();
+    auto curFrameParentNode = AceType::DynamicCast<FrameNode>(curFrameParent);
+    while (curFrameParent && (!curFrameParentNode)) {
+        curFrameParent = curFrameParent->GetParent();
+        curFrameParentNode = AceType::DynamicCast<FrameNode>(curFrameParent);
+    }
+    CHECK_NULL_RETURN(curFrameParentNode, listItemGroupPara);
+    if (curFrameParent->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+        auto itemGroupPattern = curFrameParentNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_RETURN(itemGroupPattern, listItemGroupPara);
+        listItemGroupPara.displayEndIndex = itemGroupPattern->GetDisplayEndIndexInGroup();
+        listItemGroupPara.displayStartIndex = itemGroupPattern->GetDiasplayStartIndexInGroup();
+        listItemGroupPara.lanes = itemGroupPattern->GetLanesInGroup();
+        listItemGroupPara.itemEndIndex =  itemGroupPattern->GetEndIndexInGroup();
+        LOGD("TListPattern::GetListItemGroupParameter(%{public}d,%{public}d,%{public}d,%{public}d).",
+            listItemGroupPara.displayEndIndex, listItemGroupPara.displayStartIndex,
+            listItemGroupPara.lanes, listItemGroupPara.itemEndIndex);
+    }
+    return listItemGroupPara;
+}
+
+bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
+{
+    auto listFrame = GetHost();
+    CHECK_NULL_RETURN(listFrame, false);
+    auto listFocus = listFrame->GetFocusHub();
+    CHECK_NULL_RETURN(listFocus, false);
+    for (const auto& childFocus : listFocus->GetChildren()) {
+        if (!childFocus->IsFocusable()) {
+            continue;
+        }
+        if (auto childFrame = childFocus->GetFrameNode()) {
+            if (auto childPattern = AceType::DynamicCast<ListItemPattern>(childFrame->GetPattern())) {
+                auto curIndex = childPattern->GetIndexInList();
+                auto curIndexInGroup = childPattern->GetIndexInListItemGroup();
+                if (curIndex == listIndex) {
+                    node = childFrame;
+                    return curIndexInGroup > -1;
+                }
+            }
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

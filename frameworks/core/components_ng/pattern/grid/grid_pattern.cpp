@@ -64,7 +64,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 
     auto effect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
     bool canOverScroll = (effect == EdgeEffect::SPRING) && scrollState_ != SCROLL_FROM_AXIS &&
-                         scrollState_ != SCROLL_FROM_BAR && scrollable_;
+                         scrollState_ != SCROLL_FROM_BAR && scrollable_ && !ScrollableIdle();
     result->SetCanOverScroll(canOverScroll);
 
     return result;
@@ -382,14 +382,17 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (!isConfigScrollable_ || !scrollable_) {
         return true;
     }
+    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
+    auto host = GetHost();
     // check edgeEffect is not springEffect
     if (!HandleEdgeEffect(offset, source, GetContentSize())) {
+        if (IsOutOfBoundary()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
         return false;
     }
     SetScrollState(source);
 
-    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
-    auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
@@ -1197,7 +1200,11 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
 
 bool GridPattern::IsOutOfBoundary()
 {
-    return gridLayoutInfo_.reachStart_ || gridLayoutInfo_.offsetEnd_;
+    bool outOfStart = gridLayoutInfo_.reachStart_ && Positive(gridLayoutInfo_.currentOffset_);
+    float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
+    bool outOfEnd = (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) &&
+        LessNotEqual(endPos, gridLayoutInfo_.lastMainSize_);
+    return outOfStart || outOfEnd;
 }
 
 void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)

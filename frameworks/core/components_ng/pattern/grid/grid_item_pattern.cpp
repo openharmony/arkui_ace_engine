@@ -32,12 +32,14 @@ void GridItemPattern::MarkIsSelected(bool isSelected)
         isSelected_ = isSelected;
         auto eventHub = GetEventHub<GridItemEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnSelect(isSelected);
+        eventHub->FireSelectChangeEvent(isSelected);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (isSelected) {
+            eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
             host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
         } else {
+            eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
             host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
         }
     }

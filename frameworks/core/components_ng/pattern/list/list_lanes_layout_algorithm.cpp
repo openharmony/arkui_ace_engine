@@ -31,8 +31,7 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
         float crossSize = crossSizeOptional.value();
         groupLayoutConstraint_.maxSize.SetCrossSize(crossSize, axis);
         if (lanes_ > 1) {
-            float laneGutter = GetLaneGutter();
-            crossSize = (crossSize + laneGutter) / lanes_ - laneGutter;
+            crossSize /= lanes_;
         }
         if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
             crossSize = maxLaneLength_.value();
@@ -138,7 +137,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
 }
 
 int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minLaneLength,
-    std::optional<float>& maxLaneLength, int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter)
+    std::optional<float>& maxLaneLength, int32_t lanes, std::optional<float> crossSizeOptional)
 {
     if (lanes < 1) {
         return 1;
@@ -169,8 +168,8 @@ int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minL
     // when list's width is 120, lanes_ = 3
     // when list's width is 80, lanes_ = 2
     // when list's width is 70, lanes_ = 1
-    float maxLanes = (crossSize + laneGutter) / (minLaneLength.value() + laneGutter);
-    float minLanes = (crossSize + laneGutter) / (maxLaneLength.value() + laneGutter);
+    float maxLanes = crossSize / minLaneLength.value();
+    float minLanes = crossSize / maxLaneLength.value();
     // let's considerate scenarios when maxCrossSize > 0
     // now it's guaranteed that [minLaneLength_] <= [maxLaneLength_], i.e., maxLanes >= minLanes > 0
     // there are 3 scenarios:
@@ -217,14 +216,7 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
         maxLaneLength_ = ConvertToPx(
             layoutProperty->GetLaneMaxLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
     }
-    float laneGutter = 0.0f;
-    if (layoutProperty->GetLaneGutter().has_value()) {
-        laneGutter =
-            ConvertToPx(layoutProperty->GetLaneGutter().value(), layoutConstraint.scaleProperty, mainPercentRefer)
-                .value();
-        SetLaneGutter(laneGutter);
-    }
-    lanes_ = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional, laneGutter);
+    lanes_ = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional);
 }
 
 void ListLanesLayoutAlgorithm::ModifyLaneLength(std::optional<float>& minLaneLength,

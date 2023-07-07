@@ -38,7 +38,7 @@ public:
     }
 
     static int32_t CalculateLanesParam(std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength,
-        int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter = 0.0f);
+        int32_t lanes, std::optional<float> crossSizeOptional);
 
 protected:
     void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,

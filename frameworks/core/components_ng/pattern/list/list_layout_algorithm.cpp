@@ -793,7 +793,6 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         float crossOffset = 0.0f;
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
-        pos.second.crossSize = childCrossSize;
         if (GetLanes() > 1) {
             int32_t laneIndex = 0;
             if (pos.second.isGroup) {
@@ -802,7 +801,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 laneIndex = (index - startIndex) % GetLanes();
             }
             crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize * GetLanes());
-            crossOffset += childCrossSize * laneIndex + GetLaneGutter() * laneIndex;
+            crossOffset += crossSize / GetLanes() * laneIndex;
         } else {
             crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
         }
@@ -885,8 +884,8 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     CHECK_NULL_VOID(itemGroup);
     itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
-    if (jumpIndex_.has_value()) {
-        if (forwardLayout && (scrollAlign_ == ScrollAlign::START ||
+    if (jumpIndex_.has_value() && (!jumpIndexInGroup_.has_value())) {
+        if (forwardLayout&& (scrollAlign_ == ScrollAlign::START ||
             (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::START))) {
             jumpIndexInGroup_ = 0;
         } else if (!forwardLayout && (scrollAlign_ == ScrollAlign::END ||

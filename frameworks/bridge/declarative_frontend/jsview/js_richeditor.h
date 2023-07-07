@@ -74,6 +74,8 @@ public:
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject);
+    ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
+    bool IsDrawable(const JSRef<JSVal>& jsValue);
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);
     void UpdateSpanStyle(const JSCallbackInfo& info);

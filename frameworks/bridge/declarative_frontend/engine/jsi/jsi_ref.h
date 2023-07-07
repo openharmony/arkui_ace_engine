@@ -169,32 +169,32 @@ public:
 
     JsiWeak(const JsiWeak<T>& rhs) : value_(rhs.value_)
     {
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
     }
 
     JsiWeak(JsiWeak<T>&& rhs) : value_(std::move(rhs.value_))
     {
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
         rhs.value_.Reset();
     }
 
     explicit JsiWeak(const JsiRef<T>& rhs) : value_(rhs.Get())
     {
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
     }
 
     JsiWeak<T>& operator=(const JsiWeak<T>& rhs)
     {
         value_.Reset();
         value_ = rhs.value_;
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
         return *this;
     }
 
     JsiWeak<T>& operator=(const JsiRef<T>& rhs)
     {
         value_ = rhs.Get();
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
         return *this;
     }
 
@@ -202,7 +202,7 @@ public:
     {
         value_.Reset();
         value_ = std::move(rhs.value_);
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
 
         rhs.value_.Reset();
         return *this;
@@ -224,6 +224,12 @@ public:
             LOGD("trying to acquire a strong reference to an empty handle!");
         }
         return JsiRef<T>(value_);
+    }
+
+    static void Reset(void *ref)
+    {
+        auto that = reinterpret_cast<JsiWeak<T>*>(ref);
+        that->Reset();
     }
 
 private:

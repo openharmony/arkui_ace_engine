@@ -136,7 +136,7 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
             if (!ctx) {
                 continue;
             }
-            ctx->SuccessCallback(canvasImage);
+            ctx->SuccessCallback(canvasImage->Clone());
         }
     };
     if (sync) {
@@ -276,7 +276,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
     auto [size, frameCount] = skiaImageData->Parse();
-    CHECK_NULL_RETURN(size.IsPositive() && frameCount >= 0, nullptr);
+    CHECK_NULL_RETURN(size.IsPositive(), nullptr);
 
     if (frameCount > 1) {
         return MakeRefPtr<AnimatedImageObject>(src, size, data);

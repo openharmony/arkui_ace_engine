@@ -122,6 +122,16 @@ public:
         return changed;
     }
 
+    bool WidthFixed() const
+    {
+        return width_ && width_->GetDimension().Unit() != DimensionUnit::PERCENT;
+    }
+
+    bool HeightFixed() const
+    {
+        return height_ && height_->GetDimension().Unit() != DimensionUnit::PERCENT;
+    }
+
     std::string ToString() const
     {
         static const int32_t precision = 2;

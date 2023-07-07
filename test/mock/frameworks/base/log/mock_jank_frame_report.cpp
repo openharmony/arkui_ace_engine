@@ -16,7 +16,7 @@
 #include "base/log/jank_frame_report.h"
 
 namespace OHOS::Ace {
-void JankFrameReport::JankFrameRecord(double jank) {}
+void JankFrameReport::JankFrameRecord(int64_t timeStampNanos) {}
 
 void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag) {}
 
@@ -25,4 +25,8 @@ void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag) {}
 void JankFrameReport::StartRecord(const std::string& pageUrl) {}
 
 void JankFrameReport::FlushRecord() {}
+
+void RecordPreviousEnd() {}
+
+void SetRefreshPeriod(int64_t refreshPeriod) {}
 } // namespace OHOS::Ace

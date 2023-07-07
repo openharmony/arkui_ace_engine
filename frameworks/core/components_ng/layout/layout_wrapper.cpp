@@ -22,7 +22,6 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -223,25 +222,39 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
-    constraint.MinusPadding(
-        insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
+    SizeF safeSize { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
+    safeSize.MinusPadding(insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
+    if (safeSize < constraint.maxSize) {
+        constraint.maxSize = safeSize;
+        constraint.parentIdealSize = OptionalSizeF(safeSize);
+        constraint.percentReference = safeSize;
+    }
+    if (safeSize < constraint.minSize) {
+        constraint.minSize = safeSize;
+    }
 }
 
 void LayoutWrapper::OffsetNodeToSafeArea()
 {
     auto&& insets = layoutProperty_->GetSafeAreaInsets();
     CHECK_NULL_VOID_NOLOG(insets);
-    auto offset = geometryNode_->GetParentGlobalOffset() + geometryNode_->GetMarginFrameOffset();
+    auto offset = geometryNode_->GetMarginFrameOffset();
     if (offset.GetX() < insets->left_.end) {
         offset.SetX(insets->left_.end);
     }
     if (offset.GetY() < insets->top_.end) {
         offset.SetY(insets->top_.end);
     }
-    geometryNode_->SetMarginFrameOffset(offset);
-    for (auto&& child : GetAllChildrenWithBuild()) {
-        child->geometryNode_->SetParentGlobalOffset(offset);
+
+    auto right = offset.GetX() + geometryNode_->GetMarginFrameSize().Width();
+    if (insets->right_.IsValid() && right > insets->right_.start) {
+        offset.SetX(insets->right_.start - geometryNode_->GetMarginFrameSize().Width());
     }
+    auto bottom = offset.GetY() + geometryNode_->GetMarginFrameSize().Height();
+    if (insets->bottom_.IsValid() && bottom > insets->bottom_.start) {
+        offset.SetY(insets->bottom_.start - geometryNode_->GetMarginFrameSize().Height());
+    }
+    geometryNode_->SetMarginFrameOffset(offset);
 }
 
 // This will call child and self measure process.
@@ -344,6 +357,7 @@ void LayoutWrapper::Layout()
         CHECK_NULL_VOID(pipeline);
         pipeline->GetSafeAreaManager()->AddWrapper(WeakClaim(this));
     }
+    OffsetNodeToSafeArea();
 
     if (layoutAlgorithm_->SkipLayout()) {
         LOGD(
@@ -374,7 +388,6 @@ void LayoutWrapper::Layout()
         layoutProperty_->UpdateContentConstraint();
     }
     layoutAlgorithm_->Layout(this);
-    OffsetNodeToSafeArea();
     LayoutOverlay();
 
     time = GetSysTimestamp() - time;
@@ -456,8 +469,19 @@ void LayoutWrapper::ExpandSafeAreaInner()
     auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
     CHECK_NULL_VOID_NOLOG(opts->Expansive());
 
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        ExpandIntoKeyboard();
+    }
+
+    if (!(opts->type & SAFE_AREA_TYPE_SYSTEM) && !(opts->type & SAFE_AREA_TYPE_CUTOUT)) {
+        return;
+    }
+    // expand System and Cutout safeArea
     // get frame in global offset
-    auto frame = geometryNode_->GetFrameRect() + geometryNode_->GetParentGlobalOffset();
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
+    auto frame = geometryNode_->GetFrameRect() + parentGlobalOffset;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
@@ -478,22 +502,21 @@ void LayoutWrapper::ExpandSafeAreaInner()
         frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
     }
 
+    // reset if User has fixed size
+    if (layoutProperty_->HasFixedWidth()) {
+        frame.SetWidth(geometryNode_->GetFrameRect().Width());
+    }
+    if (layoutProperty_->HasFixedHeight()) {
+        frame.SetHeight(geometryNode_->GetFrameRect().Height());
+    }
+    if (layoutProperty_->HasAspectRatio()) {
+        frame.SetHeight(frame.Width() / layoutProperty_->GetAspectRatio());
+    }
+
     // restore to local offset
-    frame -= geometryNode_->GetParentGlobalOffset();
-    if (frame != geometryNode_->GetFrameRect()) {
-        auto topLeftExpansion = frame.GetOffset() - geometryNode_->GetFrameOffset();
-        geometryNode_->SetFrameSize(frame.GetSize());
-        geometryNode_->SetFrameOffset(frame.GetOffset());
-
-        for (auto&& child : GetAllChildrenWithBuild()) {
-            auto geo = child->GetGeometryNode();
-            geo->SetParentGlobalOffset(geo->GetParentGlobalOffset() + topLeftExpansion);
-        }
-    }
-
-    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
-        ExpandIntoKeyboard();
-    }
+    frame -= parentGlobalOffset;
+    geometryNode_->SetFrameOffset(frame.GetOffset());
+    geometryNode_->SetFrameSize(frame.GetSize());
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()
@@ -502,11 +525,6 @@ void LayoutWrapper::ExpandIntoKeyboard()
     CHECK_NULL_VOID(pipeline);
     geometryNode_->SetFrameOffset(
         geometryNode_->GetFrameOffset() - OffsetF(0, pipeline->GetSafeAreaManager()->GetKeyboardOffset()));
-    for (auto&& child : GetAllChildrenWithBuild()) {
-        auto geo = child->GetGeometryNode();
-        geo->SetParentGlobalOffset(
-            geo->GetParentGlobalOffset() - OffsetF(0, pipeline->GetSafeAreaManager()->GetKeyboardOffset()));
-    }
 }
 
 bool LayoutWrapper::SkipMeasureContent() const

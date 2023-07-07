@@ -1381,23 +1381,23 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
     if (s2.find('-') != std::string::npos) {
         height = JSRef<JSVal>::Make(ToJSValue("100%"));
     }
-    if (ParseJsDimension(x, xDimen, DimensionUnit::VP)) {
+    if (ParseJsDimensionNG(x, xDimen, DimensionUnit::VP)) {
         auto offset = result.GetOffset();
         offset.SetX(xDimen);
         result.SetOffset(offset);
     }
-    if (ParseJsDimension(y, yDimen, DimensionUnit::VP)) {
+    if (ParseJsDimensionNG(y, yDimen, DimensionUnit::VP)) {
         auto offset = result.GetOffset();
         offset.SetY(yDimen);
         result.SetOffset(offset);
     }
-    if (ParseJsDimension(width, widthDimen, DimensionUnit::VP)) {
+    if (ParseJsDimensionNG(width, widthDimen, DimensionUnit::VP)) {
         if (widthDimen.Unit() == DimensionUnit::PERCENT && widthDimen.Value() < 0) {
             return true;
         }
         result.SetWidth(widthDimen);
     }
-    if (ParseJsDimension(height, heightDimen, DimensionUnit::VP)) {
+    if (ParseJsDimensionNG(height, heightDimen, DimensionUnit::VP)) {
         if (heightDimen.Unit() == DimensionUnit::PERCENT && heightDimen.Value() < 0) {
             return true;
         }

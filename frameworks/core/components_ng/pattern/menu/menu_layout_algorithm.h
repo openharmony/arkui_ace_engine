@@ -45,6 +45,7 @@ protected:
     float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);
 
     RefPtr<MenuPaintProperty> GetPaintProperty(const LayoutWrapper* layoutWrapper);
+    OffsetF GetMenuWrapperOffset(const LayoutWrapper* layoutWrapper);
 
     OffsetF position_;
     OffsetF positionOffset_;
@@ -80,7 +81,7 @@ private:
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
 
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
-    void InitTargetSizeAndPosition(bool isContextMenu);
+    void InitTargetSizeAndPosition(bool isContextMenu, const LayoutWrapper* layoutWrapper);
     OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow = false);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);

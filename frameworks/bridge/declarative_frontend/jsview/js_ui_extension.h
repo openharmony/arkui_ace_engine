@@ -24,6 +24,7 @@ class JSUIExtension : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void OnReceive(const JSCallbackInfo& info);
     static void OnRelease(const JSCallbackInfo& info);
     static void OnResult(const JSCallbackInfo& info);
 };
