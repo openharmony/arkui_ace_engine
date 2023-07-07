@@ -641,7 +641,12 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
     // set min width
-    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    float minWidth = 0.0f;
+    if (menuPattern->GetInnerMenuCount() > 0) {
+        minWidth = static_cast<float>(columnInfo->GetWidth());
+    } else {
+        minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    }
     if (minWidth > constraint.maxSize.Width()) {
         minWidth = constraint.maxSize.Width();
     }
