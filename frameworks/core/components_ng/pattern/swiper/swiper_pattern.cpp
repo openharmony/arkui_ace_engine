@@ -519,6 +519,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     endMainPos_ = swiperLayoutAlgorithm->GetEndPosition();
     startIndex_ = swiperLayoutAlgorithm->GetStartIndex();
     endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
+    autoPlayCurrentIndex_ = swiperLayoutAlgorithm->GetAutoPlayCurrentIndex();
     oldIndex_ = currentIndex_;
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
@@ -2168,7 +2169,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             if (!swiper->IsLoop() && (swiper->itemPosition_.begin()->first + 1) > (childrenSize - displayCount)) {
                 return;
             }
-            swiper->targetIndex_ = swiper->itemPosition_.begin()->first + 1;
+            swiper->targetIndex_ = swiper->autoPlayCurrentIndex_ + 1;
             auto host = swiper->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

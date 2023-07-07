@@ -462,6 +462,12 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         }
     }
 
+    for (auto pos = itemPosition_.begin(); pos != itemPosition_.end(); pos++) {
+        if (GreatNotEqual(pos->second.endPos, startMainPos_)) {
+            autoPlayCurrentIndex_ = pos->first;
+            break;
+        }
+    }
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         if (GreatNotEqual(
