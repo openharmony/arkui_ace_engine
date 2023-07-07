@@ -1756,3 +1756,9 @@ var CalendarAlign;
   CalendarAlign[CalendarAlign["CENTER"] = 1] = "CENTER";
   CalendarAlign[CalendarAlign["END"] = 2] = "END";
 })(CalendarAlign || (CalendarAlign = {}));
+
+var DragBehavior;
+(function (DragBehavior) {
+  DragBehavior[DragBehavior["COPY"] = 0] = "COPY";
+  DragBehavior[DragBehavior["MOVE"] = 1] = "MOVE";
+})(DragBehavior || (DragBehavior = {}));

@@ -246,6 +246,10 @@ enum class DragRet {
     ENABLE_DROP,
     DISABLE_DROP,
 };
+enum class DragBehavior {
+    COPY = 0,
+    MOVE = 1,
+};
 #endif
 
 class DragEvent : public AceType {
