@@ -27,8 +27,8 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -301,8 +301,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg008, TestSize.Level1)
      * @tc.expected: SideBarContainerType == EMBED
      */
     float parentWidth = PARENT_WIDTH;
-    layoutAlgorithm->AutoMode(
-        AccessibilityManager::RawPtr(layoutWrapper), parentWidth, layoutAlgorithm->minContentWidth_, 0.0);
+    layoutAlgorithm->AutoMode(layoutProperty, parentWidth);
     EXPECT_EQ(layoutAlgorithm->type_, SideBarContainerType::EMBED);
 
     /**
@@ -311,8 +310,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg008, TestSize.Level1)
      */
     parentWidth = MIN_PARENT_WIDTH;
     layoutAlgorithm->minContentWidth_ = 1.0f;
-    layoutAlgorithm->AutoMode(
-        AccessibilityManager::RawPtr(layoutWrapper), parentWidth, layoutAlgorithm->minContentWidth_, 0.0);
+    layoutAlgorithm->AutoMode(layoutProperty, parentWidth);
     EXPECT_EQ(layoutAlgorithm->type_, SideBarContainerType::OVERLAY);
 }
 
@@ -336,6 +334,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg009, TestSize.Level1)
     EXPECT_FALSE(layoutWrapper == nullptr);
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. set parentWidth < (realSidebarWidth + minContentWidth)
@@ -344,7 +344,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg009, TestSize.Level1)
     auto parentWidth = MIN_PARENT_WIDTH;
     layoutAlgorithm->minContentWidth_ = 2.0f;
     layoutAlgorithm->realSideBarWidth_ = 2.0f;
-    layoutAlgorithm->AutoChangeSideBarWidth(AccessibilityManager::RawPtr(layoutWrapper), parentWidth, 1.0, 1.0);
+    layoutAlgorithm->minSideBarWidth_ = 1.0f;
+    layoutAlgorithm->AutoChangeSideBarWidth(layoutProperty, parentWidth);
     EXPECT_NE(layoutAlgorithm->realSideBarWidth_, 2.0f);
 }
 } // namespace OHOS::Ace::NG
