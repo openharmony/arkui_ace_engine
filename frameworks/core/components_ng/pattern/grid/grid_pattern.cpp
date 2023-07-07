@@ -62,10 +62,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
     auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
 
-    auto effect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    bool canOverScroll = (effect == EdgeEffect::SPRING) && scrollState_ != SCROLL_FROM_AXIS &&
-                         scrollState_ != SCROLL_FROM_BAR && scrollable_ && !ScrollableIdle();
-    result->SetCanOverScroll(canOverScroll);
+    result->SetCanOverScroll(CanOverScroll(scrollState_));
 
     return result;
 }

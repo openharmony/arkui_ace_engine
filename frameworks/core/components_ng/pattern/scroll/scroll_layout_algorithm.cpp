@@ -101,8 +101,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
     scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);
-    auto scrollEffect = layoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
-    if (scrollEffect != EdgeEffect::SPRING || scrollPattern->GetScrollState() == SCROLL_FROM_JUMP) {
+    if (!scrollPattern->CanOverScroll(scrollPattern->GetScrollState())) {
         if (scrollableDistance_ > 0.0f) {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         } else {

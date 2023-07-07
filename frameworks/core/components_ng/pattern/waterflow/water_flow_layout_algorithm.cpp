@@ -279,7 +279,7 @@ FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
 
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (layoutInfo_.currentOffset_ > 0) {
+    if (layoutInfo_.currentOffset_ >= 0) {
         layoutInfo_.currentOffset_ = 0;
         layoutInfo_.itemStart_ = true;
     } else {

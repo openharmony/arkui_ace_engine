@@ -235,6 +235,11 @@ public:
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
     virtual void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth);
+    bool CanOverScroll(int32_t source)
+    {
+        return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
+            IsScrollable() && (!ScrollableIdle() || AnimateRunning()));
+    }
 
 protected:
     RefPtr<ScrollBar> GetScrollBar() const

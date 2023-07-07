@@ -412,10 +412,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (IsOutOfBoundary(false) && scrollState_ != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
-    auto effect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() &&
-        scrollState_ != SCROLL_FROM_BAR && scrollState_ != SCROLL_FROM_AXIS;
-    listLayoutAlgorithm->SetCanOverScroll(canOverScroll);
+    listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(scrollState_));
     if (chainAnimation_) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
     }
@@ -560,6 +557,9 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect
     if (!jumpIndex_.has_value() && !targetIndex_.has_value() && !HandleEdgeEffect(offset, source, GetContentSize())) {
+        if (IsOutOfBoundary(false)) {
+            MarkDirtyNodeSelf();
+        }
         return false;
     }
     SetScrollState(source);
