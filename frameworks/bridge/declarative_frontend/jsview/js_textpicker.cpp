@@ -1087,6 +1087,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
 
     auto pickerText = TextPickerDialogModel::GetInstance()->CreateObject();
     if (pickerText == nullptr) {
+        // parse Multi column text
         if (!ParseShowData(paramObject, settingData)) {
             return;
         }

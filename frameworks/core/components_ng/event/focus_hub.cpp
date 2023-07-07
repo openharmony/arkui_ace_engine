@@ -474,16 +474,6 @@ bool FocusHub::OnKeyEvent(const KeyEvent& keyEvent)
 bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 {
     ACE_DCHECK(IsCurrentFocus());
-    if (keyEvent.action == KeyAction::DOWN) {
-        switch (keyEvent.code) {
-            case KeyCode::KEY_SPACE:
-            case KeyCode::KEY_ENTER:
-            case KeyCode::KEY_NUMPAD_ENTER:
-                OnClick(keyEvent);
-                break;
-            default:;
-        }
-    }
 
     auto retInternal = false;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -505,6 +495,16 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     LOGD("OnKeyEvent: Node %{public}s/%{public}d consume KeyEvent(code:%{public}d, action:%{public}d) return: "
          "%{public}d",
         GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
+    if (!retInternal && !retCallback && keyEvent.action == KeyAction::DOWN) {
+        switch (keyEvent.code) {
+            case KeyCode::KEY_SPACE:
+            case KeyCode::KEY_ENTER:
+            case KeyCode::KEY_NUMPAD_ENTER:
+                OnClick(keyEvent);
+                break;
+            default:;
+        }
+    }
     return retInternal || retCallback;
 }
 
