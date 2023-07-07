@@ -1115,6 +1115,7 @@ void TextFieldPattern::HandleFocusEvent()
             layoutProperty->ResetMaxLines();
         }
         inlineSelectAllFlag_ = true;
+        inlineFocusState_ = true;
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         StartTwinkling();
@@ -1300,6 +1301,7 @@ void TextFieldPattern::HandleBlurEvent()
             layoutProperty->UpdateMaxLines(1);
         }
         inlineSelectAllFlag_ = false;
+        inlineFocusState_ = false;
         RestorePreInlineStates();
     }
     needToRequestKeyboardInner_ = false;
@@ -2189,7 +2191,7 @@ void TextFieldPattern::OnModifyDone()
         }
         HandleCounterBorder();
     }
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !inlineFocusState_) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
     }
@@ -3657,8 +3659,10 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
 
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
         HandleBlurEvent();
+        eventHub->FireOnSubmit(static_cast<int32_t>(action));
         return;
     }
 
@@ -3668,7 +3672,6 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         }
         return;
     }
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnSubmit(static_cast<int32_t>(action));
     CloseKeyboard(forceCloseKeyboard);
 }
