@@ -260,15 +260,38 @@ void ListPattern::ProcessEvent(
 
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
-
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto onScroll = listEventHub->GetOnScroll();
-    if (onScroll && !NearZero(finalOffset)) {
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && scrollStop_ && !GetScrollAbort()) {
         auto source = GetScrollState();
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (source == SCROLL_FROM_UPDATE) {
+        if (onScroll) {
+            if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
+                onScroll(offsetVP, ScrollState::SCROLL);
+                onScroll(0.0_vp, ScrollState::IDLE);
+            } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
+                source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                onScroll(offsetVP, ScrollState::FLING);
+                onScroll(0.0_vp, ScrollState::IDLE);
+            } else {
+                onScroll(offsetVP, ScrollState::IDLE);
+            }
+        }
+    } else if (onScroll && !NearZero(finalOffset)) {
+        auto source = GetScrollState();
+        auto offsetPX = Dimension(finalOffset);
+        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+        if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN &&
+            (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR || source == SCROLL_FROM_ANIMATION_CONTROLLER)) {
+            source = SCROLL_FROM_NONE;
+        }
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
             onScroll(offsetVP, ScrollState::SCROLL);
-        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
+        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
+            source == SCROLL_FROM_ANIMATION_CONTROLLER) {
             onScroll(offsetVP, ScrollState::FLING);
         } else {
             onScroll(offsetVP, ScrollState::IDLE);
@@ -673,7 +696,9 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     auto scrollBar = GetScrollBar();
     if (scrollBar && scrollBar->IsDriving()) {
         offset = scrollBar->CalcPatternOffset(offset);
-        source = SCROLL_FROM_BAR;
+        if (source == SCROLL_FROM_UPDATE) {
+            source = SCROLL_FROM_BAR;
+        }
     } else {
         ProcessDragUpdate(offset, source);
     }
