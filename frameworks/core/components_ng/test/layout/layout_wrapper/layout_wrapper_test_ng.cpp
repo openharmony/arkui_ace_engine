@@ -1594,7 +1594,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest041, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest042, TestSize.Level1)
 {
     auto layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, NODE_ID_0);
-    layoutWrapper->layoutProperty_->UpdateSafeAreaInsets(SafeAreaInsets({}, { 0, 1 }, {}, {RK356_HEIGHT - 1, RK356_HEIGHT}));
+    layoutWrapper->layoutProperty_->UpdateSafeAreaInsets(
+        SafeAreaInsets({}, { 0, 1 }, {}, { RK356_HEIGHT - 1, RK356_HEIGHT }));
     layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT - 2 });
 
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
@@ -1605,7 +1606,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest042, TestSize.Level1)
     layoutWrapper->OffsetNodeToSafeArea();
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
 
-    layoutWrapper->geometryNode_->SetFrameOffset({0, 0});
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
     layoutWrapper->OffsetNodeToSafeArea();
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
 }

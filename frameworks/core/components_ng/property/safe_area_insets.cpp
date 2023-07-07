@@ -44,6 +44,11 @@ Inset SafeAreaInsets::Inset::Combine(const Inset& other) const
     return res;
 }
 
+bool SafeAreaInsets::IsValid() const
+{
+    return top_.IsValid() || left_.IsValid() || right_.IsValid() || bottom_.IsValid();
+}
+
 std::string Inset::ToString() const
 {
     using std::to_string;
