@@ -528,10 +528,44 @@ bool ListPattern::OutBoundaryCallback()
     return outBoundary;
 }
 
+void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+    bool firstIsGroup = startIndex_ == 0 && itemPosition_.begin()->second.isGroup;
+    bool lastIsGroup = endIndex_ == maxListItemIndex_ && itemPosition_.rbegin()->second.isGroup;
+    if (!firstIsGroup && !lastIsGroup) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> childrens;
+    host->GenerateOneDepthVisibleFrame(childrens);
+    if (childrens.empty()) {
+        return;
+    }
+    if (firstIsGroup) {
+        auto itemGroup = (*childrens.begin())->GetPattern<ListItemGroupPattern>();
+        if (itemGroup) {
+            groupAtStart = itemGroup->GetDiasplayStartIndexInGroup() == 0;
+        }
+    }
+    if (lastIsGroup) {
+        auto itemGroup = (*childrens.rbegin())->GetPattern<ListItemGroupPattern>();
+        if (itemGroup) {
+            groupAtEnd = itemGroup->GetDisplayEndIndexInGroup() == itemGroup->GetEndIndexInGroup();
+        }
+    }
+}
+
 OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
-    if (startIndex_ == 0) {
+    bool groupAtStart = true;
+    bool groupAtEnd = true;
+    GetListItemGroupEdge(groupAtStart, groupAtEnd);
+    if (startIndex_ == 0 && groupAtStart) {
         auto startPos = startMainPos_ + GetChainDelta(0);
         auto newStartPos = startPos + delta;
         if (startPos > 0 && newStartPos > 0) {
@@ -552,7 +586,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
             }
         }
     }
-    if (endIndex_ == maxListItemIndex_) {
+    if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
         auto endPos = endMainPos_ + GetChainDelta(endIndex_);
         auto newEndPos = endPos + delta;
         if (endPos < contentMainSize_ && newEndPos < contentMainSize_) {
@@ -1423,16 +1457,13 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
         if (item->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             auto itemGroupPattern = item->GetPattern<ListItemGroupPattern>();
             CHECK_NULL_VOID(itemGroupPattern);
-            auto itemGroupStyle = itemGroupPattern->GetListItemGroupStyle();
-            if (itemGroupStyle == V2::ListItemGroupStyle::CARD) {
-                auto itemGroupGeometry = item->GetGeometryNode();
-                CHECK_NULL_VOID(itemGroupGeometry);
-                auto itemGroupRect = itemGroupGeometry->GetFrameRect();
-                if (!selectedZone.IsIntersectWith(itemGroupRect)) {
-                    continue;
-                }
-                HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.Top());
+            auto itemGroupGeometry = item->GetGeometryNode();
+            CHECK_NULL_VOID(itemGroupGeometry);
+            auto itemGroupRect = itemGroupGeometry->GetFrameRect();
+            if (!selectedZone.IsIntersectWith(itemGroupRect)) {
+                continue;
             }
+            HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.Top());
             continue;
         }
         auto itemPattern = item->GetPattern<ListItemPattern>();

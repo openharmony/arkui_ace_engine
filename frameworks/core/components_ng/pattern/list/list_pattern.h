@@ -258,6 +258,7 @@ private:
     void SetAccessibilityAction();
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
+    void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
 
     RefPtr<ListContentModifier> listContentModifier_;
 
