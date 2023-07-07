@@ -3680,6 +3680,7 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
 {
     textEditingValue_.text = value->text;
     textEditingValue_.caretPosition = value->selection.baseOffset;
+    ContainerScope scope(GetInstanceId());
     SetEditingValueToProperty(textEditingValue_.text);
     UpdateEditingValueToRecord();
     caretUpdateType_ = CaretUpdateType::INPUT;
