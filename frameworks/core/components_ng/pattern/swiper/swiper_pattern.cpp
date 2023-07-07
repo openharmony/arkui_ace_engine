@@ -648,6 +648,7 @@ void SwiperPattern::ShowNext()
     if (usePropertyAnimation_) {
         StopPropertyTranslateAnimation();
     }
+    moveDirection_ = true;
 
     if (isVisible_) {
         targetIndex_ = newTargetIndex;
@@ -708,6 +709,7 @@ void SwiperPattern::ShowPrevious()
     if (usePropertyAnimation_) {
         StopPropertyTranslateAnimation();
     }
+    moveDirection_ = false;
 
     if (isVisible_) {
         targetIndex_ = newTargetIndex;
