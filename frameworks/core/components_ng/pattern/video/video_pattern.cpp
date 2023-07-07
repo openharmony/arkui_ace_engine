@@ -177,22 +177,14 @@ void VideoPattern::ResetStatus()
 
 void VideoPattern::UpdateMediaPlayer()
 {
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        mediaPlayer_->CreateMediaPlayer();
-        if (!mediaPlayer_->IsMediaPlayerValid()) {
-            LOGE("Video create media player failed");
-            return;
-        }
-    }
-    PrepareMediaPlayer();
-    UpdateSpeed();
-    UpdateLooping();
-    UpdateMuted();
-    if (isInitialState_ && autoPlay_) {
-        // When video is autoPlay, start playing the video when it is initial state.
-        LOGI("Video set autoPlay, begin start.");
-        Start();
-    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    platformTask.PostTask([weak = WeakClaim(this)] {
+        auto video = weak.Upgrade();
+        CHECK_NULL_VOID(video);
+        video->UpdateMediaPlayerOnBg();
+    });
 }
 
 void VideoPattern::ResetMediaPlayer()
@@ -210,6 +202,26 @@ void VideoPattern::ResetMediaPlayer()
     PrepareSurface();
     if (mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player prepare failed");
+    }
+}
+
+void VideoPattern::UpdateMediaPlayerOnBg()
+{
+    if (!mediaPlayer_->IsMediaPlayerValid()) {
+        mediaPlayer_->CreateMediaPlayer();
+        if (!mediaPlayer_->IsMediaPlayerValid()) {
+            LOGE("Video create media player failed");
+            return;
+        }
+    }
+    PrepareMediaPlayer();
+    UpdateSpeed();
+    UpdateLooping();
+    UpdateMuted();
+    if (isInitialState_ && autoPlay_) {
+        // When video is autoPlay, start playing the video when it is initial state.
+        LOGI("Video set autoPlay, begin start.");
+        Start();
     }
 }
 
