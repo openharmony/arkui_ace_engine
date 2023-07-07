@@ -30,7 +30,7 @@ class ACE_EXPORT LinearSplitLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(LinearSplitLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    explicit LinearSplitLayoutAlgorithm(SplitType splitType, std::vector<float> childrenDragPos, bool isOverParent)
+    LinearSplitLayoutAlgorithm(SplitType splitType, std::vector<float> childrenDragPos, bool isOverParent)
         : splitType_(splitType), childrenDragPos_(std::move(childrenDragPos)), isOverParent_(isOverParent) {};
     ~LinearSplitLayoutAlgorithm() override = default;
 
@@ -58,12 +58,12 @@ public:
         return isOverParent_;
     }
 
-    [[nodiscard]] std::vector<float> GetChildrenDragPos() const
+    const std::vector<float>& GetChildrenDragPos() const
     {
         return childrenDragPos_;
     }
 
-    [[nodiscard]] std::vector<float> GetChildrenConstrains() const
+    const std::vector<float>& GetChildrenConstrains() const
     {
         return childrenConstrains_;
     }
@@ -71,11 +71,11 @@ public:
 private:
     std::pair<SizeF, SizeF> MeasureChildren(LayoutWrapper* layoutWrapper);
     LayoutConstraintF GetChildConstrain(LayoutWrapper* layoutWrapper, LayoutConstraintF childConstrain,
-        const int32_t index);
+        int32_t index);
     void LayoutRowSplit(LayoutWrapper* layoutWrapper, float childOffsetMain, float childOffsetCross);
     void LayoutColumnSplit(LayoutWrapper* layoutWrapper, float childOffsetMain, float childOffsetCross);
     void ColumnSplitChildConstrain(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& item,
-        const int32_t index);
+        int32_t index);
     static std::pair<float, float> GetDividerMargin(LayoutWrapper* layoutWrapper);
     static float GetLinearSplitChildMinSize(LayoutWrapper* layoutWrapper);
 

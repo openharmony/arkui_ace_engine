@@ -134,7 +134,7 @@ std::pair<SizeF, SizeF> LinearSplitLayoutAlgorithm::MeasureChildren(LayoutWrappe
 }
 
 LayoutConstraintF LinearSplitLayoutAlgorithm::GetChildConstrain(LayoutWrapper* layoutWrapper,
-    LayoutConstraintF childConstrain, const int32_t index)
+    LayoutConstraintF childConstrain, int32_t index)
 {
     const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
     int32_t childCount = layoutWrapper->GetTotalChildCount();
@@ -216,7 +216,8 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(LayoutWrapper* layoutWrapper, fl
         } else {
             childOffsetMain = childrenDragPos_[index];
         }
-        if (item->GetLayoutProperty()->GetCalcLayoutConstraint()->minSize.has_value()) {
+        auto& constraint = item->GetLayoutProperty()->GetCalcLayoutConstraint();
+        if (constraint && constraint->minSize.has_value()) {
             childrenConstrains_[index] = item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Width();
         } else {
             childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper);
@@ -246,13 +247,16 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
     const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
-    int32_t index = 0;
     bool isFirstSetPos = false;
+    if (!childrenDragPos_.empty() && childrenDragPos_.size() != layoutWrapper->GetTotalChildCount() + 1) {
+        childrenDragPos_.clear();
+    }
     if (childrenDragPos_.empty()) {
         childrenDragPos_ = std::vector<float>(layoutWrapper->GetTotalChildCount() + 1, 0.0f);
         isFirstSetPos = true;
     }
     splitLength_ = parentWidth;
+    int32_t index = 0;
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
         if (padding.left.has_value()) {
             childOffsetMain = padding.left.value();
@@ -292,10 +296,14 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
 }
 
 void LinearSplitLayoutAlgorithm::ColumnSplitChildConstrain(LayoutWrapper* layoutWrapper,
-    const RefPtr<LayoutWrapper>& item, const int32_t index)
+    const RefPtr<LayoutWrapper>& item, int32_t index)
 {
+    if (index >= childrenConstrains_.size()) {
+        return;
+    }
     const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
-    if (item->GetLayoutProperty()->GetCalcLayoutConstraint()->minSize.has_value()) {
+    auto& constraint = item->GetLayoutProperty()->GetCalcLayoutConstraint();
+    if (constraint && constraint->minSize.has_value()) {
         childrenConstrains_[index] = item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Height();
     } else {
         childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper);

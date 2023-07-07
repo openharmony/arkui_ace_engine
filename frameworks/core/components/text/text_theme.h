@@ -100,7 +100,7 @@ private:
     TextStyle textStyle_;
     Color selectedColor_;
     bool draggable = false;
-    double linearSplitChildMinSize_;
+    double linearSplitChildMinSize_ = 20.0;
 };
 
 } // namespace OHOS::Ace
