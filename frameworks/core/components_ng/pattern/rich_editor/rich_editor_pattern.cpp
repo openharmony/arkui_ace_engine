@@ -653,10 +653,11 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     auto contentRect = GetTextRect();
     contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
     contentRect.SetHeight(contentRect.Height() - std::max(baselineOffset_, 0.0f));
-    if (!contentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()))) {
+    if (!spanItemChildren_.empty() &&
+        !contentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()))) {
+        LOGI("the click position is not in content rect region");
         return;
     }
-    CHECK_NULL_VOID_NOLOG(!spanItemChildren_.empty());
     Offset textOffset = { info.GetLocalLocation().GetX() - contentRect.GetX(),
         info.GetLocalLocation().GetY() - contentRect.GetY() };
     CHECK_NULL_VOID(paragraph_);
