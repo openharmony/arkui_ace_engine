@@ -88,12 +88,12 @@ private:
     double focusedAreaRadius_ = 0.0;
     double topPadding_ = 0.0;
     double weekAndDayRowSpace_ = 0.0;
-    
+
     double workStateWidth_ = 0.0;
     double workStateHorizontalMovingDistance_ = 0.0;
     double workStateVerticalMovingDistance_ = 0.0;
     double touchCircleStrokeWidth_ = 0.0;
-    
+
     // GregorianDay YAxis Offset and Height.
     double gregorianDayYAxisOffset_ = 0.0;
     double gregorianDayHeight_ = 0.0;
