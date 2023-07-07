@@ -41,6 +41,12 @@ var TextInputStyle;
   TextInputStyle["Inline"] = "Inline";
 })(TextInputStyle || (TextInputStyle = {}));
 
+var TextContentStyle;
+(function (TextContentStyle) {
+  TextContentStyle["DEFAULT"] = "Default";
+  TextContentStyle["INLINE"] = "Inline";
+})(TextContentStyle || (TextContentStyle = {}));
+
 var TextAlign;
 (function (TextAlign) {
   TextAlign[TextAlign["Start"] = 0] = "Start";
