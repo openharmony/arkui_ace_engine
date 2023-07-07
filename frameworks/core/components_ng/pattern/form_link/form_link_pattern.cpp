@@ -13,21 +13,29 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/form_link/form_link_model_ng.h"
-
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form_link/form_link_pattern.h"
 
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
-void FormLinkModelNG::Create(const std::string& action)
+
+void FormLinkPattern::OnAttachToFrameNode()
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::FORM_LINK_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<FormLinkPattern>(); });
-    auto pattern = frameNode->GetPattern<FormLinkPattern>();
-    pattern->SetAction(action);
-    stack->Push(frameNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
 }
+
+bool FormLinkPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    CHECK_NULL_RETURN(dirty, false);
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    formLinkInfo_.SetFomLinkRect(geometryNode->GetFrameRect());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->AddFormLinkInfo(formLinkInfo_.ToString());
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

@@ -61,8 +61,7 @@ public:
 
     const RefPtr<SubContainer>& GetSubContainer() const;
 
-    void DispatchPointerEvent(
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
 
     void OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
 
@@ -79,6 +78,11 @@ public:
     void SetIsUnTrust(bool isUnTrust)
     {
         isUnTrust_ = isUnTrust;
+    }
+
+    void SetFormLinkInfos(const std::vector<std::string>& infos)
+    {
+        formLinkInfos_ = infos;
     }
 
 private:
@@ -110,6 +114,7 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void HideImageNode();
+    void HandleStaticFormEvent(const PointF& touchPoint);
 
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
@@ -125,6 +130,7 @@ private:
     RefPtr<PixelMap> pixelMap_ = nullptr;
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
+    std::vector<std::string> formLinkInfos_;
 };
 
 } // namespace NG

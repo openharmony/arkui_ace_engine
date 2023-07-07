@@ -102,6 +102,7 @@ build_component_ng("pattern_ng") {
     "flex/flex_model_ng.cpp",
     "flex/wrap_layout_algorithm.cpp",
     "form_link/form_link_model_ng.cpp",
+    "form_link/form_link_pattern.cpp",
     "gauge/gauge_accessibility_property.cpp",
     "gauge/gauge_layout_algorithm.cpp",
     "gauge/gauge_model_ng.cpp",

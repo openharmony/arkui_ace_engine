@@ -51,7 +51,7 @@ public:
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void SetColorMode(ColorMode colorMode) override;
 
-    void SetLoadCardCallBack(WeakPtr<PipelineBase> outSidePipelineContext)
+    void SetLoadCardCallBack(const WeakPtr<PipelineBase>& outSidePipelineContext)
     {
         const auto& loadCallback = [outSidePipelineContext](const std::string& url, int64_t cardId) -> bool {
             auto context = outSidePipelineContext.Upgrade();

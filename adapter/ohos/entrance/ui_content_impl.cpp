@@ -1662,6 +1662,16 @@ void UIContentImpl::SetActionEventHandler(std::function<void(const std::string& 
     pipelineContext->SetActionEventHandler(std::move(actionCallback));
 }
 
+void UIContentImpl::SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFormLinkInfoUpdateHandler(std::move(callback));
+}
+
 void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback)
 {
     CHECK_NULL_VOID(errorCallback);
