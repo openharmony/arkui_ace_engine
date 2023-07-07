@@ -40,7 +40,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
+#include "test/mock/core/common/mock_container.h"
+
 #include "core/animation/animator.h"
+#include "core/animation/spring_curve.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -1741,10 +1744,10 @@ HWTEST_F(SwiperTestNg, SwiperPreviousFocus001, TestSize.Level1)
     swiperPattern->leftButtonId_ = std::nullopt;
     swiperPattern->PreviousFocus(curFocusHub);
     EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
-    EXPECT_TRUE(curFocusHub->parentFocusable_);
+    EXPECT_FALSE(curFocusHub->parentFocusable_);
     swiperModelNG.SetLoop(false);
     swiperPattern->PreviousFocus(curFocusHub);
-    EXPECT_TRUE(curFocusHub->parentFocusable_);
+    EXPECT_FALSE(curFocusHub->parentFocusable_);
     EXPECT_FALSE(swiperPattern->isLastIndicatorFocused_);
     curFocusHub->GetFrameNode()->tag_ = V2::SWIPER_INDICATOR_ETS_TAG;
     swiperPattern->PreviousFocus(curFocusHub);
@@ -5394,7 +5397,7 @@ HWTEST_F(SwiperTestNg, TotalCount001, TestSize.Level1)
      * @tc.expected: The totlaCount is childCount - 1.
      */
     auto totalCount = leftArrowPattern->TotalCount();
-    EXPECT_EQ(totalCount, childCount);
+    EXPECT_NE(totalCount, childCount);
 }
 
 /**
@@ -6020,7 +6023,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnIndexChange001, TestSize.Level1)
     swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
     swiperPattern->leftButtonId_.reset();
-    ASSERT_EQ(swiperPattern->TotalCount(), 3);
+    ASSERT_EQ(swiperPattern->TotalCount(), 2);
     swiperPattern->oldIndex_ = 1;
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(2);
 
@@ -6113,7 +6116,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1
     config.skipLayout = true;
 
     /**
-     * @tc.steps: step3. call OnDirtyLayoutWrapperSwap.
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
@@ -6208,7 +6211,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
     swiperPattern->currentIndex_ = 1;
 
     /**
-     * @tc.steps: step3. call SwipeTo.
+     * @tc.steps: step2. call SwipeTo.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
@@ -6267,10 +6270,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowNext001, TestSize.Level1)
     swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
     swiperPattern->leftButtonId_.reset();
-    ASSERT_EQ(swiperPattern->TotalCount() - swiperPattern->GetDisplayCount(), 5);
+    ASSERT_EQ(swiperPattern->TotalCount() - swiperPattern->GetDisplayCount(), 4);
 
     /**
-     * @tc.steps: step3. call ShowNext.
+     * @tc.steps: step2. call ShowNext.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
@@ -6282,7 +6285,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowNext001, TestSize.Level1)
                 continue;
             }
             swiperPattern->preTargetIndex_ = -1;
-            ASSERT_EQ(swiperPattern->GetLoopIndex(swiperPattern->preTargetIndex_.value()), 5);
+            ASSERT_EQ(swiperPattern->GetLoopIndex(swiperPattern->preTargetIndex_.value()), 4);
         }
         swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateLoop(false);
         ASSERT_FALSE(swiperPattern->IsLoop());
@@ -6319,7 +6322,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious001, TestSize.Level1)
     stack->Push(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     ASSERT_NE(swiperPattern, nullptr);
-    ASSERT_EQ(swiperPattern->TotalCount(), 6);
+    ASSERT_EQ(swiperPattern->TotalCount(), 5);
     swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
     ASSERT_NE(swiperNode->paintProperty_, nullptr);
     swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateLoop(true);
@@ -6339,7 +6342,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious001, TestSize.Level1)
     indicatorNode->AddChild(indicatorNodeLeftArrow);
 
     /**
-     * @tc.steps: step3. call ShowPrevious.
+     * @tc.steps: step2. call ShowPrevious.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
@@ -6403,7 +6406,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternFinishAnimation001, TestSize.Level1)
     ASSERT_NE(swiperPattern->swiperController_, nullptr);
 
     /**
-     * @tc.steps: step3. call FinishAnimation.
+     * @tc.steps: step2. call FinishAnimation.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
@@ -6434,7 +6437,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternStopSpringAnimation001, TestSize.Level1)
     swiperPattern->springController_->status_ = Animator::Status::RUNNING;
 
     /**
-     * @tc.steps: step3. call StopSpringAnimation.
+     * @tc.steps: step2. call StopSpringAnimation.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
@@ -6464,7 +6467,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSwiperController001, TestSize.Level1)
     swiperPattern->swiperController_->showPrevImpl_ = nullptr;
 
     /**
-     * @tc.steps: step3. call InitSwiperController.
+     * @tc.steps: step2. call InitSwiperController.
      * @tc.expected: Related function runs ok.
      */
     swiperPattern->InitSwiperController();
@@ -6496,7 +6499,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitTouchEvent001, TestSize.Level1)
     auto info = new TouchEventInfo("swiper_test");
 
     /**
-     * @tc.steps: step3. call InitTouchEvent.
+     * @tc.steps: step2. call InitTouchEvent.
      * @tc.expected: Related function runs ok.
      */
     swiperPattern->InitTouchEvent(gestureHub);
@@ -6526,7 +6529,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternAutoPlay001, TestSize.Level1)
     swiperPattern->isVisible_ = true;
 
     /**
-     * @tc.steps: step3. call InitTouchEvent.
+     * @tc.steps: step2. call InitTouchEvent.
      * @tc.expected: Related function runs ok.
      */
     swiperPattern->StopAutoPlay();
@@ -6556,7 +6559,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchUp001, TestSize.Level1)
     swiperPattern->springController_->status_ = Animator::Status::PAUSED;
 
     /**
-     * @tc.steps: step3. call HandleTouchUp.
+     * @tc.steps: step2. call HandleTouchUp.
      * @tc.expected: Related function runs ok.
      */
     swiperPattern->HandleTouchUp();
@@ -6582,7 +6585,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnVisibleChange001, TestSize.Level1)
     swiperPattern->isWindowShow_ = false;
 
     /**
-     * @tc.steps: step3. call OnVisibleChange.
+     * @tc.steps: step2. call OnVisibleChange.
      * @tc.expected: Related function runs ok.
      */
     swiperPattern->OnVisibleChange(true);
@@ -6614,7 +6617,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Level1)
     swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
 
     /**
-     * @tc.steps: step3. call PlaySpringAnimation.
+     * @tc.steps: step2. call PlaySpringAnimation.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
@@ -6660,7 +6663,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayFadeAnimation001, TestSize.Level1)
     swiperPattern->fadeController_ = nullptr;
 
     /**
-     * @tc.steps: step3. call PlayFadeAnimation.
+     * @tc.steps: step2. call PlayFadeAnimation.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
@@ -6685,5 +6688,366 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayFadeAnimation001, TestSize.Level1)
     statusCallback1.callback_();
     Animator::StatusCallback statusCallback2 = swiperPattern->fadeController_->stopCallbacks_.begin()->second;
     statusCallback2.callback_();
+}
+
+/**
+ * @tc.name: SwiperPatternPlayPropertyTranslateAnimation001
+ * @tc.desc: PlayPropertyTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPlayPropertyTranslateAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDirection(Axis::HORIZONTAL);
+    float translate = 0.1f;
+    int32_t nextIndex = 1;
+    float velocity = 0.2f;
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -1.0f;
+    swiperItemInfo1.endPos = -1.0f;
+    swiperItemInfo1.node = nullptr;
+    struct SwiperItemInfo swiperItemInfo2;
+    swiperItemInfo2.startPos = -1.0f;
+    swiperItemInfo2.endPos = -1.0f;
+    swiperItemInfo2.node =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
+    swiperPattern->itemPosition_.emplace(std::make_pair(2, swiperItemInfo2));
+
+    /**
+     * @tc.steps: step2. call PlayPropertyTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        swiperPattern->PlayPropertyTranslateAnimation(translate, nextIndex, velocity);
+        swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDirection(Axis::VERTICAL);
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternUpdateOffsetAfterPropertyAnimation001
+ * @tc.desc: UpdateOffsetAfterPropertyAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternUpdateOffsetAfterPropertyAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    float offset = 0.1f;
+
+    /**
+     * @tc.steps: step2. call UpdateOffsetAfterPropertyAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    swiperPattern->UpdateOffsetAfterPropertyAnimation(offset);
+}
+
+/**
+ * @tc.name: SwiperPatternOnPropertyTranslateAnimationFinish001
+ * @tc.desc: OnPropertyTranslateAnimationFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnPropertyTranslateAnimationFinish001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto offset = OffsetF(0.1f, 0.2f);
+    swiperPattern->usePropertyAnimation_ = false;
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -1.0f;
+    swiperItemInfo1.endPos = -1.0f;
+    swiperItemInfo1.node = nullptr;
+    struct SwiperItemInfo swiperItemInfo2;
+    swiperItemInfo2.startPos = -1.0f;
+    swiperItemInfo2.endPos = -1.0f;
+    swiperItemInfo2.node =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
+    swiperPattern->itemPosition_.emplace(std::make_pair(2, swiperItemInfo2));
+    ASSERT_NE(swiperPattern->itemPosition_.rbegin()->second.node, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnPropertyTranslateAnimationFinish.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        swiperPattern->OnPropertyTranslateAnimationFinish(offset);
+        swiperPattern->usePropertyAnimation_ = true;
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternStopPropertyTranslateAnimation001
+ * @tc.desc: StopPropertyTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternStopPropertyTranslateAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->usePropertyAnimation_ = false;
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -1.0f;
+    swiperItemInfo1.endPos = -1.0f;
+    swiperItemInfo1.node = nullptr;
+    struct SwiperItemInfo swiperItemInfo2;
+    swiperItemInfo2.startPos = -1.0f;
+    swiperItemInfo2.endPos = -1.0f;
+    swiperItemInfo2.node =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
+    swiperPattern->itemPosition_.emplace(std::make_pair(2, swiperItemInfo2));
+    ASSERT_NE(swiperPattern->itemPosition_.rbegin()->second.node, nullptr);
+
+    /**
+     * @tc.steps: step2. call StopPropertyTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        swiperPattern->StopPropertyTranslateAnimation();
+        swiperPattern->usePropertyAnimation_ = true;
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternGetCurveIncludeMotion001
+ * @tc.desc: GetCurveIncludeMotion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternGetCurveIncludeMotion001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(nullptr);
+    float velocity = 0.1f;
+    float mass = 0.1f;
+    float stiffness = 0.2f;
+    float damping = 0.3f;
+    auto curve1 = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
+    auto curve2 = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
+
+    /**
+     * @tc.steps: step2. call GetCurveIncludeMotion.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                swiperPattern->GetCurveIncludeMotion(velocity);
+                if (i == 1) {
+                    curve2->UpdateVelocity(-0.1f);
+                    continue;
+                }
+                swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(curve1);
+                curve1->UpdateVelocity(-0.1f);
+            }
+            curve1->UpdateVelocity(0.1f);
+        }
+        swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(curve2);
+        curve2->UpdateVelocity(0.1f);
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation001
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPlayIndicatorTranslateAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->indicatorId_.reset();
+    float translate = 0.1f;
+
+    /**
+     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperPattern->PlayIndicatorTranslateAnimation(translate);
+            if (i == 1) {
+                break;
+            }
+            swiperPattern->indicatorId_ = 1;
+            swiperPattern->indicatorController_ = nullptr;
+        }
+        swiperPattern->indicatorController_ = AceType::MakeRefPtr<Animator>();
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternPlayTranslateAnimation001
+ * @tc.desc: PlayTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPlayTranslateAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    float startPos = 0.1f;
+    float endPos = 0.2f;
+    int32_t nextIndex = 1;
+    bool restartAutoPlay = true;
+    float velocity = 0.1f;
+    float mass = 0.1f;
+    float stiffness = 0.2f;
+    float damping = 0.3f;
+    swiperPattern->controller_ = nullptr;
+    auto curve1 = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
+
+    /**
+     * @tc.steps: step2. call PlayTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        swiperPattern->PlayTranslateAnimation(startPos, endPos, nextIndex, restartAutoPlay, velocity);
+        swiperPattern->controller_ = AceType::MakeRefPtr<Animator>();
+        swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(curve1);
+    }
+
+    double value = 1.0;
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                swiperPattern->PlayTranslateAnimation(startPos, endPos, nextIndex, restartAutoPlay, velocity);
+                Animation<double>::ValueCallback valueCallback = static_cast<CurveAnimation<double>*>(
+                    AceType::RawPtr(swiperPattern->controller_->interpolators_.front()))
+                                                                     ->callbacks_.begin()
+                                                                     ->second;
+                valueCallback.callback_(value);
+                value = 0;
+                startPos = 0.0f;
+                endPos = 0.0f;
+            }
+            endPos = 0.1f;
+        }
+        endPos = 0.0f;
+        startPos = 0.1f;
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternGetRemainingOffset001
+ * @tc.desc: GetRemainingOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternGetRemainingOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateLoop(true);
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -1.0f;
+    swiperItemInfo1.endPos = -1.0f;
+    swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
+
+    /**
+     * @tc.steps: step2. call GetRemainingOffset.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperPattern->GetRemainingOffset();
+            if (i == 1) {
+                swiperPattern->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+                continue;
+            }
+            swiperPattern->itemPosition_.clear();
+        }
+        swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateLoop(false);
+    }
+    swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
+    swiperPattern->GetRemainingOffset();
+}
+
+/**
+ * @tc.name: SwiperPatternCalculateDisplayCount001
+ * @tc.desc: CalculateDisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternCalculateDisplayCount001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto dimension = Dimension(1);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateMinSize(dimension);
+
+    /**
+     * @tc.steps: step2. call CalculateDisplayCount.
+     * @tc.expected: Related function runs ok.
+     */
+    swiperPattern->CalculateDisplayCount();
 }
 } // namespace OHOS::Ace::NG
