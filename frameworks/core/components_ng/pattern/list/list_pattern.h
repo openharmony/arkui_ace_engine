@@ -294,7 +294,7 @@ private:
     std::list<WeakPtr<FrameNode>> itemGroupList_;
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
-
+    float laneGutter_ = 0.0f;
     // chain animation
     RefPtr<ChainAnimation> chainAnimation_;
     bool dragFromSpring_ = false;

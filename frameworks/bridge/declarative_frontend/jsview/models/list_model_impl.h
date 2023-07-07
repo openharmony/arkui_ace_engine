@@ -41,6 +41,7 @@ public:
     void SetLaneConstrain(const Dimension& laneMinLength, const Dimension& laneMaxLength) override;
     void SetLaneMinLength(const Dimension& laneMinLength) override {}
     void SetLaneMaxLength(const Dimension& laneMaxLength) override {}
+    void SetLaneGutter(const Dimension& laneGutter) override {}
     void SetListItemAlign(V2::ListItemAlign listItemAlign) override;
     void SetCachedCount(int32_t cachedCount) override;
     void SetMultiSelectable(bool selectable) override;

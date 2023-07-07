@@ -28,6 +28,13 @@
 
 namespace OHOS::Ace::NG {
 
+struct ListItemGroupPaintInfo {
+    bool vertical = false;
+    int32_t lanes = 1;
+    float spaceWidth = 0.0f;
+    float laneGutter = 0.0f;
+};
+
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
 
@@ -153,7 +160,7 @@ private:
     float spaceWidth_ = 0.0f;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
-
+    float laneGutter_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };
 } // namespace OHOS::Ace::NG
