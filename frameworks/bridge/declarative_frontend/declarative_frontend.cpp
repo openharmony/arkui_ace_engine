@@ -397,7 +397,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         if (!jsEngine) {
             return;
         }
-        LOGI("DeclarativeFrontend jsEngine layoutInspectorCallback");
         jsEngine->LayoutInspectorCallback(componentId);
     };
 
@@ -407,7 +406,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         if (!jsEngine) {
             return;
         }
-        LOGI("DeclarativeFrontend jsEngine drawInspectorCallback");
         jsEngine->DrawInspectorCallback(componentId);
     };
 
