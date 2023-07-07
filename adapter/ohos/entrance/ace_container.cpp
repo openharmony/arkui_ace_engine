@@ -126,6 +126,15 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     useStageModel_ = true;
 }
 
+AceContainer::~AceContainer()
+{
+    LOG_DESTROY();
+    if (IsFormRender() && taskExecutor_) {
+        taskExecutor_->Destory();
+        taskExecutor_.Reset();
+    }
+}
+
 void AceContainer::InitializeTask()
 {
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();

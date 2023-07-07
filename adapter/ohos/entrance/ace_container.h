@@ -48,7 +48,7 @@ public:
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
-    ~AceContainer() override = default;
+    ~AceContainer() override;
 
     void Initialize() override;
 
