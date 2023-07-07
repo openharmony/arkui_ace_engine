@@ -254,42 +254,40 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
     canvas->restore();
 #else
     RSRoundRect rrect(
-        RSRect(globalX, globalY,
-            NormalizeToPx(MAGNIFIER_WIDTH) + globalX, NormalizeToPx(MAGNIFIER_WIDTH) + globalY),
+        RSRect(globalX, globalY, NormalizeToPx(MAGNIFIER_WIDTH) + globalX, NormalizeToPx(MAGNIFIER_WIDTH) + globalY),
         NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH));
     RSRecordingPath path;
     path.AddRoundRect(rrect);
 
-    RosenDecorationPainter::PaintShadow(
-        path, ShadowConfig::DefaultShadowM, static_cast<RosenRenderContext*>(&context)->GetRSNode());
+    RosenDecorationPainter::PaintShadow(path,
+        ShadowConfig::DefaultShadowM, static_cast<RosenRenderContext*>(&context)->GetRSNode());
 
-    RSRoundRect ScaleRrect(
-        RSRect(globalX * viewScale, globalY * viewScale,
-            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalX * viewScale,
-            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalY * viewScale),
+    RSRoundRect ScaleRrect(RSRect(globalX * viewScale, globalY * viewScale,
+        NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalX * viewScale,
+        NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalY * viewScale),
         NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale);
 
     canvas->Save();
     canvas->Scale(1.0 / viewScale, 1.0 / viewScale);
-    RSPen pen;
+    RSBrush brush;
     canvas->ClipRoundRect(ScaleRrect, RSClipOp::INTERSECT, true);
 
-    pen.SetColor(RSColor::COLOR_WHITE);
-    pen.SetAntiAlias(true);
-    canvas->AttachPen(pen);
+    brush.SetColor(RSColor::COLOR_WHITE);
+    brush.SetAntiAlias(true);
+    canvas->AttachBrush(brush);
     canvas->DrawRoundRect(ScaleRrect);
-    canvas->DetachPen();
+    canvas->DetachBrush();
 
-    RSSamplingOptions sampling =
-        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
-    canvas->DrawBitmapRect(bitmap,
+    RSImage image;
+    image.BuildFromBitmap(bitmap);
+    canvas->DrawImageRect(image,
         RSRect(x * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET, y * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET,
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + (x * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET),
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + (y * viewScale * MAGNIFIER_GAIN + FIXED_OFFSET)),
         RSRect(globalX * viewScale, globalY * viewScale,
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalX * viewScale,
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale + globalY * viewScale),
-        sampling);
+        RSSamplingOptions());
     canvas->Restore();
 #endif
 }
@@ -329,7 +327,7 @@ void RosenRenderTextOverlay::PaintClipLine(RSCanvas* canvas, RSPen pen)
     pen.SetColor(clipColor_.GetValue());
     RSRecordingPath linePath;
     linePath.MoveTo(static_cast<float>(NormalizeToPx(CLIP_ORIGIN_X)), static_cast<float>(NormalizeToPx(CLIP_ORIGIN_Y)));
-    linePath.RLineTo(static_cast<float>(NormalizeToPx(CLIP_LENGTH)), static_cast<float>(NormalizeToPx(CLIP_LENGTH)));
+    // Drawing is not supported
     canvas->AttachPen(pen);
     canvas->DrawPath(linePath);
     canvas->DetachPen();
@@ -469,11 +467,11 @@ void RosenRenderTextOverlay::PaintMore(RenderContext& context)
     path.MoveTo(static_cast<float>(topLeft.GetX()), static_cast<float>(topLeft.GetY()));
     path.LineTo(static_cast<float>(topLeft.GetX()), static_cast<float>(topLeft.GetY()));
     path.MoveTo(static_cast<float>(topRight.GetX()), static_cast<float>(topRight.GetY()));
-    path.RLineTo(static_cast<float>(dot2Offset_.GetX() * dipScale), static_cast<float>(0.0));
+    // Drawing is not supported
     path.MoveTo(static_cast<float>(bottomLeft.GetX()), static_cast<float>(bottomLeft.GetY()));
-    path.RLineTo(static_cast<float>(0.0), static_cast<float>(dot3Offset_.GetY() * dipScale));
+    // Drawing is not supported
     path.MoveTo(static_cast<float>(bottomRight.GetX()), static_cast<float>(bottomRight.GetY()));
-    path.RLineTo(static_cast<float>(dot4Offset_.GetX() * dipScale), static_cast<float>(dot4Offset_.GetY() * dipScale));
+    // Drawing is not supported
     canvas->AttachPen(pen);
     canvas->DrawPath(path);
     canvas->DetachPen();

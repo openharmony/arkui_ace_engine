@@ -24,6 +24,8 @@
 #include "txt/paragraph_txt.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 namespace OHOS::Ace {
@@ -410,8 +412,7 @@ void TextOverlayBase::PaintSelection(RSCanvas* canvas, const Offset& globalOffse
     Offset effectiveOffset = textOffsetForShowCaret_;
     canvas->AttachPen(pen);
     for (const auto& box : boxes) {
-        auto selectionRect = ConvertRect(box.rect.left(), box.rect.top(), box.rect.right(), box.rect.bottom())
-            + effectiveOffset;
+        auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
         selectedRect_.emplace_back(selectionRect + globalOffset);
         if (box.direction == txt::TextDirection::ltr) {
             canvas->DrawRect(RSRect(
