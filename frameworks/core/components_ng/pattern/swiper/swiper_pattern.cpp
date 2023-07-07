@@ -162,6 +162,7 @@ void SwiperPattern::OnModifyDone()
         turnPageRate_ = 0.0f;
     }
 
+    SetLazyLoadIsLoop();
     RegisterVisibleAreaChange();
     InitSwiperController();
     InitTouchEvent(gestureHub);
@@ -2336,6 +2337,19 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
         auto lazyForEach = DynamicCast<LazyForEachNode>(child);
         if (lazyForEach) {
             lazyForEach->SetRequestLongPredict(useLazyLoad);
+        }
+    }
+}
+
+void SwiperPattern::SetLazyLoadIsLoop() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    for (auto&& child : children) {
+        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
+        if (lazyForEach) {
+            lazyForEach->SetIsLoop(IsLoop());
         }
     }
 }

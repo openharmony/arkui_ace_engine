@@ -79,6 +79,16 @@ public:
         builder_->SetFlagForGeneratedItem(propertyChangeFlag);
     }
 
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+
+    bool GetIsLoop() const
+    {
+        return isLoop_;
+    }
+
 private:
     void OnAttachToMainTree(bool recursive) override
     {
@@ -118,6 +128,7 @@ private:
     bool requestLongPredict_ = false;
     bool useLongPredictTask_ = false;
     bool isRegisterListener_ = false;
+    bool isLoop_ = false;
 
     RefPtr<LazyForEachBuilder> builder_;
 

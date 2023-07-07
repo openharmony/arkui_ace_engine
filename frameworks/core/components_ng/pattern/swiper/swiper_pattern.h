@@ -537,6 +537,7 @@ private:
     bool IsChildrenSizeLessThanSwiper();
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyLoadIsLoop() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
