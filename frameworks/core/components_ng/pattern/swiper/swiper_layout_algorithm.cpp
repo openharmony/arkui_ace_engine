@@ -79,9 +79,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto contentConstraint = swiperLayoutProperty->GetContentLayoutConstraint().value();
     bool hasMinSize = swiperLayoutProperty->GetMinSize().has_value() &&
                       !LessOrEqual(swiperLayoutProperty->GetMinSizeValue().Value(), 0);
+    bool hasPrevmargin = swiperLayoutProperty->GetPrevMargin().has_value() &&
+                      !LessOrEqual(swiperLayoutProperty->GetPrevMarginValue().ConvertToPx(), 0);
+    bool hasNextmargin = swiperLayoutProperty->GetNextMargin().has_value() &&
+                      !LessOrEqual(swiperLayoutProperty->GetNextMarginValue().ConvertToPx(), 0);
 
     auto isSingleCase =
-        !hasMinSize &&
+        !hasMinSize && (!hasPrevmargin && !hasNextmargin) &&
         ((swiperLayoutProperty->GetDisplayCount().has_value() && swiperLayoutProperty->GetDisplayCountValue() == 1) ||
             (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
 
@@ -160,11 +164,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (!mainSizeIsDefined_ && isSingleCase) {
         auto childMaxMainSize = GetChildMaxSize(layoutWrapper, axis, true);
-        auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f;
-        auto nextMarginMontage = Positive(nextMargin_) ? nextMargin_ + spaceWidth_ : 0.0f;
-        auto singleCaseScenarioMainSize = childMaxMainSize + prevMarginMontage + nextMarginMontage;
-        if (singleCaseScenarioMainSize != contentMainSize_) {
-            contentMainSize_ = singleCaseScenarioMainSize;
+
+        if (childMaxMainSize != contentMainSize_) {
+            contentMainSize_ = childMaxMainSize;
             // CheckInactive
             SetInactive(layoutWrapper, 0.0f, contentMainSize_, currentTargetIndex_);
         }
@@ -406,8 +408,12 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         }
         bool hasMinSize = swiperLayoutProperty->GetMinSize().has_value() &&
                           !LessOrEqual(swiperLayoutProperty->GetMinSizeValue().Value(), 0);
+        bool hasPrevmargin = swiperLayoutProperty->GetPrevMargin().has_value() &&
+                        !LessOrEqual(swiperLayoutProperty->GetPrevMarginValue().ConvertToPx(), 0);
+        bool hasNextmargin = swiperLayoutProperty->GetNextMargin().has_value() &&
+                        !LessOrEqual(swiperLayoutProperty->GetNextMarginValue().ConvertToPx(), 0);
         auto isSingleCase =
-            !hasMinSize &&
+            !hasMinSize && (!hasPrevmargin && !hasNextmargin) &&
             ((swiperLayoutProperty->GetDisplayCount().has_value() &&
                  swiperLayoutProperty->GetDisplayCountValue() == 1) ||
                 (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
