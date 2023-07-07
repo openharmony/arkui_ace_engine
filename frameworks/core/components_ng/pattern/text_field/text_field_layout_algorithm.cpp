@@ -124,14 +124,10 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textfieldLayoutProperty);
 
     if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
-        if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
-            calcLayoutConstraint->maxSize.value().Width().has_value()) {
-            frameSize.SetWidth(std::max(layoutConstraint->maxSize.Width(), layoutConstraint->minSize.Width()));
-        } else if (!calcLayoutConstraint) {
-            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
-        } else {
-            frameSize.SetWidth(layoutConstraint->minSize.Width());
-        }
+        auto width =
+            std::max(std::min(layoutConstraint->maxSize.Width(), contentWidth + pattern->GetHorizontalPaddingSum()),
+                layoutConstraint->minSize.Width());
+        frameSize.SetWidth(width);
     }
     frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     if (layoutConstraint->maxSize.Height() < layoutConstraint->minSize.Height()) {
