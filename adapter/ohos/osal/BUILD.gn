@@ -52,6 +52,7 @@ template("ace_osal_ohos_source_set") {
     ]
 
     sources = [
+      "ace_checker.cpp",
       "ace_engine_ext.cpp",
       "ace_trace.cpp",
       "anr_thread.cpp",
@@ -133,6 +134,7 @@ template("ace_osal_ohos_source_set") {
       "ability_runtime:runtime",
       "bundle_framework:appexecfwk_core",
       "graphic_standard:librender_service_client",
+      "hichecker:libhichecker",
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
       "hitrace:libhitracechain",

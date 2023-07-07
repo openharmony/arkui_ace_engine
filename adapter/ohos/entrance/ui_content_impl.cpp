@@ -49,6 +49,7 @@
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -937,7 +938,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     // Initialize performance check parameters
-    SystemProperties::InitPerformanceParameters();
+    AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
     SystemProperties::SetColorMode(ColorMode::LIGHT);
 
@@ -1753,7 +1754,7 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, isFocusActive]() {
-            auto pipelineContext =  AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetIsFocusActive(isFocusActive);
         },
@@ -1769,7 +1770,7 @@ void UIContentImpl::SetFocusWindowId(uint32_t focusWindowId)
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, focusWindowId]() {
-            auto pipelineContext =  AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetFocusWindowId(focusWindowId);
         },

@@ -69,7 +69,6 @@ int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
-PerformancePtr SystemProperties::performanceProps_ = nullptr;
 #ifndef ENABLE_ROSEN_BACKEND
 bool SystemProperties::rosenBackendEnabled_ = false;
 #else
@@ -95,11 +94,6 @@ void SystemProperties::InitDeviceType(DeviceType type)
         deviceType_ = DeviceType::PHONE;
         paramDeviceType_ = PROPERTY_DEVICE_TYPE_PHONE;
     }
-}
-
-int32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType /* type */)
-{
-    return -1;
 }
 
 DeviceType SystemProperties::GetDeviceType()
@@ -205,13 +199,6 @@ bool SystemProperties::GetIsUseMemoryMonitor()
 {
     return false;
 }
-
-bool SystemProperties::IsPerformanceCheckEnabled()
-{
-    return false;
-}
-
-void SystemProperties::InitPerformanceParameters() {}
 
 bool SystemProperties::IsFormAnimationLimited()
 {

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
+#include "bridge/declarative_frontend/jsview/js_view.h"
 
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
@@ -22,7 +23,11 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/ui_node.h"
@@ -33,10 +38,6 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/element_register.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
 
 namespace OHOS::Ace {
 
@@ -684,7 +685,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     }
 #endif
 
-    if (SystemProperties::IsPerformanceCheckEnabled()) {
+    if (AceChecker::IsPerformanceCheckEnabled()) {
         auto uiNode = AceType::DynamicCast<NG::UINode>(node);
         if (uiNode) {
             auto codeInfo = EngineHelper::GetPositionOnJsCode();
