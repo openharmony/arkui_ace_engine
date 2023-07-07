@@ -208,7 +208,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
 
-    textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
+    textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
     auto textFrameSize = textGeometryNode->GetFrameSize();
     textGeometryNode->SetFrameSize(textFrameSize);
     textWrapper->Layout();
