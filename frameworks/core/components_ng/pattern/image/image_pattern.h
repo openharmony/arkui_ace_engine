@@ -141,6 +141,8 @@ private:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    RectF CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode);
+
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     LoadFailNotifyTask CreateLoadFailCallback();

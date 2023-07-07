@@ -17,6 +17,7 @@
 
 #include <array>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -128,24 +129,52 @@ void ImagePattern::RegisterVisibleAreaChange()
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 }
 
+RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode)
+{
+    RectF paintSize;
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, paintSize);
+    ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+    bool imageRepeatX = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_X;
+    bool imageRepeatY = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_Y;
+    
+    if (loadingCtx_->GetSourceInfo().IsSvg()) {
+        const float invalidValue = -1;
+        paintSize.SetWidth(dstRect_.IsValid() ? dstRect_.Width() : invalidValue);
+        paintSize.SetHeight(dstRect_.IsValid() ? dstRect_.Height() : invalidValue);
+        paintSize.SetLeft(dstRect_.IsValid() ? dstRect_.GetX() + geometryNode->GetContentOffset().GetX() :
+            invalidValue);
+        paintSize.SetTop(dstRect_.IsValid() ? dstRect_.GetY() + geometryNode->GetContentOffset().GetY() :
+            invalidValue);
+    } else {
+        paintSize.SetWidth(imageRepeatX ? geometryNode->GetContentSize().Width() : dstRect_.Width());
+        paintSize.SetHeight(imageRepeatY ? geometryNode->GetContentSize().Height() : dstRect_.Height());
+        paintSize.SetLeft(imageRepeatX ? 0 : dstRect_.GetX() + geometryNode->GetContentOffset().GetX());
+        paintSize.SetTop(imageRepeatY ? 0 : dstRect_.GetY() + geometryNode->GetContentOffset().GetY());
+    }
+    return paintSize;
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& geometryNode = host->GetGeometryNode();
+    const auto& layoutWrapper = host->GetLayoutWrapper().Upgrade();
+    const auto& geometryNode = layoutWrapper == nullptr ? host->GetGeometryNode() : layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto imageEventHub = GetEventHub<ImageEventHub>();
-    CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
-        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 1, geometryNode->GetContentSize().Width(),
-        geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
-        geometryNode->GetContentOffset().GetY());
-    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
     // update src data
     image_ = loadingCtx_->MoveCanvasImage();
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
+
+    RectF paintRect = CalcImageContentPaintSize(geometryNode);
+    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
+        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
+        geometryNode->GetFrameSize().Height(), 1, paintRect.Width(), paintRect.Height(),
+        paintRect.GetX(), paintRect.GetY());
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     PrepareAnimation(image_);
