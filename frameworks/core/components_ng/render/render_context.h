@@ -426,7 +426,7 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
-    virtual void SetOverrideContentRect(const std::optional<RectF>& rect) {}
+    virtual void SetUsingContentRectForRenderFrame(bool value) {}
 
 protected:
     RenderContext() = default;

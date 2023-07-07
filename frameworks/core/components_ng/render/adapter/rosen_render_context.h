@@ -237,7 +237,7 @@ public:
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
-    void SetOverrideContentRect(const std::optional<RectF>& rect) override;
+    void SetUsingContentRectForRenderFrame(bool value) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -373,6 +373,8 @@ private:
     void PaintDebugBoundary();
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
+    void SetContentRectToFrame(RectF rect);
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
@@ -425,7 +427,7 @@ private:
     VectorF currentScale_ = VectorF(1.0f, 1.0f);
     bool isTouchUpFinished_ = true;
 
-    std::optional<RectF> overrideContentRect_;
+    bool useContentRectForRSFrame_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

@@ -34,7 +34,9 @@ void CustomPaintPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    auto renderCtx = host->GetRenderContext();
+    renderCtx->SetClipToBounds(false);
+    renderCtx->SetUsingContentRectForRenderFrame(true);
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);

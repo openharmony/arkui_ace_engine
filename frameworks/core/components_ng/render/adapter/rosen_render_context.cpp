@@ -285,11 +285,8 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         return;
     }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    if (overrideContentRect_.has_value()) {
-        // arkui's contentSize corresponds to rosen's frameSize
-        rsNode_->SetFrame(paintRect.GetX() + overrideContentRect_->GetX(),
-            paintRect.GetY() + overrideContentRect_->GetY(), overrideContentRect_->Width(),
-            overrideContentRect_->Height());
+    if (useContentRectForRSFrame_) {
+        SetContentRectToFrame(paintRect);
     } else {
         rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     }
@@ -850,7 +847,7 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
     if (translateXY_) {
         auto propertyXY = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty());
         if (propertyXY) {
-            propertyXY->Set({xValue, yValue});
+            propertyXY->Set({ xValue, yValue });
         } else {
             LOGE("fail to get translateXY property");
         }
@@ -1382,10 +1379,8 @@ void RosenRenderContext::SetPositionToRSNode()
         return;
     }
     rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    if (overrideContentRect_.has_value()) {
-        // arkui's contentSize corresponds to rosen's frameSize
-        rsNode_->SetFrame(rect.GetX() + overrideContentRect_->GetX(), rect.GetY() + overrideContentRect_->GetY(),
-            overrideContentRect_->Width(), overrideContentRect_->Height());
+    if (useContentRectForRSFrame_) {
+        SetContentRectToFrame(rect);
     } else {
         rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     }
@@ -1583,7 +1578,8 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
             RSCanvas rsCanvas(&canvas);
             contentDraw(rsCanvas);
 #else
-        Rosen::RSModifierType::CONTENT_STYLE, [contentDraw = std::move(contentDraw)](std::shared_ptr<RSCanvas> canvas) {
+        Rosen::RSModifierType::CONTENT_STYLE,
+        [contentDraw = std::move(contentDraw)](std::shared_ptr<RSCanvas> canvas) {
             CHECK_NULL_VOID(canvas);
             contentDraw(*canvas);
 #endif
@@ -1634,7 +1630,8 @@ void RosenRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDr
             RSCanvas rsCanvas(&canvas);
             overlayDraw(rsCanvas);
 #else
-        Rosen::RSModifierType::OVERLAY_STYLE, [overlayDraw = std::move(overlayDraw)](std::shared_ptr<RSCanvas> canvas) {
+        Rosen::RSModifierType::OVERLAY_STYLE,
+        [overlayDraw = std::move(overlayDraw)](std::shared_ptr<RSCanvas> canvas) {
             CHECK_NULL_VOID(canvas);
             overlayDraw(*canvas);
 #endif
@@ -2160,8 +2157,8 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
         rsNode_->SetMask(Rosen::RSMask::CreatePathMask(skPath, SkiaDecorationPainter::CreateMaskSkPaint(basicShape)));
 #else
         auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
-        rsNode_->SetMask(Rosen::RSMask::CreatePathMask(
-            rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape)));
+        rsNode_->SetMask(
+            Rosen::RSMask::CreatePathMask(rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape)));
 #endif
     }
 }
@@ -2205,7 +2202,7 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 #else
     RSPath rsPath;
-    rsPath.AddRect({rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height()});
+    rsPath.AddRect({ rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
 #endif
 }
@@ -2498,9 +2495,9 @@ void RosenRenderContext::SetBounds(float positionX, float positionY, float width
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 
-void RosenRenderContext::SetOverrideContentRect(const std::optional<RectF>& rect)
+void RosenRenderContext::SetUsingContentRectForRenderFrame(bool value)
 {
-    overrideContentRect_ = rect;
+    useContentRectForRSFrame_ = value;
 }
 
 void RosenRenderContext::ClearDrawCommands()
@@ -2995,6 +2992,20 @@ void RosenRenderContext::OnRenderFitUpdate(RenderFit renderFit)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetFrameGravity(GetRosenGravity(renderFit));
+}
+
+void RosenRenderContext::SetContentRectToFrame(RectF rect)
+{
+    auto host = GetHost();
+    auto&& padding = host->GetGeometryNode()->GetPadding();
+    // minus padding to get contentRect
+    if (padding) {
+        rect.SetOffset(rect.GetOffset() + OffsetF { padding->left.value_or(0), padding->top.value_or(0) });
+        auto size = rect.GetSize();
+        MinusPaddingToSize(*padding, size);
+        rect.SetSize(size);
+    }
+    rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
 }
 
 } // namespace OHOS::Ace::NG
