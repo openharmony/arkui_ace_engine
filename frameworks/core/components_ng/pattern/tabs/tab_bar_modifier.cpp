@@ -118,18 +118,14 @@ void TabBarModifier::PaintIndicator(DrawingContext& context, RectF indicator)
     } else {
         indicator.SetHeight(tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
     }
-    if (GreatNotEqual(indicatorWidth_->Get(), 0.0f)) {
-        indicator.SetLeft(indicatorLeft_->Get() + (indicator.Width() - indicatorWidth_->Get()) / 2);
-        indicator.SetWidth(indicatorWidth_->Get());
-    } else {
-        indicator.SetLeft(indicatorLeft_->Get());
-    }
+    indicator.SetWidth(indicatorWidth_->Get());
+    indicator.SetLeft(indicatorLeft_->Get());
     if (GreatNotEqual(indicatorMarginTop_->Get(), 0.0f)) {
         indicator.SetTop(indicatorTop_->Get() + indicatorMarginTop_->Get());
     } else {
         indicator.SetTop(indicatorTop_->Get());
     }
-    
+
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(indicatorColor_->Get()));

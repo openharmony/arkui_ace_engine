@@ -473,6 +473,13 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     itemPosition_ = std::move(swiperLayoutAlgorithm->GetItemPosition());
     currentOffset_ -= swiperLayoutAlgorithm->GetCurrentOffset();
+    if (!itemPosition_.empty()) {
+        const auto& turnPageRateCallback = swiperController_->GetTurnPageRateCallback();
+        if (turnPageRateCallback && isDragging_ && !NearZero(GetTranslateLength())) {
+            turnPageRateCallback(
+                itemPosition_.begin()->first, -itemPosition_.begin()->second.startPos / GetTranslateLength());
+        }
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     CheckMarkDirtyNodeForRenderIndicator();
@@ -1457,7 +1464,8 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion(float velocity) const
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
 {
-    if (!indicatorId_.has_value()) {
+    const auto& turnPageRateCallback = swiperController_->GetTurnPageRateCallback();
+    if (!indicatorId_.has_value() && !turnPageRateCallback) {
         return;
     }
     auto host = GetHost();
@@ -1471,11 +1479,20 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
     indicatorController_->ClearInterpolators();
 
     auto translateAnimation = AceType::MakeRefPtr<CurveAnimation<double>>(0, translate, Curves::LINEAR);
-    translateAnimation->AddListener(Animation<double>::ValueCallback([weak = WeakClaim(this)](double value) {
-        auto swiper = weak.Upgrade();
-        CHECK_NULL_VOID(swiper);
-        swiper->CheckMarkDirtyNodeForRenderIndicator(static_cast<float>(value));
-    }));
+    if (itemPosition_.empty()) {
+        return;
+    }
+    translateAnimation->AddListener(Animation<double>::ValueCallback(
+        [weak = WeakClaim(this), currentContentOffset = -itemPosition_.begin()->second.startPos,
+            index = itemPosition_.begin()->first](double value) {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            const auto& turnPageRateCallback = swiper->swiperController_->GetTurnPageRateCallback();
+            if (turnPageRateCallback && !NearZero(swiper->GetTranslateLength())) {
+                turnPageRateCallback(index, (currentContentOffset - value) / swiper->GetTranslateLength());
+            }
+            swiper->CheckMarkDirtyNodeForRenderIndicator(static_cast<float>(value));
+        }));
     indicatorController_->SetDuration(GetDuration());
     indicatorController_->AddInterpolator(translateAnimation);
     indicatorController_->Play();

@@ -7050,4 +7050,131 @@ HWTEST_F(SwiperTestNg, SwiperPatternCalculateDisplayCount001, TestSize.Level1)
      */
     swiperPattern->CalculateDisplayCount();
 }
+
+/**
+ * @tc.name: SwiperPatternOnTouchTestHit001
+ * @tc.desc: OnTouchTestHit
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnTouchTestHit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnTouchTestHit.
+     * @tc.expected: Related function runs ok.
+     */
+    CommonFunc callback = [] {};
+    swiperPattern->isTouchDown_ = false;
+    swiperPattern->swiperController_->SetRemoveTabBarEventCallback(callback);
+    swiperPattern->OnTouchTestHit(SourceType::TOUCH);
+    EXPECT_NE(swiperPattern->swiperController_->GetRemoveTabBarEventCallback(), nullptr);
+}
+
+/**
+ * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation002
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPlayIndicatorTranslateAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, swiperPattern->GetIndicatorId(),
+        []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    swiperNode->AddChild(indicatorNode);
+
+    /**
+     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    TurnPageRateFunc callback = [](const int32_t i, float f) {};
+    swiperPattern->swiperController_->SetTurnPageRateCallback(callback);
+    swiperPattern->PlayIndicatorTranslateAnimation(0.1f);
+    EXPECT_NE(swiperPattern->swiperController_->GetTurnPageRateCallback(), nullptr);
+}
+
+/**
+ * @tc.name: SwiperPatternOnDirtyLayoutWrapperSwap002
+ * @tc.desc: OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    swiperNode->AddChild(leftArrow);
+    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, swiperPattern->GetRightButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(rightArrow, nullptr);
+    swiperNode->AddChild(rightArrow);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
+        swiperPattern->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(indicatorNodeLeftArrow, nullptr);
+    indicatorNode->AddChild(indicatorNodeLeftArrow);
+    swiperNode->AddChild(indicatorNode);
+    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
+    ASSERT_NE(firstChild, nullptr);
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    firstGeometryNode->SetFrameSize(SWIPER_CHILD_SIZEF_SMALL);
+    auto firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
+    auto dirty = AceType::MakeRefPtr<LayoutWrapper>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
+    dirty->AppendChild(firstLayoutWrapper);
+    struct DirtySwapConfig config;
+    swiperPattern->isInit_ = true;
+    config.skipMeasure = false;
+    config.skipLayout = false;
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap.
+     * @tc.expected: Related function runs ok.
+     */
+    TurnPageRateFunc callback = [](const int32_t i, float f) {};
+    swiperPattern->swiperController_->SetTurnPageRateCallback(callback);
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -1.0f;
+    swiperItemInfo1.endPos = -1.0f;
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(swiperPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(swiperLayoutAlgorithm, nullptr);
+    dirty->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm);
+    dirty->layoutAlgorithm_->layoutAlgorithm_ = AceType::MakeRefPtr<SwiperLayoutAlgorithm>();
+    ASSERT_NE(dirty->GetLayoutAlgorithm(), nullptr);
+    ASSERT_NE(AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm()), nullptr);
+    AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm())
+        ->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
+    swiperPattern->isDragging_ = true;
+    swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_NE(swiperPattern->swiperController_->GetTurnPageRateCallback(), nullptr);
+}
 } // namespace OHOS::Ace::NG

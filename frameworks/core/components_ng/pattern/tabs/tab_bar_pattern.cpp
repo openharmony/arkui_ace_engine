@@ -124,6 +124,9 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
                 return true;
             }
         }
+        if (source == SCROLL_FROM_AXIS) {
+            pattern->AdjustOffset(offset);
+        }
         pattern->UpdateCurrentOffset(static_cast<float>(offset));
         return true;
     };
@@ -473,6 +476,7 @@ void TabBarPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
 
     InitClick(gestureHub);
+    InitTurnPageRateEvent();
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -504,6 +508,7 @@ void TabBarPattern::OnModifyDone()
             gestureHub->RemoveScrollableEvent(tabBarPattern->scrollableEvent_);
         }
         gestureHub->RemoveTouchEvent(tabBarPattern->touchEvent_);
+        tabBarPattern->isTouchingSwiper_ = true;
     };
     swiperController_->SetRemoveTabBarEventCallback(std::move(removeEventCallback));
 
@@ -899,10 +904,12 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         if (tabItemOffsets_.empty()) {
             return;
         }
-        PlayTranslateAnimation(originalPaintRect.GetX(),
-            targetPaintRect.GetX() - tabItemOffsets_.front().GetX() + targetOffset, targetOffset);
+        PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
+            targetPaintRect.GetX() + targetPaintRect.Width() / 2 - tabItemOffsets_.front().GetX() + targetOffset,
+            targetOffset);
     } else {
-        PlayTranslateAnimation(originalPaintRect.GetX(), targetPaintRect.GetX(), targetOffset);
+        PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
+            targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
     swiperController_->SwipeTo(index);
     layoutProperty->UpdateIndicator(index);
@@ -1107,7 +1114,7 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
 
     RectF rect = layoutProperty->GetIndicatorRect(indicator);
     paintProperty->UpdateIndicator(rect);
-    currentIndicatorOffset_ = rect.GetX();
+    currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     if (tabBarStyles_[indicator] == TabBarStyle::SUBTABBATSTYLE) {
         UpdateSubTabBoard();
@@ -1394,7 +1401,7 @@ void TabBarPattern::UpdateIndicatorCurrentOffset(float offset)
 
 RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
 {
-    if (indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
+    if (indicator_ < 0 || indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
         indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
         return nullptr;
     }
@@ -1415,8 +1422,79 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
     if (!tabBarModifier_) {
         tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
     }
-    return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, backgroundColor,
-        indicatorStyles_[indicator_], currentIndicatorOffset_, selectedModes_[indicator_]);
+
+    IndicatorStyle indicatorStyle;
+    GetIndicatorStyle(indicatorStyle);
+
+    return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, backgroundColor, indicatorStyle,
+        currentIndicatorOffset_, selectedModes_[indicator_]);
+}
+
+void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
+{
+    if (indicator_ < 0 || indicator_ >= static_cast<int32_t>(indicatorStyles_.size())) {
+        return;
+    }
+    indicatorStyle = indicatorStyles_[indicator_];
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    if (NonPositive(indicatorStyle.width.Value())) {
+        indicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(indicator_).Width());
+    }
+
+    if (!isTouchingSwiper_ || axis_ != Axis::HORIZONTAL) {
+        return;
+    }
+
+    if (swiperStartIndex_ < 0 || swiperStartIndex_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        tabBarStyles_[swiperStartIndex_] != TabBarStyle::SUBTABBATSTYLE ||
+        swiperStartIndex_ >= static_cast<int32_t>(selectedModes_.size()) ||
+        selectedModes_[swiperStartIndex_] != SelectedMode::INDICATOR ||
+        swiperStartIndex_ >= static_cast<int32_t>(indicatorStyles_.size())) {
+        return;
+    }
+
+    auto nextIndex = swiperStartIndex_ + 1;
+
+    if (nextIndex < 0 || nextIndex >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        tabBarStyles_[nextIndex] != TabBarStyle::SUBTABBATSTYLE ||
+        nextIndex >= static_cast<int32_t>(selectedModes_.size()) ||
+        selectedModes_[nextIndex] != SelectedMode::INDICATOR ||
+        nextIndex >= static_cast<int32_t>(indicatorStyles_.size())) {
+        return;
+    }
+
+    indicatorStyle = indicatorStyles_[swiperStartIndex_];
+
+    if (NonPositive(indicatorStyle.width.Value())) {
+        indicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(swiperStartIndex_).Width());
+    }
+
+    IndicatorStyle nextIndicatorStyle = indicatorStyles_[nextIndex];
+    if (NonPositive(nextIndicatorStyle.width.Value())) {
+        nextIndicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(nextIndex).Width());
+    }
+    indicatorStyle.width =
+        Dimension(indicatorStyle.width.ConvertToPx() +
+                  (nextIndicatorStyle.width.ConvertToPx() - indicatorStyle.width.ConvertToPx()) * turnPageRate_);
+    indicatorStyle.marginTop = Dimension(
+        indicatorStyle.marginTop.ConvertToPx() +
+        (nextIndicatorStyle.marginTop.ConvertToPx() - indicatorStyle.marginTop.ConvertToPx()) * turnPageRate_);
+    indicatorStyle.height =
+        Dimension(indicatorStyle.height.ConvertToPx() +
+                  (nextIndicatorStyle.height.ConvertToPx() - indicatorStyle.height.ConvertToPx()) * turnPageRate_);
+    LinearColor color = LinearColor(indicatorStyle.color) +
+                        (LinearColor(nextIndicatorStyle.color) - LinearColor(indicatorStyle.color)) * turnPageRate_;
+    indicatorStyle.color = color.ToColor();
+
+    if (LessOrEqual(turnPageRate_, 0.0f) || GreatOrEqual(turnPageRate_, 1.0f)) {
+        isTouchingSwiper_ = false;
+        turnPageRate_ = 0.0f;
+    }
 }
 
 float TabBarPattern::GetSpace(int32_t indicator)
@@ -1721,5 +1799,106 @@ void TabBarPattern::TabBarClickEvent(int32_t index) const
     auto tabBarClickEvent = tabsPattern->GetTabBarClickEvent();
     CHECK_NULL_VOID(tabBarClickEvent);
     (*tabBarClickEvent)(index);
+}
+
+bool TabBarPattern::CheckSwiperDisable() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, true);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, true);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, true);
+    return swiperPaintProperty->GetDisableSwipe().value_or(false);
+}
+
+void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (swiperStartIndex_ < 0 || swiperStartIndex_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        tabBarStyles_[swiperStartIndex_] != TabBarStyle::SUBTABBATSTYLE ||
+        swiperStartIndex_ >= static_cast<int32_t>(selectedModes_.size()) ||
+        selectedModes_[swiperStartIndex_] != SelectedMode::INDICATOR) {
+        return;
+    }
+
+    auto index = swiperStartIndex_ + 1;
+    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE || index >= static_cast<int32_t>(selectedModes_.size()) ||
+        selectedModes_[index] != SelectedMode::INDICATOR) {
+        return;
+    }
+
+    if (GreatOrEqual(turnPageRate, 1.0f)) {
+        turnPageRate_ = 1.0f;
+    } else if (LessOrEqual(turnPageRate, 0.0f)) {
+        turnPageRate_ = 0.0f;
+    } else {
+        turnPageRate_ = turnPageRate;
+    }
+
+    auto originalPaintRect = layoutProperty->GetIndicatorRect(swiperStartIndex_);
+    auto targetPaintRect = layoutProperty->GetIndicatorRect(index);
+    auto paintRectDiff = std::abs(targetPaintRect.GetX() + targetPaintRect.Width() / 2 - originalPaintRect.GetX() -
+                                  originalPaintRect.Width() / 2);
+
+    currentIndicatorOffset_ = originalPaintRect.GetX() + originalPaintRect.Width() / 2 + paintRectDiff * turnPageRate_;
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TabBarPattern::AdjustOffset(double& offset) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mainSize = host->GetGeometryNode()->GetFrameSize().Width();
+    auto childCount = host->GetChildren().size() - MASK_COUNT;
+    auto childrenMainSize = 0.0f;
+    for (uint32_t index = 0; index < childCount; ++index) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+        CHECK_NULL_VOID(childFrameNode);
+        auto childGeometryNode = childFrameNode->GetGeometryNode();
+        CHECK_NULL_VOID(childGeometryNode);
+        auto childFrameSize = childGeometryNode->GetMarginFrameSize();
+        childrenMainSize += (axis_ == Axis::HORIZONTAL ? childFrameSize.Width() : childFrameSize.Height());
+    }
+    if (Positive(currentOffset_ + offset)) {
+        offset = -currentOffset_;
+    } else if (LessNotEqual(childrenMainSize + currentOffset_ + offset, mainSize)) {
+        offset = mainSize - childrenMainSize - currentOffset_;
+    }
+}
+
+void TabBarPattern::InitTurnPageRateEvent()
+{
+    auto turnPageRateCallback = [weak = WeakClaim(this)](int32_t swipingIndex, float turnPageRate) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (!pattern->CheckSwiperDisable() && pattern->axis_ == Axis::HORIZONTAL && pattern->isTouchingSwiper_) {
+                pattern->swiperStartIndex_ = swipingIndex;
+                pattern->ApplyTurnPageRateToIndicator(turnPageRate);
+            } else {
+                pattern->turnPageRate_ = 0.0f;
+            }
+        }
+    };
+    swiperController_->SetTurnPageRateCallback(std::move(turnPageRateCallback));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAnimationEndEvent([weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->isTouchingSwiper_ = false;
+        }
+    });
 }
 } // namespace OHOS::Ace::NG
