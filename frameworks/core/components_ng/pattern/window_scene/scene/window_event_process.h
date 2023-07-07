@@ -32,9 +32,12 @@ public:
     void ProcessWindowDragEvent(const RefPtr<WindowNode>& windowNode,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void CleanWindowDragEvent();
+    void CleanWindowMouseRecord();
 
 private:
     void DispatchPointerEvent(const RefPtr<WindowNode>& windowNode,
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void UpdateWindowMouseRecord(const RefPtr<WindowNode>& windowNode,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
 private:
