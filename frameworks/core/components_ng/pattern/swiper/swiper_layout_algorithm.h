@@ -166,6 +166,11 @@ public:
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
+    int32_t GetAutoPlayCurrentIndex() const
+    {
+        return autoPlayCurrentIndex_;
+    }
+
     void SetMainSizeIsMeasured(bool mainSizeIsMeasured)
     {
         mainSizeIsMeasured_ = mainSizeIsMeasured;
@@ -198,6 +203,7 @@ private:
     float nextMargin_ = 0.0f;
 
     PositionMap itemPosition_;
+    int32_t autoPlayCurrentIndex_ = 0;
     float currentOffset_ = 0.0f;
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;
