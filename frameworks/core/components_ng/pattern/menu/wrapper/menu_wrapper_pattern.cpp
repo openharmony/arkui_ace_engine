@@ -23,20 +23,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {
-OffsetF GetPageOffset()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, OffsetF());
-    auto stageManager = pipeline->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, OffsetF());
-    auto page = stageManager->GetLastPage();
-    CHECK_NULL_RETURN(page, OffsetF());
-    return page->GetOffsetRelativeToWindow();
-}
-} // namespace
-
 void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
     isHided_ = true;
@@ -56,60 +42,16 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     menuPattern->HideMenu();
 }
 
+void MenuWrapperPattern::OnAttachToFrameNode()
+{
+    RegisterOnTouch();
+}
+
 void MenuWrapperPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
 
     isHided_ = false;
-
-    // if already initialized touch event
-    CHECK_NULL_VOID_NOLOG(!onTouch_);
-
-    // hide menu when touched outside the menu region
-    auto callback = [weak = WeakClaim(RawPtr(host))](const TouchEventInfo& info) {
-        if (info.GetTouches().empty()) {
-            return;
-        }
-        auto touch = info.GetTouches().front();
-        // filter out other touch types
-        if (touch.GetTouchType() != TouchType::DOWN && touch.GetTouchType() != TouchType::UP) {
-            return;
-        }
-        auto host = weak.Upgrade();
-        CHECK_NULL_VOID(host);
-        auto pattern = host->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->IsHided()) {
-            return;
-        }
-        OffsetF position = OffsetF(touch.GetGlobalLocation().GetX(), touch.GetGlobalLocation().GetY());
-        position -= GetPageOffset();
-        auto children = host->GetChildren();
-        for (auto child = children.rbegin(); child != children.rend(); ++child) {
-            // get menu frame node (child of menu wrapper)
-            auto menuNode = DynamicCast<FrameNode>(*child);
-            CHECK_NULL_VOID(menuNode);
-
-            // get menuNode's touch region
-            auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
-            if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
-                return;
-            }
-            // if DOWN-touched outside the menu region, then hide menu
-            auto menuPattern = menuNode->GetPattern<MenuPattern>();
-            CHECK_NULL_VOID(menuPattern);
-            if (menuPattern->IsSubMenu()) {
-                pattern->HideSubMenu();
-            } else {
-                pattern->HideMenu(menuNode);
-            }
-        }
-    };
-    onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
-    gestureHub->AddTouchEvent(onTouch_);
 }
 
 // close subMenu when mouse move outside
@@ -168,5 +110,95 @@ void MenuWrapperPattern::HideSubMenu()
         menuPattern->RemoveParentHoverStyle();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void MenuWrapperPattern::RegisterOnTouch()
+{
+    // if already initialized touch event
+    CHECK_NULL_VOID_NOLOG(!onTouch_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    // hide menu when touched outside the menu region
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->OnTouchEvent(info);
+    };
+    onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gesture->AddTouchEvent(onTouch_);
+}
+
+void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
+{
+    CHECK_NULL_VOID_NOLOG(!info.GetTouches().empty());
+    auto touch = info.GetTouches().front();
+    // filter out other touch types
+    if (touch.GetTouchType() != TouchType::DOWN && touch.GetTouchType() != TouchType::UP) {
+        return;
+    }
+    if (IsHided()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto position = OffsetF(
+        static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
+    position -= host->GetPaintRectOffset();
+    auto children = host->GetChildren();
+    for (auto child = children.rbegin(); child != children.rend(); ++child) {
+        // get menu frame node (child of menu wrapper)
+        auto menuNode = DynamicCast<FrameNode>(*child);
+        CHECK_NULL_VOID(menuNode);
+        // get menuNode's touch region
+        auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
+        if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            return;
+        }
+        // if DOWN-touched outside the menu region, then hide menu
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        if (menuPattern->IsSubMenu()) {
+            HideSubMenu();
+        } else {
+            HideMenu(menuNode);
+        }
+    }
+}
+
+bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (IsContextMenu()) {
+        SetHotAreas(dirty);
+    }
+    return false;
+}
+
+void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    if (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) {
+        return;
+    }
+    auto layoutProps = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
+    float safeAreaInsetsLeft = 0.0f;
+    float safeAreaInsetsTop = 0.0f;
+    auto&& safeAreaInsets = layoutProps->GetSafeAreaInsets();
+    if (safeAreaInsets) {
+        safeAreaInsetsLeft = static_cast<float>(safeAreaInsets->left_.end);
+        safeAreaInsetsTop = static_cast<float>(safeAreaInsets->top_.end);
+    }
+    std::vector<Rect> rects;
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto frameRect = child->GetGeometryNode()->GetFrameRect();
+        // rect is relative to window
+        auto rect = Rect(frameRect.GetX() + safeAreaInsetsLeft, frameRect.GetY() + safeAreaInsetsTop, frameRect.Width(),
+            frameRect.Height());
+
+        rects.emplace_back(rect);
+    }
+    SubwindowManager::GetInstance()->SetHotAreas(rects, GetHost()->GetId());
 }
 } // namespace OHOS::Ace::NG

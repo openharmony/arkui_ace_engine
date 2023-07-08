@@ -563,43 +563,8 @@ void MenuPattern::SetAccessibilityAction()
 
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    UpdateMenuHotArea();
     UpdateMenuClip(dirty);
     return false;
-}
-
-void MenuPattern::UpdateMenuHotArea()
-{
-    auto rootNode = GetMenuWrapper();
-    CHECK_NULL_VOID(rootNode);
-    if (rootNode->GetChildren().empty()) {
-        return;
-    }
-    auto children = rootNode->GetChildren();
-    auto mainMenuNode = DynamicCast<FrameNode>(children.front());
-    CHECK_NULL_VOID(mainMenuNode);
-    auto mainMenuPattern = mainMenuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(mainMenuPattern);
-    if (!mainMenuPattern->IsContextMenu()) {
-        return;
-    }
-    std::vector<Rect> rects;
-    for (const auto& child : children) {
-        auto menuNode = DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(menuNode);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        if (!menuPattern->IsContextMenu() && !menuPattern->IsSubMenu()) {
-            continue;
-        }
-        auto menuContext = menuNode->GetRenderContext();
-        CHECK_NULL_VOID(menuContext);
-        auto menuHotArea = menuContext->GetPaintRectWithTransform();
-        rects.emplace_back(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height());
-    }
-    if (mainMenuNode->GetParent()) {
-        SubwindowManager::GetInstance()->SetHotAreas(rects, mainMenuNode->GetParent()->GetId());
-    }
 }
 
 void MenuPattern::UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty)
