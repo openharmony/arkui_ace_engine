@@ -538,6 +538,11 @@ private:
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
+    int32_t ComputeNextIndexByVelocity(float velocity) const;
+    void UpdateCurrentIndex(int32_t index);
+    void OnSpringAnimationStart(float velocity);
+    void OnSpringAndFadeAnimationFinish();
+    void OnFadeAnimationStart();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
