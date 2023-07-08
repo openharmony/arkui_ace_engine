@@ -590,18 +590,18 @@ int32_t PageRouterManager::GenerateNextPageId()
     return ++pageId_;
 }
 
-std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const std::string& url)
+std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const std::string& url, bool needIgnoreBegin)
 {
-    auto iter = std::find_if(++pageRouterStack_.rbegin(), pageRouterStack_.rend(),
-        [url](const WeakPtr<FrameNode>& item) {
-        auto pageNode = item.Upgrade();
-        CHECK_NULL_RETURN(pageNode, false);
-        auto pagePattern = pageNode->GetPattern<PagePattern>();
-        CHECK_NULL_RETURN(pagePattern, false);
-        auto entryPageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
-        CHECK_NULL_RETURN(entryPageInfo, false);
-        return entryPageInfo->GetPageUrl() == url;
-    });
+    auto iter = std::find_if(needIgnoreBegin ? ++pageRouterStack_.rbegin() : pageRouterStack_.rbegin(),
+        pageRouterStack_.rend(), [url](const WeakPtr<FrameNode>& item) {
+            auto pageNode = item.Upgrade();
+            CHECK_NULL_RETURN(pageNode, false);
+            auto pagePattern = pageNode->GetPattern<PagePattern>();
+            CHECK_NULL_RETURN(pagePattern, false);
+            auto entryPageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_RETURN(entryPageInfo, false);
+            return entryPageInfo->GetPageUrl() == url;
+        });
     if (iter == pageRouterStack_.rend()) {
         return { -1, nullptr };
     }
@@ -828,7 +828,7 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
         return;
     }
 
-    auto pageInfo = FindPageInStack(target.url);
+    auto pageInfo = FindPageInStack(target.url, true);
     if (pageInfo.second) {
         // find page in stack, pop to specified index.
         RouterPageInfo info = target;
