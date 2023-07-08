@@ -158,8 +158,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
     containerTitleRow->AddChild(maximizeBtn);
     
     RefPtr<FrameNode> minimizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MIN,
-        [windowManager] (GestureEvent& info) {
-            CHECK_NULL_VOID(windowManager);
+        [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))] (GestureEvent& info) {
+            auto windowManager = weak.Upgrade();
+            if (!windowManager) {
+                LOGE("create minBtn callback func failed,windowManager is null!");
+                return;
+            }
             LOGI("minimize button clicked");
             windowManager->WindowMinimize();
         });
@@ -173,8 +177,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
 
     RefPtr<FrameNode> closeBtn = BuildControlButton(
         InternalResource::ResourceId::IC_WINDOW_CLOSE,
-        [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID(windowManager);
+        [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+            auto windowManager = weak.Upgrade();
+            if (!windowManager) {
+                LOGE("create closeBtn callback func failed,windowManager is null!");
+                return;
+            }
             LOGI("close button clicked");
             windowManager->WindowClose();
         }, true);
@@ -302,8 +310,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
     // click maxize Item Event
-    auto maximizeClickFunc = [windowManager](GestureEvent &info) {
-        CHECK_NULL_VOID_NOLOG(windowManager);
+    auto maximizeClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent &info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            LOGE("create maxBtn callback func failed,windowManager is null");
+            return;
+        }
         LOGD("MODE_MAXIMIZE selected");
         ResetHoverTimer();
         if (MaximizeMode::MODE_AVOID_SYSTEM_BAR == windowManager->GetCurrentWindowMaximizeMode()) {
@@ -331,8 +343,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    auto fullScreenClickFunc = [windowManager](GestureEvent &info) {
-        CHECK_NULL_VOID_NOLOG(windowManager);
+    auto fullScreenClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent &info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            LOGE("create fullScreen callback func failed,windowManager is null!");
+            return;
+        }
         ResetHoverTimer();
         LOGD("MODE_FULLSCREEN selected");
         if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode()) {
@@ -373,8 +389,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildLeftSplitMenuItem()
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    auto leftSplitClickFunc = [windowManager](GestureEvent &info) {
-        CHECK_NULL_VOID_NOLOG(windowManager);
+    auto leftSplitClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent &info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            LOGE("create leftsplit callback func failed,windowMannager is null!");
+            return;
+        }
         LOGD("left split selected");
         windowManager->FireWindowSplitCallBack();
     };
@@ -392,8 +412,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildRightSplitMenuItem()
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    auto rightSplitClickFunc = [windowManager](GestureEvent &info) {
-        CHECK_NULL_VOID_NOLOG(windowManager);
+    auto rightSplitClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent &info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            LOGE("create rightSpiltBtn callback func failed, windowManager is null!");
+            return;
+        }
         LOGI("right split selected");
         windowManager->FireWindowSplitCallBack(false);
     };
