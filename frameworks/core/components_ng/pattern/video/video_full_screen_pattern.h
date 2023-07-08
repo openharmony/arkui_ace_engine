@@ -58,6 +58,15 @@ public:
 
     void UpdateState();
 
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        auto videoPattern = videoPattern_.Upgrade();
+        if (!videoPattern) {
+            return MakeRefPtr<VideoLayoutProperty>();
+        }
+        return videoPattern->GetLayoutProperty<VideoLayoutProperty>()->Clone();
+    }
+
 private:
     WeakPtr<VideoPattern> videoPattern_;
     RefPtr<EventHub> eventHub_;

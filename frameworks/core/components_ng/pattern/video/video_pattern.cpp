@@ -763,7 +763,6 @@ void VideoPattern::UpdateControllerBar()
         auto video = AceType::DynamicCast<VideoNode>(host);
         CHECK_NULL_VOID(video);
         auto controller = AceType::DynamicCast<FrameNode>(video->GetControllerRow());
-
         if (controller) {
             auto sliderNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(SLIDER_POS));
             CHECK_NULL_VOID(sliderNode);
@@ -1320,15 +1319,18 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
             break;
         }
     }
-    if (fullScreenNodeId_.has_value()) {
-        auto fullScreenNode = FrameNode::GetFrameNode(V2::VIDEO_ETS_TAG, fullScreenNodeId_.value());
-        CHECK_NULL_VOID(fullScreenNode);
-        auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-        CHECK_NULL_VOID(fullScreenPattern);
-        fullScreenPattern->SetMediaFullScreen(isFullScreen);
+    if (!SystemProperties::GetExtSurfaceEnabled()) {
         return;
     }
-    SetMediaFullScreen(isFullScreen);
+    if (!fullScreenNodeId_.has_value()) {
+        SetMediaFullScreen(isFullScreen);
+        return;
+    }
+    auto fullScreenNode = FrameNode::GetFrameNode(V2::VIDEO_ETS_TAG, fullScreenNodeId_.value());
+    CHECK_NULL_VOID(fullScreenNode);
+    auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
+    CHECK_NULL_VOID(fullScreenPattern);
+    fullScreenPattern->SetMediaFullScreen(isFullScreen);
 }
 
 void VideoPattern::FullScreen()
@@ -1348,7 +1350,6 @@ void VideoPattern::FullScreen()
         fullScreenNodeId_.value(), fullScreenPattern);
     CHECK_NULL_VOID(fullScreenNode);
     fullScreenPattern->RequestFullScreen(videoNode);
-    OnFullScreenChange(true);
 }
 
 void VideoPattern::EnableDrag()
@@ -1470,6 +1471,11 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     progressRate_ = videoPattern->GetProgressRate();
     fullScreenNodeId_.reset();
     RegisterMediaPlayerEvent();
+    auto videoNode = GetHost();
+    CHECK_NULL_VOID(videoNode);
+    // change event hub to the origin video node
+    videoPattern->GetEventHub<VideoEventHub>()->AttachHost(videoNode);
+    videoNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void VideoPattern::UpdateFsState()
