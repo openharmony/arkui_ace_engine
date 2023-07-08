@@ -317,6 +317,7 @@ void UINode::AttachToMainTree(bool recursive)
         return;
     }
     onMainTree_ = true;
+    isRemoving_ = false;
     OnAttachToMainTree(recursive);
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -751,5 +752,18 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
         // Recursively traverse the child nodes of each node
         child->GetPerformanceCheckData(nodeMap);
     }
+}
+
+RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
+{
+    if (id.empty()) {
+        return nullptr;
+    }
+    for (auto& [node, index] : disappearingChildren_) {
+        if (node->GetInspectorIdValue("") == id) {
+            return node;
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG
