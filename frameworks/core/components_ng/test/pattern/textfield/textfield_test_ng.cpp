@@ -5835,4 +5835,68 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     event.code = KeyCode::KEY_FORWARD_DEL;
     EXPECT_TRUE(pattern->OnKeyEvent(event));
 }
+
+/**
+ * @tc.name: StopEditing001
+ * @tc.desc: test StopEditing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, StopEditing001, TestSize.Level2)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldController = AceType::MakeRefPtr<TextFieldController>();
+    ASSERT_NE(textFieldController, nullptr);
+    textFieldController->SetPattern(textFieldPattern);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = false;
+    textFieldPattern->StopEditing();
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->OnModifyDone();
+    textFieldPattern->textEditingValue_.Reset();
+    textFieldPattern->StopEditing();
+    textFieldController->StopEditing();
+    textFieldController->stopEditing_ = []() {};
+    textFieldController->StopEditing();
+    EXPECT_EQ(textFieldPattern->imeAttached_, false);
+}
+
+/**
+ * @tc.name: TextFieldPatternOnTextInputScroll001
+ * @tc.desc: Verify that the AddScrollEvent interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextInputScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call the OnTextInputScroll.
+     * @tc.expected: step2. Check the value set in OnTextInputScroll.
+     */
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLines(2);
+    pattern->OnTextInputScroll(0.0f);
+    layoutProperty->UpdateMaxLines(1);
+    pattern->textRect_.x_ = 10.0f;
+    pattern->textRect_.width_ = 200.0f;
+    pattern->contentRect_.x_ = 20.0f;
+    pattern->contentRect_.width_ = 100.0f;
+    pattern->OnTextInputScroll(-1000.0f);
+    pattern->isSingleHandle_ = false;
+    pattern->OnTextInputScroll(0.0f);
+    pattern->isSingleHandle_ = true;
+    pattern->OnTextInputScroll(0.0f);
+    EXPECT_EQ(pattern->caretRect_.GetX(), 0.0f);
+    EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->currentOffset_, pattern->textRect_.GetY()));
+}
 } // namespace OHOS::Ace::NG
