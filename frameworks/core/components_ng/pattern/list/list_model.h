@@ -48,6 +48,7 @@ public:
     virtual void SetLaneConstrain(const Dimension& laneMinLength, const Dimension& laneMaxLength) = 0;
     virtual void SetLaneMinLength(const Dimension& laneMinLength) = 0;
     virtual void SetLaneMaxLength(const Dimension& laneMaxLength) = 0;
+    virtual void SetLaneGutter(const Dimension& laneGutter) = 0;
     virtual void SetListItemAlign(V2::ListItemAlign listItemAlign) = 0;
     virtual void SetMultiSelectable(bool selectable) = 0;
     virtual void SetCachedCount(int32_t cachedCount) = 0;

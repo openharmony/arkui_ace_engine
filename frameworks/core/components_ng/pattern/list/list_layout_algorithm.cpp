@@ -798,8 +798,10 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 laneIndex = (index - startIndex) % GetLanes();
             }
+
+            float laneGutter = GetLaneGutter();
             crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize * GetLanes());
-            crossOffset += crossSize / GetLanes() * laneIndex;
+            crossOffset += ((crossSize + laneGutter) / GetLanes() - laneGutter) * laneIndex + laneGutter * laneIndex;
         } else {
             crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
         }
