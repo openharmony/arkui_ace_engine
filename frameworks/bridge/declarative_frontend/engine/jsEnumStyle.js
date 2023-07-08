@@ -1749,3 +1749,10 @@ var WebCaptureMode;
 (function (WebCaptureMode) {
   WebCaptureMode[WebCaptureMode["HOME_SCREEN"] = 0] = "HOME_SCREEN";
 })(WebCaptureMode || (WebCaptureMode = {}));
+
+var CalendarAlign;
+(function (CalendarAlign) {
+  CalendarAlign[CalendarAlign["START"] = 0] = "START";
+  CalendarAlign[CalendarAlign["CENTER"] = 1] = "CENTER";
+  CalendarAlign[CalendarAlign["END"] = 2] = "END";
+})(CalendarAlign || (CalendarAlign = {}));
