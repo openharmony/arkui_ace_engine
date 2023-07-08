@@ -1533,7 +1533,9 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsAlign", info, checkList)) {
+    if (!CheckJSCallbackInfo("JsAlign", info, checkList) && PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        ViewAbstractModel::GetInstance()->SetAlign(Alignment::CENTER);
         return;
     }
     auto value = info[0]->ToNumber<int32_t>();
