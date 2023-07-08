@@ -178,8 +178,8 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     auto renderContext = host->GetRenderContext();
     if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         auto minSize = std::min(frameSize.Height(), frameSize.Width());
-        if (renderContext->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
-            minSize = GetFirstValidRadius(renderContext->GetBorderRadius().value()).ConvertToPx() * 2;
+        if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
+            minSize = GetFirstValidRadius(buttonLayoutProperty->GetBorderRadius().value()).ConvertToPx() * 2;
         }
         radius.SetValue(minSize / 2.0);
         BorderRadiusProperty borderRadius { radius, radius, radius, radius };
