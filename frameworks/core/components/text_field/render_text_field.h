@@ -143,6 +143,7 @@ public:
     std::u16string GetLeftTextOfCursor(int32_t number);
     std::u16string GetRightTextOfCursor(int32_t number);
     int32_t GetTextIndexAtCursor();
+    bool IsSelected() const;
 
     void SetInputFilter(const std::string& inputFilter)
     {

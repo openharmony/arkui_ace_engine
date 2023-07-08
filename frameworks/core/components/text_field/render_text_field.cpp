@@ -2815,24 +2815,33 @@ void RenderTextField::Delete(int32_t start, int32_t end)
 
 std::u16string RenderTextField::GetLeftTextOfCursor(int32_t number)
 {
-    if (number > cursorPositionForShow_) {
-        number = cursorPositionForShow_;
+    auto start = cursorPositionForShow_;
+    if (IsSelected()) {
+        start = std::min(GetEditingValue().selection.GetStart(), GetEditingValue().selection.GetEnd());
     }
-    auto stringText =
-        GetEditingValue().GetSelectedText(TextSelection(cursorPositionForShow_ - number, cursorPositionForShow_));
+    auto stringText = GetEditingValue().GetSelectedText(TextSelection(start - number, start));
     return StringUtils::Str8ToStr16(stringText);
 }
 
 std::u16string RenderTextField::GetRightTextOfCursor(int32_t number)
 {
-    auto stringText =
-        GetEditingValue().GetSelectedText(TextSelection(cursorPositionForShow_, cursorPositionForShow_ + number));
+    auto end = cursorPositionForShow_;
+    if (IsSelected()) {
+        end = std::max(GetEditingValue().selection.GetStart(), GetEditingValue().selection.GetEnd());
+    }
+    auto stringText = GetEditingValue().GetSelectedText(TextSelection(end, end + number));
     return StringUtils::Str8ToStr16(stringText);
 }
 
 int32_t RenderTextField::GetTextIndexAtCursor()
 {
     return cursorPositionForShow_;
+}
+
+bool RenderTextField::IsSelected() const
+{
+    return GetEditingValue().selection.IsValid() &&
+           !(GetEditingValue().selection.GetStart() == GetEditingValue().selection.GetEnd());
 }
 
 std::string RenderTextField::ProvideRestoreInfo()

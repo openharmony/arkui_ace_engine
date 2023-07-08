@@ -263,13 +263,15 @@ std::wstring TextPattern::GetWideText() const
 std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
 {
     auto wideText = GetWideText();
-    if (start < 0 || end > static_cast<int32_t>(wideText.length()) || start >= end) {
-        LOGI("Get selected boundary is invalid");
-        return "";
-    }
-    auto min = std::min(start, end);
-    auto max = std::max(start, end);
+    auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
+    auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
+        static_cast<int32_t>(wideText.length()));
     return StringUtils::ToString(wideText.substr(min, max - min));
+}
+
+bool TextPattern::IsSelected() const
+{
+    return textSelector_.IsValid() && !textSelector_.StartEqualToDest();
 }
 
 void TextPattern::HandleOnCopy()
