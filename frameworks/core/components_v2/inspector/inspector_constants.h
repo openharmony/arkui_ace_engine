@@ -298,6 +298,10 @@ ACE_EXPORT extern const char SCROLL_ETS_TAG[];
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[];
 ACE_EXPORT extern const char CALENDAR_ETS_TAG[];
 
+// calendarPicker
+ACE_EXPORT extern const char CALENDAR_PICKER_COMPONENT_TAG[];
+ACE_EXPORT extern const char CALENDAR_PICKER_ETS_TAG[];
+
 // badge
 ACE_EXPORT extern const char BADGE_COMPONENT_TAG[];
 ACE_EXPORT extern const char BADGE_ETS_TAG[];

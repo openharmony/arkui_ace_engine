@@ -288,6 +288,10 @@ const char SCROLL_ETS_TAG[] = "Scroll";
 const char CALENDAR_COMPONENT_TAG[] = "calendar";
 const char CALENDAR_ETS_TAG[] = "Calendar";
 
+// calendarPicker
+const char CALENDAR_PICKER_COMPONENT_TAG[] = "CalendarPickerComponent";
+const char CALENDAR_PICKER_ETS_TAG[] = "CalendarPicker";
+
 // badge
 const char BADGE_COMPONENT_TAG[] = "BadgeComponent";
 const char BADGE_ETS_TAG[] = "Badge";

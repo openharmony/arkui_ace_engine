@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -291,6 +291,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { TOGGLE_COMPONENT_TAG, TOGGLE_ETS_TAG },
     { SCROLL_COMPONENT_TAG, SCROLL_ETS_TAG },
     { CALENDAR_COMPONENT_TAG, CALENDAR_ETS_TAG },
+    { CALENDAR_PICKER_COMPONENT_TAG, CALENDAR_PICKER_ETS_TAG },
     { BADGE_COMPONENT_TAG, BADGE_ETS_TAG },
     { SEARCH_COMPONENT_TAG, SEARCH_ETS_TAG },
     { FORM_COMPONENT_TAG, FORM_ETS_TAG },
