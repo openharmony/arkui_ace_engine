@@ -2140,6 +2140,72 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderPatternTest010
+ * @tc.desc: Test slider_pattern HandleHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     * @tc.steps: step2. call HandleHoverEvent hover false with normal.
+     * @tc.expected: step2. sliderPattern->bubbleFlag_ is false.
+     */
+    sliderPattern->bubbleFlag_ = true;
+    sliderPattern->mouseHoverFlag_ = true;
+    sliderPattern->mousePressedFlag_ = false;
+    sliderPattern->focusFlag_ = false;
+    sliderPattern->HandleHoverEvent(false);
+    ASSERT_FALSE(sliderPattern->bubbleFlag_);
+
+    /**
+     * @tc.steps: step3. call HandleHoverEvent hover false with mouse pressed.
+     * @tc.expected: step3. sliderPattern->bubbleFlag_ is true.
+     */
+    sliderPattern->bubbleFlag_ = true;
+    sliderPattern->mouseHoverFlag_ = false;
+    sliderPattern->mousePressedFlag_ = true;
+    sliderPattern->focusFlag_ = false;
+    sliderPattern->HandleHoverEvent(false);
+    ASSERT_TRUE(sliderPattern->bubbleFlag_);
+
+    /**
+     * @tc.steps: step4. call HandleHoverEvent hover false with focus.
+     * @tc.expected: step4. sliderPattern->bubbleFlag_ is true.
+     */
+    sliderPattern->bubbleFlag_ = true;
+    sliderPattern->mouseHoverFlag_ = false;
+    sliderPattern->mousePressedFlag_ = false;
+    sliderPattern->focusFlag_ = true;
+    sliderPattern->HandleHoverEvent(false);
+    ASSERT_TRUE(sliderPattern->bubbleFlag_);
+
+    /**
+     * @tc.steps: step5. call HandleHoverEvent hover true.
+     * @tc.expected: step5. sliderPattern->bubbleFlag_ is true.
+     */
+    sliderPattern->bubbleFlag_ = true;
+    sliderPattern->mouseHoverFlag_ = true;
+    sliderPattern->mousePressedFlag_ = false;
+    sliderPattern->focusFlag_ = false;
+    sliderPattern->HandleHoverEvent(true);
+    ASSERT_TRUE(sliderPattern->bubbleFlag_);
+}
+
+/**
  * @tc.name: SliderLayoutAlgorithmTest001
  * @tc.desc: Test slider_layout_algorithm Measure and Layout(Reverse=false)
  * @tc.type: FUNC
