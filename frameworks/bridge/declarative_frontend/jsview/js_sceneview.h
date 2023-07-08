@@ -38,6 +38,9 @@ public:
     static void JsAddCustomRender(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
+    static void JsShader(const JSCallbackInfo& info);
+    static void JsShaderImageTexture(const JSCallbackInfo& info);
+    static void JsShaderInputBuffer(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
