@@ -134,6 +134,9 @@ public:
     int32_t AddTextSpan(const TextSpanOptions& options);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
+    std::u16string GetLeftTextOfCursor(int32_t number);
+    std::u16string GetRightTextOfCursor(int32_t number);
+    int32_t GetTextIndexAtCursor();
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);

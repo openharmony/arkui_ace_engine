@@ -297,6 +297,26 @@ void RichEditorPattern::DeleteSpansByRange(
     host->MarkModifyDone();
 }
 
+std::u16string RichEditorPattern::GetLeftTextOfCursor(int32_t number)
+{
+    if (number > caretPosition_) {
+        number = caretPosition_;
+    }
+    auto stringText = GetSelectedText(caretPosition_ - number, caretPosition_);
+    return StringUtils::Str8ToStr16(stringText);
+}
+
+std::u16string RichEditorPattern::GetRightTextOfCursor(int32_t number)
+{
+    auto stringText = GetSelectedText(caretPosition_, caretPosition_ + number);
+    return StringUtils::Str8ToStr16(stringText);
+}
+
+int32_t RichEditorPattern::GetTextIndexAtCursor()
+{
+    return caretPosition_;
+}
+
 void RichEditorPattern::ClearContent(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(child);
