@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 240.0_vp;
 
 class ACE_EXPORT NavigationLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(NavigationLayoutProperty, LayoutProperty);
@@ -75,13 +75,14 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        std::string navBarWidthRange = GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH).ToString() + ", "
-            + GetMaxNavBarWidthValue(DEFAULT_MAX_NAV_BAR_WIDTH).ToString();
+        std::string navBarWidthRange = GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH).ToString() + ", " +
+                                       GetMaxNavBarWidthValue(DEFAULT_MAX_NAV_BAR_WIDTH).ToString();
         json->Put("navBarWidth", GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).ToString().c_str());
         json->Put("navBarWidthRange", navBarWidthRange.c_str());
         json->Put("minContentWidth", GetMinContentWidthValue(DEFAULT_MIN_CONTENT_WIDTH).ToString().c_str());
-        json->Put("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) ==
-            NavBarPosition::START ? "NavBarPosition.Start" : "NavBarPosition.End");
+        json->Put("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) == NavBarPosition::START
+                                        ? "NavBarPosition.Start"
+                                        : "NavBarPosition.End");
         static const std::array<std::string, 3> NAVIGATION_MODE_TO_STRING = {
             "NavigationMode.STACK",
             "NavigationMode.SPLIT",
