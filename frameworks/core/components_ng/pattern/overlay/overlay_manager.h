@@ -27,6 +27,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
@@ -103,6 +104,9 @@ public:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     void ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
         std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    void ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
+        std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
 
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
