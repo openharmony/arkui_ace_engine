@@ -40,6 +40,9 @@ public:
         value->propBadgeCount_ = CloneBadgeCount();
         value->propBadgeMaxCount_ = CloneBadgeMaxCount();
         value->propBadgePosition_ = CloneBadgePosition();
+        value->propBadgePositionX_ = CloneBadgePositionX();
+        value->propBadgePositionY_ = CloneBadgePositionY();
+        value->propIsPositionXy_ = CloneIsPositionXy();
 
         value->propBadgeColor_ = CloneBadgeColor();
         value->propBadgeTextColor_ = CloneBadgeTextColor();
@@ -58,6 +61,9 @@ public:
         ResetBadgeCount();
         ResetBadgeMaxCount();
         ResetBadgePosition();
+        ResetBadgePositionX();
+        ResetBadgePositionY();
+        ResetIsPositionXy();
 
         ResetBadgeColor();
         ResetBadgeTextColor();
@@ -99,6 +105,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCount, int, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeMaxCount, int, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgePosition, BadgePosition, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgePositionX, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgePositionY, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsPositionXy, bool, PROPERTY_UPDATE_MEASURE_SELF);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeTextColor, Color, PROPERTY_UPDATE_MEASURE);

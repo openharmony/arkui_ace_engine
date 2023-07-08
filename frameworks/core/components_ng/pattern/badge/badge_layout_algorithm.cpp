@@ -122,14 +122,10 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto parentSize = geometryNode->GetFrameSize();
-    auto width = parentSize.Width();
-    auto height = parentSize.Height();
     auto offset = geometryNode->GetFrameOffset();
 
     auto layoutProperty = DynamicCast<BadgeLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto badgePosition = layoutProperty->GetBadgePosition();
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -185,27 +181,38 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
 
     OffsetF textOffset;
-    if (textData == " ") {
-        if (badgePosition == BadgePosition::RIGHT_TOP) {
-            textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY());
-        } else if (badgePosition == BadgePosition::RIGHT) {
-            textOffset =
-                OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height / 2 - badgeCircleRadius);
+    if (!layoutProperty->GetIsPositionXy().value()) {
+        auto parentSize = geometryNode->GetFrameSize();
+        auto width = parentSize.Width();
+        auto height = parentSize.Height();
+        auto badgePosition = layoutProperty->GetBadgePosition();
+        if (textData == " ") {
+            if (badgePosition == BadgePosition::RIGHT_TOP) {
+                textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY());
+            } else if (badgePosition == BadgePosition::RIGHT) {
+                textOffset = OffsetF(
+                    offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height / 2 - badgeCircleRadius);
+            } else {
+                textOffset = OffsetF(offset.GetX(), offset.GetY() + height / 2 - badgeCircleRadius);
+            }
         } else {
-            textOffset = OffsetF(offset.GetX(), offset.GetY() + height / 2 - badgeCircleRadius);
+            if (badgePosition == BadgePosition::RIGHT_TOP) {
+                textOffset = OffsetF(
+                    width - badgeCircleDiameter + Dimension(2.0_vp).ConvertToPx(), 0 - Dimension(2.0_vp).ConvertToPx());
+                textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
+            } else if (badgePosition == BadgePosition::RIGHT) {
+                textOffset = OffsetF(width - badgeCircleDiameter, height / 2 - badgeCircleRadius);
+                textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
+            } else {
+                textOffset = OffsetF(0, height / 2 - badgeCircleRadius);
+                textOffset = OffsetF(offset.GetX(), offset.GetY() + textOffset.GetY());
+            }
         }
     } else {
-        if (badgePosition == BadgePosition::RIGHT_TOP) {
-            textOffset = OffsetF(
-                width - badgeCircleDiameter + Dimension(2.0_vp).ConvertToPx(), 0 - Dimension(2.0_vp).ConvertToPx());
-            textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
-        } else if (badgePosition == BadgePosition::RIGHT) {
-            textOffset = OffsetF(width - badgeCircleDiameter, height / 2 - badgeCircleRadius);
-            textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
-        } else {
-            textOffset = OffsetF(0, height / 2 - badgeCircleRadius);
-            textOffset = OffsetF(offset.GetX(), offset.GetY() + textOffset.GetY());
-        }
+        auto badgePositionX = layoutProperty->GetBadgePositionX();
+        auto badgePositionY = layoutProperty->GetBadgePositionY();
+        textOffset = OffsetF(
+            offset.GetX() + badgePositionX->ConvertToPx(), offset.GetY() + badgePositionY->ConvertToPx());
     }
 
     textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
