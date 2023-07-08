@@ -733,8 +733,8 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
 
-    int32_t start = 0;
-    int32_t end = 0;
+    int32_t start = -1;
+    int32_t end = -1;
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     JSContainerBase::ParseJsInt32(jsObject->GetProperty("start"), start);
