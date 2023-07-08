@@ -619,7 +619,7 @@ double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std:
 }
 
 bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, bool isStroke,
-        const PaintState& state, bool hasShadow)
+    const PaintState& state, bool hasShadow)
 {
     using namespace Constants;
     Rosen::TypographyStyle style;
@@ -642,7 +642,6 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
 #ifndef NEW_SKIA
         txtShadow.blurRadius = shadow_.GetBlurRadius();
 #else
-        //TODO txtShadow.blur_sigma 
 #endif
         txtStyle.shadows.emplace_back(txtShadow);
     }

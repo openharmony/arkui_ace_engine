@@ -97,7 +97,8 @@ double TextOverlayBase::GetBoundaryOfParagraph(bool isLeftBoundary) const
     double rightBoundaryOfParagraph = boxes.front().rect.GetLeft();
     double bottomBoundaryOfParagraph = boxes.front().rect.GetBottom();
     for (const auto& box : boxes) {
-        if (cursorPositionType_ == CursorPositionType::END && !NearEqual(box.rect.GetBottom(), bottomBoundaryOfParagraph)) {
+        if (cursorPositionType_ == CursorPositionType::END &&
+            !NearEqual(box.rect.GetBottom(), bottomBoundaryOfParagraph)) {
             bottomBoundaryOfParagraph = box.rect.GetBottom();
             leftBoundaryOfParagraph = box.rect.GetLeft();
             rightBoundaryOfParagraph = box.rect.GetRight();

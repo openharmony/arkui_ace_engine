@@ -36,8 +36,8 @@ public:
         return std::make_unique<TestingTypographyCreate>();
     }
 
-   static std::unique_ptr<TestingTypographyCreate> Create(const TestingTypographyStyle& style,
-                                                    std::shared_ptr<TestingFontCollection> collection)
+    static std::unique_ptr<TestingTypographyCreate> Create(
+        const TestingTypographyStyle &style, std::shared_ptr<TestingFontCollection> collection)
     {
         return std::make_unique<TestingTypographyCreate>();
     }

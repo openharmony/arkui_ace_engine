@@ -17,12 +17,12 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("view_abstract_test_ng") {
   module_out_path = base_test_output_path
   include_dirs = [
-  "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
-  "//foundation/graphic/graphic_2d/rosen/modules//2d_graphics/include",
-  "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-  "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-  "//third_party/flutter/skia",
-]
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
+    "//foundation/graphic/graphic_2d/rosen/modules//2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//third_party/flutter/skia",
+  ]
 
   sources = [
     "$ace_root/frameworks/base/geometry/dimension.cpp",

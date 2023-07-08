@@ -64,8 +64,8 @@ SkColor ConvertSkColor(Color color);
 
 OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
 
-void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context,
-            OHOS::Rosen::TextStyle& txtStyle);
+void ConvertTxtStyle(const TextStyle &textStyle,
+    const WeakPtr<PipelineBase> &context, OHOS::Rosen::TextStyle &txtStyle);
 
 Rect ConvertSkRect(const Rosen::Drawing::RectF &skRect);
 

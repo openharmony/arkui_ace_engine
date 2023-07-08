@@ -226,7 +226,6 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtShadow.blurRadius = spanShadow.GetBlurRadius();
 #endif
         txtStyle.shadows.emplace_back(txtShadow);
-
     }
 
     if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {
@@ -275,7 +274,8 @@ Rect ConvertSkRect(const Rosen::Drawing::RectF &skRect)
 
 OHOS::Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration)
 {
-    OHOS::Rosen::PlaceholderVerticalAlignment convertValue = OHOS::Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;
+    OHOS::Rosen::PlaceholderVerticalAlignment convertValue =
+        OHOS::Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;
     switch (textDecoration) {
         case PlaceholderAlignment::BASELINE:
             convertValue = OHOS::Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;

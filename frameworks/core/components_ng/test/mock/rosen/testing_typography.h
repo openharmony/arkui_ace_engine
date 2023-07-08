@@ -67,7 +67,8 @@ public:
 
     virtual void Paint(TestingCanvas* canvas, double x, double y) {}
 
-    virtual std::vector<TestingTypographyProperties::TextRect> GetTextRectsByBoundary(size_t /* start */, size_t /* end */,
+    virtual std::vector<TestingTypographyProperties::TextRect> GetTextRectsByBoundary(
+        size_t /* start */, size_t /* end */,
         TestingTypographyProperties::TextRectHeightStyle /* height */,
         TestingTypographyProperties::TextRectWidthStyle /* width */)
     {

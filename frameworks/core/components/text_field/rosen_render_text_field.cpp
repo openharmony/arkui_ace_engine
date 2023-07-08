@@ -963,7 +963,7 @@ std::shared_ptr<RSShaderEffect> RosenRenderTextField::MakeGradientShader(double 
 }
 
 void RosenRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::TypographyStyle> paragraphStyle,
-        std::unique_ptr<Rosen::TextStyle> txtStyle, double textAreaWidth)
+    std::unique_ptr<Rosen::TextStyle> txtStyle, double textAreaWidth)
 {
     if (maxLines_ != 1 || showPlaceholder_ || !paragraph_ || !needFade_) {
         // Not support placeHolder or multiline.

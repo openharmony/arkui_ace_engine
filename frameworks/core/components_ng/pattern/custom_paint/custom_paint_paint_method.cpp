@@ -1783,7 +1783,8 @@ double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<O
     return x;
 }
 
-OHOS::Rosen::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const
+OHOS::Rosen::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(
+    OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const
 {
     if (align == OHOS::Rosen::TextAlign::START) {
         return (direction == OHOS::Rosen::TextDirection::LTR) ? OHOS::Rosen::TextAlign::LEFT

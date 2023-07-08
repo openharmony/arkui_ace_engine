@@ -18,12 +18,12 @@ ohos_unittest("calendar_pattern_test_ng") {
   module_out_path = pattern_test_output_path
 
   include_dirs = [
-  "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
-  "//foundation/graphic/graphic_2d/rosen/modules//2d_graphics/include",
-  "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-  "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-  "//third_party/flutter/skia",
-]
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
+    "//foundation/graphic/graphic_2d/rosen/modules//2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//third_party/flutter/skia",
+  ]
 
   sources = [
     # animation
@@ -166,8 +166,8 @@ ohos_unittest("calendar_pattern_test_ng") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_unittest_log",
     "$cjson_root:cjson_static",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text",
     "//third_party/googletest:gmock_main",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text"
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

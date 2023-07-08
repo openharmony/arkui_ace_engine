@@ -65,13 +65,11 @@ void RosenFontCollection::VaryFontCollectionWithFontWeightScale(float fontWeight
     if (LessOrEqual(fontWeightScale, 0.0)) {
         return;
     }
-
 }
 
 void RosenFontCollection::LoadSystemFont()
 {
     ACE_FUNCTION_TRACE();
-
 }
 
 void RosenFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)

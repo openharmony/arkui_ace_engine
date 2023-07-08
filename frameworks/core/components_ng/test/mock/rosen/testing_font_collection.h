@@ -38,7 +38,6 @@ public:
         return std::make_shared<TestingFontCollection>();
     }
 
-
 private:
     static std::shared_ptr<TestingFontCollection> instance;
 };

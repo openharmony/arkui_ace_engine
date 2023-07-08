@@ -48,7 +48,7 @@ config("ace_unittest_config") {
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
     "//third_party/skia",
-    "//third_party/flutter/build/skia"
+    "//third_party/flutter/build/skia",
   ]
   cflags_cc = []
   defines = []

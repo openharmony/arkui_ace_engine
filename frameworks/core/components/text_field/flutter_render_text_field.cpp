@@ -187,7 +187,7 @@ void FlutterRenderTextField::PaintSelectCaret(SkCanvas* canvas)
     if (!boxes.empty()) {
         Offset startCaretOffset = Offset(
             boxes.back().rect.GetRight() - boxes.front().rect.GetLeft(),
-                boxes.back().rect.GetTop() - boxes.front().rect.GetTop());
+            boxes.back().rect.GetTop() - boxes.front().rect.GetTop());
         if (start >= GetInitIndex() && end >= GetInitIndex()) {
             startCaretRect_ = caretRect + startCaretOffset;
         } else {
@@ -820,7 +820,7 @@ sk_sp<SkShader> FlutterRenderTextField::MakeGradientShader(double shadeWidth) co
 }
 
 void FlutterRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::TypographyStyle> paragraphStyle,
-            std::unique_ptr<Rosen::TextStyle> txtStyle, double textAreaWidth)
+    std::unique_ptr<Rosen::TextStyle> txtStyle, double textAreaWidth)
 {
     if (maxLines_ != 1 || showPlaceholder_ || !paragraph_ || !needFade_) {
         // Not support placeHolder or multiline.

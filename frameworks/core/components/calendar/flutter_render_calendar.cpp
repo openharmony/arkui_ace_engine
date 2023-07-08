@@ -52,7 +52,7 @@ std::unique_ptr<Rosen::Typography> GetTextParagraph(const std::string& text, con
 }
 
 void DrawCalendarText(ScopedCanvas& canvas, const std::string& text,
-        const Rosen::TextStyle& textStyle, const Rect& boxRect, Rect& textRect)
+    const Rosen::TextStyle& textStyle, const Rect& boxRect, Rect& textRect)
 {
     // The lunar calendar description is truncated by more than three characters.
     std::string newText { text };
