@@ -137,7 +137,7 @@ RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geomet
     ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     bool imageRepeatX = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_X;
     bool imageRepeatY = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_Y;
-    
+
     if (loadingCtx_->GetSourceInfo().IsSvg()) {
         const float invalidValue = -1;
         paintSize.SetWidth(dstRect_.IsValid() ? dstRect_.Width() : invalidValue);
@@ -149,8 +149,8 @@ RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geomet
     } else {
         paintSize.SetWidth(imageRepeatX ? geometryNode->GetContentSize().Width() : dstRect_.Width());
         paintSize.SetHeight(imageRepeatY ? geometryNode->GetContentSize().Height() : dstRect_.Height());
-        paintSize.SetLeft(imageRepeatX ? 0 : dstRect_.GetX() + geometryNode->GetContentOffset().GetX());
-        paintSize.SetTop(imageRepeatY ? 0 : dstRect_.GetY() + geometryNode->GetContentOffset().GetY());
+        paintSize.SetLeft((imageRepeatX ? 0 : dstRect_.GetX()) + geometryNode->GetContentOffset().GetX());
+        paintSize.SetTop((imageRepeatY ? 0 : dstRect_.GetY()) + geometryNode->GetContentOffset().GetY());
     }
     return paintSize;
 }
