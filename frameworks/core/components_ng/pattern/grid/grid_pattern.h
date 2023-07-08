@@ -31,7 +31,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
-class GridScrollBar;
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
@@ -130,8 +129,6 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
-    void OnMouseSelectAll();
-
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
     bool IsAtTop() const override
@@ -206,14 +203,9 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-    void UninitMouseEvent();
-    void InitMouseEvent();
-    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
-    void ClearMultiSelect();
-    void ClearSelectedZone();
-    void OnMouseRelease();
-    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
-    void MultiSelectWithoutKeyboard(const RectF& selectedZone);
+
+    void ClearMultiSelect() override;
+    void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
@@ -223,21 +215,16 @@ private:
     RefPtr<GridPositionController> positionController_;
     float animatorOffset_ = 0.0f;
 
-    bool multiSelectable_ = false;
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
-    bool isMouseEventInit_ = false;
+
     bool scrollable_ = true;
     int32_t scrollState_ = SCROLL_FROM_NONE;
-    bool mousePressed_ = false;
+
     bool firstShow_ = true;
 
     int32_t lastFocusItemMainIndex_ = 0;
     int32_t lastFocusItemCrossIndex_ = 0;
-
-    OffsetF mouseStartOffset_;
-    OffsetF mouseEndOffset_;
-    OffsetF mousePressOffset_;
 
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
 

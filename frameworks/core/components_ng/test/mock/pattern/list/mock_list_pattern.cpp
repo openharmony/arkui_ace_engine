@@ -95,4 +95,8 @@ void ListPattern::FireOnScrollStart() {}
 void ListPattern::OnAnimateStop() {}
 
 void ListPattern::ScrollTo(float position) {}
+
+void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
+
+void ListPattern::ClearMultiSelect() {};
 } // namespace OHOS::Ace::NG
