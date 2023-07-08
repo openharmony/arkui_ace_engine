@@ -791,6 +791,11 @@ void OverlayManager::HideMenu(int32_t targetId)
     BlurOverlayNode();
     menuMap_[targetId]->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        RemoveEventColumn();
+        RemovePixelMapAnimation(false, 0, 0);
+        RemoveFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void OverlayManager::HideAllMenus()
@@ -1644,6 +1649,25 @@ RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
+void OverlayManager::MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
+{
+    CHECK_NULL_VOID(windowScene);
+    columnNode->MountToParent(windowScene);
+    columnNode->OnMountToParentDone();
+    windowScene->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    pixmapColumnNodeWeak_ = columnNode;
+    hasPixelMap_ = true;
+}
+
+void OverlayManager::MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
+{
+    CHECK_NULL_VOID(windowScene);
+    columnNode->MountToParent(windowScene, 1);
+    columnNode->OnMountToParentDone();
+    eventColumnNodeWeak_ = columnNode;
+    hasEvent_ = true;
+}
+
 void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
