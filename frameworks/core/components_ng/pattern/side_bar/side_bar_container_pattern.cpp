@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+
 #include <optional>
 
 #include "base/mousestyle/mouse_style.h"
@@ -48,6 +49,7 @@ constexpr Dimension DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING = 2.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr float HOVER_OPACITY = 0.05f;
 constexpr float PRESS_OPACITY = 0.1f;
+constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -566,8 +568,8 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneOffset.SetY(-dividerStartMagin.ConvertToPx());
     SizeF hotZoneSize;
-    hotZoneSize.SetWidth(realDividerWidth_ +
-        DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM * DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
+    hotZoneSize.SetWidth(realDividerWidth_ + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
+                                                 DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneSize.SetHeight(layoutAlgorithm->GetRealSideBarHeight());
 
     DimensionRect hotZoneRegion;
@@ -615,40 +617,44 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
 
-    auto frameSize = geometryNode->GetFrameSize();
-    auto parentWidth = frameSize.Width();
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    auto scaleProperty = constraint->scaleProperty;
-    auto minSideBarWidthPx = ConvertToPx(adjustMinSideBarWidth_, scaleProperty, parentWidth).value_or(0);
-    auto maxSideBarWidthPx = ConvertToPx(adjustMaxSideBarWidth_, scaleProperty, parentWidth).value_or(0);
+        auto frameSize = geometryNode->GetFrameSize();
+        auto parentWidth = frameSize.Width();
+        auto constraint = layoutProperty->GetLayoutConstraint();
+        auto scaleProperty = constraint->scaleProperty;
+        minSideBarWidth_ = ConvertToPx(adjustMinSideBarWidth_, scaleProperty, parentWidth).value_or(0);
+        maxSideBarWidth_ = ConvertToPx(adjustMaxSideBarWidth_, scaleProperty, parentWidth).value_or(0);
+    }
 
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     bool isSideBarStart = sideBarPosition == SideBarPosition::START;
 
     auto sideBarLine = preSidebarWidth_ + (isSideBarStart ? xOffset : -xOffset);
 
-    if (sideBarLine > minSideBarWidthPx && sideBarLine < maxSideBarWidthPx) {
+    if (sideBarLine > minSideBarWidth_ && sideBarLine < maxSideBarWidth_) {
         realSideBarWidth_ = sideBarLine;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 
-    if (sideBarLine >= maxSideBarWidthPx) {
-        realSideBarWidth_ = maxSideBarWidthPx;
+    if (sideBarLine >= maxSideBarWidth_) {
+        realSideBarWidth_ = maxSideBarWidth_;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 
     auto halfDragRegionWidth = dragRect_.Width() / 2;
-    if (sideBarLine > minSideBarWidthPx - halfDragRegionWidth) {
-        realSideBarWidth_ = minSideBarWidthPx;
+    if (sideBarLine > minSideBarWidth_ - halfDragRegionWidth) {
+        realSideBarWidth_ = minSideBarWidth_;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
-    realSideBarWidth_ = minSideBarWidthPx;
+    realSideBarWidth_ = minSideBarWidth_;
 
     auto autoHide_ = layoutProperty->GetAutoHide().value_or(true);
     if (autoHide_) {
@@ -781,8 +787,7 @@ SideBarPosition SideBarContainerPattern::GetSideBarPositionWithRtl(
 {
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
     if (layoutProperty->GetLayoutDirection() == TextDirection::RTL) {
-        sideBarPosition = (sideBarPosition == SideBarPosition::START)
-                            ? SideBarPosition::END : SideBarPosition::START;
+        sideBarPosition = (sideBarPosition == SideBarPosition::START) ? SideBarPosition::END : SideBarPosition::START;
     }
     return sideBarPosition;
 }
