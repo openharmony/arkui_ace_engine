@@ -77,6 +77,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE) {
                 if (!tabBarPattern->GetChangeByClick()) {
                     tabBarPattern->PlayTabBarTranslateAnimation(index);
+                    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
                 } else {
                     tabBarPattern->SetChangeByClick(false);
                 }
