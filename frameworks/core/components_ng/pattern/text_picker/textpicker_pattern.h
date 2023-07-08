@@ -224,8 +224,6 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
-    bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange) override;
-
     void SetValues(const std::vector<std::string>& values)
     {
         values_.clear();

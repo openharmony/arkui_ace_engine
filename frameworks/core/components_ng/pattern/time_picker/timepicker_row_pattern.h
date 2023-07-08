@@ -75,8 +75,6 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
-    bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange) override;
-
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TimePickerLayoutProperty>();

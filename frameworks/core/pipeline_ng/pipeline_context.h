@@ -137,6 +137,8 @@ public:
 
     void HandleOnAreaChangeEvent();
 
+    void NotifyConfigurationChange(const OnConfigurationChange& configurationChange) override;
+
     void AddVisibleAreaChangeNode(
         const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);

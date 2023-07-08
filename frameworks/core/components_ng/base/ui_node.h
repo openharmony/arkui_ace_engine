@@ -70,7 +70,9 @@ public:
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
 
-    virtual void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+    void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange);
+
+    virtual void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
 
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
@@ -114,6 +116,11 @@ public:
     RefPtr<UINode> GetParent() const
     {
         return parent_.Upgrade();
+    }
+
+    void SetNeedCallChildrenUpdate(bool needCallChildrenUpdate)
+    {
+        needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
     void SetParent(const WeakPtr<UINode>& parent)
@@ -512,6 +519,7 @@ private:
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
+    bool needCallChildrenUpdate_ = true;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;

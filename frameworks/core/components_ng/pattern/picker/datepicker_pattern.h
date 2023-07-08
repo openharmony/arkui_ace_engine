@@ -91,8 +91,6 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
-    bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange) override;
-    
     void SetChangeCallback(ColumnChangeCallback&& value);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);

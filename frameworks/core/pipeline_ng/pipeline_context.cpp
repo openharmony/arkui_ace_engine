@@ -330,6 +330,14 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
     needRenderNode_.insert(node);
 }
 
+void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange)
+{
+    LOGI("NotifyConfigurationChange");
+    auto rootNode = GetRootElement();
+    rootNode->UpdateConfigurationUpdate(configurationChange);
+    PipelineBase::NotifyConfigurationChange(configurationChange);
+}
+
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);

@@ -255,6 +255,8 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
 
+void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange) {}
+
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)

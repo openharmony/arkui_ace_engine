@@ -215,6 +215,20 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
     }
 }
 
+void UINode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
+{
+    OnConfigurationUpdate(configurationChange);
+    if (needCallChildrenUpdate_) {
+        auto children = GetChildren();
+        for (const auto& child : children) {
+            if (!child) {
+                continue;
+            }
+            child->UpdateConfigurationUpdate(configurationChange);
+        }
+    }
+}
+
 bool UINode::OnRemoveFromParent(bool allowTransition)
 {
     // The recursive flag will used by RenderContext, if recursive flag is false,
