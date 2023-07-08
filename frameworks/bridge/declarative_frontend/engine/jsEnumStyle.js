@@ -1744,3 +1744,8 @@ var RenderFit;
   RenderFit[RenderFit["RESIZE_COVER_TOP_LEFT"] = 14] = "RESIZE_COVER_TOP_LEFT";
   RenderFit[RenderFit["RESIZE_COVER_BOTTOM_RIGHT"] = 15] = "RESIZE_COVER_BOTTOM_RIGHT";
 })(RenderFit || (RenderFit = {}));
+
+var WebCaptureMode;
+(function (WebCaptureMode) {
+  WebCaptureMode[WebCaptureMode["HOME_SCREEN"] = 0] = "HOME_SCREEN";
+})(WebCaptureMode || (WebCaptureMode = {}));

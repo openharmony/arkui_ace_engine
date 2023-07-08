@@ -358,6 +358,38 @@ void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
     }
 }
 
+void WebScreenCaptureRequestOhos::Deny() const
+{
+    if (request_) {
+        request_->Refuse();
+    }
+}
+
+std::string WebScreenCaptureRequestOhos::GetOrigin() const
+{
+    if (request_) {
+        return request_->Origin();
+    }
+    return "";
+}
+
+void WebScreenCaptureRequestOhos::SetCaptureMode(int32_t mode)
+{
+    config_.mode = mode;
+}
+
+void WebScreenCaptureRequestOhos::SetSourceId(int32_t sourceId)
+{
+    config_.sourceId = sourceId;
+}
+
+void WebScreenCaptureRequestOhos::Grant() const
+{
+    if (request_) {
+        request_->Agree(config_);
+    }
+}
+
 int32_t ContextMenuParamOhos::GetXCoord() const
 {
     if (param_) {
@@ -1632,6 +1664,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onOverScrollV2_ = useNewPipe ? eventHub->GetOnOverScrollEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetOverScrollId(), oldContext);
+        onScreenCaptureRequestV2_ = useNewPipe ? eventHub->GetOnScreenCaptureRequestEvent() : nullptr;
     }
     return true;
 }
@@ -3808,6 +3841,25 @@ void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NW
                 onPermissionRequestV2(
                     std::make_shared<WebPermissionRequestEvent>(
                     AceType::MakeRefPtr<WebPermissionRequestOhos>(request)));
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void WebDelegate::OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), request]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            // ace 2.0
+            auto onScreenCaptureRequestV2 = delegate->onScreenCaptureRequestV2_;
+            if (onScreenCaptureRequestV2) {
+                onScreenCaptureRequestV2(
+                    std::make_shared<WebScreenCaptureRequestEvent>(
+                    AceType::MakeRefPtr<WebScreenCaptureRequestOhos>(request)));
             }
         },
         TaskExecutor::TaskType::JS);

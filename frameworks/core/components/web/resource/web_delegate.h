@@ -262,6 +262,29 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
+class WebScreenCaptureRequestOhos : public WebScreenCaptureRequest {
+    DECLARE_ACE_TYPE(WebScreenCaptureRequestOhos, WebScreenCaptureRequest)
+
+public:
+    WebScreenCaptureRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request)
+        : request_(request) {}
+
+    void Deny() const override;
+
+    std::string GetOrigin() const override;
+
+    void SetCaptureMode(int32_t mode) override;
+
+    void SetSourceId(int32_t sourceId) override;
+
+    void Grant() const override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest> request_;
+
+    OHOS::NWeb::NWebScreenCaptureConfig config_;
+};
+
 class WebWindowNewHandlerOhos : public WebWindowNewHandler {
     DECLARE_ACE_TYPE(WebWindowNewHandlerOhos, WebWindowNewHandler)
 
@@ -472,6 +495,7 @@ public:
     void OnFocus();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
+    void OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
@@ -725,6 +749,7 @@ private:
     EventCallbackV2 onAudioStateChangedV2_;
     EventCallbackV2 onFirstContentfulPaintV2_;
     EventCallbackV2 onOverScrollV2_;
+    EventCallbackV2 onScreenCaptureRequestV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

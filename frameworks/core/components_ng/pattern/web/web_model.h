@@ -138,6 +138,8 @@ public:
     virtual void SetAudioExclusive(bool audioExclusive) {};
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 
+    virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
+
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

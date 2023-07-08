@@ -146,6 +146,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnScaleChange, void);
     ACE_WEB_EVENT_PROPERTY(OnScroll, void);
     ACE_WEB_EVENT_PROPERTY(OnPermissionRequest, void);
+    ACE_WEB_EVENT_PROPERTY(OnScreenCaptureRequest, void);
     ACE_WEB_EVENT_PROPERTY(OnSearchResultReceive, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowNew, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowExit, void);

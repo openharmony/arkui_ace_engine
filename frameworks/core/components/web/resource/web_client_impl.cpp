@@ -580,6 +580,15 @@ void WebClientImpl::OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest>
     delegate->OnPermissionRequestPrompt(request);
 }
 
+void WebClientImpl::OnScreenCaptureRequest(std::shared_ptr<NWeb::NWebScreenCaptureAccessRequest> request)
+{
+    LOGI("OnScreenCaptureRequest");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnScreenCaptureRequest(request);
+}
+
 bool WebClientImpl::RunContextMenu(
     std::shared_ptr<NWeb::NWebContextMenuParams> params,
     std::shared_ptr<NWeb::NWebContextMenuCallback> callback)
