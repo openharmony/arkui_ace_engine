@@ -973,6 +973,7 @@ private:
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
+    float FitCursorInSafeArea();
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
     void ResetBackgroundColor();
@@ -1051,6 +1052,7 @@ private:
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
+    // relative to frameRect
     RectF caretRect_;
     bool cursorVisible_ = false;
     bool focusEventInitialized_ = false;
