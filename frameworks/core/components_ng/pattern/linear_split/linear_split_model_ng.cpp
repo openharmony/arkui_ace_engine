@@ -41,4 +41,9 @@ void LinearSplitModelNG::SetResizeable(NG::SplitType splitType, bool resizeable)
     ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizeable, resizeable);
 }
 
+void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ItemDivider& divider)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider);
+}
+
 } // namespace OHOS::Ace::NG

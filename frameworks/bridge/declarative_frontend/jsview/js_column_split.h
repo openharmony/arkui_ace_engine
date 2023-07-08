@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_COLUMN_SPLIT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_COLUMN_SPLIT_H
 
+#include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
@@ -26,6 +27,7 @@ public:
     static void Create();
     static void JSBind(BindingTarget globalObj);
     static void JsResizeable(bool resizeable);
+    static void JsDivider(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework
