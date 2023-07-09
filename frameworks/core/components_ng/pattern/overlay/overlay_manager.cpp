@@ -1461,7 +1461,9 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_MASK_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
         maskNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundMask.value());
+        if (sheetStyle.backgroundMask.has_value()) {
+            maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundMask.value());
+        }
         maskNode->MountToParent(rootNode);
         sheetNode->MountToParent(rootNode);
         modalList_.emplace_back(WeakClaim(RawPtr(sheetNode)));
