@@ -341,8 +341,6 @@ public:
     {
         imeAttached_ = imeAttached;
     }
-
-    void UpdateConfiguration();
 #endif
 
     // distribute
