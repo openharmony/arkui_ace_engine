@@ -1618,6 +1618,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::OnSslSelectCertRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
+    JSClass<JSWeb>::StaticMethod("onContextMenuHide", &JSWeb::OnContextMenuHide);
     JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
     JSClass<JSWeb>::StaticMethod("mediaPlayGestureAccess", &JSWeb::MediaPlayGestureAccess);
     JSClass<JSWeb>::StaticMethod("onDragStart", &JSWeb::JsOnDragStart);
@@ -1715,6 +1716,13 @@ JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& event
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("url", eventInfo.GetLoadedUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> ContextMenuHideEventToJSValue(const ContextMenuHideEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("info", eventInfo.GetInfo());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2543,6 +2551,26 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
         return false;
     };
     WebModel::GetInstance()->SetOnContextMenuShow(jsCallback);
+}
+
+void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb: OnContextMenuHide");
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ContextMenuHideEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ContextMenuHideEventToJSValue);
+
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ContextMenuHideEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOnContextMenuHide(jsCallback);
 }
 
 void JSWeb::JsEnabled(bool isJsEnabled)

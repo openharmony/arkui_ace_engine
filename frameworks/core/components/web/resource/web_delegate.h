@@ -559,6 +559,7 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
     bool OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info);
     bool OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
+    void OnContextMenuHide(const std::string& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
     bool OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void OnResourceLoad(const std::string& url);
@@ -569,6 +570,7 @@ public:
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
+    bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
     void UpdateDragCursor(NWeb::NWebDragData::DragOperation op)
     {

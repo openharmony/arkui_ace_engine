@@ -489,6 +489,7 @@ void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
     }
 
     CHECK_NULL_VOID(delegate_);
+    delegate_->OnContextMenuHide("");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -547,6 +548,7 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
         if (!pattern->isDragging_) {
             return;
         }
+        pattern->OnQuickMenuDismissed();
 
         // update drag status
         info->SetResult(pattern->GetDragAcceptableStatus());
@@ -596,6 +598,14 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
     eventHub->SetOnDrop(std::move(onDragDropId));
 }
 
+bool WebPattern::IsImageDrag()
+{
+    if (delegate_) {
+        return delegate_->IsImageDrag();
+    }
+    return false;
+}
+
 DragRet WebPattern::GetDragAcceptableStatus()
 {
     OHOS::NWeb::NWebDragData::DragOperation status = delegate_->GetDragAcceptableStatus();
@@ -624,7 +634,11 @@ bool WebPattern::NotifyStartDragTask()
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
-    gestureHub->StartLongPressActionForWeb();
+    if (!isMouseEvent_) {
+        // mouse drag does not need long press action
+        LOGI("is not mouse drag, do not need to do long press action");
+        gestureHub->StartLongPressActionForWeb();
+    }
     gestureHub->StartDragTaskForWeb();
 
     auto pipeline = PipelineContext::GetCurrentContext();

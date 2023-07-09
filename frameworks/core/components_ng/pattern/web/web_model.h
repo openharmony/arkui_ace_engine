@@ -58,6 +58,7 @@ public:
     virtual void SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetJsEnabled(bool isJsEnabled) = 0;
     virtual void SetFileAccessEnabled(bool isFileAccessEnabled) = 0;
     virtual void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled) = 0;

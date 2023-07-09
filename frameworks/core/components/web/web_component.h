@@ -752,6 +752,21 @@ public:
         onContextMenuImpl_ = std::move(onContextMenuImpl);
     }
 
+    using OnContextMenuHideImpl = std::function<void(const BaseEventInfo* info)>;
+    void OnContextMenuHide(const BaseEventInfo* info) const
+    {
+        if (onContextMenuHideImpl_) {
+            onContextMenuHideImpl_(info);
+        }
+    }
+    void SetOnContextMenuHide(OnContextMenuHideImpl&& onContextMenuHideImpl)
+    {
+        if (onContextMenuHideImpl == nullptr) {
+            return;
+        }
+        onContextMenuHideImpl_ = std::move(onContextMenuHideImpl);
+    }
+
     using OnUrlLoadInterceptImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnUrlLoadIntercept(const BaseEventInfo* info) const
     {
@@ -955,6 +970,7 @@ private:
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
     OnSslSelectCertRequestImpl onSslSelectCertRequestImpl_;
     OnContextMenuImpl onContextMenuImpl_;
+    OnContextMenuHideImpl onContextMenuHideImpl_;
     OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
     OnProgressChangeImpl onProgressChangeImpl_ = nullptr;
     OnWindowNewImpl onWindowNewImpl_ = nullptr;

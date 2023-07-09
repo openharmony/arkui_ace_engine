@@ -595,6 +595,23 @@ private:
     std::string loadedUrl_;
 };
 
+class ACE_EXPORT ContextMenuHideEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ContextMenuHideEvent, BaseEventInfo);
+
+public:
+    explicit ContextMenuHideEvent(const std::string& info) : BaseEventInfo("ContextMenuHideEvent"), info_(info)
+    {}
+    ~ContextMenuHideEvent() = default;
+
+    const std::string& GetInfo() const
+    {
+        return info_;
+    }
+
+private:
+    std::string info_;
+};
+
 class ACE_EXPORT LoadWebProgressChangeEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebProgressChangeEvent, BaseEventInfo);
 

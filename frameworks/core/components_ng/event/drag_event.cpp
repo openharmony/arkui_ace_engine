@@ -39,6 +39,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 
+#ifdef WEB_SUPPORTED
+#include "core/components_ng/pattern/web/web_pattern.h"
+#endif // WEB_SUPPORTED
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t PAN_FINGER = 1;
@@ -355,8 +359,15 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
-        bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID_NOLOG(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+        if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+            auto webPattern = frameNode->GetPattern<WebPattern>();
+            CHECK_NULL_VOID(webPattern);
+            bool isWebmageDrag = webPattern->IsImageDrag();
+            CHECK_NULL_VOID(isWebmageDrag && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+        } else {
+            bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
+            CHECK_NULL_VOID_NOLOG(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+        }
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
