@@ -263,8 +263,6 @@ public:
         return { FocusType::NODE, true };
     }
 
-    void UpdateConfiguration();
-
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
 

@@ -198,19 +198,6 @@ TextFieldPattern::~TextFieldPattern()
     }
 }
 
-#if defined(ENABLE_STANDARD_INPUT)
-void TextFieldPattern::UpdateConfiguration()
-{
-    MiscServices::Configuration configuration;
-    LOGI("UpdateConfiguration: Enter key type %{public}d", (int32_t)GetTextInputActionValue(TextInputAction::DONE));
-    LOGI("UpdateConfiguration: Enter keyboard type %{public}d", static_cast<int32_t>(keyboard_));
-    configuration.SetEnterKeyType(
-        static_cast<MiscServices::EnterKeyType>(static_cast<int32_t>(GetTextInputActionValue(TextInputAction::DONE))));
-    configuration.SetTextInputType(static_cast<MiscServices::TextInputType>(static_cast<int32_t>(keyboard_)));
-    MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
-}
-#endif
-
 bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
@@ -2962,13 +2949,11 @@ TextInputAction TextFieldPattern::GetDefaultTextInputAction()
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-    auto host = GetHost();
-    auto context = host->GetContext();
+    auto context = GetHost()->GetContext();
     CHECK_NULL_RETURN(context, false);
     if (needShowSoftKeyboard) {
         LOGI("Start to request keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
-        UpdateConfiguration();
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
         }
@@ -2977,14 +2962,12 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             LOGE("Request open soft keyboard failed because input method is null.");
             return false;
         }
-        MiscServices::InputAttribute inputAttribute;
-        inputAttribute.inputPattern = (int32_t)keyboard_;
-        inputAttribute.enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE);
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
-        if (context) {
-            LOGI("RequestKeyboard set calling window id is : %{public}u", context->GetFocusWindowId());
-            inputMethod->SetCallingWindow(context->GetFocusWindowId());
-        }
+        MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
+            .enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE) };
+        MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
+            .windowId = context->GetFocusWindowId() };
+        LOGI("RequestKeyboard set calling window id is : %{public}u", textConfig.windowId);
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeAttached_ = true;
 #endif
