@@ -99,6 +99,10 @@ private:
         int32_t currentIndex, int32_t lineIndex, LayoutWrapper* layoutWrapper);
     void CalculateLineHeightForLargeItem(int32_t lineIndex, int32_t currentLineIndex,
         std::map<int32_t, std::map<int32_t, int32_t>>::iterator gridMatrixIter, LayoutWrapper* layoutWrapper);
+    void ScrollToIndexStart(LayoutWrapper* layoutWrapper, int32_t targetIndex);
+    void ScrollToIndexEnd(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
+    void ScrollToIndexCenter(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
+    void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
