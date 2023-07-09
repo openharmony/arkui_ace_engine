@@ -41,6 +41,7 @@ public:
         value->propBarWidth_ = CloneBarWidth();
         value->propEdgeEffect_ = CloneEdgeEffect();
         value->propScrollEnabled_ = CloneScrollEnabled();
+        value->propScrollSnapAlign_ = CloneScrollSnapAlign();
         return value;
     }
 
@@ -65,12 +66,19 @@ public:
         EdgeEffect edgeEffect = propEdgeEffect_.value_or(EdgeEffect::NONE);
         json->Put("edgeEffect", edgeEffectMap[edgeEffect].c_str());
         json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
+        std::unordered_map<ScrollSnapAlign, std::string> scrollSnapAlignMap {
+            { ScrollSnapAlign::NONE, "ScrollSnapAlign.NONE" }, { ScrollSnapAlign::START, "ScrollSnapAlign.START" },
+            { ScrollSnapAlign::CENTER, "ScrollSnapAlign::CENTER" }, { ScrollSnapAlign::END, "ScrollSnapAlign::END" }
+        };
+        ScrollSnapAlign scrollSnapAlign = propScrollSnapAlign_.value_or(ScrollSnapAlign::NONE);
+        json->Put("scrollSnapAlign", scrollSnapAlignMap[scrollSnapAlign].c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

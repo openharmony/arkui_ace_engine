@@ -200,6 +200,22 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->OnScrollSnapCallback(targetOffset, velocity);
     };
     scrollable->SetOnScrollSnapCallback(scrollSnap);
+
+    auto calePredictSnapOffsetCallback = [weak = WeakClaim(this)](
+                                             float finalOffset, float velocity) -> std::optional<float> {
+        auto pattern = weak.Upgrade();
+        std::optional<float> predictSnapOffset;
+        CHECK_NULL_RETURN_NOLOG(pattern, predictSnapOffset);
+        return pattern->CalePredictSnapOffset(finalOffset, velocity);
+    };
+    scrollable->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
+
+    auto needScrollSnapToSideCallback = [weak = WeakClaim(this)](float delta) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->NeedScrollSnapToSide(delta);
+    };
+    scrollable->SetNeedScrollSnapToSideCallback(std::move(needScrollSnapToSideCallback));
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
