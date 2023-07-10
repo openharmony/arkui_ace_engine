@@ -77,7 +77,7 @@ public:
     void ShowActionMenu(const std::string& title,
         const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback) override;
     void CloseDialog(int32_t instanceId) override;
-    int32_t GetChildContainerId() const
+    int32_t GetChildContainerId() const override
     {
         return childContainerId_;
     }
