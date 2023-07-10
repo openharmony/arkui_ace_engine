@@ -570,6 +570,9 @@ public:
         isPicker_ = isPicker;
     }
 
+    void SetFocusDisable();
+    void SetFocusEnable();
+    
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

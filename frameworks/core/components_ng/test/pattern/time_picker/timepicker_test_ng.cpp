@@ -1687,6 +1687,18 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex + 1) % totalOptionCount);
 
+    keyEvent.code = KeyCode::KEY_MOVE_HOME;
+    currentIndex = pattern->GetCurrentIndex();
+    totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+    EXPECT_EQ(pattern->GetCurrentIndex(), 0);
+
+    keyEvent.code = KeyCode::KEY_MOVE_END;
+    currentIndex = pattern->GetCurrentIndex();
+    totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+    EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount - 1));
+
     keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(timePickerRowPattern->focusKeyID_, 1);
@@ -1765,6 +1777,30 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern012, TestSize.Level1)
     keyEvent.code = KeyCode::KEY_DPAD_CENTER;
     EXPECT_FALSE(timePickerRowPattern->OnKeyEvent(keyEvent));
     EXPECT_FALSE(timePickerRowPattern->HandleDirectionKey(KeyCode::KEY_DPAD_CENTER));
+}
+
+/**
+ * @tc.name: TimePickerRowPattern013
+ * @tc.desc: Test TimePickerRowPattern SetFocusDisable and SetFocusEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern013, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    TimePickerModelNG::GetInstance()->SetHour24(false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto host = timePickerRowPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto focusHub = host->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    timePickerRowPattern->SetFocusDisable();
+    timePickerRowPattern->SetFocusEnable();
 }
 
 /**
