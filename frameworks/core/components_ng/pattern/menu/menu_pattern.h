@@ -214,7 +214,6 @@ private:
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void UpdateMenuHotArea();
     void UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty);
 
     // If CustomBuilder is declared with <Menu> and <MenuItem>,

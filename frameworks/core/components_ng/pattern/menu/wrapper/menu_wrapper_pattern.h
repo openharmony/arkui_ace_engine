@@ -105,7 +105,12 @@ public:
     }
 
 private:
+    void OnAttachToFrameNode() override;
+    void RegisterOnTouch();
+    void OnTouchEvent(const TouchEventInfo& info);
     void OnModifyDone() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
 
