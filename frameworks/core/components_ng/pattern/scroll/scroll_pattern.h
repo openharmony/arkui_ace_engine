@@ -190,7 +190,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     // scrollSnap
-    std::optional<float> CalePredictSnapOffset(float finalOffset, float velocity) override;
+    std::optional<float> CalePredictSnapOffset(float delta) override;
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);

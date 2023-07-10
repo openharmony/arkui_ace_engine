@@ -143,6 +143,14 @@ public:
         scrollable->StopScrollable();
     }
 
+    void StartScrollSnapMotion(float scrollSnapDelta, float scrollSnapVelocity)
+    {
+        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID_NOLOG(scrollable);
+        scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
+    }
+
     bool IsScrollBarPressed() const
     {
         if (scrollBar_) {
@@ -246,7 +254,7 @@ public:
     bool ShouldSelectScrollBeStopped();
 
     // scrollSnap
-    virtual std::optional<float> CalePredictSnapOffset(float finalOffset, float velocity)
+    virtual std::optional<float> CalePredictSnapOffset(float delta)
     {
         std::optional<float> predictSnapPosition;
         return predictSnapPosition;

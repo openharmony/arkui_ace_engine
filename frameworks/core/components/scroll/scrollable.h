@@ -76,7 +76,7 @@ using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
 using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
 using ContinuousSlidingCallback= std::function<double()>;
-using CalePredictSnapOffsetCallback = std::function<std::optional<float>(float finalOffset, float velocity)>;
+using CalePredictSnapOffsetCallback = std::function<std::optional<float>(float delta)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
@@ -423,7 +423,7 @@ public:
         needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
     }
 
-    void ProcessScrollSnapSpringMotion(float predictSnapOffset, float currentPostion, float scrollSnapVelocity);
+    void ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity);
 
     void StopSnapController()
     {
