@@ -162,7 +162,7 @@ if (defined(use_new_skia) && use_new_skia) {
     {
       label = "//third_party/skia:skia_canvaskit"
       subsystem_name = "thirdparty"
-      part_name = "third_party_skia"
+      part_name = "skia"
     },
   ]
 }
