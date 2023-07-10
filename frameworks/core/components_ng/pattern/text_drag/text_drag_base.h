@@ -52,6 +52,14 @@ public:
     virtual void CreateHandles() = 0;
     virtual bool CloseKeyboard(bool forceClose) = 0;
 
+    virtual void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+        const std::vector<Rect>& rectsForPlaceholders, OffsetF contentOffset) {}
+    
+    virtual OffsetF GetContentOffset()
+    {
+        return OffsetF(0, 0);
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(TextDragBase);
 };
 } // namespace OHOS::Ace::NG

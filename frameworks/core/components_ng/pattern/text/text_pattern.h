@@ -216,6 +216,35 @@ public:
     }
     void OnColorConfigurationUpdate() override;
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+    void InitDragEvent();
+    virtual std::function<void(Offset)> GetThumbnailCallback();
+#endif
+
+    void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+        const std::vector<Rect>& rectsForPlaceholders, OffsetF contentOffset) override
+    {
+        placeHolderIndex_ = placeHolderIndex;
+        imageOffset_ = contentOffset;
+        rectsForPlaceholders_ = rectsForPlaceholders;
+    }
+
+    const std::vector<int32_t>& GetPlaceHolderIndex()
+    {
+        return placeHolderIndex_;
+    }
+
+    const std::vector<Rect>& GetRectsForPlaceholders()
+    {
+        return rectsForPlaceholders_;
+    }
+
+    OffsetF GetContentOffset() override
+    {
+        return imageOffset_;
+    }
+
 protected:
     void HandleOnCopy();
     void InitMouseEvent();
@@ -237,19 +266,25 @@ protected:
     std::string GetSelectedText(int32_t start, int32_t end) const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
     RectF contentRect_;
+    WeakPtr<FrameNode> dragNodeWk_;
+    RefPtr<FrameNode> dragNode_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     CopyOptions copyOption_ = CopyOptions::None;
+    
+    OffsetF imageOffset_;
     std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::vector<MenuOptionsParam> menuOptionItems_;
+    std::vector<int32_t> placeHolderIndex_;
     TextSelector textSelector_;
     float baselineOffset_ = 0.0f;
     bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
+    std::vector<Rect> rectsForPlaceholders_;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -261,11 +296,6 @@ private:
     void HandlePanStart(const GestureEvent& info);
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
-#ifdef ENABLE_DRAG_FRAMEWORK
-    DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
-    void InitDragEvent();
-    std::function<void(Offset)> GetThumbnailCallback();
-#endif
     inline RSTextRect ConvertRect(const Rect& rect);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
@@ -273,11 +303,10 @@ private:
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
     void FontRegisterCallback(RefPtr<SpanNode> spanNode);
     // to check if drag is in progress
+
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
-    WeakPtr<FrameNode> dragNodeWk_;
     bool panEventInitialized_ = false;
-    RefPtr<FrameNode> dragNode_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;

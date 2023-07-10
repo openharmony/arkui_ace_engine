@@ -18,6 +18,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -53,6 +54,11 @@ void RichEditorPattern::OnModifyDone()
     InitClickEvent(gestureEventHub);
     InitLongPressEvent(gestureEventHub);
     InitTouchEvent();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (host->IsDraggable()) {
+        InitDragEvent();
+    }
+#endif
 }
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
@@ -1724,4 +1730,31 @@ void RichEditorPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle
         SetCaretPosition(textSelector_.destinationOffset);
     }
 }
+#ifdef ENABLE_DRAG_FRAMEWORK
+std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
+{
+    return [wk = WeakClaim(this)](const Offset& point) {
+        auto pattern = wk.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->BetweenSelectedPosition(point)) {
+            auto host = pattern->GetHost();
+            auto children = host->GetChildren();
+            std::list<RefPtr<FrameNode>> imageChildren;
+            for (const auto& child : children) {
+                auto node = DynamicCast<FrameNode>(child);
+                if (!node) {
+                    continue;
+                }
+                auto image = node->GetPattern<ImagePattern>();
+                if (image) {
+                    imageChildren.emplace_back(node);
+                }
+            }
+            pattern->dragNode_ = TextDragPattern::CreateDragNode(host, imageChildren);
+            pattern->dragNodeWk_ = pattern->dragNode_;
+            FrameNode::ProcessOffscreenNode(pattern->dragNode_);
+        }
+    };
+}
+#endif
 } // namespace OHOS::Ace::NG

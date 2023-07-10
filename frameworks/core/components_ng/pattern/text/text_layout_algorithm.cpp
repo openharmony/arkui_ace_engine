@@ -327,6 +327,16 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
         ++index;
     }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitSpanImageLayout(placeHolderIndex, rectsForPlaceholders, contentOffset);
+#endif
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
