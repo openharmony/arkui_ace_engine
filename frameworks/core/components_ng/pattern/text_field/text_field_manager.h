@@ -22,6 +22,7 @@
 #include "core/common/manager_interface.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/key_event_handler.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
@@ -52,6 +53,8 @@ public:
         onFocusTextField_ = onFocusTextField;
     }
 
+    void ScrollTextFieldToSafeArea(const SafeAreaInsets::Inset& bottomInset);
+
     void ClearOnFocusTextField();
 
     bool ResetSlidingPanelParentHeight();
@@ -72,6 +75,8 @@ public:
     const RefPtr<KeyEventHandler>& GetKeyEventHandler();
 
 private:
+    std::pair<RefPtr<FrameNode>, OffsetF> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
+
     bool hasMove_ = false;
     Offset position_;
     float height_ = 0.0f;
