@@ -1199,6 +1199,7 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
         }
     }
     lunarResult.month = month;
+    lunarResult.isLeapMonth = (lunarResult.month == lunarLeapMonth && hasLeapMonth);
     lunarResult.day = monthDaysIndex + 1; // day start form 1, index start from 0
     lunarResult.year = startDateLunar_.year + yearDatePickerColumnPattern->GetCurrentIndex();
 
