@@ -304,9 +304,9 @@ void JSList::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSList::SetScrollEnabled(bool scrollEnabled)
+void JSList::SetScrollEnabled(const JSCallbackInfo& args)
 {
-    ListModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+    ListModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
 }
 
 void JSList::ScrollCallback(const JSCallbackInfo& args)

@@ -216,9 +216,9 @@ void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetOnScrollBarUpdate(std::move(onScrollBarUpdate));
 }
 
-void JSGrid::SetScrollEnabled(bool scrollEnabled)
+void JSGrid::SetScrollEnabled(const JSCallbackInfo& args)
 {
-    GridModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+    GridModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
 }
 
 void JSGrid::JSBind(BindingTarget globalObj)

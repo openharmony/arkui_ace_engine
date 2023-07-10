@@ -90,9 +90,9 @@ void JSScroll::SetScrollable(int32_t value)
     ScrollModel::GetInstance()->SetAxis(AXIS[value]);
 }
 
-void JSScroll::SetScrollEnabled(bool scrollEnabled)
+void JSScroll::SetScrollEnabled(const JSCallbackInfo& args)
 {
-    ScrollModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+    ScrollModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
 }
 
 void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)

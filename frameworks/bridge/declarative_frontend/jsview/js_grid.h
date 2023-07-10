@@ -55,7 +55,7 @@ public:
     static void JsOnGridDrop(const JSCallbackInfo& info);
     static void JsGridHeight(const JSCallbackInfo& info);
     static void SetNestedScroll(const JSCallbackInfo& args);
-    static void SetScrollEnabled(bool scrollEnabled);
+    static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetFriction(const JSCallbackInfo& info);
 };
 
