@@ -81,23 +81,7 @@ private:
 
     RefPtr<PasteData> pasteData_;
 };
-#ifdef ENABLE_DRAG_FRAMEWORK
-class ScopeRAII {
-public:
-    explicit ScopeRAII(NativeScopeManager* manager) : manager_(manager)
-    {
-        scope_ = manager_->Open();
-    }
-    ~ScopeRAII()
-    {
-        manager_->Close(scope_);
-    }
 
-private:
-    NativeScopeManager* manager_;
-    NativeScope* scope_;
-};
-#endif
 class JsDragEvent : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)

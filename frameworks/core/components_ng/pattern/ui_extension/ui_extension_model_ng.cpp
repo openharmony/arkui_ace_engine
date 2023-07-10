@@ -35,6 +35,15 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
+void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnRemoteReadyCallback(std::move(onRemoteReady));
+}
+
 void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

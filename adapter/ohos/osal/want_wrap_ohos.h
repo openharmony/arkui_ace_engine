@@ -25,6 +25,19 @@
 #include "want.h"
 
 namespace OHOS::Ace {
+class WantParamsWrapOhos : public WantParamsWrap {
+    DECLARE_ACE_TYPE(WantParamsWrapOhos, WantParamsWrap);
+public:
+    WantParamsWrapOhos(NativeEngine* engine, NativeValue* value);
+    ~WantParamsWrapOhos() = default;
+    const AAFwk::WantParams& GetWantParams() const
+    {
+        return params_;
+    }
+private:
+    AAFwk::WantParams params_;
+};
+
 class WantWrapOhos : public WantWrap {
     DECLARE_ACE_TYPE(WantWrapOhos, WantWrap)
 

@@ -20,6 +20,16 @@
 #include "napi_common_want.h"
 
 namespace OHOS::Ace {
+RefPtr<WantParamsWrap> WantParamsWrap::CreateWantWrap(NativeEngine* engine, NativeValue* value)
+{
+    return AceType::MakeRefPtr<WantParamsWrapOhos>(engine, value);
+}
+WantParamsWrapOhos::WantParamsWrapOhos(NativeEngine* engine, NativeValue* value)
+{
+    AppExecFwk::UnwrapWantParams(
+        reinterpret_cast<napi_env>(engine), reinterpret_cast<napi_value>(value), params_);
+}
+
 NativeValue* WantWrap::ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine)
 {
     return reinterpret_cast<NativeValue*>(OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(engine), want));

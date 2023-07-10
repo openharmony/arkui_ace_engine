@@ -52,11 +52,62 @@ UIExtensionModel* UIExtensionModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+void JSUIExtensionProxy::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSUIExtensionProxy>::Declare("UIExtensionProxy ");
+    JSClass<JSUIExtensionProxy>::CustomMethod("send", &JSUIExtensionProxy::Send);
+    JSClass<JSUIExtensionProxy>::Bind(globalObj, &JSUIExtensionProxy::Constructor, &JSUIExtensionProxy::Destructor);
+}
+
+void JSUIExtensionProxy::Constructor(const JSCallbackInfo& info)
+{
+    auto uiExtensionProxy = Referenced::MakeRefPtr<JSUIExtensionProxy>();
+    uiExtensionProxy->IncRefCount();
+    info.SetReturnValue(Referenced::RawPtr(uiExtensionProxy));
+}
+
+void JSUIExtensionProxy::Destructor(JSUIExtensionProxy* uiExtensionProxy)
+{
+    if (uiExtensionProxy != nullptr) {
+        uiExtensionProxy->DecRefCount();
+    }
+}
+
+void JSUIExtensionProxy::Send(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scopeRAII(nativeEngine->GetScopeManager());
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    auto wantParams = WantParamsWrap::CreateWantWrap(nativeEngine, nativeValue);
+    if (proxy_) {
+        proxy_->SendData(wantParams);
+    }
+}
+
+void JSUIExtensionProxy::SetInstanceId(int32_t instanceId)
+{
+    instanceId_ = instanceId;
+}
+
+void JSUIExtensionProxy::SetProxy(const RefPtr<NG::UIExtensionProxy>& proxy)
+{
+    proxy_ = proxy;
+}
+
 void JSUIExtension::JSBind(BindingTarget globalObj)
 {
     JSClass<JSUIExtension>::Declare("UIExtensionComponent");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSUIExtension>::StaticMethod("create", &JSUIExtension::Create, opt);
+    JSClass<JSUIExtension>::StaticMethod("onRemoteReady", &JSUIExtension::OnRemoteReady);
     JSClass<JSUIExtension>::StaticMethod("onReceive", &JSUIExtension::OnReceive);
     JSClass<JSUIExtension>::StaticMethod("onRelease", &JSUIExtension::OnRelease);
     JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::OnResult);
@@ -72,6 +123,26 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     auto wantObj = JSRef<JSObject>::Cast(info[0]);
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
     UIExtensionModel::GetInstance()->Create(want);
+}
+
+void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onRemoteReady = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+        (const RefPtr<NG::UIExtensionProxy>& session) {
+        ContainerScope scope(instanceId);
+        JSRef<JSObject> contextObj = JSClass<JSUIExtensionProxy>::NewInstance();
+        RefPtr<JSUIExtensionProxy> proxy = Referenced::Claim(contextObj->Unwrap<JSUIExtensionProxy>());
+        proxy->SetInstanceId(instanceId);
+        proxy->SetProxy(session);
+        auto returnValue = JSRef<JSVal>::Cast(contextObj);
+        func->ExecuteJS(1, &returnValue);
+    };
+    UIExtensionModel::GetInstance()->SetOnRemoteReady(std::move(onRemoteReady));
 }
 
 void JSUIExtension::OnReceive(const JSCallbackInfo& info)

@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT UIExtensionModelNG : public UIExtensionModel {
 public:
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap) override;
+    void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;
     void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive) override;
