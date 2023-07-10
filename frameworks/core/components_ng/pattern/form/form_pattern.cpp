@@ -39,7 +39,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
-constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 5000;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 20000;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
