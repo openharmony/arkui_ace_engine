@@ -40,6 +40,7 @@
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+class BackgroundModifier;
 class BorderImageModifier;
 class DebugBoundaryModifier;
 class MouseSelectModifier;
@@ -223,6 +224,10 @@ public:
         return needDebugBoundary_;
     }
 
+    void OnBackgroundAlignUpdate(const Alignment& align) override;
+    void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) override;
+    void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
+
     void OnBackgroundColorUpdate(const Color& value) override;
 
     void MarkContentChanged(bool isChanged) override;
@@ -396,6 +401,7 @@ private:
 
     RefPtr<RosenTransitionEffect> transitionEffect_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
+    std::shared_ptr<BackgroundModifier> backgroundModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     std::shared_ptr<MoonProgressModifier> moonProgressModifier_;

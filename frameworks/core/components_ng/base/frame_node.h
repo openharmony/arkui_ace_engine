@@ -373,6 +373,11 @@ public:
         userSet_ = true;
     }
 
+    void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
+    {
+        builderFunc_ = buildFunc;
+    }
+
     bool IsDraggable() const
     {
         return draggable_;
@@ -494,6 +499,9 @@ private:
         VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
+    // set costom background layoutConstraint
+    void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
+
     struct ZIndexComparator {
         bool operator()(const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) const
         {
@@ -520,6 +528,7 @@ private:
     // only valid during layout task
     WeakPtr<LayoutWrapper> layoutWrapper_;
 
+    std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;

@@ -155,6 +155,17 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
+void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    std::string backgroundPixelMap = "NONE";
+    if (propBackgroundPixelMap.has_value()) {
+        backgroundPixelMap = std::to_string(propBackgroundPixelMap.value()->GetWidth()) + ", " +
+                          std::to_string(propBackgroundPixelMap.value()->GetHeight());
+    }
+    json->Put("backgroundPixelMap", backgroundPixelMap.c_str());
+    json->Put("backgroundAlign", propBackgroundAlign.value().ToString().c_str());
+}
+
 void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());

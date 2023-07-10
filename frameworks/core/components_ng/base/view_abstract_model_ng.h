@@ -862,6 +862,8 @@ public:
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
+    void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
+
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
