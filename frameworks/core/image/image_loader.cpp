@@ -609,19 +609,19 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
 #endif
 {
     auto uri = imageSourceInfo.GetSrc();
-
+    auto bundleName = imageSourceInfo.GetBundleName();
+    auto moudleName = imageSourceInfo.GetModuleName();
     auto themeManager = PipelineBase::CurrentThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
-    auto themeConstants =
-        themeManager->GetThemeConstants(imageSourceInfo.GetBundleName(), imageSourceInfo.GetModuleName());
+    auto themeConstants = themeManager->GetThemeConstants();
     CHECK_NULL_RETURN(themeConstants, nullptr);
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
     if (GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
-        if (!themeConstants->GetRawFileData(rawFile, dataLen, data)) {
-            LOGE("get image data by name failed, uri:%{private}s, rawFile:%{public}s", uri.c_str(), rawFile.c_str());
+        if (!themeConstants->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
+            LOGW("get image data by name failed, uri:%{private}s, rawFile:%{public}s", uri.c_str(), rawFile.c_str());
             return nullptr;
         }
 #ifndef USE_ROSEN_DRAWING
@@ -633,8 +633,8 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     }
     uint32_t resId = 0;
     if (GetResourceId(uri, resId)) {
-        if (!themeConstants->GetMediaData(resId, dataLen, data)) {
-            LOGE("get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(), resId);
+        if (!themeConstants->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
+            LOGW("get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(), resId);
             return nullptr;
         }
 #ifndef USE_ROSEN_DRAWING
@@ -646,8 +646,8 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     }
     std::string resName;
     if (GetResourceName(uri, resName)) {
-        if (!themeConstants->GetMediaData(resName, dataLen, data)) {
-            LOGE("get image data by name failed, uri:%{private}s, resName:%{public}s", uri.c_str(), resName.c_str());
+        if (!themeConstants->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
+            LOGW("get image data by name failed, uri:%{private}s, resName:%{public}s", uri.c_str(), resName.c_str());
             return nullptr;
         }
 #ifndef USE_ROSEN_DRAWING
@@ -657,7 +657,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
         drawingData->BuildWithCopy(data.get(), dataLen);
 #endif
     }
-    LOGE("load image data failed, as uri is invalid:%{private}s", uri.c_str());
+    LOGW("load image data failed, as uri is invalid:%{private}s", uri.c_str());
     return nullptr;
 }
 
