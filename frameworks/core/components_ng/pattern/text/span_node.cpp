@@ -134,7 +134,7 @@ void SpanNode::RequestTextFlushDirty()
         }
         parent = parent->GetParent();
     }
-    LOGI("fail to find Text or Parent Span");
+    LOGD("fail to find Text or Parent Span");
 }
 
 int32_t SpanItem::UpdateParagraph(
