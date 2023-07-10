@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/loading_progress_model_impl.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -72,7 +73,9 @@ void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
 {
     Color progressColor;
     if (!ParseJsColor(info[0], progressColor)) {
-        return;
+        RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(progressTheme);
+        progressColor = progressTheme->GetLoadingColor();
     }
 
     LoadingProgressModel::GetInstance()->SetColor(progressColor);
