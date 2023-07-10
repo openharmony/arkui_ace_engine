@@ -84,6 +84,19 @@ void GridPattern::OnAttachToFrameNode()
     host->GetRenderContext()->UpdateClipEdge(true);
 }
 
+void GridPattern::InitScrollableEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gridEventHub = host->GetEventHub<GridEventHub>();
+    auto onScrollFrameBegin = gridEventHub->GetOnScrollFrameBegin();
+    auto scrollableEvent = GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
+    if (onScrollFrameBegin) {
+        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
+    }
+}
+
 void GridPattern::OnModifyDone()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
@@ -106,6 +119,7 @@ void GridPattern::OnModifyDone()
     SetAxis(gridLayoutInfo_.axis_);
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+        InitScrollableEvent();
     }
 
     auto edgeEffect = gridLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
@@ -201,8 +215,26 @@ float GridPattern::GetMainContentSize() const
     return geometryNode->GetPaddingSize().MainSize(gridLayoutInfo_.axis_);
 }
 
+void GridPattern::FireOnScrollStart()
+{
+    if (GetScrollAbort()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID_NOLOG(hub);
+    auto onScrollStart = hub->GetOnScrollStart();
+    CHECK_NULL_VOID_NOLOG(onScrollStart);
+    onScrollStart();
+}
+
 bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
+    if (source == SCROLL_FROM_START) {
+        FireOnScrollStart();
+        return true;
+    }
     return ScrollablePattern::OnScrollCallback(offset, source);
 }
 
@@ -227,6 +259,8 @@ void GridPattern::CheckRestartSpring()
     if (AnimateRunning()) {
         return;
     }
+    
+    FireOnScrollStart();
     edgeEffect->ProcessScrollOver(0);
 }
 
@@ -323,8 +357,13 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
         firstShow_ = false;
     }
+
+    bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
+                        (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
+    bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
+    ProcessEvent(indexChanged, gridLayoutInfo_.currentOffset_, offsetEnd);
 
     SetScrollState(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
@@ -357,6 +396,68 @@ void GridPattern::CheckScrollable()
     if (!gridLayoutProperty->GetScrollEnabled().value_or(scrollable_)) {
         SetScrollEnable(false);
     }
+}
+
+void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, bool offsetEnd)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gridEventHub = host->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(gridEventHub);
+    
+    auto onScroll = gridEventHub->GetOnScroll();
+    if (onScroll && !NearZero(finalOffset)) {
+        auto source = scrollState_;
+        auto offsetPX = Dimension(finalOffset);
+        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+        if (source == SCROLL_FROM_UPDATE) {
+            onScroll(offsetVP, ScrollState::SCROLL);
+        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
+            onScroll(offsetVP, ScrollState::FLING);
+        } else {
+            onScroll(offsetVP, ScrollState::IDLE);
+        }
+    }
+
+    if (indexChanged) {
+        auto onScrollIndex = gridEventHub->GetOnScrollIndex();
+        if (onScrollIndex) {
+            onScrollIndex(gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_);
+        }
+    }
+
+    auto onReachStart = gridEventHub->GetOnReachStart();
+    if (onReachStart && gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
+        onReachStart();
+    }
+
+    auto onReachEnd = gridEventHub->GetOnReachEnd();
+    if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1) &&
+        gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) {
+        onReachEnd();
+    }
+
+    if (scrollStop_) {
+        auto onScrollStop = gridEventHub->GetOnScrollStop();
+        if (!GetScrollAbort() && onScrollStop) {
+            onScrollStop();
+        }
+        scrollStop_ = false;
+        SetScrollAbort(false);
+    }
+}
+
+void GridPattern::MarkDirtyNodeSelf()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void GridPattern::OnScrollEndCallback()
+{
+    scrollStop_ = true;
+    MarkDirtyNodeSelf();
 }
 
 void GridPattern::FlushCurrentFocus()
@@ -871,6 +972,9 @@ bool GridPattern::UpdateStartIndex(int32_t index)
 
 void GridPattern::OnAnimateStop()
 {
+    scrollStop_ = true;
+    MarkDirtyNodeSelf();
+ 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
@@ -885,6 +989,7 @@ void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     ScrollablePattern::AnimateTo(position, duration, curve, smooth);
+    FireOnScrollStart();
 }
 
 void GridPattern::ScrollTo(float position)
