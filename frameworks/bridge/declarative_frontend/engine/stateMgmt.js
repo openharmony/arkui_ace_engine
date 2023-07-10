@@ -4674,13 +4674,13 @@ class ViewPU extends NativeViewPartialUpdate {
         
         this.isActive_ = active;
         if (this.isActive_) {
-            this.onActive();
+            this.onActiveInternal();
         }
         else {
-            this.onInactive();
+            this.onInactiveInternal();
         }
     }
-    onActive() {
+    onActiveInternal() {
         if (!this.isActive_) {
             return;
         }
@@ -4693,7 +4693,7 @@ class ViewPU extends NativeViewPartialUpdate {
             }
         }
     }
-    onInactive() {
+    onInactiveInternal() {
         if (this.isActive_) {
             return;
         }

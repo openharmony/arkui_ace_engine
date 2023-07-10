@@ -195,13 +195,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
     this.isActive_ = active;
     if (this.isActive_) {
-      this.onActive()
+      this.onActiveInternal()
     } else {
-      this.onInactive();
+      this.onInactiveInternal();
     }
   }
 
-  private onActive(): void {   
+  private onActiveInternal(): void {
     if (!this.isActive_) {
       return;
     }
@@ -217,7 +217,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
 
-  private onInactive(): void {
+  private onInactiveInternal(): void {
     if (this.isActive_) {
       return;
     }
