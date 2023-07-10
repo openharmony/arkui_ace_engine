@@ -74,6 +74,11 @@ public:
         return miniHeight_;
     }
 
+    Dimension GetCustomHeight()
+    {
+        return customHeight_;
+    }
+
     void SetInvisibleFlag(bool invisibleFlag)
     {
         invisibleFlag_ = invisibleFlag;
@@ -94,6 +99,7 @@ private:
     Dimension fullHeight_;
     Dimension halfHeight_;
     Dimension miniHeight_;
+    Dimension customHeight_;
     bool invisibleFlag_ = false;
     float maxWidth_ = 0.0f;
     SizeF idealSize_;

@@ -363,6 +363,7 @@ enum class PanelType {
     MINI_BAR,
     FOLDABLE_BAR,
     TEMP_DISPLAY,
+    CUSTOM,
 };
 
 enum class PanelMode {
@@ -370,6 +371,7 @@ enum class PanelMode {
     HALF,
     FULL,
     AUTO,
+    CUSTOM,
 };
 
 enum class ColorScheme : int32_t {

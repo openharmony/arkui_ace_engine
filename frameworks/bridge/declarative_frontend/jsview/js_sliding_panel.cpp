@@ -56,7 +56,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::vector<PanelMode> PANEL_MODES = { PanelMode::MINI, PanelMode::HALF, PanelMode::FULL, PanelMode::AUTO };
-const std::vector<PanelType> PANEL_TYPES = { PanelType::MINI_BAR, PanelType::FOLDABLE_BAR, PanelType::TEMP_DISPLAY };
+const std::vector<PanelType> PANEL_TYPES = { PanelType::MINI_BAR, PanelType::FOLDABLE_BAR, PanelType::TEMP_DISPLAY,
+    PanelType::CUSTOM };
 const std::vector<VisibleType> PANEL_VISIBLE_TYPES = { VisibleType::GONE, VisibleType::VISIBLE,
     VisibleType::INVISIBLE };
 
@@ -88,6 +89,7 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("showCloseIcon", &JSSlidingPanel::SetShowCloseIcon, opt);
     JSClass<JSSlidingPanel>::StaticMethod("mode", &JSSlidingPanel::SetPanelMode, opt);
     JSClass<JSSlidingPanel>::StaticMethod("type", &JSSlidingPanel::SetPanelType, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("customHeight", &JSSlidingPanel::SetCustomHeight, opt);
     JSClass<JSSlidingPanel>::StaticMethod("backgroundMask", &JSSlidingPanel::SetBackgroundMask, opt);
     JSClass<JSSlidingPanel>::StaticMethod("fullHeight", &JSSlidingPanel::SetFullHeight, opt);
     JSClass<JSSlidingPanel>::StaticMethod("halfHeight", &JSSlidingPanel::SetHalfHeight, opt);
@@ -390,6 +392,20 @@ void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
         }
     }
     SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
+}
+
+void JSSlidingPanel::SetCustomHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    CalcDimension customHeight;
+    if (!ParseJsDimensionVp(info[0], customHeight)) {
+        customHeight = Dimension(0.0);
+    }
+
+    SlidingPanelModel::GetInstance()->SetCustomHeight(customHeight);
 }
 
 void JSSlidingPanel::SetMiniHeight(const JSCallbackInfo& info)

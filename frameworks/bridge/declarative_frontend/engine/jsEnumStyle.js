@@ -286,7 +286,13 @@ var PanelType;
   PanelType[PanelType["Minibar"] = 0] = "Minibar";
   PanelType[PanelType["Foldable"] = 1] = "Foldable";
   PanelType[PanelType["Temporary"] = 2] = "Temporary";
+  PanelType[PanelType["CUSTOM"] = 3] = "CUSTOM";
 })(PanelType || (PanelType = {}));
+
+var PanelHeight;
+(function (PanelHeight) {
+  PanelHeight[PanelHeight["WRAP_CONTENT"] = 0] = "WRAP_CONTENT";
+})(PanelHeight || (PanelHeight = {}));
 
 var PanelMode;
 (function (PanelMode) {
