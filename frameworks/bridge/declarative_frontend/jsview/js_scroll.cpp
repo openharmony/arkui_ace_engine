@@ -54,6 +54,41 @@ ScrollModel* ScrollModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE };
+
+bool ParseJsDimensionArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result)
+{
+    if (!jsValue->IsArray()) {
+        LOGE("args is not array orobject!");
+        return false;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        CalcDimension dimension;
+        if (JSViewAbstract::ParseJsDimensionVp(value, dimension)) {
+            result.emplace_back(static_cast<Dimension>(dimension));
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool CheckSnapPaginations(std::vector<Dimension> snapPaginations)
+{
+    CHECK_NULL_RETURN_NOLOG(!snapPaginations.empty(), false);
+    float preValue = (*snapPaginations.begin()).Value();
+    CHECK_NULL_RETURN_NOLOG(!Negative(preValue), false);
+    auto unit = (*snapPaginations.begin()).Unit();
+    for (auto iter = snapPaginations.begin() + 1; iter < snapPaginations.end(); ++iter) {
+        if (Negative((*iter).Value()) || (*iter).Unit() != unit || LessOrEqual((*iter).Value(), preValue)) {
+            LOGE("Invalid snapPagination");
+            return false;
+        }
+        preValue = (*iter).Value();
+    }
+    return true;
+}
 } // namespace
 
 void JSScroll::Create(const JSCallbackInfo& info)
@@ -255,6 +290,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("nestedScroll", &JSScroll::SetNestedScroll);
     JSClass<JSScroll>::StaticMethod("enableScrollInteraction", &JSScroll::SetScrollEnabled);
     JSClass<JSScroll>::StaticMethod("friction", &JSScroll::SetFriction);
+    JSClass<JSScroll>::StaticMethod("scrollSnap", &JSScroll::SetScrollSnap);
     JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -370,5 +406,39 @@ void JSScroll::SetFriction(const JSCallbackInfo& info)
         friction = -1.0;
     }
     ScrollModel::GetInstance()->SetFriction(friction);
+}
+
+void JSScroll::SetScrollSnap(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    auto snapAlignValue = obj->GetProperty("snapAlign");
+    int32_t snapAlign = static_cast<int32_t>(ScrollSnapAlign::NONE);
+    if (snapAlignValue->IsNull() || snapAlignValue->IsUndefined() || !ParseJsInt32(snapAlignValue, snapAlign) ||
+        snapAlign < static_cast<int32_t>(ScrollSnapAlign::NONE) ||
+        snapAlign > static_cast<int32_t>(ScrollSnapAlign::END)) {
+        snapAlign = static_cast<int32_t>(ScrollSnapAlign::NONE);
+    }
+
+    auto paginationValue = obj->GetProperty("snapPagination");
+    CalcDimension intervalSize;
+    std::vector<Dimension> snapPaginations;
+    if (!ParseJsDimensionVp(paginationValue, intervalSize) || intervalSize.IsNegative()) {
+        intervalSize = CalcDimension(0.0);
+    }
+    if (!ParseJsDimensionArray(paginationValue, snapPaginations) || !CheckSnapPaginations(snapPaginations)) {
+        std::vector<Dimension>().swap(snapPaginations);
+    }
+
+    bool enableSnapToStart = true;
+    bool enableSnapToEnd = true;
+    ParseJsBool(obj->GetProperty("enableSnapToStart"), enableSnapToStart);
+    ParseJsBool(obj->GetProperty("enableSnapToEnd"), enableSnapToEnd);
+    std::pair<bool, bool> enableSnapToSide = { enableSnapToStart, enableSnapToEnd };
+    ScrollModel::GetInstance()->SetScrollSnap(
+        static_cast<ScrollSnapAlign>(snapAlign), intervalSize, snapPaginations, enableSnapToSide);
 }
 } // namespace OHOS::Ace::Framework

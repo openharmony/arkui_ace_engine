@@ -38,6 +38,13 @@ enum class NestedScrollMode {
     PARALLEL,
 };
 
+enum class ScrollSnapAlign {
+    NONE = 0,
+    START,
+    CENTER,
+    END,
+};
+
 struct ScrollInfo {
     Dimension dx;
     Dimension dy;

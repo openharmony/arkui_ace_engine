@@ -245,6 +245,18 @@ public:
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
 
+    // scrollSnap
+    virtual std::optional<float> CalePredictSnapOffset(float finalOffset, float velocity)
+    {
+        std::optional<float> predictSnapPosition;
+        return predictSnapPosition;
+    }
+
+    virtual bool NeedScrollSnapToSide(float delta)
+    {
+        return false;
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {

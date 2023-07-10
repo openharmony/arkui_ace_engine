@@ -76,6 +76,8 @@ using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
 using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
 using ContinuousSlidingCallback= std::function<double()>;
+using CalePredictSnapOffsetCallback = std::function<std::optional<float>(float finalOffset, float velocity)>;
+using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -410,6 +412,35 @@ public:
     {
         return dragEndPosition_ - dragStartPosition_;
     }
+
+    void SetCalePredictSnapOffsetCallback(CalePredictSnapOffsetCallback&& calePredictSnapOffsetCallback)
+    {
+        calePredictSnapOffsetCallback_ = std::move(calePredictSnapOffsetCallback);
+    }
+
+    void SetNeedScrollSnapToSideCallback(NeedScrollSnapToSideCallback&& needScrollSnapToSideCallback)
+    {
+        needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
+    }
+
+    void ProcessScrollSnapSpringMotion(float predictSnapOffset, float currentPostion, float scrollSnapVelocity);
+
+    void StopSnapController()
+    {
+        if (snapController_ && !snapController_->IsStopped()) {
+            snapController_->Stop();
+        }
+    }
+
+    double GetCurrentPos() const
+    {
+        return currentPos_;
+    }
+
+    bool GetNeedScrollSnapChange() const
+    {
+        return needScrollSnapChange_;
+    }
     
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
@@ -449,9 +480,11 @@ private:
     RefPtr<Animator> controller_;
     RefPtr<Animator> springController_;
     RefPtr<Animator> scrollSnapController_;
+    RefPtr<Animator> snapController_;
     RefPtr<FrictionMotion> motion_;
     RefPtr<ScrollMotion> scrollMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
+    RefPtr<SpringMotion> snapMotion_;
     RefPtr<SpringProperty> spring_;
     WeakPtr<PipelineBase> context_;
     WeakPtr<RenderNode> scrollableNode_;
@@ -486,6 +519,11 @@ private:
     std::function<OverScrollOffset(double)> overScrollOffsetCallback_;
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;
+
+    // scrollSnap
+    bool needScrollSnapChange_ = false;
+    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
+    NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
 };
 
 } // namespace OHOS::Ace

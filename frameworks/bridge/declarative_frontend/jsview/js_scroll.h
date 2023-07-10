@@ -44,6 +44,7 @@ public:
     static void SetNestedScroll(const JSCallbackInfo& args);
     static void SetScrollEnabled(bool scrollEnabled);
     static void SetFriction(const JSCallbackInfo& info);
+    static void SetScrollSnap(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework
