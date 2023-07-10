@@ -39,7 +39,6 @@ template("ace_core_components_theme_set") {
     configs = [ "$ace_root:ace_config" ]
     deps = [
       ":build_theme_code",
-      "$ace_flutter_engine_root/skia:ace_skia_$platform",
     ]
 
     if (ace_use_new_skia) {
