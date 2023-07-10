@@ -808,6 +808,13 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
         }
         rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        FlushUITasks();
+        CHECK_NULL_VOID_NOLOG(keyboardHeight > 0);
+        // only scroll when keyboard shows
+        auto safeAreaBottom = GetSafeArea().bottom_.Combine(GetSafeAreaManager()->GetKeyboardInset());
+        CHECK_NULL_VOID_NOLOG(safeAreaBottom.IsValid());
+        manager->ScrollTextFieldToSafeArea(safeAreaBottom);
+        FlushUITasks();
     };
 
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
