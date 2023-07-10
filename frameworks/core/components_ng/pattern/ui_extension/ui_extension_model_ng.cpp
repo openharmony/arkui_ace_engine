@@ -59,4 +59,13 @@ void UIExtensionModelNG::SetOnReceive(std::function<void(const AAFwk::WantParams
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     pattern->SetOnReceiveCallback(std::move(onReceive));
 }
+
+void UIExtensionModelNG::SetOnError(
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    pattern->SetOnErrorCallback(std::move(onError));
+}
 } // namespace OHOS::Ace::NG

@@ -47,6 +47,8 @@ public:
     void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback);
+    void SetOnErrorCallback(
+        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
 
     void OnConnect() override;
     void OnDisconnect() override;
@@ -63,6 +65,12 @@ private:
     enum ReleaseCode {
         DESTROY_NORMAL = 0,
         CONNECT_BROKEN,
+    };
+
+    struct ErrorMsg {
+        int32_t code = 0;
+        std::string name;
+        std::string message;
     };
 
     void OnModifyDone() override;
@@ -87,9 +95,11 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     std::function<void(int32_t)> onReleaseCallback_;
-    std::function<void(int32_t, const AAFwk::Want&)> OnResultCallback_;
-    std::function<void(const AAFwk::WantParams&)> OnReceiveCallback_;
+    std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
+    std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
+    std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
 
+    ErrorMsg lastError_;
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -60,6 +60,7 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSUIExtension>::StaticMethod("onReceive", &JSUIExtension::OnReceive);
     JSClass<JSUIExtension>::StaticMethod("onRelease", &JSUIExtension::OnRelease);
     JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::OnResult);
+    JSClass<JSUIExtension>::StaticMethod("onError", &JSUIExtension::OnError);
     JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -138,5 +139,27 @@ void JSUIExtension::OnResult(const JSCallbackInfo& info)
             func->ExecuteJS(1, &returnValue);
         };
     UIExtensionModel::GetInstance()->SetOnResult(std::move(onResult));
+}
+
+void JSUIExtension::OnError(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+        (int32_t code, const std::string& name, const std::string& message) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("UIExtensionComponent.onError");
+            JSRef<JSObject> obj = JSRef<JSObject>::New();
+            obj->SetProperty<int32_t>("code", code);
+            obj->SetProperty<std::string>("name", name);
+            obj->SetProperty<std::string>("message", message);
+            auto returnValue = JSRef<JSVal>::Cast(obj);
+            func->ExecuteJS(1, &returnValue);
+        };
+    UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
 }
 } // namespace OHOS::Ace::Framework
