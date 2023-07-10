@@ -2978,9 +2978,11 @@ void RosenRenderContext::PaintPixmapBgImage()
 {
     auto image = DynamicCast<NG::PixelMapImage>(bgImage_);
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
+    auto pixmap = image->GetPixelMap();
+    CHECK_NULL_VOID(pixmap);
 
     auto rosenImage = std::make_shared<Rosen::RSImage>();
-    rosenImage->SetPixelMap(image->GetPixelMap()->GetPixelMapSharedPtr());
+    rosenImage->SetPixelMap(pixmap->GetPixelMapSharedPtr());
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     rsNode_->SetBgImage(rosenImage);
 }
