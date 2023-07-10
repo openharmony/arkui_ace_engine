@@ -102,6 +102,8 @@ namespace {
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
+constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 constexpr double FULL_DIMENSION = 100.0;
@@ -5018,7 +5020,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
         std::move(onShowCallback), std::move(onDismissCallback));
 }
 
-void JSViewAbstract::ParseModalStyle(const JSRef<JSObject> &paramObj, NG::ModalStyle &modalStyle)
+void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle)
 {
     auto modalTransition = paramObj->GetProperty("modalTransition");
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
@@ -5119,8 +5121,8 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             return;
         }
         if (heightStr.find("calc") != std::string::npos) {
-                LOGI("calc value = %{public}s", heightStr.c_str());
-                sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+            LOGI("calc value = %{public}s", heightStr.c_str());
+            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
         } else {
             sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
         }
@@ -5250,6 +5252,12 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
         uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
         for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() >= SAFE_AREA_TYPE_LIMIT) {
+                LOGW("Safe area type parameter is wrong, use default value SAFE_AREA_TYPE_ALL.");
+                safeAreaType = NG::SAFE_AREA_TYPE_ALL;
+                break;
+            }
             safeAreaType |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
         opts.type = safeAreaType;
@@ -5258,6 +5266,12 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
         auto paramArray = JSRef<JSArray>::Cast(info[1]);
         uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
         for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() >= SAFE_AREA_EDGE_LIMIT) {
+                LOGW("Safe area edge parameter is wrong, use default value SAFE_AREA_EDGE_ALL.");
+                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+                break;
+            }
             safeAreaEdge |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
         opts.edges = safeAreaEdge;
