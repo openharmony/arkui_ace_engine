@@ -33,8 +33,7 @@ template("ace_base_i18n") {
       }
       configs += [ "$ace_flutter_engine_root/icu:icu_config_$platform" ]
     } else {
-      #deps += [ "$ace_flutter_engine_root/icu:ace_libicu_$platform" ]
-      configs += [ "$ace_flutter_engine_root/icu:icu_config_$platform" ]
+      deps += [ "$ace_flutter_engine_root/icu:ace_libicu_$platform" ]
     }
 
     configs += [

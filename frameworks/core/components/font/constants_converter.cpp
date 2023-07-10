@@ -24,130 +24,130 @@
 
 namespace OHOS::Ace::Constants {
 
-OHOS::Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
+Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
 {
-    OHOS::Rosen::FontWeight convertValue;
+    Rosen::FontWeight convertValue;
     switch (fontWeight) {
         case FontWeight::W100:
         case FontWeight::LIGHTER:
-            convertValue = OHOS::Rosen::FontWeight::W100;
+            convertValue = Rosen::FontWeight::W100;
             break;
         case FontWeight::W200:
-            convertValue = OHOS::Rosen::FontWeight::W200;
+            convertValue = Rosen::FontWeight::W200;
             break;
         case FontWeight::W300:
-            convertValue = OHOS::Rosen::FontWeight::W300;
+            convertValue = Rosen::FontWeight::W300;
             break;
         case FontWeight::W400:
         case FontWeight::NORMAL:
         case FontWeight::REGULAR:
-            convertValue = OHOS::Rosen::FontWeight::W400;
+            convertValue = Rosen::FontWeight::W400;
             break;
         case FontWeight::W500:
         case FontWeight::MEDIUM:
-            convertValue = OHOS::Rosen::FontWeight::W500;
+            convertValue = Rosen::FontWeight::W500;
             break;
         case FontWeight::W600:
-            convertValue = OHOS::Rosen::FontWeight::W600;
+            convertValue = Rosen::FontWeight::W600;
             break;
         case FontWeight::W700:
         case FontWeight::BOLD:
-            convertValue = OHOS::Rosen::FontWeight::W700;
+            convertValue = Rosen::FontWeight::W700;
             break;
         case FontWeight::W800:
-            convertValue = OHOS::Rosen::FontWeight::W800;
+            convertValue = Rosen::FontWeight::W800;
             break;
         case FontWeight::W900:
         case FontWeight::BOLDER:
-            convertValue = OHOS::Rosen::FontWeight::W900;
+            convertValue = Rosen::FontWeight::W900;
             break;
         default:
             LOGW("FontWeight setting error! Now using default FontWeight.");
-            convertValue = OHOS::Rosen::FontWeight::W400;
+            convertValue = Rosen::FontWeight::W400;
             break;
     }
     return convertValue;
 }
 
-OHOS::Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
+Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle)
 {
-    OHOS::Rosen::FontStyle convertValue;
+    Rosen::FontStyle convertValue;
     switch (fontStyle) {
         case FontStyle::NORMAL:
-            convertValue = OHOS::Rosen::FontStyle::NORMAL;
+            convertValue = Rosen::FontStyle::NORMAL;
             break;
         case FontStyle::ITALIC:
-            convertValue = OHOS::Rosen::FontStyle::ITALIC;
+            convertValue = Rosen::FontStyle::ITALIC;
             break;
         default:
             LOGW("FontStyle setting error! Now using default FontStyle");
-            convertValue = OHOS::Rosen::FontStyle::NORMAL;
+            convertValue = Rosen::FontStyle::NORMAL;
             break;
     }
     return convertValue;
 }
 
-OHOS::Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline)
+Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline)
 {
-    OHOS::Rosen::TextBaseline convertValue;
+    Rosen::TextBaseline convertValue;
     switch (textBaseline) {
         case TextBaseline::ALPHABETIC:
-            convertValue = OHOS::Rosen::TextBaseline::ALPHABETIC;
+            convertValue = Rosen::TextBaseline::ALPHABETIC;
             break;
         case TextBaseline::IDEOGRAPHIC:
-            convertValue = OHOS::Rosen::TextBaseline::IDEOGRAPHIC;
+            convertValue = Rosen::TextBaseline::IDEOGRAPHIC;
             break;
         default:
             LOGD("TextBaseline setting error! Now using default TextBaseline");
-            convertValue = OHOS::Rosen::TextBaseline::ALPHABETIC;
+            convertValue = Rosen::TextBaseline::ALPHABETIC;
             break;
     }
     return convertValue;
 }
 
-OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
+Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign)
 {
-    OHOS::Rosen::TextAlign convertValue;
+    Rosen::TextAlign convertValue;
     switch (textAlign) {
         case TextAlign::LEFT:
-            convertValue = OHOS::Rosen::TextAlign::LEFT;
+            convertValue = Rosen::TextAlign::LEFT;
             break;
         case TextAlign::RIGHT:
-            convertValue = OHOS::Rosen::TextAlign::RIGHT;
+            convertValue = Rosen::TextAlign::RIGHT;
             break;
         case TextAlign::CENTER:
-            convertValue = OHOS::Rosen::TextAlign::CENTER;
+            convertValue = Rosen::TextAlign::CENTER;
             break;
         case TextAlign::JUSTIFY:
-            convertValue = OHOS::Rosen::TextAlign::JUSTIFY;
+            convertValue = Rosen::TextAlign::JUSTIFY;
             break;
         case TextAlign::START:
-            convertValue = OHOS::Rosen::TextAlign::START;
+            convertValue = Rosen::TextAlign::START;
             break;
         case TextAlign::END:
-            convertValue = OHOS::Rosen::TextAlign::END;
+            convertValue = Rosen::TextAlign::END;
             break;
         default:
             LOGW("TextAlign setting error! Now using default TextAlign");
-            convertValue = OHOS::Rosen::TextAlign::START;
+            convertValue = Rosen::TextAlign::START;
             break;
     }
     return convertValue;
 }
 
-OHOS::Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection)
+Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection)
 {
-    OHOS::Rosen::TextDirection convertValue;
+    Rosen::TextDirection convertValue;
     switch (textDirection) {
         case TextDirection::RTL:
-            convertValue = OHOS::Rosen::TextDirection::RTL;
+            convertValue = Rosen::TextDirection::RTL;
             break;
         case TextDirection::LTR:
-            convertValue = OHOS::Rosen::TextDirection::LTR;
+            convertValue = Rosen::TextDirection::LTR;
             break;
         default:
             LOGW("TextDirection setting error! Now using default TextDirection");
-            convertValue = OHOS::Rosen::TextDirection::LTR;
+            convertValue = Rosen::TextDirection::LTR;
             break;
     }
     return convertValue;
@@ -158,21 +158,21 @@ SkColor ConvertSkColor(Color color)
     return color.GetValue();
 }
 
-OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
+Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
 {
-    OHOS::Rosen::TextDecoration convertValue = OHOS::Rosen::TextDecoration::NONE;
+    Rosen::TextDecoration convertValue = Rosen::TextDecoration::NONE;
     switch (textDecoration) {
         case TextDecoration::NONE:
-            convertValue = OHOS::Rosen::TextDecoration::NONE;
+            convertValue = Rosen::TextDecoration::NONE;
             break;
         case TextDecoration::UNDERLINE:
-            convertValue = OHOS::Rosen::TextDecoration::UNDERLINE;
+            convertValue = Rosen::TextDecoration::UNDERLINE;
             break;
         case TextDecoration::OVERLINE:
-            convertValue = OHOS::Rosen::TextDecoration::OVERLINE;
+            convertValue = Rosen::TextDecoration::OVERLINE;
             break;
         case TextDecoration::LINE_THROUGH:
-            convertValue = OHOS::Rosen::TextDecoration::LINE_THROUGH;
+            convertValue = Rosen::TextDecoration::LINE_THROUGH;
             break;
         default:
             LOGW("TextDecoration setting error! Now using default TextDecoration");
@@ -181,11 +181,11 @@ OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecorati
     return convertValue;
 }
 
-void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, OHOS::Rosen::TextStyle& txtStyle)
+void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
-    // Font size must be px when transferring to OHOS::Rosen::TextStyle
+    // Font size must be px when transferring to Rosen::TextStyle
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
         txtStyle.fontSize = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
@@ -217,7 +217,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
 
     for (auto& spanShadow : textStyle.GetTextShadows()) {
-        OHOS::Rosen::TextShadow txtShadow;
+        Rosen::TextShadow txtShadow;
         txtShadow.color = spanShadow.GetColor().GetValue();
         txtShadow.offset.SetX(spanShadow.GetOffset().GetX());
         txtShadow.offset.SetY(spanShadow.GetOffset().GetY());
@@ -254,7 +254,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     // set font variant
     auto fontFeatures = textStyle.GetFontFeatures();
     if (!fontFeatures.empty()) {
-        OHOS::Rosen::FontFeatures features;
+        Rosen::FontFeatures features;
         for (auto iter = fontFeatures.begin(); iter != fontFeatures.end(); ++iter) {
             features.SetFeature(iter->first, iter->second);
         }
@@ -272,28 +272,28 @@ Rect ConvertSkRect(const Rosen::Drawing::RectF &skRect)
     return result;
 }
 
-OHOS::Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration)
+Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration)
 {
-    OHOS::Rosen::PlaceholderVerticalAlignment convertValue =
-        OHOS::Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;
+    Rosen::PlaceholderVerticalAlignment convertValue =
+        Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;
     switch (textDecoration) {
         case PlaceholderAlignment::BASELINE:
-            convertValue = OHOS::Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;
+            convertValue = Rosen::PlaceholderVerticalAlignment::OFFSET_AT_BASELINE;
             break;
         case PlaceholderAlignment::ABOVEBASELINE:
-            convertValue = OHOS::Rosen::PlaceholderVerticalAlignment::ABOVE_BASELINE;
+            convertValue = Rosen::PlaceholderVerticalAlignment::ABOVE_BASELINE;
             break;
         case PlaceholderAlignment::BELOWBASELINE:
-            convertValue = OHOS::Rosen::PlaceholderVerticalAlignment::BELOW_BASELINE;
+            convertValue = Rosen::PlaceholderVerticalAlignment::BELOW_BASELINE;
             break;
         case PlaceholderAlignment::TOP:
-            convertValue = OHOS::Rosen::PlaceholderVerticalAlignment::TOP_OF_ROW_BOX;
+            convertValue = Rosen::PlaceholderVerticalAlignment::TOP_OF_ROW_BOX;
             break;
         case PlaceholderAlignment::BOTTOM:
-            convertValue = OHOS::Rosen::PlaceholderVerticalAlignment::BOTTOM_OF_ROW_BOX;
+            convertValue = Rosen::PlaceholderVerticalAlignment::BOTTOM_OF_ROW_BOX;
             break;
         case PlaceholderAlignment::MIDDLE:
-            convertValue = OHOS::Rosen::PlaceholderVerticalAlignment::CENTER_OF_ROW_BOX;
+            convertValue = Rosen::PlaceholderVerticalAlignment::CENTER_OF_ROW_BOX;
             break;
         default:
             LOGW("PlaceholderAlignment setting error! Now using default PlaceholderAlignment");
@@ -302,7 +302,7 @@ OHOS::Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(Placeholde
     return convertValue;
 }
 
-void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderSpan& txtSpan)
+void ConvertPlaceholderRun(const PlaceholderRun& span, Rosen::PlaceholderSpan& txtSpan)
 {
     txtSpan.width = span.width;
     txtSpan.height = span.height;

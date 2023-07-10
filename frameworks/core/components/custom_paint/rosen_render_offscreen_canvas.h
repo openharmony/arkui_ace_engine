@@ -145,7 +145,7 @@ private:
     std::unique_ptr<Rosen::Typography> paragraph_;
     bool HasShadow() const;
     bool HasImageShadow() const;
-    void UpdateTextStyleForeground(bool isStroke, OHOS::Rosen::TextStyle& style, bool hasShadow);
+    void UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& style, bool hasShadow);
     double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<Rosen::Typography>& paragraph);
     TextDirection GetTextDirection(const std::string& text);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);

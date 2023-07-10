@@ -37,6 +37,7 @@
 #include "include/encode/SkWebpEncoder.h"
 #include "include/utils/SkBase64.h"
 #include "include/utils/SkParsePath.h"
+#include "unicode/ubidi.h"
 
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
@@ -46,7 +47,6 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/flutter_font_collection.h"
 #include "core/image/image_provider.h"
-#include "unicode/ubidi.h"
 
 namespace OHOS::Ace {
 namespace {
