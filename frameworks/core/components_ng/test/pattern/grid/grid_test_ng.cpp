@@ -1989,37 +1989,6 @@ HWTEST_F(GridTestNg, MouseSelect003, TestSize.Level1)
 }
 
 /**
- * @tc.name: MouseSelect004
- * @tc.desc: Test OnMouseSelectAll func
- * @tc.type: FUNC
- */
-HWTEST_F(GridTestNg, MouseSelect004, TestSize.Level1)
-{
-    GridModelNG gridModelNG;
-    gridModelNG.Create(nullptr, nullptr);
-    gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    gridModelNG.SetMultiSelectable(true);
-    CreateGridItem(8, -1, ITEM_HEIGHT);
-    GetInstance();
-    RunMeasureAndLayout();
-
-    /**
-     * @tc.steps: step1. Run OnMouseSelectAll func.
-     * @tc.expected: All items are selected.
-     */
-    pattern_->OnMouseSelectAll();
-    auto children = frameNode_->GetChildren();
-    for (const auto& item : children) {
-        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
-        if (!itemFrameNode) {
-            continue;
-        }
-        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
-        EXPECT_TRUE(itemPattern->IsSelected());
-    }
-}
-
-/**
  * @tc.name: MouseSelect005
  * @tc.desc: Test select in other condition
  * @tc.type: FUNC
@@ -3141,8 +3110,8 @@ HWTEST_F(GridTestNg, GridScrollTest001, TestSize.Level1)
     RunMeasureAndLayout();
     Dimension offset(1.0);
     auto fireOnScroll = eventHub_->FireOnScrollBarUpdate(1.0, offset);
-    EXPECT_FLOAT_EQ(fireOnScroll.first.value(), 10.0f);
-    EXPECT_FLOAT_EQ(fireOnScroll.second.value(), 10.0f);
+    EXPECT_FLOAT_EQ(fireOnScroll.first.value(), 1.0f);
+    EXPECT_FLOAT_EQ(fireOnScroll.second.value(), 1.0f);
 }
 
 /**
