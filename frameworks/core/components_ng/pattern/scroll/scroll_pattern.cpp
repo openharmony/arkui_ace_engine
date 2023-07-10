@@ -141,6 +141,14 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             GetScrollBar()->OnScrollEnd();
         }
     }
+    if (ScrollableIdle() && !AnimateRunning()) {
+        auto predictSnapOffset = CalePredictSnapOffset(0.0);
+        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+            StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
+            FireOnScrollStart();
+            scrollStop_ = false;
+        }
+    }
     if (scrollStop_) {
         FireOnScrollStop();
         scrollStop_ = false;
@@ -668,12 +676,12 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
-std::optional<float> ScrollPattern::CalePredictSnapOffset(float finalOffset, float velocity)
+std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta)
 {
     std::optional<float> predictSnapOffset;
     CHECK_NULL_RETURN_NOLOG(!snapOffsets_.empty(), predictSnapOffset);
     CHECK_NULL_RETURN_NOLOG(GetScrollSnapAlign() != ScrollSnapAlign::NONE, predictSnapOffset);
-    float finalPosition = currentOffset_ + finalOffset;
+    float finalPosition = currentOffset_ + delta;
     if (!IsSnapToInterval()) {
         if (!enableSnapToSide_.first) {
             if (GreatNotEqual(finalPosition, *(snapOffsets_.begin() + 1)) ||

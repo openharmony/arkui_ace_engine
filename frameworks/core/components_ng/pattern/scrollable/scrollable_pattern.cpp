@@ -201,12 +201,11 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetOnScrollSnapCallback(scrollSnap);
 
-    auto calePredictSnapOffsetCallback = [weak = WeakClaim(this)](
-                                             float finalOffset, float velocity) -> std::optional<float> {
+    auto calePredictSnapOffsetCallback = [weak = WeakClaim(this)](float delta) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         std::optional<float> predictSnapOffset;
         CHECK_NULL_RETURN_NOLOG(pattern, predictSnapOffset);
-        return pattern->CalePredictSnapOffset(finalOffset, velocity);
+        return pattern->CalePredictSnapOffset(delta);
     };
     scrollable->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
 
