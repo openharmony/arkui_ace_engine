@@ -63,7 +63,7 @@ void JSCalendarPicker::JSBind(BindingTarget globalObj)
 void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
 {
     NG::CalendarEdgeAlign alignType = NG::CalendarEdgeAlign::EDGE_ALIGN_END;
-    DimensionOffset offset = DimensionOffset(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
+    DimensionOffset offset;
     if (!info[0]->IsNumber()) {
         CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset);
         return;
@@ -71,6 +71,7 @@ void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
     alignType = static_cast<NG::CalendarEdgeAlign>(info[0]->ToNumber<int32_t>());
 
     if (!info[1]->IsObject()) {
+        CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset);
         return;
     }
     auto offsetObj = JSRef<JSObject>::Cast(info[1]);
