@@ -234,6 +234,7 @@ void NavigationPattern::OnModifyDone()
             }
             hostNode->NavTransitionInAnimation(preTopNavDestination, newTopNavDestination);
         }
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
