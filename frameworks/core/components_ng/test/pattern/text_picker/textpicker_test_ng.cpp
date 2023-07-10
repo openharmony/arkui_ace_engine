@@ -1924,19 +1924,42 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow010, TestSize.Level1)
 HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow011, TestSize.Level1)
 {
     TextPickerDialogView::dialogNode_ = nullptr;
-
+    // when rangeVector and multi selection are both empty, dialog will not display
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     TextPickerSettingData settingData;
     settingData.rangeVector = {};
-    settingData.selected = 0;
+    settingData.options = {};
 
     DialogProperties dialogProperties;
-    SystemProperties::SetDeviceType(DeviceType::PHONE);
-    SystemProperties::SetDeviceOrientation(0);
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
 
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
-    EXPECT_EQ(frameNode, nullptr);
+    auto frameNode1 = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    EXPECT_EQ(frameNode1, nullptr);
+
+    // when one of rangeVector and multi selection is valid, dialog will display
+    settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
+    auto frameNode2 = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(frameNode2, nullptr);
+    TextPickerDialogView::dialogNode_ = nullptr;
+
+    settingData.rangeVector = {};
+    NG::TextCascadePickerOptions options1;
+    NG::TextCascadePickerOptions options1Child;
+    options1Child.rangeResult = { "11", "12" };
+    options1.rangeResult = { "1" };
+    options1.children.emplace_back(options1Child);
+    settingData.options.emplace_back(options1);
+    NG::TextCascadePickerOptions options2;
+    NG::TextCascadePickerOptions options2Child;
+    NG::TextCascadePickerOptions options2Child2Child;
+    options2Child2Child.rangeResult = { "221", "222" };
+    options2Child.rangeResult = { "21" };
+    options2Child.children.emplace_back(options2Child2Child);
+    options2.rangeResult = { "2" };
+    options2.children.emplace_back(options2Child);
+    settingData.options.emplace_back(options2);
+    auto frameNode3 = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(frameNode3, nullptr);
 }
 
 /**
