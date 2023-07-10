@@ -736,6 +736,7 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
 
     CHECK_NULL_VOID(skiaDom_);
     // draw the svg
+#ifndef USE_ROSEN_DRAWING
     SkRect srcRect;
     SkRect dstRect;
     switch (canvasImage.flag) {
@@ -770,6 +771,45 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
     skCanvas->scale(scaleX, scaleY);
     skiaDom_->render(skCanvas);
     skCanvas->restore();
+#else
+    RSRect srcRect;
+    RSRect dstRect;
+    switch (canvasImage.flag) {
+        case 0:
+            srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width() + canvasImage.dx,
+                skiaDom_->containerSize().height() + canvasImage.dy);
+            break;
+        case 1: {
+            srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        case 2: {
+            srcRect = RSRect(canvasImage.sx, canvasImage.sy,
+                canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        default:
+            break;
+    }
+    float scaleX = dstRect.GetWidth() / srcRect.GetWidth();
+    float scaleY = dstRect.GetHeight() / srcRect.GetHeight();
+    OffsetF offset = GetContentOffset(paintWrapper);
+    OffsetF startPoint = offset + OffsetF(dstRect.GetLeft(), dstRect.GetTop()) -
+        OffsetF(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
+
+    RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
+    rsCanvas->Save();
+    rsCanvas->ClipRect(dstRect, RSClipOp::INTERSECT);
+    rsCanvas->Translate(startPoint.GetX(), startPoint.GetY());
+    rsCanvas->Scale(scaleX, scaleY);
+    rsCanvas->DrawSVGDOM(skiaDom_);
+    rsCanvas->Restore();
+#endif
 }
 
 void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData)
@@ -784,6 +824,7 @@ void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace:
     for (uint32_t i = 0; i < imageData.data.size(); ++i) {
         data[i] = imageData.data[i].GetValue();
     }
+#ifndef USE_ROSEN_DRAWING
     SkBitmap skBitmap;
     auto imageInfo = SkImageInfo::Make(imageData.dirtyWidth, imageData.dirtyHeight, SkColorType::kBGRA_8888_SkColorType,
         SkAlphaType::kOpaque_SkAlphaType);
@@ -795,12 +836,21 @@ void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace:
 #else
     skCanvas_->drawImage(skBitmap.asImage(), imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
 #endif
+#else
+    RSBitmap bitmap;
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
+    bitmap.SetPixels(data);
+    auto contentOffset = GetContentOffset(paintWrapper);
+    rsCanvas_->DrawBitmap(bitmap, imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
+#endif
     delete[] data;
 }
 
 void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& rect)
 {
     OffsetF offset = GetContentOffset(paintWrapper);
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
 #ifndef NEW_SKIA
     InitImagePaint(paint);
@@ -839,11 +889,52 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
         skCanvas_->drawRect(skRect, paint);
         skCanvas_->restore();
     }
+#else
+    RSBrush brush;
+    RSSamplingOptions options;
+    InitImagePaint(nullptr, &brush, options);
+    brush.SetAntiAlias(antiAlias_);
+    if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+        brush.SetColor(fillState_.GetColor().GetValue());
+    }
+    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
+        rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
+    if (HasShadow()) {
+        RSRecordingPath path;
+        path.AddRect(rsRect);
+        PaintShadow(path, shadow_, rsCanvas_.get());
+    }
+    if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
+        UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
+    }
+    if (fillState_.GetPatternValue().IsValid() && fillState_.GetPaintStyle() == PaintStyle::ImagePattern) {
+        UpdatePaintShader(fillState_.GetPatternValue(), nullptr, &brush);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        brush.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        rsCanvas_->AttachBrush(brush);
+        rsCanvas_->DrawRect(rsRect);
+        rsCanvas_->DetachBrush();
+    } else {
+        RSBrush compositeOperationpBrush;
+        InitPaintBlend(compositeOperationpBrush);
+        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        rsCanvas_->SaveLayer(slo);
+        rsCanvas_->AttachBrush(brush);
+        rsCanvas_->DrawRect(rsRect);
+        rsCanvas_->DetachBrush();
+        rsCanvas_->Restore();
+    }
+#endif
 }
 
 void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& rect)
 {
     OffsetF offset = GetContentOffset(paintWrapper);
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
 #ifndef NEW_SKIA
     GetStrokePaint(paint);
@@ -875,11 +966,46 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
         skCanvas_->drawRect(skRect, paint);
         skCanvas_->restore();
     }
+#else
+    RSPen pen;
+    RSSamplingOptions options;
+    GetStrokePaint(pen, options);
+    pen.SetAntiAlias(antiAlias_);
+    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
+        rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
+    if (HasShadow()) {
+        RSRecordingPath path;
+        path.AddRect(rsRect);
+        PaintShadow(path, shadow_, rsCanvas_.get());
+    }
+    if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
+        UpdatePaintShader(offset, &pen, nullptr, strokeState_.GetGradient());
+    }
+    if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
+        UpdatePaintShader(strokeState_.GetPatternValue(), &pen, nullptr);
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        rsCanvas_->AttachPen(pen);
+        rsCanvas_->DrawRect(rsRect);
+        rsCanvas_->DetachPen();
+    } else {
+        RSBrush compositeOperationpBrush;
+        InitPaintBlend(compositeOperationpBrush);
+        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        rsCanvas_->SaveLayer(slo);
+        rsCanvas_->AttachPen(pen);
+        rsCanvas_->DrawRect(rsRect);
+        rsCanvas_->DetachPen();
+        rsCanvas_->Restore();
+    }
+#endif
 }
 
 void CustomPaintPaintMethod::ClearRect(PaintWrapper* paintWrapper, const Rect& rect)
 {
     OffsetF offset = GetContentOffset(paintWrapper);
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
 #ifndef NEW_SKIA
     InitImagePaint(paint);
@@ -892,10 +1018,23 @@ void CustomPaintPaintMethod::ClearRect(PaintWrapper* paintWrapper, const Rect& r
     auto skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), rect.Bottom() + offset.GetY());
     skCanvas_->drawRect(skRect, paint);
+#else
+    RSBrush brush;
+    RSSamplingOptions options;
+    InitImagePaint(nullptr, &brush, options);
+    brush.SetAntiAlias(antiAlias_);
+    brush.SetBlendMode(RSBlendMode::CLEAR);
+    RSRect rsRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
+        rect.Right() + offset.GetX(), rect.Bottom() + offset.GetY());
+    rsCanvas_->AttachBrush(brush);
+    rsCanvas_->DrawRect(rsRect);
+    rsCanvas_->DetachBrush();
+#endif
 }
 
 void CustomPaintPaintMethod::SetFillRuleForPath(const CanvasFillRule& rule)
 {
+#ifndef USE_ROSEN_DRAWING
     if (rule == CanvasFillRule::NONZERO) {
 #ifndef NEW_SKIA
         skPath_.setFillType(SkPath::FillType::kWinding_FillType);
@@ -909,10 +1048,18 @@ void CustomPaintPaintMethod::SetFillRuleForPath(const CanvasFillRule& rule)
         skPath_.setFillType(SkPathFillType::kEvenOdd);
 #endif
     }
+#else
+    if (rule == CanvasFillRule::NONZERO) {
+        rsPath_.SetFillStyle(RSPathFillType::WINDING);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        rsPath_.SetFillStyle(RSPathFillType::EVENTODD);
+    }
+#endif
 }
 
 void CustomPaintPaintMethod::SetFillRuleForPath2D(const CanvasFillRule& rule)
 {
+#ifndef USE_ROSEN_DRAWING
     if (rule == CanvasFillRule::NONZERO) {
 #ifndef NEW_SKIA
         skPath2d_.setFillType(SkPath::FillType::kWinding_FillType);
@@ -926,11 +1073,19 @@ void CustomPaintPaintMethod::SetFillRuleForPath2D(const CanvasFillRule& rule)
         skPath2d_.setFillType(SkPathFillType::kEvenOdd);
 #endif
     }
+#else
+    if (rule == CanvasFillRule::NONZERO) {
+        rsPath2d_.SetFillStyle(RSPathFillType::WINDING);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        rsPath2d_.SetFillStyle(RSPathFillType::EVENTODD);
+    }
+#endif
 }
 
 void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
 {
     OffsetF offset = GetContentOffset(paintWrapper);
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
 #ifndef NEW_SKIA
     InitImagePaint(paint);
@@ -965,6 +1120,42 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
         skCanvas_->drawPath(skPath_, paint);
         skCanvas_->restore();
     }
+#else
+    RSBrush brush;
+    RSSamplingOptions options;
+    InitImagePaint(nullptr, &brush, options);
+    brush.SetAntiAlias(antiAlias_);
+    if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+        brush.SetColor(fillState_.GetColor().GetValue());
+    }
+    if (HasShadow()) {
+        PaintShadow(rsPath_, shadow_, rsCanvas_.get());
+    }
+    if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
+        UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
+    }
+    if (fillState_.GetPatternValue().IsValid() && fillState_.GetPaintStyle() == PaintStyle::ImagePattern) {
+        UpdatePaintShader(fillState_.GetPatternValue(), nullptr, &brush);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        brush.SetAlphaF(globalState_.GetAlpha());
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        rsCanvas_->AttachBrush(brush);
+        rsCanvas_->DrawPath(rsPath_);
+        rsCanvas_->DetachBrush();
+    } else {
+        RSBrush compositeOperationpBrush;
+        InitPaintBlend(compositeOperationpBrush);
+        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        rsCanvas_->SaveLayer(slo);
+        rsCanvas_->AttachBrush(brush);
+        rsCanvas_->DrawPath(rsPath_);
+        rsCanvas_->DetachBrush();
+        rsCanvas_->Restore();
+    }
+#endif
 }
 
 void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path)
@@ -973,11 +1164,16 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper, const RefPtr<Canva
     OffsetF offset = GetContentOffset(paintWrapper);
     ParsePath2D(offset, path);
     Path2DFill(offset);
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.reset();
+#else
+    rsPath2d_.Reset();
+#endif
 }
 
 void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
 #ifndef NEW_SKIA
     InitImagePaint(paint);
@@ -1012,6 +1208,42 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
         skCanvas_->drawPath(skPath2d_, paint);
         skCanvas_->restore();
     }
+#else
+    RSBrush brush;
+    RSSamplingOptions options;
+    InitImagePaint(nullptr, &brush, options);
+    brush.SetAntiAlias(antiAlias_);
+    if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+        brush.SetColor(fillState_.GetColor().GetValue());
+    }
+    if (HasShadow()) {
+        PaintShadow(rsPath2d_, shadow_, rsCanvas_.get());
+    }
+    if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
+        UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
+    }
+    if (fillState_.GetPatternValue().IsValid() && fillState_.GetPaintStyle() == PaintStyle::ImagePattern) {
+        UpdatePaintShader(fillState_.GetPattern(), nullptr, &brush);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        brush.SetAlphaF(globalState_.GetAlpha());
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        rsCanvas_->AttachBrush(brush);
+        rsCanvas_->DrawPath(rsPath2d_);
+        rsCanvas_->DetachBrush();
+    } else {
+        RSBrush compositeOperationpBrush;
+        InitPaintBlend(compositeOperationpBrush);
+        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        rsCanvas_->SaveLayer(slo);
+        rsCanvas_->AttachBrush(brush);
+        rsCanvas_->DrawPath(rsPath2d_);
+        rsCanvas_->DetachBrush();
+        rsCanvas_->Restore();
+    }
+#endif
 }
 
 void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
