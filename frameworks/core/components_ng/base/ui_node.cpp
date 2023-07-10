@@ -215,6 +215,20 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
     }
 }
 
+void UINode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
+{
+    OnConfigurationUpdate(configurationChange);
+    if (needCallChildrenUpdate_) {
+        auto children = GetChildren();
+        for (const auto& child : children) {
+            if (!child) {
+                continue;
+            }
+            child->UpdateConfigurationUpdate(configurationChange);
+        }
+    }
+}
+
 bool UINode::OnRemoveFromParent(bool allowTransition)
 {
     // The recursive flag will used by RenderContext, if recursive flag is false,
@@ -303,6 +317,7 @@ void UINode::AttachToMainTree(bool recursive)
         return;
     }
     onMainTree_ = true;
+    isRemoving_ = false;
     OnAttachToMainTree(recursive);
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -585,13 +600,6 @@ void UINode::SetActive(bool active)
     }
 }
 
-void UINode::SetJSViewActive(bool active)
-{
-    for (const auto& child : children_) {
-        child->SetJSViewActive(active);
-    }
-}
-
 void UINode::OnVisibleChange(bool isVisible)
 {
     for (const auto& child : GetChildren()) {
@@ -744,5 +752,18 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
         // Recursively traverse the child nodes of each node
         child->GetPerformanceCheckData(nodeMap);
     }
+}
+
+RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
+{
+    if (id.empty()) {
+        return nullptr;
+    }
+    for (auto& [node, index] : disappearingChildren_) {
+        if (node->GetInspectorIdValue("") == id) {
+            return node;
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

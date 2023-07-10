@@ -330,6 +330,14 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
     needRenderNode_.insert(node);
 }
 
+void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange)
+{
+    LOGI("NotifyConfigurationChange");
+    auto rootNode = GetRootElement();
+    rootNode->UpdateConfigurationUpdate(configurationChange);
+    PipelineBase::NotifyConfigurationChange(configurationChange);
+}
+
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
@@ -723,17 +731,37 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
-        SyncSafeArea();
-    }
+    AnimationOption option;
+    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
+    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), systemSafeArea]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID_NOLOG(safeAreaManager);
+        if (safeAreaManager->UpdateSystemSafeArea(systemSafeArea)) {
+            pipeline->SyncSafeArea();
+            pipeline->FlushUITasks();
+        }
+    });
 }
 
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
-        SyncSafeArea();
-    }
+    AnimationOption option;
+    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
+    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), cutoutSafeArea]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID_NOLOG(safeAreaManager);
+        if (safeAreaManager->UpdateCutoutSafeArea(cutoutSafeArea)) {
+            pipeline->SyncSafeArea();
+            pipeline->FlushUITasks();
+        }
+    });
 }
 
 void PipelineContext::SyncSafeArea()
@@ -1141,12 +1169,10 @@ void PipelineContext::FlushTouchEvents()
         canUseLongPredictTask_ = false;
         eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_map<int, TouchEvent> idToTouchPoints;
-        for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
+        for (auto iter = touchEvents.begin(); iter != touchEvents.end(); ++iter) {
             auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
-            auto result = idToTouchPoints.emplace(scalePoint.id, scalePoint);
-            if (!result.second) {
-                idToTouchPoints[scalePoint.id].history.emplace_back(scalePoint);
-            }
+            idToTouchPoints.emplace(scalePoint.id, scalePoint);
+            idToTouchPoints[scalePoint.id].history.emplace_back(scalePoint);
         }
         std::list<TouchEvent> touchPoints;
         for (auto& [_, item] : idToTouchPoints) {

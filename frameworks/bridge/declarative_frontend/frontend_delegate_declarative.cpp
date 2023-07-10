@@ -1842,7 +1842,6 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
 {
-    LOGI("FrontendDelegateDeclarative::OnLayoutCompleted");
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), componentId] {
             auto delegate = weak.Upgrade();
@@ -1856,7 +1855,6 @@ void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& component
 
 void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
 {
-    LOGI("FrontendDelegateDeclarative::OnDrawCompleted");
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), componentId] {
             auto delegate = weak.Upgrade();

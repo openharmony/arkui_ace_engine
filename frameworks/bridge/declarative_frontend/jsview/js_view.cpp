@@ -642,13 +642,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
     };
 
-    auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active) -> void {
-        auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID(jsView);
-        ContainerScope scope(jsView->GetInstanceId());
-        jsView->jsViewFunction_->ExecuteSetActive(active);
-    };
-
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
@@ -659,7 +652,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .completeReloadFunc = std::move(completeReloadFunc),
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
-        .setActiveFunc = std::move(setActiveFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };
@@ -838,8 +830,10 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
         auto node = view->GetCachedRecycleNode();
         node->SetRecycleRenderFunc(std::move(recycleUpdateFunc));
         auto newElmtId = ViewStackModel::GetInstance()->GetElmtIdToAccountFor();
-        ElementRegister::GetInstance()->UpdateRecycleElmtId(AceType::DynamicCast<NG::UINode>(node)->GetId(), newElmtId);
-        AceType::DynamicCast<NG::UINode>(node)->UpdateRecycleElmtId(newElmtId);
+        auto uiNode = AceType::DynamicCast<NG::UINode>(node);
+        ElementRegister::GetInstance()->UpdateRecycleElmtId(uiNode->GetId(), newElmtId);
+        uiNode->UpdateRecycleElmtId(newElmtId);
+        NG::LayoutProperty::UpdateAllGeometryTransition(uiNode);
         ViewStackModel::GetInstance()->Push(node, true);
     } else {
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);

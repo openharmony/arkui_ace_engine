@@ -17,11 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 
 #include "base/geometry/axis.h"
+#include "core/animation/select_motion.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
@@ -235,6 +237,25 @@ public:
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
     virtual void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth);
+    bool CanOverScroll(int32_t source)
+    {
+        return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
+            IsScrollable() && (!ScrollableIdle() || AnimateRunning()));
+    }
+    void MarkSelectedItems();
+    bool ShouldSelectScrollBeStopped();
+
+    // scrollSnap
+    virtual std::optional<float> CalePredictSnapOffset(float finalOffset, float velocity)
+    {
+        std::optional<float> predictSnapPosition;
+        return predictSnapPosition;
+    }
+
+    virtual bool NeedScrollSnapToSide(float delta)
+    {
+        return false;
+    }
 
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
@@ -253,12 +274,29 @@ protected:
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
+    // select with mouse
+    void InitMouseEvent();
+    void UninitMouseEvent();
+    void DrawSelectedZone(const RectF& selectedZone);
+    void ClearSelectedZone();
+    bool multiSelectable_ = false;
+    bool isMouseEventInit_ = false;
+
 private:
     void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
     void OnScrollEnd();
     bool OnScrollPosition(double offset, int32_t source);
     void SetParentScrollable();
+
+    // select with mouse
+    virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
+    virtual void ClearMultiSelect() {};
+    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
+    void OnMouseRelease();
+    void SelectWithScroll();
+    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
+    float GetOutOfScrollableOffset() const;
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -281,6 +319,14 @@ private:
     bool scrollAbort_ = false;
 
     NestedScrollOptions nestedScroll_;
+
+    // select with mouse
+    bool mousePressed_ = false;
+    OffsetF mouseStartOffset_;
+    OffsetF mouseEndOffset_;
+    OffsetF mousePressOffset_;
+    MouseInfo lastMouseMove_;
+    RefPtr<SelectMotion> selectMotion_;
 };
 } // namespace OHOS::Ace::NG
 

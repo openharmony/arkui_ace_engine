@@ -240,6 +240,9 @@ public:
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
 
+    // background
+    virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
+
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
     virtual void BindMenu(

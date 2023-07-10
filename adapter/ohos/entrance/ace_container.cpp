@@ -126,6 +126,15 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     useStageModel_ = true;
 }
 
+AceContainer::~AceContainer()
+{
+    LOG_DESTROY();
+    if (IsFormRender() && taskExecutor_) {
+        taskExecutor_->Destory();
+        taskExecutor_.Reset();
+    }
+}
+
 void AceContainer::InitializeTask()
 {
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
@@ -1438,18 +1447,10 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
 void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const OnConfigurationChange&
     configurationChange)
 {
-    auto weak = WeakClaim(this);
-    auto container = weak.Upgrade();
-    CHECK_NULL_VOID(container);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    RefPtr<NG::FrameNode> rootNode = context->GetRootElement();
-    rootNode->UpdateConfigurationUpdate(configurationChange);
-
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition]() {
+        [instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition, configurationChange]() {
             ContainerScope scope(instanceId);
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -1461,13 +1462,13 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const On
             auto taskExecutor = container->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask(
-                [instanceId, weak, needReloadTransition]() {
+                [instanceId, weak, needReloadTransition, configurationChange]() {
                     ContainerScope scope(instanceId);
                     auto container = weak.Upgrade();
                     CHECK_NULL_VOID(container);
                     auto pipeline = container->GetPipelineContext();
                     CHECK_NULL_VOID(pipeline);
-                    pipeline->NotifyConfigurationChange();
+                    pipeline->NotifyConfigurationChange(configurationChange);
                     pipeline->FlushReload();
                     if (needReloadTransition) {
                         // reload transition animation

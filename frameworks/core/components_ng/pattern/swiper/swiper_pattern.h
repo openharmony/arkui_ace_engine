@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
@@ -208,6 +209,21 @@ public:
     float GetTurnPageRate() const
     {
         return turnPageRate_;
+    }
+
+    void SetTurnPageRate(float turnPageRate)
+    {
+        turnPageRate_ = turnPageRate;
+    }
+
+    float GetTouchBottomRate() const
+    {
+        return touchBottomRate_;
+    }
+
+    void SetTouchBottomRate(float touchBottomRate)
+    {
+        touchBottomRate_ = touchBottomRate;
     }
 
     RefPtr<Animator> GetController()
@@ -405,7 +421,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
     void OnTouchTestHit(SourceType hitTestType) override;
-
+    void SwipeToWithoutAnimation(int32_t index);
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -449,12 +465,12 @@ private:
     void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f);
     void StopPropertyTranslateAnimation();
     void UpdateOffsetAfterPropertyAnimation(float offset);
-    void OnPropertyTranslateAnimationFinish(int32_t nextIndex, const OffsetF& offset);
+    void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     RefPtr<Curve> GetCurveIncludeMotion(float velocity = 0.0f) const;
     void PlayIndicatorTranslateAnimation(float translate);
 
     // Implement of swiper controller
-    void SwipeToWithoutAnimation(int32_t index);
+
     void FinishAnimation();
     void StopTranslateAnimation();
     void StopSpringAnimation();
@@ -500,7 +516,7 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool forceStop = false);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -514,13 +530,14 @@ private:
     float GetCustomPropertyOffset() const;
     float GetCurrentFirstIndexStartPos() const;
     void UpdateAnimationProperty(float velocity);
-    void TriggerAnimationEndOnTouchDown();
+    void TriggerAnimationEndOnForceStop();
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
     bool IsChildrenSizeLessThanSwiper();
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyLoadIsLoop() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -551,9 +568,11 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    float touchBottomRate_ = 1.0f;
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
+    int32_t autoPlayCurrentIndex_ = 0;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -601,6 +620,8 @@ private:
     bool mainSizeIsMeasured_ = false;
 
     bool usePropertyAnimation_ = false;
+    int32_t propertyAnimationIndex_ = -1;
+
     std::optional<int32_t> surfaceChangedCallbackId_;
 };
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
@@ -484,44 +486,46 @@ OffsetF GridScrollLayoutAlgorithm::CalculateLargeItemOffset(
 
 bool GridScrollLayoutAlgorithm::NeedAdjust(const RefPtr<GridItemLayoutProperty>& itemLayoutProperty)
 {
+    bool needAdjust = false;
     if (itemLayoutProperty->GetRowStart().has_value()) {
         currentItemRowStart_ = itemLayoutProperty->GetRowStart().value_or(-1);
         if ((currentItemRowStart_ < 0) || (currentItemRowStart_ >= static_cast<int32_t>(mainCount_))) {
-            return true;
+            needAdjust = true;
         }
     }
     if (itemLayoutProperty->GetRowEnd().has_value()) {
         currentItemRowEnd_ = itemLayoutProperty->GetRowEnd().value_or(-1);
         if ((currentItemRowEnd_ < 0) || (currentItemRowEnd_ >= static_cast<int32_t>(mainCount_))) {
-            return true;
+            needAdjust = true;
         }
     }
     if (itemLayoutProperty->GetColumnStart().has_value()) {
         currentItemColStart_ = itemLayoutProperty->GetColumnStart().value_or(-1);
         if ((currentItemColStart_ < 0) || (currentItemColStart_ >= static_cast<int32_t>(crossCount_))) {
-            return true;
+            needAdjust = true;
         }
     }
     if (itemLayoutProperty->GetColumnEnd().has_value()) {
         currentItemColEnd_ = itemLayoutProperty->GetColumnEnd().value_or(-1);
         if ((currentItemColEnd_ < 0) || (currentItemColEnd_ >= static_cast<int32_t>(crossCount_))) {
-            return true;
+            needAdjust = true;
         }
     }
-    return false;
+    return needAdjust;
 }
 
 void GridScrollLayoutAlgorithm::AdjustRowColSpan(const RefPtr<LayoutWrapper>& itemLayoutWrapper)
 {
     auto itemLayoutProperty = DynamicCast<GridItemLayoutProperty>(itemLayoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(itemLayoutProperty);
+    bool needAdjust = false;
     currentItemRowSpan_ = 1;
     currentItemColSpan_ = 1;
     currentItemRowStart_ = -1;
     currentItemColStart_ = -1;
     currentItemColEnd_ = -1;
     currentItemRowEnd_ = -1;
-    auto needAdjust = NeedAdjust(itemLayoutProperty);
+    needAdjust = NeedAdjust(itemLayoutProperty);
     if (!needAdjust) {
         currentItemRowSpan_ = std::max(currentItemRowEnd_ - currentItemRowStart_ + 1, 1);
         currentItemColSpan_ = std::max(currentItemColEnd_ - currentItemColStart_ + 1, 1);
@@ -602,7 +606,24 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
     if (layoutWrapper->GetTotalChildCount() <= targetIndex) {
         return;
     }
-    /* 2.2 targetIndex is already in the matrix */
+
+    switch (gridLayoutInfo_.scrollAlign_) {
+        case ScrollAlign::START:
+            ScrollToIndexStart(layoutWrapper, targetIndex);
+            return;
+        case ScrollAlign::END:
+            ScrollToIndexEnd(layoutWrapper, mainSize, targetIndex);
+            return;
+        case ScrollAlign::CENTER:
+            ScrollToIndexCenter(layoutWrapper, mainSize, targetIndex);
+            return;
+        default:
+            ScrollToIndexAuto(layoutWrapper, mainSize, targetIndex);
+    }
+}
+
+void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex)
+{
     int32_t startLine = 0;
     if (IsIndexInMatrix(targetIndex, startLine)) {
         if (startLine < gridLayoutInfo_.endMainLineIndex_ && startLine > gridLayoutInfo_.startMainLineIndex_) {
@@ -647,6 +668,102 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
     grid->ChildrenUpdatedFrom(0);
     GetTargetIndexInfoWithBenchMark(layoutWrapper, targetIndex);
     moveToEndLineIndex_ = isTargetBackward ? targetIndex : moveToEndLineIndex_;
+}
+
+void GridScrollLayoutAlgorithm::ScrollToIndexStart(LayoutWrapper* layoutWrapper, int32_t targetIndex)
+{
+    int32_t startLine = 0;
+    /* targetIndex is in the matrix */
+    if (IsIndexInMatrix(targetIndex, startLine)) {
+        if (startLine == gridLayoutInfo_.startMainLineIndex_) {
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+            gridLayoutInfo_.currentOffset_ = 0;
+            gridLayoutInfo_.ResetPositionFlags();
+            return;
+        }
+
+        gridLayoutInfo_.startMainLineIndex_ = startLine;
+        gridLayoutInfo_.UpdateStartIndexByStartLine();
+        gridLayoutInfo_.prevOffset_ = 0;
+        gridLayoutInfo_.currentOffset_ = 0;
+        gridLayoutInfo_.ResetPositionFlags();
+        return;
+    }
+    /* targetIndex is out of the matrix */
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        LOGW("no grid for jump to index:%{public}d", targetIndex);
+        return;
+    }
+    auto grid = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(grid);
+    grid->ChildrenUpdatedFrom(0);
+    GetTargetIndexInfoWithBenchMark(layoutWrapper, targetIndex);
+}
+
+void GridScrollLayoutAlgorithm::ScrollToIndexEnd(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex)
+{
+    auto grid = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(grid);
+
+    int32_t startLine = 0;
+    if (IsIndexInMatrix(targetIndex, startLine)) {
+        mainSize += mainGap_;
+        for (int32_t i = 0; i <= startLine; ++i) {
+            mainSize -= (mainGap_ + gridLayoutInfo_.lineHeightMap_[i]);
+            if (mainSize < 0) {
+                grid->ChildrenUpdatedFrom(0);
+                GetTargetIndexInfoWithBenchMark(layoutWrapper, targetIndex);
+                moveToEndLineIndex_ = targetIndex >= gridLayoutInfo_.endMainLineIndex_ ? targetIndex : -1;
+                return;
+            }
+        }
+        ScrollToIndexStart(layoutWrapper, 0);
+        return;
+    }
+
+    gridLayoutInfo_.startIndex_ = targetIndex;
+    auto pattern = grid->GetPattern<GridPattern>();
+    float height = pattern->EstimateHeight();
+    if (height <= mainSize) {
+        ScrollToIndexStart(layoutWrapper, 0);
+        return;
+    }
+    grid->ChildrenUpdatedFrom(0);
+    GetTargetIndexInfoWithBenchMark(layoutWrapper, targetIndex);
+    moveToEndLineIndex_ = targetIndex;
+}
+
+void GridScrollLayoutAlgorithm::ScrollToIndexCenter(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex)
+{
+    int32_t startLine = 0;
+    /* targetIndex is in the matrix */
+    if (IsIndexInMatrix(targetIndex, startLine)) {
+        gridLayoutInfo_.startMainLineIndex_ = startLine;
+        gridLayoutInfo_.UpdateStartIndexByStartLine();
+        gridLayoutInfo_.prevOffset_ = 0;
+        gridLayoutInfo_.currentOffset_ = (mainSize - gridLayoutInfo_.lineHeightMap_[startLine]) / 2;
+        gridLayoutInfo_.ResetPositionFlags();
+        return;
+    }
+    /* targetIndex is out of the matrix */
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        LOGW("no grid for jump to index:%{public}d", targetIndex);
+        return;
+    }
+    auto grid = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(grid);
+    grid->ChildrenUpdatedFrom(0);
+    gridLayoutInfo_.startMainLineIndex_ = targetIndex;
+    GetTargetIndexInfoWithBenchMark(layoutWrapper, targetIndex);
+    /* calculate item height */
+    auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(targetIndex);
+    if (!itemWrapper) {
+        return;
+    }
+    bool hasNormalItem = false;
+    LargeItemLineHeight(itemWrapper, hasNormalItem);
+    // scroll to center of the screen
+    gridLayoutInfo_.currentOffset_ = (mainSize - cellAveLength_) / 2;
 }
 
 float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
@@ -752,7 +869,7 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
     }
 
     // skip lines not in matrix
-    if (GreatOrEqual(gridLayoutInfo_.currentOffset_, mainSize)) {
+    if (GreatOrEqual(gridLayoutInfo_.currentOffset_, mainSize) && gridLayoutInfo_.startIndex_ > 0) {
         auto grid = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(grid);
         auto pattern = grid->GetPattern<GridPattern>();
@@ -973,6 +1090,9 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         if (reverse && currentIndex >= gridLayoutInfo_.startIndex_) {
             break;
         }
+        if (gridLayoutInfo_.lineHeightMap_.find(currentMainLineIndex_) != gridLayoutInfo_.lineHeightMap_.end()) {
+            currentMainLineIndex_ = gridLayoutInfo_.endMainLineIndex_ + 1;
+        }
         // Step1. Get wrapper of [GridItem]
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
         if (!itemWrapper) {
@@ -1164,7 +1284,13 @@ int32_t GridScrollLayoutAlgorithm::MeasureNewChild(const SizeF& frameSize, int32
             crossCount, crossSpan);
         return crossSpan;
     }
-    int32_t mainIndex = gridLayoutInfo_.endMainLineIndex_ + 1;
+    int32_t mainIndex = currentMainLineIndex_;
+
+    if (gridLayoutInfo_.endMainLineIndex_ >= mainIndex &&
+        (gridLayoutInfo_.lineHeightMap_.find(mainIndex) != gridLayoutInfo_.lineHeightMap_.end())) {
+        mainIndex = gridLayoutInfo_.endMainLineIndex_ + 1;
+    }
+
     if (crossStart >= 0 && crossStart < crossCount) {
         if (crossStart < lastCross_) {
             return -1;

@@ -134,6 +134,11 @@ public:
     ~AnimatedPixmap() override = default;
     RefPtr<PixelMap> GetPixelMap() const override;
 
+    RefPtr<CanvasImage> Clone() override
+    {
+        return Claim(this);
+    }
+
 private:
     void DecodeImpl(uint32_t idx) override;
 

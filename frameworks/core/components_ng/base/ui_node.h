@@ -70,7 +70,9 @@ public:
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
 
-    virtual void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+    void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange);
+
+    virtual void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
 
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
@@ -114,6 +116,11 @@ public:
     RefPtr<UINode> GetParent() const
     {
         return parent_.Upgrade();
+    }
+
+    void SetNeedCallChildrenUpdate(bool needCallChildrenUpdate)
+    {
+        needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
     void SetParent(const WeakPtr<UINode>& parent)
@@ -277,8 +284,6 @@ public:
 
     virtual void SetActive(bool active);
 
-    virtual void SetJSViewActive(bool active);
-
     virtual void OnVisibleChange(bool isVisible);
 
     virtual bool MarkRemoving();
@@ -335,6 +340,7 @@ public:
     {
         return isDisappearing_;
     }
+    RefPtr<UINode> GetDisappearingChildById(const std::string& id) const;
 
     // These two interfaces are only used for fast preview.
     // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
@@ -514,6 +520,7 @@ private:
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
+    bool needCallChildrenUpdate_ = true;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;

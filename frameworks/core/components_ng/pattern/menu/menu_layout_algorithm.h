@@ -45,11 +45,13 @@ protected:
     float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);
 
     RefPtr<MenuPaintProperty> GetPaintProperty(const LayoutWrapper* layoutWrapper);
+    OffsetF GetMenuWrapperOffset(const LayoutWrapper* layoutWrapper);
 
+    // position input is relative to main window left top point,
+    // menu show position is relative to menuWrapper.
     OffsetF position_;
     OffsetF positionOffset_;
     SizeF wrapperSize_;
-    OffsetF pageOffset_;
 
 private:
     enum class ErrorPositionType {
@@ -58,6 +60,8 @@ private:
         BOTTOM_RIGHT_ERROR,
     };
     void Initialize(LayoutWrapper* layoutWrapper);
+    void InitializePadding(LayoutWrapper* layoutWrapper);
+    void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
     LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);
     void UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
@@ -80,7 +84,7 @@ private:
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
 
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
-    void InitTargetSizeAndPosition(bool isContextMenu);
+    void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu);
     OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow = false);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);

@@ -285,6 +285,11 @@ public:
         isAnimating_ = isAnimating;
     }
 
+    bool GetTouchingSwiper() const
+    {
+        return isTouchingSwiper_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -340,6 +345,11 @@ private:
     void SetAccessibilityAction();
     void AdjustFocusPosition();
     void TabBarClickEvent(int32_t index) const;
+    void ApplyTurnPageRateToIndicator(float turnPageRate);
+    bool CheckSwiperDisable() const;
+    void AdjustOffset(double& offset) const;
+    void InitTurnPageRateEvent();
+    void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -373,6 +383,9 @@ private:
     std::vector<IndicatorStyle> indicatorStyles_;
     std::vector<TabBarStyle> tabBarStyles_;
     bool isFirstFocus_ = true;
+    bool isTouchingSwiper_ = false;
+    float turnPageRate_ = 0.0f;
+    int32_t swiperStartIndex_ = 0;
 
     RefPtr<TabBarModifier> tabBarModifier_;
     std::vector<bool> gradientRegions_ = {false, false, false, false};

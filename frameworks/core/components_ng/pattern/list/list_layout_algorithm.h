@@ -34,7 +34,6 @@ struct ListItemInfo {
     float startPos;
     float endPos;
     bool isGroup;
-    float crossSize = 0.0f;
 };
 
 enum class ScrollAutoType {

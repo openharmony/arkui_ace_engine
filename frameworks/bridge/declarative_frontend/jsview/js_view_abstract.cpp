@@ -102,6 +102,8 @@ namespace {
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
+constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 constexpr double FULL_DIMENSION = 100.0;
@@ -1381,23 +1383,23 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
     if (s2.find('-') != std::string::npos) {
         height = JSRef<JSVal>::Make(ToJSValue("100%"));
     }
-    if (ParseJsDimension(x, xDimen, DimensionUnit::VP)) {
+    if (ParseJsDimensionNG(x, xDimen, DimensionUnit::VP)) {
         auto offset = result.GetOffset();
         offset.SetX(xDimen);
         result.SetOffset(offset);
     }
-    if (ParseJsDimension(y, yDimen, DimensionUnit::VP)) {
+    if (ParseJsDimensionNG(y, yDimen, DimensionUnit::VP)) {
         auto offset = result.GetOffset();
         offset.SetY(yDimen);
         result.SetOffset(offset);
     }
-    if (ParseJsDimension(width, widthDimen, DimensionUnit::VP)) {
+    if (ParseJsDimensionNG(width, widthDimen, DimensionUnit::VP)) {
         if (widthDimen.Unit() == DimensionUnit::PERCENT && widthDimen.Value() < 0) {
             return true;
         }
         result.SetWidth(widthDimen);
     }
-    if (ParseJsDimension(height, heightDimen, DimensionUnit::VP)) {
+    if (ParseJsDimensionNG(height, heightDimen, DimensionUnit::VP)) {
         if (heightDimen.Unit() == DimensionUnit::PERCENT && heightDimen.Value() < 0) {
             return true;
         }
@@ -4929,6 +4931,36 @@ void JSViewAbstract::JsAccessibilityLevel(const std::string& level)
     ViewAbstractModel::GetInstance()->SetAccessibilityImportance(level);
 }
 
+void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
+{
+    // Check the parameters
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
+        LOGE("Builder param is invalid, not an object.");
+        return;
+    }
+    JSRef<JSObject> backgroundObj = JSRef<JSObject>::Cast(info[0]);
+    auto builder = backgroundObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("builder param is not a function.");
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("BindBackground");
+        func->Execute();
+    };
+    Alignment alignment = Alignment::CENTER;
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[1]);
+        auto align = object->GetProperty("align");
+        auto value = align->ToNumber<int32_t>();
+        alignment = ParseAlignment(value);
+    }
+    ViewAbstractModel::GetInstance()->BindBackground(std::move(buildFunc), alignment);
+}
+
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 {
     // Check the parameters
@@ -5018,7 +5050,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
         std::move(onShowCallback), std::move(onDismissCallback));
 }
 
-void JSViewAbstract::ParseModalStyle(const JSRef<JSObject> &paramObj, NG::ModalStyle &modalStyle)
+void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle)
 {
     auto modalTransition = paramObj->GetProperty("modalTransition");
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
@@ -5088,6 +5120,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto height = paramObj->GetProperty("height");
     auto showDragBar = paramObj->GetProperty("dragBar");
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
+    auto backgroundMask = paramObj->GetProperty("backgroundMask");
     if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
         sheetStyle.showDragBar = true;
     } else {
@@ -5118,8 +5151,8 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
             return;
         }
         if (heightStr.find("calc") != std::string::npos) {
-                LOGI("calc value = %{public}s", heightStr.c_str());
-                sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+            LOGI("calc value = %{public}s", heightStr.c_str());
+            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
         } else {
             sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
         }
@@ -5137,6 +5170,13 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
+    // parse backgroundMask color
+    Color maskColor;
+    if (backgroundMask->IsNull() || backgroundMask->IsUndefined() ||
+        !JSViewAbstract::ParseJsColor(backgroundMask, maskColor)) {
+        maskColor.SetValue(0x00000000);
+    }
+    sheetStyle.backgroundMask = std::move(maskColor);
 }
 
 void JSViewAbstract::ParseOverlayCallback(
@@ -5242,6 +5282,12 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
         uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
         for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() >= SAFE_AREA_TYPE_LIMIT) {
+                LOGW("Safe area type parameter is wrong, use default value SAFE_AREA_TYPE_ALL.");
+                safeAreaType = NG::SAFE_AREA_TYPE_ALL;
+                break;
+            }
             safeAreaType |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
         opts.type = safeAreaType;
@@ -5250,6 +5296,12 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
         auto paramArray = JSRef<JSArray>::Cast(info[1]);
         uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
         for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() >= SAFE_AREA_EDGE_LIMIT) {
+                LOGW("Safe area edge parameter is wrong, use default value SAFE_AREA_EDGE_ALL.");
+                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+                break;
+            }
             safeAreaEdge |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
         opts.edges = safeAreaEdge;
@@ -5345,6 +5397,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("bindPopup", &JSViewAbstract::JsBindPopup);
 #endif
 
+    JSClass<JSViewAbstract>::StaticMethod("background", &JSViewAbstract::JsBackground);
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);

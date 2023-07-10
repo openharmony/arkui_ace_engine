@@ -43,10 +43,14 @@ private:
     void DrawCircleBadge(SkCanvas* canvas, const Offset& offset);
     void DrawNumericalBadge(SkCanvas* canvas, const Offset& offset);
     void RenderBadgeBoundary(SkCanvas* canvas, double startX, double startY, double width, double height);
+    void SetBoundaryForNumericalBadge(
+        double& boundaryStartX, double& boundaryStartY, SkRRect& rRect, const Offset& offset);
 #else
     void DrawCircleBadge(RSCanvas* canvas, const Offset& offset);
     void DrawNumericalBadge(RSCanvas* canvas, const Offset& offset);
     void RenderBadgeBoundary(RSCanvas* canvas, double startX, double startY, double width, double height);
+    void SetBoundaryForNumericalBadge(
+        double& boundaryStartX, double& boundaryStartY, RSRoundRect& rRect, const Offset& offset);
 #endif
 
     double badgeCircleDiameter_ = 0.0;

@@ -626,25 +626,26 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
     if (isSelected_ != isSelected) {
         isSelected_ = isSelected;
         auto eventHub = GetEventHub<ListItemEventHub>();
-        auto onSelect = eventHub->GetOnSelect();
-        if (onSelect) {
-            onSelect(isSelected);
-        }
+        eventHub->FireSelectChangeEvent(isSelected);
         auto host = GetHost();
         CHECK_NULL_VOID_NOLOG(host);
         if (isSelected) {
+            eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
             host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
         } else {
+            eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
             host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
         }
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto context = host->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        if (listItemStyle_ == V2::ListItemStyle::CARD) {
-            context->OnMouseSelectUpdate(isSelected, selectColor, selectColor);
-        } else {
-            context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        if (!eventHub->HasStateStyle(UI_STATE_SELECTED)) {
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto context = host->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            if (listItemStyle_ == V2::ListItemStyle::CARD) {
+                context->OnMouseSelectUpdate(isSelected, selectColor, selectColor);
+            } else {
+                context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+            }
         }
     }
 }

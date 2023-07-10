@@ -255,6 +255,8 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
 
+void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange) {}
+
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -392,6 +394,8 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
 void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type) {}
 
 void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {

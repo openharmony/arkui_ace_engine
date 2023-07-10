@@ -66,12 +66,11 @@ void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty&
 
 ACE_FORCE_EXPORT void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
 
-ACE_FORCE_EXPORT void MinusPaddingToSize(
-    const PaddingPropertyF& padding, SizeF& size, Axis reserveAxis = Axis::NONE);
+ACE_FORCE_EXPORT void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
 
 void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size, Axis reserveAxis = Axis::NONE);
+void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
 float GetCrossAxisSize(const SizeF& size, Axis axis);
 

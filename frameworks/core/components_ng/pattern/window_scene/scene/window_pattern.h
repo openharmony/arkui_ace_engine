@@ -67,7 +67,6 @@ private:
     bool CreatePersistentNode();
 
     void BufferAvailableCallback();
-    void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);

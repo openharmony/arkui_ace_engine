@@ -65,7 +65,8 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         return;
     }
     std::string key = args[0]->ToString();
-    std::string value = args[1]->ToString();
+    auto serializedValue = JSON::Stringify(args.GetVm(), args[1].Get().GetLocalHandle());
+    std::string value = serializedValue->ToString(args.GetVm())->ToString();
     auto container = Container::Current();
     if (!container) {
         LOGW("container is null");

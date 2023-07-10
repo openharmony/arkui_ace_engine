@@ -93,4 +93,8 @@ void GridPattern::OnAnimateStop() {}
 void GridPattern::ScrollTo(float position) {}
 
 void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) {}
+
+void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
+
+void GridPattern::ClearMultiSelect() {};
 } // namespace OHOS::Ace::NG

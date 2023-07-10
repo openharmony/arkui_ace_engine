@@ -1684,4 +1684,305 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     inputHub->showMenu_->onMouseCallback_(mouseInfo);
     EXPECT_TRUE(mouseInfo.IsStopPropagation());
 }
+
+/**
+ * @tc.name: ViewAbstractDisableClickTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableClickTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetOnClick(std::move(tapEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto gestureHub = node->GetOrCreateGestureEventHub();
+    auto& callback = gestureHub->clickEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnClick();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    GestureEventFunc tapEventFunc2;
+    ViewAbstract::SetOnClick(std::move(tapEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableTouchTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableTouchTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    TouchEventFunc touchEventFunc;
+    ViewAbstract::SetOnTouch(std::move(touchEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto gestureHub = node->GetOrCreateGestureEventHub();
+    auto& callback = gestureHub->touchEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnTouch();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    TouchEventFunc touchEventFunc2;
+    ViewAbstract::SetOnTouch(std::move(touchEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableMouseTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnMouseEventFunc onMouseEventFunc;
+    ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetOrCreateInputEventHub();
+    auto& callback = eventHub->mouseEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnMouse();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnMouseEventFunc onMouseEventFunc2;
+    ViewAbstract::SetOnMouse(std::move(onMouseEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableHoverTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableHoverTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnHoverFunc onHoverEventFunc;
+    ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetOrCreateInputEventHub();
+    auto& callback = eventHub->hoverEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnHover();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnHoverFunc onHoverEventFunc2;
+    ViewAbstract::SetOnHover(std::move(onHoverEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableKeyTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnKeyCallbackFunc onKeyCallback = [](KeyEventInfo& info) {};
+    ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto focusHub = node->GetOrCreateFocusHub();
+    auto& callback = focusHub->focusCallbackEvents_->onKeyEventCallback_;
+    EXPECT_TRUE(callback);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnKeyEvent();
+    EXPECT_FALSE(callback);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnKeyCallbackFunc onKeyCallback2 = [](KeyEventInfo& info) {};
+    ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback2));
+    EXPECT_TRUE(callback);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableFocusTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableFocusTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnFocusFunc onFocusCallback = []() {};
+    ViewAbstract::SetOnFocus(std::move(onFocusCallback));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto focusHub = node->GetOrCreateFocusHub();
+    auto& callback = focusHub->focusCallbackEvents_->onFocusCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnFocus();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnFocusFunc onFocusCallback2 = []() {};
+    ViewAbstract::SetOnFocus(std::move(onFocusCallback2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableBlurTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnBlurFunc onBlurCallback = []() {};
+    ViewAbstract::SetOnFocus(std::move(onBlurCallback));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto focusHub = node->GetOrCreateFocusHub();
+    auto& callback = focusHub->focusCallbackEvents_->onBlurCallback_;
+    EXPECT_TRUE(callback);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnBlur();
+    EXPECT_FALSE(callback);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnBlurFunc onBlurCallback2 = []() {};
+    ViewAbstract::SetOnBlur(std::move(onBlurCallback2));
+    EXPECT_TRUE(callback);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
 } // namespace OHOS::Ace::NG

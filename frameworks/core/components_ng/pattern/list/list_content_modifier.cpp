@@ -51,9 +51,13 @@ void ListContentModifier::onDraw(DrawingContext& context)
 void ListContentModifier::PaintDivider(
     const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas)
 {
+    float fSpacingTotal = (dividerInfo.lanes - 1) * dividerInfo.laneGutter;
+    float laneLen =
+        (dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
+
     float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
-    DividerPainter dividerPainter(dividerInfo.constrainStrokeWidth, crossLen,
-        dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
+    DividerPainter dividerPainter(
+        dividerInfo.constrainStrokeWidth, crossLen, dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
 
     int32_t lanes = dividerInfo.lanes;
     int32_t laneIdx = 0;
@@ -67,8 +71,8 @@ void ListContentModifier::PaintDivider(
             float mainPos = child.second.startPos - divOffset + dividerInfo.mainPadding;
             float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
-                crossPos += laneIdx * (child.second.crossSize + dividerInfo.laneGutter);
-                float laneLen = child.second.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
+                crossPos +=
+                    laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
                 dividerPainter.SetDividerLength(laneLen);
             } else {
                 dividerPainter.SetDividerLength(crossLen);
@@ -94,8 +98,8 @@ void ListContentModifier::PaintDivider(
             float mainPos = itemPosition.at(index).endPos + divOffset + dividerInfo.mainPadding;
             float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !itemPosition.at(index).isGroup) {
-                crossPos += laneIdx * (itemPosition.at(index).crossSize + dividerInfo.laneGutter);
-                float laneLen = itemPosition.at(index).crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
+                crossPos +=
+                    laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
                 dividerPainter.SetDividerLength(laneLen);
             } else {
                 dividerPainter.SetDividerLength(crossLen);

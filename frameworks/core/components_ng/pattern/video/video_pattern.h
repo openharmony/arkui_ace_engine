@@ -149,6 +149,9 @@ public:
     void OnAreaChangedInner() override;
 
     void UpdateMediaPlayer();
+
+    // It is used to init mediaplayer on background.
+    void UpdateMediaPlayerOnBg();
     void ResetMediaPlayer();
 
     void EnableDrag();
@@ -206,6 +209,11 @@ public:
     void OnError(const std::string& errorId);
 
     void OnResolutionChange() const;
+
+    void ResetLastBoundsRect()
+    {
+        lastBoundsRect_.SetRect(0.0f, 0.0f, 0.0f, 0.0f);
+    }
 
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;

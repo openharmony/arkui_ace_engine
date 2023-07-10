@@ -29,6 +29,7 @@ constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
+constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 } // namespace
 
 void SwiperIndicatorPattern::OnAttachToFrameNode() {}
@@ -444,7 +445,14 @@ void SwiperIndicatorPattern::InitPanEvent(const RefPtr<GestureEventHub>& gesture
 
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    if (swiperPattern->GetDirection() == Axis::VERTICAL) {
+        panDirection = { .type = PanDirection::VERTICAL };
+    }
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
@@ -459,26 +467,27 @@ void SwiperIndicatorPattern::HandleDragUpdate(const GestureEvent& info)
     if (CheckIsTouchBottom(info)) {
         return;
     }
-
-    auto dragPoint =
-        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
-    auto offset = dragPoint - dragStartPoint_;
-    auto moveDistance = std::abs(std::fmod(offset.GetX(), INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx()));
-    if (isTouchBottomAnimationPlay_ && LessNotEqual(moveDistance, INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
-        isTouchBottomAnimationPlay_ = false;
-    }
-
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    if (!isTouchBottomAnimationPlay_ && GreatOrEqual(moveDistance, INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    auto offset = dragPoint - dragStartPoint_;
+    auto turnPageRateOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
+        return;
+    }
+
+    auto turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
+    swiperPattern->SetTurnPageRate(turnPageRate);
+    if (std::abs(turnPageRate) >= 1) {
         if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
-            swiperPattern->ShowNext();
+            swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + 1);
         } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
-            swiperPattern->ShowPrevious();
+            swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() - 1);
         }
-        isTouchBottomAnimationPlay_ = true;
+        dragStartPoint_ = dragPoint;
     }
 }
 
@@ -488,10 +497,10 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetTurnPageRate(0.0f);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     touchBottomType_ = TouchBottomType::NONE;
-    touchBottomStartPosition_.reset();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -513,36 +522,32 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     auto isLoop = swiperPaintProperty->GetLoop().value_or(true);
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    auto offset = dragPoint - dragStartPoint_;
+    auto touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    auto touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
+                               ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx()
+                               : 1;
+
+    swiperPattern->SetTurnPageRate(0);
+    swiperPattern->SetTouchBottomRate(std::abs(touchBottomRate));
     TouchBottomType touchBottomType = TouchBottomType::NONE;
 
     if ((currentIndex <= 0) && !isLoop) {
-        if (!touchBottomStartPosition_.has_value()) {
-            touchBottomStartPosition_ = dragPoint;
-        }
-
-        auto offset = dragPoint - touchBottomStartPosition_.value();
-        if (Negative(info.GetMainDelta()) || NonPositive(offset.GetX())) {
+        if (Negative(info.GetMainDelta()) || NonPositive(touchOffset)) {
             touchBottomType = TouchBottomType::START;
         }
     }
 
     if ((currentIndex >= childrenSize - displayCount) && !isLoop) {
-        if (!touchBottomStartPosition_.has_value()) {
-            touchBottomStartPosition_ = dragPoint;
-        }
-
-        auto offset = dragPoint - touchBottomStartPosition_.value();
-        if (Positive(info.GetMainDelta()) || NonNegative(offset.GetX())) {
+        if (Positive(info.GetMainDelta()) || NonNegative(touchOffset)) {
             touchBottomType = TouchBottomType::END;
         }
     }
 
-    if (touchBottomType_ != touchBottomType) {
-        touchBottomType_ = touchBottomType;
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
+    touchBottomType_ = touchBottomType;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     return touchBottomType == TouchBottomType::NONE ? false : true;
 }

@@ -312,7 +312,7 @@ void ScrollBar::SetGestureEvent()
     if (!touchEvent_) {
         touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto scrollBar = weak.Upgrade();
-            CHECK_NULL_VOID(scrollBar && scrollBar->IsScrollable());
+            CHECK_NULL_VOID_NOLOG(scrollBar && scrollBar->IsScrollable());
             if (info.GetTouches().empty()) {
                 return;
             }

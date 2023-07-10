@@ -1272,7 +1272,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
 
     navigation->SetBackButtonEvent(navDestination, nullptr);
 
-    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propNavigationMode_ = NavigationMode::STACK;
+    pattern->navigationMode_ = NavigationMode::STACK;
     auto stack = AceType::MakeRefPtr<NavigationStack>();
     std::pair<std::string, RefPtr<UINode>> p("test0", preNavDestination);
     std::pair<std::string, RefPtr<UINode>> p2("test", preNavDestination);
@@ -1306,9 +1306,9 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
     navDestination->backButtonEvent_(event);
     EXPECT_TRUE(navigation->GetLayoutProperty<NavigationLayoutProperty>()->propDestinationChange_.value());
 
-    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propNavigationMode_ = NavigationMode::AUTO;
+    pattern->navigationMode_ = NavigationMode::AUTO;
     navDestination->backButtonEvent_(event);
-    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propNavigationMode_ = NavigationMode::SPLIT;
+    pattern->navigationMode_ = NavigationMode::SPLIT;
     preNavDestination->tag_ = "preNavDestination";
     navDestination->backButtonEvent_(event);
     preNavDestination->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
@@ -1829,6 +1829,12 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0033, TestSize.Level1)
      */
     GestureEvent info;
     info.inputEventType_ = InputEventType::AXIS;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    pattern->InitPanEvent(gestureEventHub);
+    ASSERT_NE(pattern->panEvent_, nullptr);
+    ASSERT_NE(pattern->panEvent_->actionStart_, nullptr);
+
     pattern->panEvent_->actionStart_(info);
     pattern->panEvent_->actionUpdate_(info);
     pattern->panEvent_->actionEnd_(info);

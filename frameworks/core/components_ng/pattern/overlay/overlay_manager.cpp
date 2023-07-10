@@ -35,6 +35,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -908,6 +909,16 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
     OpenDialogAnimation(dialogNode);
 }
 
+void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
+    std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+{
+    auto dialogNode =
+        CalendarDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
+    BeforeShowDialog(dialogNode);
+    OpenDialogAnimation(dialogNode);
+}
+
 void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
@@ -1446,6 +1457,14 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         }
         modalStack_.push(WeakClaim(RawPtr(sheetNode)));
         SaveLastModalNode();
+        // create backgroundmask node
+        auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_MASK_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        maskNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        if (sheetStyle.backgroundMask.has_value()) {
+            maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundMask.value());
+        }
+        maskNode->MountToParent(rootNode);
         sheetNode->MountToParent(rootNode);
         modalList_.emplace_back(WeakClaim(RawPtr(sheetNode)));
         FireModalPageShow();
@@ -1531,6 +1550,7 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
                 auto root = rootWeak.Upgrade();
                 CHECK_NULL_VOID_NOLOG(sheet && root);
                 ContainerScope scope(id);
+                OverlayManager::DestroySheetMask(sheet);
                 root->RemoveChild(sheet);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 }, TaskExecutor::TaskType::UI);
@@ -1594,12 +1614,30 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto root = DynamicCast<FrameNode>(rootNode);
+    OverlayManager::DestroySheetMask(sheetNode);
     root->RemoveChild(sheetNode);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     modalStack_.pop();
     modalList_.pop_back();
     FireModalPageHide();
     SaveLastModalNode();
+}
+
+void OverlayManager::DestroySheetMask(const RefPtr<FrameNode>& sheetNode)
+{
+    // destory bindsheet masknode
+    auto rootNode = sheetNode->GetParent();
+    CHECK_NULL_VOID(rootNode);
+    auto root = DynamicCast<FrameNode>(rootNode);
+    auto sheetChild = std::find(root->GetChildren().begin(), root->GetChildren().end(), sheetNode);
+    if (sheetChild == root->GetChildren().end()) {
+        return;
+    }
+    --sheetChild;
+    if (DynamicCast<FrameNode>(*sheetChild)->GetTag() != V2::SHEET_MASK_TAG) {
+        return;
+    }
+    root->RemoveChild(*sheetChild);
 }
 
 RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)

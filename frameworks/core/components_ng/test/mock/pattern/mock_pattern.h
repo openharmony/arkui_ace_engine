@@ -36,7 +36,6 @@ public:
     MOCK_METHOD0(CreateLayoutProperty, RefPtr<LayoutProperty>());
     MOCK_METHOD0(CreateLayoutAlgorithm, RefPtr<LayoutAlgorithm>());
     MOCK_METHOD0(CreateNodePaintMethod, RefPtr<NodePaintMethod>());
-    MOCK_METHOD0(NeedOverridePaintRect, bool());
     MOCK_METHOD0(CreateEventHub, RefPtr<EventHub>());
     MOCK_METHOD0(OnContextAttached, void());
     MOCK_METHOD0(OnModifyDone, void());

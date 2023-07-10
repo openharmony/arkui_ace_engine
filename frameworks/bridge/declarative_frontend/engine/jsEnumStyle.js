@@ -41,6 +41,12 @@ var TextInputStyle;
   TextInputStyle["Inline"] = "Inline";
 })(TextInputStyle || (TextInputStyle = {}));
 
+var TextContentStyle;
+(function (TextContentStyle) {
+  TextContentStyle["DEFAULT"] = "Default";
+  TextContentStyle["INLINE"] = "Inline";
+})(TextContentStyle || (TextContentStyle = {}));
+
 var TextAlign;
 (function (TextAlign) {
   TextAlign[TextAlign["Start"] = 0] = "Start";
@@ -1738,3 +1744,15 @@ var RenderFit;
   RenderFit[RenderFit["RESIZE_COVER_TOP_LEFT"] = 14] = "RESIZE_COVER_TOP_LEFT";
   RenderFit[RenderFit["RESIZE_COVER_BOTTOM_RIGHT"] = 15] = "RESIZE_COVER_BOTTOM_RIGHT";
 })(RenderFit || (RenderFit = {}));
+
+var WebCaptureMode;
+(function (WebCaptureMode) {
+  WebCaptureMode[WebCaptureMode["HOME_SCREEN"] = 0] = "HOME_SCREEN";
+})(WebCaptureMode || (WebCaptureMode = {}));
+
+var CalendarAlign;
+(function (CalendarAlign) {
+  CalendarAlign[CalendarAlign["START"] = 0] = "START";
+  CalendarAlign[CalendarAlign["CENTER"] = 1] = "CENTER";
+  CalendarAlign[CalendarAlign["END"] = 2] = "END";
+})(CalendarAlign || (CalendarAlign = {}));

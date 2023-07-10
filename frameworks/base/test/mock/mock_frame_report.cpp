@@ -30,6 +30,7 @@ bool FrameReport::LoadLibrary()
 {
     frameSchedHandle_ = nullptr;
     frameSchedSoLoaded_ = false;
+    enable_ = false;
     return false;
 }
 

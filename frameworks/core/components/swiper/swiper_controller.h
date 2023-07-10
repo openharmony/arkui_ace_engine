@@ -25,6 +25,7 @@ namespace OHOS::Ace {
 using CommonFunc = std::function<void()>;
 using SwipeToImpl = std::function<void(const int32_t, bool)>;
 using SwipeToWithoutAnimationImpl = std::function<void(const int32_t)>;
+using TurnPageRateFunc = std::function<void(const int32_t, float)>;
 
 class SwiperController : public virtual AceType {
     DECLARE_ACE_TYPE(SwiperController, AceType);
@@ -155,6 +156,16 @@ public:
         return addSwiperEventCallback_;
     }
 
+    void SetTurnPageRateCallback(const TurnPageRateFunc& turnPageRateCallback)
+    {
+        turnPageRateCallback_ = turnPageRateCallback;
+    }
+
+    const TurnPageRateFunc& GetTurnPageRateCallback() const
+    {
+        return turnPageRateCallback_;
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
@@ -167,6 +178,7 @@ private:
     CommonFunc addTabBarEventCallback_;
     CommonFunc removeSwiperEventCallback_;
     CommonFunc addSwiperEventCallback_;
+    TurnPageRateFunc turnPageRateCallback_;
 };
 
 } // namespace OHOS::Ace

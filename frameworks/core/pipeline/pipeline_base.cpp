@@ -20,6 +20,8 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -327,9 +329,9 @@ void PipelineBase::NotifyDestroyEventDismiss() const
 void PipelineBase::NotifyDispatchTouchEventDismiss(const TouchEvent& event) const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
-        if (iterDispatchTouchEventHander) {
-            iterDispatchTouchEventHander(event);
+    for (auto& iterDispatchTouchEventHandler : dispatchTouchEventHandler_) {
+        if (iterDispatchTouchEventHandler) {
+            iterDispatchTouchEventHandler(event);
         }
     }
 }
@@ -600,14 +602,31 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
 void PipelineBase::OnVirtualKeyboardAreaChange(
     Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        return;
+    auto currentContainer = Container::Current();
+    if (!currentContainer->IsSubContainer()) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
+        if (subwindow && subwindow->GetShown()) {
+            // subwindow is shown, main window no need to handle the keyboard event
+            return;
+        }
     }
     double keyboardHeight = keyboardArea.Height();
+    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        keyboardHeight = ModifyKeyboardHeight(keyboardHeight);
+    }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
+}
+
+double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
+{
+    auto windowRect = GetCurrentWindowRect();
+    auto deviceHeight = SystemProperties::GetDeviceHeight();
+    return keyboardHeight - (deviceHeight - windowRect.Bottom()) > 0.0
+               ? keyboardHeight - (deviceHeight - windowRect.Bottom())
+               : 0.0;
 }
 
 void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)

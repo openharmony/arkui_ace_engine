@@ -21,18 +21,29 @@
 #include "include/codec/SkCodec.h"
 #include "include/core/SkBitmap.h"
 #include "include/core/SkGraphics.h"
+#ifdef USE_ROSEN_DRAWING
+#include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#endif
 
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_compressor.h"
 #include "core/image/image_loader.h"
@@ -44,12 +55,22 @@ ImageDecoder::ImageDecoder(const RefPtr<ImageObject>& obj, const SizeF& size, bo
     CHECK_NULL_VOID(obj_);
     CHECK_NULL_VOID(ImageProvider::PrepareImageData(obj_));
 
+#ifndef USE_ROSEN_DRAWING
     auto data = AceType::DynamicCast<SkiaImageData>(obj_->GetData());
     CHECK_NULL_VOID(data);
     data_ = data->GetSkData();
+#else
+    auto data = AceType::DynamicCast<DrawingImageData>(obj_->GetData());
+    CHECK_NULL_VOID(data);
+    data_ = data->GetRSData();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 RefPtr<CanvasImage> ImageDecoder::MakeSkiaImage()
+#else
+RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
+#endif
 {
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
     ACE_SCOPED_TRACE("MakeSkiaImage %s", obj_->GetSourceInfo().ToString().c_str());
@@ -62,12 +83,22 @@ RefPtr<CanvasImage> ImageDecoder::MakeSkiaImage()
         }
     }
 
+#ifndef USE_ROSEN_DRAWING
     auto image = ResizeSkImage();
     CHECK_NULL_RETURN(image, nullptr);
+#else
+    auto skImage = ResizeSkImage();
+    CHECK_NULL_RETURN(skImage, nullptr);
+    auto image = std::make_shared<RSImage>(&skImage);
+#endif
     auto canvasImage = CanvasImage::Create(&image);
 
     if (ImageCompressor::GetInstance()->CanCompress()) {
+#ifndef USE_ROSEN_DRAWING
         TryCompress(DynamicCast<SkiaImage>(canvasImage));
+#else
+        TryCompress(DynamicCast<DrawingImage>(canvasImage));
+#endif
     }
     return canvasImage;
 }
@@ -77,7 +108,11 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
     ACE_SCOPED_TRACE("MakePixmapImage %s", obj_->GetSourceInfo().ToString().c_str());
 
+#ifndef USE_ROSEN_DRAWING
     auto source = ImageSource::Create(data_->bytes(), data_->size());
+#else
+    auto source = ImageSource::Create(static_cast<const uint8_t*>(data_->GetData()), data_->GetSize());
+#endif
     CHECK_NULL_RETURN(source, nullptr);
 
     auto width = std::lround(desiredSize_.Width());
@@ -111,13 +146,23 @@ sk_sp<SkImage> ImageDecoder::ForceResizeImage(const sk_sp<SkImage>& image, const
 
 sk_sp<SkImage> ImageDecoder::ResizeSkImage()
 {
+#ifndef USE_ROSEN_DRAWING
     auto encodedImage = SkImage::MakeFromEncoded(data_);
+#else
+    CHECK_NULL_RETURN(data_, nullptr);
+    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto encodedImage = SkImage::MakeFromEncoded(skData);
+#endif
     CHECK_NULL_RETURN_NOLOG(desiredSize_.IsPositive(), encodedImage);
 
     auto width = std::lround(desiredSize_.Width());
     auto height = std::lround(desiredSize_.Height());
 
+#ifndef USE_ROSEN_DRAWING
     auto codec = SkCodec::MakeFromData(data_);
+#else
+    auto codec = SkCodec::MakeFromData(skData);
+#endif
     CHECK_NULL_RETURN(codec, {});
     auto info = codec->getInfo();
 
@@ -152,6 +197,7 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     auto cachedData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
     CHECK_NULL_RETURN_NOLOG(cachedData, {});
 
+#ifndef USE_ROSEN_DRAWING
     auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);
     CHECK_NULL_RETURN(skiaImageData, {});
     auto stripped = ImageCompressor::StripFileHeader(skiaImageData->GetSkData());
@@ -160,21 +206,46 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     // create encoded SkImage to use its uniqueId
     auto image = SkImage::MakeFromEncoded(data_);
     auto canvasImage = AceType::DynamicCast<SkiaImage>(CanvasImage::Create(&image));
+#else
+    auto rosenImageData = AceType::DynamicCast<DrawingImageData>(cachedData);
+    CHECK_NULL_RETURN(rosenImageData, {});
+    auto stripped = ImageCompressor::StripFileHeader(rosenImageData->GetRSData());
+    LOGI("use astc cache %{public}s", key.c_str());
+
+    // create encoded SkImage to use its uniqueId
+    CHECK_NULL_RETURN(data_, {});
+    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto skImage = SkImage::MakeFromEncoded(skData);
+    std::shared_ptr<RSImage> image = nullptr;
+    if (skImage) {
+        image = std::make_shared<RSImage>(&skImage);
+    }
+    auto canvasImage = AceType::DynamicCast<DrawingImage>(CanvasImage::Create(&image));
+#endif
     // round width and height to nearest int
     int32_t dstWidth = std::lround(desiredSize_.Width());
     int32_t dstHeight = std::lround(desiredSize_.Height());
     canvasImage->SetCompressData(stripped, dstWidth, dstHeight);
+#ifndef USE_ROSEN_DRAWING
     canvasImage->ReplaceSkImage(nullptr);
+#else
+    canvasImage->ReplaceRSImage(nullptr);
+#endif
     return canvasImage;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void ImageDecoder::TryCompress(const RefPtr<SkiaImage>& image)
+#else
+void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
+#endif
 {
 #ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.
     return;
 #else
     // decode image to texture if not decoded
+#ifndef USE_ROSEN_DRAWING
     auto skImage = image->GetImage();
     CHECK_NULL_VOID(skImage);
     auto rasterizedImage = skImage->makeRasterImage();
@@ -196,6 +267,30 @@ void ImageDecoder::TryCompress(const RefPtr<SkiaImage>& image)
         } else {
             image->ReplaceSkImage(rasterizedImage);
         }
+#else
+    auto rsImage = image->GetImage();
+    CHECK_NULL_VOID(rsImage);
+    RSBitmapFormat rsBitmapFormat { rsImage->GetColorType(), rsImage->GetAlphaType() };
+    RSBitmap rsBitmap;
+    rsBitmap.Build(rsImage->GetWidth(), rsImage->GetHeight(), rsBitmapFormat);
+    CHECK_NULL_VOID(rsImage->ReadPixels(rsBitmap, 0, 0));
+    auto width = rsBitmap.GetWidth();
+    auto height = rsBitmap.GetHeight();
+    // try compress image
+    if (ImageCompressor::GetInstance()->CanCompress()) {
+        auto key = ImageUtils::GenerateImageKey(obj_->GetSourceInfo(), desiredSize_);
+        auto compressData = ImageCompressor::GetInstance()->GpuCompress(key, rsBitmap, width, height);
+        ImageCompressor::GetInstance()->WriteToFile(key, compressData, { width, height });
+        if (compressData) {
+            // replace rsImage of [CanvasImage] with [rasterizedImage]
+            image->SetCompressData(compressData, width, height);
+            image->ReplaceRSImage(nullptr);
+        } else {
+            auto rasterizedImage = std::make_shared<RSImage>();
+            rasterizedImage->BuildFromBitmap(rsBitmap);
+            image->ReplaceRSImage(rasterizedImage);
+        }
+#endif
         auto taskExecutor = Container::CurrentTaskExecutor();
         auto releaseTask = ImageCompressor::GetInstance()->ScheduleReleaseTask();
         if (taskExecutor) {

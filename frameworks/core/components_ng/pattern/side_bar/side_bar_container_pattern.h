@@ -56,9 +56,15 @@ public:
         layoutAlgorithm->SetControlButtonClick(isControlButtonClick_);
         auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
         if (layoutProperty) {
-            layoutAlgorithm->SetSideBarContainerType(
-                layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED));
+            layoutAlgorithm->SetSideBarContainerType(type_);
         }
+        layoutAlgorithm->SetMinSideBarWidth(minSideBarWidth_);
+        layoutAlgorithm->SetMaxSideBarWidth(maxSideBarWidth_);
+        layoutAlgorithm->SetMinContentWidth(minContentWidth_);
+        layoutAlgorithm->SetTypeUpdateWidth(typeUpdateWidth_);
+        auto host = GetHost();
+        auto sideBarContainerPattern = host->GetPattern<SideBarContainerPattern>();
+        layoutAlgorithm->SetPattern(AceType::WeakClaim(AceType::RawPtr(sideBarContainerPattern)));
         return layoutAlgorithm;
     }
 
@@ -107,6 +113,22 @@ public:
     void InitControlButtonMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void UpdateSideBarPosition(float value);
+    void SetMinSideBarWidth(float minSideBarWidth)
+    {
+        minSideBarWidth_ = minSideBarWidth;
+    }
+    void SetMaxSideBarWidth(float maxSideBarWidth)
+    {
+        maxSideBarWidth_ = maxSideBarWidth;
+    }
+    void SetMinContentWidth(float minContentWidth)
+    {
+        minContentWidth_ = minContentWidth;
+    }
+    void SetTypeUpdateWidth(float typeUpdateWidth)
+    {
+        typeUpdateWidth_ = typeUpdateWidth;
+    }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -162,6 +184,11 @@ private:
 
     Dimension adjustMaxSideBarWidth_;
     Dimension adjustMinSideBarWidth_;
+    SideBarContainerType type_ = SideBarContainerType::EMBED;
+    float minContentWidth_ = -1.0f;
+    float minSideBarWidth_ = -1.0f;
+    float maxSideBarWidth_ = -1.0f;
+    float typeUpdateWidth_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
 };

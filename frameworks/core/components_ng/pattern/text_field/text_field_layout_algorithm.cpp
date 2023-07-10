@@ -43,6 +43,7 @@ namespace {
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr float ERROR_TEXT_UNDERLINE_MARGIN = 27.0f;
 constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
+constexpr float INLINE_SAFE_BOUNDARY_VALUE = 2.0f;
 } // namespace
 
 void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -124,14 +125,10 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textfieldLayoutProperty);
 
     if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
-        if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
-            calcLayoutConstraint->maxSize.value().Width().has_value()) {
-            frameSize.SetWidth(std::max(layoutConstraint->maxSize.Width(), layoutConstraint->minSize.Width()));
-        } else if (!calcLayoutConstraint) {
-            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
-        } else {
-            frameSize.SetWidth(layoutConstraint->minSize.Width());
-        }
+        auto width =
+            std::max(std::min(layoutConstraint->maxSize.Width(), contentWidth + pattern->GetHorizontalPaddingSum()),
+                layoutConstraint->minSize.Width());
+        frameSize.SetWidth(width);
     }
     frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     if (layoutConstraint->maxSize.Height() < layoutConstraint->minSize.Height()) {
@@ -218,7 +215,12 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
         // for text area or placeholder, max width is content width without password icon
-        paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+        if (isInlineStyle) {
+            paragraph_->Layout(idealWidth + textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
+                textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
+        } else {
+            paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+        }
     }
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength()) {
         auto textLength = showPlaceHolder ? 0 : StringUtils::ToWstring(textContent).length();
@@ -259,8 +261,12 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
                 layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
             idealWidth = paragraph_->GetLongestLine();
         }
-        textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
-            paragraph_->GetHeight()));
+        if (isInlineStyle) {
+            textRect_.SetSize(SizeF(idealWidth, paragraph_->GetHeight()));
+        } else {
+            textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
+                paragraph_->GetHeight()));
+        }
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     // check password image size.

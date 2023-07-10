@@ -72,6 +72,7 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
+const uint32_t MAX_LINES = 3;
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -991,18 +992,25 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
 
 void JSTextField::SetBarState(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsNumber()) {
-        LOGI("SetBarState create error, info is not number or non-valid");
+    if (info.Length() < 1) {
+        LOGI("The arg(SetBarState) is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    DisplayMode displayMode = static_cast<DisplayMode>(info[0]->ToNumber<int32_t>());
-    TextFieldModel::GetInstance()->SetBarState(displayMode);
+    auto BarStateString = info[0]->ToString();
+    if (BarStateString == "Off") {
+        TextFieldModel::GetInstance()->SetBarState(DisplayMode::OFF);
+    } else if (BarStateString == "On") {
+        TextFieldModel::GetInstance()->SetBarState(DisplayMode::ON);
+    } else {
+        TextFieldModel::GetInstance()->SetBarState(DisplayMode::AUTO);
+    }
 }
 
 void JSTextField::SetMaxLines(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsNumber()) {
         LOGI("SetMaxLines create error, info is not number or non-valid");
+        TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
         return;
     }
     TextFieldModel::GetInstance()->SetMaxViewLines(info[0]->ToNumber<uint32_t>());

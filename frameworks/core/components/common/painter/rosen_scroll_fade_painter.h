@@ -25,6 +25,9 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/scroll/scroll_fade_painter.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace {
 

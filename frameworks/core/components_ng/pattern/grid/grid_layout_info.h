@@ -21,6 +21,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/rect_t.h"
+#include "core/components/scroll/scroll_controller_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -92,6 +93,11 @@ struct GridLayoutInfo {
         return startIndex_ != 0 && gridMatrix_.empty();
     }
 
+    void SetScrollAlign(ScrollAlign align)
+    {
+        scrollAlign_ = align;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
@@ -111,6 +117,7 @@ struct GridLayoutInfo {
     int32_t jumpIndex_ = -1;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
+    ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
 
     bool reachEnd_ = false;
     bool reachStart_ = false;

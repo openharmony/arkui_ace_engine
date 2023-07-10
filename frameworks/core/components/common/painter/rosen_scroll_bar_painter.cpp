@@ -26,6 +26,9 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr double FULL_ALPHA = 255.0;
+#ifdef USE_ROSEN_DRAWING
+constexpr float FLOAT_HALF = 0.5f;
+#endif
 
 } // namespace
 
@@ -95,25 +98,25 @@ void RosenScrollBarPainter::PaintCircleBar(RSCanvas* canvas, const Offset& offse
 
         auto rootSize = scrollBar->GetRootSize();
         // do not draw scrollbar when central is out of scroll viewport
-        if (rootSize.Height() * RSSCALAR_HALF < offset.GetY() ||
-            rootSize.Height() * RSSCALAR_HALF > offset.GetY() + paintRect.Height()) {
+        if (rootSize.Height() * FLOAT_HALF < offset.GetY() ||
+            rootSize.Height() * FLOAT_HALF > offset.GetY() + paintRect.Height()) {
             return;
         }
         double scrollBarWidth = scrollBar->GetNormalWidthToPx();
         double diameter = rootSize.Width() - scrollBarWidth;
         RSRect arcRect = RSRect(
-            scrollBarWidth * RSSCALAR_HALF,
-            scrollBarWidth * RSSCALAR_HALF,
-            diameter + scrollBarWidth * RSSCALAR_HALF,
-            diameter + scrollBarWidth * RSSCALAR_HALF);
+            scrollBarWidth * FLOAT_HALF,
+            scrollBarWidth * FLOAT_HALF,
+            diameter + scrollBarWidth * FLOAT_HALF,
+            diameter + scrollBarWidth * FLOAT_HALF);
         // paint background
         double deltaAngle = scrollBar->GetBottomAngle() - scrollBar->GetTopAngle();
         pen.SetColor(scrollBar->GetBackgroundColor().GetValue());
         canvas->AttachPen(pen);
         if (scrollBar->GetPositionMode() == PositionMode::LEFT) {
-            canvas->DrawArc(arcRect, deltaAngle * RSSCALAR_HALF - STRAIGHT_ANGLE, -deltaAngle);
+            canvas->DrawArc(arcRect, deltaAngle * FLOAT_HALF - STRAIGHT_ANGLE, -deltaAngle);
         } else {
-            canvas->DrawArc(arcRect, -deltaAngle * RSSCALAR_HALF, deltaAngle);
+            canvas->DrawArc(arcRect, -deltaAngle * FLOAT_HALF, deltaAngle);
         }
         canvas->DetachPen();
 
@@ -173,7 +176,7 @@ void RosenScrollBarPainter::PaintRectBar(
             barRect.Left(), barRect.Top(), barRect.Right(), barRect.Bottom());
         pen.SetColor(scrollBar->GetBackgroundColor().GetValue());
         brush.SetColor(scrollBar->GetBackgroundColor().GetValue());
-        double filletRadius = backgroundRect.GetWidth() * RSSCALAR_HALF;
+        double filletRadius = backgroundRect.GetWidth() * FLOAT_HALF;
         canvas->AttachPen(pen);
         canvas->AttachBrush(brush);
         RSRoundRect backRoundRect(backgroundRect, filletRadius, filletRadius);

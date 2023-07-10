@@ -144,11 +144,6 @@ void DatePickerPattern::OnLanguageConfigurationUpdate()
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
 }
 
-bool DatePickerPattern::NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
-{
-    return false;
-}
-
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
 {
     CHECK_NULL_VOID(GetHost());
@@ -1204,6 +1199,7 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
         }
     }
     lunarResult.month = month;
+    lunarResult.isLeapMonth = (lunarResult.month == lunarLeapMonth && hasLeapMonth);
     lunarResult.day = monthDaysIndex + 1; // day start form 1, index start from 0
     lunarResult.year = startDateLunar_.year + yearDatePickerColumnPattern->GetCurrentIndex();
 

@@ -648,9 +648,11 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         pickerDialog.isSelectedDate = true;
     }
     auto lunar = paramObject->GetProperty("lunar");
+    auto lunarSwitch = paramObject->GetProperty("lunarSwitch");
     auto sTime = paramObject->GetProperty("showTime");
     auto useMilitary = paramObject->GetProperty("useMilitaryTime");
     settingData.isLunar = lunar->ToBoolean();
+    settingData.lunarswitch = lunarSwitch->ToBoolean();
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
     pickerDialog.parseStartDate = ParseDate(startDate);

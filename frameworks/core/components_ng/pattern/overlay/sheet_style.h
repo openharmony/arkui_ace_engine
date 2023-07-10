@@ -38,11 +38,13 @@ struct SheetStyle {
     std::optional<SheetMode> sheetMode;
     std::optional<bool> showDragBar;
     std::optional<Color> backgroundColor;
+    std::optional<Color> backgroundMask;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
         return !(height != sheetStyle.height || sheetMode != sheetStyle.sheetMode ||
-                 showDragBar != sheetStyle.showDragBar || backgroundColor != sheetStyle.backgroundColor);
+                 showDragBar != sheetStyle.showDragBar || backgroundColor != sheetStyle.backgroundColor ||
+                 backgroundMask != sheetStyle.backgroundMask);
     }
 };
 } // namespace OHOS::Ace::NG

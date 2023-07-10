@@ -314,8 +314,8 @@ HWTEST_F(TextFieldPatternTestNg, DeleteBackward, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::NONE;
     auto deleteLen = 2;
     auto caretPosition = 4;
-    std::string expectStr = TEXT_VALUE.substr(0, caretPosition - deleteLen) +
-                            TEXT_VALUE.substr(caretPosition, TEXT_VALUE.size());
+    std::string expectStr =
+        TEXT_VALUE.substr(0, caretPosition - deleteLen) + TEXT_VALUE.substr(caretPosition, TEXT_VALUE.size());
     pattern->DeleteBackward(deleteLen);
     layoutProperty->UpdateMaxLines(1);
     pattern->UpdateEditingValue(TEXT_VALUE, caretPosition);
@@ -631,7 +631,7 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. set isTextArea to true and call AdjustTextRectOffsetX,AdjustTextAreaOffsetY.
@@ -1431,10 +1431,8 @@ HWTEST_F(TextFieldPatternTestNg, MakeEmptyOffset, TestSize.Level1)
      * @tc.expected: step2. Check the return value.
      */
     auto width = pattern->contentRect_.Width();
-    std::pair<TextAlign, OffsetF> textAlignPairs[] = {
-        std::make_pair(TextAlign::CENTER, OffsetF(width * 0.5f, 0.0f)),
-        std::make_pair(TextAlign::END, OffsetF(width, 0.0f)),
-        std::make_pair(TextAlign::START, OffsetF()),
+    std::pair<TextAlign, OffsetF> textAlignPairs[] = { std::make_pair(TextAlign::CENTER, OffsetF(width * 0.5f, 0.0f)),
+        std::make_pair(TextAlign::END, OffsetF(width, 0.0f)), std::make_pair(TextAlign::START, OffsetF()),
         std::make_pair(TextAlign::JUSTIFY, OffsetF()) };
     for (auto pair : textAlignPairs) {
         layoutProperty->UpdateTextAlign(pair.first);
@@ -4161,7 +4159,7 @@ HWTEST_F(TextFieldPatternTestNg, MeasureContent, TestSize.Level2)
     pattern->CreateNodePaintMethod();
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(-40)));
-    pattern->dragContents_ = { "", "selected", "after"};
+    pattern->dragContents_ = { "", "selected", "after" };
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(40)));
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
@@ -5033,8 +5031,8 @@ HWTEST_F(TextFieldPatternTestNg, TextInputActionToString, TestSize.Level2)
      * @tc.steps: step2. update TextInputAction and call TextInputActionToString.
      * @tc.expected: Check the return string.
      */
-    std::pair<TextInputAction, std::string> inputTextInputActions[] = {
-        std::make_pair(TextInputAction::GO, "EnterKeyType.Go"),
+    std::pair<TextInputAction, std::string> inputTextInputActions[] = { std::make_pair(
+                                                                            TextInputAction::GO, "EnterKeyType.Go"),
         std::make_pair(TextInputAction::SEARCH, "EnterKeyType.Search"),
         std::make_pair(TextInputAction::SEND, "EnterKeyType.Send"),
         std::make_pair(TextInputAction::DONE, "EnterKeyType.Done"),
@@ -5370,8 +5368,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelSetPadding, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
     ASSERT_NE(theme, nullptr);
-    std::vector<AnimatableDimension*> paddings = {
-        &theme->padding_.top_, &theme->padding_.bottom_,
+    std::vector<AnimatableDimension*> paddings = { &theme->padding_.top_, &theme->padding_.bottom_,
         &theme->padding_.left_, &theme->padding_.right_ };
     for (auto pd : paddings) {
         pd->SetValue(5);
@@ -5379,8 +5376,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelSetPadding, TestSize.Level1)
         pd->SetUnit(DimensionUnit::CALC);
     }
     textFieldModelInstance.SetPadding(padding, edgePadding, true);
-    std::vector<std::optional<CalcLength>*> checkPaddings = {
-        &paddingProperty->top, &paddingProperty->bottom,
+    std::vector<std::optional<CalcLength>*> checkPaddings = { &paddingProperty->top, &paddingProperty->bottom,
         &paddingProperty->left, &paddingProperty->right };
     for (auto pd : checkPaddings) {
         ASSERT_TRUE(pd->has_value());
@@ -5759,8 +5755,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
      * @tc.steps: step2. test center keys.
      * @tc.expected: Check the return value.
      */
-    KeyCode centerCodes[] = { KeyCode::KEY_ENTER, KeyCode::KEY_NUMPAD_ENTER,
-        KeyCode::KEY_DPAD_CENTER };
+    KeyCode centerCodes[] = { KeyCode::KEY_ENTER, KeyCode::KEY_NUMPAD_ENTER, KeyCode::KEY_DPAD_CENTER };
     for (auto centerCode : centerCodes) {
         event.code = centerCode;
         EXPECT_TRUE(pattern->OnKeyEvent(event));
@@ -5773,8 +5768,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     std::chrono::milliseconds milliseconds(0);
     TimeStamp time(milliseconds);
     KeyEvent symbolKeyWithOnePressedCode(
-        KeyCode::KEY_EQUALS, KeyAction::DOWN, { KeyCode::KEY_EQUALS },
-        1, time, 0, 0, SourceType::KEYBOARD);
+        KeyCode::KEY_EQUALS, KeyAction::DOWN, { KeyCode::KEY_EQUALS }, 1, time, 0, 0, SourceType::KEYBOARD);
     EXPECT_TRUE(pattern->OnKeyEvent(symbolKeyWithOnePressedCode));
 
     KeyEvent symbolKeyWithMaxKeySize(KeyCode::KEY_EQUALS, KeyAction::DOWN,
@@ -5785,13 +5779,12 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
      * @tc.steps: step4. test direction keys.
      * @tc.expected: Check the return value.
      */
-    KeyCode directionCodes[] = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN,
-        KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT };
+    KeyCode directionCodes[] = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_DPAD_LEFT,
+        KeyCode::KEY_DPAD_RIGHT };
     KeyCode shiftKeyCodes[] = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
     for (auto directionKeyCode : directionCodes) {
         for (auto shiftCode : shiftKeyCodes) {
-            KeyEvent directionKey(directionKeyCode, KeyAction::DOWN,
-                { shiftCode, directionKeyCode }, 1, time, 0, 0,
+            KeyEvent directionKey(directionKeyCode, KeyAction::DOWN, { shiftCode, directionKeyCode }, 1, time, 0, 0,
                 SourceType::KEYBOARD);
             EXPECT_TRUE(pattern->OnKeyEvent(directionKey));
         }
@@ -5806,26 +5799,22 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
      * @tc.expected: Check the return value.
      */
     KeyCode ctrlCodes[] = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT };
-    KeyCode letterCodes[] = { KeyCode::KEY_Z, KeyCode::KEY_A,
-        KeyCode::KEY_C, KeyCode::KEY_V, KeyCode::KEY_X };
+    KeyCode letterCodes[] = { KeyCode::KEY_Z, KeyCode::KEY_A, KeyCode::KEY_C, KeyCode::KEY_V, KeyCode::KEY_X };
     // redo action
     for (auto ctrl : ctrlCodes) {
         for (auto shift : shiftKeyCodes) {
             KeyEvent letterKey(
-                KeyCode::KEY_Z, KeyAction::DOWN, { ctrl, shift, KeyCode::KEY_Z },
-                1, time, 0, 0, SourceType::KEYBOARD);
+                KeyCode::KEY_Z, KeyAction::DOWN, { ctrl, shift, KeyCode::KEY_Z }, 1, time, 0, 0, SourceType::KEYBOARD);
             EXPECT_FALSE(pattern->OnKeyEvent(letterKey));
         }
         KeyEvent letterKey(
-            KeyCode::KEY_Y, KeyAction::DOWN, { ctrl, KeyCode::KEY_Y },
-            1, time, 0, 0, SourceType::KEYBOARD);
+            KeyCode::KEY_Y, KeyAction::DOWN, { ctrl, KeyCode::KEY_Y }, 1, time, 0, 0, SourceType::KEYBOARD);
         EXPECT_FALSE(pattern->OnKeyEvent(letterKey));
     }
 
     for (auto ctrl : ctrlCodes) {
         for (auto letter : letterCodes) {
-            KeyEvent letterKey(letter, KeyAction::DOWN, { ctrl, letter },
-            1, time, 0, 0, SourceType::KEYBOARD);
+            KeyEvent letterKey(letter, KeyAction::DOWN, { ctrl, letter }, 1, time, 0, 0, SourceType::KEYBOARD);
             EXPECT_FALSE(pattern->OnKeyEvent(letterKey));
         }
     }
@@ -5834,5 +5823,112 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     EXPECT_TRUE(pattern->OnKeyEvent(event));
     event.code = KeyCode::KEY_FORWARD_DEL;
     EXPECT_TRUE(pattern->OnKeyEvent(event));
+}
+
+/**
+ * @tc.name: StopEditing001
+ * @tc.desc: test StopEditing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, StopEditing001, TestSize.Level2)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldController = AceType::MakeRefPtr<TextFieldController>();
+    ASSERT_NE(textFieldController, nullptr);
+    textFieldController->SetPattern(textFieldPattern);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = false;
+    textFieldPattern->StopEditing();
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->OnModifyDone();
+    textFieldPattern->textEditingValue_.Reset();
+    textFieldPattern->StopEditing();
+    textFieldController->StopEditing();
+    textFieldController->stopEditing_ = []() {};
+    textFieldController->StopEditing();
+    EXPECT_EQ(textFieldPattern->imeAttached_, false);
+}
+
+/**
+ * @tc.name: TextFieldPatternOnTextInputScroll001
+ * @tc.desc: Verify that the AddScrollEvent interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextInputScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call the OnTextInputScroll.
+     * @tc.expected: step2. Check the value set in OnTextInputScroll.
+     */
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLines(2);
+    pattern->OnTextInputScroll(0.0f);
+    layoutProperty->UpdateMaxLines(1);
+    pattern->textRect_.x_ = 10.0f;
+    pattern->textRect_.width_ = 200.0f;
+    pattern->contentRect_.x_ = 20.0f;
+    pattern->contentRect_.width_ = 100.0f;
+    pattern->OnTextInputScroll(-1000.0f);
+    pattern->isSingleHandle_ = false;
+    pattern->OnTextInputScroll(0.0f);
+    pattern->isSingleHandle_ = true;
+    pattern->OnTextInputScroll(0.0f);
+    EXPECT_EQ(pattern->caretRect_.GetX(), 0.0f);
+    EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->currentOffset_, pattern->textRect_.GetY()));
+}
+
+/**
+ * @tc.name: FitInSafeArea
+ * @tc.desc: Test TextArea.FitInSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLines(2);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    AceType::DynamicCast<MockPipelineBase>(pipeline)->SetRootSize(1000, 1000);
+    pipeline->GetSafeAreaManager()->UpdateKeyboardSafeArea(500.0f);
+
+    // test caret inside safeArea
+    pattern->contentRect_ = RectF { 0.0f, 0.0f, 1000.0f, 1000.0f };
+    const RectF CARET_RECT_SAFE { 0.0f, 0.0f, 100.0f, 100.0f };
+    pattern->caretRect_ = CARET_RECT_SAFE;
+    auto dy = pattern->AdjustTextAreaOffsetY();
+    EXPECT_EQ(dy, 0.0f);
+    EXPECT_EQ(pattern->caretRect_, CARET_RECT_SAFE);
+
+    // test caret outside safeArea
+    const RectF CARE_RECT_DANGEROUS { 600.0f, 600.0f, 100.0f, 100.0f };
+    pattern->caretRect_ = CARE_RECT_DANGEROUS;
+    dy = pattern->AdjustTextAreaOffsetY();
+    // caretBottom is 200 below safeAreaBottom
+    EXPECT_EQ(dy, -200.0f);
+    EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS - OffsetF(0.0f, 200.0f));
+
+    // test caret when keyboard is down
+    pipeline->GetSafeAreaManager()->UpdateKeyboardSafeArea(0.0f);
+    pattern->caretRect_ = CARE_RECT_DANGEROUS;
+    EXPECT_EQ(dy, 0.0f);
+    EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
 }
 } // namespace OHOS::Ace::NG

@@ -329,6 +329,7 @@ public:
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
+    bool IsImageDrag();
     DragRet GetDragAcceptableStatus();
 
 private:
@@ -391,6 +392,7 @@ private:
     void OnScrollBarColorUpdate(const std::string& value);
 
     void InitEvent();
+    void InitFeatureParam();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
@@ -526,6 +528,8 @@ private:
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
     bool isVisible_ = true;
+    bool isVisibleActiveEnable_ = true;
+    bool isMemoryLevelEnable_ = true;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);

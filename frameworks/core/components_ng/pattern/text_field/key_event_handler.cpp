@@ -37,7 +37,8 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
             }
         } else if (HandleShiftPressedEvent(keyEvent)) {
             return true;
-        } else if (keyEvent.IsDirectionalKey()) {
+        } else if (keyEvent.IsDirectionalKey() || keyEvent.code == KeyCode::KEY_MOVE_HOME ||
+            keyEvent.code == KeyCode::KEY_MOVE_END) {
             HandleDirectionalKey(keyEvent);
             return true;
         } else if (keyEvent.IsNumberKey()) {
@@ -109,29 +110,37 @@ void KeyEventHandler::ParseAppendValue(KeyCode keycode, std::string& appendEleme
     }
 }
 
-bool KeyEventHandler::HandleDirectionalKey(const KeyEvent& keyEvent)
+bool KeyEventHandler::IsCtrlShiftWith(const KeyEvent& keyEvent, const KeyCode expectCode)
+{
+    return (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, expectCode }) ||
+            keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, expectCode }) ||
+            keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, expectCode }) ||
+            keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, expectCode }) ||
+	    keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_CTRL_LEFT, expectCode }) ||
+	    keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_CTRL_RIGHT, expectCode }) ||
+	    keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_CTRL_LEFT, expectCode }) ||
+	    keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_CTRL_RIGHT, expectCode }));
+}
+
+bool KeyEventHandler::HandleDirectionalMoveKey(const KeyEvent& keyEvent)
 {
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
-    bool updateSelection = false;
-    if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_UP }) ||
-        keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_DPAD_UP })) {
-        pattern->HandleSelectionUp();
-        updateSelection = true;
-    } else if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_DOWN }) ||
-               keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_DPAD_DOWN })) {
-        pattern->HandleSelectionDown();
-        updateSelection = true;
-    } else if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_LEFT }) ||
-               keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_DPAD_LEFT })) {
-        pattern->HandleSelectionLeft();
-        updateSelection = true;
-    } else if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_RIGHT }) ||
-               keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_DPAD_RIGHT })) {
-        pattern->HandleSelectionRight();
-        updateSelection = true;
+    bool quickDirectionalKey = false;
+    if (keyEvent.IsCtrlWith(KeyCode::KEY_DPAD_LEFT)) {
+        quickDirectionalKey = pattern->CursorMoveLeftWord();
+    } else if (keyEvent.IsCtrlWith(KeyCode::KEY_DPAD_UP)) { // caret move to paragraph head
+        quickDirectionalKey = pattern->CursorMoveToParagraphBegin();
+    } else if (keyEvent.IsCtrlWith(KeyCode::KEY_MOVE_HOME)) {
+        quickDirectionalKey = pattern->CursorMoveHome();
+    } else if (keyEvent.IsCtrlWith(KeyCode::KEY_DPAD_RIGHT)) {
+        quickDirectionalKey = pattern->CursorMoveRightWord();
+    } else if (keyEvent.IsCtrlWith(KeyCode::KEY_DPAD_DOWN)) { // caret move to paragraph tail
+        quickDirectionalKey = pattern->CursorMoveToParagraphEnd();
+    } else if (keyEvent.IsCtrlWith(KeyCode::KEY_MOVE_END)) {
+        quickDirectionalKey = pattern->CursorMoveEnd();
     }
-    if (updateSelection) {
+    if (quickDirectionalKey) {
         return true;
     }
     bool handleDirectionalKey = false;
@@ -145,13 +154,62 @@ bool KeyEventHandler::HandleDirectionalKey(const KeyEvent& keyEvent)
         case KeyCode::KEY_DPAD_LEFT:
             handleDirectionalKey = pattern->CursorMoveLeft();
             break;
+        case KeyCode::KEY_MOVE_HOME:
+            handleDirectionalKey = pattern->CursorMoveLineBegin();
+            break;
         case KeyCode::KEY_DPAD_RIGHT:
             handleDirectionalKey = pattern->CursorMoveRight();
+            break;
+        case KeyCode::KEY_MOVE_END:
+            handleDirectionalKey = pattern->CursorMoveLineEnd();
             break;
         default:
             LOGW("Unknown direction");
     }
     return handleDirectionalKey;
+}
+
+bool KeyEventHandler::HandleDirectionalKey(const KeyEvent& keyEvent)
+{
+    auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_RETURN(pattern, false);
+    bool updateSelection = false;
+    if (keyEvent.IsShiftWith(KeyCode::KEY_DPAD_UP)) {
+        pattern->HandleSelectionUp();
+        updateSelection = true;
+    } else if (keyEvent.IsShiftWith(KeyCode::KEY_DPAD_DOWN)) {
+        pattern->HandleSelectionDown();
+        updateSelection = true;
+    } else if (keyEvent.IsShiftWith(KeyCode::KEY_DPAD_LEFT)) {
+        pattern->HandleSelectionLeft();
+        updateSelection = true;
+    } else if (IsCtrlShiftWith(keyEvent, KeyCode::KEY_DPAD_LEFT)) {
+        pattern->HandleSelectionLeftWord();
+        updateSelection = true;
+    } else if (keyEvent.IsShiftWith(KeyCode::KEY_MOVE_HOME)) {
+        pattern->HandleSelectionLineBegin();
+        updateSelection = true;
+    } else if (IsCtrlShiftWith(keyEvent, KeyCode::KEY_MOVE_HOME)) {
+        pattern->HandleSelectionHome();
+        updateSelection = true;
+    } else if (keyEvent.IsShiftWith(KeyCode::KEY_DPAD_RIGHT)) {
+        pattern->HandleSelectionRight();
+        updateSelection = true;
+    } else if (IsCtrlShiftWith(keyEvent, KeyCode::KEY_DPAD_RIGHT)) {
+        pattern->HandleSelectionRightWord();
+        updateSelection = true;
+    } else if (keyEvent.IsShiftWith(KeyCode::KEY_MOVE_END)) {
+        pattern->HandleSelectionLineEnd();
+        updateSelection = true;
+    } else if (IsCtrlShiftWith(keyEvent, KeyCode::KEY_MOVE_END)) {
+        pattern->HandleSelectionEnd();
+        updateSelection = true;
+    }
+    if (updateSelection) {
+        return updateSelection;
+    }
+    updateSelection = HandleDirectionalMoveKey(keyEvent);
+    return updateSelection;
 }
 
 bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)

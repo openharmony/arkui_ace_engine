@@ -34,7 +34,6 @@ void VideoFullScreenNode::InitVideoFullScreenNode(const RefPtr<VideoNode>& video
         CHECK_NULL_VOID(controlRowNode);
         AddChild(controlRowNode);
     }
-    InitVideoParam(video);
 }
 
 RefPtr<VideoFullScreenNode> VideoFullScreenNode::CreateFullScreenNode(const std::string& tag,
@@ -44,27 +43,5 @@ RefPtr<VideoFullScreenNode> VideoFullScreenNode::CreateFullScreenNode(const std:
     ElementRegister::GetInstance()->AddUINode(fullScreenNode);
     fullScreenNode->InitializePatternAndContext();
     return fullScreenNode;
-}
-
-void VideoFullScreenNode::InitVideoParam(const RefPtr<VideoNode>& video)
-{
-    // init preview param
-    auto layoutProperty = video->GetLayoutProperty<VideoLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto fullScreenLayout = GetLayoutProperty<VideoLayoutProperty>();
-    CHECK_NULL_VOID(fullScreenLayout);
-
-    if (layoutProperty->HasPosterImageInfo()) {
-        fullScreenLayout->UpdatePosterImageInfo(layoutProperty->GetPosterImageInfo().value());
-    }
-    if (layoutProperty->HasObjectFit()) {
-        fullScreenLayout->UpdateObjectFit(layoutProperty->GetObjectFit().value());
-    }
-    if (layoutProperty->HasVideoSource()) {
-        fullScreenLayout->UpdateVideoSource(layoutProperty->GetVideoSource().value());
-    }
-    if (layoutProperty->HasControls()) {
-        fullScreenLayout->UpdateControls(layoutProperty->GetControls().value());
-    }
 }
 }

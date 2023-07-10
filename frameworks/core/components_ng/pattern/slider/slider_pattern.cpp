@@ -638,6 +638,9 @@ void SliderPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub)
 void SliderPattern::HandleHoverEvent(bool isHover)
 {
     mouseHoverFlag_ = mouseHoverFlag_ && isHover;
+    if (!mouseHoverFlag_ && !mousePressedFlag_ && !focusFlag_) {
+        bubbleFlag_ = false;
+    }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

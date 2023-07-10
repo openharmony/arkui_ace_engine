@@ -118,8 +118,6 @@ public:
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
-    std::map<int32_t, RefPtr<FrameNode>> FindDragFrameNodeMapByPosition(
-        float globalX, float globalY, DragType dragType);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,

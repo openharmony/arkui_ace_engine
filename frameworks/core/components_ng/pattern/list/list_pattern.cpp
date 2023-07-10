@@ -40,8 +40,6 @@ constexpr Dimension CHAIN_INTERVAL_DEFAULT = 20.0_vp;
 constexpr double CHAIN_SPRING_MASS = 1.0;
 constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
-constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
-constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 } // namespace
@@ -207,6 +205,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     SetScrollState(SCROLL_FROM_NONE);
     isInitialized_ = true;
+    MarkSelectedItems();
     return true;
 }
 
@@ -246,6 +245,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     if (!listContentModifier_) {
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>();
     }
+
     paint->SetLaneGutter(laneGutter_);
     listContentModifier_->SetItemsPosition(itemPosition_);
     paint->SetContentModifier(listContentModifier_);
@@ -262,15 +262,38 @@ void ListPattern::ProcessEvent(
 
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
-
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto onScroll = listEventHub->GetOnScroll();
-    if (onScroll && !NearZero(finalOffset)) {
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && scrollStop_ && !GetScrollAbort()) {
         auto source = GetScrollState();
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (source == SCROLL_FROM_UPDATE) {
+        if (onScroll) {
+            if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
+                onScroll(offsetVP, ScrollState::SCROLL);
+                onScroll(0.0_vp, ScrollState::IDLE);
+            } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
+                source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                onScroll(offsetVP, ScrollState::FLING);
+                onScroll(0.0_vp, ScrollState::IDLE);
+            } else {
+                onScroll(offsetVP, ScrollState::IDLE);
+            }
+        }
+    } else if (onScroll && !NearZero(finalOffset)) {
+        auto source = GetScrollState();
+        auto offsetPX = Dimension(finalOffset);
+        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+        if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN &&
+            (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR || source == SCROLL_FROM_ANIMATION_CONTROLLER)) {
+            source = SCROLL_FROM_NONE;
+        }
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
             onScroll(offsetVP, ScrollState::SCROLL);
-        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
+        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
+            source == SCROLL_FROM_ANIMATION_CONTROLLER) {
             onScroll(offsetVP, ScrollState::FLING);
         } else {
             onScroll(offsetVP, ScrollState::IDLE);
@@ -414,10 +437,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (IsOutOfBoundary(false) && scrollState_ != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
-    auto effect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() &&
-        scrollState_ != SCROLL_FROM_BAR && scrollState_ != SCROLL_FROM_AXIS;
-    listLayoutAlgorithm->SetCanOverScroll(canOverScroll);
+    listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(scrollState_));
     if (chainAnimation_) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
     }
@@ -510,10 +530,44 @@ bool ListPattern::OutBoundaryCallback()
     return outBoundary;
 }
 
+void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+    bool firstIsGroup = startIndex_ == 0 && itemPosition_.begin()->second.isGroup;
+    bool lastIsGroup = endIndex_ == maxListItemIndex_ && itemPosition_.rbegin()->second.isGroup;
+    if (!firstIsGroup && !lastIsGroup) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> childrens;
+    host->GenerateOneDepthVisibleFrame(childrens);
+    if (childrens.empty()) {
+        return;
+    }
+    if (firstIsGroup) {
+        auto itemGroup = (*childrens.begin())->GetPattern<ListItemGroupPattern>();
+        if (itemGroup) {
+            groupAtStart = itemGroup->GetDiasplayStartIndexInGroup() == 0;
+        }
+    }
+    if (lastIsGroup) {
+        auto itemGroup = (*childrens.rbegin())->GetPattern<ListItemGroupPattern>();
+        if (itemGroup) {
+            groupAtEnd = itemGroup->GetDisplayEndIndexInGroup() == itemGroup->GetEndIndexInGroup();
+        }
+    }
+}
+
 OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
-    if (startIndex_ == 0) {
+    bool groupAtStart = true;
+    bool groupAtEnd = true;
+    GetListItemGroupEdge(groupAtStart, groupAtEnd);
+    if (startIndex_ == 0 && groupAtStart) {
         auto startPos = startMainPos_ + GetChainDelta(0);
         auto newStartPos = startPos + delta;
         if (startPos > 0 && newStartPos > 0) {
@@ -534,7 +588,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
             }
         }
     }
-    if (endIndex_ == maxListItemIndex_) {
+    if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
         auto endPos = endMainPos_ + GetChainDelta(endIndex_);
         auto newEndPos = endPos + delta;
         if (endPos < contentMainSize_ && newEndPos < contentMainSize_) {
@@ -562,6 +616,9 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect
     if (!jumpIndex_.has_value() && !targetIndex_.has_value() && !HandleEdgeEffect(offset, source, GetContentSize())) {
+        if (IsOutOfBoundary(false)) {
+            MarkDirtyNodeSelf();
+        }
         return false;
     }
     SetScrollState(source);
@@ -675,7 +732,9 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     auto scrollBar = GetScrollBar();
     if (scrollBar && scrollBar->IsDriving()) {
         offset = scrollBar->CalcPatternOffset(offset);
-        source = SCROLL_FROM_BAR;
+        if (source == SCROLL_FROM_UPDATE) {
+            source = SCROLL_FROM_BAR;
+        }
     } else {
         ProcessDragUpdate(offset, source);
     }
@@ -1321,95 +1380,23 @@ float ListPattern::GetChainDelta(int32_t index) const
     return chainAnimation_->GetValue(index);
 }
 
-void ListPattern::UninitMouseEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto mouseEventHub = host->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent(nullptr);
-    ClearMultiSelect();
-    isMouseEventInit_ = false;
-}
-
-void ListPattern::InitMouseEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto mouseEventHub = host->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEventWithoutKeyboard(info);
-        }
-    });
-    isMouseEventInit_ = true;
-}
-
-void ListPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
-{
-    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
-        return;
-    }
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-    if (manager->IsDragged()) {
-        return;
-    }
-
-    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
-    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-    if (info.GetAction() == MouseAction::PRESS) {
-        ClearMultiSelect();
-        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        mousePressed_ = true;
-        // do not select when click
-    } else if (info.GetAction() == MouseAction::MOVE) {
-        if (!mousePressed_) {
-            return;
-        }
-        const static double FRAME_SELECTION_DISTANCE =
-            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
-        auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
-        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
-            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-            MultiSelectWithoutKeyboard(selectedZone);
-        }
-    } else if (info.GetAction() == MouseAction::RELEASE) {
-        mouseStartOffset_.Reset();
-        mouseEndOffset_.Reset();
-        mousePressed_ = false;
-        ClearSelectedZone();
-    }
-}
-
 void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> childrens;
-    host->GenerateOneDepthVisibleFrame(childrens);
+    host->GenerateOneDepthAllFrame(childrens);
     for (const auto& item : childrens) {
         if (item->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             auto itemGroupPattern = item->GetPattern<ListItemGroupPattern>();
             CHECK_NULL_VOID(itemGroupPattern);
-            auto itemGroupStyle = itemGroupPattern->GetListItemGroupStyle();
-            if (itemGroupStyle == V2::ListItemGroupStyle::CARD) {
-                auto itemGroupGeometry = item->GetGeometryNode();
-                CHECK_NULL_VOID(itemGroupGeometry);
-                auto itemGroupRect = itemGroupGeometry->GetFrameRect();
-                if (!selectedZone.IsIntersectWith(itemGroupRect)) {
-                    continue;
-                }
-                HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.Top());
+            auto itemGroupGeometry = item->GetGeometryNode();
+            CHECK_NULL_VOID(itemGroupGeometry);
+            auto itemGroupRect = itemGroupGeometry->GetFrameRect();
+            if (!selectedZone.IsIntersectWith(itemGroupRect)) {
+                continue;
             }
+            HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.Top());
             continue;
         }
         auto itemPattern = item->GetPattern<ListItemPattern>();
@@ -1429,9 +1416,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
         }
     }
 
-    auto hostContext = host->GetRenderContext();
-    CHECK_NULL_VOID(hostContext);
-    hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+    DrawSelectedZone(selectedZone);
 }
 
 void ListPattern::HandleCardModeSelectedEvent(
@@ -1439,7 +1424,7 @@ void ListPattern::HandleCardModeSelectedEvent(
 {
     CHECK_NULL_VOID(itemGroupNode);
     std::list<RefPtr<FrameNode>> childrens;
-    itemGroupNode->GenerateOneDepthVisibleFrame(childrens);
+    itemGroupNode->GenerateOneDepthAllFrame(childrens);
     for (const auto& item : childrens) {
         auto itemPattern = item->GetPattern<ListItemPattern>();
         CHECK_NULL_VOID(itemPattern);
@@ -1478,43 +1463,6 @@ void ListPattern::ClearMultiSelect()
     }
 
     ClearSelectedZone();
-}
-
-void ListPattern::ClearSelectedZone()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hostContext = host->GetRenderContext();
-    CHECK_NULL_VOID(hostContext);
-    hostContext->UpdateMouseSelectWithRect(RectF(), SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
-}
-
-RectF ListPattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset)
-{
-    RectF selectedZone;
-    if (startOffset.GetX() <= endOffset.GetX()) {
-        if (startOffset.GetY() <= endOffset.GetY()) {
-            // bottom right
-            selectedZone = RectF(startOffset.GetX(), startOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
-                endOffset.GetY() - startOffset.GetY());
-        } else {
-            // top right
-            selectedZone = RectF(startOffset.GetX(), endOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
-                startOffset.GetY() - endOffset.GetY());
-        }
-    } else {
-        if (startOffset.GetY() <= endOffset.GetY()) {
-            // bottom left
-            selectedZone = RectF(endOffset.GetX(), startOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
-                endOffset.GetY() - startOffset.GetY());
-        } else {
-            // top left
-            selectedZone = RectF(endOffset.GetX(), endOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
-                startOffset.GetY() - endOffset.GetY());
-        }
-    }
-
-    return selectedZone;
 }
 
 void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)

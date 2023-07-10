@@ -244,13 +244,8 @@ private:
     void RegistOritationListener();
 
     // multiSelectable
-    void UninitMouseEvent();
-    void InitMouseEvent();
-    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
-    void ClearMultiSelect();
-    void ClearSelectedZone();
-    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
-    void MultiSelectWithoutKeyboard(const RectF& selectedZone);
+    void ClearMultiSelect() override;
+    void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void HandleCardModeSelectedEvent(
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
 
@@ -258,6 +253,7 @@ private:
     void SetAccessibilityAction();
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
+    void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
 
     RefPtr<ListContentModifier> listContentModifier_;
 
@@ -301,15 +297,7 @@ private:
     RefPtr<SpringProperty> springProperty_;
     std::optional<ChainAnimationOptions> chainAnimationOptions_;
 
-    // multiSelectable
-    bool multiSelectable_ = false;
-    bool isMouseEventInit_ = false;
-    bool mousePressed_ = false;
-
     bool isOritationListenerRegisted_ = false;
-    OffsetF mouseStartOffset_;
-    OffsetF mouseEndOffset_;
-    OffsetF mousePressOffset_;
 
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;

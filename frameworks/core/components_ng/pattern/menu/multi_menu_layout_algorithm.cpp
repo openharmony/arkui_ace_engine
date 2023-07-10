@@ -21,10 +21,6 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr uint32_t MIN_GRID_COUNTS = 2;
-} // namespace
-
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -39,7 +35,7 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(columnInfo);
     CHECK_NULL_VOID(columnInfo->GetParent());
     columnInfo->GetParent()->BuildColumnWidth();
-    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    auto minWidth = static_cast<float>(columnInfo->GetWidth());
     childConstraint.minSize.SetWidth(minWidth);
     // Calculate max width of menu items
     UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);

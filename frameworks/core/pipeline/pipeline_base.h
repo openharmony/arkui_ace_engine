@@ -295,6 +295,12 @@ public:
         actionEventHandler_ = std::move(listener);
     }
 
+    using FormLinkInfoUpdateHandler = std::function<void(const std::vector<std::string>&)>;
+    void SetFormLinkInfoUpdateHandler(FormLinkInfoUpdateHandler&& listener)
+    {
+        formLinkInfoUpdateHandler_ = std::move(listener);
+    }
+
     using StatusBarEventHandler = std::function<void(const Color& color)>;
     void SetStatusBarEventHandler(StatusBarEventHandler&& listener)
     {
@@ -560,7 +566,7 @@ public:
         return dipScale_;
     }
 
-    // Get the widnow design scale used to covert lpx to logic px.
+    // Get the window design scale used to covert lpx to logic px.
     double GetLogicScale() const
     {
         return designWidthScale_;
@@ -718,7 +724,7 @@ public:
         configChangedCallback_.push_back(std::move(listener));
     }
 
-    void NotifyConfigurationChange()
+    virtual void NotifyConfigurationChange(const OnConfigurationChange& configurationChange)
     {
         for (const auto& callback : configChangedCallback_) {
             if (callback) {
@@ -897,6 +903,12 @@ public:
         return lastTouchTime_;
     }
 
+    void AddFormLinkInfo(const std::string& info)
+    {
+        LOGI("AddFormLinkInfo is %{public}s", info.c_str());
+        formLinkInfos_.push_back(info);
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -904,6 +916,10 @@ protected:
             isForegroundCalled_ = false;
             nextFrameLayoutCallback_();
             LOGI("nextFrameLayoutCallback called");
+        }
+        // Update FormLinkInfo after layout. (For static form use only)
+        if (formLinkInfoUpdateHandler_) {
+            formLinkInfoUpdateHandler_(formLinkInfos_);
         }
     }
 
@@ -987,6 +1003,7 @@ protected:
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
+    FormLinkInfoUpdateHandler formLinkInfoUpdateHandler_;
     RefPtr<PlatformResRegister> platformResRegister_;
 
     WeakPtr<PipelineBase> parentPipeline_;
@@ -1004,9 +1021,11 @@ protected:
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
     uint64_t lastTouchTime_ = 0;
+    std::vector<std::string> formLinkInfos_;
 
 private:
     void DumpFrontend() const;
+    double ModifyKeyboardHeight(double keyboardHeight) const;
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
     MenuEventHandler menuEventHandler_;

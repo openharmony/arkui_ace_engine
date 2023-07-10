@@ -800,6 +800,7 @@ HWTEST_F(SearchTestNg, SetSearchSrcPath001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     SetIconTheme();
+    SetSearchTheme();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetSearchSrcPath("");
@@ -834,6 +835,7 @@ HWTEST_F(SearchTestNg, SetRightIconSrcPath001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     SetIconTheme();
+    SetSearchTheme();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetRightIconSrcPath("");
@@ -1365,6 +1367,12 @@ HWTEST_F(SearchTestNg, Pattern011, TestSize.Level1)
      * @tc.step: step2. call GetOnHoverEventFunc()(false).
      * @tc.expected: isHover_ is false.
      */
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<SearchTheme>();
+    checkboxTheme->searchButtonSpace_ = 0.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
     pattern->hoverEvent_->GetOnHoverEventFunc()(false);
     EXPECT_FALSE(pattern->isHover_);
     MouseInfo mouseInfo;

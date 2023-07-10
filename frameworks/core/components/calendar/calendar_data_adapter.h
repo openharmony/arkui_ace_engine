@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,6 +118,13 @@ struct CalendarDay {
     bool isFirstOfLunar = false;
     bool hasSchedule = false;
     bool markLunarDay = false;
+
+    // For calendar selector
+    bool isHovering = false;
+    bool isPressing = false;
+    bool isSelected = false;
+    bool isKeyFocused = false;
+
     std::string lunarMonth;
     std::string lunarDay;
     std::string dayMark;

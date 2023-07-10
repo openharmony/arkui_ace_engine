@@ -25,6 +25,12 @@ NativeValue* WantWrap::ConvertToNativeValue(const OHOS::AAFwk::Want& want, Nativ
     return reinterpret_cast<NativeValue*>(OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(engine), want));
 }
 
+NativeValue* WantWrap::ConvertParamsToNativeValue(const OHOS::AAFwk::WantParams& wantParams, NativeEngine* engine)
+{
+    return reinterpret_cast<NativeValue*>(
+        OHOS::AppExecFwk::WrapWantParams(reinterpret_cast<napi_env>(engine), wantParams));
+}
+
 RefPtr<WantWrap> WantWrap::CreateWantWrap(void* nativeEngine, void* nativeValue)
 {
     NativeEngine* engine = reinterpret_cast<NativeEngine*>(nativeEngine);

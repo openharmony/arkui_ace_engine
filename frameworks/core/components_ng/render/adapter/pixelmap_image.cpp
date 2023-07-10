@@ -34,6 +34,11 @@ RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
     return AceType::MakeRefPtr<PixelMapImage>(pixelMap);
 }
 
+RefPtr<CanvasImage> PixelMapImage::Clone()
+{
+    return MakeRefPtr<PixelMapImage>(pixelMap_);
+}
+
 int32_t PixelMapImage::GetWidth() const
 {
     auto pixmap = GetPixelMap();

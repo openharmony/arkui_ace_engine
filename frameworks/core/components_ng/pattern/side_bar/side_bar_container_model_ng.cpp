@@ -27,19 +27,20 @@
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER = 1;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
-constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
-constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
+static Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
+static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
-constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
+static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
+constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 
-ImageSourceInfo CreateSourceInfo(
-    const std::string& src, bool isPixelMap, RefPtr<PixelMap>& pixMap)
+ImageSourceInfo CreateSourceInfo(const std::string& src, bool isPixelMap, RefPtr<PixelMap>& pixMap)
 {
 #if defined(PIXEL_MAP_SUPPORTED)
     if (isPixelMap && pixMap) {
@@ -52,6 +53,13 @@ ImageSourceInfo CreateSourceInfo(
 
 void SideBarContainerModelNG::Create()
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
+        DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
+        DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
+    }
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto sideBarContainerNode = FrameNode::GetOrCreateFrameNode(

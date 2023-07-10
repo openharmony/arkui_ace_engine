@@ -39,8 +39,8 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
-    return [weak = WeakClaim(this), dividerLineWidth, frameRect, dividerColor, dividerSpacing,
-               pressColor, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
+    return [weak = WeakClaim(this), dividerLineWidth, frameRect, dividerColor, dividerSpacing, pressColor,
+               enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(picker);
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
@@ -77,7 +77,7 @@ void TextPickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     auto height = static_cast<float>((frameRect.Height() - theme->GetDividerSpacing().ConvertToPx()) / 2);
     // Paint gradient rect over the picker content.
     RSBrush topBrush;
-    RSRect rect(0.0f, frameRect.Right(), 0.0f, frameRect.Bottom());
+    RSRect rect(0.0f, 0.0f, frameRect.Right() - frameRect.Left(), frameRect.Bottom() - frameRect.Top());
     RSPoint topStartPoint;
     topStartPoint.SetX(0.0f);
     topStartPoint.SetY(0.0f);

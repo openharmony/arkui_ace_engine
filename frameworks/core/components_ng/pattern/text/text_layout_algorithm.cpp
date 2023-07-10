@@ -105,9 +105,14 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     baselineOffset_ = static_cast<float>(baselineOffset);
 
-    float heightFinal =
-        std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-
+    float heightFinal = static_cast<float>(height + std::fabs(baselineOffset));
+    if (contentConstraint.selfIdealSize.Height().has_value()) {
+        heightFinal = std::min(
+            static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.selfIdealSize.Height().value());
+    } else {
+        heightFinal =
+            std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
+    }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
 

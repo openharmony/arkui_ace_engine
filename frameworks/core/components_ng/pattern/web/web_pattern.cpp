@@ -35,6 +35,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
+#include "parameters.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -140,6 +141,9 @@ constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5;
 constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
+// web feature params
+const std::string VISIBLE_ACTIVE_ENABLE = "persist.web.visible_active_enable";
+const std::string MEMORY_LEVEL_ENABEL = "persist.web.memory_level_enable";
 
 WebPattern::WebPattern() = default;
 
@@ -223,6 +227,12 @@ void WebPattern::InitEvent()
     context->SetConfigChangedCallback(std::move(langTask));
 }
 
+void WebPattern::InitFeatureParam()
+{
+    isVisibleActiveEnable_ = system::GetBoolParameter(VISIBLE_ACTIVE_ENABLE, true);
+    isMemoryLevelEnable_ = system::GetBoolParameter(MEMORY_LEVEL_ENABEL, true);
+}
+
 void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (panEvent_) {
@@ -237,7 +247,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
     PanDirection panDirection;
-    panDirection.type = PanDirection::VERTICAL;
+    panDirection.type = PanDirection::ALL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
@@ -479,6 +489,7 @@ void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
     }
 
     CHECK_NULL_VOID(delegate_);
+    delegate_->OnContextMenuHide("");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -537,6 +548,7 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
         if (!pattern->isDragging_) {
             return;
         }
+        pattern->OnQuickMenuDismissed();
 
         // update drag status
         info->SetResult(pattern->GetDragAcceptableStatus());
@@ -586,6 +598,14 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
     eventHub->SetOnDrop(std::move(onDragDropId));
 }
 
+bool WebPattern::IsImageDrag()
+{
+    if (delegate_) {
+        return delegate_->IsImageDrag();
+    }
+    return false;
+}
+
 DragRet WebPattern::GetDragAcceptableStatus()
 {
     OHOS::NWeb::NWebDragData::DragOperation status = delegate_->GetDragAcceptableStatus();
@@ -614,7 +634,11 @@ bool WebPattern::NotifyStartDragTask()
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
-    gestureHub->StartLongPressActionForWeb();
+    if (!isMouseEvent_) {
+        // mouse drag does not need long press action
+        LOGI("is not mouse drag, do not need to do long press action");
+        gestureHub->StartLongPressActionForWeb();
+    }
     gestureHub->StartDragTaskForWeb();
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1375,6 +1399,8 @@ void WebPattern::OnModifyDone()
 
     // Initialize events such as keyboard, focus, etc.
     InitEvent();
+    // Initialize web params.
+    InitFeatureParam();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -2229,10 +2255,14 @@ void WebPattern::OnVisibleChange(bool isVisible)
     if (!isVisible_) {
         LOGI("web is not visible");
         CloseSelectOverlay();
-        OnInActive();
+        if (isVisibleActiveEnable_) {
+            OnInActive();
+        }
     } else {
         LOGI("web is visible");
-        OnActive();
+        if (isVisibleActiveEnable_) {
+            OnActive();
+        }
     }
 }
 
@@ -2247,6 +2277,9 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
 
 void WebPattern::OnNotifyMemoryLevel(int32_t level)
 {
+    if (!isMemoryLevelEnable_) {
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
     delegate_->NotifyMemoryLevel(level);
 }

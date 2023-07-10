@@ -28,6 +28,7 @@ enum class VisualState {
     PRESSED,
     DISABLED,
     HOVER,
+    SELECTED,
     NOTSET,
 };
 

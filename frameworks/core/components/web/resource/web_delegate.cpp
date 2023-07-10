@@ -358,6 +358,38 @@ void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
     }
 }
 
+void WebScreenCaptureRequestOhos::Deny() const
+{
+    if (request_) {
+        request_->Refuse();
+    }
+}
+
+std::string WebScreenCaptureRequestOhos::GetOrigin() const
+{
+    if (request_) {
+        return request_->Origin();
+    }
+    return "";
+}
+
+void WebScreenCaptureRequestOhos::SetCaptureMode(int32_t mode)
+{
+    config_.mode = mode;
+}
+
+void WebScreenCaptureRequestOhos::SetSourceId(int32_t sourceId)
+{
+    config_.sourceId = sourceId;
+}
+
+void WebScreenCaptureRequestOhos::Grant() const
+{
+    if (request_) {
+        request_->Agree(config_);
+    }
+}
+
 int32_t ContextMenuParamOhos::GetXCoord() const
 {
     if (param_) {
@@ -1629,6 +1661,10 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
         onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
+        onOverScrollV2_ = useNewPipe ? eventHub->GetOnOverScrollEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetOverScrollId(), oldContext);
+        onScreenCaptureRequestV2_ = useNewPipe ? eventHub->GetOnScreenCaptureRequestEvent() : nullptr;
     }
     return true;
 }
@@ -3810,6 +3846,25 @@ void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NW
         TaskExecutor::TaskType::JS);
 }
 
+void WebDelegate::OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), request]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            // ace 2.0
+            auto onScreenCaptureRequestV2 = delegate->onScreenCaptureRequestV2_;
+            if (onScreenCaptureRequestV2) {
+                onScreenCaptureRequestV2(
+                    std::make_shared<WebScreenCaptureRequestEvent>(
+                    AceType::MakeRefPtr<WebScreenCaptureRequestOhos>(request)));
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
 {
     auto context = context_.Upgrade();
@@ -4228,6 +4283,31 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
     return result;
 }
 
+void WebDelegate::OnContextMenuHide(const std::string& info)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnContextMenuHideEvent = webEventHub->GetOnContextMenuHideEvent();
+            CHECK_NULL_VOID(propOnContextMenuHideEvent);
+            propOnContextMenuHideEvent(std::make_shared<ContextMenuHideEvent>(info));
+            return;
+        } else {
+            LOGE("current is not new pipeline");
+        }
+    });
+    return;
+}
+
 bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
 {
     auto context = context_.Upgrade();
@@ -4390,6 +4470,14 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
         return false;
     }
     return webPattern->NotifyStartDragTask();
+}
+
+bool WebDelegate::IsImageDrag()
+{
+    if (dragData_) {
+        return dragData_->IsSingleImageContent();
+    }
+    return false;
 }
 
 std::shared_ptr<OHOS::NWeb::NWebDragData> WebDelegate::GetOrCreateDragData()
@@ -4982,5 +5070,21 @@ void WebDelegate::OnDateTimeChooserClose()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->OnDateTimeChooserClose();
+}
+
+void WebDelegate::OnOverScroll(float xOffset, float yOffset)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), xOffset, yOffset]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onOverScrollV2 = delegate->onOverScrollV2_;
+            if (onOverScrollV2) {
+                onOverScrollV2(std::make_shared<WebOnOverScrollEvent>(xOffset, yOffset));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 } // namespace OHOS::Ace

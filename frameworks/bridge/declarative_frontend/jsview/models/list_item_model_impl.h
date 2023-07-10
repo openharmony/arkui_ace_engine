@@ -33,6 +33,8 @@ public:
     void SetSticky(V2::StickyMode stickyMode) override;
     void SetEditMode(uint32_t editMode) override;
     void SetSelectable(bool selectable) override;
+    void SetSelected(bool selected) override {};
+    void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) override {};
     void SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
         V2::SwipeEdgeEffect edgeEffect) override;
     void SetSelectCallback(OnSelectFunc&& selectCallback) override;

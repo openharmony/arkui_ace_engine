@@ -31,6 +31,11 @@ int32_t PixelMapImage::GetHeight() const
     return 0;
 }
 
+RefPtr<CanvasImage> PixelMapImage::Clone()
+{
+    return Claim(this);
+}
+
 void PixelMapImage::Cache(const std::string& key) {}
 RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
 {

@@ -32,6 +32,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -409,35 +410,18 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     hasPendingRequest_ = false;
 }
 
-void FrameNode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
-{
-    OnConfigurationUpdate(configurationChange);
-    auto updateFlag = pattern_->NeedCallChildrenUpdate(configurationChange);
-    if (updateFlag) {
-        auto children = GetChildren();
-        if (children.empty()) {
-            return;
-        }
-        for (const auto& child : children) {
-            if (!child) {
-                continue;
-            }
-            child->UpdateConfigurationUpdate(configurationChange);
-        }
-    }
-}
-
 void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
 {
-    CHECK_NULL_VOID(pattern_);
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    MarkModifyDone();
-    MarkDirtyNode();
 }
 
 void FrameNode::OnVisibleChange(bool isVisible)
@@ -483,11 +467,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
-        if (pattern_->NeedOverridePaintRect()) {
-            renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
-        } else {
-            renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
-        }
+        renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
     }
 
     // clean layout flag.
@@ -531,6 +511,17 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         }
     }
 
+    // update background
+    if (builderFunc_) {
+        auto builderNode = builderFunc_();
+        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        builderNode->MountToParent(columnNode);
+        SetBackgroundLayoutConstraint(columnNode);
+        renderContext_->CreateBackgroundPixelMap(columnNode);
+        builderFunc_ = nullptr;
+    }
+
     // update focus state
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
@@ -540,6 +531,18 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     // rebuild child render node.
     RebuildRenderContextTree();
+}
+
+void FrameNode::SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    layoutConstraint.percentReference.SetWidth(geometryNode_->GetFrameSize().Width());
+    layoutConstraint.percentReference.SetHeight(geometryNode_->GetFrameSize().Height());
+    layoutConstraint.maxSize.SetWidth(geometryNode_->GetFrameSize().Width());
+    layoutConstraint.maxSize.SetHeight(geometryNode_->GetFrameSize().Height());
+    customNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
 }
 
 void FrameNode::AdjustGridOffset()
@@ -727,9 +730,6 @@ void FrameNode::SetActive(bool active)
         if (parent) {
             parent->MarkNeedSyncRenderTree();
         }
-    }
-    if (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG) {
-        SetJSViewActive(active);
     }
 }
 
@@ -1908,6 +1908,12 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
         }
     }
     return nodes;
+}
+
+void FrameNode::AddFRCSceneInfo(const std::string& name, float speed, SceneStatus status)
+{
+    // [PLANNING]: Frame Rate Controller(FRC):
+    // Based on scene, speed and scene status, FrameRateRange will be sent to RSNode.
 }
 
 void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)

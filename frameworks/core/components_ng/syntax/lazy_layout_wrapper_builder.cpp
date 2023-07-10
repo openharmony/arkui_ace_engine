@@ -81,10 +81,12 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
 
     std::list<int32_t> idleIndexes;
     std::unordered_map<int32_t, std::optional<std::string>> cacheItems;
+    bool isLoop = host->GetIsLoop();
     for (int32_t i = 0; i < cacheCount_; i++) {
         if (frontNodeIds.empty()) {
-            if (startIndex_.value() - i > 0) {
+            if (startIndex_.value() - i > 0 || (isLoop && cacheCount_ < totalCount)) {
                 auto idleIndex = startIndex_.value() - 1 - i;
+                idleIndex = totalCount > 0 ? (idleIndex + totalCount) % totalCount : idleIndex;
                 auto cacheInfo = builder_->GetCacheItemInfo(idleIndex);
                 if (!cacheInfo) {
                     cacheInfo = GetKeyByIndexFromPreNodes(idleIndex);
@@ -101,8 +103,9 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
         }
 
         if (backNodeIds.empty()) {
-            if (endIndex_.value() + i < (totalCount - 1)) {
+            if (endIndex_.value() + i < (totalCount - 1)  || (isLoop && cacheCount_ < totalCount)) {
                 auto idleIndex = endIndex_.value() + 1 + i;
+                idleIndex = totalCount > 0 ? (idleIndex + totalCount) % totalCount : idleIndex;
                 auto cacheInfo = builder_->GetCacheItemInfo(idleIndex);
                 if (!cacheInfo) {
                     idleIndexes.emplace_back(idleIndex);

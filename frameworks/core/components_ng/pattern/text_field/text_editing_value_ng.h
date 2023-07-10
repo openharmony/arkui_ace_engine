@@ -69,6 +69,18 @@ struct TextEditingValueNG {
         return StringUtils::ToString(wideText.substr(0, caretPosition));
     }
 
+    std::string GetValueBeforeCursor(int32_t number) const
+    {
+        auto wideText = GetWideText();
+        if (caretPosition > static_cast<int32_t>(wideText.length()) || caretPosition <= 0 || number < 0) {
+            return "";
+        }
+        if (number > caretPosition) {
+            number = caretPosition;
+        }
+        return StringUtils::ToString(wideText.substr(caretPosition - number, number));
+    }
+
     std::string GetValueAfterCursor() const
     {
         auto wideText = GetWideText();
@@ -76,6 +88,15 @@ struct TextEditingValueNG {
             return "";
         }
         return StringUtils::ToString(wideText.substr(caretPosition));
+    }
+
+    std::string GetValueAfterCursor(int32_t number) const
+    {
+        auto wideText = GetWideText();
+        if (caretPosition > static_cast<int32_t>(wideText.length()) || caretPosition < 0 || number < 0) {
+            return "";
+        }
+        return StringUtils::ToString(wideText.substr(caretPosition, number));
     }
 
     std::string GetValueBeforePosition(int32_t position) const

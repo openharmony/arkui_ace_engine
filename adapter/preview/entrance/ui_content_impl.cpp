@@ -163,7 +163,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     systemResourcesPath_ = options.systemResourcePath;
     appResourcesPath_ = options.appResourcePath;
     containerSdkPath_ = options.containerSdkPath;
-    startUrl_ = options.url;
     language_ = options.language;
     region_ = options.region;
     script_ = options.script;
@@ -227,7 +226,7 @@ void UIContentImpl::DestroyCallback() const
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
     CommonInitialize(window, url, storage);
-    AceContainer::RunPage(instanceId_, UNUSED_PAGE_ID, startUrl_, "");
+    AceContainer::RunPage(instanceId_, UNUSED_PAGE_ID, url, "");
 }
 
 std::string UIContentImpl::GetContentInfo() const

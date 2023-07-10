@@ -135,6 +135,11 @@ public:
         return isSelected_;
     }
 
+    void SetSelected(bool selected)
+    {
+        isSelected_ = selected;
+    }
+
     bool Selectable() const
     {
         return selectable_;

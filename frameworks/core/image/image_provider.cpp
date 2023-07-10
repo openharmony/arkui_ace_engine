@@ -21,9 +21,12 @@
 #include "experimental/svg/model/SkSVGDOM.h"
 #endif
 #include "image_compressor.h"
-#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkGraphics.h"
 #include "include/core/SkStream.h"
+
+#ifdef USE_ROSEN_DRAWING
+#include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#include "drawing/engine_adapter/skia_adapter/skia_image.h"
 #endif
 
 #include "base/log/ace_trace.h"
@@ -247,33 +250,10 @@ RefPtr<ImageObject> ImageProvider::GeneratorAceImageObject(
 #ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> ImageProvider::LoadImageRawData(
     const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase> context)
-{
-    ACE_FUNCTION_TRACE();
-    auto imageCache = context->GetImageCache();
-    if (imageCache) {
-        // 1. try get data from cache.
-        auto cacheData = imageCache->GetCacheImageData(imageInfo.GetSrc());
-        if (cacheData) {
-            LOGD("sk data from memory cache.");
-            return AceType::DynamicCast<SkiaCachedImageData>(cacheData)->imageData;
-        }
-    }
-    // 2. try load raw image file.
-    auto imageLoader = ImageLoader::CreateImageLoader(imageInfo);
-    if (!imageLoader) {
-        LOGE("imageLoader create failed. imageInfo: %{private}s", imageInfo.ToString().c_str());
-        return nullptr;
-    }
-    auto data = imageLoader->LoadImageData(imageInfo, context);
-    if (data && imageCache) {
-        // cache sk data.
-        imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(data));
-    }
-    return data;
-}
 #else
 std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
     const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase> context)
+#endif
 {
     ACE_FUNCTION_TRACE();
     auto imageCache = context->GetImageCache();
@@ -281,9 +261,13 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
         // 1. try get data from cache.
         auto cacheData = imageCache->GetCacheImageData(imageInfo.GetSrc());
         if (cacheData) {
+#ifndef USE_ROSEN_DRAWING
+            LOGD("sk data from memory cache.");
+            return AceType::DynamicCast<SkiaCachedImageData>(cacheData)->imageData;
+#else
             LOGD("drawing data from memory cache.");
-            return nullptr;
-            // return AceType::DynamicCast<DrawingCachedImageData>(cacheData)->imageData;  // TODO depend on flutter
+            return AceType::DynamicCast<RosenCachedImageData>(cacheData)->imageData;
+#endif
         }
     }
     // 2. try load raw image file.
@@ -294,15 +278,22 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
     }
     auto data = imageLoader->LoadImageData(imageInfo, context);
     if (data && imageCache) {
+#ifndef USE_ROSEN_DRAWING
         // cache sk data.
-        imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<DrawingCachedImageData>(data));
+        imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(data));
+#else
+        // cache drawing data.
+        imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<RosenCachedImageData>(data));
+#endif
     }
     return data;
 }
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> ImageProvider::LoadImageRawDataFromFileCache(
+#else
+std::shared_ptr<RSData> ImageProvider::LoadImageRawDataFromFileCache(
+#endif
     const RefPtr<PipelineBase> context,
     const std::string key,
     const std::string suffix)
@@ -313,16 +304,16 @@ sk_sp<SkData> ImageProvider::LoadImageRawDataFromFileCache(
         std::string cacheFilePath = ImageCache::GetImageCacheFilePath(key) + suffix;
         auto data = imageCache->GetDataFromCacheFile(cacheFilePath);
         if (data) {
+#ifndef USE_ROSEN_DRAWING
             return AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
+#else
+            return AceType::DynamicCast<RosenCachedImageData>(data)->imageData;
+#endif
         }
     }
     return nullptr;
 }
-#else
-    // TODO Drawing : depend on flutter
-#endif
 
-#ifndef USE_ROSEN_DRAWING
 void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
     std::function<void(const sk_sp<SkSVGDOM>&)> successCallback, std::function<void()> failedCallback,
     const WeakPtr<PipelineBase> context, uint64_t svgThemeColor, OnPostBackgroundTask onBackgroundTaskPostCallback)
@@ -346,7 +337,12 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
         }
         auto imageData = imageLoader->LoadImageData(info, context);
         if (imageData) {
+#ifndef USE_ROSEN_DRAWING
             const auto svgStream = std::make_unique<SkMemoryStream>(std::move(imageData));
+#else
+            auto skData = imageData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+            const auto svgStream = std::make_unique<SkMemoryStream>(std::move(skData));
+#endif
             if (svgStream) {
                 auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, svgThemeColor);
                 if (skiaDom) {
@@ -365,58 +361,20 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
     }
     BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
 }
-#else
-void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
-    std::function<void(const std::shared_ptr<RSSVGDOM>&)> successCallback,
-    std::function<void()> failedCallback,
-    const WeakPtr<PipelineBase> context, uint64_t svgThemeColor, OnPostBackgroundTask onBackgroundTaskPostCallback)
-{
-    auto task = [src, successCallback, failedCallback, context, svgThemeColor, id = Container::CurrentId()] {
-        ContainerScope scope(id);
-        auto pipelineContext = context.Upgrade();
-        if (!pipelineContext) {
-            LOGW("render image or pipeline has been released.");
-            return;
-        }
-        auto taskExecutor = pipelineContext->GetTaskExecutor();
-        if (!taskExecutor) {
-            return;
-        }
-        ImageSourceInfo info(src);
-        auto imageLoader = ImageLoader::CreateImageLoader(info);
-        if (!imageLoader) {
-            LOGE("load image failed when create image loader.");
-            return;
-        }
-        auto imageData = imageLoader->LoadImageData(info, context);
-        if (imageData) {
-            const auto svgStream = std::make_unique<RSMemoryStream>(std::move(imageData));
-            if (svgStream) {
-                auto svgDom = RSSVGDOM::CreateFromStream(*svgStream, svgThemeColor);
-                if (svgDom) {
-                    taskExecutor->PostTask(
-                        [successCallback, svgDom] { successCallback(svgDom); }, TaskExecutor::TaskType::UI);
-                    return;
-                }
-            }
-        }
-        LOGE("svg data wrong!");
-        taskExecutor->PostTask([failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI);
-    };
-    CancelableTask cancelableTask(std::move(task));
-    if (onBackgroundTaskPostCallback) {
-        onBackgroundTaskPostCallback(cancelableTask);
-    }
-    BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
-}
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
+#else
+void ImageProvider::GetSVGImageDOMAsyncFromData(const std::shared_ptr<RSData>& data,
+#endif
     std::function<void(const sk_sp<SkSVGDOM>&)> successCallback, std::function<void()> failedCallback,
     const WeakPtr<PipelineBase> context, uint64_t svgThemeColor, OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
+#ifndef USE_ROSEN_DRAWING
     auto task = [skData, successCallback, failedCallback, context, svgThemeColor, id = Container::CurrentId()] {
+#else
+    auto task = [data, successCallback, failedCallback, context, svgThemeColor, id = Container::CurrentId()] {
+#endif
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
@@ -428,7 +386,12 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
             return;
         }
 
+#ifndef USE_ROSEN_DRAWING
         const auto svgStream = std::make_unique<SkMemoryStream>(skData);
+#else
+        auto skData = data->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+        const auto svgStream = std::make_unique<SkMemoryStream>(skData);
+#endif
         if (svgStream) {
             auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, svgThemeColor);
             if (skiaDom) {
@@ -446,43 +409,6 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
     }
     BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
 }
-#else
-void ImageProvider::GetSVGImageDOMAsyncFromData(const std::shared_ptr<RSData>& data,
-    std::function<void(const std::shared_ptr<RSSVGDOM>&)> successCallback,
-    std::function<void()> failedCallback,
-    const WeakPtr<PipelineBase> context, uint64_t svgThemeColor, OnPostBackgroundTask onBackgroundTaskPostCallback)
-{
-    auto task = [data, successCallback, failedCallback, context, svgThemeColor, id = Container::CurrentId()] {
-        ContainerScope scope(id);
-        auto pipelineContext = context.Upgrade();
-        if (!pipelineContext) {
-            LOGW("render image or pipeline has been released.");
-            return;
-        }
-        auto taskExecutor = pipelineContext->GetTaskExecutor();
-        if (!taskExecutor) {
-            return;
-        }
-
-        const auto svgStream = std::make_unique<RSMemoryStream>(data);
-        if (svgStream) {
-            auto svgDom = RSSVGDOM::CreateFromStream(*svgStream, svgThemeColor);
-            if (svgDom) {
-                taskExecutor->PostTask(
-                    [successCallback, svgDom] { successCallback(svgDom); }, TaskExecutor::TaskType::UI);
-                return;
-            }
-        }
-        LOGE("svg data wrong!");
-        taskExecutor->PostTask([failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI);
-    };
-    CancelableTask cancelableTask(std::move(task));
-    if (onBackgroundTaskPostCallback) {
-        onBackgroundTaskPostCallback(cancelableTask);
-    }
-    BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
-}
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> context,
@@ -544,7 +470,13 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
 #endif
 }
 #else
-    // TODO Drawing : SkGraphics
+void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> context,
+    const std::shared_ptr<RSImage>& image, const std::shared_ptr<RSData>& data,
+    const std::function<void(std::shared_ptr<RSImage>, std::shared_ptr<RSData>)>&& callback, const std::string src)
+{
+    LOGE("Drawing is not supported");
+    callback(image, nullptr);
+}
 #endif
 
 #ifndef USE_ROSEN_DRAWING
@@ -581,8 +513,7 @@ sk_sp<SkImage> ImageProvider::ResizeSkImage(
 }
 #else
 std::shared_ptr<RSImage> ImageProvider::ResizeDrawingImage(
-    const std::shared_ptr<RSImage>& rawImage,
-    const std::string& src, Size imageSize, bool forceResize)
+    const std::shared_ptr<RSImage>& rawImage, const std::string& src, Size imageSize, bool forceResize)
 {
     if (!imageSize.IsValid()) {
         LOGE("not valid size!, imageSize: %{private}s, src: %{private}s", imageSize.ToString().c_str(), src.c_str());
@@ -617,8 +548,15 @@ std::shared_ptr<RSImage> ImageProvider::ResizeDrawingImage(
 #ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
     const sk_sp<SkImage>& rawImage, int32_t dstWidth, int32_t dstHeight, const std::string& srcKey)
+#else
+std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
+    const std::shared_ptr<RSImage>& rawRSImage, int32_t dstWidth, int32_t dstHeight, const std::string& srcKey)
+#endif
 {
     ACE_FUNCTION_TRACE();
+#ifdef USE_ROSEN_DRAWING
+    auto rawImage = rawRSImage->GetImpl<Rosen::Drawing::SkiaImage>()->GetImage();
+#endif
     auto scaledImageInfo =
         SkImageInfo::Make(dstWidth, dstHeight, rawImage->colorType(), rawImage->alphaType(), rawImage->refColorSpace());
     SkBitmap scaledBitmap;
@@ -626,7 +564,11 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         LOGE("Could not allocate bitmap when attempting to scale. srcKey: %{private}s, destination size: [%{public}d x"
              " %{public}d], raw image size: [%{public}d x %{public}d]",
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
+#ifndef USE_ROSEN_DRAWING
         return rawImage;
+#else
+        return rawRSImage;
+#endif
     }
 #if defined(NEW_SKIA) || defined(FLUTTER_2_5)
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
@@ -637,7 +579,11 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
              " %{public}d], raw image size: [%{public}d x %{public}d]",
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
+#ifndef USE_ROSEN_DRAWING
         return rawImage;
+#else
+        return rawRSImage;
+#endif
     }
     // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
     scaledBitmap.setImmutable();
@@ -647,7 +593,12 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         bool needCacheResizedImageFile =
             (1.0 * dstWidth * dstHeight) / (rawImage->width() * rawImage->height()) < RESIZE_MAX_PROPORTION;
         auto context = PipelineBase::GetCurrentContext();
+#ifndef USE_ROSEN_DRAWING
         CHECK_NULL_RETURN(context, scaledImage);
+#else
+        auto scaledRSImage = std::make_shared<RSImage>(static_cast<void*>(&scaledImage));
+        CHECK_NULL_RETURN(context, scaledRSImage);
+#endif
         // card doesn't encode and cache image file.
         if (needCacheResizedImageFile && !srcKey.empty() && !context->IsFormRender()) {
             BackgroundTaskExecutor::GetInstance().PostTask(
@@ -662,73 +613,21 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
                 },
                 BgTaskPriority::LOW);
         }
+#ifndef USE_ROSEN_DRAWING
         return scaledImage;
+#else
+        return scaledRSImage;
+#endif
     }
     LOGE("Could not create a scaled image from a scaled bitmap. srcKey: %{private}s, destination size: [%{public}d x"
          " %{public}d], raw image size: [%{public}d x %{public}d]",
         srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
+#ifndef USE_ROSEN_DRAWING
     return rawImage;
-}
 #else
-std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
-    const std::shared_ptr<RSImage>& rawImage, int32_t dstWidth, int32_t dstHeight,
-    const std::string& srcKey)
-{
-    ACE_FUNCTION_TRACE();
-    RSBitmapFormat bitmapFormat = {
-        rawImage->GetColorType(),
-        rawImage->GetAlphaType()
-    };
-    RSBitmap scaledBitmap;
-    scaledBitmap.Build(dstWidth, dstHeight, bitmapFormat);
-    if (!scaledBitmap.TryAllocPixels()) {
-        LOGE("Could not allocate bitmap when attempting to scale. srcKey: %{private}s, destination size: [%{public}d x"
-             " %{public}d], raw image size: [%{public}d x %{public}d]",
-            srcKey.c_str(), dstWidth, dstHeight, rawImage->GetWidth(), rawImage->GetHeight());
-        return rawImage;
-    }
-#ifdef FLUTTER_2_5
-    if (!rawImage->ScalePixels(scaledBitmap.GetPixmap(),
-            RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::NONE),
-            RSCachingHint::DISALLOW)) {
-#else
-    if (!rawImage->ScalePixels(
-            scaledBitmap.GetPixmap(), RSFilterQuality::LOW, RSCachingHint::DISALLOW)) {
+    return rawRSImage;
 #endif
-        LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
-             " %{public}d], raw image size: [%{public}d x %{public}d]",
-            srcKey.c_str(), dstWidth, dstHeight, rawImage->GetWidth(), rawImage->GetHeight());
-        return rawImage;
-    }
-    // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
-    scaledBitmap.SetImmutable();
-    auto scaledImage = std::make_shared<RSImage>();
-    scaledImage->BuildFromBitmap(scaledBitmap);
-    if (scaledImage) {
-        const double RESIZE_MAX_PROPORTION = ImageCompressor::GetInstance()->CanCompress() ? 1.0 : 0.25;
-        bool needCacheResizedImageFile =
-            (1.0 * dstWidth * dstHeight) / (rawImage->GetWidth() * rawImage->GetHeight()) < RESIZE_MAX_PROPORTION;
-        if (needCacheResizedImageFile && !srcKey.empty()) {
-            BackgroundTaskExecutor::GetInstance().PostTask(
-                [srcKey, scaledImage]() {
-                    LOGI("write png cache file: %{private}s", srcKey.c_str());
-                    auto data = scaledImage->EncodeToData(RSEncodedImageFormat::PNG, 100);
-                    if (!data) {
-                        LOGI("encode cache image into cache file failed.");
-                        return;
-                    }
-                    ImageCache::WriteCacheFile(srcKey, data->GetData(), data->GetSize());
-                },
-                BgTaskPriority::LOW);
-        }
-        return scaledImage;
-    }
-    LOGE("Could not create a scaled image from a scaled bitmap. srcKey: %{private}s, destination size: [%{public}d x"
-         " %{public}d], raw image size: [%{public}d x %{public}d]",
-        srcKey.c_str(), dstWidth, dstHeight, rawImage->GetWidth(), rawImage->GetHeight());
-    return rawImage;
 }
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> ImageProvider::GetSkImage(const std::string& src, const WeakPtr<PipelineBase> context, Size targetSize)
@@ -767,12 +666,12 @@ std::shared_ptr<RSImage> ImageProvider::GetDrawingImage(const std::string& src,
         LOGE("fetch data failed. src: %{private}s", src.c_str());
         return nullptr;
     }
-    auto rawImage = std::make_shared<RSImage>();
-    rawImage->BuildFromEncoded(imageData);
-    if (!rawImage) {
+    auto skImage = SkImage::MakeFromEncoded(imageData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData());
+    if (!skImage) {
         LOGE("MakeFromEncoded failed! src: %{private}s", src.c_str());
         return nullptr;
     }
+    auto rawImage = std::make_shared<RSImage>(static_cast<void*>(&skImage));
     auto image = ResizeDrawingImage(rawImage, src, targetSize);
     return image;
 }
@@ -808,6 +707,14 @@ void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineBase>& context, const 
 #ifndef USE_ROSEN_DRAWING
 bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
 {
+#else
+bool ImageProvider::IsWideGamut(const std::shared_ptr<RSColorSpace>& rsColorSpace)
+{
+    if (!rsColorSpace) {
+        return false;
+    }
+    auto colorSpace = rsColorSpace->GetImpl<Rosen::Drawing::SkiaColorSpace>()->GetColorSpace();
+#endif
     skcms_ICCProfile encodedProfile;
     if (!colorSpace)
         return false;
@@ -838,9 +745,6 @@ bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
                        2.0;
     return GreatNotEqual(areaOfPoint, SRGB_GAMUT_AREA);
 }
-#else
-    // TODO Drawing : colorSpace->toProfile
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 SkImageInfo ImageProvider::MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
@@ -851,7 +755,10 @@ SkImageInfo ImageProvider::MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& p
     return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), ct, at, cs);
 }
 #else
-    // TODO Drawing : SkImageInfo
+RSBitmapFormat ImageProvider::MakeRSBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap)
+{
+    return { PixelFormatToDrawingColorType(pixmap), AlphaTypeToDrawingAlphaType(pixmap) };
+}
 #endif
 
 #ifndef USE_ROSEN_DRAWING
@@ -938,7 +845,6 @@ RSColorType ImageProvider::PixelFormatToDrawingColorType(const RefPtr<PixelMap>&
         case PixelFormat::ALPHA_8:
             return RSColorType::COLORTYPE_ALPHA_8;
         case PixelFormat::RGBA_F16:
-            return RSColorType::COLORTYPE_RGBA_F16;
         case PixelFormat::UNKNOWN:
         case PixelFormat::ARGB_8888:
         case PixelFormat::RGB_888:

@@ -57,8 +57,10 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSUIExtension>::Declare("UIExtensionComponent");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSUIExtension>::StaticMethod("create", &JSUIExtension::Create, opt);
+    JSClass<JSUIExtension>::StaticMethod("onReceive", &JSUIExtension::OnReceive);
     JSClass<JSUIExtension>::StaticMethod("onRelease", &JSUIExtension::OnRelease);
     JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::OnResult);
+    JSClass<JSUIExtension>::StaticMethod("onError", &JSUIExtension::OnError);
     JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -70,6 +72,29 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     auto wantObj = JSRef<JSObject>::Cast(info[0]);
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
     UIExtensionModel::GetInstance()->Create(want);
+}
+
+void JSUIExtension::OnReceive(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onReceive = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+        (const AAFwk::WantParams& wantParams) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("UIExtensionComponent.UIExtensionDataSession.onReceive");
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        auto nativeWantParams = WantWrap::ConvertParamsToNativeValue(wantParams, nativeEngine);
+        auto wantParamsJSVal = JsConverter::ConvertNativeValueToJsVal(nativeWantParams);
+        func->ExecuteJS(1, &wantParamsJSVal);
+    };
+    UIExtensionModel::GetInstance()->SetOnReceive(std::move(onReceive));
 }
 
 void JSUIExtension::OnRelease(const JSCallbackInfo& info)
@@ -107,9 +132,34 @@ void JSUIExtension::OnResult(const JSCallbackInfo& info)
             CHECK_NULL_VOID(nativeEngine);
             auto nativeWant = WantWrap::ConvertToNativeValue(want, nativeEngine);
             auto wantJSVal = JsConverter::ConvertNativeValueToJsVal(nativeWant);
-            JSRef<JSVal> jsParams[2] = { JSRef<JSVal>::Make(ToJSValue(code)), wantJSVal };
-            func->ExecuteJS(2, jsParams);
+            JSRef<JSObject> obj = JSRef<JSObject>::New();
+            obj->SetProperty<int32_t>("code", code);
+            obj->SetPropertyObject("want", wantJSVal);
+            auto returnValue = JSRef<JSVal>::Cast(obj);
+            func->ExecuteJS(1, &returnValue);
         };
     UIExtensionModel::GetInstance()->SetOnResult(std::move(onResult));
+}
+
+void JSUIExtension::OnError(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId]
+        (int32_t code, const std::string& name, const std::string& message) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("UIExtensionComponent.onError");
+            JSRef<JSObject> obj = JSRef<JSObject>::New();
+            obj->SetProperty<int32_t>("code", code);
+            obj->SetProperty<std::string>("name", name);
+            obj->SetProperty<std::string>("message", message);
+            auto returnValue = JSRef<JSVal>::Cast(obj);
+            func->ExecuteJS(1, &returnValue);
+        };
+    UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
 }
 } // namespace OHOS::Ace::Framework

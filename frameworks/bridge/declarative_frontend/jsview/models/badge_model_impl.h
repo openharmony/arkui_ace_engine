@@ -22,6 +22,8 @@ namespace OHOS::Ace::Framework {
 class BadgeModelImpl : public OHOS::Ace::BadgeModel {
 public:
     void Create(BadgeParameters& badgeParameters) override;
+private:
+    void SetPositionForBadge(BadgeParameters& badgeParameters);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_BADGE_MODEL_IMPL_H

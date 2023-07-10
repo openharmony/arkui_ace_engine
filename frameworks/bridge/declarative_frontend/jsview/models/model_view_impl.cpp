@@ -135,4 +135,20 @@ void ModelViewImpl::SetHeight(Dimension& height)
     }
     ViewAbstractModel::GetInstance()->SetHeight(height);
 }
+
+void ModelViewImpl::SetShader(const std::string& path)
+{
+    LOGD("ModelViewImpl::SetShader() NOT IMPLEMENTED YET");
+}
+
+void ModelViewImpl::AddShaderImageTexture(const std::string& path)
+{
+    LOGD("ModelViewImpl::AddShaderImageTexture() NOT IMPLEMENTED YET");
+}
+
+void ModelViewImpl::AddShaderInputBuffer(const RefPtr<OHOS::Render3D::ShaderInputBuffer>& buffer)
+{
+    LOGD("ModelViewImpl::AddShaderInputBuffer() NOT IMPLEMENTED YET");
+}
+
 } // namespace OHOS::Ace::Framework

@@ -25,6 +25,7 @@
 
 namespace OHOS::AAFwk {
 class Want;
+class WantParams;
 }
 
 namespace OHOS::Ace {
@@ -36,6 +37,9 @@ public:
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
     virtual void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
+    virtual void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive);
+    virtual void SetOnError(
+        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
 private:
     static std::unique_ptr<UIExtensionModel> instance_;
     static std::mutex mutex_;

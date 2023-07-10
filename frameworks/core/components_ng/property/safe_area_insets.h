@@ -53,6 +53,8 @@ struct SafeAreaInsets {
         : left_(left), top_(top), right_(right), bottom_(bottom)
     {}
 
+    bool IsValid() const;
+
     std::string ToString() const;
 
     bool operator==(const SafeAreaInsets& other) const

@@ -24,6 +24,11 @@
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
 namespace OHOS::Ace {
+enum GetSpansMethod : int32_t {
+    GETSPANS,
+    ONSELECT,
+};
+
 enum RichEditorImageSize : int32_t {
     SIZEWIDTH,
     SIZEHEIGHT,

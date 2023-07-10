@@ -161,4 +161,6 @@ void LayoutProperty::SetOverlayOffset(
 {}
 
 void LayoutProperty::GetOverlayOffset(Dimension& overlayOffsetX, Dimension& overlayOffsetY) {}
+
+void LayoutProperty::UpdateAllGeometryTransition(const RefPtr<UINode>& parent) {}
 } // namespace OHOS::Ace::NG

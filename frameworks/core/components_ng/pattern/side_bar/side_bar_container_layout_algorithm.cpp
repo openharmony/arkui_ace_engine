@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -43,7 +44,6 @@ static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 static Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-static Dimension WINDOE_WIDTH = 520.0_vp;
 } // namespace
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -57,7 +57,6 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
-    const auto& scaleProperty = constraint->scaleProperty;
     auto idealSize = CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -66,26 +65,32 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto parentWidth = idealSize.Width();
     if (needInitRealSideBarWidth_) {
-        InitRealSideBarWidth(layoutWrapper, parentWidth);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            GetAllPropertyValue(layoutProperty, parentWidth);
+        } else {
+            InitRealSideBarWidth(layoutWrapper, parentWidth);
+        }
     }
 
-    auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
-    auto minSideBarWidthPx = ConvertToPx(adjustMinSideBarWidth_, scaleProperty, parentWidth).value_or(0);
-    auto dividerStrokeWidthPx = ConvertToPx(dividerStrokeWidth, scaleProperty, parentWidth).value_or(1);
-    AutoChangeSideBarWidth(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
+    if (parentWidth >= typeUpdateWidth_) {
+        type_ = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
+    }
 
     if (type_ == SideBarContainerType::AUTO) {
-        AutoMode(layoutWrapper, parentWidth, minSideBarWidthPx, dividerStrokeWidthPx);
+        AutoMode(layoutProperty, parentWidth);
     }
 
-    if ((parentWidth <  WINDOE_WIDTH.ConvertToPx()) &&
-        (!layoutProperty->GetShowSideBar().has_value()) &&
+    if ((parentWidth < typeUpdateWidth_) && (!layoutProperty->GetShowSideBar().has_value()) &&
         (type_ != SideBarContainerType::OVERLAY)) {
         if (isControlButtonClick_) {
             type_ = SideBarContainerType::OVERLAY;
         } else {
             sideBarStatus_ = SideBarStatus::HIDDEN;
         }
+    }
+    if (type_ != SideBarContainerType::OVERLAY) {
+        AutoChangeSideBarWidth(layoutProperty, parentWidth);
     }
 
     /*
@@ -197,6 +202,144 @@ void SideBarContainerLayoutAlgorithm::AdjustMinAndMaxSideBarWidth(LayoutWrapper*
     }
 }
 
+void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth)
+{
+    const auto& constraint = layoutProperty->GetLayoutConstraint();
+    const auto& scaleProperty = constraint->scaleProperty;
+    auto realSideBarWidth = layoutProperty->GetSideBarWidth().value_or(-1.0_vp);
+    auto minSideBarWidth = layoutProperty->GetMinSideBarWidth().value_or(-1.0_vp);
+    auto minContentWidth = layoutProperty->GetMinContentWidth().value_or(-1.0_vp);
+    auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidth().value_or(-1.0_vp);
+
+    realSideBarWidth_ = ConvertToPx(realSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
+    minSideBarWidth_ = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
+    minContentWidth_ = ConvertToPx(minContentWidth, scaleProperty, parentWidth).value_or(-1.0f);
+    maxSideBarWidth_ = ConvertToPx(maxSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
+
+    defaultRealSideBarWidth_ = ConvertToPx(DEFAULT_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
+    defaultMinSideBarWidth_ = ConvertToPx(DEFAULT_MIN_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
+    defaultMaxSideBarWidth_ = ConvertToPx(DEFAULT_MAX_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
+    defaultMinContentWidth_ = ConvertToPx(DEFAULT_MIN_CONTENT_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
+
+    MeasureTypeUpdateWidth();
+    if (minContentWidth_ < 0.0f) {
+        if (maxSideBarWidth_ >= 0.0f) {
+            minContentWidth_ = 0.0f;
+        } else {
+            minContentWidth_ = defaultMinContentWidth_;
+        }
+    }
+    InitSideBarWidth(parentWidth);
+    MeasureRealSideBarWidth(parentWidth);
+
+    auto sideBarContainerPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
+    sideBarContainerPattern->SetMinSideBarWidth(minSideBarWidth_);
+    sideBarContainerPattern->SetMaxSideBarWidth(maxSideBarWidth_);
+    sideBarContainerPattern->SetMinContentWidth(minContentWidth_);
+    sideBarContainerPattern->SetTypeUpdateWidth(typeUpdateWidth_);
+}
+
+void SideBarContainerLayoutAlgorithm::MeasureTypeUpdateWidth()
+{
+    if (minSideBarWidth_ >= 0.0f && minContentWidth_ >= 0.0f) {
+        typeUpdateWidth_ = minSideBarWidth_ + minContentWidth_;
+        return;
+    } else if (minSideBarWidth_ >= 0.0f) {
+        typeUpdateWidth_ = minSideBarWidth_ + defaultMinContentWidth_;
+    } else if (minContentWidth_ >= 0.0f) {
+        typeUpdateWidth_ = minContentWidth_ + defaultMinSideBarWidth_;
+    } else {
+        typeUpdateWidth_ = defaultMinSideBarWidth_ + defaultMinContentWidth_;
+    }
+    if (typeUpdateWidth_ < defaultMinSideBarWidth_ + defaultMinContentWidth_) {
+        typeUpdateWidth_ = defaultMinSideBarWidth_ + defaultMinContentWidth_;
+    }
+}
+
+void SideBarContainerLayoutAlgorithm::InitSideBarWidth(float parentWidth)
+{
+    if (minSideBarWidth_ >= parentWidth) {
+        minSideBarWidth_ = parentWidth;
+        maxSideBarWidth_ = parentWidth;
+        realSideBarWidth_ = parentWidth;
+        minContentWidth_ = 0.0f;
+        return;
+    }
+
+    if (maxSideBarWidth_ >= parentWidth) {
+        maxSideBarWidth_ = parentWidth;
+        if (realSideBarWidth_ <= minSideBarWidth_) {
+            realSideBarWidth_ = minSideBarWidth_;
+        } else if (realSideBarWidth_ >= maxSideBarWidth_) {
+            realSideBarWidth_ = maxSideBarWidth_;
+        }
+        return;
+    }
+    if (minSideBarWidth_ >= 0.0f && maxSideBarWidth_ >= 0.0f) {
+        if (minSideBarWidth_ >= maxSideBarWidth_) {
+            maxSideBarWidth_ = minSideBarWidth_;
+            realSideBarWidth_ = minSideBarWidth_;
+            return;
+        }
+    }
+
+    if (realSideBarWidth_ < 0.0f) {
+        return;
+    }
+    if (realSideBarWidth_ <= minSideBarWidth_) {
+        realSideBarWidth_ = minSideBarWidth_;
+        return;
+    } else if (realSideBarWidth_ >= maxSideBarWidth_ && maxSideBarWidth_ >= 0) {
+        realSideBarWidth_ = maxSideBarWidth_;
+        return;
+    } else if (realSideBarWidth_ >= parentWidth) {
+        realSideBarWidth_ = parentWidth;
+    }
+}
+
+void SideBarContainerLayoutAlgorithm::MeasureRealSideBarWidth(float parentWidth)
+{
+    if (minSideBarWidth_ < 0.0f) {
+        if (realSideBarWidth_ >= 0.0f) {
+            minSideBarWidth_ = realSideBarWidth_;
+        } else if (maxSideBarWidth_ >= 0.0f) {
+            minSideBarWidth_ = maxSideBarWidth_;
+        } else {
+            minSideBarWidth_ = defaultMinSideBarWidth_;
+        }
+        if (minSideBarWidth_ >= defaultMinSideBarWidth_) {
+            minSideBarWidth_ = defaultMinSideBarWidth_;
+        }
+        if (minSideBarWidth_ >= parentWidth) {
+            minSideBarWidth_ = parentWidth;
+            maxSideBarWidth_ = parentWidth;
+            realSideBarWidth_ = parentWidth;
+            return;
+        }
+    }
+
+    if (maxSideBarWidth_ < 0.0f) {
+        maxSideBarWidth_ = defaultMaxSideBarWidth_;
+        if (maxSideBarWidth_ <= realSideBarWidth_) {
+            maxSideBarWidth_ = realSideBarWidth_;
+        } else if (maxSideBarWidth_ <= minSideBarWidth_) {
+            maxSideBarWidth_ = minSideBarWidth_;
+            realSideBarWidth_ = minSideBarWidth_;
+            return;
+        }
+    }
+
+    if (realSideBarWidth_ < 0.0f) {
+        realSideBarWidth_ = defaultRealSideBarWidth_;
+        if (realSideBarWidth_ <= minSideBarWidth_) {
+            realSideBarWidth_ = minSideBarWidth_;
+        } else if (realSideBarWidth_ >= maxSideBarWidth_) {
+            realSideBarWidth_ = maxSideBarWidth_;
+        }
+    }
+}
+
 void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth)
 {
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -222,41 +365,36 @@ void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layout
 }
 
 void SideBarContainerLayoutAlgorithm::AutoChangeSideBarWidth(
-    LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx)
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth)
 {
     /*
      * When reducing component width, first reduce the width of the content to minContentWidth,
      * and then reduce the width of the sidebar
      */
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
     const auto& scaleProperty = constraint->scaleProperty;
-    auto minContentWidth = layoutProperty->GetMinContentWidth().value_or(DEFAULT_MIN_CONTENT_WIDTH);
-    auto minContentWidthPx = ConvertToPx(minContentWidth, scaleProperty, parentWidth).value_or(0);
-    minContentWidth_ = minContentWidthPx;
+    auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
+    auto dividerStrokeWidthPx = ConvertToPx(dividerStrokeWidth, scaleProperty, parentWidth).value_or(1);
 
     if ((realSideBarWidth_ + minContentWidth_ + dividerStrokeWidthPx) >= parentWidth) {
-        realSideBarWidth_ = parentWidth - minContentWidth_- dividerStrokeWidthPx;
+        realSideBarWidth_ = parentWidth - minContentWidth_ - dividerStrokeWidthPx;
     }
-    if (realSideBarWidth_ <= minSideBarWidthPx) {
-        realSideBarWidth_ = minSideBarWidthPx;
+    if (realSideBarWidth_ <= minSideBarWidth_) {
+        realSideBarWidth_ = minSideBarWidth_;
     }
 }
 
 void SideBarContainerLayoutAlgorithm::AutoMode(
-    LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx)
+    const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth)
 {
     /*
      * SideBarContainer AUTO mode:
-     * When the component width is greater than or equal to minNavBarWidth+minContentWidth,
+     * When the component width is greater or equal to minNavBarWidth+minContentWidth,
      * it is displayed in Embed mode;
      * When the component width is smaller than minNavBarWidth+minContentWidth,
      * it is displayed in Overlay mode.
      */
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-    if (parentWidth < (minSideBarWidthPx + minContentWidth_ + dividerStrokeWidthPx)) {
+    if (parentWidth < typeUpdateWidth_) {
         type_ = SideBarContainerType::OVERLAY;
     } else {
         type_ = SideBarContainerType::EMBED;
@@ -407,7 +545,7 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    CHECK_NULL_VOID (layoutWrapper->GetGeometryNode());
+    CHECK_NULL_VOID(layoutWrapper->GetGeometryNode());
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
@@ -437,10 +575,10 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     auto controlButtonWidth = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
 
-    if ((sideBarPosition == SideBarPosition::END) && // sideBarPosition is End, other pass
+    if ((sideBarPosition == SideBarPosition::END) &&             // sideBarPosition is End, other pass
         (!layoutProperty->GetControlButtonLeft().has_value())) { // origin value has not set
-        auto defaultControlButtonLeftPx = ConvertToPx(DEFAULT_CONTROL_BUTTON_LEFT,
-            scaleProperty, parentWidth).value_or(0);
+        auto defaultControlButtonLeftPx =
+            ConvertToPx(DEFAULT_CONTROL_BUTTON_LEFT, scaleProperty, parentWidth).value_or(0);
         auto controlButtonWidthPx = ConvertToPx(controlButtonWidth, scaleProperty, parentWidth).value_or(0);
         controlButtonLeftPx = parentWidth - defaultControlButtonLeftPx - controlButtonWidthPx;
     }
@@ -456,7 +594,7 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    CHECK_NULL_VOID (layoutWrapper->GetGeometryNode());
+    CHECK_NULL_VOID(layoutWrapper->GetGeometryNode());
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     float sideBarOffsetX = 0.0f;
@@ -551,7 +689,7 @@ void SideBarContainerLayoutAlgorithm::LayoutDivider(
             if (sideBarPosition == SideBarPosition::START) {
                 dividerOffsetX = realSideBarWidth_ + currentOffset_;
             } else {
-                dividerOffsetX = parentWidth - realDividerWidth_ + currentOffset_ ;
+                dividerOffsetX = parentWidth - realDividerWidth_ + currentOffset_;
             }
             break;
         default:
@@ -569,8 +707,7 @@ SideBarPosition SideBarContainerLayoutAlgorithm::GetSideBarPositionWithRtl(
 {
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
     if (layoutProperty->GetLayoutDirection() == TextDirection::RTL) {
-        sideBarPosition = (sideBarPosition == SideBarPosition::START)
-                            ? SideBarPosition::END : SideBarPosition::START;
+        sideBarPosition = (sideBarPosition == SideBarPosition::START) ? SideBarPosition::END : SideBarPosition::START;
     }
     return sideBarPosition;
 }
