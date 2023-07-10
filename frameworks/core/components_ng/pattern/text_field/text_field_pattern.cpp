@@ -4141,13 +4141,21 @@ void TextFieldPattern::DeleteForward(int32_t length)
 
 std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)
 {
-    auto stringText = textEditingValue_.GetValueBeforeCursor(number);
+    auto start = textEditingValue_.caretPosition;
+    if (InSelectMode()) {
+        start = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
+    }
+    auto stringText = textEditingValue_.GetSelectedText(start - number, start);
     return StringUtils::Str8ToStr16(stringText);
 }
 
 std::u16string TextFieldPattern::GetRightTextOfCursor(int32_t number)
 {
-    auto stringText = textEditingValue_.GetValueAfterCursor(number);
+    auto end = textEditingValue_.caretPosition;
+    if (InSelectMode()) {
+        end = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
+    }
+    auto stringText = textEditingValue_.GetSelectedText(end, end + number);
     return StringUtils::Str8ToStr16(stringText);
 }
 

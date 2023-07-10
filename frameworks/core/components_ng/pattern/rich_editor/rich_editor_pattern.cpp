@@ -302,13 +302,21 @@ std::u16string RichEditorPattern::GetLeftTextOfCursor(int32_t number)
     if (number > caretPosition_) {
         number = caretPosition_;
     }
-    auto stringText = GetSelectedText(caretPosition_ - number, caretPosition_);
+    auto start = caretPosition_;
+    if (IsSelected()) {
+        start = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
+    }
+    auto stringText = GetSelectedText(start - number, start);
     return StringUtils::Str8ToStr16(stringText);
 }
 
 std::u16string RichEditorPattern::GetRightTextOfCursor(int32_t number)
 {
-    auto stringText = GetSelectedText(caretPosition_, caretPosition_ + number);
+    auto end = caretPosition_;
+    if (IsSelected()) {
+        end = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
+    }
+    auto stringText = GetSelectedText(end, end + number);
     return StringUtils::Str8ToStr16(stringText);
 }
 

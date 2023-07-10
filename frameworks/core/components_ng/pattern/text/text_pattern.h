@@ -229,6 +229,7 @@ protected:
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool IsSelected() const;
     virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     std::wstring GetWideText() const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
