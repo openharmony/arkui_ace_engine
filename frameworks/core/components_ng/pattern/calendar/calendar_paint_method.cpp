@@ -46,12 +46,12 @@ constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
 std::unique_ptr<RSParagraph> GetTextParagraph(const std::string& text, const RSTextStyle& textStyle)
 {
     RSParagraphStyle style;
-    auto fontCollection = RSFontCollection::GetInstance(false);
+    auto fontCollection = RSFontCollection::Create();
     CHECK_NULL_RETURN(fontCollection, nullptr);
-    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::CreateRosenBuilder(style, fontCollection);
+    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
     builder->PushStyle(textStyle);
-    builder->AddText(StringUtils::Str8ToStr16(text));
-    return builder->Build();
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    return builder->CreateTypography();
 }
 
 void DrawCalendarText(
@@ -163,8 +163,8 @@ void CalendarPaintMethod::DrawCalendar(
     RSTextStyle dateTextStyle;
     RSTextStyle lunarTextStyle;
     InitTextStyle(dateTextStyle, lunarTextStyle);
-    dateTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
-    lunarTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+    dateTextStyle.locale = Localization::GetInstance()->GetFontLocale();
+    lunarTextStyle.locale = Localization::GetInstance()->GetFontLocale();
 
     auto x = dayOffset.GetX();
     auto y = dayOffset.GetY();
@@ -280,11 +280,11 @@ void CalendarPaintMethod::DrawCalendarPickerBackgroundArea(
 
 void CalendarPaintMethod::InitTextStyle(RSTextStyle& dateTextStyle, RSTextStyle& lunarTextStyle)
 {
-    dateTextStyle.fontSize_ = dayFontSize_;
-    dateTextStyle.fontWeight_ = static_cast<RSFontWeight>(dayFontWeight_);
+    dateTextStyle.fontSize = dayFontSize_;
+    dateTextStyle.fontWeight = static_cast<RSFontWeight>(dayFontWeight_);
 
-    lunarTextStyle.fontSize_ = lunarDayFontSize_;
-    lunarTextStyle.fontWeight_ = static_cast<RSFontWeight>(lunarDayFontWeight_);
+    lunarTextStyle.fontSize = lunarDayFontSize_;
+    lunarTextStyle.fontWeight = static_cast<RSFontWeight>(lunarDayFontWeight_);
 }
 
 void CalendarPaintMethod::SetDayTextStyle(
@@ -292,15 +292,15 @@ void CalendarPaintMethod::SetDayTextStyle(
 {
     // Set the noncurrent month style and current month style.
     if (day.month.month != currentMonth_.month) {
-        dateTextStyle.color_ = nonCurrentMonthDayColor_;
-        lunarTextStyle.color_ = day.markLunarDay ? RSColor(markLunarColor_.GetRed(), markLunarColor_.GetGreen(),
+        dateTextStyle.color = nonCurrentMonthDayColor_;
+        lunarTextStyle.color = day.markLunarDay ? RSColor(markLunarColor_.GetRed(), markLunarColor_.GetGreen(),
             markLunarColor_.GetBlue(), WEEKEND_TRANSPARENT) : nonCurrentMonthLunarColor_;
     } else {
-        dateTextStyle.color_ = (IsToday(day) && day.focused) ? focusedDayColor_
+        dateTextStyle.color = (IsToday(day) && day.focused) ? focusedDayColor_
                                : IsToday(day)                ? todayDayColor_
                                : IsOffDay(day)               ? weekendDayColor_
                                                              : dayColor_;
-        lunarTextStyle.color_ =
+        lunarTextStyle.color =
             (IsToday(day) && day.focused) ? focusedLunarColor_
             : IsToday(day)                ? todayLunarColor_
                            : (day.markLunarDay ? markLunarColor_ : (IsOffDay(day) ? weekendLunarColor_ : lunarColor_));
@@ -310,12 +310,12 @@ void CalendarPaintMethod::SetDayTextStyle(
 void CalendarPaintMethod::SetCalendarPickerDayTextStyle(RSTextStyle& dateTextStyle, const CalendarDay& day)
 {
     if (day.month.month != currentMonth_.month) {
-        dateTextStyle.color_ = textNonCurrentMonthColor_;
+        dateTextStyle.color = textNonCurrentMonthColor_;
     } else {
         if (IsToday(day)) {
-            dateTextStyle.color_ = day.isSelected ? textSelectedDayColor_ : textCurrentDayColor_;
+            dateTextStyle.color = day.isSelected ? textSelectedDayColor_ : textCurrentDayColor_;
         } else {
-            dateTextStyle.color_ = textCurrentMonthColor_;
+            dateTextStyle.color = textCurrentMonthColor_;
         }
     }
 }
@@ -323,25 +323,25 @@ void CalendarPaintMethod::SetCalendarPickerDayTextStyle(RSTextStyle& dateTextSty
 void CalendarPaintMethod::SetOffWorkTextStyle(RSTextStyle& offWorkTextStyle, const CalendarDay& day) const
 {
     // Paint off or work mark value.
-    offWorkTextStyle.fontWeight_ = static_cast<RSFontWeight>(workStateFontWeight_);
-    offWorkTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+    offWorkTextStyle.fontWeight = static_cast<RSFontWeight>(workStateFontWeight_);
+    offWorkTextStyle.locale = Localization::GetInstance()->GetFontLocale();
     if (day.month.month == currentMonth_.month) {
         if (day.dayMark == "work") {
-            offWorkTextStyle.fontSize_ = workDayMarkSize_;
-            offWorkTextStyle.color_ = workDayMarkColor_;
+            offWorkTextStyle.fontSize = workDayMarkSize_;
+            offWorkTextStyle.color = workDayMarkColor_;
         } else if (day.dayMark == "off") {
-            offWorkTextStyle.fontSize_ = offDayMarkSize_;
-            offWorkTextStyle.color_ = offDayMarkColor_;
+            offWorkTextStyle.fontSize = offDayMarkSize_;
+            offWorkTextStyle.color = offDayMarkColor_;
         }
     } else {
         if (day.dayMark == "work") {
-            offWorkTextStyle.fontSize_ = workDayMarkSize_;
-            offWorkTextStyle.color_ =
+            offWorkTextStyle.fontSize = workDayMarkSize_;
+            offWorkTextStyle.color =
                 RSColor(nonCurrentMonthWorkDayMarkColor_.GetRed(), nonCurrentMonthWorkDayMarkColor_.GetGreen(),
                     nonCurrentMonthWorkDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
         } else if (day.dayMark == "off") {
-            offWorkTextStyle.fontSize_ = offDayMarkSize_;
-            offWorkTextStyle.color_ =
+            offWorkTextStyle.fontSize = offDayMarkSize_;
+            offWorkTextStyle.color =
                 RSColor(nonCurrentMonthOffDayMarkColor_.GetRed(), nonCurrentMonthOffDayMarkColor_.GetGreen(),
                     nonCurrentMonthOffDayMarkColor_.GetBlue(), WEEKEND_TRANSPARENT);
         }
@@ -349,7 +349,7 @@ void CalendarPaintMethod::SetOffWorkTextStyle(RSTextStyle& offWorkTextStyle, con
 
     // If it is today and it is focused, workState color is same as focused day color.
     if (IsToday(day) && day.focused) {
-        offWorkTextStyle.color_ = focusedDayColor_;
+        offWorkTextStyle.color = focusedDayColor_;
     }
 }
 
@@ -386,9 +386,9 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
 {
     uint32_t totalWeek = weekNumbers_.size();
     RSTextStyle weekTextStyle;
-    weekTextStyle.color_ = weekColor_;
-    weekTextStyle.fontSize_ = weekFontSize_;
-    weekTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+    weekTextStyle.color = weekColor_;
+    weekTextStyle.fontSize = weekFontSize_;
+    weekTextStyle.locale = Localization::GetInstance()->GetFontLocale();
     static const int32_t daysOfWeek = 7;
 
     auto startDayOfWeek = startOfWeek_;

@@ -17,12 +17,12 @@
 #include "core/components_ng/render/font_collection.h"
 
 namespace OHOS::Ace::NG {
-TxtFontCollection::TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection)
+TxtFontCollection::TxtFontCollection(const std::shared_ptr<Rosen::FontCollection>& fontCollection)
     : collection_(fontCollection)
 {}
 RefPtr<FontCollection> FontCollection::Current()
 {
-    std::shared_ptr<txt::FontCollection> fontCollection;
+    std::shared_ptr<Rosen::FontCollection> fontCollection;
     return AceType::MakeRefPtr<TxtFontCollection>(fontCollection);
 }
 } // namespace OHOS::Ace::NG

@@ -16,12 +16,12 @@
 #include "core/components/track/flutter_render_arc_track.h"
 
 #include "flutter/lib/ui/painting/path.h"
-#include "include/core/SkClipOp.h"
-#include "txt/paragraph_builder.h"
-#include "txt/paragraph_txt.h"
+#include "third_party/skia/include/core/SkClipOp.h"
 
 #include "core/components/font/flutter_font_collection.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
+#include "rosen_text/typography_create.h"
+#include "rosen_text/typography.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -76,20 +76,20 @@ void SetTextStyle(const ScopedCanvas& canvas, const RenderRingInfo& trackInfo, c
     }
     double pathStartVertexX = trackInfo.center.GetX();
     double pathStartVertexY = trackInfo.center.GetY() - trackInfo.radius + (trackInfo.thickness / 2);
-    txt::ParagraphStyle style;
-    txt::TextStyle txtStyle;
-    txtStyle.font_size = 80;
-    txtStyle.font_weight = txt::FontWeight::w400;
+    Rosen::TypographyStyle style;
+    Rosen::TextStyle txtStyle;
+    txtStyle.fontSize = 80;
+    txtStyle.fontWeight = Rosen::FontWeight::W400;
     txtStyle.color = markedColor.GetValue();
-    std::unique_ptr<txt::ParagraphBuilder> builder;
-    style.max_lines = 1;
-    builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    std::unique_ptr<Rosen::TypographyCreate> builder;
+    style.maxLines = 1;
+    builder = Rosen::TypographyCreate::Create(style, fontCollection);
     builder->PushStyle(txtStyle);
-    builder->AddText(StringUtils::Str8ToStr16(markedText));
-    auto paragraph = builder->Build();
+    builder->AppendText(StringUtils::Str8ToStr16(markedText));
+    auto paragraph = builder->CreateTypography();
     paragraph->Layout(dataRegion.Width());
     paragraph->Paint(
-        canvas->canvas(), pathStartVertexX - txtStyle.font_size, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
+        canvas->canvas(), pathStartVertexX - txtStyle.fontSize, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
 }
 
 void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo, const std::string markedText,

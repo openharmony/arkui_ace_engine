@@ -61,8 +61,8 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
             RSRect(0, 0, frameSize.Width(), frameSize.Height()), borderRadius_.value().x_, borderRadius_.value().y_);
         canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
     }
-    canvas.DrawImageRect(
-        rsImage, OHOS::Rosen::Drawing::Rect(0.0, 0.0, frameSize.Width(), frameSize.Height()), rosen::SamplingOptions());
+    canvas.DrawImageRect(rsImage, OHOS::Rosen::Drawing::Rect(0.0, 0.0, frameSize.Width(), frameSize.Height()),
+        OHOS::Rosen::Drawing::SamplingOptions());
     canvas.Restore();
 }
 

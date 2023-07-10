@@ -17,8 +17,6 @@
 
 #include <cmath>
 
-#include "txt/paragraph_builder.h"
-#include "txt/paragraph_txt.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "unicode/uchar.h"
 
@@ -34,6 +32,8 @@
 #include "core/components/text_span/rosen_render_text_span.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #include "core/pipeline/pipeline_context.h"
+#include "rosen_text/typography_create.h"
+#include "rosen_text/typography.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -375,9 +375,8 @@ bool RosenRenderText::UpdateParagraphAndLayout(double paragraphMaxWidth)
 uint32_t RosenRenderText::GetTextLines()
 {
     uint32_t textLines = 0;
-    auto paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
-    if (paragraphTxt != nullptr) {
-        textLines = paragraphTxt->GetLineCount();
+    if (paragraph_ != nullptr) {
+        textLines = paragraph_->GetLineCount();
     }
     return textLines;
 }
@@ -387,7 +386,7 @@ int32_t RosenRenderText::GetTouchPosition(const Offset& offset)
     if (!paragraph_) {
         return 0;
     }
-    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
+    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
 }
 
 Size RosenRenderText::GetSize()
@@ -446,11 +445,11 @@ void RosenRenderText::ApplyIndents(double width)
         indents.push_back(0.0);
         indents.push_back(-indent);
     }
+
 #ifndef NEW_SKIA
     // TODO SetIndents need must
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
-    if (paragraphTxt != nullptr) {
-        paragraphTxt->SetIndents(indents);
+    if (paragraph_ != nullptr) {
+        paragraph_->SetIndents(indents);
     }
 #endif
 }
@@ -463,7 +462,7 @@ bool RosenRenderText::UpdateParagraph()
 
     using namespace Constants;
 
-    txt::ParagraphStyle style;
+    Rosen::TypographyStyle style;
 
     if (alignment_.has_value()) {
         textStyle_.SetTextAlign(alignment_.value());
@@ -485,34 +484,33 @@ bool RosenRenderText::UpdateParagraph()
         }
     }
     std::string displayData = ApplyWhiteSpace();
-    style.text_direction = ConvertTxtTextDirection(defaultTextDirection_);
-    style.text_align = ConvertTxtTextAlign(textAlign);
-    style.max_lines = textStyle_.GetMaxLines();
+    style.textDirection = ConvertTxtTextDirection(defaultTextDirection_);
+    style.textAlign = ConvertTxtTextAlign(textAlign);
+    style.maxLines = textStyle_.GetMaxLines();
     style.locale = Localization::GetInstance()->GetFontLocale();
     if (textStyle_.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         if (!IsCompatibleVersion() && textStyle_.GetMaxLines() == UINT32_MAX && !text_->GetAutoMaxLines()) {
-            style.max_lines = 1;
+            style.maxLines = 1;
         }
         style.ellipsis = ELLIPSIS;
         auto context = GetContext().Upgrade();
         if (context && context->UseLiteStyle()) {
-            style.max_lines = 1;
+            style.maxLines = 1;
         }
     }
 #ifndef NEW_SKIA
-    style.word_break_type = static_cast<minikin::WordBreakType>(textStyle_.GetWordBreak());
+    style.wordBreakType = static_cast<Rosen::WordBreakType>(textStyle_.GetWordBreak());
 #endif
 
-    std::unique_ptr<txt::ParagraphBuilder> builder;
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return false;
     }
-    builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    auto builder = Rosen::TypographyCreate::Create(style, fontCollection);
     std::string textValue = "";
 
-    txt::TextStyle txtStyle;
+    Rosen::TextStyle txtStyle;
     ConvertTxtStyle(textStyle_, context_, txtStyle);
     builder->PushStyle(txtStyle);
     const auto& children = GetChildren();
@@ -528,9 +526,9 @@ bool RosenRenderText::UpdateParagraph()
         textForDisplay_ = textValue;
     } else {
         StringUtils::TransformStrCase(displayData, (int32_t)textStyle_.GetTextCase());
-        builder->AddText(StringUtils::Str8ToStr16(displayData));
+        builder->AppendText(StringUtils::Str8ToStr16(displayData));
     }
-    paragraph_ = builder->Build();
+    paragraph_ = builder->CreateTypography();
 
     ApplyIndents(GetLayoutParam().GetMaxSize().Width());
     return true;
@@ -544,18 +542,16 @@ double RosenRenderText::GetTextWidth()
     if (!IsCompatibleVersion()) {
         return paragraph_->GetMaxIntrinsicWidth();
     }
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
-    if (paragraphTxt != nullptr && paragraphTxt->GetLineCount() == 1) {
-        return std::max(paragraph_->GetLongestLine(), paragraph_->GetMaxIntrinsicWidth());
+    if (paragraph_ != nullptr && paragraph_->GetLineCount() == 1) {
+        return std::max(paragraph_->GetActualWidth(), paragraph_->GetMaxIntrinsicWidth());
     }
-    return paragraph_->GetLongestLine();
+    return paragraph_->GetActualWidth();
 }
 
 bool RosenRenderText::DidExceedMaxLines(double paragraphMaxWidth)
 {
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
-    if (paragraphTxt != nullptr) {
-        bool didExceedMaxLines = paragraphTxt->DidExceedMaxLines() ||
+    if (paragraph_ != nullptr) {
+        bool didExceedMaxLines = paragraph_->DidExceedMaxLines() ||
                                  (textStyle_.GetAdaptHeight() &&
                                      GreatNotEqual(paragraph_->GetHeight(), GetLayoutParam().GetMaxSize().Height()));
         if (textStyle_.GetMaxLines() == 1) {

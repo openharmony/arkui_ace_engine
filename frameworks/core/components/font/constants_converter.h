@@ -16,21 +16,26 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 
-#include "txt/placeholder_run.h"
-#include "txt/text_baseline.h"
-#include "txt/text_decoration.h"
-#include "txt/text_style.h"
-#include "include/core/SkColor.h"
+#include "rosen_text/typography_types.h"
+#include "third_party/skia/include/core/SkColor.h"
 
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/pipeline_base.h"
 
-namespace txt {
+namespace OHOS::Rosen {
 enum class FontWeight;
 enum class FontStyle;
 enum class TextAlign;
+enum class TextBaseline;
 enum class TextDirection;
-} // namespace txt
+enum class PlaceholderVerticalAlignment;
+struct TextStyle;
+struct PlaceholderSpan;
+
+namespace Drawing {
+class RectF;
+} // namespace Drawing
+} // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
 
@@ -45,27 +50,28 @@ class Color;
 
 namespace Constants {
 
-txt::FontWeight ConvertTxtFontWeight(FontWeight fontWeight);
+OHOS::Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight);
 
-txt::FontStyle ConvertTxtFontStyle(FontStyle fontStyle);
+OHOS::Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle);
 
-txt::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
+OHOS::Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
 
-txt::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
+OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
 
-txt::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
+OHOS::Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 
 SkColor ConvertSkColor(Color color);
 
-txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
+OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
 
-void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle);
+void ConvertTxtStyle(const TextStyle &textStyle,
+    const WeakPtr<PipelineBase> &context, OHOS::Rosen::TextStyle &txtStyle);
 
-Rect ConvertSkRect(SkRect skRect);
+Rect ConvertSkRect(const Rosen::Drawing::RectF &skRect);
 
-txt::PlaceholderAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration);
+OHOS::Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration);
 
-void ConvertPlaceholderRun(const PlaceholderRun& span, txt::PlaceholderRun& txtSpan);
+void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderSpan& txtSpan);
 
 } // namespace Constants
 

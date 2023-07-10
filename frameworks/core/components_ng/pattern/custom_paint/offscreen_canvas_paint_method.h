@@ -18,6 +18,8 @@
 
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 
+#include "rosen_text/text_style.h"
+
 namespace OHOS::Ace::NG {
 using setColorFunc = std::function<void (const std::string&)>;
 
@@ -64,9 +66,9 @@ private:
 
     void PaintText(const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke,
         bool hasShadow = false);
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
-    void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
+    void UpdateTextStyleForeground(bool isStroke, OHOS::Rosen::TextStyle& txtStyle, bool hasShadow);
 #ifndef USE_ROSEN_DRAWING
     void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;

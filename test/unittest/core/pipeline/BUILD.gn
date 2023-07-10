@@ -16,6 +16,12 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("pipeline_context_test_ng") {
   module_out_path = "$basic_test_output_path/pipeline"
+  include_dirs = [
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+  ]
 
   sources = [
     # animation

@@ -18,9 +18,10 @@
 
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/lib/ui/painting/path.h"
-#include "txt/paragraph.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkPath.h"
+#include "rosen_text/text_style.h"
+#include "rosen_text/typography.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPath.h"
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
@@ -98,12 +99,12 @@ private:
     void UpdatePaintShader(SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
-    std::unique_ptr<txt::Paragraph> paragraph_;
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<Rosen::Typography>& paragraph);
+    std::unique_ptr<Rosen::Typography> paragraph_;
     bool HasShadow() const;
     bool HasImageShadow() const;
-    void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& style, bool hasShadow);
-    double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    void UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& style, bool hasShadow);
+    double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<Rosen::Typography>& paragraph);
     TextDirection GetTextDirection(const std::string& text);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateLineDash(SkPaint& paint);

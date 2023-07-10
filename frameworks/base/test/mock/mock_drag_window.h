@@ -30,7 +30,7 @@ public:
 
     MOCK_METHOD1(DrawImage, void(void* skImage));
     MOCK_METHOD3(DrawText,
-        void(std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText));
+        void(std::shared_ptr<Rosen::Typography> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText));
     MOCK_METHOD2(DrawTextNG, void(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern));
     MOCK_METHOD1(DrawPixelMap, void(const RefPtr<PixelMap>&));
     MOCK_METHOD1(DrawFrameNode, void(const RefPtr<NG::FrameNode>&));

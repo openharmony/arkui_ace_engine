@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-void FlutterRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
+void FlutterRenderTextSpan::UpdateText(Rosen::TypographyCreate& builder,
     std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions, std::string& textValue)
 {
     if (!spanComponent_) {
@@ -34,14 +34,14 @@ void FlutterRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
     }
     if (spanComponent_->HasNewStyle()) {
         LOGD("test span has new style");
-        txt::TextStyle style;
+        Rosen::TextStyle style;
         Constants::ConvertTxtStyle(spanStyle_, context_, style);
         builder.PushStyle(style);
     }
     UpdateTouchRegions(touchRegions);
     auto displayText = spanComponent_->GetSpanData();
     StringUtils::TransformStrCase(displayText, (int32_t)spanStyle_.GetTextCase());
-    builder.AddText(StringUtils::Str8ToStr16(displayText));
+    builder.AppendText(StringUtils::Str8ToStr16(displayText));
     textValue.append(displayText);
     for (const auto& child : GetChildren()) {
         auto flutterRenderTextSpan = AceType::DynamicCast<FlutterRenderTextSpan>(child);
@@ -50,7 +50,7 @@ void FlutterRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
         }
     }
     if (spanComponent_->HasNewStyle()) {
-        builder.Pop();
+        builder.PopStyle();
     }
 }
 

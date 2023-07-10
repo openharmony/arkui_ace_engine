@@ -19,6 +19,8 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
+#include "rosen_text/text_style.h"
+
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
 class RosenRenderContext;
@@ -89,9 +91,9 @@ private:
 
     void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
         bool isStroke, bool hasShadow = false);
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = false);
-    void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
+    void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow);
 #ifndef USE_ROSEN_DRAWING
     void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
 #else

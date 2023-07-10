@@ -16,8 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_SPAN_FLUTTER_RENDER_TEXT_SPAN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_SPAN_FLUTTER_RENDER_TEXT_SPAN_H
 
-#include "txt/paragraph_builder.h"
-
+#include "rosen_text/typography_create.h"
 #include "core/components/text_span/render_text_span.h"
 #include "core/gestures/gesture_type.h"
 #include "core/pipeline/base/render_node.h"
@@ -32,7 +31,7 @@ public:
     ~FlutterRenderTextSpan() override = default;
 
     // Called by parent to add text with style to builder.
-    void UpdateText(txt::ParagraphBuilder& builder,
+    void UpdateText(Rosen::TypographyCreate& builder,
         std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions, std::string& textValue);
 
 private:

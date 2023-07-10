@@ -68,10 +68,10 @@ TextDragData TextDragPattern::CalculateTextDragData(
     CHECK_NULL_RETURN(!boxes.empty(), {});
     auto boxFirst = boxes.front();
     auto boxLast = boxes.back();
-    float leftHandleX = boxFirst.rect_.GetLeft() + textStartX;
-    float leftHandleY = boxFirst.rect_.GetTop() + textStartY;
-    float rightHandleX = boxLast.rect_.GetRight() + textStartX;
-    float rightHandleY = boxLast.rect_.GetTop() + textStartY;
+    float leftHandleX = boxFirst.rect.GetLeft() + textStartX;
+    float leftHandleY = boxFirst.rect.GetTop() + textStartY;
+    float rightHandleX = boxLast.rect.GetRight() + textStartX;
+    float rightHandleY = boxLast.rect.GetTop() + textStartY;
     bool oneLineSelected = (leftHandleY == rightHandleY);
     if (oneLineSelected) {
         if (leftHandleX < contentRect.Left()) {
@@ -85,7 +85,7 @@ TextDragData TextDragPattern::CalculateTextDragData(
             leftHandleX = contentRect.Left();
             leftHandleY = contentRect.Top();
         }
-        if (boxLast.rect_.GetBottom() > contentRect.Bottom()) {
+        if (boxLast.rect.GetBottom() > contentRect.Bottom()) {
             rightHandleX = contentRect.Right();
             rightHandleY = contentRect.Bottom() - lineHeight;
         }
