@@ -15,7 +15,11 @@
 
 #include "core/components_ng/image_provider/svg_image_object.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 
@@ -45,10 +49,17 @@ void SvgImageObject::MakeCanvasImage(
 
 bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor)
 {
+#ifndef USE_ROSEN_DRAWING
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, false);
     // update SVGSkiaDom
     svgDomBase_ = skiaImageData->MakeSvgDom(svgFillColor);
+#else
+    auto rosenImageData = DynamicCast<DrawingImageData>(data);
+    CHECK_NULL_RETURN(rosenImageData, false);
+    // update SVGSkiaDom
+    svgDomBase_ = rosenImageData->MakeSvgDom(svgFillColor);
+#endif
     CHECK_NULL_RETURN(svgDomBase_, false);
     // get ImageSize
     SetImageSize(svgDomBase_->GetContainerSize());
