@@ -163,6 +163,23 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void InitDragDropEvent();
+    void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
+    NG::DragDropInfo OnDragStart(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void OnDragEnd();
+    void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
+
+    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(RefPtr<SpanNode> node);
@@ -214,6 +231,9 @@ private:
     RefPtr<RichEditorContentModifier> richEditorContentModifier_;
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::list<ResultObject> dragResultObjects_;
+#endif // ENABLE_DRAG_FRAMEWORK
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG
