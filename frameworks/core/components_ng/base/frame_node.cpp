@@ -73,6 +73,8 @@ FrameNode::~FrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
+        auto dragManager = pipeline->GetDragDropManager();
+        dragManager->RemoveDragFrameNode(AceType::WeakClaim(this));
     }
 }
 
