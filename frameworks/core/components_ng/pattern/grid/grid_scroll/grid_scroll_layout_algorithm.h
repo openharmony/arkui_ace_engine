@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -92,6 +93,7 @@ private:
 
     OffsetF CalculateLargeItemOffset(
         OffsetF currOffset, int32_t itemIndex, int32_t currLineIndex, int32_t currentCrossIndex);
+    bool NeedAdjust(const RefPtr<GridItemLayoutProperty>& itemLayoutWrapper);
     void AdjustRowColSpan(const RefPtr<LayoutWrapper>& itemLayoutWrapper);
     void LargeItemNextLineHeight(int32_t currentLineIndex, LayoutWrapper* layoutWrapper);
     void LargeItemForwardLineHeight(int32_t currentLineIndex, LayoutWrapper* LayoutWrapper);
