@@ -1370,6 +1370,23 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     if (NearZero(dragOffset)) {
         return;
     }
+    if (NeedScrollSnapAlignEffect()) {
+        auto delta = 0.0f;
+        if (chainAnimation_->GetControlIndex() < startIndex_ - 1) {
+            delta = chainAnimation_->SetControlIndex(std::max(startIndex_ - 1, 0));
+        }
+        if (chainAnimation_->GetControlIndex() > endIndex_ + 1) {
+            delta = chainAnimation_->SetControlIndex(std::min(endIndex_ + 1, maxListItemIndex_));
+        }
+        if (!NearZero(delta)) {
+            auto scrollableEvent = GetScrollableEvent();
+            CHECK_NULL_VOID(scrollableEvent);
+            auto scrollable = scrollableEvent->GetScrollable();
+            CHECK_NULL_VOID(scrollable);
+            scrollable->UpdateScrollSnapStartOffset(delta);
+            currentDelta_ -= delta;
+        }
+    }
     bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
     chainAnimation_->SetDelta(-dragOffset, overDrag);
 }
