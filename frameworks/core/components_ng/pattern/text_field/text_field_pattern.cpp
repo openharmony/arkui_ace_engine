@@ -60,6 +60,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/image/image_source_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
@@ -755,10 +756,7 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
     if (!IsTextArea()) {
         return 0.0f;
     }
-    // text rect height exceeds content region but caret is still in region
-    if (CursorInContentRegion()) {
-        return 0.0f;
-    }
+
     if (caretRect_.GetY() < contentRect_.GetY()) {
         auto dy = contentRect_.GetY() - caretRect_.GetY();
         caretRect_.SetTop(caretRect_.GetY() + dy);
@@ -766,9 +764,9 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
         return dy;
     }
     auto dy = contentRect_.GetY() + contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
-    // caret does not exceed bottom boundary, no need to shift text rect and caret rect
+    // caret does not exceed bottom boundary, still need to check against safeArea
     if (GreatOrEqual(dy, 0.0f)) {
-        return dy;
+        return FitCursorInSafeArea();
     }
     caretRect_.SetTop(caretRect_.GetY() + dy);
     textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
@@ -785,6 +783,25 @@ bool TextFieldPattern::CursorInContentRegion()
     return GreatOrEqual(caretRect_.GetX(), contentRect_.GetX()) &&
            LessOrEqual(
                caretRect_.GetX() + CURSOR_WIDTH.ConvertToPx(), contentRect_.GetX() + contentRect_.Width() - unitWidth_);
+}
+
+float TextFieldPattern::FitCursorInSafeArea()
+{
+    // check if caret is below safeArea
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto safeAreaBottom = pipeline->GetSafeArea().bottom_;
+    safeAreaBottom = safeAreaBottom.Combine(pipeline->GetSafeAreaManager()->GetKeyboardInset());
+    CHECK_NULL_RETURN_NOLOG(safeAreaBottom.IsValid(), 0.0f);
+    // get global height of caret
+    auto host = GetHost();
+    auto globalBottom = host->GetPaintRectOffset().GetY() + caretRect_.Bottom();
+    if (globalBottom > safeAreaBottom.start) {
+        auto dy = safeAreaBottom.start - globalBottom;
+        caretRect_.SetTop(caretRect_.GetY() + dy);
+        textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
+        return dy;
+    }
+    return 0.0f;
 }
 
 bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
@@ -834,7 +851,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
             firstHandleHeight = firstHandle->Height();
         }
         if (LessNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY() + firstHandle->Height(),
-            contentRect_.GetY() + contentRect_.Height())) {
+                                              contentRect_.GetY() + contentRect_.Height())) {
             firstHandleHeight = firstHandle->Height();
         }
         if (!isSingleHandle_) {
@@ -842,7 +859,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
                 secondHandleHeight = secondHandle->Height();
             }
             if (LessNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY() + secondHandle->Height(),
-                contentRect_.GetY() + contentRect_.Height())) {
+                                                  contentRect_.GetY() + contentRect_.Height())) {
                 secondHandleHeight = secondHandle->Height();
             }
         }
