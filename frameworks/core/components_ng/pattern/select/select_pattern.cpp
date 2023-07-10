@@ -25,7 +25,6 @@
 #include "core/animation/curves.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -34,10 +33,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -93,15 +90,6 @@ void SelectPattern::ShowSelectMenu()
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateTargetSize(selectSize_);
     auto offset = GetHost()->GetPaintRectOffset();
-    auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-                            context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    if (isContainerModal) {
-        auto newOffsetX = offset.GetX() + static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx() * 2) +
-                          static_cast<float>(CONTENT_PADDING.ConvertToPx() * 2);
-        auto newOffsetY = offset.GetY() + static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
-        offset.SetX(newOffsetX);
-        offset.SetY(newOffsetY);
-    }
     offset.AddY(selectSize_.Height());
     LOGD("select offset %{public}s size %{public}s", offset.ToString().c_str(), selectSize_.ToString().c_str());
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
