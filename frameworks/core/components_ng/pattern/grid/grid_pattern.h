@@ -20,6 +20,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
@@ -156,6 +157,8 @@ public:
 
     bool UpdateStartIndex(int32_t index);
 
+    bool UpdateStartIndex(int32_t index, ScrollAlign align);
+
     float GetTotalOffset() const override
     {
         return EstimateHeight();
@@ -175,6 +178,7 @@ public:
     int32_t GetChildrenCount() const;
     void MoveItems(int32_t itemIndex, int32_t insertIndex);
     void ClearDragState();
+    float EstimateHeight() const;
 
 private:
     float GetMainGap();
@@ -209,7 +213,6 @@ private:
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
-    float EstimateHeight() const;
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<GridPositionController> positionController_;

@@ -869,6 +869,12 @@ bool GridPattern::UpdateStartIndex(int32_t index)
     return true;
 }
 
+bool GridPattern::UpdateStartIndex(int32_t index, ScrollAlign align)
+{
+    gridLayoutInfo_.scrollAlign_ = align;
+    return UpdateStartIndex(index);
+}
+
 void GridPattern::OnAnimateStop()
 {
     auto host = GetHost();
