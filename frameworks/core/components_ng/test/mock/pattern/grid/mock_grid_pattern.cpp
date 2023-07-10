@@ -97,4 +97,9 @@ void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
 
 void GridPattern::ClearMultiSelect() {};
+
+bool GridPattern::IsItemSelected(const MouseInfo& info)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

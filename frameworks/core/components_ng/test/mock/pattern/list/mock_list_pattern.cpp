@@ -99,4 +99,9 @@ void ListPattern::ScrollTo(float position) {}
 void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
 
 void ListPattern::ClearMultiSelect() {};
+
+bool ListPattern::IsItemSelected(const MouseInfo& info)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

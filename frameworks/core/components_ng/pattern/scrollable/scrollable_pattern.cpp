@@ -594,7 +594,9 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
     if (info.GetAction() == MouseAction::PRESS) {
-        ClearMultiSelect();
+        if (!IsItemSelected(info)) {
+            ClearMultiSelect();
+        }
         mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);

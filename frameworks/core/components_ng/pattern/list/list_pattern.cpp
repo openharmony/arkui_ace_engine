@@ -1465,6 +1465,27 @@ void ListPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
+bool ListPattern::IsItemSelected(const MouseInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    CHECK_NULL_RETURN_NOLOG(node, false);
+    auto itemPattern = node->GetPattern<ListItemPattern>();
+    if (itemPattern) {
+        return itemPattern->IsSelected();
+    }
+    auto itemGroupPattern = node->GetPattern<ListItemGroupPattern>();
+    if (itemGroupPattern) {
+        auto itemNode = node->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        CHECK_NULL_RETURN_NOLOG(itemNode, false);
+        itemPattern = itemNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_RETURN_NOLOG(itemPattern, false);
+        return itemPattern->IsSelected();
+    }
+    return false;
+}
+
 void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
 {
     if (swiperItem_ != swiperItem) {

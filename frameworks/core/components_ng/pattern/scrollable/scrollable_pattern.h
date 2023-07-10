@@ -292,6 +292,10 @@ private:
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
+    virtual bool IsItemSelected(const MouseInfo& info)
+    {
+        return false;
+    }
     void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void OnMouseRelease();
     void SelectWithScroll();
