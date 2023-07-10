@@ -67,9 +67,13 @@ public:
     void HideAllPopups();
     void HideCustomPopups();
 
-    const PopupInfo& GetPopupInfo(int32_t targetId)
+    PopupInfo GetPopupInfo(int32_t targetId) const
     {
-        return popupMap_[targetId];
+        auto it = popupMap_.find(targetId);
+        if (it == popupMap_.end()) {
+            return {};
+        }
+        return it->second;
     }
 
     bool HasPopupInfo(int32_t targetId) const
