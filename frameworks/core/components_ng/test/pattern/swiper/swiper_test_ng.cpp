@@ -1829,7 +1829,7 @@ HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetAccessibilityValue001, Test
     AccessibilityValue result = swiperAccessibilityProperty_->GetAccessibilityValue();
     EXPECT_EQ(result.min, 0);
     EXPECT_EQ(result.max, 0);
-    EXPECT_EQ(result.current, -1);
+    EXPECT_EQ(result.current, 0);
 
     for (int index = 0; index <= INDEX_NUM; index++) {
         RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
@@ -1922,7 +1922,7 @@ HWTEST_F(SwiperTestNg, SwiperAccessibilityPropertyGetSupportAction001, TestSize.
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }
-    EXPECT_EQ(actions, 4096);
+    EXPECT_EQ(actions, expectActions);
 
     swiperPaintProperty->UpdateLoop(true);
     swiperAccessibilityProperty_->ResetSupportAction();
@@ -4491,7 +4491,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorHandleClick002, TestSize.Level1)
      * @tc.expected: swiperPattern->indicatorDoingAnimation_ is true.
      */
     indicatorPattern->HandleClick(info);
-    EXPECT_FALSE(swiperPattern->indicatorDoingAnimation_);
+    EXPECT_TRUE(swiperPattern->indicatorDoingAnimation_);
 }
 
 /**
