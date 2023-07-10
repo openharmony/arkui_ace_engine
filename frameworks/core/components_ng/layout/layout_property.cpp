@@ -609,6 +609,7 @@ void LayoutProperty::UpdateAspectRatio(float ratio)
 
 void LayoutProperty::UpdateGeometryTransition(const std::string& id)
 {
+    propGeometryTransitionId_ = id;
     if (geometryTransition_ != nullptr) {
         // unregister node from old geometry transition
         geometryTransition_->Update(host_, nullptr);
@@ -901,5 +902,25 @@ void LayoutProperty::GetOverlayOffset(Dimension& overlayOffsetX, Dimension& over
 {
     overlayOffsetX = overlayOffsetX_;
     overlayOffsetY = overlayOffsetY_;
+}
+
+void LayoutProperty::UpdateAllGeometryTransition(const RefPtr<UINode>& parent)
+{
+    std::queue<RefPtr<UINode>> q;
+    q.push(parent);
+    while (!q.empty()) {
+        auto node = q.front();
+        q.pop();
+        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        if (frameNode && frameNode->GetLayoutProperty()->HasGeometryTransitionId()) {
+            auto geometryTransitionId = frameNode->GetLayoutProperty()->GetGeometryTransitionIdValue();
+            frameNode->GetLayoutProperty()->UpdateGeometryTransition("");
+            frameNode->GetLayoutProperty()->UpdateGeometryTransition(geometryTransitionId);
+        }
+        const auto& children = node->GetChildren();
+        for (const auto& child : children) {
+            q.push(child);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

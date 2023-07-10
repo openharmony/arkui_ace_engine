@@ -161,8 +161,8 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
 
     auto rect = GetPaintRectWithoutTransform();
     isBreakingPoint_ = !recursive;
-    if (rect.IsValid() && !CheckNeedRequestMeasureAndLayout(host->GetLayoutProperty()->GetPropertyChangeFlag())) {
-        // has set size before and do not need layout, trigger transition directly.
+    if (rect.IsValid()) {
+        // has set size before, trigger transition directly.
         NotifyTransitionInner(rect.GetSize(), true);
         return;
     }
@@ -2782,8 +2782,7 @@ void RosenRenderContext::OnTransitionOutFinish()
         LOGD("RosenTransitionEffect: transition out finish, node %{public}d, break point %{public}d, break point tag: "
              "%{public}s",
             host->GetId(), breakPointChild->GetId(), breakPointChild->GetTag().c_str());
-        // host is the frameNode playing transition. This node needs to execute other necessary cleanup work.
-        host->OnRemoveFromParent(false);
+        breakPointChild->OnRemoveFromParent(false);
         // remove breakPoint
         breakPointParent->RemoveDisappearingChild(breakPointChild);
         breakPointParent->MarkNeedSyncRenderTree();
@@ -2792,10 +2791,7 @@ void RosenRenderContext::OnTransitionOutFinish()
         LOGD("RosenTransitionEffect: transition out finish, node %{public}d, node tag: %{public}s", host->GetId(),
             host->GetTag().c_str());
         // When host's transition is done, RemoveImmediately must return true, so this branch means
-        // host is different from breakPointChild. It will be in the children of its parent.
-        // RemoveChild will call host->OnRemoveFromParent.
-        parent->RemoveChild(host);
-        parent->RebuildRenderContextTree();
+        // host is different from breakPointChild. It will be removed when breakPoint is removed.
     }
     if (isModalRootNode_ && breakPointParent->GetChildren().empty()) {
         auto grandParent = breakPointParent->GetParent();

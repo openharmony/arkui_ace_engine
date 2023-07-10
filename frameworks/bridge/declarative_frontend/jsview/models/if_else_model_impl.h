@@ -27,6 +27,10 @@ public:
     void Pop() override;
     void SetBranchId(int32_t value) override;
     int32_t GetBranchId() override;
+    bool CanRetake(const std::string& id) override
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace::Framework

@@ -340,6 +340,7 @@ public:
     {
         return isDisappearing_;
     }
+    RefPtr<UINode> GetDisappearingChildById(const std::string& id) const;
 
     // These two interfaces are only used for fast preview.
     // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
