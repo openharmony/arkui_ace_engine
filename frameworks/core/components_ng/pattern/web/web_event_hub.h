@@ -140,6 +140,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnLoadIntercept, bool);
     ACE_WEB_EVENT_PROPERTY(OnFileSelectorShow, bool);
     ACE_WEB_EVENT_PROPERTY(OnContextMenuShow, bool);
+    ACE_WEB_EVENT_PROPERTY(OnContextMenuHide, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderExited, void);
     ACE_WEB_EVENT_PROPERTY(OnRefreshAccessedHistory, void);
     ACE_WEB_EVENT_PROPERTY(OnResourceLoad, void);

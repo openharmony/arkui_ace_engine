@@ -329,6 +329,7 @@ public:
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
+    bool IsImageDrag();
     DragRet GetDragAcceptableStatus();
 
 private:

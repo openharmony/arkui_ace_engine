@@ -311,6 +311,15 @@ void WebModelNG::SetOnContextMenuShow(std::function<bool(const BaseEventInfo* in
     webEventHub->SetOnContextMenuShowEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnContextMenuHideEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetJsEnabled(bool isJsEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

@@ -4283,6 +4283,31 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
     return result;
 }
 
+void WebDelegate::OnContextMenuHide(const std::string& info)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnContextMenuHideEvent = webEventHub->GetOnContextMenuHideEvent();
+            CHECK_NULL_VOID(propOnContextMenuHideEvent);
+            propOnContextMenuHideEvent(std::make_shared<ContextMenuHideEvent>(info));
+            return;
+        } else {
+            LOGE("current is not new pipeline");
+        }
+    });
+    return;
+}
+
 bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
 {
     auto context = context_.Upgrade();
@@ -4445,6 +4470,14 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
         return false;
     }
     return webPattern->NotifyStartDragTask();
+}
+
+bool WebDelegate::IsImageDrag()
+{
+    if (dragData_) {
+        return dragData_->IsSingleImageContent();
+    }
+    return false;
 }
 
 std::shared_ptr<OHOS::NWeb::NWebDragData> WebDelegate::GetOrCreateDragData()
