@@ -59,9 +59,13 @@ public:
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
 
-    const PopupInfo& GetPopupInfo(int32_t targetId)
+    PopupInfo GetPopupInfo(int32_t targetId) const
     {
-        return popupMap_[targetId];
+        auto it = popupMap_.find(targetId);
+        if (it == popupMap_.end()) {
+            return {};
+        }
+        return it->second;
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
