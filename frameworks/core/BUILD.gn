@@ -390,7 +390,6 @@ template("ace_core_source_set") {
     ]
 
     deps += [ "$ace_root/frameworks/core/components_part_upd/foreach:ace_core_components_foreach_part_upd_$platform" ]
-    deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
 
     deps += [
       "$ace_root/frameworks/core/components_ng/animation:ace_core_components_animation_ng_$platform",
@@ -428,6 +427,7 @@ template("ace_core_source_set") {
       ]
       if (is_ohos) {
         external_deps += [ "graphic_standard:libtexgine" ]
+        external_deps += [ "graphic_standard:rosen_text" ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
@@ -867,6 +867,7 @@ template("ace_core_ng_source_set") {
       ]
       if (is_ohos) {
         external_deps += [ "graphic_standard:libtexgine" ]
+        external_deps += [ "graphic_standard:rosen_text" ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {

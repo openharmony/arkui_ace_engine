@@ -56,7 +56,6 @@ template("build_component") {
       deps = []
       deps += extra_deps
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
 
       if (ace_use_new_skia) {
         deps += [
@@ -132,6 +131,7 @@ template("build_component") {
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
+        external_deps += [ "graphic_standard:rosen_text" ]
         if (is_cross_platform_build) {
           deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
         } else {

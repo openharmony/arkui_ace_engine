@@ -18,15 +18,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("scroll_test_ng") {
   module_out_path = pattern_test_output_path
 
-  include_dirs = [
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-    "//third_party/flutter/skia",
-  ]
   sources = [
     # special
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
