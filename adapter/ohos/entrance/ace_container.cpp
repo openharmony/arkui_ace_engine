@@ -1358,6 +1358,8 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY); });
     windowManager->SetWindowGetModeCallBack(
         [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+    windowManager->SetWindowGetTypeCallBack(
+        [window = uiWindow_]() -> WindowType { return static_cast<WindowType>(window->GetType()); });
     windowManager->SetWindowSetMaximizeModeCallBack(
         [window = uiWindow_](MaximizeMode mode) {
             window->SetGlobalMaximizeMode(static_cast<Rosen::MaximizeMode>(mode));
