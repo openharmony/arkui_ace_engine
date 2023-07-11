@@ -796,6 +796,17 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     }
     copyOption_ = CopyOptions::Local;
     TextPattern::HandleLongPress(info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
+    if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
+        eventHub->FireOnSelect(&textSelectInfo);
+    }
+    SetCaretPosition(selectEnd);
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1446,6 +1457,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         } else {
             int32_t extend = paragraph_->GetHandlePositionForClick(textOffset);
             textSelector_.Update(textSelector_.baseOffset, extend);
+            SetCaretPosition(extend);
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1656,5 +1668,58 @@ RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end, 
     }
     selection.SetResultObjectList(resultObjects);
     return selection;
+}
+
+void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
+{
+    SelectOverlayInfo selectInfo;
+    selectInfo.firstHandle.paintRect = firstHandle;
+    selectInfo.secondHandle.paintRect = secondHandle;
+    selectInfo.onHandleMove = [weak = WeakClaim(this)](const RectF& handleRect, bool isFirst) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleMove(handleRect, isFirst);
+    };
+    selectInfo.onHandleMoveDone = [weak = WeakClaim(this)](const RectF& handleRect, bool isFirst) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleMoveDone(handleRect, isFirst);
+    };
+    selectInfo.menuInfo.menuIsShow = false;
+    selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showPaste = false;
+
+    if (!menuOptionItems_.empty()) {
+        selectInfo.menuOptionItems = GetMenuOptionItems();
+    }
+
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        SelectHandleInfo firstHandleInfo;
+        SelectHandleInfo secondHandleInfo;
+        firstHandleInfo.paintRect = textSelector_.firstHandle;
+        secondHandleInfo.paintRect = textSelector_.secondHandle;
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+    } else {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        selectInfo.callerFrameNode = GetHost();
+        selectOverlayProxy_ =
+            pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
+        CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+    }
+}
+
+void RichEditorPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
+{
+    TextPattern::OnHandleMove(handleRect, isFirstHandle);
+    if (!isFirstHandle) {
+        SetCaretPosition(textSelector_.destinationOffset);
+    }
 }
 } // namespace OHOS::Ace::NG

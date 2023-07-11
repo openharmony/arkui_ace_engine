@@ -215,6 +215,7 @@ public:
         onClick_ = std::move(onClick);
     }
     void OnColorConfigurationUpdate() override;
+
 protected:
     void HandleOnCopy();
     void InitMouseEvent();
@@ -226,11 +227,12 @@ protected:
     bool IsDraggable(const Offset& localOffset);
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
+    virtual void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelected() const;
     virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    virtual void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     std::wstring GetWideText() const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
@@ -248,9 +250,8 @@ protected:
     bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
-    
+
 private:
-    void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
