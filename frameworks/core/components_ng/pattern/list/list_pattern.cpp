@@ -1451,15 +1451,29 @@ void ListPattern::ClearMultiSelect()
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> children;
     host->GenerateOneDepthAllFrame(children);
-    for (const auto& item : children) {
-        if (!AceType::InstanceOf<FrameNode>(item)) {
+    for (const auto& child : children) {
+        if (!child) {
             continue;
         }
-
-        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
-        auto itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
-        CHECK_NULL_VOID(itemPattern);
-        itemPattern->MarkIsSelected(false);
+        auto itemPattern = child->GetPattern<ListItemPattern>();
+        if (itemPattern) {
+            itemPattern->MarkIsSelected(false);
+            continue;
+        }
+        auto itemGroupPattern = child->GetPattern<ListItemGroupPattern>();
+        if (itemGroupPattern) {
+            std::list<RefPtr<FrameNode>> itemChildren;
+            child->GenerateOneDepthAllFrame(itemChildren);
+            for (const auto& item : itemChildren) {
+                if (!item) {
+                    continue;
+                }
+                itemPattern = item->GetPattern<ListItemPattern>();
+                if (itemPattern) {
+                    itemPattern->MarkIsSelected(false);
+                }
+            }
+        }
     }
 
     ClearSelectedZone();
