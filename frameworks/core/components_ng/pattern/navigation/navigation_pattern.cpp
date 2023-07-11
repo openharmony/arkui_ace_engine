@@ -259,6 +259,7 @@ void NavigationPattern::OnModifyDone()
                 hostNode->BackToNavBar(preTopNavDestination);
             }
         }
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
