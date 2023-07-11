@@ -228,7 +228,7 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         return;
     }
 
-    onFormSurfaceNodeCallback_(rsSurfaceNode);
+    onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic);
     if (!formRendererDispatcher_) {
         sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
