@@ -61,6 +61,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 
 void GridPattern::UpdateScrollBarOffset() {}
 
+void GridPattern::OnScrollEndCallback() {}
+
 bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
     return true;

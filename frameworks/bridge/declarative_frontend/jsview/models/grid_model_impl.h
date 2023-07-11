@@ -56,6 +56,16 @@ public:
     void SetOnItemDragMove(std::function<void(const ItemDragInfo&, int32_t, int32_t)>&& value) override;
     void SetOnItemDragLeave(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;
     void SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>&& value) override;
+
+    void SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll) override {};
+    void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) override {};
+    void SetOnScrollFrameBegin(
+        std::function<ScrollFrameResult(Dimension, ScrollState)>&& onScrollFrameBegin) override {};
+    void SetOnScrollStart(std::function<void()>&& onScrollStart) override {};
+    void SetOnScrollStop(std::function<void()>&& onScrollStop) override {};
+    void SetOnReachStart(std::function<void()>&& onReachStart) override {};
+    void SetOnReachEnd(std::function<void()>&& onReachEnd) override {};
+
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
 };

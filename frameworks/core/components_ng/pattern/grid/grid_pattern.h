@@ -215,8 +215,15 @@ private:
     void SetAccessibilityAction();
 
     GridLayoutInfo gridLayoutInfo_;
+    void ProcessEvent(bool indexChanged, float finalOffset, bool offsetEnd);
+    void MarkDirtyNodeSelf();
+    void OnScrollEndCallback() override;
+    void FireOnScrollStart();
+    void InitScrollableEvent();
+
     RefPtr<GridPositionController> positionController_;
     float animatorOffset_ = 0.0f;
+    bool scrollStop_ = false;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
