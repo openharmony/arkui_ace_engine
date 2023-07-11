@@ -1562,31 +1562,21 @@ std::string RichEditorPattern::GetSelectedSpanText(std::wstring value, int32_t s
 TextStyleResult RichEditorPattern::GetTextStyleObject(RefPtr<SpanNode> node)
 {
     TextStyleResult textStyle;
-    if (node->HasTextColor()) {
-        textStyle.fontColor = node->GetTextColorValue(Color::BLACK).ColorToString();
+    textStyle.fontColor = node->GetTextColorValue(Color::BLACK).ColorToString();
+    textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp();
+    textStyle.fontStyle = static_cast<int32_t>(node->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
+    textStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
+    std::string fontFamilyValue = "";
+    const std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
+    auto fontFamily = node->GetFontFamilyValue(defaultFontFamily);
+    for (auto str : fontFamily) {
+        fontFamilyValue += str;
+        fontFamilyValue += ",";
     }
-    if (node->HasFontSize()) {
-        textStyle.fontSize = node->GetFontSizeValue(Dimension()).ConvertToVp();
-    }
-    if (node->HasItalicFontStyle()) {
-        textStyle.fontStyle = static_cast<int32_t>(node->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
-    }
-    if (node->HasFontWeight()) {
-        textStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
-    }
-    if (node->HasFontFamily()) {
-        std::string fontFamilyValue = "";
-        const std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
-        auto fontFamily = node->GetFontFamilyValue(defaultFontFamily);
-        for (auto str : fontFamily) {
-            fontFamilyValue += str;
-        }
-        textStyle.fontFamily = fontFamilyValue;
-    }
-    if (node->HasTextDecoration()) {
-        textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
-        textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
-    }
+    fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() - 1);
+    textStyle.fontFamily = fontFamilyValue != "" ? fontFamilyValue : defaultFontFamily.front();
+    textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
+    textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
     return textStyle;
 }
 
