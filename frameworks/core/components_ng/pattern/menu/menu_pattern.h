@@ -201,6 +201,8 @@ public:
     uint32_t GetInnerMenuCount() const;
     void OnColorConfigurationUpdate() override;
 
+    RefPtr<FrameNode> GetMenuWrapper() const;
+
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
@@ -225,8 +227,6 @@ private:
     bool OnKeyEvent(const KeyEvent& event) const;
 
     void DisableTabInMenu();
-
-    RefPtr<FrameNode> GetMenuWrapper() const;
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;

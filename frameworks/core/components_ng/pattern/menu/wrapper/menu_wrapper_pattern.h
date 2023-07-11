@@ -22,6 +22,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
@@ -103,6 +104,18 @@ public:
         CHECK_NULL_RETURN(menu, nullptr);
         return menu;
     }
+    OffsetT<Dimension> GetAnimationOffset();
+    void SetAniamtinOption(const AnimationOption& animationOption);
+
+    void SetMenuPlacementAfterLayout(const Placement& placement)
+    {
+        menuPlacement_ = placement;
+    }
+
+    void SetFirstShow()
+    {
+        isFirstShow_ = true;
+    }
 
 private:
     void OnAttachToFrameNode() override;
@@ -111,6 +124,7 @@ private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void StartShowAnimation();
 
     void HideMenu(const RefPtr<FrameNode>& menu);
 
@@ -118,6 +132,9 @@ private:
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
 
+    AnimationOption animationOption_;
+    Placement menuPlacement_ = Placement::NONE;
+    bool isFirstShow_ = true;
     bool isHided_ = false;
 
     std::list<int32_t> subMenuIds_;
