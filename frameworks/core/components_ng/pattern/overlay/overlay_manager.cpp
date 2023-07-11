@@ -236,7 +236,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     pipeline->RequestFrame();
 }
 
-void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow)
+void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow)
 {
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -264,26 +264,9 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInS
                 TaskExecutor::TaskType::UI);
         });
 
-    auto context = menu->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateOpacity(0.0);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
-    context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
-
-    AnimationUtils::Animate(
-        option,
-        [context]() {
-            if (context) {
-                context->UpdateOpacity(1.0);
-                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-            }
-        },
-        option.GetOnFinishEvent());
+    auto pattern = menu->GetPattern<MenuWrapperPattern>();
+    pattern->SetAniamtinOption(option);
+    pattern->SetFirstShow();
 }
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
@@ -329,22 +312,22 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
             },
             TaskExecutor::TaskType::UI);
     });
-
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
     AnimationUtils::Animate(
         option,
         [context, menuAnimationOffset]() {
             context->UpdateOpacity(0.0);
-            context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
+            context->UpdateOffset(menuAnimationOffset);
         },
         option.GetOnFinishEvent());
-
     // start animation immediately
     pipeline->RequestFrame();
 }
@@ -724,7 +707,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         menu->MountToParent(rootNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        ShowMenuAnimation(menu);
+        SetShowMenuAnimation(menu);
         menu->MarkModifyDone();
         LOGI("menuNode mounted");
     }
@@ -748,7 +731,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     CHECK_NULL_VOID(rootNode);
     rootNode->Clean();
     menu->MountToParent(rootNode);
-    ShowMenuAnimation(menu, true);
+    SetShowMenuAnimation(menu, true);
     menu->MarkModifyDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     LOGI("menuNode mounted in subwindow");

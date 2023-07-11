@@ -256,7 +256,7 @@ private:
     void FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow = false);
     void BlurOverlayNode(bool isInSubWindow = false);
 
-    void ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
+    void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);

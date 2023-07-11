@@ -173,6 +173,11 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if (IsContextMenu()) {
         SetHotAreas(dirty);
     }
+    if (isFirstShow_) {
+        // only start animation when menu wrapper mount on.
+        StartShowAnimation();
+        isFirstShow_ = false;
+    }
     return false;
 }
 
@@ -200,5 +205,66 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
         rects.emplace_back(rect);
     }
     SubwindowManager::GetInstance()->SetHotAreas(rects, GetHost()->GetId());
+}
+
+void MenuWrapperPattern::StartShowAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateOpacity(0.0);
+    context->UpdateOffset(GetAnimationOffset());
+
+    AnimationUtils::Animate(
+        animationOption_,
+        [context]() {
+            if (context) {
+                context->UpdateOpacity(1.0);
+                context->UpdateOffset(OffsetT<Dimension>());
+            }
+        },
+        animationOption_.GetOnFinishEvent());
+}
+
+void MenuWrapperPattern::SetAniamtinOption(const AnimationOption& animationOption)
+{
+    animationOption_.SetCurve(animationOption.GetCurve());
+    animationOption_.SetDuration(animationOption.GetDuration());
+    animationOption_.SetFillMode(animationOption.GetFillMode());
+    animationOption_.SetOnFinishEvent(animationOption.GetOnFinishEvent());
+}
+
+OffsetT<Dimension> MenuWrapperPattern::GetAnimationOffset()
+{
+    OffsetT<Dimension> offset;
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, offset);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, offset);
+    auto animationOffset = theme->GetMenuAnimationOffset();
+
+    switch (menuPlacement_) {
+        case Placement::LEFT:
+        case Placement::LEFT_TOP:
+        case Placement::LEFT_BOTTOM:
+            offset.SetX(animationOffset);
+            break;
+        case Placement::RIGHT:
+        case Placement::RIGHT_TOP:
+        case Placement::RIGHT_BOTTOM:
+            offset.SetX(-animationOffset);
+            break;
+        case Placement::TOP:
+        case Placement::TOP_LEFT:
+        case Placement::TOP_RIGHT:
+            offset.SetY(animationOffset);
+            break;
+        default:
+            offset.SetY(-animationOffset);
+            break;
+    }
+    return offset;
 }
 } // namespace OHOS::Ace::NG

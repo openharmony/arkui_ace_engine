@@ -30,6 +30,7 @@
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline/pipeline_base.h"
@@ -414,6 +415,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             position_ += offset;
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        SetMenuPlacementForAnimation(layoutWrapper);
         arrowPosition_ = GetArrowPositionWithPlacement(size);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
             LayoutArrow(layoutWrapper);
@@ -429,6 +431,19 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
     }
+}
+
+void MenuLayoutAlgorithm::SetMenuPlacementForAnimation(LayoutWrapper* layoutWrapper)
+{
+    auto menu = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->SetMenuPlacementAfterLayout(placement_);
 }
 
 void MenuLayoutAlgorithm::LayoutArrow(const LayoutWrapper* layoutWrapper)
@@ -737,6 +752,7 @@ void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>
 float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position)
 {
     float wrapperHeight = wrapperSize_.Height();
+    placement_ = Placement::BOTTOM;
     // can put menu below click point
     if (bottomSpace_ >= size.Height()) {
         return position + margin_;
@@ -744,6 +760,8 @@ float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position)
 
     // put menu above click point
     if (topSpace_ >= size.Height()) {
+        // menu show on top
+        placement_ = Placement::TOP;
         return topSpace_ - size.Height() + margin_;
     }
 
@@ -902,7 +920,7 @@ OffsetF MenuLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool didNe
         targetOffset_.GetY() - childSize.Height() - targetSpace_);
     OffsetF defaultPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() + (targetSize_.Height() - childSize.Height()) / 2.0);
-    auto placement = placement_;
+
     OffsetF childPosition;
     OffsetF position = defaultPosition;
     auto positionOffset = positionOffset_;
@@ -937,7 +955,7 @@ OffsetF MenuLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool didNe
     }
     positionOffset_ = positionOffset;
     arrowPlacement_ = placement_;
-    placement_ = placement;
+
     return position;
 }
 
