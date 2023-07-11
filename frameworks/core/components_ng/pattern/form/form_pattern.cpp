@@ -201,6 +201,7 @@ void FormPattern::TakeSurfaceCaptureForUI()
 {
     if (isDynamic_) {
         LOGI("Now it's a dynamic card");
+        formLinkInfos_.clear();
         return;
     }
 
