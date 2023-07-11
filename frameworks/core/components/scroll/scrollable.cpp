@@ -998,10 +998,6 @@ void Scrollable::ProcessScrollMotionStop()
             return;
         }
     }
-    if ((!scrollPause_ || !scrollOverCallback_) && moved_) {
-        HandleScrollEnd();
-    }
-
     // spring effect special process
     if (scrollPause_) {
         scrollPause_ = false;
@@ -1012,6 +1008,7 @@ void Scrollable::ProcessScrollMotionStop()
             return;
         }
         moved_ = false;
+        HandleScrollEnd();
 #ifdef OHOS_PLATFORM
         LOGI("controller stop increase cpu frequency");
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
