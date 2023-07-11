@@ -48,7 +48,11 @@ public:
     virtual void Destroy() const = 0;
     virtual void DrawPixelMap(const RefPtr<PixelMap>& pixelmap) = 0;
     virtual void DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode) = 0;
+#ifndef USE_ROSEN_DRAWING
     virtual void DrawImage(void* skImage) = 0;
+#else
+    virtual void DrawImage(void* drawingImage) = 0;
+#endif
     virtual void DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern) = 0;
 
     virtual void DrawText(std::shared_ptr<Rosen::Typography> paragraph_,
