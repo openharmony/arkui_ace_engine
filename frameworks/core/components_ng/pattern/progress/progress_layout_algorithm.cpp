@@ -52,7 +52,8 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
                        .ConvertToPx();
     float diameter =
         progressTheme ? progressTheme->GetRingDiameter().ConvertToPx() : DEFALT_RING_DIAMETER.ConvertToPx();
-    float width_ = progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.maxSize.Width();
+    float width_ =
+        progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.percentReference.Width();
     if (contentConstraint.selfIdealSize.Width()) {
         width_ = contentConstraint.selfIdealSize.Width().value();
     }
