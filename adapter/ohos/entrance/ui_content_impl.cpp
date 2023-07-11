@@ -636,13 +636,9 @@ void UIContentImpl::CommonInitializeForm(
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
-                [context = context_] {
-                    auto sharedContext = context.lock();
-                    CHECK_NULL_VOID_NOLOG(sharedContext);
-                    auto abilityContext =
-                        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                    CHECK_NULL_VOID_NOLOG(abilityContext);
-                    abilityContext->CloseAbility();
+                [window = window_] {
+                    CHECK_NULL_VOID_NOLOG(window);
+                    window->PerformBack();
                 },
                 [context = context_](const std::string& address) {
                     auto sharedContext = context.lock();
@@ -1096,13 +1092,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
-                [context = context_] {
-                    auto sharedContext = context.lock();
-                    CHECK_NULL_VOID_NOLOG(sharedContext);
-                    auto abilityContext =
-                        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                    CHECK_NULL_VOID_NOLOG(abilityContext);
-                    abilityContext->CloseAbility();
+                [window = window_] {
+                    CHECK_NULL_VOID_NOLOG(window);
+                    window->PerformBack();
                 },
                 [context = context_](const std::string& address) {
                     auto sharedContext = context.lock();
