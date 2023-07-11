@@ -27,8 +27,14 @@ class WantParams;
 } // namespace AAFwk
 
 namespace OHOS::Ace {
+class WantParamsWrap : public AceType {
+    DECLARE_ACE_TYPE(WantParamsWrap, AceType);
+public:
+    static RefPtr<WantParamsWrap> CreateWantWrap(NativeEngine* engine, NativeValue* value);
+};
+
 class ACE_EXPORT WantWrap : public AceType {
-    DECLARE_ACE_TYPE(WantWrap, AceType)
+    DECLARE_ACE_TYPE(WantWrap, AceType);
 
 public:
     static NativeValue* ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine);

@@ -357,6 +357,7 @@ void JsBindViews(BindingTarget globalObj)
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);
     JSUIExtension::JSBind(globalObj);
+    JSUIExtensionProxy::JSBind(globalObj);
 #endif
     JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);

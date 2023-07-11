@@ -29,6 +29,7 @@ class WantParams;
 }
 
 namespace OHOS::Ace::NG {
+class UIExtensionProxy;
 class UIExtensionPattern : public WindowPattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, WindowPattern);
 
@@ -44,6 +45,7 @@ public:
         return false;
     }
 
+    void SetOnRemoteReadyCallback(std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
     void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback);
@@ -89,11 +91,14 @@ private:
     void UnregisterAbilityResultListener();
     void OnConnectInner();
 
+    void OnRemoteReady();
     void OnResult(int32_t code, const AAFwk::Want& want);
     void OnReceive(const AAFwk::WantParams& wantParams);
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
+
+    std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;

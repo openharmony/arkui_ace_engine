@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 
 #include "scope_manager/native_scope_manager.h"
 
@@ -36,22 +36,6 @@ constexpr int32_t MIN_DISABLE_EVENT_VERSION = 10;
 } // namespace
 
 #if !defined(PREVIEW)
-class ScopeRAII {
-public:
-    explicit ScopeRAII(NativeScopeManager* manager) : manager_(manager)
-    {
-        scope_ = manager_->Open();
-    }
-    ~ScopeRAII()
-    {
-        manager_->Close(scope_);
-    }
-
-private:
-    NativeScopeManager* manager_;
-    NativeScope* scope_;
-};
-
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 {
     if (!obj->IsObject()) {

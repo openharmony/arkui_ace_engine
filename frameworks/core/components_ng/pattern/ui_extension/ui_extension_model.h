@@ -29,12 +29,16 @@ class WantParams;
 }
 
 namespace OHOS::Ace {
+namespace NG {
+class UIExtensionProxy;
+}
 class ACE_EXPORT UIExtensionModel {
 public:
     static UIExtensionModel* GetInstance();
     virtual ~UIExtensionModel() = default;
 
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
+    virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
     virtual void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
     virtual void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive);

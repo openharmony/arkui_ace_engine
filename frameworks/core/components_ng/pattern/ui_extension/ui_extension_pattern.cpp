@@ -26,6 +26,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/event/ace_events.h"
@@ -65,6 +66,7 @@ UIExtensionPattern::~UIExtensionPattern()
 
 void UIExtensionPattern::OnConnect()
 {
+    LOGI("UIExtensionPattern OnConnect called");
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(pipeline);
@@ -79,6 +81,7 @@ void UIExtensionPattern::OnConnect()
 
 void UIExtensionPattern::OnConnectInner()
 {
+    LOGI("UIExtensionPattern OnConnectInner called");
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
@@ -93,6 +96,7 @@ void UIExtensionPattern::OnConnectInner()
     surfaceNode->CreateNodeInRenderThread();
     auto pipeline = PipelineBase::GetCurrentContext();
     TransferFocusWindowId(pipeline->GetFocusWindowId());
+    OnRemoteReady();
 }
 
 void UIExtensionPattern::OnDisconnect()
@@ -108,6 +112,23 @@ void UIExtensionPattern::OnDisconnect()
         CHECK_NULL_VOID_NOLOG(extensionPattern);
         if (extensionPattern->onReleaseCallback_) {
             extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
+        }
+    }, TaskExecutor::TaskType::UI);
+}
+
+void UIExtensionPattern::OnRemoteReady()
+{
+    LOGI("UIExtensionPattern OnRemoteReady called");
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    taskExecutor->PostTask([weak = WeakClaim(this)]() {
+        auto extensionPattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(extensionPattern);
+        if (extensionPattern->onRemoteReadyCallback_) {
+            extensionPattern->onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(extensionPattern->session_));
         }
     }, TaskExecutor::TaskType::UI);
 }
@@ -381,6 +402,20 @@ void UIExtensionPattern::OnModifyDone()
 void UIExtensionPattern::UnregisterAbilityResultListener()
 {
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+}
+
+void UIExtensionPattern::SetOnRemoteReadyCallback(std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+{
+    onRemoteReadyCallback_ = std::move(callback);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
+    extSessionEventCallback->notifyRemoteReadyFunc_ =
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->OnRemoteReady();
+            }
+        };
 }
 
 void UIExtensionPattern::SetOnReleaseCallback(std::function<void(int32_t)>&& callback)
