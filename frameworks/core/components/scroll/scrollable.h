@@ -291,9 +291,11 @@ public:
         return currentVelocity_;
     };
 
+    void OnAnimateStop();
     void StartSpringMotion(
         double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent);
 
+    void UpdateScrollSnapStartOffset(double offset);
     void StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity);
 
     bool IsAnimationNotRunning() const;
