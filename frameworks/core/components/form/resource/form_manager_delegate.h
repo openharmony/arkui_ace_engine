@@ -53,7 +53,7 @@ public:
     using OnFormLinkInfoUpdateCallback = std::function<void(const std::vector<std::string>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
-    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&)>;
+    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, bool)>;
     using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
     using ActionEventHandle = std::function<void(const std::string&)>;
     using UnTrustFormCallback = std::function<void()>;
