@@ -481,7 +481,9 @@ void TabBarPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
         InitScrollable(gestureHub);
-        SetEdgeEffect(gestureHub);
+        if (layoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
+            SetEdgeEffect(gestureHub);
+        }
     }
     InitTouch(gestureHub);
     InitHoverEvent();
