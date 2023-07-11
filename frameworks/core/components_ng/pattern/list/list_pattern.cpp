@@ -940,7 +940,8 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             moveStep = -1;
             nextIndex = maxListItemIndex_;
             nextIndexInGroup = -1;
-        } else if ((isVertical && step == FocusStep::DOWN) || (!isVertical && step == FocusStep::RIGHT)) {
+        } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT) ||
+                (step == FocusStep::TAB)) {
             moveStep = 1;
             if ((curIndexInGroup == -1) || (curIndexInGroup >= curListItemGroupPara.itemEndIndex)) {
                 nextIndex = curIndex + moveStep;
@@ -948,7 +949,8 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             } else {
                 nextIndexInGroup = curIndexInGroup + moveStep;
             }
-        } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
+        } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT) ||
+                (step == FocusStep::SHIFT_TAB)) {
             moveStep = -1;
             if ((curIndexInGroup == -1) || (curIndexInGroup <= 0)) {
                 nextIndex = curIndex + moveStep;
@@ -984,7 +986,8 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
                 moveStep = -curListItemGroupPara.lanes;
                 nextIndexInGroup = curIndexInGroup + moveStep;
             }
-        } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN)) {
+        } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN) ||
+                   (step == FocusStep::TAB)) {
             moveStep = 1;
             if (((curIndexInGroup == -1) && ((curIndex - (lanes_ - 1)) % lanes_ != 0)) || ((curIndexInGroup != -1) &&
                 ((curIndexInGroup - (curListItemGroupPara.lanes - 1)) % curListItemGroupPara.lanes == 0))) {
@@ -994,7 +997,8 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
                 ((curIndexInGroup - (curListItemGroupPara.lanes - 1)) % curListItemGroupPara.lanes != 0)) {
                 nextIndexInGroup = curIndexInGroup + moveStep;
             }
-        } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP)) {
+        } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP) ||
+                   (step == FocusStep::SHIFT_TAB)) {
             moveStep = -1;
             if (((curIndexInGroup == -1) && (curIndex % lanes_ != 0)) || ((curIndexInGroup != -1) &&
                 (curIndexInGroup % curListItemGroupPara.lanes == 0))) {
@@ -1072,7 +1076,7 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
     auto isScrollIndex = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, isScrollIndex);
-    if (nextIndex < curIndex && nextIndex < startIndex_) {
+    if (nextIndex < startIndex_) {
         if (nextIndexInGroup == -1) {
             isScrollIndex = true;
             ScrollToIndex(nextIndex, smooth_, ScrollAlign::START);
@@ -1081,7 +1085,7 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
             ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::START);
             pipeline->FlushUITasks();
         }
-    } else if (nextIndex > curIndex && nextIndex > endIndex_) {
+    } else if (nextIndex > endIndex_) {
         if (nextIndexInGroup == -1) {
             isScrollIndex = true;
             ScrollToIndex(nextIndex, smooth_, ScrollAlign::END);
@@ -1093,6 +1097,7 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
     }
     return isScrollIndex;
 }
+
 bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
     int32_t moveStep, FocusStep step, bool isScrollIndex)
 {

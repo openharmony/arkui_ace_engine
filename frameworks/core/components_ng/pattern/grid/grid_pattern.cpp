@@ -514,18 +514,18 @@ std::pair<FocusStep, FocusStep> GridPattern::GetFocusSteps(int32_t curMainIndex,
     auto isFirstFocusable = isFirstOrLastFocusable.first;
     auto isLastFocusable = isFirstOrLastFocusable.second;
     if (gridLayoutInfo_.axis_ == Axis::VERTICAL) {
-        if (isFirstFocusable && step == FocusStep::LEFT) {
+        if (isFirstFocusable && step == FocusStep::SHIFT_TAB) {
             firstStep = FocusStep::UP;
             secondStep = FocusStep::RIGHT_END;
-        } else if (isLastFocusable && step == FocusStep::RIGHT) {
+        } else if (isLastFocusable && step == FocusStep::TAB) {
             firstStep = FocusStep::DOWN;
             secondStep = FocusStep::LEFT_END;
         }
     } else if (gridLayoutInfo_.axis_ == Axis::HORIZONTAL) {
-        if (isFirstFocusable && step == FocusStep::UP) {
+        if (isFirstFocusable && step == FocusStep::SHIFT_TAB) {
             firstStep = FocusStep::LEFT;
             secondStep = FocusStep::DOWN_END;
-        } else if (isLastFocusable && step == FocusStep::DOWN) {
+        } else if (isLastFocusable && step == FocusStep::TAB) {
             firstStep = FocusStep::RIGHT;
             secondStep = FocusStep::UP_END;
         }
@@ -626,16 +626,16 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
                (step == FocusStep::RIGHT_END && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = curMaxCrossCount - 1;
-    } else if ((step == FocusStep::UP && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
-               (step == FocusStep::LEFT && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+    } else if (((step == FocusStep::UP || step == FocusStep::SHIFT_TAB) && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
+               ((step == FocusStep::LEFT || step == FocusStep::SHIFT_TAB) && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = curCrossIndex - 1;
     } else if ((step == FocusStep::UP && gridLayoutInfo_.axis_ == Axis::VERTICAL) ||
                (step == FocusStep::LEFT && gridLayoutInfo_.axis_ == Axis::HORIZONTAL)) {
         nextMainIndex = curMainIndex - 1;
         nextCrossIndex = curCrossIndex + static_cast<int32_t>((curCrossSpan - 1) / 2);
-    } else if ((step == FocusStep::DOWN && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
-               (step == FocusStep::RIGHT && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+    } else if (((step == FocusStep::DOWN || step == FocusStep::TAB) && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
+               ((step == FocusStep::RIGHT || step == FocusStep::TAB) && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = curCrossIndex + curCrossSpan;
     } else if ((step == FocusStep::DOWN && gridLayoutInfo_.axis_ == Axis::VERTICAL) ||
@@ -697,7 +697,10 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     if (nextCrossIndex >= nextMaxCrossCount) {
         LOGI("Next index return: { %{public}d,%{public}d }. Next cross index is greater than max cross count",
             nextMainIndex, nextMaxCrossCount - 1);
-        return { nextMainIndex, nextMaxCrossCount - 1 };
+        if (nextMaxCrossCount - 1 != curCrossIndex) {
+            return { nextMainIndex, nextMaxCrossCount - 1 };
+        }
+        return { -1, -1 };
     }
     LOGI("Next index return: { %{public}d,%{public}d }.", nextMainIndex, nextCrossIndex);
     return { nextMainIndex, nextCrossIndex };
