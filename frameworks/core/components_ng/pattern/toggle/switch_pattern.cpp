@@ -331,15 +331,6 @@ void SwitchPattern::InitMouseEvent()
 
 void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
-        auto pattern = wp.Upgrade();
-        if (!pattern) {
-            return false;
-        }
-        return pattern->OnKeyEvent(event);
-    };
-    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
-
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -347,18 +338,6 @@ void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
-}
-
-bool SwitchPattern::OnKeyEvent(const KeyEvent& event)
-{
-    if (event.action != KeyAction::DOWN) {
-        return false;
-    }
-    if (event.code == KeyCode::KEY_ENTER) {
-        OnClick();
-        return true;
-    }
-    return false;
 }
 
 void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
