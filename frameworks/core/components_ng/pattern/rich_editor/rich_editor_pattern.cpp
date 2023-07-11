@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
@@ -225,6 +224,10 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
         DeleteSpanByRange(start, end, startInfo);
     } else {
         DeleteSpansByRange(start, end, startInfo, endInfo);
+    }
+    if (textSelector_.IsValid()) {
+        SetCaretPosition(textSelector_.GetTextStart());
+        textSelector_.Update(-1, -1);
     }
     SetCaretOffset(start);
     ResetSelection();
@@ -1008,31 +1011,30 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     CHECK_NULL_VOID(isInsert);
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
-    RichEditorAbstractSpanResult retInfo;
-    info.SetSpanIndex(info.GetSpanIndex());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
     if (spanNode == nullptr && info.GetSpanIndex() == 0) {
-        CreateTextSpanNode(spanNode, info, insertValue, retInfo);
+        CreateTextSpanNode(spanNode, info, insertValue);
         return;
     }
     if (spanNode == nullptr && info.GetSpanIndex() != 0) {
         auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
         if (spanNodeBefore == nullptr) {
-            CreateTextSpanNode(spanNode, info, insertValue, retInfo);
+            CreateTextSpanNode(spanNode, info, insertValue);
             return;
         }
-        auto text = spanNodeBefore->GetSpanItem()->content;
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        std::wstring textTemp = converter.from_bytes(text);
-        std::wstring insertValueTemp = converter.from_bytes(insertValue);
-        textTemp.append(insertValueTemp);
-        text = converter.to_bytes(textTemp);
-        spanNodeBefore->UpdateContent(text);
-        AfterIMEInsertValue(
-            spanNodeBefore, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), retInfo);
+        InsertValueToBeforeSpan(spanNodeBefore, insertValue);
+        AfterIMEInsertValue(spanNodeBefore, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
         return;
+    }
+    if (info.GetOffsetInSpan() == 0) {
+        auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
+        if (spanNodeBefore != nullptr) {
+            InsertValueToBeforeSpan(spanNodeBefore, insertValue);
+            AfterIMEInsertValue(spanNodeBefore, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
+            return;
+        }
     }
     auto text = spanNode->GetSpanItem()->content;
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -1041,12 +1043,23 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     textTemp.insert(info.GetOffsetInSpan(), insertValueTemp);
     text = converter.to_bytes(textTemp);
     spanNode->UpdateContent(text);
-    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), retInfo);
+    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
     return;
 }
 
-void RichEditorPattern::CreateTextSpanNode(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info,
-    const std::string& insertValue, RichEditorAbstractSpanResult& retInfo)
+void RichEditorPattern::InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue)
+{
+    auto text = spanNodeBefore->GetSpanItem()->content;
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring textTemp = converter.from_bytes(text);
+    std::wstring insertValueTemp = converter.from_bytes(insertValue);
+    textTemp.append(insertValueTemp);
+    text = converter.to_bytes(textTemp);
+    spanNodeBefore->UpdateContent(text);
+}
+
+void RichEditorPattern::CreateTextSpanNode(
+    RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1054,7 +1067,7 @@ void RichEditorPattern::CreateTextSpanNode(RefPtr<SpanNode>& spanNode, const Tex
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
     spanNode->UpdateContent(insertValue);
-    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), retInfo);
+    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
 }
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::string& insertValue)
@@ -1067,17 +1080,27 @@ bool RichEditorPattern::BeforeIMEInsertValue(const std::string& insertValue)
     return eventHub->FireAboutToIMEInput(insertValueInfo);
 }
 
-void RichEditorPattern::AfterIMEInsertValue(
-    const RefPtr<SpanNode>& spanNode, int32_t insertValueLength, RichEditorAbstractSpanResult& retInfo)
+void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t insertValueLength)
 {
+    RichEditorAbstractSpanResult retInfo;
     isTextChange_ = true;
     moveDirection_ = MoveDirection::FORWARD;
     moveLength_ += insertValueLength;
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    retInfo.SetSpanRangeStart(spanNode->GetSpanItem()->position - insertValueLength);
-    retInfo.SetSpanRangeEnd(spanNode->GetSpanItem()->position);
+    auto contentLength = StringUtils::ToWstring(spanNode->GetSpanItem()->content).length();
+    auto spanEnd = spanNode->GetSpanItem()->position + insertValueLength;
+    auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    retInfo.SetSpanIndex(host->GetChildIndex(spanNode));
+    retInfo.SetSpanRangeStart(spanStart);
+    retInfo.SetSpanRangeEnd(spanEnd);
+    auto offset = GetCaretPosition() - spanStart;
+    retInfo.SetOffsetInSpan(offset);
+    retInfo.SetEraseLength(insertValueLength);
     retInfo.SetValue(spanNode->GetSpanItem()->content);
+    retInfo.SetOffsetInSpan(GetCaretPosition() - retInfo.GetSpanRangeStart());
     if (spanNode->HasTextColor()) {
         retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
     }
@@ -1109,6 +1132,11 @@ void RichEditorPattern::DeleteBackward(int32_t length)
 {
     if (caretPosition_ == 0) {
         return;
+    }
+    if (textSelector_.IsValid()) {
+        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+        SetCaretPosition(textSelector_.GetTextEnd());
+        textSelector_.Update(-1, -1);
     }
     RichEditorDeleteValue info;
     info.SetOffset(caretPosition_ - 1);
@@ -1277,6 +1305,7 @@ int32_t RichEditorPattern::DeleteValueSetImageSpan(
     spanResult.SetSpanType(SpanResultType::IMAGE);
     spanResult.SetSpanRangeEnd(spanItem->position);
     spanResult.SetSpanRangeStart(spanItem->position - 1);
+    spanResult.SetEraseLength(1);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, IMAGE_SPAN_LENGTH);
     auto imageNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(spanResult.GetSpanIndex()));
@@ -1311,6 +1340,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
         eraseLength = spanItem->position - currentPosition;
     }
     spanResult.SetSpanRangeEnd(spanItem->position);
+    spanResult.SetValue(spanItem->content);
     spanResult.SetOffsetInSpan(currentPosition - contentStartPosition);
     spanResult.SetEraseLength(eraseLength);
     return eraseLength;

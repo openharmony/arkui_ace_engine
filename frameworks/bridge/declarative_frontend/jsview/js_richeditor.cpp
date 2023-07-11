@@ -277,7 +277,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     spanRange->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textSpanResult.GetSpanRangeEnd())));
     offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan())));
     offsetInSpan->SetValueAt(
-        0, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength())));
+        1, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength())));
     spanPositionObj->SetPropertyObject("spanRange", spanRange);
     spanPositionObj->SetProperty<int32_t>("spanIndex", textSpanResult.GetSpanIndex());
     decorationObj->SetProperty<TextDecoration>("type", textSpanResult.GetTextDecoration());
@@ -313,7 +313,7 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
         spanRange->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeStart())));
         spanRange->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeEnd())));
         offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan())));
-        offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan() + it.GetEraseLength())));
+        offsetInSpan->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan() + it.GetEraseLength())));
         spanPositionObj->SetPropertyObject("spanRange", spanRange);
         spanPositionObj->SetProperty<int32_t>("spanIndex", it.GetSpanIndex());
         spanResultObj->SetPropertyObject("spanPosition", spanPositionObj);

@@ -105,8 +105,8 @@ public:
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     int32_t GetInstanceId() const;
     void InsertValue(const std::string& insertValue);
-    void CreateTextSpanNode(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue,
-        RichEditorAbstractSpanResult& retInfo);
+    void CreateTextSpanNode(
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
     void DeleteBackward(int32_t length);
     void DeleteForward(int32_t length);
     void SetInputMethodStatus(bool keyboardShown);
@@ -182,8 +182,8 @@ private:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
-    void AfterIMEInsertValue(
-        const RefPtr<SpanNode>& spanNode, int32_t moveLength, RichEditorAbstractSpanResult& retInfo);
+    void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength);
+    void InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
