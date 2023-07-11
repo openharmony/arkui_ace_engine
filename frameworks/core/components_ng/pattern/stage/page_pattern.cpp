@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/common/container.h"
@@ -148,6 +149,7 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID_NOLOG(Container::IsForeground());
     isOnShow_ = true;
     JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
+    PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     if (onPageShow_) {
         onPageShow_();
     }
