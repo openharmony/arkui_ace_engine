@@ -1025,7 +1025,6 @@ protected:
 
 private:
     void DumpFrontend() const;
-    double ModifyKeyboardHeight(double keyboardHeight) const;
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
     MenuEventHandler menuEventHandler_;
