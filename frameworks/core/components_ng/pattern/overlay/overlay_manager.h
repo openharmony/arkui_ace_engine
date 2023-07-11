@@ -222,7 +222,8 @@ public:
     {
         filterColumnNodeWeak_ = columnNode;
     }
-
+    void MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
+    void MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
     void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();

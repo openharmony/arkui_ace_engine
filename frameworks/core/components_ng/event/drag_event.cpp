@@ -307,7 +307,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 actuator->SetFilter(actuator);
             }
             actuator->SetPixelMap(actuator);
-            actuator->SetEventColumn();
+            actuator->SetEventColumn(actuator);
         }
     };
     longPressUpdate_ = longPressUpdate;
@@ -425,12 +425,17 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(hub);
     hub->SetPixelMap(gestureHub->GetPixelMap());
     // mount to rootNode
-    manager->MountPixelMapToRootNode(columnNode);
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        auto windowScene = manager->FindWindowScene(frameNode);
+        manager->MountPixelMapToWindowScene(columnNode, windowScene);
+    } else {
+        manager->MountPixelMapToRootNode(columnNode);
+    }
     imageNode->MarkModifyDone();
     ShowPixelMapAnimation(imageNode);
 }
 
-void DragEventActuator::SetEventColumn()
+void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -453,7 +458,16 @@ void DragEventActuator::SetEventColumn()
     props->UpdateUserDefinedIdealSize(targetSize);
     BindClickEvent(columnNode);
     columnNode->MarkModifyDone();
-    manager->MountEventToRootNode(columnNode);
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        auto gestureHub = actuator->gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        auto frameNode = gestureHub->GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto windowScene = manager->FindWindowScene(frameNode);
+        manager->MountEventToWindowScene(columnNode, windowScene);
+    } else {
+        manager->MountEventToRootNode(columnNode);
+    }
 }
 
 void DragEventActuator::HideFilter()

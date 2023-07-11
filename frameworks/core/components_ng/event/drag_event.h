@@ -97,7 +97,7 @@ public:
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
-    void SetEventColumn();
+    void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
     void HideEventColumn();
