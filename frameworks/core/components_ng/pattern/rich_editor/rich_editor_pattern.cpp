@@ -226,6 +226,8 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     } else {
         DeleteSpansByRange(start, end, startInfo, endInfo);
     }
+    SetCaretOffset(start);
+    ResetSelection();
 }
 
 void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
