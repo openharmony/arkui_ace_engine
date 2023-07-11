@@ -730,8 +730,8 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector5F& rotate)
 
 void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
 {
-    float zPivot = 0.0;
-    auto z = center.GetZ();
+    float zPivot = 0.0f;
+    auto& z = center.GetZ();
     if (z.has_value()) {
         zPivot = static_cast<float>(z.value().ConvertToPx());
     }

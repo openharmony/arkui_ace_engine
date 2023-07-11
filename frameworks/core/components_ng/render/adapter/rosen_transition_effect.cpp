@@ -343,7 +343,7 @@ void PropertyTransitionEffectTemplate<Modifier, PropertyType>::OnDetach(const Re
     modifier_.reset();
 }
 
-void RosenPivotTransitionEffect::SetPivot(Dimension centerX, Dimension centerY, Dimension centerZ)
+void RosenPivotTransitionEffect::SetPivot(const Dimension& centerX, const Dimension& centerY, const Dimension& centerZ)
 {
     centerX_ = centerX;
     centerY_ = centerY;

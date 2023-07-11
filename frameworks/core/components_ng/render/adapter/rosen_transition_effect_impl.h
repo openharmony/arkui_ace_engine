@@ -111,7 +111,7 @@ public:
         const Dimension& centerZ = Dimension(0.0));
     ~RosenPivotTransitionEffect() override = default;
 
-    void SetPivot(Dimension centerX, Dimension centerY, Dimension centerZ = Dimension(0.0));
+    void SetPivot(const Dimension& centerX, const Dimension& centerY, const Dimension& centerZ = Dimension(0.0));
 
 private:
     void OnUpdateTransitionContext(
