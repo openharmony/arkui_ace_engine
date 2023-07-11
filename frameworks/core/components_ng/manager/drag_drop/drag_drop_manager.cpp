@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/utils/time_util.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -301,6 +302,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
 #else
     UpdateDragWindowPosition(static_cast<int32_t>(point.GetX()), static_cast<int32_t>(point.GetY()));
 #endif // ENABLE_DRAG_FRAMEWORK
+    UpdateVelocityTrackerPoint(point, false);
 
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON);
@@ -356,9 +358,11 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         LOGD("DragDropManager Is On DragCancel");
         InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_CANCEL, false);
         summaryMap_.clear();
+        ClearVelocityInfo();
         return;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
+    UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON);
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -375,6 +379,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #endif // ENABLE_DRAG_FRAMEWORK
     UpdateDragEvent(event, point);
     eventHub->FireOnDrop(event, extraParams);
+    ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     InteractionManager::GetInstance()->StopDrag(
         TranslateDragResult(event->GetResult()), event->IsUseCustomAnimation());
@@ -442,6 +447,7 @@ void DragDropManager::FireOnDragEvent(
     event->SetY((double)point.GetY());
     event->SetScreenX((double)point.GetScreenX());
     event->SetScreenY((double)point.GetScreenY());
+    event->SetVelocity(velocityTracker_.GetVelocity());
 
     switch (type) {
         case DragEventType::ENTER:
@@ -822,4 +828,17 @@ void DragDropManager::ClearExtraInfo()
     extraInfo_.clear();
 }
 #endif // ENABLE_DRAG_FRAMEWORK
+
+void DragDropManager::ClearVelocityInfo()
+{
+    velocityTracker_.Reset();
+}
+
+void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
+{
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp curTime(microseconds);
+    velocityTracker_.UpdateTrackerPoint(point.GetX(), point.GetY(), curTime, isEnd);
+}
+
 } // namespace OHOS::Ace::NG
