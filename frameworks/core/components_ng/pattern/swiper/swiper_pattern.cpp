@@ -145,6 +145,23 @@ void SwiperPattern::OnModifyDone()
     InitSwiperController();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
+    if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
+        StopPropertyTranslateAnimation();
+        StopTranslateAnimation();
+        StopSpringAnimation();
+        StopFadeAnimation();
+        currentOffset_ = 0.0f;
+        mainSizeIsMeasured_ = false;
+        itemPosition_.clear();
+        jumpIndex_ = currentIndex_;
+        for (const auto& child : host->GetChildren()) {
+            if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
+                auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
+                CHECK_NULL_VOID(lazyForEachNode);
+                lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
+            }
+        }
+    }
     if (IsDisableSwipe()) {
         if (panEvent_) {
             gestureHub->RemovePanEvent(panEvent_);
@@ -195,18 +212,6 @@ void SwiperPattern::OnModifyDone()
         translateTask_.Cancel();
     }
     SetAccessibilityAction();
-    if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
-        mainSizeIsMeasured_ = false;
-        itemPosition_.clear();
-        jumpIndex_ = currentIndex_;
-        for (const auto& child : host->GetChildren()) {
-            if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
-                auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
-                CHECK_NULL_VOID(lazyForEachNode);
-                lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
-            }
-        }
-    }
 }
 
 void SwiperPattern::BeforeCreateLayoutWrapper()
@@ -245,6 +250,10 @@ void SwiperPattern::InitSurfaceChangedCallback()
                     return;
                 }
                 if (type == WindowSizeChangeReason::ROTATION) {
+                    swiper->StopPropertyTranslateAnimation();
+                    swiper->StopTranslateAnimation();
+                    swiper->StopSpringAnimation();
+                    swiper->StopFadeAnimation();
                     swiper->currentOffset_ = 0.0f;
                     swiper->itemPosition_.clear();
                     swiper->jumpIndex_ = swiper->currentIndex_;
