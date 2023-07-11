@@ -28,6 +28,9 @@ void GridPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlig
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
+    if (align == ScrollAlign::NONE) {
+        align = ScrollAlign::AUTO;
+    }
     gridPattern->UpdateStartIndex(index, align);
 }
 

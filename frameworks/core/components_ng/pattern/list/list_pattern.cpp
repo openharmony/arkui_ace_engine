@@ -122,6 +122,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             float targetPos = 0.0f;
             switch (scrollAlign_) {
                 case ScrollAlign::START:
+                case ScrollAlign::NONE:
                     targetPos = iter->second.startPos;
                     break;
                 case ScrollAlign::CENTER:
