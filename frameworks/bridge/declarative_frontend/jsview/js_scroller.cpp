@@ -176,7 +176,7 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 {
     int32_t index = 0;
     bool smooth = false;
-    ScrollAlign align = ScrollAlign::START;
+    ScrollAlign align = ScrollAlign::NONE;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], index) || index < 0) {
         LOGW("Invalid params");
         return;
