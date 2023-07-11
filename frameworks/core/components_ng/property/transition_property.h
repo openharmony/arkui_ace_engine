@@ -77,24 +77,27 @@ struct RotateOptions {
     CalcDimension centerX;
     CalcDimension centerY;
     CalcDimension centerZ;
+    // camera distance value
+    float perspective = 1.0f;
+    
     RotateOptions(float xDirection, float yDirection, float zDirection, float angle, const CalcDimension& centerX,
-        const CalcDimension& centerY)
-        : xDirection(xDirection), yDirection(yDirection), zDirection(zDirection), angle(angle), centerX(centerX),
-          centerY(centerY)
-    {}
+        const CalcDimension& centerY, const CalcDimension& centerZ = CalcDimension(0.0f, DimensionUnit::PX),
+        const float perspective = 1.0f) : xDirection(xDirection), yDirection(yDirection), zDirection(zDirection),
+        angle(angle), centerX(centerX), centerY(centerY), centerZ(centerZ), perspective(perspective) {}
     RotateOptions() = default;
     bool operator==(const RotateOptions& other) const
     {
         return NearEqual(angle, other.angle) && NearEqual(xDirection, other.xDirection) &&
                NearEqual(yDirection, other.yDirection) && NearEqual(zDirection, other.zDirection) &&
                NearEqual(centerX, other.centerX) && NearEqual(centerY, other.centerY) &&
-               NearEqual(centerZ, other.centerZ);
+               NearEqual(centerZ, other.centerZ) && NearEqual(perspective, other.perspective);
     }
     std::string ToString() const
     {
         return "rotate:[" + std::to_string(xDirection) + "," + std::to_string(yDirection) + "," +
                std::to_string(zDirection) + "," + centerX.ToString() + "," + centerY.ToString() +
-               ", cameraDistance: " + centerZ.ToString() + ", angle:" + std::to_string(angle) + "]";
+               "," + centerZ.ToString() + ", angle:" + std::to_string(angle) + ", perspective:" +
+               std::to_string(perspective) + "]";
     }
 };
 struct TransitionOptions {

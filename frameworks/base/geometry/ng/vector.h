@@ -59,5 +59,21 @@ struct Vector4F {
     float w = 0.0f;
 };
 
+struct Vector5F {
+    Vector5F(float xF, float yF, float zF, float wF, float vF) : x(xF), y(yF), z(zF), w(wF), v(vF) {}
+
+    bool operator==(const Vector5F& other) const
+    {
+        return NearEqual(x, other.x) && NearEqual(y, other.y) && NearEqual(z, other.z) &&
+            NearEqual(w, other.w) && NearEqual(v, other.v);
+    }
+
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+    float w = 0.0f;
+    float v = 0.0f;
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_VECTORF_H

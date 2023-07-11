@@ -170,7 +170,7 @@ public:
     static void SetScale(const NG::VectorF& value);
     static void SetPivot(const DimensionOffset& value);
     static void SetTranslate(const NG::TranslateOptions& value);
-    static void SetRotate(const NG::Vector4F& value);
+    static void SetRotate(const NG::Vector5F& value);
 
     static void SetTransformMatrix(const Matrix4& matrix);
 

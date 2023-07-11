@@ -328,7 +328,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, TranslateOptions);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector5F);
 
     // Foreground
     ACE_DEFINE_PROPERTY_GROUP(Foreground, ForegroundProperty);
@@ -467,7 +467,7 @@ protected:
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
 
-    virtual void OnTransformRotateUpdate(const Vector4F& value) {}
+    virtual void OnTransformRotateUpdate(const Vector5F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}

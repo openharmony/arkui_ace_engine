@@ -45,7 +45,7 @@ const Color WHITE = Color(0xffffffff);
 const Offset OFFSETS {2.0, 2.0};
 
 const NG::VectorF VECTOR_TEST = {10.0, 20.0};
-const NG::Vector4F VECTOR_4F_TEST = {20.0, 40.0, 60.0, 80.0};
+const NG::Vector5F VECTOR_5F_TEST = {20.0f, 40.0f, 60.0f, 80.0f, 1.0f};
 const NG::TranslateOptions PTTION_TEST = {OFFSET_X, OFFSET_Y, POSITION_X};
 const NG::OffsetT<Dimension> POSITION = {POSITION_X, POSITION_Y};
 const NG::OffsetT<Dimension> OFFSET_TEST = {OFFSET_X, OFFSET_Y};
@@ -407,11 +407,11 @@ HWTEST_F(RenderPropertyTestNg, TransformPropertyTest001, TestSize.Level1)
     json->Delete("translate");
 
     /**
-     * @tc.steps: step3. call ToJsonValue. push propTransformRotate is VECTOR_4F_TEST.
+     * @tc.steps: step3. call ToJsonValue. push propTransformRotate is VECTOR_5F_TEST.
      * @tc.steps: step3. push propTransformScale is VECTOR_TEST.
      * @tc.steps: step3. push propTransformTranslate is PTTION_TEST.
      */
-    transformProperty.propTransformRotate = VECTOR_4F_TEST;
+    transformProperty.propTransformRotate = VECTOR_5F_TEST;
     transformProperty.propTransformScale = VECTOR_TEST;
     transformProperty.propTransformTranslate = PTTION_TEST;
     transformProperty.ToJsonValue(json);

@@ -191,7 +191,7 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
     NotifyTransitionInner(rect.GetSize(), false);
 }
 
-void RosenRenderContext::SetPivot(float xPivot, float yPivot)
+void RosenRenderContext::SetPivot(float xPivot, float yPivot, float zPivot)
 {
     // change pivot without animation
     CHECK_NULL_VOID(rsNode_);
@@ -202,6 +202,7 @@ void RosenRenderContext::SetPivot(float xPivot, float yPivot)
         auto modifier = std::make_shared<Rosen::RSPivotModifier>(pivotProperty_);
         rsNode_->AddModifier(modifier);
     }
+    rsNode_->SetPivotZ(zPivot);
 }
 
 void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transitionIn)
@@ -210,23 +211,24 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
     CHECK_NULL_VOID_NOLOG(transitionEffect);
     float xPivot = 0.0f;
     float yPivot = 0.0f;
+    float zPivot = 0.0f;
     if (transitionEffect->HasRotate()) {
         xPivot = ConvertDimensionToScaleBySize(transitionEffect->GetRotateValue().centerX, frameSize.Width());
         yPivot = ConvertDimensionToScaleBySize(transitionEffect->GetRotateValue().centerY, frameSize.Height());
+        zPivot = static_cast<float>(transitionEffect->GetRotateValue().centerZ.ConvertToPx());
     } else if (transitionEffect->HasScale()) {
         xPivot = ConvertDimensionToScaleBySize(transitionEffect->GetScaleValue().centerX, frameSize.Width());
         yPivot = ConvertDimensionToScaleBySize(transitionEffect->GetScaleValue().centerY, frameSize.Height());
     } else {
         return;
     }
-    SetPivot(xPivot, yPivot);
+    SetPivot(xPivot, yPivot, zPivot);
 }
 
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
 {
     // skip if node already created
     CHECK_NULL_VOID_NOLOG(!rsNode_);
-
     if (isRoot) {
         rsNode_ = Rosen::RSRootNode::Create();
         return;
@@ -310,7 +312,12 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         auto vec = propTransform_->GetTransformCenterValue();
         float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
         float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
-        SetPivot(xPivot, yPivot);
+        if (vec.GetZ().has_value()) {
+            float zPivot = static_cast<float>(vec.GetZ().value().ConvertToPx());
+            SetPivot(xPivot, yPivot, zPivot);
+        } else {
+            SetPivot(xPivot, yPivot);
+        }
     }
 
     if (propTransform_ && propTransform_->HasTransformTranslate()) {
@@ -706,7 +713,7 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
+void RosenRenderContext::OnTransformRotateUpdate(const Vector5F& rotate)
 {
     CHECK_NULL_VOID(rsNode_);
     float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2));
@@ -716,22 +723,25 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
     }
     // for rosen backend, the rotation angles in the x and y directions should be set to opposite angles
     rsNode_->SetRotation(-rotate.w * rotate.x / norm, -rotate.w * rotate.y / norm, rotate.w * rotate.z / norm);
+    // set camera distance
+    rsNode_->SetCameraDistance(rotate.v);
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
 {
+    float zPivot = 0.0f;
+    auto& z = center.GetZ();
+    if (z.has_value()) {
+        zPivot = static_cast<float>(z.value().ConvertToPx());
+    }
     RectF rect = GetPaintRectWithoutTransform();
     if (!RectIsNull()) {
         float xPivot = ConvertDimensionToScaleBySize(center.GetX(), rect.Width());
         float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
-        SetPivot(xPivot, yPivot);
-
-        auto z = center.GetZ();
-        if (z.has_value()) {
-            float zPivot = ConvertDimensionToScaleBySize(z.value(), rect.Width());
-            rsNode_->SetCameraDistance(zPivot);
-        }
+        SetPivot(xPivot, yPivot, zPivot);
+    } else {
+        rsNode_->SetPivotZ(zPivot);
     }
     RequestNextFrame();
 }

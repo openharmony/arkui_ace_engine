@@ -260,6 +260,7 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
         }
         rotate.centerY = length;
     }
+    // if specify centerZ
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
         if (length.Unit() == DimensionUnit::INVALID) {
             LOGW("centerZ is invalid");
@@ -268,6 +269,9 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     }
     // if specify angle
     JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
+    float perspective = 1.0f;
+    JSViewAbstract::GetPerspective("perspective", argsPtrItem, perspective);
+    rotate.perspective = perspective;
 }
 
 bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOption& option)
@@ -1133,7 +1137,7 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
         ParseJsRotate(argsPtrItem, rotate, angle);
         if (angle) {
             ViewAbstractModel::GetInstance()->SetRotate(
-                rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value());
+                rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value(), rotate.perspective);
             ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
         } else {
             LOGE("Js JsRotate failed, not specify angle");
@@ -5785,6 +5789,15 @@ void JSViewAbstract::GetAngle(
         angle = static_cast<float>(value->GetDouble());
     } else {
         LOGE("Invalid value type");
+    }
+}
+
+void JSViewAbstract::GetPerspective(
+    const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, float& perspective)
+{
+    auto value = jsonValue->GetValue(key);
+    if (value && value->IsNumber()) {
+        perspective = static_cast<float>(value->GetDouble());
     }
 }
 
