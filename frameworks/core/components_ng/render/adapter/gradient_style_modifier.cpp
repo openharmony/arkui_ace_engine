@@ -30,12 +30,11 @@ void GradientStyleModifier::Draw(RSDrawingContext& context) const
     CHECK_NULL_VOID(colors_);
     CHECK_NULL_VOID(colorStops_);
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
-    RSCanvas rsCanvas(&skCanvas);
     SizeF contentSize(context.width, context.height);
-    PaintGradient(rsCanvas, contentSize);
+    PaintGradient(*skCanvas, contentSize);
 }
 
-void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSize) const
+void GradientStyleModifier::PaintGradient(SkCanvas& canvas, const SizeF& frameSize) const
 {
     if (Negative(frameSize.Height()) || Negative(frameSize.Width())) {
         return;
@@ -45,29 +44,18 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
     paint.setAntiAlias(true);
     paint.setShader(shader);
 
-    auto imageInfo = SkImageInfo::Make(
-        frameSize.Width(), frameSize.Height(), SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-    SkBitmap skBitmap;
-    skBitmap.allocPixels(imageInfo);
-
-    std::unique_ptr<SkCanvas> skCanvas = std::make_unique<SkCanvas>(skBitmap);
-    skCanvas->drawPaint(paint);
-    auto skImage = SkImage::MakeFromBitmap(skBitmap);
-    RSImage rsImage(&skImage);
-
-    canvas.Save();
+    SkRRect rRect;
     if (borderRadius_.has_value()) {
-        RSRoundRect rRect(
-            RSRect(0, 0, frameSize.Width(), frameSize.Height()), borderRadius_.value().x_, borderRadius_.value().y_);
-        rRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, borderRadius_.value().x_, borderRadius_.value().x_);
-        rRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, borderRadius_.value().y_, borderRadius_.value().y_);
-        rRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, borderRadius_.value().z_, borderRadius_.value().z_);
-        rRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, borderRadius_.value().w_, borderRadius_.value().w_);
-        canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
+        SkVector fRadii[4] = { { borderRadius_.value().x_, borderRadius_.value().x_ },
+            { borderRadius_.value().y_, borderRadius_.value().y_ },
+            { borderRadius_.value().z_, borderRadius_.value().z_ },
+            { borderRadius_.value().w_, borderRadius_.value().w_ } };
+        rRect.setRectRadii(SkRect::MakeWH(frameSize.Width(), frameSize.Height()), fRadii);
+        canvas.save();
+        canvas.clipRRect(rRect, SkClipOp::kIntersect, true);
     }
-    canvas.DrawImageRect(rsImage, OHOS::Rosen::Drawing::Rect(0.0, 0.0, frameSize.Width(), frameSize.Height()),
-        OHOS::Rosen::Drawing::SamplingOptions());
-    canvas.Restore();
+    canvas.drawRect(SkRect::MakeXYWH(0, 0, frameSize.Width(), frameSize.Height()), paint);
+    canvas.restore();
 }
 
 Gradient GradientStyleModifier::GetGradient() const
