@@ -30,7 +30,7 @@ public:
     void SetChangeEvent(SelectedChangeEvent&& onChange) override;
 
 private:
-    void LayOutCounter(const RefPtr<CalendarPickerPattern>& pickerPattern, RefPtr<FrameNode>& pickerNode,
+    void LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern, RefPtr<FrameNode>& pickerNode,
         const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme);
     RefPtr<FrameNode> CreateButtonChild(int32_t id, bool isAdd, const RefPtr<CalendarTheme>& theme);
     RefPtr<FrameNode> CreateButtonImageChild(bool isAdd, const RefPtr<CalendarTheme>& theme);

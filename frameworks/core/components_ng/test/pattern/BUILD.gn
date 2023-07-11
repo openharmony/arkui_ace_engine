@@ -20,6 +20,7 @@ group("pattern_unittest") {
     "bubble:bubble_test_ng",
     "button:button_test_ng",
     "calendar:calendar_pattern_test_ng",
+    "calendar_picker:calendar_picker_test_ng",
     "checkbox:checkbox_test_ng",
     "checkboxgroup:checkboxgroup_test_ng",
     "common_view:common_view_test_ng",
