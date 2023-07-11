@@ -328,6 +328,7 @@ void ListPattern::ProcessEvent(
     if (scrollStop_) {
         auto onScrollStop = listEventHub->GetOnScrollStop();
         if (!GetScrollAbort() && onScrollStop) {
+            SetScrollState(SCROLL_FROM_NONE);
             onScrollStop();
         }
         scrollStop_ = false;
