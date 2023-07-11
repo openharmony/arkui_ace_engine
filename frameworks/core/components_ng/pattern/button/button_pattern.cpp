@@ -90,6 +90,12 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetMaxLines().has_value()) {
         textLayoutProperty->UpdateMaxLines(layoutProperty->GetMaxLines().value());
     }
+    if (layoutProperty->GetMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+    }
+    if (layoutProperty->GetMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+    }
     if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
         textLayoutProperty->UpdateHeightAdaptivePolicy(layoutProperty->GetHeightAdaptivePolicy().value());
     }
