@@ -776,6 +776,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
+    // prevent repeated trigger with same keyboardHeight
+    if (keyboardHeight == safeAreaManager_->GetKeyboardInset().Length()) {
+        return;
+    }
+
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
@@ -816,10 +821,15 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
         }
         rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        // layout immediately
         FlushUITasks();
-        CHECK_NULL_VOID_NOLOG(keyboardHeight > 0);
+
+        CHECK_NULL_VOID_NOLOG(manager);
         // only scroll when keyboard shows
-        auto safeAreaBottom = GetSafeArea().bottom_.Combine(GetSafeAreaManager()->GetKeyboardInset());
+        if (keyboardHeight <= 0) {
+            return;
+        }
+        auto safeAreaBottom = GetSafeArea().bottom_.Combine(safeAreaManager_->GetKeyboardInset());
         CHECK_NULL_VOID_NOLOG(safeAreaBottom.IsValid());
         manager->ScrollTextFieldToSafeArea(safeAreaBottom);
         FlushUITasks();
