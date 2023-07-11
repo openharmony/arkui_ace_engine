@@ -56,9 +56,6 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
     auto maxSize = childLayoutConstraint.maxSize;
-    auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
-    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::PANEL);
-    columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto idealSize =
         !invisibleFlag_
             ? ((PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9)
@@ -68,13 +65,7 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                       : CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL,
                             layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true))
             : SizeF();
-    auto width = 0.0f;
-    if (gridSizeType == ScreenSizeType::SM) {
-        width = idealSize.Width();
-    } else {
-        auto columns = columnInfo->GetColumns(gridSizeType);
-        width = columnInfo->GetWidth(columns) + columnInfo->GetParent()->GetGutterWidth().ConvertToPx() * DOUBLENESS;
-    }
+    auto width = GetMaxWidthByScreenSizeType(maxSize, idealSize);
     maxWidth_ = width;
     idealSize_ = idealSize;
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -182,5 +173,35 @@ void SlidingPanelLayoutAlgorithm::MeasureCloseIcon(
     closeIconGeometryNode->SetFrameSize(frameSize);
     auto childConstraint = slidingPanelLayoutProperty->CreateChildConstraint();
     closeIconWrapper->Measure(childConstraint);
+}
+
+float SlidingPanelLayoutAlgorithm::GetMaxWidthByScreenSizeType(const SizeF& maxSize, const SizeF& idealSize) const
+{
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::PANEL);
+    columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
+    auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
+    auto width = 0.0f;
+    auto columns = 0;
+    switch (gridSizeType) {
+        case ScreenSizeType::UNDEFINED:
+        case ScreenSizeType::XS:
+        case ScreenSizeType::SM:
+            width = idealSize.Width();
+            break;
+        case ScreenSizeType::MD:
+            columns = columnInfo->GetColumns(gridSizeType);
+            width =
+                columnInfo->GetWidth(columns) + columnInfo->GetParent()->GetGutterWidth().ConvertToPx() * DOUBLENESS;
+            break;
+        case ScreenSizeType::LG:
+        case ScreenSizeType::XL:
+            columns = columnInfo->GetColumns(ScreenSizeType::LG);
+            width =
+                columnInfo->GetWidth(columns) + columnInfo->GetParent()->GetGutterWidth().ConvertToPx() * DOUBLENESS;
+            break;
+        default:
+            break;
+    }
+    return width;
 }
 } // namespace OHOS::Ace::NG
