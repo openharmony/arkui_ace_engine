@@ -3534,6 +3534,9 @@ int32_t TextFieldPattern::GetLineBeginPosision(int32_t originCaretPosition, bool
     if (textEditingValue_.text[strIndex] == '\n') {
         moveLineBeginOffset--;
     }
+    if (moveLineBeginOffset > originCaretPosition) {
+        return 0;
+    }
     return originCaretPosition - moveLineBeginOffset;
 }
 
@@ -3557,11 +3560,17 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
         strIndex++) {
         moveLineEndOffset++;
     }
+    if (moveLineEndOffset > textLength - originCaretPosition) {
+        return textLength;
+    }
     return originCaretPosition + moveLineEndOffset;
 }
 
 bool TextFieldPattern::CharLineChanged(int32_t caretPosition)
 {
+    if (caretPosition < 0 || caretPosition > static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+        return true;
+    }
     auto caretMetrics = CalcCursorOffsetByPosition(caretPosition);
     return !NearEqual(caretMetrics.offset.GetY(), caretRect_.GetY());
 }
