@@ -52,7 +52,6 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_DRAG_BAR,
     THEME_PATTERN_CLOSE_ICON,
     THEME_PATTERN_SEMI_MODAL,
-    // append
     THEME_PATTERN_BADGE,
     THEME_PATTERN_CALENDAR,
     THEME_PATTERN_CAMERA,
@@ -518,9 +517,7 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
         auto manager = GetResourceManager();
         CHECK_NULL_RETURN_NOLOG(manager, "");
         // Adapt to the input like: "file:///index.html?a=1", before the new solution comes.
-        auto it = std::find_if(fileName.begin(), fileName.end(), [](char c) {
-            return (c == '#') || (c == '?');
-        });
+        auto it = std::find_if(fileName.begin(), fileName.end(), [](char c) { return (c == '#') || (c == '?'); });
         std::string params;
         std::string newFileName = fileName;
         if (it != fileName.end()) {
@@ -543,7 +540,22 @@ bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len
     CHECK_NULL_RETURN_NOLOG(manager, false);
     auto state = manager->GetRawFileFromHap(rawFile, len, dest);
     if (state != Global::Resource::SUCCESS || !dest) {
-        LOGE("GetRawFileFromHap error, raw filename:%{public}s, error:%{public}u", rawFile.c_str(), state);
+        LOGW("GetRawFileFromHap error, raw filename:%{public}s, error:%{public}u", rawFile.c_str(), state);
+        return false;
+    }
+    return true;
+}
+
+bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    auto manager = GetResourceManager(bundleName, moduleName);
+    CHECK_NULL_RETURN_NOLOG(manager, false);
+    auto state = manager->GetRawFileFromHap(rawFile, len, dest);
+    if (state != Global::Resource::SUCCESS || !dest) {
+        LOGW("GetRawFileFromHap error, raw filename:%{public}s, bundleName:%{public}s, moduleName:%{public}s, "
+             "error:%{public}u",
+            rawFile.c_str(), bundleName.c_str(), moduleName.c_str(), state);
         return false;
     }
     return true;
@@ -555,7 +567,21 @@ bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_
     CHECK_NULL_RETURN_NOLOG(manager, false);
     auto state = manager->GetMediaDataById(resId, len, dest);
     if (state != Global::Resource::SUCCESS) {
-        LOGE("GetMediaDataById error, id=%{public}u, error:%{public}u", resId, state);
+        LOGW("GetMediaDataById error, id=%{public}u, error:%{public}u", resId, state);
+        return false;
+    }
+    return true;
+}
+
+bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    auto manager = GetResourceManager(bundleName, moduleName);
+    CHECK_NULL_RETURN_NOLOG(manager, false);
+    auto state = manager->GetMediaDataById(resId, len, dest);
+    if (state != Global::Resource::SUCCESS) {
+        LOGW("GetMediaDataById error, id=%{public}u, bundleName:%{public}s, moduleName:%{public}s, error:%{public}u",
+            resId, bundleName.c_str(), moduleName.c_str(), state);
         return false;
     }
     return true;
@@ -567,10 +593,49 @@ bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, 
     CHECK_NULL_RETURN_NOLOG(manager, false);
     auto state = manager->GetMediaDataByName(resName.c_str(), len, dest);
     if (state != Global::Resource::SUCCESS) {
-        LOGE("GetMediaDataByName error, res=%{public}s, error:%{public}u", resName.c_str(), state);
+        LOGW("GetMediaDataByName error, res=%{public}s, error:%{public}u", resName.c_str(), state);
         return false;
     }
     return true;
+}
+
+bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    auto manager = GetResourceManager(bundleName, moduleName);
+    CHECK_NULL_RETURN_NOLOG(manager, false);
+    auto state = manager->GetMediaDataByName(resName.c_str(), len, dest);
+    if (state != Global::Resource::SUCCESS) {
+        LOGW("GetMediaDataByName error, res=%{public}s, bundleName:%{public}s, moduleName:%{public}s, error:%{public}u",
+            resName.c_str(), bundleName.c_str(), moduleName.c_str(), state);
+        return false;
+    }
+    return true;
+}
+
+std::shared_ptr<Global::Resource::ResourceManager> ResourceAdapterImpl::GetResourceManager(
+    const std::string& bundleName, const std::string& moduleName)
+{
+    if (bundleName.empty() && moduleName.empty()) {
+        return sysResourceManager_;
+    }
+
+    std::unique_lock<std::shared_mutex> lock(resourceMutex_);
+    auto iter = resourceManagers_.find({ bundleName, moduleName });
+    if (iter != resourceManagers_.end()) {
+        return iter->second;
+    } else {
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
+        auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+        CHECK_NULL_RETURN(aceContainer, nullptr);
+        auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
+        CHECK_NULL_RETURN(context, nullptr);
+        auto resourceManager = context->GetResourceManager();
+        CHECK_NULL_RETURN(resourceManager, nullptr);
+        resourceManagers_[{ bundleName, moduleName }] = resourceManager;
+        return resourceManager;
+    }
 }
 
 void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, const std::string& moduleName)
