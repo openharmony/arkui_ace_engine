@@ -655,7 +655,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoIcon(const std::string& icon)
     };
     auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     iconProps->UpdateMargin(margin);
-    LOGD("item icon src = %s", item.icon.c_str());
+    LOGD("item icon src = %s", icon.c_str());
     auto imageSrc = ImageSourceInfo(icon);
     iconProps->UpdateImageSourceInfo(imageSrc);
     iconProps->UpdateUserDefinedIdealSize(CalcSize(SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE));
