@@ -140,6 +140,10 @@ public:
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::function<void(Offset)> GetThumbnailCallback() override;
+#endif
+
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
