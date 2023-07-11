@@ -152,6 +152,14 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
         return;
     }
+    if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED &&
+        tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && axis == Axis::VERTICAL) {
+        indicator_ = indicator;
+        currentOffset_ = 0.0f;
+        OffsetF childOffset = OffsetF(0.0f, 0.0f);
+        LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+        return;
+    }
     if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
         childrenMainSize_ <= frameSize.MainSize(axis)) {
         indicator_ = indicator;
