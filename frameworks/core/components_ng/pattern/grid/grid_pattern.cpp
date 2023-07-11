@@ -206,6 +206,17 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
+bool GridPattern::IsItemSelected(const MouseInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    CHECK_NULL_RETURN_NOLOG(node, false);
+    auto itemPattern = node->GetPattern<GridItemPattern>();
+    CHECK_NULL_RETURN_NOLOG(itemPattern, false);
+    return itemPattern->IsSelected();
+}
+
 float GridPattern::GetMainContentSize() const
 {
     auto host = GetHost();
