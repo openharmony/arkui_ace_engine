@@ -18,8 +18,8 @@
 #include <algorithm>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_checker.h"
 #include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
@@ -629,7 +629,7 @@ std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
 
 void LayoutWrapper::AddNodeFlexLayouts()
 {
-    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+    if (!AceChecker::IsPerformanceCheckEnabled()) {
         return;
     }
     auto host = GetHostNode();
@@ -655,7 +655,7 @@ void LayoutWrapper::AddNodeFlexLayouts()
 
 void LayoutWrapper::AddNodeLayoutTime(int64_t time)
 {
-    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+    if (!AceChecker::IsPerformanceCheckEnabled()) {
         return;
     }
     auto host = GetHostNode();

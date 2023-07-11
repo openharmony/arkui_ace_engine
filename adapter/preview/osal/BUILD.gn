@@ -59,6 +59,7 @@ ohos_source_set("preview_osal_source") {
 
     sources = [
       "${ace_root}/adapter/ohos/osal/log_wrapper.cpp",
+      "ace_checker.cpp",
       "ace_engine_ext.cpp",
       "ace_trace.cpp",
       "event_report.cpp",

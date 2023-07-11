@@ -169,6 +169,7 @@ foreach(item, ace_platforms) {
 
     if (platform == "ohos") {
       external_deps = [
+        "hichecker:libhichecker",
         "init:libbeget_proxy",
         "init:libbegetutil",
         "window_manager:libwsutils",
