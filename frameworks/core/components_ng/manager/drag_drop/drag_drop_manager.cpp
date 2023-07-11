@@ -366,7 +366,12 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON);
 #ifdef ENABLE_DRAG_FRAMEWORK
-    bool isUseDefaultDrop = false;
+    if (!dragFrameNode) {
+        LOGD("DragDropManager Not Use DefaultDrop");
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
+        summaryMap_.clear();
+        return;
+    }
 #endif // ENABLE_DRAG_FRAMEWORK
     CHECK_NULL_VOID_NOLOG(dragFrameNode);
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
@@ -374,7 +379,6 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
 #ifdef ENABLE_DRAG_FRAMEWORK
-    isUseDefaultDrop = true;
     InteractionManager::GetInstance()->SetDragWindowVisible(false);
 #endif // ENABLE_DRAG_FRAMEWORK
     UpdateDragEvent(event, point);
@@ -383,10 +387,6 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #ifdef ENABLE_DRAG_FRAMEWORK
     InteractionManager::GetInstance()->StopDrag(
         TranslateDragResult(event->GetResult()), event->IsUseCustomAnimation());
-    if (!isUseDefaultDrop) {
-        LOGD("DragDropManager Not Use DefaultDrop");
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
-    }
     summaryMap_.clear();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
