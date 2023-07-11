@@ -241,9 +241,9 @@ void JSWaterFlow::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSWaterFlow::SetScrollEnabled(bool scrollEnabled)
+void JSWaterFlow::SetScrollEnabled(const JSCallbackInfo& args)
 {
-    WaterFlowModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+    WaterFlowModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
 }
 
 void JSWaterFlow::SetFriction(const JSCallbackInfo& info)
