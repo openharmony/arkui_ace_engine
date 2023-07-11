@@ -329,6 +329,12 @@ bool Scrollable::IsSpringStopped() const
     return !springController_ || (springController_->IsStopped());
 }
 
+bool Scrollable::IsSnapStopped() const
+{
+    return !snapController_ || (snapController_->IsStopped()) ||
+           (snapController_->GetStatus() == Animator::Status::IDLE);
+}
+
 void Scrollable::StopScrollable()
 {
     if (controller_) {
@@ -620,7 +626,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
     scrollSnapController_->ClearAllListeners();
-    snapController_->ClearAllListeners();
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
@@ -1076,7 +1081,7 @@ void Scrollable::ProcessScrollMotion(double position)
     currentPos_ = position;
 
     // spring effect special process
-    if (canOverScroll_ || needScrollSnapChange_ ||
+    if ((IsSnapStopped() && canOverScroll_) || needScrollSnapChange_ ||
         (!overScrollOffsetCallback_ && (outBoundaryCallback_ && outBoundaryCallback_()))) {
         scrollPause_ = true;
         controller_->Stop();

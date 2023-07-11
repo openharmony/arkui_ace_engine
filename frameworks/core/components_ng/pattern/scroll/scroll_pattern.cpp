@@ -141,17 +141,16 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             GetScrollBar()->OnScrollEnd();
         }
     }
+    if (scrollStop_) {
+        FireOnScrollStop();
+        scrollStop_ = false;
+    }
     if (ScrollableIdle() && !AnimateRunning()) {
         auto predictSnapOffset = CalePredictSnapOffset(0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
             FireOnScrollStart();
-            scrollStop_ = false;
         }
-    }
-    if (scrollStop_) {
-        FireOnScrollStop();
-        scrollStop_ = false;
     }
     CheckScrollable();
     auto host = GetHost();

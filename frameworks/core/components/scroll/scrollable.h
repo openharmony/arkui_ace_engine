@@ -304,6 +304,8 @@ public:
 
     bool IsSpringStopped() const;
 
+    bool IsSnapStopped() const;
+
     void StopScrollable();
 
     bool Available() const
