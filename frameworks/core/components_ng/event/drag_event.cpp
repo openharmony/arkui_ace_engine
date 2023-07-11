@@ -360,10 +360,12 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(manager);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+#ifdef WEB_SUPPORTED
             auto webPattern = frameNode->GetPattern<WebPattern>();
             CHECK_NULL_VOID(webPattern);
             bool isWebmageDrag = webPattern->IsImageDrag();
             CHECK_NULL_VOID(isWebmageDrag && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+#endif
         } else {
             bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
             CHECK_NULL_VOID_NOLOG(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
