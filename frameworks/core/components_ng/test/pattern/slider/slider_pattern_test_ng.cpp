@@ -517,13 +517,14 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg006, TestSize.Level1)
 HWTEST_F(SliderPatternTestNg, SliderPatternTestNg007, TestSize.Level1)
 {
     RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
-    EXPECT_NE(sliderPattern, nullptr);
+    ASSERT_NE(sliderPattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentOffset(OffsetF());
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    EXPECT_NE(sliderPaintProperty, nullptr);
+    ASSERT_NE(sliderPaintProperty, nullptr);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
-    EXPECT_NE(sliderLayoutProperty, nullptr);
+    ASSERT_NE(sliderLayoutProperty, nullptr);
     /**
      * @tc.cases: case1. InputEventType is AXIS and MoveStep(-1).
      */
