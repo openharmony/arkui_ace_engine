@@ -103,7 +103,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         touchPoint.sourceTool };
     event.pointerEvent = pointerEvent;
 #ifdef SECURITY_COMPONENT_ENABLE
-    event.enhanceData_ = pointerEvent->GetEnhanceData();
+    event.enhanceData = pointerEvent->GetEnhanceData();
 #endif
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
@@ -247,6 +247,9 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     TimeStamp time(microseconds);
     events.time = time;
     events.pointerEvent = pointerEvent;
+#ifdef SECURITY_COMPONENT_ENABLE
+    events.enhanceData = pointerEvent->GetEnhanceData();
+#endif
     LOGD("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
         events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
