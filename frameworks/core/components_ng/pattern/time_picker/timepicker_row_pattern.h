@@ -314,6 +314,22 @@ public:
     }
 
     void CreateAmPmNode();
+    void OnColorConfigurationUpdate() override;
+	
+    void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
+    {
+        contentRowNode_ = contentRowNode;
+    }
+
+    void SetbuttonTitleNode(RefPtr<FrameNode>& buttonTitleNode)
+    {
+        buttonTitleNode_ = buttonTitleNode;
+    }
+
+    void SetPickerTag(bool isPicker)
+    {
+        isPicker_ = isPicker;
+    }
 
 private:
     void OnModifyDone() override;
@@ -355,6 +371,10 @@ private:
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
+
+    RefPtr<FrameNode> buttonTitleNode_;
+    RefPtr<FrameNode> contentRowNode_;
+    bool isPicker_ = false;
 };
 } // namespace OHOS::Ace::NG
 

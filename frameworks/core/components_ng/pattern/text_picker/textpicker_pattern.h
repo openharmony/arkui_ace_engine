@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "core/components/picker/picker_theme.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_row_accessibility_property.h"
@@ -278,6 +279,18 @@ public:
 
     size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
 
+    void OnColorConfigurationUpdate() override;
+
+    void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
+    {
+        contentRowNode_ = contentRowNode;
+    }
+
+    void SetPickerTag(bool isPicker)
+    {
+        isPicker_ = isPicker;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -332,6 +345,9 @@ private:
     bool operationOn_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
+
+    RefPtr<NG::FrameNode> contentRowNode_;
+    bool isPicker_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-
 #include <cstdint>
 
 #include "base/geometry/ng/size_t.h"
@@ -303,7 +302,6 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
 }
 
-
 void TimePickerRowPattern::SetChangeCallback(ColumnChangeCallback&& value)
 {
     auto host = GetHost();
@@ -547,7 +545,7 @@ void TimePickerRowPattern::HandleHour12Change(bool isAdd, uint32_t index, std::v
 uint32_t TimePickerRowPattern::GetAmPmHour(uint32_t hourOf24) const
 {
     if (hourOf24 == 0) {
-        return AM_PM_HOUR_12; // AM 12:00 means 00:00 in 24 hour style
+        return AM_PM_HOUR_12;                         // AM 12:00 means 00:00 in 24 hour style
     }
     if (1 <= hourOf24 && hourOf24 <= AM_PM_HOUR_11) { // 00:00 to 11:00 is the same for any hour style
         return hourOf24;
@@ -742,4 +740,42 @@ bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
+void TimePickerRowPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
+    pickerProperty->UpdateColor(normalStyle.GetTextColor());
+    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    if (isPicker_) {
+        host->SetNeedCallChildrenUpdate(false);
+        return;
+    }
+    auto dialogContext = host->GetRenderContext();
+    CHECK_NULL_VOID(dialogContext);
+    dialogContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    auto buttonTitleRenderContext = buttonTitleNode_->GetRenderContext();
+    CHECK_NULL_VOID(buttonTitleRenderContext);
+    buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto childText = buttonTitleNode_->GetFirstChild();
+    CHECK_NULL_VOID(childText);
+    auto textTitleNode = DynamicCast<FrameNode>(childText);
+    CHECK_NULL_VOID(textTitleNode);
+    auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+    auto contentChildren = contentRowNode_->GetChildren();
+    auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    host->SetNeedCallChildrenUpdate(false);
+    OnModifyDone();
+}
 } // namespace OHOS::Ace::NG

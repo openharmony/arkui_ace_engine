@@ -199,6 +199,7 @@ public:
     // acquire first menu node in wrapper node by submenu node
     RefPtr<MenuPattern> GetMainMenuPattern() const;
     uint32_t GetInnerMenuCount() const;
+    void OnColorConfigurationUpdate() override;
 
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);

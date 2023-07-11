@@ -19,7 +19,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/base/frame_node.h"
@@ -27,9 +27,8 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 #include "core/pipeline/pipeline_base.h"
-#include "base/memory/ace_type.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -128,7 +127,6 @@ void DatePickerPattern::InitDisabled()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-
 void DatePickerPattern::OnLanguageConfigurationUpdate()
 {
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
@@ -194,6 +192,56 @@ void DatePickerPattern::SetChangeCallback(ColumnChangeCallback&& value)
         CHECK_NULL_VOID(datePickerColumnPattern);
         datePickerColumnPattern->SetChangeCallback(std::move(value));
     }
+}
+
+void DatePickerPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    pickerProperty->UpdateColor(normalStyle.GetTextColor());
+    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    if (isPicker_) {
+        host->SetNeedCallChildrenUpdate(false);
+        return;
+    }
+    auto dialogContext = host->GetRenderContext();
+    CHECK_NULL_VOID(dialogContext);
+    dialogContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    auto titleLayoutRenderContext = buttonTitleNode_->GetRenderContext();
+    titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+
+    auto childButton = buttonTitleNode_->GetFirstChild();
+    CHECK_NULL_VOID(childButton);
+    auto ButtonNode = DynamicCast<FrameNode>(childButton);
+    CHECK_NULL_VOID(ButtonNode);
+    auto buttonTitleRenderContext = ButtonNode->GetRenderContext();
+    CHECK_NULL_VOID(buttonTitleRenderContext);
+    buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+    auto childText = ButtonNode->GetFirstChild();
+    CHECK_NULL_VOID(childText);
+    auto textTitleNode = DynamicCast<FrameNode>(childText);
+    CHECK_NULL_VOID(textTitleNode);
+    auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+
+    auto contentChildren = contentRowNode_->GetChildren();
+    auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+
+    OnModifyDone();
+    host->SetNeedCallChildrenUpdate(false);
 }
 
 void DatePickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -319,8 +367,8 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
     if (code == KeyCode::KEY_DPAD_RIGHT) {
         focusKeyID_ += 1;
         auto childSize = static_cast<int32_t>(host->GetChildren().size());
-        if (focusKeyID_ > childSize -1) {
-            focusKeyID_ = childSize -1;
+        if (focusKeyID_ > childSize - 1) {
+            focusKeyID_ = childSize - 1;
         }
         PaintFocusState();
         return true;
@@ -725,17 +773,16 @@ void DatePickerPattern::HandleSolarMonthDaysChange(bool isAdd, uint32_t index)
             date.SetYear(startDateSolar_.GetYear());
         }
     }
-    if (!isAdd &&
-        monthDaysDatePickerColumnPattern->GetCurrentIndex() == GetOptionCount(monthDaysNode) - 1) {
-            // reduce to previous year
-            date.SetYear(date.GetYear() - 1);
-            if (date.GetYear() < startDateSolar_.GetYear()) {
-                date.SetYear(endDateSolar_.GetYear());
-            }
-            // reduce to previous year's last day
-            date.SetMonth(MAX_MONTH);
-            date.SetDay(PickerDate::GetMaxDay(date.GetYear(), date.GetMonth()));
+    if (!isAdd && monthDaysDatePickerColumnPattern->GetCurrentIndex() == GetOptionCount(monthDaysNode) - 1) {
+        // reduce to previous year
+        date.SetYear(date.GetYear() - 1);
+        if (date.GetYear() < startDateSolar_.GetYear()) {
+            date.SetYear(endDateSolar_.GetYear());
         }
+        // reduce to previous year's last day
+        date.SetMonth(MAX_MONTH);
+        date.SetDay(PickerDate::GetMaxDay(date.GetYear(), date.GetMonth()));
+    }
     uint32_t maxDay = PickerDate::GetMaxDay(date.GetYear(), date.GetMonth());
     if (date.GetDay() > maxDay) {
         date.SetDay(maxDay);
@@ -827,7 +874,7 @@ void DatePickerPattern::HandleReduceLunarMonthDaysChange(uint32_t index)
         if (lunarDate.year < startDateLunar_.year) {
             lunarDate.year = endDateLunar_.year;
         }
-        lunarDate.month = MAX_MONTH; // set to be previous year's max month
+        lunarDate.month = MAX_MONTH;                                    // set to be previous year's max month
         lunarDate.isLeapMonth = false;
         if (LunarCalculator::GetLunarLeapMonth(lunarDate.year) == 12) { // leap 12th month
             lunarDate.isLeapMonth = true;
@@ -953,7 +1000,7 @@ void DatePickerPattern::HandleLunarYearChange(bool isAdd, uint32_t index)
     auto optionCount = GetOptionCount(yearColumn);
     if (isAdd) { // need reduce one index
         lastYearIndex = optionCount != 0 ? (GetOptionCount(yearColumn) + lastYearIndex - 1) % optionCount : 0;
-    } else { // need add one index
+    } else {     // need add one index
         lastYearIndex = optionCount != 0 ? (GetOptionCount(yearColumn) + lastYearIndex + 1) % optionCount : 0;
     }
     uint32_t lastLunarYear = startDateLunar_.year + lastYearIndex;

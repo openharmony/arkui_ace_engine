@@ -815,4 +815,35 @@ std::string TextPickerPattern::GetOptionsMultiStr() const
     }
     return result;
 }
+
+void TextPickerPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string tag = host->GetTag();
+    auto child = host->GetChildren();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto dialogContext = host->GetRenderContext();
+    CHECK_NULL_VOID(dialogContext);
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerProperty->UpdateColor(normalStyle.GetTextColor());
+    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    if (isPicker_) {
+        host->SetNeedCallChildrenUpdate(false);
+        return;
+    }
+    dialogContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    auto contentChildren = contentRowNode_->GetChildren();
+    auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    host->SetNeedCallChildrenUpdate(false);
+    OnModifyDone();
+}
 } // namespace OHOS::Ace::NG
