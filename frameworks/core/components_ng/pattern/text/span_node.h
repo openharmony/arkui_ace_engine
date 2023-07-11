@@ -154,12 +154,21 @@ public:
     GestureEventFunc onClick;
     std::list<RefPtr<SpanItem>> children;
     int32_t placeHolderIndex = -1;
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    int32_t selectedStart = -1;
+    int32_t selectedEnd = -1;
+#endif // ENABLE_DRAG_FRAMEWORK
     virtual int32_t UpdateParagraph(const RefPtr<Paragraph>& builder, double width = 0.0f, double height = 0.0f,
         VerticalAlign verticalAlign = VerticalAlign::BASELINE);
+    virtual void UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
     std::string GetFont() const;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    virtual void StartDrag(int32_t start, int32_t end);
+    virtual void EndDrag();
+    virtual bool IsDragging();
+#endif // ENABLE_DRAG_FRAMEWORK
 };
 
 struct ImageSpanItem : public SpanItem {

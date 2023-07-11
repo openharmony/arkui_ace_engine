@@ -27,6 +27,11 @@
 #endif
 #endif
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "core/common/ace_engine_ext.h"
+#include "core/common/udmf/udmf_client.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
@@ -57,7 +62,9 @@ void RichEditorPattern::OnModifyDone()
     if (host->IsDraggable()) {
         InitDragEvent();
     }
-#endif
+    InitDragDropEvent();
+    AddDragFrameNodeToManager(host);
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
@@ -840,6 +847,156 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
     };
     textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void RichEditorPattern::InitDragDropEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->InitDragDropEvent();
+    gestureHub->SetTextDraggable(true);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onDragStart = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
+        const std::string& extraParams) -> NG::DragDropInfo {
+        NG::DragDropInfo itemInfo;
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_RETURN(pattern, itemInfo);
+        return pattern->OnDragStart(event);
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+    auto onDragMove = [weakPtr = WeakClaim(this)](
+        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnDragMove(event);
+    };
+    eventHub->SetOnDragMove(std::move(onDragMove));
+    auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnDragEnd();
+    };
+    eventHub->SetOnDragEnd(std::move(onDragEnd));
+}
+
+NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEvent>& event)
+{
+    NG::DragDropInfo itemInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, itemInfo);
+    auto selectStart = textSelector_.GetTextStart();
+    auto selectEnd = textSelector_.GetTextEnd();
+    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
+    dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
+    if (dragResultObjects_.empty()) {
+        return itemInfo;
+    }
+    UpdateSpanItemDragStatus(dragResultObjects_, true);
+    RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+    auto resultProcesser = [unifiedData](const ResultObject& result) {
+        if (result.type == RichEditorSpanType::TYPESPAN) {
+            UdmfClient::GetInstance()->AddTextRecord(unifiedData, result.valueString);
+            return;
+        }
+        if (result.type == RichEditorSpanType::TYPEIMAGE) {
+            if (result.valuePixelMap) {
+                const uint8_t* pixels = result.valuePixelMap->GetPixels();
+                CHECK_NULL_VOID(pixels);
+                int32_t length = result.valuePixelMap->GetByteCount();
+                std::vector<uint8_t> data(pixels, pixels + length);
+                UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data);
+            } else {
+                UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
+            }
+        }
+    };
+    for (const auto& resultObj : dragResultObjects_) {
+        resultProcesser(resultObj);
+    }
+    event->SetData(unifiedData);
+
+    AceEngineExt::GetInstance().DragStartExt();
+
+    StopTwinkling();
+    CloseKeyboard(true);
+    CloseSelectOverlay();
+    ResetSelection();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return itemInfo;
+}
+
+void RichEditorPattern::OnDragEnd()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (dragResultObjects_.empty()) {
+        return;
+    }
+    UpdateSpanItemDragStatus(dragResultObjects_, false);
+    StartTwinkling();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
+{
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
+    auto touchX = Dimension(event->GetX(), DimensionUnit::VP).ConvertToPx();
+    auto touchY = Dimension(event->GetY(), DimensionUnit::VP).ConvertToPx();
+    auto contentRect = GetTextRect();
+    contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { touchX - contentRect.GetX(), touchY - contentRect.GetY() };
+    CHECK_NULL_VOID(paragraph_);
+    auto position = paragraph_->GetHandlePositionForClick(textOffset);
+    float caretHeight = 0.0f;
+    SetCaretPosition(position);
+    OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+    CHECK_NULL_VOID(richEditorOverlayModifier_);
+    richEditorOverlayModifier_->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+    StartTwinkling();
+}
+
+void RichEditorPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool isDragging)
+{
+    if (resultObjects.empty()) {
+        return;
+    }
+    auto dragStatusUpdateAction = [weakPtr = WeakClaim(this), isDragging](const ResultObject& resultObj) {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto it = pattern->spanItemChildren_.begin();
+        std::advance(it, resultObj.spanPosition.spanIndex);
+        auto spanItem = *it;
+        CHECK_NULL_VOID(spanItem);
+        if (resultObj.type == RichEditorSpanType::TYPESPAN) {
+            if (isDragging) {
+                spanItem->StartDrag(resultObj.offsetInSpan[RichEditorSpanRange::RANGESTART],
+                    resultObj.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+            } else {
+                spanItem->EndDrag();
+            }
+            return;
+        }
+
+        if (resultObj.type == RichEditorSpanType::TYPEIMAGE) {
+            auto imageNode =
+                DynamicCast<FrameNode>(pattern->GetChildByIndex(resultObj.spanPosition.spanIndex));
+            CHECK_NULL_VOID(imageNode);
+            auto renderContext = imageNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateOpacity(isDragging ? (double)DRAGGED_TEXT_OPACITY/255 : 1);
+            imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    };
+    for (const auto& resultObj : resultObjects) {
+        dragStatusUpdateAction(resultObj);
+    }
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 
 bool RichEditorPattern::SelectOverlayIsOn()
 {

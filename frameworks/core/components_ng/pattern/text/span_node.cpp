@@ -141,20 +141,19 @@ int32_t SpanItem::UpdateParagraph(
     const RefPtr<Paragraph>& builder, double /* width */, double /* height */, VerticalAlign /* verticalAlign */)
 {
     CHECK_NULL_RETURN(builder, -1);
+    std::optional<TextStyle> textStyle;
     if (fontStyle || textLineStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, -1);
-        TextStyle textStyle =
+        TextStyle themeTextStyle =
             CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
-        if (NearZero(textStyle.GetFontSize().Value())) {
+        if (NearZero(themeTextStyle.GetFontSize().Value())) {
             return -1;
         }
-        builder->PushStyle(textStyle);
+        textStyle = themeTextStyle;
+        builder->PushStyle(themeTextStyle);
     }
-    auto displayText = content;
-    auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
-    StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
-    builder->AddText(StringUtils::Str8ToStr16(displayText));
+    UpdateTextStyle(builder, textStyle);
     for (const auto& child : children) {
         if (child) {
             child->UpdateParagraph(builder);
@@ -165,6 +164,67 @@ int32_t SpanItem::UpdateParagraph(
     }
     return -1;
 }
+
+void SpanItem::UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
+{
+    auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
+    auto updateTextAction = [builder, textCase](const std::string& content, const std::optional<TextStyle>& textStyle) {
+        if (content.empty()) {
+            return;
+        }
+        auto displayText = content;
+        StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+        if (textStyle.has_value()) {
+            builder->PushStyle(textStyle.value());
+        }
+        builder->AddText(StringUtils::Str8ToStr16(displayText));
+        if (textStyle.has_value()) {
+            builder->PopStyle();
+        }
+    };
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (!IsDragging()) {
+#endif // ENABLE_DRAG_FRAMEWORK
+        updateTextAction(content, textStyle);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    } else {
+        auto beforeSelectedText = content.substr(0, selectedStart);
+        updateTextAction(beforeSelectedText, textStyle);
+
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        TextStyle normalStyle = !pipelineContext ? TextStyle()
+            : CreateTextStyleUsingTheme(nullptr, nullptr, pipelineContext->GetTheme<TextTheme>());
+        TextStyle selectedTextStyle = textStyle.value_or(normalStyle);
+        Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
+        selectedTextStyle.SetTextColor(color);
+        auto selectedText = content.substr(selectedStart, selectedEnd - selectedStart);
+        updateTextAction(selectedText, selectedTextStyle);
+
+        auto afterSelectedText = content.substr(selectedEnd);
+        updateTextAction(afterSelectedText, textStyle);
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+}
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void SpanItem::StartDrag(int32_t start, int32_t end)
+{
+    selectedStart = std::max(0, start);
+    int contentLen = content.size();
+    selectedEnd = std::min(contentLen, end);
+}
+
+void SpanItem::EndDrag()
+{
+    selectedStart = -1;
+    selectedEnd = -1;
+}
+
+bool SpanItem::IsDragging()
+{
+    return selectedStart != -1 && selectedEnd != -1;
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 
 int32_t ImageSpanItem::UpdateParagraph(
     const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)
