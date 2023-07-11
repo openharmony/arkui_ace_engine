@@ -49,7 +49,14 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
     formRequest.compId = compId;
     formRequest.want = want;
     formRequest.formJsInfo = formJsInfo;
-    formRequests_.push_back(formRequest);
+    auto info = std::find_if(
+        formRequests_.begin(), formRequests_.end(), formRequest);
+    if (info != formRequests_.end()) {
+        *info = formRequest;
+    } else {
+        formRequests_.emplace_back(formRequest);
+    }
+
     if (formRenderer_ == nullptr) {
         formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_);
         if (!formRenderer_) {

@@ -46,6 +46,10 @@ struct FormRequest {
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     bool isDynamic = true;
     bool hasRelease = false;
+    bool operator() (const FormRequest& info) const
+    {
+        return compId == info.compId && formJsInfo.formId == info.formJsInfo.formId;
+    }
 };
 
 /**
