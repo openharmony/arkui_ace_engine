@@ -52,4 +52,6 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 {
     return false;
 }
+
+void UIExtensionPattern::OnVisibleChange(bool visible) {}
 } // namespace OHOS::Ace::NG

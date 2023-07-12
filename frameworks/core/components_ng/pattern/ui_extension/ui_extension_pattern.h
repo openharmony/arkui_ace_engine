@@ -39,6 +39,9 @@ public:
 
     void OnWindowShow() override;
     void OnWindowHide() override;
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+    FocusPattern GetFocusPattern() const override;
+    void OnVisibleChange(bool visible) override;
 
     bool HasStartingPage() override
     {
@@ -59,10 +62,6 @@ public:
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
     void RequestExtensionSessionDestruction();
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
-
-    FocusPattern GetFocusPattern() const override;
 
 private:
     enum ReleaseCode {
@@ -95,6 +94,7 @@ private:
     void OnRemoteReady();
     void OnResult(int32_t code, const AAFwk::Want& want);
     void OnReceive(const AAFwk::WantParams& wantParams);
+    void RegisterVisibleAreaChange();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
