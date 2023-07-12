@@ -78,7 +78,9 @@ void JSCounter::JsEnableDec(const JSCallbackInfo& args)
         LOGW("Must contain at least 1 argument");
         return;
     }
-    if (args[0]->IsBoolean()) {
+    if (!args[0]->IsBoolean()) {
+        CounterModel::GetInstance()->SetEnableDec(true);
+    } else {
         CounterModel::GetInstance()->SetEnableDec(args[0]->ToBoolean());
     }
 }
@@ -89,7 +91,9 @@ void JSCounter::JsEnableInc(const JSCallbackInfo& args)
         LOGW("Must contain at least 1 argument");
         return;
     }
-    if (args[0]->IsBoolean()) {
+    if (!args[0]->IsBoolean()) {
+        CounterModel::GetInstance()->SetEnableInc(true);
+    } else {
         CounterModel::GetInstance()->SetEnableInc(args[0]->ToBoolean());
     }
 }
