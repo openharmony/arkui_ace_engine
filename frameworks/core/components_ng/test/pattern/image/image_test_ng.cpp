@@ -222,6 +222,47 @@ HWTEST_F(ImageTestNg, ImagePatternModifyDone001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImagePatternModifyDone002
+ * @tc.desc: When enter pattern's onModifyDone, check obscured and events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImagePatternModifyDone002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetCopyOption(CopyOptions::InApp);
+    /**
+     * @tc.steps: step2. call MarkModifyDone and check obscured and events
+     * @tc.expected: step2. has_value return false and events are not nullptr
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_FALSE(frameNode->GetRenderContext()->GetObscured().has_value());
+    EXPECT_NE(imagePattern->longPressEvent_, nullptr);
+    EXPECT_NE(imagePattern->clickEvent_, nullptr);
+    EXPECT_NE(imagePattern->mouseEvent_, nullptr);
+    /**
+     * @tc.steps: step3. set obscured
+     */
+    std::vector<ObscuredReasons> reasons;
+    reasons.emplace_back(static_cast<ObscuredReasons>(0));
+    frameNode->GetRenderContext()->UpdateObscured(reasons);
+    /**
+     * @tc.steps: step4. call MarkModifyDone and check obscured
+     * @tc.expected: step4. has_value return true and and events are nullptr
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(frameNode->GetRenderContext()->GetObscured().has_value());
+    EXPECT_EQ(imagePattern->longPressEvent_, nullptr);
+    EXPECT_EQ(imagePattern->clickEvent_, nullptr);
+    EXPECT_EQ(imagePattern->mouseEvent_, nullptr);
+}
+
+/**
  * @tc.name: UpdateInternalResource001
  * @tc.desc: Verify that ImagePattern can load correct resource Icon.
  * @tc.type: FUNC
