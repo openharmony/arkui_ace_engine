@@ -98,6 +98,8 @@ public:
 
     void FlushColumn();
 
+    void FlushAmPmFormatString();
+
     void OnDataLinking(
         const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
 
