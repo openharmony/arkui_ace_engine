@@ -17,9 +17,9 @@
 
 #include <map>
 
-#include "base/ui_extension/ui_extension_helper.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
+#include "core/common/ui_extension_helper.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -229,14 +229,19 @@ void AppBarView::BindContentCover(int32_t targetId)
         auto onRelease = [overlayManager, &modalStyle, targetId](int32_t releaseCode) {
             overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
         };
-        auto onError = [overlayManager, &modalStyle, targetId](int32_t code, const std::string& name, const std::string& message) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
-        };
+        auto onError =
+            [overlayManager, &modalStyle, targetId](int32_t code, const std::string& name, const std::string& message) {
+                overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
+            };
+        auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
         std::map<std::string, std::string> params;
         params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
         params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
         params.try_emplace("module", Container::Current()->GetModuleName());
-        auto uiExtNode = OHOS::Ace::UIExtensionHelper::GetInstance().CreateUIExtensionNode(
+        if (missionId != -1) {
+            params.try_emplace("missionId", std::to_string(missionId));
+        }
+        auto uiExtNode = OHOS::Ace::UIExtensionHelper::CreateUIExtensionNode(
             bundleName, abilityName, params, std::move(onRelease), std::move(onError));
         auto layoutProperty = uiExtNode->GetLayoutProperty();
         CHECK_NULL_RETURN(layoutProperty, uiExtNode);
