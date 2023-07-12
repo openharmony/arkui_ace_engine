@@ -279,9 +279,9 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     }
     auto startDays = pickerDialog.parseStartDate.ToDays();
     auto endDays = pickerDialog.parseEndDate.ToDays();
-    auto selectedDays = pickerDialog.parseSelectedDate.ToDays();
-    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
-        LOGE("date error");
+    if (startDays > endDays) {
+        pickerDialog.parseStartDate.SetYear(0);
+        pickerDialog.parseEndDate.SetYear(0);
     }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
