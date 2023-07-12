@@ -262,7 +262,7 @@ private:
     void BlurOverlayNode(bool isInSubWindow = false);
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
-    void PopMenuAnimation(const RefPtr<FrameNode>& menu);
+    void PopMenuAnimation(const RefPtr<FrameNode>& menu, const WeakPtr<UINode>& windowScene = nullptr);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);

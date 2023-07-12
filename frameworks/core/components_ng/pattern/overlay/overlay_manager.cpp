@@ -269,34 +269,39 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
     pattern->SetFirstShow();
 }
 
-void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
+void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, const WeakPtr<UINode>& windowScene)
 {
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
-                                weak = WeakClaim(this)] {
+    option.SetOnFinishEvent([windowSceneWeak = windowScene, rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)),
+                                id = Container::CurrentId(), weak = WeakClaim(this)] {
         ContainerScope scope(id);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(
-            [rootWeak, menuWK, id, weak]() {
+            [windowSceneWeak, rootWeak, menuWK, id, weak]() {
                 auto menu = menuWK.Upgrade();
                 auto root = rootWeak.Upgrade();
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID_NOLOG(menu && overlayManager);
                 if (SystemProperties::IsSceneBoardEnabled()) {
-                    auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
-                    CHECK_NULL_VOID(wrapperPattern);
-                    auto menuChild = wrapperPattern->GetMenu();
-                    CHECK_NULL_VOID(menuChild);
-                    auto menuPattern = AceType::DynamicCast<MenuPattern>(menuChild->GetPattern());
-                    CHECK_NULL_VOID(menuPattern);
-                    root = overlayManager->FindWindowScene(
-                        FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId()));
+                    auto windowScene = windowSceneWeak.Upgrade();
+                    if (!windowScene) {
+                        auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
+                        CHECK_NULL_VOID(wrapperPattern);
+                        auto menuChild = wrapperPattern->GetMenu();
+                        CHECK_NULL_VOID(menuChild);
+                        auto menuPattern = AceType::DynamicCast<MenuPattern>(menuChild->GetPattern());
+                        CHECK_NULL_VOID(menuPattern);
+                        root = overlayManager->FindWindowScene(
+                            FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId()));
+                    } else {
+                        root = windowScene;
+                    }
                 }
                 CHECK_NULL_VOID(root);
                 ContainerScope scope(id);
@@ -792,7 +797,7 @@ void OverlayManager::HideAllMenus()
             for (const auto& child : windowScene.Upgrade()->GetChildren()) {
                 auto node = DynamicCast<FrameNode>(child);
                 if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-                    PopMenuAnimation(node);
+                    PopMenuAnimation(node, windowScene);
                     BlurOverlayNode();
                 }
             }
