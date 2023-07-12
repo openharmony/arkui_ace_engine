@@ -449,8 +449,8 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
      * @tc.steps: step3. create contentConstraint.
      */
     LayoutConstraintF contentConstraint;
-    contentConstraint.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    contentConstraint.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
     contentConstraint.selfIdealSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
 
@@ -501,7 +501,10 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm002, TestSize.Level1)
     progressTheme->trackThickness_ = TEST_PROGRESS_STROKE_WIDTH;
     progressTheme->ringDiameter_ = DEFALT_RING_DIAMETER;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
-    auto size = progressLayoutAlgorithm->MeasureContent(LayoutConstraintF(), &layoutWrapper);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_SCALE);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), TEST_PROGRESS_STROKE_WIDTH.ConvertToPx());
@@ -546,8 +549,8 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
      * @tc.steps: step3. create contentConstraint.
      */
     LayoutConstraintF contentConstraint;
-    contentConstraint.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    contentConstraint.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
 
     /**
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
@@ -620,8 +623,8 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator002, TestSize.Level1)
      * @tc.steps: step3. create contentConstraint.
      */
     LayoutConstraintF contentConstraint;
-    contentConstraint.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    contentConstraint.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
 
     /**
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
@@ -698,8 +701,8 @@ HWTEST_F(ProgressTestNg, RingProgressCreator001, TestSize.Level1)
      * @tc.steps: step3. create contentConstraint.
      */
     LayoutConstraintF contentConstraint;
-    contentConstraint.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    contentConstraint.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
     /**
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
      * @tc.expected: step4. create layoutWrapper success.
@@ -729,8 +732,8 @@ HWTEST_F(ProgressTestNg, RingProgressCreator001, TestSize.Level1)
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
 
     LayoutConstraintF contentConstraint2;
-    contentConstraint2.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    contentConstraint2.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint2.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint2.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
     contentConstraint2.selfIdealSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint2, &layoutWrapper);
     ASSERT_NE(size, std::nullopt);
@@ -779,8 +782,8 @@ HWTEST_F(ProgressTestNg, ScaleProgressFrameNodeCreator001, TestSize.Level1)
      * @tc.steps: step3. create contentConstraint.
      */
     LayoutConstraintF contentConstraint;
-    contentConstraint.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    contentConstraint.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
     contentConstraint.selfIdealSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
 
@@ -853,8 +856,8 @@ HWTEST_F(ProgressTestNg, CapulseProgressCreator001, TestSize.Level1)
      * @tc.steps: step3. create contentConstraint.
      */
     LayoutConstraintF contentConstraint;
-    contentConstraint.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    contentConstraint.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
 
     /**
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
@@ -875,7 +878,7 @@ HWTEST_F(ProgressTestNg, CapulseProgressCreator001, TestSize.Level1)
     EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_CAPSULE);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STORKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Height(), DEFALT_CAPSULE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Width(), DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_MAXSIZE_WIDTH);
 
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
@@ -884,13 +887,13 @@ HWTEST_F(ProgressTestNg, CapulseProgressCreator001, TestSize.Level1)
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
 
     LayoutConstraintF contentConstraint2;
-    contentConstraint2.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    contentConstraint2.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint2.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint2.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
     contentConstraint2.selfIdealSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint2, &layoutWrapper);
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_HEIGHT);
-    EXPECT_EQ(size->Width(), DEFALT_CAPSULE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_MAXSIZE_WIDTH);
 }
 
 /**
@@ -1639,6 +1642,8 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure001, TestSize.Level1)
         AceType::DynamicCast<ProgressLayoutProperty>(layoutProperty);
     ASSERT_NE(progressLayoutProperty, nullptr);
     LayoutConstraintF contentConstraint;
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
     LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
     auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     ASSERT_NE(progressLayoutAlgorithm, nullptr);
@@ -1689,6 +1694,8 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure002, TestSize.Level1)
         AceType::DynamicCast<ProgressLayoutProperty>(layoutProperty);
     ASSERT_NE(progressLayoutProperty, nullptr);
     LayoutConstraintF contentConstraint;
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
     LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
     auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     ASSERT_NE(progressLayoutAlgorithm, nullptr);
