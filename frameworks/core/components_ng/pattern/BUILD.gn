@@ -485,7 +485,7 @@ build_component_ng("pattern_ng") {
   }
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_standard:librender_service_client" ]
+    external_deps = [ "graphic_2d:librender_service_client" ]
   } else if (is_cross_platform_build) {
     deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }
@@ -518,6 +518,6 @@ build_component_ng("pattern_model_component_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_standard:librender_service_client" ]
+    external_deps = [ "graphic_2d:librender_service_client" ]
   }
 }

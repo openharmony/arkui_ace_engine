@@ -39,7 +39,7 @@ ohos_fuzztest("ArkuiFormRenderGroupFuzzTest") {
 
   deps = [
     "$ace_root/interfaces/inner_api/form_render:ace_form_render",
-    "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [
@@ -50,7 +50,7 @@ ohos_fuzztest("ArkuiFormRenderGroupFuzzTest") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "form_fwk:form_manager",
-    "graphic_standard:surface",
+    "graphic_2d:surface",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
