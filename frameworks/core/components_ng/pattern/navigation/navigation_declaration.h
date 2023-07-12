@@ -51,9 +51,11 @@ constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 constexpr Dimension TITLE_HEIGHT = 56.0_vp;
 constexpr Dimension MAX_TITLE_FONT_SIZE = 30.0_vp;
 constexpr Dimension MIN_TITLE_FONT_SIZE = 20.0_vp;
+constexpr Dimension MIN_ADAPT_TITLE_FONT_SIZE = 14.0_vp;
 // subtitle
 constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title3
 constexpr Dimension SUBTITLE_HEIGHT = 26.0_vp;
+constexpr Dimension MIN_ADAPT_SUBTITLE_FONT_SIZE = 10.0_vp;
 constexpr Color SUBTITLE_COLOR = Color(0x99000000); // ohos_id_alpha_content_secondary
 // back button
 constexpr Dimension BACK_BUTTON_SIZE = 48.0_vp;
@@ -62,6 +64,7 @@ constexpr Dimension BACK_BUTTON_ICON_SIZE = 24.0_vp;
 constexpr Dimension TITLEBAR_HEIGHT_MINI = 56.0_vp;
 constexpr Dimension TITLEBAR_HEIGHT_WITH_SUBTITLE = 137.0_vp;
 constexpr Dimension TITLEBAR_HEIGHT_WITHOUT_SUBTITLE = 112.0_vp;
+constexpr uint32_t TITLEBAR_MAX_LINES = 2;
 // toolbar item
 constexpr Dimension TEXT_FONT_SIZE = 10.0_vp;
 constexpr Color TEXT_COLOR = Color(0xE6000000);
@@ -98,10 +101,23 @@ constexpr float MAX_NAV_BAR_WIDTH_SCALE = 0.4f;
 // more button
 constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
 
+// maximum number of toolbar items
+constexpr uint32_t MAXIMUM_TOOLBAR_ITEMS_IN_BAR = 5;
+constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
+
+enum class ToolbarItemStatus {
+    NORMAL = 0,
+    DISABLED,
+    ACTIVE,
+};
+
+// appbar menu item and toolbar item configuration
 struct BarItem {
     std::optional<std::string> text;
     std::optional<std::string> icon;
     std::function<void()> action;
+    ToolbarItemStatus status;
+    std::optional<std::string> activeIcon;
     std::string ToString() const
     {
         std::string result;
@@ -111,6 +127,11 @@ struct BarItem {
         result.append(icon.value_or("na"));
         return result;
     }
+};
+
+enum class ToolbarIconStatus {
+    INITIAL = 0,
+    ACTIVE,
 };
 
 enum class TitleBarChildType {

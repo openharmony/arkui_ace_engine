@@ -150,6 +150,57 @@ void JSNavigation::ParseBarItems(
     }
 }
 
+void JSNavigation::ParseToolbarItemsConfiguration(
+    const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items)
+{
+    auto length = jsArray->Length();
+    for (size_t i = 0; i < length; i++) {
+        auto item = jsArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            continue;
+        }
+        NG::BarItem toolBarItem;
+        std::string text;
+        std::string icon;
+        std::string activeIcon;
+
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        auto itemValueObject = itemObject->GetProperty("value");
+        if (ParseJsString(itemValueObject, text)) {
+            toolBarItem.text = text;
+        }
+
+        auto itemIconObject = itemObject->GetProperty("icon");
+        if (ParseJsMedia(itemIconObject, icon)) {
+            toolBarItem.icon = icon;
+        }
+
+        auto itemActionValue = itemObject->GetProperty("action");
+        if (itemActionValue->IsFunction()) {
+            RefPtr<JsFunction> onClickFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(itemActionValue));
+            auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                if (func) {
+                    func->ExecuteJS();
+                }
+            };
+            toolBarItem.action = onItemClick;
+        }
+
+        auto itemStatusValue = itemObject->GetProperty("status");
+        if (itemStatusValue->IsNumber()) {
+            toolBarItem.status = static_cast<NG::ToolbarItemStatus>(itemStatusValue->ToNumber<int32_t>());
+        }
+
+        auto itemActiveIconObject = itemObject->GetProperty("activeIcon");
+        if (ParseJsMedia(itemActiveIconObject, activeIcon)) {
+            toolBarItem.activeIcon = activeIcon;
+        }
+
+        items.push_back(toolBarItem);
+    }
+}
+
 bool JSNavigation::ParseCommonTitle(const JSRef<JSVal>& jsValue)
 {
     bool isCommonTitle = false;
@@ -199,6 +250,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("hideBackButton", &JSNavigation::SetHideBackButton, opt);
     JSClass<JSNavigation>::StaticMethod("hideToolBar", &JSNavigation::SetHideToolBar, opt);
     JSClass<JSNavigation>::StaticMethod("toolBar", &JSNavigation::SetToolBar);
+    JSClass<JSNavigation>::StaticMethod("toolbarConfiguration", &JSNavigation::SetToolbarConfiguration);
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
     JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
@@ -361,6 +413,34 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
     std::list<RefPtr<AceType>> items;
     NavigationModel::GetInstance()->GetToolBarItems(items);
     ParseToolBarItems(JSRef<JSArray>::Cast(itemsValue), items);
+}
+
+void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
+        if (NavigationModel::GetInstance()->NeedSetItems()) {
+            std::vector<NG::BarItem> toolbarItems;
+            if (info[0]->IsUndefined()) {
+                toolbarItems = {};
+            } else {
+                ParseToolbarItemsConfiguration(info, JSRef<JSArray>::Cast(info[0]), toolbarItems);
+            }
+            NavigationModel::GetInstance()->SetToolbarConfiguration(std::move(toolbarItems));
+            return;
+        }
+        std::list<RefPtr<AceType>> items;
+        NavigationModel::GetInstance()->GetToolBarItems(items);
+        ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
+    } else if (info[0]->IsObject()) {
+        auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+        if (builderFuncParam->IsFunction()) {
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(builderFuncParam);
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavigationModel::GetInstance()->SetCustomToolBar(customNode);
+        }
+    }
 }
 
 void JSNavigation::SetMenus(const JSCallbackInfo& info)

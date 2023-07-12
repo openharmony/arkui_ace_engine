@@ -30,6 +30,8 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo) {}
 
+void OverlayManager::ErasePopup(int32_t targetId) {}
+
 void OverlayManager::HideAllPopups() {}
 
 void OverlayManager::HideCustomPopups() {};
