@@ -102,6 +102,7 @@ void PixelMapImage::DrawToRSCanvas(
 void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 {
 #ifdef ENABLE_ROSEN_BACKEND
+#ifdef NEW_SKIA
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_VOID(rsCanvas);
     auto skCanvas = rsCanvas->ExportSkCanvas();
@@ -112,10 +113,6 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     SkSamplingOptions option;
     SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
 
-#ifndef NEW_SKIA
-    recordingCanvas->DrawPixelMapRect(
-        imagePattern->GetCanvasImage()->GetPixelMap()->GetPixelMapSharedPtr(), dst, option, &paint);
-#else
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
     recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
 #endif

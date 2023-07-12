@@ -150,15 +150,19 @@ template("build_component_ng") {
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
       }
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
-
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
         if (is_cross_platform_build) {
-          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+          deps += [
+            "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text_static",
+            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
+          ]
         } else {
-          external_deps += [ "graphic_2d:librender_service_client" ]
+          external_deps += [
+            "graphic_2d:librender_service_client",
+            "graphic_2d:rosen_text",
+          ]
         }
 
         include_dirs += [
