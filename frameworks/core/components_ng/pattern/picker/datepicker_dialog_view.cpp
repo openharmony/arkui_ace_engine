@@ -48,6 +48,7 @@ constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension LUNARSWITCH_MARGIN_TO_BUTTON = 8.0_vp;
+constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
 
@@ -130,6 +131,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         pickerRow->MountToParent(pickerStack);
 
         CreateTitleIconNode(buttonTitleNode);
+        SetTitleMouseHoverEvent(buttonTitleNode);
         buttonTitleNode->MarkModifyDone();
         RefPtr<DateTimeAnimationController> animationController = AceType::MakeRefPtr<DateTimeAnimationController>();
         auto titleSwitchEvent = [contentColumn, pickerStack, animationController]() {
@@ -144,13 +146,25 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
             auto timeNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(1));
             CHECK_NULL_VOID(monthDaysNode);
             CHECK_NULL_VOID(timeNode);
+            auto timePickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
+            CHECK_NULL_VOID(timePickerPattern);
             auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
             CHECK_NULL_VOID(monthDaysPickerPattern);
 
             PickerDate selectedDate =
                 switchFlag_ ? datePickerPattern->GetCurrentDate() : monthDaysPickerPattern->GetCurrentDate();
             SetSelectedDate(switchFlag_ ? monthDaysNode : dateNode, selectedDate);
-            switchFlag_ ? monthDaysNode->MarkModifyDone() : dateNode->MarkModifyDone();
+            if (switchFlag_) {
+                datePickerPattern->SetFocusDisable();
+                timePickerPattern->SetFocusDisable();
+                monthDaysPickerPattern->SetFocusEnable();
+                monthDaysNode->MarkModifyDone();
+            } else {
+                monthDaysPickerPattern->SetFocusDisable();
+                timePickerPattern->SetFocusDisable();
+                datePickerPattern->SetFocusEnable();
+                dateNode->MarkModifyDone();
+            }
 
             auto contentRow = AceType::DynamicCast<FrameNode>(contentColumn->GetLastChild());
             auto titleRow = AceType::DynamicCast<FrameNode>(contentColumn->GetChildAtIndex(0));
@@ -197,10 +211,6 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
 
     // build dialog accept and cancel button
     auto changeEvent = dialogEvent["changeId"];
-    if (settingData.showTime) {
-        auto changeEventSame = changeEvent;
-        SetDialogChange(acceptNode, std::move(changeEventSame));
-    }
     SetDialogChange(dateNode, std::move(changeEvent));
     auto contentRow = CreateButtonNode(acceptNode, dateNode, dialogEvent, std::move(dialogCancelEvent));
     CHECK_NULL_RETURN(contentRow, nullptr);
@@ -387,6 +397,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(
     buttonConfirmEventHub->SetStateEffect(true);
 
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
@@ -400,7 +411,6 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(
     margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
     margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
-
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
@@ -409,10 +419,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(
     auto clickCallback = [dateNode](const GestureEvent& /* info */) {
         auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_VOID(pickerPattern);
-        auto str = pickerPattern->GetSelectedObject(true);
         auto datePickerEventHub = pickerPattern->GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
-        datePickerEventHub->FireDialogAcceptEvent(str);
+        datePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
     buttonConfirmNode->MarkModifyDone();
@@ -672,6 +681,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
@@ -878,5 +888,47 @@ void DatePickerDialogView::SetTimeTextProperties(
     pickerProperty->UpdateSelectedColor(properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     pickerProperty->UpdateSelectedWeight(
         properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
+}
+
+void DatePickerDialogView::SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow)
+{
+    auto eventHub = titleRow->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    auto mouseTask = [titleRow](bool isHover) {
+        HandleMouseEvent(titleRow, isHover);
+    };
+    auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
+    CHECK_NULL_VOID(mouseEvent);
+    inputHub->AddOnHoverEvent(mouseEvent);
+}
+
+void DatePickerDialogView::HandleMouseEvent(const RefPtr<FrameNode>& titleRow, bool isHover)
+{
+    if (isHover) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(theme);
+        PlayHoverAnimation(titleRow, theme->GetHoverColor());
+    } else {
+        PlayHoverAnimation(titleRow, Color::TRANSPARENT);
+    }
+}
+
+void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleRow, const Color& color)
+{
+    AnimationOption option = AnimationOption();
+    option.SetDuration(HOVER_ANIMATION_DURATION);
+    option.SetCurve(Curves::FRICTION);
+    option.SetFillMode(FillMode::FORWARDS);
+    AnimationUtils::Animate(option, [titleRow, color]() {
+        auto buttonTitleNode = AceType::DynamicCast<FrameNode>(titleRow);
+        CHECK_NULL_VOID(buttonTitleNode);
+        auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
+        buttonTitleRenderContext->UpdateBackgroundColor(color);
+        buttonTitleNode->MarkModifyDone();
+        buttonTitleNode->MarkDirtyNode();
+    });
 }
 } // namespace OHOS::Ace::NG
