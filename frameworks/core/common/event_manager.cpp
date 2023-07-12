@@ -592,11 +592,12 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     LOGD("DispatchMouseEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
         event.action == MouseAction::MOVE || event.action == MouseAction::WINDOW_ENTER ||
-        event.action == MouseAction::WINDOW_LEAVE || event.action == MouseAction::PULL_MOVE ||
-        event.action == MouseAction::PULL_UP) {
+        event.action == MouseAction::WINDOW_LEAVE) {
         MouseTestResult handledResults;
         handledResults.clear();
-        if (event.button == MouseButton::LEFT_BUTTON) {
+        if ((event.button == MouseButton::LEFT_BUTTON && !SystemProperties::IsSceneBoardEnabled()) ||
+            (event.button == MouseButton::LEFT_BUTTON && SystemProperties::IsSceneBoardEnabled() &&
+            event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);
