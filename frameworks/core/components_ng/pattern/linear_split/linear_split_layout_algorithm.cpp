@@ -143,12 +143,15 @@ LayoutConstraintF LinearSplitLayoutAlgorithm::GetChildConstrain(LayoutWrapper* l
         float childMaxSize =
                 childrenDragPos_[index + 1] - childrenDragPos_[index] - static_cast<float>(DEFAULT_SPLIT_HEIGHT);
         if (splitType_ == SplitType::ROW_SPLIT) {
+            if (index == childCount - 1) {
+                childMaxSize += static_cast<float>(DEFAULT_SPLIT_HEIGHT);
+            }
             constrain.selfIdealSize.SetWidth(childMaxSize);
         } else {
             if (index == 0) {
                 childMaxSize -= startMargin;
             } else if (index == childCount - 1) {
-                childMaxSize -= endMargin + static_cast<float>(DEFAULT_SPLIT_HEIGHT);
+                childMaxSize = childMaxSize - endMargin + static_cast<float>(DEFAULT_SPLIT_HEIGHT);
             } else {
                 childMaxSize -= startMargin + endMargin;
             }
@@ -167,8 +170,8 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     childrenConstrains_ = std::vector<float>(childCount, 0.0f);
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
-        childTotalWidth += item->GetGeometryNode()->GetFrameSize().Width();
-        childTotalHeight += item->GetGeometryNode()->GetFrameSize().Height();
+        childTotalWidth += item->GetGeometryNode()->GetMarginFrameSize().Width();
+        childTotalHeight += item->GetGeometryNode()->GetMarginFrameSize().Height();
     }
 
     const auto splitHeightFloat = static_cast<float>(DEFAULT_SPLIT_HEIGHT);
@@ -217,13 +220,16 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(LayoutWrapper* layoutWrapper, fl
             childOffsetMain = childrenDragPos_[index];
         }
         auto& constraint = item->GetLayoutProperty()->GetCalcLayoutConstraint();
+        auto childMargin = item->GetLayoutProperty()->CreateMargin();
+        float marginWidth = childMargin.left.value_or(0.f) + childMargin.right.value_or(0.f);
         if (constraint && constraint->minSize.has_value()) {
-            childrenConstrains_[index] = item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Width();
+            childrenConstrains_[index] =
+                    item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Width() + marginWidth;
         } else {
-            childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper);
+            childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper) + marginWidth;
         }
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
-        childOffsetMain += item->GetGeometryNode()->GetFrameSize().Width();
+        childOffsetMain += item->GetGeometryNode()->GetMarginFrameSize().Width();
         if (index < layoutWrapper->GetTotalChildCount() - 1) {
             if (!isFirstSetPos) {
                 childOffsetMain = childrenDragPos_[index + 1] - static_cast<float>(DEFAULT_SPLIT_HEIGHT);
@@ -275,7 +281,7 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
 
         ColumnSplitChildConstrain(layoutWrapper, item, index);
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
-        childOffsetCross += item->GetGeometryNode()->GetFrameSize().Height();
+        childOffsetCross += item->GetGeometryNode()->GetMarginFrameSize().Height();
         if (index < layoutWrapper->GetTotalChildCount() - 1) {
             childOffsetCross += startMargin;
             if (!isFirstSetPos) {
@@ -303,10 +309,12 @@ void LinearSplitLayoutAlgorithm::ColumnSplitChildConstrain(LayoutWrapper* layout
     }
     const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
     auto& constraint = item->GetLayoutProperty()->GetCalcLayoutConstraint();
+    auto childMargin = item->GetLayoutProperty()->CreateMargin();
+    float marginHeight = childMargin.top.value_or(0.f) + childMargin.bottom.value_or(0.f);
     if (constraint && constraint->minSize.has_value()) {
-        childrenConstrains_[index] = item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Height();
+        childrenConstrains_[index] = item->GetLayoutProperty()->GetLayoutConstraint()->minSize.Height() + marginHeight;
     } else {
-        childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper);
+        childrenConstrains_[index] = GetLinearSplitChildMinSize(layoutWrapper) + marginHeight;
     }
     if (index == 0) {
         childrenConstrains_[index] += startMargin;
