@@ -786,7 +786,7 @@ void OverlayManager::HideAllMenus()
 {
     LOGD("OverlayManager::HideAllMenus");
     if (SystemProperties::IsSceneBoardEnabled()) {
-        for (const auto& windowScene : windowSceneList_) {
+        for (const auto& windowScene : windowSceneSet_) {
             if (!windowScene.Upgrade()) {
                 continue;
             }
@@ -1640,7 +1640,7 @@ RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
     }
     CHECK_NULL_RETURN(parent, nullptr);
     LOGI("FindWindowScene success");
-    windowSceneList_.push_back(parent);
+    windowSceneSet_.insert(parent);
     return parent;
 }
 
