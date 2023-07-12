@@ -198,7 +198,7 @@ public:
 
     bool IsSnapToInterval() const
     {
-        return Positive(intervalSize_.Value());
+        return snapPaginations_.empty();
     }
 
     std::vector<float> GetSnapOffsets() const
@@ -301,6 +301,7 @@ private:
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;
     SizeF viewPort_;
+    SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
     bool scrollStop_ = false;
