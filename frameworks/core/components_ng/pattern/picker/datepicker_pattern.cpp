@@ -39,6 +39,7 @@ constexpr uint32_t MAX_MONTH = 12;
 constexpr uint32_t MIN_DAY = 1;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
+const int32_t UNOPTION_COUNT = 2;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -281,7 +282,10 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto childSize = static_cast<float>(host->GetChildren().size());
+    auto childSize = 1.0f;
+    if (!ShowMonthDays()) {
+        childSize = static_cast<float>(host->GetChildren().size());
+    }
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
     auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
@@ -323,9 +327,9 @@ bool DatePickerPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN ||
-        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT) {
-        HandleDirectionKey(event.code);
-        return true;
+        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT ||
+        event.code == KeyCode::KEY_MOVE_HOME || event.code == KeyCode::KEY_MOVE_END) {
+        return HandleDirectionKey(event.code);
     }
     return false;
 }
@@ -338,22 +342,26 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     auto pickerChild = DynamicCast<FrameNode>(stackChild->GetChildAtIndex(1));
     auto pattern = pickerChild->GetPattern<DatePickerColumnPattern>();
-    auto currernIndex = pattern->GetCurrentIndex();
     auto totalOptionCount = GetOptionCount(pickerChild);
-    if (code == KeyCode::KEY_DPAD_UP && totalOptionCount != 0) {
-        pattern->SetCurrentIndex((totalOptionCount + currernIndex - 1) % totalOptionCount);
-        pattern->FlushCurrentOptions();
-        pattern->HandleChangeCallback(false, true);
-        pattern->HandleEventCallback(true);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (totalOptionCount == 0) {
+        return false;
+    }
+    if (code == KeyCode::KEY_DPAD_UP) {
+        pattern->InnerHandleScroll(false, false);
         return true;
     }
-    if (code == KeyCode::KEY_DPAD_DOWN && totalOptionCount != 0) {
-        pattern->SetCurrentIndex((totalOptionCount + currernIndex + 1) % totalOptionCount);
-        pattern->FlushCurrentOptions();
-        pattern->HandleChangeCallback(true, true);
-        pattern->HandleEventCallback(true);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (code == KeyCode::KEY_DPAD_DOWN) {
+        pattern->InnerHandleScroll(true, false);
+        return true;
+    }
+    if (code == KeyCode::KEY_MOVE_HOME) {
+        pattern->SetCurrentIndex(1);
+        pattern->InnerHandleScroll(false, false);
+        return true;
+    }
+    if (code == KeyCode::KEY_MOVE_END) {
+        pattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+        pattern->InnerHandleScroll(true, false);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_LEFT) {
@@ -366,9 +374,12 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
     }
     if (code == KeyCode::KEY_DPAD_RIGHT) {
         focusKeyID_ += 1;
-        auto childSize = static_cast<int32_t>(host->GetChildren().size());
-        if (focusKeyID_ > childSize - 1) {
-            focusKeyID_ = childSize - 1;
+        auto childSize = 1.0f;
+        if (!ShowMonthDays()) {
+            childSize = static_cast<float>(host->GetChildren().size());
+        }
+        if (focusKeyID_ > childSize -1) {
+            focusKeyID_ = childSize -1;
         }
         PaintFocusState();
         return true;
@@ -1901,4 +1912,25 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("constructor", jsonConstructor);
 }
 
+void DatePickerPattern::SetFocusDisable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    focusHub->SetFocusable(false);
+}
+
+void DatePickerPattern::SetFocusEnable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    focusHub->SetFocusable(true);
+}
 } // namespace OHOS::Ace::NG

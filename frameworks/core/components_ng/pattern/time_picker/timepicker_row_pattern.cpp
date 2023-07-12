@@ -36,6 +36,7 @@ constexpr uint32_t AM_PM_HOUR_11 = 11;
 const int32_t AM_PM_COUNT = 3;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
+const int32_t UNOPTION_COUNT = 2;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -684,18 +685,39 @@ bool TimePickerRowPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN ||
-        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT) {
-        HandleDirectionKey(event.code);
-        return true;
+        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT ||
+        event.code == KeyCode::KEY_MOVE_HOME || event.code == KeyCode::KEY_MOVE_END) {
+        return HandleDirectionKey(event.code);
     }
     return false;
+}
+
+void TimePickerRowPattern::SetFocusDisable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    focusHub->SetFocusable(false);
+}
+
+void TimePickerRowPattern::SetFocusEnable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    focusHub->SetFocusable(true);
 }
 
 bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     auto childSize = host->GetChildren().size();
     auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
@@ -705,20 +727,23 @@ bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
     if (totalOptionCount == 0) {
         return false;
     }
-    if (code == KeyCode::KEY_DPAD_UP) {
-        pattern->SetCurrentIndex((totalOptionCount + currernIndex - 1) % totalOptionCount);
+    if (code == KeyCode::KEY_DPAD_UP || code == KeyCode::KEY_DPAD_DOWN) {
+        auto index = (code == KeyCode::KEY_DPAD_UP) ? -1 : 1;
+        pattern->SetCurrentIndex((totalOptionCount + currernIndex + index) % totalOptionCount);
         pattern->FlushCurrentOptions();
-        pattern->HandleChangeCallback(false, true);
+        pattern->HandleChangeCallback((code == KeyCode::KEY_DPAD_UP) ? false : true, true);
         pattern->HandleEventCallback(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
-    if (code == KeyCode::KEY_DPAD_DOWN) {
-        pattern->SetCurrentIndex((totalOptionCount + currernIndex + 1) % totalOptionCount);
-        pattern->FlushCurrentOptions();
-        pattern->HandleChangeCallback(true, true);
-        pattern->HandleEventCallback(true);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (code == KeyCode::KEY_MOVE_HOME) {
+        pattern->SetCurrentIndex(1);
+        pattern->InnerHandleScroll(false, false);
+        return true;
+    }
+    if (code == KeyCode::KEY_MOVE_END) {
+        pattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+        pattern->InnerHandleScroll(true, false);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_LEFT) {

@@ -461,6 +461,13 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow002, TestSize.Level1)
 
     ASSERT_NE(dialogNode, nullptr);
     auto titleNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild());
+    ASSERT_NE(titleNode, nullptr);
+    DatePickerDialogView::HandleMouseEvent(titleNode, true);
+    auto renderContext = titleNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+    DatePickerDialogView::HandleMouseEvent(titleNode, false);
+    renderContext = titleNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
     auto titleEventHub = titleNode->GetOrCreateGestureEventHub();
     titleEventHub->ActClick();
     titleEventHub->ActClick();
@@ -1225,7 +1232,21 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest006, TestSize.Level1)
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
     /**
-     * @tc.cases: case3. UP KeyAction.
+     * @tc.cases: case3. home KeyEvent.
+     */
+    KeyEvent keyEventHome(KeyCode::KEY_MOVE_HOME, KeyAction::DOWN);
+    datePickerPattern->OnKeyEvent(keyEventHome);
+    propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    /**
+     * @tc.cases: case4. end KeyEvent.
+     */
+    KeyEvent keyEventEnd(KeyCode::KEY_MOVE_END, KeyAction::DOWN);
+    datePickerPattern->OnKeyEvent(keyEventEnd);
+    propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    /**
+     * @tc.cases: case5. UP KeyAction.
      */
     KeyEvent keyActionUp(KeyCode::KEY_DPAD_DOWN, KeyAction::UP);
     EXPECT_FALSE(datePickerPattern->OnKeyEvent(keyActionUp));

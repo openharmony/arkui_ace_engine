@@ -1120,10 +1120,7 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(layoutProperty);
     if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
         !textEditingValue_.GetWideText().empty()) {
-        ApplyInlineStates();
-        if (!IsTextArea()) {
-            layoutProperty->ResetMaxLines();
-        }
+        ApplyInlineStates(true);
         inlineSelectAllFlag_ = true;
         inlineFocusState_ = true;
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2209,6 +2206,9 @@ void TextFieldPattern::OnModifyDone()
     if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !inlineFocusState_) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
+    }
+    if (IsSelected() && paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+        ApplyInlineStates(false);
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
@@ -4695,12 +4695,12 @@ std::string TextFieldPattern::GetShowPasswordIconString() const
 
 std::string TextFieldPattern::GetInputStyleString() const
 {
+    std::string result = isTextInput_ ? "TextInputStyle.Default" : "TextContentStyle.DEFAULT";
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, "TextInputStyle.Default");
-    std::string result = "TextInputStyle.Default";
+    CHECK_NULL_RETURN(paintProperty, result);
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
         case InputStyle::INLINE:
-            result = "TextInputStyle.Inline";
+            result = isTextInput_ ? "TextInputStyle.Inline" : "TextContentStyle.INLINE";
             break;
         case InputStyle::DEFAULT:
         default:
@@ -4826,16 +4826,17 @@ std::string TextFieldPattern::GetBarStateString() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    std::string displayModeString = "DisplayMode.AUTO";
+    std::string displayModeString;
     switch (layoutProperty->GetDisplayModeValue(DisplayMode::AUTO)) {
         case DisplayMode::OFF:
-            displayModeString = "DisplayMode.OFF";
+            displayModeString = "BarState.OFF";
             break;
         case DisplayMode::ON:
-            displayModeString = "DisplayMode.ON";
+            displayModeString = "BarState.ON";
             break;
         case DisplayMode::AUTO:
         default:
+            displayModeString = "BarState.AUTO";
             break;
     }
     return displayModeString;
@@ -5107,7 +5108,7 @@ void TextFieldPattern::SaveInlineStates()
     }
 }
 
-void TextFieldPattern::ApplyInlineStates()
+void TextFieldPattern::ApplyInlineStates(bool focusStatus)
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -5128,7 +5129,9 @@ void TextFieldPattern::ApplyInlineStates()
     BorderColorProperty inlineBorderColor;
     inlineBorderColor.SetColor(theme->GetInlineBorderColor());
     renderContext->UpdateBorderColor(inlineBorderColor);
-    layoutProperty->UpdatePadding({ CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp) });
+    auto padding = theme->GetInlineBorderWidth();
+    layoutProperty->UpdatePadding(
+        { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding)});
     ProcessInnerPadding();
     textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     MarginProperty margin;
@@ -5139,13 +5142,23 @@ void TextFieldPattern::ApplyInlineStates()
     margin.top = CalcLength(inlineState_.padding.top->GetDimension() + inlineState_.margin.top->GetDimension());
     layoutProperty->UpdateMargin(margin);
     CalcSize idealSize;
-    std::optional<CalcLength> width(paragraph_->GetActualWidth());
-    idealSize.SetWidth(width);
+    inlinePadding_ = padding.ConvertToPx() + padding.ConvertToPx();
+    if (focusStatus) {
+        previewWidth_ = paragraph_->GetActualWidth() + inlinePadding_;
+        std::optional<CalcLength> width(previewWidth_);
+        idealSize.SetWidth(width);
+    } else {
+        std::optional<CalcLength> width(previewWidth_);
+        idealSize.SetWidth(width);
+    }
     layoutProperty->UpdateUserDefinedIdealSize(idealSize);
     auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (layoutConstraint && layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->Height()) {
         layoutProperty->ClearUserDefinedIdealSize(false, true);
         inlineState_.setHeight = true;
+    }
+    if (!IsTextArea()) {
+        layoutProperty->ResetMaxLines();
     }
 }
 
@@ -5168,6 +5181,7 @@ void TextFieldPattern::RestorePreInlineStates()
     renderContext->UpdateBorderColor(inlineState_.borderColor);
     layoutProperty->UpdatePadding(inlineState_.padding);
     ProcessInnerPadding();
+    inlinePadding_ = 0.0f;
     textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     layoutProperty->UpdateMargin(inlineState_.margin);
     CalcSize idealSize;

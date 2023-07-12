@@ -356,6 +356,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (isDragCancel_) {
         LOGD("DragDropManager Is On DragCancel");
+        InteractionManager::GetInstance()->SetDragWindowVisible(false);
         InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_CANCEL, false);
         summaryMap_.clear();
         ClearVelocityInfo();

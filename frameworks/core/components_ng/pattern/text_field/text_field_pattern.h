@@ -907,6 +907,11 @@ public:
         return inlineSingleLineHeight_;
     }
 
+    float GetInlinePadding() const
+    {
+        return inlinePadding_;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -1017,7 +1022,7 @@ private:
 
     void UpdateCopyAllStatus();
     void SaveInlineStates();
-    void ApplyInlineStates();
+    void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
 
     RectF frameRect_;
@@ -1104,6 +1109,8 @@ private:
     bool inlineSelectAllFlag_ = false;
     bool inlineFocusState_ = false;
     float inlineSingleLineHeight_ = 0.0f;
+    float inlinePadding_ = 0.0f;
+    float previewWidth_ = 0.0f;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;

@@ -290,6 +290,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(
     buttonConfirmEventHub->SetStateEffect(true);
 
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
@@ -312,10 +313,9 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(
     auto clickCallback = [dateNode](const GestureEvent& /* info */) {
         auto pickerPattern = dateNode->GetPattern<TimePickerRowPattern>();
         CHECK_NULL_VOID(pickerPattern);
-        auto str = pickerPattern->GetSelectedObject(true);
         auto timePickerEventHub = pickerPattern->GetEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
-        timePickerEventHub->FireDialogAcceptEvent(str);
+        timePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
     buttonConfirmNode->MarkModifyDone();
@@ -359,6 +359,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);

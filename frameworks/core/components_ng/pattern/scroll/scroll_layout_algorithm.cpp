@@ -97,10 +97,11 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto size = geometryNode->GetFrameSize();
 
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    viewPort_ = size;
+    viewSize_ = size;
     MinusPaddingToSize(padding, size);
+    viewPort_ = size;
     auto childSize = childGeometryNode->GetMarginFrameSize();
-    scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);
+    scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis);
     if (!scrollPattern->CanOverScroll(scrollPattern->GetScrollState())) {
         if (scrollableDistance_ > 0.0f) {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
@@ -109,7 +110,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     viewPortExtent_ = childSize;
-    viewPortLength_ = GetMainAxisSize(size, axis);
+    viewPortLength_ = GetMainAxisSize(viewPort_, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
     auto scrollAlignment = Alignment::CENTER;
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {

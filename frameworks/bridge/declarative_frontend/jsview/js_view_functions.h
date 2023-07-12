@@ -65,6 +65,7 @@ public:
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
     void ExecuteRecycle(const std::string& viewName);
     void ExecuteAboutToRecycle();
+    void ExecuteSetActive(bool active);
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
@@ -107,6 +108,7 @@ private:
     JSWeak<JSFunc> jsSetInitiallyProvidedValueFunc_;
     JSWeak<JSFunc> jsRecycleFunc_;
     JSWeak<JSFunc> jsAboutToRecycleFunc_;
+    JSWeak<JSFunc> jsSetActive_;
 
     JSExecutionContext context_;
 };

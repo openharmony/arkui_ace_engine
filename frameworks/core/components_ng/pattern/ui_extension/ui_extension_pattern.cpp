@@ -38,7 +38,7 @@ namespace OHOS::Ace::NG {
 UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID_NOLOG(container);
     auto callerToken = container->GetToken();
     Rosen::ExtensionSessionManager::GetInstance().Init();
     auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
@@ -49,6 +49,7 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
         .want = new (std::nothrow) Want(want),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
+    CHECK_NULL_VOID(session_);
     RegisterLifecycleListener();
     RequestExtensionSessionActivation();
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
@@ -82,21 +83,22 @@ void UIExtensionPattern::OnConnect()
 void UIExtensionPattern::OnConnectInner()
 {
     LOGI("UIExtensionPattern OnConnectInner called");
-    CHECK_NULL_VOID(session_);
+    CHECK_NULL_VOID_NOLOG(session_);
     auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
-    CHECK_NULL_VOID(contentNode_);
+    CHECK_NULL_VOID_NOLOG(surfaceNode);
+    CHECK_NULL_VOID_NOLOG(contentNode_);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID_NOLOG(context);
     context->SetRSNode(surfaceNode);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID_NOLOG(host);
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
     auto pipeline = PipelineBase::GetCurrentContext();
     TransferFocusWindowId(pipeline->GetFocusWindowId());
     OnRemoteReady();
+    RegisterVisibleAreaChange();
 }
 
 void UIExtensionPattern::OnDisconnect()
@@ -179,7 +181,7 @@ void UIExtensionPattern::OnWindowHide()
 
 void UIExtensionPattern::RequestExtensionSessionActivation()
 {
-    CHECK_NULL_VOID(session_);
+    LOGI("UIExtension request UIExtensionAbility foreground");
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(extensionSession);
     if (errcode != OHOS::Rosen::WSError::WS_OK) {
@@ -197,7 +199,7 @@ void UIExtensionPattern::RequestExtensionSessionActivation()
 
 void UIExtensionPattern::RequestExtensionSessionBackground()
 {
-    CHECK_NULL_VOID(session_);
+    LOGI("UIExtension request UIExtensionAbility background");
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession);
     if (errcode != OHOS::Rosen::WSError::WS_OK) {
@@ -212,7 +214,7 @@ void UIExtensionPattern::RequestExtensionSessionBackground()
 
 void UIExtensionPattern::RequestExtensionSessionDestruction()
 {
-    CHECK_NULL_VOID(session_);
+    LOGI("UIExtension request UIExtensionAbility destroy");
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession);
     if (errcode != OHOS::Rosen::WSError::WS_OK) {
@@ -357,7 +359,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID(pointerEvent);
+    CHECK_NULL_VOID_NOLOG(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID_NOLOG(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
@@ -372,7 +374,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID(pointerEvent);
+    CHECK_NULL_VOID_NOLOG(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID_NOLOG(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
@@ -385,17 +387,17 @@ void UIExtensionPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID_NOLOG(host);
     auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
+    CHECK_NULL_VOID_NOLOG(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
+    CHECK_NULL_VOID_NOLOG(gestureHub);
     InitTouchEvent(gestureHub);
     auto inputHub = hub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(inputHub);
+    CHECK_NULL_VOID_NOLOG(inputHub);
     InitMouseEvent(inputHub);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
 }
 
@@ -485,5 +487,28 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(session_, false);
     session_->UpdateViewConfig(wmConfig, Rosen::SizeChangeReason::UNDEFINED);
     return false;
+}
+
+void UIExtensionPattern::OnVisibleChange(bool visible)
+{
+    if (visible) {
+        RequestExtensionSessionActivation();
+    } else {
+        RequestExtensionSessionBackground();
+    }
+}
+
+void UIExtensionPattern::RegisterVisibleAreaChange()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto uiExtension = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(uiExtension);
+        uiExtension->OnVisibleChange(visible);
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 }
 } // namespace OHOS::Ace::NG

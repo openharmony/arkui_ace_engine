@@ -19,16 +19,27 @@
  * all definitions in this file are framework internal
  */
 
+
 abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T> 
 implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber, IMultiPropertiesReadSubscriber
-// these interfaces implementations are all empty functioms, overwrite FU base class implementations.
+// these interfaces implementations are all empty functions, overwrite FU base class implementations.
 {
+  static readonly DelayedNotifyChangesEnum=class  {
+    static readonly do_not_delay = 0;
+    static readonly delay_none_pending = 1;
+    static readonly delay_notification_pending = 2;
+  };
+  
   private owningView_ : ViewPU = undefined;
+  
   private dependentElementIds_: Set<number> = new Set<number>();
 
   // PU code stores object references to dependencies directly as class variable
   // SubscriberManager is not used for lookup in PU code path to speedup updates
   protected subscriberRefs_: Set<IPropertySubscriber>;
+  
+  // when owning ViewPU is inActive, delay notifying changes
+  private delayedNotification_: number = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
@@ -79,6 +90,35 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     super.unlinkSuscriber(id);
   }
 
+
+  /**
+   * put the property to delayed notification mode
+   * feature is only used for @StorageLink/Prop, @LocalStorageLink/Prop
+   */
+  public enableDelayedNotification() : void {
+  if (this.delayedNotification_ != ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) {
+      stateMgmtConsole.debug(`${this.constructor.name}: enableDelayedNotification.`);
+      this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_none_pending;
+    }
+  }
+
+  /*
+     when moving from inActive to active state the owning ViewPU calls this function
+     This solution is faster than ViewPU polling each variable to send back a viewPropertyHasChanged event
+     with the elmtIds
+
+    returns undefined if variable has _not_ changed
+    returns dependentElementIds_ Set if changed. This Set is empty if variable is not used to construct the UI
+  */
+  public moveElmtIdsForDelayedUpdate(): Set<number> | undefined {
+    const result = (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending)
+      ? this.dependentElementIds_
+      : undefined;
+    stateMgmtConsole.debug(`${this.constructor.name}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);
+    this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
+    return result;
+  }
+
   protected notifyPropertyRead() {
     stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
         notifyPropertyRead, DO NOT USE with PU. Use notifyPropertyHasBeenReadPU`);
@@ -103,7 +143,13 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   protected notifyPropertyHasChangedPU() {
     stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyHasChangedPU.`)
     if (this.owningView_) {
-      this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+      if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
+        // send viewPropertyHasChanged right away
+        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+      } else {
+        // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
+        this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
+      }
     }
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
@@ -114,12 +160,12 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         }
       }
     });
-  }
-  
+  }  
 
+  
   public markDependentElementsDirty(view: ViewPU) {
-    // TODO ace-ets2bundle, framework, compilated apps need to update together
-    // this function will be removed after a short transiition periode
+    // TODO ace-ets2bundle, framework, complicated apps need to update together
+    // this function will be removed after a short transition period.
     stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
   }
