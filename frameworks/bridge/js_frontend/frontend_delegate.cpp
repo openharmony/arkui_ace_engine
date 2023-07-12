@@ -19,6 +19,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -114,6 +115,11 @@ bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content)
     return true;
 }
 
+void FrontendDelegate::GetRectangleById(const std::string& key, NG::Rectangle& rectangle)
+{
+    NG::Inspector::GetRectangleById(key, rectangle);
+}
+
 template<typename T>
 bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content, std::string& ami)
 {
@@ -132,8 +138,7 @@ bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content, s
 }
 
 template<typename T>
-bool FrontendDelegate::GetResourceData(const std::string& fileUri, const RefPtr<AssetManager>& assetManager,
-    T& content)
+bool FrontendDelegate::GetResourceData(const std::string& fileUri, const RefPtr<AssetManager>& assetManager, T& content)
 {
     std::string targetFilePath;
     if (!ParseFileUri(assetManager, fileUri, targetFilePath)) {
@@ -150,9 +155,9 @@ bool FrontendDelegate::GetResourceData(const std::string& fileUri, const RefPtr<
 
 template bool FrontendDelegate::GetResourceData(const std::string& fileUri, std::string& content);
 template bool FrontendDelegate::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content);
-template bool FrontendDelegate::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content,
-                                                std::string& ami);
-template bool FrontendDelegate::GetResourceData(const std::string& fileUri, const RefPtr<AssetManager>& assetManager,
-    std::vector<uint8_t>& content);
+template bool FrontendDelegate::GetResourceData(
+    const std::string& fileUri, std::vector<uint8_t>& content, std::string& ami);
+template bool FrontendDelegate::GetResourceData(
+    const std::string& fileUri, const RefPtr<AssetManager>& assetManager, std::vector<uint8_t>& content);
 
 } // namespace OHOS::Ace::Framework

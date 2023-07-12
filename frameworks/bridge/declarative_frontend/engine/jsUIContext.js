@@ -112,6 +112,12 @@ class UIContext {
         return this.UIInspector_;
     }
 
+    getComponentUtils() {
+        if(this.componentUtils_ == null) {
+            this.componentUtils_ = new ComponentUtils(this.instanceId_);
+        }
+        return this.componentUtils_;
+    }
     animateTo(value, event) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         Context.animateTo(value, event);
@@ -154,6 +160,24 @@ class UIContext {
             callback();
         }
         __JSScopeUtil__.restoreInstanceId();
+    }
+}
+class ComponentUtils {
+    /**
+     * Construct new instance of ComponentUtils.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 10
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_componentUtils = globalThis.requireNapi('componentUtils');
+    }
+    getRectangleById(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let componentInformation = this.ohos_componentUtils.getRectangleById(id);
+        __JSScopeUtil__.restoreInstanceId();
+        return componentInformation;
     }
 }
 
