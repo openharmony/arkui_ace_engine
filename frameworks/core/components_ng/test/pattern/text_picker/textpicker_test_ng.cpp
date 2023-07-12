@@ -4693,4 +4693,100 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest006, TestSize.Level1)
     textPickerPattern->SetButtonIdeaSize();
     EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->width_.value(), CalcLength(12.0));
 }
+
+/**
+ * @tc.name: GetOptionsMultiStr001
+ * @tc.desc: Test TextPickerPattern GetOptionsMultiStr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, GetOptionsMultiStr001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    /**
+     * @tc.step: step2. call GetOptionsMultiStr().
+     * @tc.expected: the result of GetOptionsMultiStr is empty.
+     */
+    std::string result = pickerPattern -> GetOptionsMultiStr();
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetOptionsMultiStr002
+ * @tc.desc: Test TextPickerPattern GetOptionsMultiStr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, GetOptionsMultiStr002, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    /**
+     * @tc.step: step2. call GetOptionsMultiStr().
+     * @tc.expected: the result of GetOptionsMultiStr is [["11"]].
+     */
+    std::vector<TextCascadePickerOptions> options;
+    TextCascadePickerOptions options1;
+    options1.rangeResult = { "11", "12", "13" };
+    options.emplace_back(options1);
+    TextPickerModelNG::GetInstance()->SetColumns(options);
+    std::string result = pickerPattern -> GetOptionsMultiStr();
+    std::string expectResult = "[[\"11\"]]";
+    EXPECT_EQ(result, expectResult);
+}
+
+/**
+ * @tc.name: GetOptionsCascadeStr001
+ * @tc.desc: Test GetOptionsCascadeStr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, GetOptionsCascadeStr001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    TextPickerModelNG::GetInstance()->MultiInit(theme);
+    TextPickerModelNG::GetInstance()->SetIsCascade(true);
+    std::vector<NG::TextCascadePickerOptions> options;
+    NG::TextCascadePickerOptions options1;
+    options1.rangeResult = { "11", "12", "13" };
+    options.emplace_back(options1);
+    NG::TextCascadePickerOptions options2;
+    options2.rangeResult = { "21", "22", "23" };
+    options.emplace_back(options2);
+    NG::TextCascadePickerOptions options3;
+    options3.rangeResult = { "31", "32", "33" };
+    options.emplace_back(options3);
+
+    TextPickerModelNG::GetInstance()->SetColumns(options);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    /**
+     * @tc.step: step2. call GetOptionsCascadeStr().
+     * @tc.expected: the result of GetOptionsCascadeStr is "[{"text":"11"},{"text":"21"},{"text":"31"}]".
+     */
+    std::string result = pickerPattern -> GetOptionsCascadeStr(options);
+    std::string expectResult = "[{\"text\":\"11\"},{\"text\":\"21\"},{\"text\":\"31\"}]";
+    EXPECT_EQ(result, expectResult);
+}
 } // namespace OHOS::Ace::NG
