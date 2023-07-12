@@ -38,14 +38,6 @@ public:
     }
 
     void EnableDrag();
-    void SetDraggable(bool draggable)
-    {
-        draggable_ = draggable;
-    }
-    bool IsDraggable() const
-    {
-        return draggable_;
-    }
 
     bool DefaultSupportDrag() override
     {
@@ -65,7 +57,6 @@ private:
 
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<InputEvent> onMouseEvent_;
-    bool draggable_ = false;
 
     // Mark the address in the pattern, used to link to the website.
     std::string address_;

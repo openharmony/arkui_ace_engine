@@ -42,6 +42,7 @@ const char THEME_PATTERN_COUNTER[] = "counter_pattern";
 const char THEME_PATTERN_DIVIDER[] = "divider_pattern";
 const char THEME_PATTERN_FOCUS_ANIMATION[] = "focus_animation_pattern";
 const char THEME_PATTERN_GRID[] = "grid_pattern";
+const char THEME_PATTERN_HYPERLINK[] = "hyperlink_pattern";
 const char THEME_PATTERN_ICON[] = "icon_pattern";
 const char THEME_PATTERN_IMAGE[] = "image_pattern";
 const char THEME_PATTERN_LIST[] = "list_pattern";
