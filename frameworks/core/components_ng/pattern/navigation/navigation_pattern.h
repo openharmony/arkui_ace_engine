@@ -177,6 +177,26 @@ public:
     void OnWindowHide() override;
     void OnWindowShow() override;
 
+    void SetNavBarVisibilityChange(bool isChange)
+    {
+        navBarVisibilityChange_ = isChange;
+    }
+
+    bool IsNavBarVisibilityChange() const
+    {
+        return navBarVisibilityChange_;
+    }
+
+    void SetNavModeChange(bool isChange)
+    {
+        navModeChange_ = isChange;
+    }
+
+    bool IsNavModeChange() const
+    {
+        return navModeChange_;
+    }
+
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode currentMode);
@@ -191,6 +211,7 @@ private:
     void UpdateResponseRegion(float realDividerWidth, float realNavBarWidth,
     float dragRegionHeight, OffsetF dragRectOffset);
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
+    void OnNavBarStateChange();
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
@@ -204,6 +225,8 @@ private:
     float realNavBarWidth_ = 360.0f;
     float realDividerWidth_ = 2.0f;
     bool navigationStackProvided_ = false;
+    bool navBarVisibilityChange_ = false;
+    bool navModeChange_ = false;
 };
 
 } // namespace OHOS::Ace::NG

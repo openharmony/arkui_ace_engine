@@ -666,6 +666,21 @@ void NavigationModelNG::SetHideTitleBar(bool hideTitleBar)
 
 void NavigationModelNG::SetHideNavBar(bool hideNavBar)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
+
+    auto lastHideNavBarValue = navigationLayoutProperty->GetHideNavBar();
+    if (lastHideNavBarValue.has_value()) {
+        pattern->SetNavBarVisibilityChange(hideNavBar != lastHideNavBarValue.value());
+    } else {
+        pattern->SetNavBarVisibilityChange(true);
+    }
+
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
 }
 
