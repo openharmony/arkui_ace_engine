@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/geometry/axis.h"
+#include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/qrcode/qrcode_layout_algorithm.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_method.h"
@@ -48,6 +49,7 @@ public:
         return MakeRefPtr<QRCodePaintMethod>(qrCodeSize_);
     }
     void OnModifyDone() override;
+    FocusPattern GetFocusPattern() const override;
 
 private:
     void OnAttachToFrameNode() override;

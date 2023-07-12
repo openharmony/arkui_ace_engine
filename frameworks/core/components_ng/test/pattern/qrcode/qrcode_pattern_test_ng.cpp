@@ -36,6 +36,8 @@
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_bitmap.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -62,9 +64,27 @@ const uint32_t QR_CODE_VALUE_MAX_LENGTH = 256;
 
 class QRCodePropertyTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void MockPipelineContextGetTheme();
 };
+
+void QRCodePropertyTestNg::SetUpTestSuite()
+{
+    MockPipelineBase::SetUp();
+}
+
+void QRCodePropertyTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+}
+
+void QRCodePropertyTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<QrcodeTheme>()));
+}
 
 /**
  * @tc.name: QRCodePaintPropertyTest001
@@ -73,6 +93,7 @@ public:
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     QRCodeModelNG qrCodeModelNG;
     qrCodeModelNG.Create(CREATE_VALUE);
     qrCodeModelNG.SetQRCodeColor(QR_CODE_COLOR_VALUE);
@@ -93,6 +114,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     QRCodeModelNG qrCodeModelNG;
     qrCodeModelNG.Create(CREATE_VALUE);
     qrCodeModelNG.SetQRCodeColor(QR_CODE_COLOR_VALUE);
@@ -130,6 +152,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest002, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     QRCodeModelNG qrCodeModelNG;
     qrCodeModelNG.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -175,6 +198,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest003, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest004, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
      */
@@ -246,6 +270,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest004, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest005, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
      */
@@ -291,6 +316,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest005, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest006, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
      */
@@ -319,6 +345,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest006, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest007, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
      */
@@ -348,6 +375,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest007, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest008, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
      */
@@ -382,6 +410,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest008, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest009, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode paintMethod.
      */
@@ -408,6 +437,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest009, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest010, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. Initialize renderContext and qrcodePaintProperty.
      */
@@ -458,6 +488,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest010, TestSize.Level1)
  */
 HWTEST_F(QRCodePropertyTestNg, QRCodePaintMethodTest011, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create qrcode paintMethod.
      */
@@ -490,5 +521,135 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePaintMethodTest011, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Restore()).Times(1).WillOnce(Return());
     qrcodePaintMethod.qrCodeSize_ = 50;
     qrcodePaintMethod.Paint(rsCanvas, paintWrapper);
+}
+
+/**
+ * @tc.name: QRCodeModelSetContentOpacity001
+ * @tc.desc: test SetContentOpacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodePropertyTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto pipeline = MockPipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    ASSERT_NE(qrCodeTheme, nullptr);
+
+    /**
+     * @tc.steps: steps2. SetContentOpacity
+     * @tc.expected: steps2. Check the result of SetContentOpacity
+     */
+    qrCodeModelNG.SetContentOpacity(0.1);
+    auto frameNode1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode1, nullptr);
+    auto qrcodePaintProperty1 = frameNode1->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(qrcodePaintProperty1, nullptr);
+    EXPECT_EQ(
+        qrcodePaintProperty1->GetColorValue().GetValue(), qrCodeTheme->GetQrcodeColor().BlendOpacity(0.1).GetValue());
+
+    qrCodeModelNG.Create(CREATE_VALUE);
+    qrCodeModelNG.SetQRCodeColor(qrCodeTheme->GetQrcodeColor());
+    qrCodeModelNG.SetContentOpacity(1);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode2, nullptr);
+    auto qrcodePaintProperty2 = frameNode2->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(qrcodePaintProperty2, nullptr);
+    EXPECT_EQ(qrcodePaintProperty2->GetColorValue().GetValue(), qrCodeTheme->GetQrcodeColor().GetValue());
+}
+
+/**
+ * @tc.name: QRCodePatternGetFocusPattern001
+ * @tc.desc: test GetFocusPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodePropertyTestNg, QRCodePatternGetFocusPattern001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+
+    /**
+     * @tc.steps: steps2. GetFocusPattern
+     * @tc.expected: steps2. Check the result of GetFocusPattern
+     */
+    auto focusPattern = qrCodePattern->GetFocusPattern();
+    EXPECT_EQ(focusPattern.focusType_, FocusType::NODE);
+    EXPECT_EQ(focusPattern.focusable_, true);
+    EXPECT_EQ(focusPattern.styleType_, FocusStyleType::INNER_BORDER);
+}
+
+/**
+ * @tc.name: QRCodeLayoutAlgorithmMeasureContent001
+ * @tc.desc: test MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodePropertyTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    PaddingProperty padding;
+    padding.left = CalcLength(200.0_vp);
+    padding.right = CalcLength(200.0_vp);
+    padding.top = CalcLength(200.0_vp);
+    padding.bottom = CalcLength(200.0_vp);
+    layoutProperty->UpdatePadding(padding);
+    LayoutWrapper layoutWrapper(frameNode, nullptr, layoutProperty);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto qrCodeLayoutAlgorithm = AceType::DynamicCast<QRCodeLayoutAlgorithm>(qrCodePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(qrCodeLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(qrCodeLayoutAlgorithm));
+
+    /**
+     * @tc.steps: steps2. MeasureContent
+     * @tc.expected: steps2. Check the result of MeasureContent
+     */
+    LayoutConstraintF contentConstraint;
+    auto size = qrCodeLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(size->Width(), 0.0f);
+    contentConstraint.selfIdealSize.SetWidth(20.0f);
+    contentConstraint.selfIdealSize.SetHeight(20.0f);
+    auto size1 = qrCodeLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_NE(size1, std::nullopt);
+    EXPECT_EQ(size1->Width(), 20.0f);
+    contentConstraint.parentIdealSize = PARENT_SIZE;
+    contentConstraint.maxSize = CONTAINER_SIZE;
+    contentConstraint.minSize = SizeF(ZERO, ZERO);
+    OptionalSize<float> selfIdealSize1(200.0f, 200.0f);
+    contentConstraint.selfIdealSize = (selfIdealSize1);
+    auto size2 = qrCodeLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_NE(size2, std::nullopt);
+    EXPECT_EQ(size2->Height(), 200.0f);
 }
 } // namespace OHOS::Ace::NG
