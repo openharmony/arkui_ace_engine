@@ -21,7 +21,8 @@
 
 namespace OHOS::Ace::NG {
 
-BarItemNode::BarItemNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, MakeRefPtr<BarItemPattern>())
+BarItemNode::BarItemNode(const std::string& tag, int32_t nodeId)
+    : FrameNode(tag, nodeId, MakeRefPtr<BarItemPattern>()), isMoreItemNode_(false), isTitleMenuNodeShowing_(false)
 {}
 
 } // namespace OHOS::Ace::NG

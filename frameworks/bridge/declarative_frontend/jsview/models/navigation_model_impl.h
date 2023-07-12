@@ -40,6 +40,7 @@ public:
     void SetCustomToolBar(const RefPtr<AceType>& customToolBar) override;
     bool NeedSetItems() override;
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void GetToolBarItems(std::list<RefPtr<AceType>>& items) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void GetMenuItems(std::list<RefPtr<AceType>>& items) override;

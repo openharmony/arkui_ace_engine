@@ -221,6 +221,8 @@ build_component_ng("pattern_ng") {
     "navigation/title_bar_layout_algorithm.cpp",
     "navigation/title_bar_node.cpp",
     "navigation/title_bar_pattern.cpp",
+    "navigation/tool_bar_layout_algorithm.cpp",
+    "navigation/tool_bar_node.cpp",
     "navigator/navigator_event_hub.cpp",
     "navigator/navigator_model_ng.cpp",
     "navigator/navigator_pattern.cpp",
