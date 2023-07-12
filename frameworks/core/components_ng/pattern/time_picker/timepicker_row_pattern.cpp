@@ -301,6 +301,24 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     auto cancelNode = buttonCancelNode->GetFirstChild();
     auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    FlushAmPmFormatString();
+}
+
+void TimePickerRowPattern::FlushAmPmFormatString()
+{
+    auto it = std::find(vecAmPm_.begin(), vecAmPm_.end(), "AM");
+    if (it != vecAmPm_.end()) {
+        vecAmPm_.clear();
+        vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
+        std::string am = vecAmPm_[0];
+        vecAmPm_.emplace_back(am);
+        std::string pm = vecAmPm_[1];
+        vecAmPm_.emplace_back(pm);
+    } else {
+        vecAmPm_.clear();
+        vecAmPm_.emplace_back("AM");
+        vecAmPm_.emplace_back("PM");
+    }
 }
 
 void TimePickerRowPattern::SetChangeCallback(ColumnChangeCallback&& value)
