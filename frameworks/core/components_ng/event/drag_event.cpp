@@ -129,34 +129,29 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
-        if (info.GetSourceDevice() == SourceType::MOUSE) {
-            LOGD("User use default no animation");
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto dragDropManager = pipeline->GetDragDropManager();
-            CHECK_NULL_VOID(dragDropManager);
-            dragDropManager->SetIsDragged(true);
-        } else if (gestureHub->GetTextDraggable()) {
-            HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-        } else if (!isNotInPreviewState_) {
-            HideEventColumn();
-            HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-            HideFilter();
-            AnimationOption option;
-            option.SetDuration(PIXELMAP_ANIMATION_DURATION);
-            option.SetCurve(Curves::SHARP);
-            AnimationUtils::Animate(
-                option,
-                [renderContext]() {
-                    renderContext->UpdateOpacity(SCALE_NUMBER);
-                }, option.GetOnFinishEvent());
-            if (SystemProperties::IsSceneBoardEnabled()) {
-                auto pipelineContext = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID(pipelineContext);
-                auto manager = pipelineContext->GetOverlayManager();
-                manager->HideAllMenus();
-            } else {
-                SubwindowManager::GetInstance()->HideMenuNG();
+        if (info.GetSourceDevice() != SourceType::MOUSE) {
+            if (gestureHub->GetTextDraggable()) {
+                HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+            } else if (!isNotInPreviewState_) {
+                HideEventColumn();
+                HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+                HideFilter();
+                AnimationOption option;
+                option.SetDuration(PIXELMAP_ANIMATION_DURATION);
+                option.SetCurve(Curves::SHARP);
+                AnimationUtils::Animate(
+                    option,
+                    [renderContext]() {
+                        renderContext->UpdateOpacity(SCALE_NUMBER);
+                    }, option.GetOnFinishEvent());
+                if (SystemProperties::IsSceneBoardEnabled()) {
+                    auto pipelineContext = PipelineContext::GetCurrentContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    auto manager = pipelineContext->GetOverlayManager();
+                    manager->HideAllMenus();
+                } else {
+                    SubwindowManager::GetInstance()->HideMenuNG();
+                }
             }
         }
 
