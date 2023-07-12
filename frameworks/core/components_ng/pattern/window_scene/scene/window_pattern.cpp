@@ -417,4 +417,10 @@ void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId)
     CHECK_NULL_VOID(session_);
     session_->TransferFocusWindowIdEvent(focusWindowId);
 }
+
+void WindowPattern::TransferFocusState(bool focusState)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusStateEvent(focusState);
+}
 } // namespace OHOS::Ace::NG
