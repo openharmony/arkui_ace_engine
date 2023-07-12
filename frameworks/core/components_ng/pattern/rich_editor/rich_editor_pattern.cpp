@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -60,10 +62,9 @@ void RichEditorPattern::OnModifyDone()
     InitTouchEvent();
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (host->IsDraggable()) {
-        InitDragEvent();
+        InitDragDropEvent();
+        AddDragFrameNodeToManager(host);
     }
-    InitDragDropEvent();
-    AddDragFrameNodeToManager(host);
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
@@ -857,6 +858,7 @@ void RichEditorPattern::InitDragDropEvent()
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
     gestureHub->SetTextDraggable(true);
+    gestureHub->SetThumbnailCallback(GetThumbnailCallback());
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragStart = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
@@ -874,7 +876,9 @@ void RichEditorPattern::InitDragDropEvent()
         pattern->OnDragMove(event);
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
-    auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
+    auto onDragEnd = [weakPtr = WeakClaim(this), scopeId = Container::CurrentId()](
+                         const RefPtr<OHOS::Ace::DragEvent>& event) {
+        ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnDragEnd();
