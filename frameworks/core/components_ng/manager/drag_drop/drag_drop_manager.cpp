@@ -271,11 +271,17 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode)
+void DragDropManager::UpdateDragAllowDrop(
+    const RefPtr<FrameNode>& dragFrameNode, const RefPtr<OHOS::Ace::DragEvent>& event)
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+        auto records = event->GetData();
+        if (records && records->GetSize() > 1) {
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+        } else {
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+        }
         return;
     }
     for (const auto& it : summaryMap_) {
@@ -284,7 +290,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
             return;
         }
     }
-    InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
+    InteractionManager::GetInstance()->UpdateDragStyle(event->IsCopy() ? DragCursorStyle::COPY : DragCursorStyle::MOVE);
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -313,7 +319,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
         }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
@@ -477,7 +483,7 @@ void DragDropManager::FireOnDragEvent(
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
     } else {
-        UpdateDragAllowDrop(frameNode);
+        UpdateDragAllowDrop(frameNode, event);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 }
