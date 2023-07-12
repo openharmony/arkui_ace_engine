@@ -190,6 +190,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     LOGI("Add form success isDynamic: %{public}d", isDynamic_);
     if (formCallbackClient_ == nullptr) {
         formCallbackClient_ = std::make_shared<FormCallbackClient>();
+        formCallbackClient_->SetInstanceId(Container::CurrentId());
     }
     formCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
     clientInstance->AddForm(formCallbackClient_, formJsInfo);
