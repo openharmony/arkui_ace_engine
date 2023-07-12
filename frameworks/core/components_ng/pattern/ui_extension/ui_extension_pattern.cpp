@@ -42,6 +42,9 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
     auto callerToken = container->GetToken();
     Rosen::ExtensionSessionManager::GetInstance().Init();
     auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
+    if (want.GetElement().GetBundleName() == "AbilityComp") {
+        return;
+    }
     Rosen::SessionInfo extensionSessionInfo = {
         .bundleName_ = want.GetElement().GetBundleName(),
         .abilityName_ = want.GetElement().GetAbilityName(),
