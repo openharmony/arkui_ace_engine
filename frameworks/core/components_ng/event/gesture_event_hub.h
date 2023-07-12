@@ -390,6 +390,12 @@ public:
         return pixelMap_;
     }
 
+    RefPtr<LongPressRecognizer> GetLongPressRecognizer() const
+    {
+        CHECK_NULL_RETURN(longPressEventActuator_, nullptr);
+        return longPressEventActuator_->GetLongPressRecognizer();
+    }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallback GetDragCallback();
