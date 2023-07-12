@@ -83,7 +83,7 @@ private:
         const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
     bool IsIndexInMatrix(int32_t index, int32_t& startLine);
     void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize);
-    void GetTargetIndexInfoWithBenchMark(LayoutWrapper* layoutWrapper, int32_t targetIndex);
+    void GetTargetIndexInfoWithBenchMark(LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex);
 
     void UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize);
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
@@ -102,9 +102,8 @@ private:
     void CalculateLineHeightForLargeItem(int32_t lineIndex, int32_t currentLineIndex,
         std::map<int32_t, std::map<int32_t, int32_t>>::iterator gridMatrixIter, LayoutWrapper* layoutWrapper);
     void ScrollToIndexStart(LayoutWrapper* layoutWrapper, int32_t targetIndex);
-    void ScrollToIndexEnd(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
-    void ScrollToIndexCenter(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
     void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
+    void UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize);
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
