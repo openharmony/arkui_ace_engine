@@ -116,8 +116,9 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
 #ifdef ENABLE_DRAG_FRAMEWORK
         view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
-        if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        if (SystemProperties::IsSceneBoardEnabled() &&
+            (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
             view->ProcessMouseEvent(pointerEvent);
         } else {
             view->ProcessTouchEvent(pointerEvent);
