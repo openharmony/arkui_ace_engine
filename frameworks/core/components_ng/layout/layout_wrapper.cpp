@@ -26,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -466,6 +467,14 @@ void LayoutWrapper::SaveGeoState()
 
 void LayoutWrapper::ExpandSafeAreaInner()
 {
+    // children of Scrollable nodes don't support expandSafeArea
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    if (parent && parent->GetPattern<ScrollablePattern>()) {
+        return;
+    }
+
     auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
     CHECK_NULL_VOID_NOLOG(opts->Expansive());
 
@@ -478,8 +487,6 @@ void LayoutWrapper::ExpandSafeAreaInner()
     }
     // expand System and Cutout safeArea
     // get frame in global offset
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(host);
     auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
     auto frame = geometryNode_->GetFrameRect() + parentGlobalOffset;
     auto pipeline = PipelineContext::GetCurrentContext();
