@@ -128,10 +128,12 @@ RefPtr<FrameNode> CalendarPickerTestNg::CalendarDialogShow(
     RefPtr<OHOS::Ace::MockThemeManager> themeManager, RefPtr<FrameNode> entryNode)
 {
     EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
@@ -215,8 +217,24 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest001, TestSize.Level1)
 
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
@@ -428,6 +446,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest001, TestSize.Level1)
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     auto gesture = calendarDialogNode->GetOrCreateGestureEventHub();
@@ -471,7 +490,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest002, TestSize.Level1)
         .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;
