@@ -63,6 +63,7 @@ const char THEME_PATTERN_SELECT[] = "select_pattern";
 const char THEME_PATTERN_SLIDER[] = "slider_pattern";
 const char THEME_PATTERN_TEXT[] = "text_pattern";
 const char THEME_PATTERN_TEXTFIELD[] = "textfield_pattern";
+const char THEME_PATTERN_RICH_EDITOR[] = "rich_editor_pattern";
 const char THEME_PATTERN_TEXT_OVERLAY[] = "text_overlay_pattern";
 const char THEME_PATTERN_VIDEO[] = "video_pattern";
 const char THEME_PATTERN_INDEXER[] = "indexer_pattern";

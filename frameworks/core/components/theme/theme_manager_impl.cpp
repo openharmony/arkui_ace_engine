@@ -65,6 +65,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "core/components/theme/advanced_pattern_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -126,7 +127,8 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::SecurityComponentTheme::TypeId(), &ThemeBuildFunc<NG::SecurityComponentTheme::Builder> },
     { NG::FormTheme::TypeId(), &ThemeBuildFunc<NG::FormTheme::Builder> },
     { CloseIconTheme::TypeId(), &ThemeBuildFunc<CloseIconTheme::Builder> },
-    { NG::SideBarTheme::TypeId(), &ThemeBuildFunc<NG::SideBarTheme::Builder> }
+    { NG::SideBarTheme::TypeId(), &ThemeBuildFunc<NG::SideBarTheme::Builder> },
+    { NG::RichEditorTheme::TypeId(), &ThemeBuildFunc<NG::RichEditorTheme::Builder> }
 };
 } // namespace
 

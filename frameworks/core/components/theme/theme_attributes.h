@@ -66,6 +66,7 @@ extern const char THEME_PATTERN_SELECT[];
 extern const char THEME_PATTERN_SLIDER[];
 extern const char THEME_PATTERN_TEXT[];
 extern const char THEME_PATTERN_TEXTFIELD[];
+extern const char THEME_PATTERN_RICH_EDITOR[];
 extern const char THEME_PATTERN_TEXT_OVERLAY[];
 extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
