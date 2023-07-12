@@ -309,7 +309,7 @@ private:
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 
-    std::list<WeakPtr<UINode>> windowSceneList_;
+    std::set<WeakPtr<UINode>> windowSceneSet_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };
