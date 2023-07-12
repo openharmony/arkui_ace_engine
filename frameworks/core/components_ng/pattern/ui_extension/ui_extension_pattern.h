@@ -46,6 +46,7 @@ public:
     }
 
     void SetOnRemoteReadyCallback(std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback);
