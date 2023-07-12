@@ -136,6 +136,8 @@ void VideoTestNg::SetUpTestSuite()
     MockPipelineBase::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineBase::GetCurrent()->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<VideoTheme>()));
 }
 
@@ -967,10 +969,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     auto frameNode = CreateVideoNode(testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
-    auto rootNode = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
-    EXPECT_FALSE(rootNode == nullptr);
-    frameNode->SetHostRootId(rootNode->GetId());
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1064,8 +1062,6 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
      * @tc.expected: step1. Create Video successfully
      */
     MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
-    auto rootNode = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     VideoModelNG video;
     auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
     video.Create(videoController);
@@ -1079,7 +1075,6 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
-    frameNode->SetHostRootId(rootNode->GetId());
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     EXPECT_FALSE(videoLayoutProperty == nullptr);
 
@@ -1652,10 +1647,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
     auto frameNode = CreateVideoNode(testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
-    auto rootNode = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
-    EXPECT_FALSE(rootNode == nullptr);
-    frameNode->SetHostRootId(rootNode->GetId());
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1729,6 +1720,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
      * @tc.expected: step4. ExitFullScreen() will be called
      */
     // construct a FullScreenManager
+    auto rootNode = MockPipelineBase::GetCurrent()->rootNode_;
     auto fullScreenManager = AceType::MakeRefPtr<FullScreenManager>(rootNode);
 
     auto flag = fullScreenManager->OnBackPressed(); // will on videoPattern->OnBackPressed()
