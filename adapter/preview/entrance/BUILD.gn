@@ -69,7 +69,7 @@ ohos_source_set("preview_entrance_source") {
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       external_deps += [
-        "graphic_standard:librender_service_client",
+        "graphic_2d:librender_service_client",
         "previewer:ide_util",
         "window_manager:previewer_window",
       ]

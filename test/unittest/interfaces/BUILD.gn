@@ -42,7 +42,7 @@ ohos_unittest("ui_content_test") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
-    "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
@@ -88,7 +88,7 @@ ohos_unittest("form_render_test") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
-    "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
@@ -100,7 +100,7 @@ ohos_unittest("form_render_test") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "form_fwk:form_manager",
-    "graphic_standard:surface",
+    "graphic_2d:surface",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
