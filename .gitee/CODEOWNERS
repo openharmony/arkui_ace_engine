@@ -27,6 +27,7 @@ frameworks/core/components_ng/render/adapter/  @yan-shuifeng @sunfei2021
 frameworks/core/components_ng/layout/  @yan-shuifeng @yangfan229
 frameworks/core/components_ng/property/  @yan-shuifeng
 frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo
+frameworks/core/components_ng/manager/safe_area/  @zhoutianer
 
 [Common source]
 frameworks/core/common/  @yan-shuifeng @sunfei2021
