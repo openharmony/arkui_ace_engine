@@ -134,6 +134,7 @@ ohos_unittest("time_picker_test_ng") {
     # mock
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_measure_util.cpp",
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
     "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
