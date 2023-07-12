@@ -103,4 +103,5 @@ bool SystemProperties::GetIsUseMemoryMonitor()
 {
     return false;
 }
+
 } // namespace OHOS::Ace

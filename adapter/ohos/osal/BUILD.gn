@@ -65,6 +65,7 @@ template("ace_osal_ohos_source_set") {
       "socperf_client_impl.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",
+      "ui_extension_helper_impl.cpp",
       "want_wrap_ohos.cpp",
     ]
 
