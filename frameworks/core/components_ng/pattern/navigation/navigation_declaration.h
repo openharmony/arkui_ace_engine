@@ -105,7 +105,7 @@ constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
 constexpr uint32_t MAXIMUM_TOOLBAR_ITEMS_IN_BAR = 5;
 constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
 
-enum class ToolbarItemStatus {
+enum class NavToolbarItemStatus {
     NORMAL = 0,
     DISABLED,
     ACTIVE,
@@ -116,7 +116,7 @@ struct BarItem {
     std::optional<std::string> text;
     std::optional<std::string> icon;
     std::function<void()> action;
-    ToolbarItemStatus status;
+    NavToolbarItemStatus status;
     std::optional<std::string> activeIcon;
     std::string ToString() const
     {
