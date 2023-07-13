@@ -48,10 +48,5 @@ FocusPattern UIExtensionPattern::GetFocusPattern() const
     return { FocusType::NODE, true, FocusStyleType::NONE };
 }
 
-bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    return false;
-}
-
 void UIExtensionPattern::OnVisibleChange(bool visible) {}
 } // namespace OHOS::Ace::NG
