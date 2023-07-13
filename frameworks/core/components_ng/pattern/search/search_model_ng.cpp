@@ -439,6 +439,9 @@ void SearchModelNG::SetTextAlign(const TextAlign& textAlign)
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldLayoutProperty->GetTextAlignValue(TextAlign::START) != textAlign) {
+        textFieldLayoutProperty->UpdateTextAlignChanged(true);
+    }
     textFieldLayoutProperty->UpdateTextAlign(textAlign);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
