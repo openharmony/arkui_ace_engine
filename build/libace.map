@@ -68,6 +68,8 @@
       OHOS::Ace::MemoryMonitor::*;
       OHOS::Ace::DumpLog::*;
       OHOS::Ace::AceEngine::*;
+      OHOS::Ace::UdmfClient::*;
+      OHOS::Ace::DragEvent::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

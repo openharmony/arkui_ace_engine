@@ -797,8 +797,9 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
 
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
-    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(abilityId_));
     CHECK_NULL_RETURN(container, false);
+    container->SetCurPointerEvent(pointerEvent);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     CHECK_NULL_RETURN(aceView, false);
     aceView->DispatchTouchEvent(aceView, pointerEvent);

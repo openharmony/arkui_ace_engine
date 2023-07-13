@@ -414,6 +414,9 @@ public:
 
     bool IsLauncherContainer() override;
 
+    void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
+    void GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType) override;
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -468,6 +471,9 @@ private:
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
+    // For custom drag event
+    std::mutex pointerEventMutex_;
+    std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
 
