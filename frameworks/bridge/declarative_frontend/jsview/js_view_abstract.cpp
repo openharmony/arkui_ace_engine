@@ -269,7 +269,7 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     }
     // if specify angle
     JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
-    float perspective = 1.0f;
+    float perspective = 0.0f;
     JSViewAbstract::GetPerspective("perspective", argsPtrItem, perspective);
     rotate.perspective = perspective;
 }

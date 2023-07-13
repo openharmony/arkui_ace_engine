@@ -215,7 +215,7 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
     if (transitionEffect->HasRotate()) {
         xPivot = ConvertDimensionToScaleBySize(transitionEffect->GetRotateValue().centerX, frameSize.Width());
         yPivot = ConvertDimensionToScaleBySize(transitionEffect->GetRotateValue().centerY, frameSize.Height());
-        zPivot = static_cast<float>(transitionEffect->GetRotateValue().centerZ.ConvertToPx());
+        zPivot = static_cast<float>(transitionEffect->GetRotateValue().centerZ.ConvertToVp());
     } else if (transitionEffect->HasScale()) {
         xPivot = ConvertDimensionToScaleBySize(transitionEffect->GetScaleValue().centerX, frameSize.Width());
         yPivot = ConvertDimensionToScaleBySize(transitionEffect->GetScaleValue().centerY, frameSize.Height());
@@ -313,7 +313,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
         float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
         if (vec.GetZ().has_value()) {
-            float zPivot = static_cast<float>(vec.GetZ().value().ConvertToPx());
+            float zPivot = static_cast<float>(vec.GetZ().value().ConvertToVp());
             SetPivot(xPivot, yPivot, zPivot);
         } else {
             SetPivot(xPivot, yPivot);
@@ -730,18 +730,16 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector5F& rotate)
 
 void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
 {
-    float zPivot = 0.0f;
-    auto& z = center.GetZ();
-    if (z.has_value()) {
-        zPivot = static_cast<float>(z.value().ConvertToPx());
-    }
     RectF rect = GetPaintRectWithoutTransform();
     if (!RectIsNull()) {
         float xPivot = ConvertDimensionToScaleBySize(center.GetX(), rect.Width());
         float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
+        float zPivot = 0.0f;
+        auto& z = center.GetZ();
+        if (z.has_value()) {
+            zPivot = static_cast<float>(z.value().ConvertToVp());
+        }
         SetPivot(xPivot, yPivot, zPivot);
-    } else {
-        rsNode_->SetPivotZ(zPivot);
     }
     RequestNextFrame();
 }
