@@ -16,12 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H
 
-#ifndef USE_ROSEN_DRAWING
 #ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
 #else
 #include "experimental/svg/model/SkSVGDOM.h"
-#endif
 #endif
 
 #include "base/image/pixel_map.h"

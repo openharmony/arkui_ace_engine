@@ -99,8 +99,10 @@ void SetTextStyle(RSCanvas* canvas, const RenderRingInfo& trackInfo, const std::
         LOGW("PaintText: fontCollection is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     double pathStartVertexX = trackInfo.center.GetX();
     double pathStartVertexY = trackInfo.center.GetY() - trackInfo.radius + (trackInfo.thickness / 2);
+#endif
     Rosen::TypographyStyle style;
     Rosen::TextStyle txtStyle;
     txtStyle.fontSize = 80;

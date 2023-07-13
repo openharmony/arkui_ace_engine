@@ -66,7 +66,6 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     recordingCanvas->MultiplyAlpha((disabled_ ? 102.0 / 255 : 1));
 #else
-    auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
     LOGE("Drawing is not supported");
 #endif
 #endif

@@ -103,8 +103,6 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
         PaintTrack(canvas, trackPaint, originX, originY, trackColor);
         recordingCanvas->RestoreAlpha();
 #else
-        auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
-        LOGE("Drawing is not supported");
         PaintTrack(canvas, trackPen, originX, originY, trackColor);
 #endif
 #else

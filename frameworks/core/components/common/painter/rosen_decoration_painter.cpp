@@ -49,6 +49,7 @@ namespace {
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t DASHED_LINE_LENGTH = 3;
 constexpr int32_t DEL_NUM = 2;
+#ifndef USE_ROSEN_DRAWING
 constexpr float TOP_START = 225.0f;
 constexpr float TOP_END = 270.0f;
 constexpr float RIGHT_START = 315.0f;
@@ -58,6 +59,7 @@ constexpr float BOTTOM_END = 90.0f;
 constexpr float LEFT_START = 135.0f;
 constexpr float LEFT_END = 180.0f;
 constexpr float SWEEP_ANGLE = 45.0f;
+#endif
 constexpr float EXTEND = 1024.0f;
 constexpr uint32_t COLOR_MASK = 0xff000000;
 #ifdef USE_ROSEN_DRAWING
