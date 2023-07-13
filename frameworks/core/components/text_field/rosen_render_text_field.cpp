@@ -373,7 +373,7 @@ void RosenRenderTextField::PaintSelection(RSCanvas* canvas) const
 #else
         auto rect = RSRect(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom());
 
-        if (box.direction == txt::TextDirection::ltr) {
+        if (box.direction == Rosen::TextDirection::LTR) {
             rect = RSRect(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom());
         }
         canvas->AttachBrush(brush);

@@ -184,10 +184,15 @@ void RosenRenderSurface::ConsumeBuffer()
     auto rsNode = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
     rsNode->DrawOnNode(
+#ifndef USE_ROSEN_DRAWING
         Rosen::RSModifierType::CONTENT_STYLE, [surfaceBuffer, width, height](const std::shared_ptr<SkCanvas>& canvas) {
             Rosen::RSSurfaceBufferInfo info { surfaceBuffer, 0, 0, width, height };
             auto* recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas.get());
             recordingCanvas->DrawSurfaceBuffer(info);
+#else
+        Rosen::RSModifierType::CONTENT_STYLE, [surfaceBuffer, width, height](const std::shared_ptr<RSCanvas>& canvas) {
+            CHECK_NULL_VOID(canvas);
+#endif
         });
     rosenRenderContext->StopRecordingIfNeeded();
 

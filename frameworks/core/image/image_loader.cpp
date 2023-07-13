@@ -358,16 +358,23 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
     CHECK_NULL_RETURN(fd >= 0, nullptr);
 #ifndef USE_ROSEN_DRAWING
     auto data = SkData::MakeFromFD(fd);
-#else
-    auto data = std::make_shared<RSData>();
-    LOGE("Drawing is not supported");
-#endif
     close(fd);
     CHECK_NULL_RETURN(data, nullptr);
+#else
+    auto skData = SkData::MakeFromFD(fd);
+    close(fd);
+    CHECK_NULL_RETURN(skData, nullptr);
+    auto data = std::make_shared<RSData>();
+    data->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(skData);
+#endif
     BackgroundTaskExecutor::GetInstance().PostTask(
         [src, data]() {
             // cache file content
+#ifndef USE_ROSEN_DRAWING
             ImageCache::WriteCacheFile(src, data->data(), data->size());
+#else
+            ImageCache::WriteCacheFile(src, data->GetData(), data->GetSize());
+#endif
         },
         BgTaskPriority::LOW);
     return data;

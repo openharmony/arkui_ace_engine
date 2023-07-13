@@ -31,7 +31,9 @@ namespace {
 
 constexpr Dimension CLIP_ORIGIN_X = 4.5754_vp;
 constexpr Dimension CLIP_ORIGIN_Y = 6.3432_vp;
+#ifndef USE_ROSEN_DRAWING
 constexpr Dimension CLIP_LENGTH = 4.0_vp;
+#endif
 constexpr Dimension MAGNIFIER_WIDTH = 48.0_vp;
 constexpr Dimension MAGNIFIER_RADIUS = 24.0_vp;
 constexpr Dimension MAGNIFIER_OFFSET = 7.0_vp;

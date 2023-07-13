@@ -123,9 +123,15 @@ inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t l
 
 void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
+#ifndef USE_ROSEN_DRAWING
     rsRecordingCanvas_ = std::make_shared<OHOS::Rosen::RSRecordingCanvas>(width, height);
     skCanvas_ = std::static_pointer_cast<SkCanvas>(rsRecordingCanvas_);
     contentModifier_->UpdateCanvas(rsRecordingCanvas_);
+#else
+    rsRecordingCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
+    rsCanvas_ = std::static_pointer_cast<RSCanvas>(rsRecordingCanvas_);
+    contentModifier_->UpdateCanvas(rsRecordingCanvas_);
+#endif
 }
 
 bool CustomPaintPaintMethod::HasShadow() const
@@ -649,7 +655,9 @@ void CustomPaintPaintMethod::GetStrokePaint(RSPen& pen, RSSamplingOptions& optio
         { LineCapStyle::SQUARE, RSPen::CapStyle::SQUARE_CAP },
     };
     InitImagePaint(&pen, nullptr, options);
-    pen.SetColor(strokeState_.GetColor().GetValue());
+    if (strokeState_.GetPaintStyle() == PaintStyle::Color) {
+        pen.SetColor(strokeState_.GetColor().GetValue());
+    }
     pen.SetJoinStyle(ConvertEnumToDrawingEnum(
         strokeState_.GetLineJoin(), skLineJoinTable, ArraySize(skLineJoinTable), RSPen::JoinStyle::MITER_JOIN));
     pen.SetCapStyle(ConvertEnumToDrawingEnum(
@@ -664,7 +672,6 @@ void CustomPaintPaintMethod::GetStrokePaint(RSPen& pen, RSSamplingOptions& optio
     if (globalState_.HasGlobalAlpha()) {
         pen.SetAlphaF(globalState_.GetAlpha());
     }
-    return pen;
 }
 
 void CustomPaintPaintMethod::InitImagePaint(RSPen* pen, RSBrush* brush, RSSamplingOptions& options)
