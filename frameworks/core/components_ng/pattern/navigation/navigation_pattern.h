@@ -211,6 +211,7 @@ private:
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     bool UpdateEventHub(const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, NavigationMode navigationMode);
+    bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
@@ -240,6 +241,7 @@ private:
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;
+    NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 };
 
 } // namespace OHOS::Ace::NG

@@ -322,6 +322,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     navigationLayoutProperty->UpdateNavigationMode(navigationLayoutAlgorithm->GetNavigationMode());
     UpdateEventHub(hostNode, navigationLayoutProperty, navigationLayoutAlgorithm->GetNavigationMode());
+    UpdateTitleModeChangeEventHub(hostNode);
     UpdateResponseRegion(navigationLayoutAlgorithm->GetRealDividerWidth(),
         navigationLayoutAlgorithm->GetRealNavBarWidth(), navigationLayoutAlgorithm->GetRealNavBarHeight(),
         navigationLayoutAlgorithm->GetNavBarOffset());
@@ -351,6 +352,27 @@ bool NavigationPattern::UpdateEventHub(const RefPtr<NavigationGroupNode>& hostNo
                 navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                 eventHub->FireNavBarStateChangeEvent(true);
             }
+        }
+    }
+    return true;
+}
+
+bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode)
+{
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_RETURN(navBarNode, false);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, false);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_RETURN(titleBarLayoutProperty, false);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
+        auto titleBarPattern = AceType::DynamicCast<TitleBarPattern>(titleBarNode->GetPattern());
+        CHECK_NULL_RETURN(titleBarPattern, false);
+        NavigationTitleMode titleMode = titleBarPattern->GetNavigationTitleMode();
+        if (titleMode != NavigationTitleMode::FREE && titleMode_ != titleMode) {
+            NavigationTitleModeChangeEvent navigationTitleModeChange(titleMode == NavigationTitleMode::MINI);
+            eventHub->FireChangeEvent(&navigationTitleModeChange);
+            titleMode_ = titleMode;
         }
     }
     return true;

@@ -132,6 +132,11 @@ public:
             true : false;
     }
 
+    NavigationTitleMode GetNavigationTitleMode() const
+    {
+        return titleMode_;
+    }
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -198,6 +203,8 @@ private:
     float initialSubtitleOffsetY_ = 0.0f;
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
+
+    NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 };
 
 } // namespace OHOS::Ace::NG
