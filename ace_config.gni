@@ -89,6 +89,7 @@ window_manager_path = "//foundation/window/window_manager"
 graphic_2d_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
+crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
 
 # Config toolchain

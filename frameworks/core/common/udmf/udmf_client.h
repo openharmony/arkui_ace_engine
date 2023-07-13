@@ -19,12 +19,13 @@
 #include <map>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
 #include "core/common/frontend.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/form/resource/form_request_data.h"
 
 namespace OHOS::Ace {
-class UdmfClient : public AceType {
+class ACE_FORCE_EXPORT UdmfClient : public AceType {
     DECLARE_ACE_TYPE(UdmfClient, AceType);
 
 public:
