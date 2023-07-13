@@ -75,6 +75,10 @@ protected:
     void RegisterOrUpdateSecurityComponent(RefPtr<FrameNode>& frameNode, int32_t& scId);
     void UnregisterSecurityComponent();
     void InitSecurityComponentAppearCallback(RefPtr<FrameNode>& frameNode);
+#ifdef SECURITY_COMPONENT_ENABLE
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValueRect(std::unique_ptr<JsonValue>& json) const;
+#endif
 private:
     RefPtr<ClickEvent> clickListener_;
     bool isAppearCallback_ = false;
