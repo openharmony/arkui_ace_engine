@@ -67,7 +67,7 @@ template("napi_dragcontroller_static") {
         config.enable_drag_framework) {
       external_deps += [
         "device_status:devicestatus_client",
-        "graphic_2d:librender_service_client",
+        "graphic_standard:librender_service_client",
       ]
     }
 
