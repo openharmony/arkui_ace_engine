@@ -343,6 +343,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { LOCATION_BUTTON_COMPONENT_TAG, LOCATION_BUTTON_ETS_TAG },
     { PASTE_BUTTON_COMPONENT_TAG, PASTE_BUTTON_ETS_TAG },
     { SAVE_BUTTON_COMPONENT_TAG, SAVE_BUTTON_ETS_TAG },
+    { PARTICLE_COMPONENT_TAG, PARTICLE_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;
