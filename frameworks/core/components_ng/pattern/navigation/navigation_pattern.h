@@ -211,7 +211,7 @@ private:
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     bool UpdateEventHub(const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, NavigationMode navigationMode);
-    bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
+    bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
