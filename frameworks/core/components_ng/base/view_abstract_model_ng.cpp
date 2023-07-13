@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t LONG_PRESS_DURATION = 280;
+constexpr int32_t LONG_PRESS_DURATION = 800;
 
 void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode, bool isContextMenu,
     const NG::OffsetF& offset, const MenuParam& menuParam = MenuParam())

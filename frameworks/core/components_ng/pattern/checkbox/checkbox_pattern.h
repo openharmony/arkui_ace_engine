@@ -160,6 +160,7 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -182,7 +183,6 @@ private:
     void CheckBoxGroupIsTrue();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;

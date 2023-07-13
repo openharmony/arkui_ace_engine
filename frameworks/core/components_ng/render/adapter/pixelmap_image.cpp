@@ -99,6 +99,28 @@ void PixelMapImage::DrawToRSCanvas(
 #endif
 }
 
+void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+#ifdef NEW_SKIA
+    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
+    CHECK_NULL_VOID(rsCanvas);
+    auto skCanvas = rsCanvas->ExportSkCanvas();
+    CHECK_NULL_VOID(skCanvas);
+    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
+    CHECK_NULL_VOID(recordingCanvas);
+    SkPaint paint;
+    SkSamplingOptions option;
+    SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
+
+    auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
+#endif
+#else
+    LOGE("Drawing is not supported");
+#endif
+}
+
 void PixelMapImage::Cache(const std::string& key)
 {
     auto pipeline = PipelineContext::GetCurrentContext();

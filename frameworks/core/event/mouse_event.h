@@ -77,6 +77,7 @@ enum class HoverEffectType : int32_t {
 };
 
 struct MouseEvent final {
+    int32_t id = 0;
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
@@ -89,6 +90,7 @@ struct MouseEvent final {
     float screenX = 0.0f;
     float screenY = 0.0f;
     MouseAction action = MouseAction::NONE;
+    MouseAction pullAction = MouseAction::NONE;
     MouseButton button = MouseButton::NONE_BUTTON;
     int32_t pressedButtons = 0; // combined by MouseButtons
     TimeStamp time;
@@ -96,6 +98,7 @@ struct MouseEvent final {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::vector<uint8_t> enhanceData;
 
     Offset GetOffset() const
     {
@@ -131,13 +134,15 @@ struct MouseEvent final {
                 .screenX = screenX,
                 .screenY = screenY,
                 .action = action,
+                .pullAction = pullAction,
                 .button = button,
                 .pressedButtons = pressedButtons,
                 .time = time,
                 .deviceId = deviceId,
                 .targetDisplayId = targetDisplayId,
                 .sourceType = sourceType,
-                .pointerEvent = pointerEvent };
+                .pointerEvent = pointerEvent,
+                .enhanceData = enhanceData };
         }
 
         return { .x = x / scale,
@@ -152,13 +157,15 @@ struct MouseEvent final {
             .screenX = screenX / scale,
             .screenY = screenY / scale,
             .action = action,
+            .pullAction = pullAction,
             .button = button,
             .pressedButtons = pressedButtons,
             .time = time,
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent };
+            .pointerEvent = pointerEvent,
+            .enhanceData = enhanceData };
     }
 
     TouchEvent CreateTouchPoint() const
@@ -173,8 +180,11 @@ struct MouseEvent final {
         } else {
             type = TouchType::UNKNOWN;
         }
-        int32_t id = GetId();
-        TouchPoint point { .id = id,
+        int32_t pointId = id;
+        if (sourceType == SourceType::MOUSE) {
+            pointId = GetId();
+        }
+        TouchPoint point { .id = pointId,
             .x = x,
             .y = y,
             .screenX = screenX,
@@ -182,7 +192,7 @@ struct MouseEvent final {
             .downTime = time,
             .size = 0.0,
             .isPressed = (type == TouchType::DOWN) };
-        TouchEvent event { .id = id,
+        TouchEvent event { .id = pointId,
             .x = x,
             .y = y,
             .screenX = screenX,
@@ -193,7 +203,8 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent };
+            .pointerEvent = pointerEvent,
+            .enhanceData = enhanceData };
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -218,7 +229,8 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent };
+            .pointerEvent = pointerEvent,
+            .enhanceData = enhanceData };
     }
 };
 

@@ -329,6 +329,12 @@ bool Scrollable::IsSpringStopped() const
     return !springController_ || (springController_->IsStopped());
 }
 
+bool Scrollable::IsSnapStopped() const
+{
+    return !snapController_ || (snapController_->IsStopped()) ||
+           (snapController_->GetStatus() == Animator::Status::IDLE);
+}
+
 void Scrollable::StopScrollable()
 {
     if (controller_) {
@@ -620,7 +626,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
     scrollSnapController_->ClearAllListeners();
-    snapController_->ClearAllListeners();
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
@@ -845,35 +850,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     scrollSnapController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
-        if (scroll->moved_) {
-            scroll->HandleScrollEnd();
-        }
-        scroll->currentVelocity_ = 0.0;
-        if (scroll->isTouching_ || scroll->isDragUpdateStop_) {
-            return;
-        }
-        scroll->moved_ = false;
-#ifdef OHOS_PLATFORM
-        LOGI("springController stop increase cpu frequency");
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-        if (FrameReport::GetInstance().GetEnable()) {
-            FrameReport::GetInstance().EndListFling();
-        }
-#endif
-        if (scroll->scrollEnd_) {
-            scroll->scrollEnd_();
-        }
-        // Send event to accessibility when scroll stop.
-        auto context = scroll->GetContext().Upgrade();
-        if (context) {
-            AccessibilityEvent scrollEvent;
-            scrollEvent.nodeId = scroll->nodeId_;
-            scrollEvent.eventType = "scrollend";
-            context->SendEventToAccessibility(scrollEvent);
-        }
-#if !defined(PREVIEW)
-        LayoutInspector::SupportInspector();
-#endif
+        scroll->OnAnimateStop();
     });
     scrollSnapController_->PlayMotion(scrollSnapMotion_);
 }
@@ -912,6 +889,24 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
     snapController_->PlayMotion(snapMotion_);
 }
 
+void Scrollable::UpdateScrollSnapStartOffset(double offset)
+{
+    if (scrollSnapMotion_ && scrollSnapController_ && scrollSnapController_->IsRunning()) {
+        scrollSnapController_->ClearStopListeners();
+        scrollSnapController_->Stop();
+        auto currPos = scrollSnapMotion_->GetCurrentPosition();
+        auto endPos = scrollSnapMotion_->GetEndValue();
+        auto velocity = scrollSnapMotion_->GetCurrentVelocity();
+        scrollSnapMotion_->Reset(currPos + offset, endPos, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+        scrollSnapController_->PlayMotion(scrollSnapMotion_);
+        scrollSnapController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto scroll = weak.Upgrade();
+            CHECK_NULL_VOID(scroll);
+            scroll->OnAnimateStop();
+        });
+    }
+}
+
 void Scrollable::ProcessScrollSnapMotion(double position)
 {
     LOGD("[scroll] currentPos_(%{public}lf), position(%{public}lf)", currentPos_, position);
@@ -929,7 +924,40 @@ void Scrollable::ProcessScrollSnapMotion(double position)
             touchUp_ = true;
         }
     }
-    currentPos_ = position;
+    currentPos_ = scrollSnapMotion_->GetCurrentPosition();
+}
+
+void Scrollable::OnAnimateStop()
+{
+    if (moved_) {
+        HandleScrollEnd();
+    }
+    currentVelocity_ = 0.0;
+    if (isTouching_ || isDragUpdateStop_) {
+        return;
+    }
+    moved_ = false;
+#ifdef OHOS_PLATFORM
+    LOGI("springController stop increase cpu frequency");
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndListFling();
+    }
+#endif
+    if (scrollEnd_) {
+        scrollEnd_();
+    }
+    // Send event to accessibility when scroll stop.
+    auto context = GetContext().Upgrade();
+    if (context) {
+        AccessibilityEvent scrollEvent;
+        scrollEvent.nodeId = nodeId_;
+        scrollEvent.eventType = "scrollend";
+        context->SendEventToAccessibility(scrollEvent);
+    }
+#if !defined(PREVIEW)
+    LayoutInspector::SupportInspector();
+#endif
 }
 
 void Scrollable::StartSpringMotion(
@@ -954,37 +982,8 @@ void Scrollable::StartSpringMotion(
     springController_->PlayMotion(scrollMotion_);
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto scroll = weak.Upgrade();
-        if (scroll) {
-            if (scroll->moved_) {
-                scroll->HandleScrollEnd();
-            }
-            scroll->currentVelocity_ = 0.0;
-            if (scroll->isTouching_ || scroll->isDragUpdateStop_) {
-                return;
-            }
-            scroll->moved_ = false;
-#ifdef OHOS_PLATFORM
-            LOGI("springController stop increase cpu frequency");
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-            if (FrameReport::GetInstance().GetEnable()) {
-                FrameReport::GetInstance().EndListFling();
-            }
-#endif
-            if (scroll->scrollEnd_) {
-                scroll->scrollEnd_();
-            }
-            // Send event to accessibility when scroll stop.
-            auto context = scroll->GetContext().Upgrade();
-            if (context) {
-                AccessibilityEvent scrollEvent;
-                scrollEvent.nodeId = scroll->nodeId_;
-                scrollEvent.eventType = "scrollend";
-                context->SendEventToAccessibility(scrollEvent);
-            }
-#if !defined(PREVIEW)
-            LayoutInspector::SupportInspector();
-#endif
-        }
+        CHECK_NULL_VOID(scroll);
+        scroll->OnAnimateStop();
     });
 }
 
@@ -998,10 +997,6 @@ void Scrollable::ProcessScrollMotionStop()
             return;
         }
     }
-    if ((!scrollPause_ || !scrollOverCallback_) && moved_) {
-        HandleScrollEnd();
-    }
-
     // spring effect special process
     if (scrollPause_) {
         scrollPause_ = false;
@@ -1012,6 +1007,7 @@ void Scrollable::ProcessScrollMotionStop()
             return;
         }
         moved_ = false;
+        HandleScrollEnd();
 #ifdef OHOS_PLATFORM
         LOGI("controller stop increase cpu frequency");
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
@@ -1076,7 +1072,7 @@ void Scrollable::ProcessScrollMotion(double position)
     currentPos_ = position;
 
     // spring effect special process
-    if (canOverScroll_ || needScrollSnapChange_ ||
+    if ((IsSnapStopped() && canOverScroll_) || needScrollSnapChange_ ||
         (!overScrollOffsetCallback_ && (outBoundaryCallback_ && outBoundaryCallback_()))) {
         scrollPause_ = true;
         controller_->Stop();

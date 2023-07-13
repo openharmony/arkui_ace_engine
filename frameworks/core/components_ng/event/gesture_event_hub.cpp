@@ -554,23 +554,31 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
             pixelMap = pixelMap_->GetPixelMapSharedPtr();
         }
     }
+    float scale = 1.0f;
     auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
     if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
             pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) ||
         (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
             pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE &&
             pixelMap->GetWidth() > minDeviceLength)) {
-        float scale = static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
+        scale = static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
         pixelMap->scale(scale, scale);
     } else if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
-    int32_t width = pixelMap->GetWidth();
-    int32_t height = pixelMap->GetHeight();
-    DragData dragData { { pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE }, {}, udKey,
-        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetGlobalLocation().GetX(),
-        info.GetGlobalLocation().GetY(), info.GetTargetDisplayId(), true };
+    auto frameNodeOffset = frameNode->GetOffsetRelativeToWindow();
+    auto coordinateX = frameNodeOffset.GetX() > SystemProperties::GetDeviceWidth() ?
+        frameNodeOffset.GetX() - SystemProperties::GetDeviceWidth() :
+        frameNodeOffset.GetX();
+    auto coordinateY = frameNodeOffset.GetY();
+    DragData dragData { { pixelMap, scale * (coordinateX - info.GetGlobalLocation().GetX()),
+                            scale * (coordinateY - info.GetGlobalLocation().GetY()) },
+        {}, udKey, static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
+        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetTargetDisplayId(), true };
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
+    if (dragEventActuator_->GetIsNotInPreviewState()) {
+        Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+    }
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
         return;

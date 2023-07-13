@@ -70,11 +70,11 @@ void ScrollPattern::OnAttachToFrameNode()
 void ScrollPattern::OnModifyDone()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID_NOLOG(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID_NOLOG(layoutProperty);
     auto paintProperty = host->GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_VOID_NOLOG(paintProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis != GetAxis()) {
         SetAxis(axis);
@@ -118,18 +118,19 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         return false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    CHECK_NULL_RETURN_NOLOG(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithm, false);
+    CHECK_NULL_RETURN_NOLOG(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
     auto axis = GetAxis();
     auto oldMainSize = GetMainAxisSize(viewPort_, axis);
-    auto newMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPortSize(), axis);
+    auto newMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPort(), axis);
     auto oldExtentMainSize = GetMainAxisSize(viewPortExtent_, axis);
     auto newExtentMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPortExtent(), axis);
-    viewPortLength_ = layoutAlgorithm->GetViewPort();
-    viewPort_ = layoutAlgorithm->GetViewPortSize();
+    viewPortLength_ = layoutAlgorithm->GetViewPortLength();
+    viewPort_ = layoutAlgorithm->GetViewPort();
+    viewSize_ = layoutAlgorithm->GetViewSize();
     viewPortExtent_ = layoutAlgorithm->GetViewPortExtent();
     if (scrollSnapUpdate_ || !NearEqual(oldMainSize, newMainSize) || !NearEqual(oldExtentMainSize, newExtentMainSize)) {
         CaleSnapOffsets();
@@ -141,17 +142,16 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             GetScrollBar()->OnScrollEnd();
         }
     }
+    if (scrollStop_) {
+        FireOnScrollStop();
+        scrollStop_ = false;
+    }
     if (ScrollableIdle() && !AnimateRunning()) {
         auto predictSnapOffset = CalePredictSnapOffset(0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
             FireOnScrollStart();
-            scrollStop_ = false;
         }
-    }
-    if (scrollStop_) {
-        FireOnScrollStop();
-        scrollStop_ = false;
     }
     CheckScrollable();
     auto host = GetHost();
@@ -436,7 +436,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
         return true;
     }
     // TODO: ignore handle refresh
-    if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewPort_)) {
+    if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -581,8 +581,15 @@ void ScrollPattern::UpdateScrollBarOffset()
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
-    Size size(viewPort_.Width(), viewPort_.Height());
-    auto estimatedHeight = (GetAxis() == Axis::HORIZONTAL) ? viewPortExtent_.Width() : viewPortExtent_.Height();
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID_NOLOG(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    Size size(viewSize_.Width(), viewSize_.Height());
+    auto viewPortExtent = viewPortExtent_;
+    AddPaddingToSize(padding, viewPortExtent);
+    auto estimatedHeight = (GetAxis() == Axis::HORIZONTAL) ? viewPortExtent.Width() : viewPortExtent.Height();
     UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size, Offset(0.0, 0.0));
 }
 
@@ -738,6 +745,7 @@ void ScrollPattern::CaleSnapOffsets()
 
 void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
 {
+    CHECK_NULL_VOID_NOLOG(Positive(intervalSize_.Value()));
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
     auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
     auto start = 0.0f;

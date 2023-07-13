@@ -39,6 +39,9 @@ public:
 
     void OnWindowShow() override;
     void OnWindowHide() override;
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+    FocusPattern GetFocusPattern() const override;
+    void OnVisibleChange(bool visible) override;
 
     bool HasStartingPage() override
     {
@@ -46,6 +49,7 @@ public:
     }
 
     void SetOnRemoteReadyCallback(std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback);
@@ -58,10 +62,6 @@ public:
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
     void RequestExtensionSessionDestruction();
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
-
-    FocusPattern GetFocusPattern() const override;
 
 private:
     enum ReleaseCode {
@@ -94,6 +94,7 @@ private:
     void OnRemoteReady();
     void OnResult(int32_t code, const AAFwk::Want& want);
     void OnReceive(const AAFwk::WantParams& wantParams);
+    void RegisterVisibleAreaChange();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

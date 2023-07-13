@@ -30,6 +30,8 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo) {}
 
+void OverlayManager::ErasePopup(int32_t targetId) {}
+
 void OverlayManager::HideAllPopups() {}
 
 void OverlayManager::HideCustomPopups() {};
@@ -94,4 +96,10 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
 }
 
 void OverlayManager::RemoveIndexerPopupById(int32_t targetId) {}
+
+void OverlayManager::BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle,
+    std::function<void()>&& onAppear, std::function<void()>&& onDisappear, int32_t targetId)
+{}
+
 } // namespace OHOS::Ace::NG

@@ -70,6 +70,10 @@ public:
     void SetDelta(float delta, bool isOverDrag);
     float GetValue(int32_t index);
     float SetControlIndex(int32_t index);
+    int32_t GetControlIndex()
+    {
+        return controlIndex_;
+    }
     void SetMaxIndex(int32_t index)
     {
         maxIndex_ = index;

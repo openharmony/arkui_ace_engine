@@ -183,7 +183,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
-        if (isInlineStyle && !pattern->IsTextArea()) {
+        if (!pattern->IsTextArea()) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
             pattern->SetTextInputFlag(true);
         }
@@ -261,12 +261,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
                 layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
             idealWidth = paragraph_->GetActualWidth();
         }
-        if (isInlineStyle) {
-            textRect_.SetSize(SizeF(idealWidth, paragraph_->GetHeight()));
-        } else {
-            textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
-                paragraph_->GetHeight()));
-        }
+        textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
+            paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     // check password image size.
@@ -383,6 +379,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         textRect_.SetOffset(OffsetF(textRectOffsetX, textOffset.GetY()));
     }
+
     // update image rect.
     if (!imageRect_.IsEmpty()) {
         auto imageOffset = Alignment::GetAlignPosition(size, imageRect_.GetSize(), Alignment::CENTER_RIGHT);

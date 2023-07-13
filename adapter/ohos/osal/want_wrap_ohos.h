@@ -47,6 +47,7 @@ public:
     ~WantWrapOhos() = default;
     void SetWantParamsFromWantWrap(void* want) override;
     std::string ToString() const override;
+    void SetWantParam(const std::map<std::string, std::string>& params) override;
 
     const AAFwk::Want& GetWant() const
     {

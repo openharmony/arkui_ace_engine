@@ -78,6 +78,13 @@ void WantWrapOhos::SetWantParamsFromWantWrap(void* want)
     destWant->SetParams(params);
 }
 
+void WantWrapOhos::SetWantParam(const std::map<std::string, std::string>& params)
+{
+    for (const auto& param : params) {
+        want_.SetParam(param.first, param.second);
+    }
+}
+
 std::string WantWrapOhos::ToString() const
 {
     return want_.ToString();

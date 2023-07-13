@@ -80,6 +80,11 @@ public:
         isUnTrust_ = isUnTrust;
     }
 
+    void SetIsDynamic(bool isDynamic)
+    {
+        isDynamic_ = isDynamic;
+    }
+
     void SetFormLinkInfos(const std::vector<std::string>& infos)
     {
         formLinkInfos_ = infos;
@@ -127,6 +132,7 @@ private:
     bool isVisible_ = true;
     bool isUnTrust_ = false;
     bool isDynamic_ = true;
+    bool isSnapshot_ = false;
     RefPtr<PixelMap> pixelMap_ = nullptr;
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();

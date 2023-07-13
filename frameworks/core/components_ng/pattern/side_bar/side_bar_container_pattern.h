@@ -152,6 +152,7 @@ private:
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
     void OnUpdateShowDivider(
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
+    void OnUpdateSideBarAndContent(const RefPtr<FrameNode>& host);
     void OnHover(bool isHover);
     void OnControlButtonHover(bool isHover);
     void AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
@@ -159,6 +160,8 @@ private:
         int32_t duration, const RefPtr<Curve>& curve);
     void HandleMouseEvent(const MouseInfo& info);
     SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
+    RefPtr<FrameNode> GetSideBarNode(const RefPtr<FrameNode>& host) const;
+    RefPtr<FrameNode> GetContentNode(const RefPtr<FrameNode>& host) const;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;

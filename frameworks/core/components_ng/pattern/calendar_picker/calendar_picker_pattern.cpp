@@ -31,9 +31,6 @@ constexpr int32_t ADD_BUTTON_INDEX = 0;
 constexpr int32_t SUB_BUTTON_INDEX = 1;
 constexpr uint32_t MIN_YEAR = 1;
 constexpr uint32_t MAX_YEAR = 5000;
-constexpr uint32_t NUMBER_10 = 10;
-constexpr uint32_t NUMBER_1000 = 1000;
-constexpr uint32_t NUMBER_9999 = 9999;
 constexpr uint32_t DELAY_TIME = 2000;
 constexpr uint32_t MAX_MONTH = 12;
 constexpr Dimension DIALOG_HEIGHT = 348.0_vp;
@@ -393,16 +390,16 @@ bool CalendarPickerPattern::HandleYearKeyEvent(uint32_t number)
     };
 
     if (isKeyWaiting_) {
-        if (json->GetUInt("year") >= NUMBER_1000) {
+        if (json->GetUInt("year") >= 1000) {
             isKeyWaiting_ = false;
             return true;
         }
 
-        auto newYear = json->GetUInt("year") * NUMBER_10 + number;
-        if (newYear < 1 || newYear > NUMBER_9999) {
+        auto newYear = json->GetUInt("year") * 10 + number;
+        if (newYear < 1 || newYear > 9999) {
             return true;
         }
-        if (newYear < NUMBER_1000) {
+        if (newYear < 1000) {
             json->Replace("year", static_cast<int32_t>(newYear));
             SetDate(json->ToString());
             PostTaskToUI(std::move(taskCallback));
@@ -442,12 +439,12 @@ bool CalendarPickerPattern::HandleMonthKeyEvent(uint32_t number)
     };
 
     if (isKeyWaiting_) {
-        if (json->GetUInt("month") >= NUMBER_10) {
+        if (json->GetUInt("month") >= 10) {
             isKeyWaiting_ = false;
             return false;
         }
 
-        auto newMonth = json->GetUInt("month") * NUMBER_10 + number;
+        auto newMonth = json->GetUInt("month") * 10 + number;
         if (newMonth < 1 || newMonth > MAX_MONTH) {
             return true;
         }
@@ -484,12 +481,12 @@ bool CalendarPickerPattern::HandleDayKeyEvent(uint32_t number)
     };
 
     if (isKeyWaiting_) {
-        if (json->GetUInt("day") >= NUMBER_10) {
+        if (json->GetUInt("day") >= 10) {
             isKeyWaiting_ = false;
             return false;
         }
 
-        auto newDay = json->GetUInt("day") * NUMBER_10 + number;
+        auto newDay = json->GetUInt("day") * 10 + number;
         if (newDay <= PickerDate::GetMaxDay(json->GetUInt("year"), json->GetUInt("month"))) {
             json->Replace("day", static_cast<int32_t>(newDay));
             SetDate(json->ToString());
@@ -789,19 +786,19 @@ std::string CalendarPickerPattern::GetEntryDateInfo()
     CHECK_NULL_RETURN(yearNode, "");
     auto textLayoutProperty = yearNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    json->Put("year", std::stoi(textLayoutProperty->GetContent().value_or("1970")));
+    json->Put("year", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("1970")));
 
     auto monthNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(MONTH_INDEX));
     CHECK_NULL_RETURN(monthNode, "");
     textLayoutProperty = monthNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    json->Put("month", std::stoi(textLayoutProperty->GetContent().value_or("01")));
+    json->Put("month", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("01")));
 
     auto dayNode = AceType::DynamicCast<FrameNode>(contentNode->GetLastChild());
     CHECK_NULL_RETURN(dayNode, "");
     textLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    json->Put("day", std::stoi(textLayoutProperty->GetContent().value_or("01")));
+    json->Put("day", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("01")));
 
     return json->ToString();
 }
@@ -834,7 +831,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     CHECK_NULL_VOID(monthNode);
     textLayoutProperty = monthNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto monthString = (json->GetUInt("month") < NUMBER_10 ? "0" : "") + std::to_string(json->GetUInt("month"));
+    auto monthString = (json->GetUInt("month") < 10 ? "0" : "") + std::to_string(json->GetUInt("month"));
     textLayoutProperty->UpdateContent(monthString);
     monthNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -842,7 +839,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     CHECK_NULL_VOID(dayNode);
     textLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto dayString = (json->GetUInt("day") < NUMBER_10 ? "0" : "") + std::to_string(json->GetUInt("day"));
+    auto dayString = (json->GetUInt("day") < 10 ? "0" : "") + std::to_string(json->GetUInt("day"));
     textLayoutProperty->UpdateContent(dayString);
     dayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }

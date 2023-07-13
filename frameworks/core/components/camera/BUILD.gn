@@ -47,7 +47,7 @@ build_component("camera") {
     external_deps = [
       "c_utils:utils",
       "camera_framework:camera_framework",
-      "graphic_standard:surface",
+      "graphic_2d:surface",
       "ipc:ipc_core",
       "player_framework:media_client",
     ]

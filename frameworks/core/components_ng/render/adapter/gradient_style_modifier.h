@@ -68,7 +68,7 @@ public:
     ~GradientStyleModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override;
-    void PaintGradient(RSCanvas& canvas, const SizeF& frameSize) const;
+    void PaintGradient(SkCanvas& canvas, const SizeF& frameSize) const;
 
     Gradient GetGradient() const;
     void SetGradient(const Gradient& gradient);

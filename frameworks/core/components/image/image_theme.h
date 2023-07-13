@@ -62,7 +62,8 @@ public:
                 return;
             }
             theme->fillColor_ = pattern->GetAttr<Color>("fill_color", Color());
-            theme->draggable_ = pattern->GetAttr<int32_t>("draggable", 0);
+            auto draggable = pattern->GetAttr<std::string>("draggable", "0");
+            theme->draggable_ = StringUtils::StringToInt(draggable);
         }
     };
 

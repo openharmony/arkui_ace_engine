@@ -137,7 +137,7 @@ struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, TranslateOptions);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector4F);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector5F);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 

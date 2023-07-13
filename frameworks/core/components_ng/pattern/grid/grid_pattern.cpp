@@ -206,6 +206,17 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
+bool GridPattern::IsItemSelected(const MouseInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    CHECK_NULL_RETURN_NOLOG(node, false);
+    auto itemPattern = node->GetPattern<GridItemPattern>();
+    CHECK_NULL_RETURN_NOLOG(itemPattern, false);
+    return itemPattern->IsSelected();
+}
+
 float GridPattern::GetMainContentSize() const
 {
     auto host = GetHost();
@@ -406,13 +417,30 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, bool offset
     CHECK_NULL_VOID(gridEventHub);
     
     auto onScroll = gridEventHub->GetOnScroll();
-    if (onScroll && !NearZero(finalOffset)) {
+    if (scrollStop_ && !GetScrollAbort()) {
         auto source = scrollState_;
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-        if (source == SCROLL_FROM_UPDATE) {
+        if (onScroll) {
+            if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
+                onScroll(offsetVP, ScrollState::SCROLL);
+                onScroll(0.0_vp, ScrollState::IDLE);
+            } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
+                source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                onScroll(offsetVP, ScrollState::FLING);
+                onScroll(0.0_vp, ScrollState::IDLE);
+            } else {
+                onScroll(offsetVP, ScrollState::IDLE);
+            }
+        }
+    } else if (onScroll && !NearZero(finalOffset)) {
+        auto source = scrollState_;
+        auto offsetPX = Dimension(finalOffset);
+        auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
             onScroll(offsetVP, ScrollState::SCROLL);
-        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
+        } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
+            source == SCROLL_FROM_ANIMATION_CONTROLLER) {
             onScroll(offsetVP, ScrollState::FLING);
         } else {
             onScroll(offsetVP, ScrollState::IDLE);
@@ -440,6 +468,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, bool offset
     if (scrollStop_) {
         auto onScrollStop = gridEventHub->GetOnScrollStop();
         if (!GetScrollAbort() && onScrollStop) {
+            scrollState_ = SCROLL_FROM_NONE;
             onScrollStop();
         }
         scrollStop_ = false;

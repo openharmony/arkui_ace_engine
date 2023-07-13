@@ -17,14 +17,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("navigation_test_ng") {
   module_out_path = pattern_test_output_path
 
-  include_dirs = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
-    "//foundation/graphic/graphic_2d/rosen/modules//2d_graphics/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-    "//third_party/flutter/skia",
-  ]
-
   sources = [
     # custom
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
@@ -39,7 +31,6 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/base/geometry/matrix3.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
-    "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
@@ -57,6 +48,8 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
@@ -94,6 +87,10 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/toggle_button_accessibility_property.cpp",
@@ -151,6 +148,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
     "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_subwindow_manager.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
@@ -195,6 +193,8 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/tool_bar_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/tool_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_model_ng.cpp",

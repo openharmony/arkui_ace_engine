@@ -122,6 +122,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             float targetPos = 0.0f;
             switch (scrollAlign_) {
                 case ScrollAlign::START:
+                case ScrollAlign::NONE:
                     targetPos = iter->second.startPos;
                     break;
                 case ScrollAlign::CENTER:
@@ -328,6 +329,7 @@ void ListPattern::ProcessEvent(
     if (scrollStop_) {
         auto onScrollStop = listEventHub->GetOnScrollStop();
         if (!GetScrollAbort() && onScrollStop) {
+            SetScrollState(SCROLL_FROM_NONE);
             onScrollStop();
         }
         scrollStop_ = false;
@@ -1375,6 +1377,23 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     if (NearZero(dragOffset)) {
         return;
     }
+    if (NeedScrollSnapAlignEffect()) {
+        auto delta = 0.0f;
+        if (chainAnimation_->GetControlIndex() < startIndex_ - 1) {
+            delta = chainAnimation_->SetControlIndex(std::max(startIndex_ - 1, 0));
+        }
+        if (chainAnimation_->GetControlIndex() > endIndex_ + 1) {
+            delta = chainAnimation_->SetControlIndex(std::min(endIndex_ + 1, maxListItemIndex_));
+        }
+        if (!NearZero(delta)) {
+            auto scrollableEvent = GetScrollableEvent();
+            CHECK_NULL_VOID(scrollableEvent);
+            auto scrollable = scrollableEvent->GetScrollable();
+            CHECK_NULL_VOID(scrollable);
+            scrollable->UpdateScrollSnapStartOffset(delta);
+            currentDelta_ -= delta;
+        }
+    }
     bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
     chainAnimation_->SetDelta(-dragOffset, overDrag);
 }
@@ -1456,18 +1475,53 @@ void ListPattern::ClearMultiSelect()
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> children;
     host->GenerateOneDepthAllFrame(children);
-    for (const auto& item : children) {
-        if (!AceType::InstanceOf<FrameNode>(item)) {
+    for (const auto& child : children) {
+        if (!child) {
             continue;
         }
-
-        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
-        auto itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
-        CHECK_NULL_VOID(itemPattern);
-        itemPattern->MarkIsSelected(false);
+        auto itemPattern = child->GetPattern<ListItemPattern>();
+        if (itemPattern) {
+            itemPattern->MarkIsSelected(false);
+            continue;
+        }
+        auto itemGroupPattern = child->GetPattern<ListItemGroupPattern>();
+        if (itemGroupPattern) {
+            std::list<RefPtr<FrameNode>> itemChildren;
+            child->GenerateOneDepthAllFrame(itemChildren);
+            for (const auto& item : itemChildren) {
+                if (!item) {
+                    continue;
+                }
+                itemPattern = item->GetPattern<ListItemPattern>();
+                if (itemPattern) {
+                    itemPattern->MarkIsSelected(false);
+                }
+            }
+        }
     }
 
     ClearSelectedZone();
+}
+
+bool ListPattern::IsItemSelected(const MouseInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    CHECK_NULL_RETURN_NOLOG(node, false);
+    auto itemPattern = node->GetPattern<ListItemPattern>();
+    if (itemPattern) {
+        return itemPattern->IsSelected();
+    }
+    auto itemGroupPattern = node->GetPattern<ListItemGroupPattern>();
+    if (itemGroupPattern) {
+        auto itemNode = node->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        CHECK_NULL_RETURN_NOLOG(itemNode, false);
+        itemPattern = itemNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_RETURN_NOLOG(itemPattern, false);
+        return itemPattern->IsSelected();
+    }
+    return false;
 }
 
 void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)

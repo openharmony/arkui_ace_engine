@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-
 #include <cstdint>
 
 #include "base/geometry/ng/size_t.h"
@@ -37,6 +36,7 @@ constexpr uint32_t AM_PM_HOUR_11 = 11;
 const int32_t AM_PM_COUNT = 3;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
+const int32_t UNOPTION_COUNT = 2;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -301,8 +301,25 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     auto cancelNode = buttonCancelNode->GetFirstChild();
     auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    FlushAmPmFormatString();
 }
 
+void TimePickerRowPattern::FlushAmPmFormatString()
+{
+    auto it = std::find(vecAmPm_.begin(), vecAmPm_.end(), "AM");
+    if (it != vecAmPm_.end()) {
+        vecAmPm_.clear();
+        vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
+        std::string am = vecAmPm_[0];
+        vecAmPm_.emplace_back(am);
+        std::string pm = vecAmPm_[1];
+        vecAmPm_.emplace_back(pm);
+    } else {
+        vecAmPm_.clear();
+        vecAmPm_.emplace_back("AM");
+        vecAmPm_.emplace_back("PM");
+    }
+}
 
 void TimePickerRowPattern::SetChangeCallback(ColumnChangeCallback&& value)
 {
@@ -547,7 +564,7 @@ void TimePickerRowPattern::HandleHour12Change(bool isAdd, uint32_t index, std::v
 uint32_t TimePickerRowPattern::GetAmPmHour(uint32_t hourOf24) const
 {
     if (hourOf24 == 0) {
-        return AM_PM_HOUR_12; // AM 12:00 means 00:00 in 24 hour style
+        return AM_PM_HOUR_12;                         // AM 12:00 means 00:00 in 24 hour style
     }
     if (1 <= hourOf24 && hourOf24 <= AM_PM_HOUR_11) { // 00:00 to 11:00 is the same for any hour style
         return hourOf24;
@@ -686,18 +703,39 @@ bool TimePickerRowPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN ||
-        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT) {
-        HandleDirectionKey(event.code);
-        return true;
+        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT ||
+        event.code == KeyCode::KEY_MOVE_HOME || event.code == KeyCode::KEY_MOVE_END) {
+        return HandleDirectionKey(event.code);
     }
     return false;
+}
+
+void TimePickerRowPattern::SetFocusDisable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    focusHub->SetFocusable(false);
+}
+
+void TimePickerRowPattern::SetFocusEnable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    focusHub->SetFocusable(true);
 }
 
 bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     auto childSize = host->GetChildren().size();
     auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
@@ -707,20 +745,23 @@ bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
     if (totalOptionCount == 0) {
         return false;
     }
-    if (code == KeyCode::KEY_DPAD_UP) {
-        pattern->SetCurrentIndex((totalOptionCount + currernIndex - 1) % totalOptionCount);
+    if (code == KeyCode::KEY_DPAD_UP || code == KeyCode::KEY_DPAD_DOWN) {
+        auto index = (code == KeyCode::KEY_DPAD_UP) ? -1 : 1;
+        pattern->SetCurrentIndex((totalOptionCount + currernIndex + index) % totalOptionCount);
         pattern->FlushCurrentOptions();
-        pattern->HandleChangeCallback(false, true);
+        pattern->HandleChangeCallback((code == KeyCode::KEY_DPAD_UP) ? false : true, true);
         pattern->HandleEventCallback(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
-    if (code == KeyCode::KEY_DPAD_DOWN) {
-        pattern->SetCurrentIndex((totalOptionCount + currernIndex + 1) % totalOptionCount);
-        pattern->FlushCurrentOptions();
-        pattern->HandleChangeCallback(true, true);
-        pattern->HandleEventCallback(true);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (code == KeyCode::KEY_MOVE_HOME) {
+        pattern->SetCurrentIndex(1);
+        pattern->InnerHandleScroll(false, false);
+        return true;
+    }
+    if (code == KeyCode::KEY_MOVE_END) {
+        pattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+        pattern->InnerHandleScroll(true, false);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_LEFT) {
@@ -742,4 +783,42 @@ bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
+void TimePickerRowPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
+    pickerProperty->UpdateColor(normalStyle.GetTextColor());
+    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    if (isPicker_) {
+        host->SetNeedCallChildrenUpdate(false);
+        return;
+    }
+    auto dialogContext = host->GetRenderContext();
+    CHECK_NULL_VOID(dialogContext);
+    dialogContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    auto buttonTitleRenderContext = buttonTitleNode_->GetRenderContext();
+    CHECK_NULL_VOID(buttonTitleRenderContext);
+    buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto childText = buttonTitleNode_->GetFirstChild();
+    CHECK_NULL_VOID(childText);
+    auto textTitleNode = DynamicCast<FrameNode>(childText);
+    CHECK_NULL_VOID(textTitleNode);
+    auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+    auto contentChildren = contentRowNode_->GetChildren();
+    auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    host->SetNeedCallChildrenUpdate(false);
+    OnModifyDone();
+}
 } // namespace OHOS::Ace::NG

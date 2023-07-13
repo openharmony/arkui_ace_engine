@@ -69,9 +69,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
-
     void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange);
-
     virtual void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
 
     // process offscreen process.
@@ -284,6 +282,8 @@ public:
 
     virtual void SetActive(bool active);
 
+    virtual void SetJSViewActive(bool active);
+
     virtual void OnVisibleChange(bool isVisible);
 
     virtual bool MarkRemoving();
@@ -457,6 +457,7 @@ public:
     {
         isBuildByJS_ = isBuildByJS;
     }
+
     // --------------------------------------------------------------------------------
 
 protected:
@@ -500,6 +501,9 @@ protected:
     virtual bool RemoveImmediately() const;
     void ResetParent();
 
+protected:
+    bool needCallChildrenUpdate_ = true;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
 
@@ -520,7 +524,6 @@ private:
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
-    bool needCallChildrenUpdate_ = true;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;

@@ -42,6 +42,8 @@ constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t ITEM_HALF_HEIGHT = 1;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
+constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
+constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
 } // namespace
 
 void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
@@ -409,7 +411,8 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
         float allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount_ - 1);
         float padding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
         float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
-        float newRectWidth = rectWidth * (1.225f - 0.0125f * itemCount_);
+        float newRectWidth =
+            rectWidth * (TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE - TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE * itemCount_);
         auto changeValue = (newRectWidth - rectWidth) * touchBottomRate_;
 
         float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());

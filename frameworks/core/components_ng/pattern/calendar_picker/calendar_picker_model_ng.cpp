@@ -55,13 +55,13 @@ void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
     pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
     pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateCrossAxisAlign(FlexAlign::CENTER);
     pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    LayOutCounter(pickerPattern, pickerNode, settingData, theme);
+    LayoutPicker(pickerPattern, pickerNode, settingData, theme);
 
     pickerNode->MarkModifyDone();
     stack->Push(pickerNode);
 }
 
-void CalendarPickerModelNG::LayOutCounter(const RefPtr<CalendarPickerPattern>& pickerPattern,
+void CalendarPickerModelNG::LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern,
     RefPtr<FrameNode>& pickerNode, const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme)
 {
     if (!pickerPattern->HasContentNode()) {
@@ -137,7 +137,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonImageChild(bool isAdd, cons
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
-    std::string iconPath = "";
+    std::string iconPath;
     ImageSourceInfo imageSourceInfo;
     if (isAdd) {
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG);

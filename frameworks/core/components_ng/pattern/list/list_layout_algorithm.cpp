@@ -175,6 +175,7 @@ void ListLayoutAlgorithm::CalculateEstimateOffset(ScrollAlign align)
         float averageHeight = itemsHeight / static_cast<float>(lines);
         switch (align) {
             case ScrollAlign::START:
+            case ScrollAlign::NONE:
                 estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes());
                 break;
             case ScrollAlign::CENTER:
@@ -370,6 +371,7 @@ void ListLayoutAlgorithm::MeasureList(
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         switch (scrollAlign_) {
             case ScrollAlign::START:
+            case ScrollAlign::NONE:
             case ScrollAlign::CENTER:
                 jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
                 if (scrollAlign_ == ScrollAlign::START) {

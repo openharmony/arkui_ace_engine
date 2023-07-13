@@ -182,6 +182,8 @@ public:
             theme->inlineRadiusSize_ = Radius(pattern->GetAttr<Dimension>(INLINE_RADIUS_SIZE, 4.0_vp));
             theme->inlineBgColor_ = pattern->GetAttr<Color>(INLINE_BG_COLOR, Color());
             theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
+            auto draggable = pattern->GetAttr<std::string>("draggable", "0");
+            theme->draggable_ = StringUtils::StringToInt(draggable);
         }
     };
 
@@ -452,6 +454,11 @@ public:
         return inlineBorderWidth_;
     }
 
+    bool GetDraggable() const
+    {
+        return draggable_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -519,6 +526,7 @@ private:
     Dimension inlineBorderWidth_ = 2.0_vp;
 
     bool showEllipsis_ = true;
+    bool draggable_ = false;
 };
 
 } // namespace OHOS::Ace

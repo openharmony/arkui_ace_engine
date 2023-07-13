@@ -34,6 +34,7 @@ public:
     static void SetHideBackButton(bool hide);
     static void SetHideToolBar(bool hide);
     static void SetToolBar(const JSCallbackInfo& info);
+    static void SetToolbarConfiguration(const JSCallbackInfo& info);
     static void SetMenus(const JSCallbackInfo& info);
     static void SetMenuCount(int32_t menuCount);
     static void SetOnTitleModeChanged(const JSCallbackInfo& info);
@@ -51,6 +52,8 @@ public:
     static void ParseBarItems(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
     static bool ParseCommonTitle(const JSRef<JSVal>& jsValue);
+    static void ParseToolbarItemsConfiguration(
+        const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
 };
 } // namespace OHOS::Ace::Framework
 

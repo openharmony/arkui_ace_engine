@@ -199,6 +199,9 @@ public:
     // acquire first menu node in wrapper node by submenu node
     RefPtr<MenuPattern> GetMainMenuPattern() const;
     uint32_t GetInnerMenuCount() const;
+    void OnColorConfigurationUpdate() override;
+
+    RefPtr<FrameNode> GetMenuWrapper() const;
 
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
@@ -224,8 +227,6 @@ private:
     bool OnKeyEvent(const KeyEvent& event) const;
 
     void DisableTabInMenu();
-
-    RefPtr<FrameNode> GetMenuWrapper() const;
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;

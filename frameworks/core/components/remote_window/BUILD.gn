@@ -31,7 +31,7 @@ build_component("remote_window") {
     ]
 
     external_deps = [
-      "graphic_standard:surface",
+      "graphic_2d:surface",
       "ipc:ipc_core",
     ]
   }

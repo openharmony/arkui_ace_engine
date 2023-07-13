@@ -82,13 +82,14 @@ void FormRendererGroup::ReloadForm(const AppExecFwk::FormJsInfo& formJsInfo)
 
     formRenderer_->ReloadForm(formJsInfo.formSrc);
     for (auto &formRequest : formRequests_) {
-        formRequest.formJsInfo = formJsInfo;
-        formRequest.isDynamic = formJsInfo.isDynamic;
-        if (!formJsInfo.isDynamic && currentCompId_ == formRequest.compId) {
+        bool allDynamic = formJsInfo.isDynamic && formRequest.isDynamic;
+        if (!allDynamic && currentCompId_ == formRequest.compId) {
             HILOG_INFO("SurfaceReuse due to change to static card when curCompId is %{public}s.",
                 formRequest.compId.c_str());
             formRenderer_->OnSurfaceReuse(formJsInfo);
         }
+        formRequest.formJsInfo = formJsInfo;
+        formRequest.isDynamic = formJsInfo.isDynamic;
     }
 }
 

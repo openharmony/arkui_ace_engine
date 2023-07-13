@@ -97,6 +97,7 @@ template("build_component_plugin") {
 
       # using graphcis_2d drawing lib
       include_dirs = [
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
         "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",

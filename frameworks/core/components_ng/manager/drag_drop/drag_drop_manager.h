@@ -24,6 +24,7 @@
 #include "base/window/drag_window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
+#include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace::NG {
 
@@ -81,7 +82,7 @@ public:
     void RestoreClipboardData();
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const RefPtr<OHOS::Ace::DragEvent>& event);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
@@ -126,6 +127,8 @@ private:
     int32_t GetItemIndex(const RefPtr<FrameNode>& frameNode, DragType dragType, float globalX, float globalY);
     void CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height);
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
+    void ClearVelocityInfo();
+    void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
 
     std::set<WeakPtr<FrameNode>> dragFrameNodes_;
     std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -150,6 +153,7 @@ private:
     int64_t currentId_ = -1;
 
     bool isDragged_ = false;
+    VelocityTracker velocityTracker_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

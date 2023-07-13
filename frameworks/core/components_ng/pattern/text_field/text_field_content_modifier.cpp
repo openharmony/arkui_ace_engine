@@ -99,8 +99,8 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
         clipRectHeight = contentOffset.GetY() + contentSize.Height() + errorViewHeight;
     }
     canvas.Save();
-    RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(),
-        contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(), clipRectHeight);
+    RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(), contentSize.Width() + contentOffset.GetX() -
+        textFieldPattern->GetUnitWidth() + textFieldPattern->GetInlinePadding(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
         paragraph->Paint(

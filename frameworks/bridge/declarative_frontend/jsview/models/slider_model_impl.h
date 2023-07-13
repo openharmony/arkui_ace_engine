@@ -50,6 +50,7 @@ public:
     void ResetBlockBorderWidth() override {};
     void ResetStepColor() override {};
     void ResetTrackBorderRadius() override {};
+    void ResetBlockSize() override {};
     void ResetBlockType() override {};
     void ResetBlockImage() override {};
     void ResetBlockShape() override {};

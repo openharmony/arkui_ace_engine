@@ -52,7 +52,7 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
-    void SetCalendarEdgeAlign(const CalendarEdgeAlign align)
+    void SetCalendarEdgeAlign(CalendarEdgeAlign align)
     {
         align_ = align;
     }
@@ -62,7 +62,7 @@ public:
         return align_;
     }
 
-    void SetCalendarDialogOffset(const DimensionOffset offset)
+    void SetCalendarDialogOffset(const DimensionOffset& offset)
     {
         offset_ = offset;
     }
@@ -72,7 +72,7 @@ public:
         return offset_;
     }
 
-    void SetCalendarData(const CalendarSettingData data)
+    void SetCalendarData(const CalendarSettingData& data)
     {
         calendarData_ = data;
     }
@@ -192,8 +192,8 @@ private:
     bool isDialogShow_ = false;
     bool isKeyWaiting_ = false;
     bool isFirtFocus_ = true;
-    RefPtr<ClickEvent> clickListener_ = nullptr;
-    RefPtr<InputEvent> hoverListener_ = nullptr;
+    RefPtr<ClickEvent> clickListener_;
+    RefPtr<InputEvent> hoverListener_;
     CalendarPickerSelectedType selected_ = CalendarPickerSelectedType::OTHER;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPickerPattern);
 };

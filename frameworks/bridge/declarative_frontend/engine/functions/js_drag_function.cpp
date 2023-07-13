@@ -106,8 +106,11 @@ public:
         JSClass<JsDragEvent>::CustomMethod("useCustomDropAnimation", &JsDragEvent::UseCustomDropAnimation);
         JSClass<JsDragEvent>::CustomMethod("setDragInfo", &JsDragEvent::SetDragInfo);
         JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
-        JSClass<JsDragEvent>::CustomMethod("copy", &JsDragEvent::Copy);
+        JSClass<JsDragEvent>::CustomMethod("dragBehavior", &JsDragEvent::DragBehavior);
 #endif
+        JSClass<JsDragEvent>::CustomMethod("getVelocityX", &JsDragEvent::GetVelocityX);
+        JSClass<JsDragEvent>::CustomMethod("getVelocityY", &JsDragEvent::GetVelocityY);
+        JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
         JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
     }
 
@@ -259,10 +262,10 @@ public:
         args.SetReturnValue(jsValue);
     }
 
-    void Copy(const JSCallbackInfo& args)
+    void DragBehavior(const JSCallbackInfo& args)
     {
-        if (args[0]->IsBoolean()) {
-            dragEvent_->SetCopy(args[0]->ToBoolean());
+        if (args[0]->IsNumber()) {
+            dragEvent_->SetCopy(!static_cast<bool>(args[0]->ToNumber<int32_t>()));
         }
     }
 #endif
@@ -274,6 +277,27 @@ public:
     RefPtr<DragEvent> GetDragEvent() const
     {
         return dragEvent_;
+    }
+
+    void GetVelocityX(const JSCallbackInfo& args)
+    {
+        auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityX())));
+        auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+        args.SetReturnValue(jsValueRef);
+    }
+
+    void GetVelocityY(const JSCallbackInfo& args)
+    {
+        auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityY())));
+        auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+        args.SetReturnValue(jsValueRef);
+    }
+
+    void GetVelocity(const JSCallbackInfo& args)
+    {
+        auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityValue())));
+        auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+        args.SetReturnValue(jsValueRef);
     }
 
 private:

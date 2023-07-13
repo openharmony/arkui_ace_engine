@@ -56,7 +56,6 @@ template("build_component") {
       deps = []
       deps += extra_deps
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
 
       if (ace_use_new_skia) {
         deps += [
@@ -133,9 +132,15 @@ template("build_component") {
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
         if (is_cross_platform_build) {
-          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+          deps += [
+            "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text_static",
+            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
+          ]
         } else {
-          external_deps += [ "graphic_standard:librender_service_client" ]
+          external_deps += [
+            "graphic_2d:librender_service_client",
+            "graphic_2d:rosen_text",
+          ]
         }
       }
       part_name = ace_engine_part

@@ -31,6 +31,7 @@
 #include "core/common/manager_interface.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
@@ -603,7 +604,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     auto currentContainer = Container::Current();
-    if (!currentContainer->IsSubContainer()) {
+    if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown()) {
             // subwindow is shown, main window no need to handle the keyboard event
@@ -612,6 +613,11 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     }
     double keyboardHeight = keyboardArea.Height();
     if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        if (windowManager_->GetWindowType() == WindowType::WINDOW_TYPE_UNDEFINED ||
+            windowManager_->GetWindowType() > WindowType::WINDOW_TYPE_APP_END) {
+            // only app window need avoid virtual keyboard
+            return;
+        }
         keyboardHeight = ModifyKeyboardHeight(keyboardHeight);
     }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {

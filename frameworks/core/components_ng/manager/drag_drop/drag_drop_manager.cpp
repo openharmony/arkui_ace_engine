@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/utils/time_util.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
@@ -270,11 +271,17 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode)
+void DragDropManager::UpdateDragAllowDrop(
+    const RefPtr<FrameNode>& dragFrameNode, const RefPtr<OHOS::Ace::DragEvent>& event)
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+        auto records = event->GetData();
+        if (records && records->GetSize() > 1) {
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+        } else {
+            InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+        }
         return;
     }
     for (const auto& it : summaryMap_) {
@@ -283,7 +290,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
             return;
         }
     }
-    InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
+    InteractionManager::GetInstance()->UpdateDragStyle(event->IsCopy() ? DragCursorStyle::COPY : DragCursorStyle::MOVE);
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -301,6 +308,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
 #else
     UpdateDragWindowPosition(static_cast<int32_t>(point.GetX()), static_cast<int32_t>(point.GetY()));
 #endif // ENABLE_DRAG_FRAMEWORK
+    UpdateVelocityTrackerPoint(point, false);
 
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON);
@@ -311,7 +319,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
         }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
+        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
@@ -354,15 +362,23 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (isDragCancel_) {
         LOGD("DragDropManager Is On DragCancel");
+        InteractionManager::GetInstance()->SetDragWindowVisible(false);
         InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_CANCEL, false);
         summaryMap_.clear();
+        ClearVelocityInfo();
         return;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
+    UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON);
 #ifdef ENABLE_DRAG_FRAMEWORK
-    bool isUseDefaultDrop = false;
+    if (!dragFrameNode) {
+        LOGD("DragDropManager Not Use DefaultDrop");
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
+        summaryMap_.clear();
+        return;
+    }
 #endif // ENABLE_DRAG_FRAMEWORK
     CHECK_NULL_VOID_NOLOG(dragFrameNode);
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
@@ -370,18 +386,14 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
 #ifdef ENABLE_DRAG_FRAMEWORK
-    isUseDefaultDrop = true;
     InteractionManager::GetInstance()->SetDragWindowVisible(false);
 #endif // ENABLE_DRAG_FRAMEWORK
     UpdateDragEvent(event, point);
     eventHub->FireOnDrop(event, extraParams);
+    ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     InteractionManager::GetInstance()->StopDrag(
         TranslateDragResult(event->GetResult()), event->IsUseCustomAnimation());
-    if (!isUseDefaultDrop) {
-        LOGD("DragDropManager Not Use DefaultDrop");
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
-    }
     summaryMap_.clear();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
@@ -442,6 +454,7 @@ void DragDropManager::FireOnDragEvent(
     event->SetY((double)point.GetY());
     event->SetScreenX((double)point.GetScreenX());
     event->SetScreenY((double)point.GetScreenY());
+    event->SetVelocity(velocityTracker_.GetVelocity());
 
     switch (type) {
         case DragEventType::ENTER:
@@ -470,7 +483,7 @@ void DragDropManager::FireOnDragEvent(
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
     } else {
-        UpdateDragAllowDrop(frameNode);
+        UpdateDragAllowDrop(frameNode, event);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 }
@@ -822,4 +835,17 @@ void DragDropManager::ClearExtraInfo()
     extraInfo_.clear();
 }
 #endif // ENABLE_DRAG_FRAMEWORK
+
+void DragDropManager::ClearVelocityInfo()
+{
+    velocityTracker_.Reset();
+}
+
+void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
+{
+    std::chrono::microseconds microseconds(GetMicroTickCount());
+    TimeStamp curTime(microseconds);
+    velocityTracker_.UpdateTrackerPoint(point.GetX(), point.GetY(), curTime, isEnd);
+}
+
 } // namespace OHOS::Ace::NG

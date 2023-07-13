@@ -403,23 +403,11 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         std::optional<TextDecoration> textDecoration;
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
-        } else if (typeValue->IsUndefined()) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipelineContext);
-            auto theme = pipelineContext->GetTheme<TextTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
-            textDecoration = theme->GetTextStyle().GetTextDecoration();
         }
         std::optional<Color> colorVal;
         Color result;
         if (ParseJsColor(colorValue, result)) {
             colorVal = result;
-        } else if (colorValue->IsUndefined()) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipelineContext);
-            auto theme = pipelineContext->GetTheme<TextTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
-            colorVal = theme->GetTextStyle().GetTextDecorationColor();
         }
 
         if (textDecoration) {

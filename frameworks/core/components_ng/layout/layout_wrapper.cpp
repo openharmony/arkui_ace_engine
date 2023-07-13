@@ -18,14 +18,15 @@
 #include <algorithm>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_checker.h"
 #include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -224,7 +225,9 @@ void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraint
 {
     SizeF safeSize { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
     safeSize.MinusPadding(insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
-    if (safeSize < constraint.maxSize) {
+    if (safeSize.Width() < constraint.maxSize.Width() || safeSize.Height() < constraint.maxSize.Height()) {
+        safeSize.SetWidth(std::min(safeSize.Width(), constraint.maxSize.Width()));
+        safeSize.SetHeight(std::min(safeSize.Height(), constraint.maxSize.Height()));
         constraint.maxSize = safeSize;
         constraint.parentIdealSize = OptionalSizeF(safeSize);
         constraint.percentReference = safeSize;
@@ -466,6 +469,14 @@ void LayoutWrapper::SaveGeoState()
 
 void LayoutWrapper::ExpandSafeAreaInner()
 {
+    // children of Scrollable nodes don't support expandSafeArea
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    if (parent && parent->GetPattern<ScrollablePattern>()) {
+        return;
+    }
+
     auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
     CHECK_NULL_VOID_NOLOG(opts->Expansive());
 
@@ -478,8 +489,6 @@ void LayoutWrapper::ExpandSafeAreaInner()
     }
     // expand System and Cutout safeArea
     // get frame in global offset
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(host);
     auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
     auto frame = geometryNode_->GetFrameRect() + parentGlobalOffset;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -629,7 +638,7 @@ std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
 
 void LayoutWrapper::AddNodeFlexLayouts()
 {
-    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+    if (!AceChecker::IsPerformanceCheckEnabled()) {
         return;
     }
     auto host = GetHostNode();
@@ -655,7 +664,7 @@ void LayoutWrapper::AddNodeFlexLayouts()
 
 void LayoutWrapper::AddNodeLayoutTime(int64_t time)
 {
-    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+    if (!AceChecker::IsPerformanceCheckEnabled()) {
         return;
     }
     auto host = GetHostNode();

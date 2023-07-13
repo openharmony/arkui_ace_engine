@@ -15,6 +15,11 @@
 
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
+#include <map>
+
+#include "base/ui_extension/ui_extension_helper.h"
+#include "base/want/want_wrap.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -122,26 +127,34 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
         true));
     appBarRow->AddChild(titleLabel);
 
-#ifndef IS_EMULATOR
-    if (SystemProperties::GetExtSurfaceEnabled()) {
-        appBarRow->AddChild(BuildIconButton(
-            InternalResource::ResourceId::APP_BAR_FA_SVG,
-            [pipeline, appBarTheme](GestureEvent& info) {
-#ifdef PREVIEW
-                LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
-                     "emulator or a real device instead.");
-#else
-                if (pipeline && appBarTheme) {
-                    LOGI("start panel bundleName is %{public}s, abilityName is %{public}s",
-                        appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
-                    pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
-                }
-#endif
-            },
-            false));
-    }
+#ifdef IS_EMULATOR
+    return appBarRow;
 #endif
 
+    auto buttonNode = BuildIconButton(InternalResource::ResourceId::APP_BAR_FA_SVG, nullptr, false);
+    auto buttonId = buttonNode->GetId();
+    auto clickCallback = [pipeline, appBarTheme, buttonId](GestureEvent& info) {
+#ifdef PREVIEW
+        LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
+                "emulator or a real device instead.");
+#else
+        if (!pipeline || !appBarTheme) {
+            return;
+        }
+        if (SystemProperties::GetExtSurfaceEnabled()) {
+            LOGI("start panel bundleName is %{public}s, abilityName is %{public}s",
+                appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
+            pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
+        } else {
+            BindContentCover(buttonId);
+        }
+#endif
+    };
+    auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
+    if (buttonEventHub) {
+        buttonEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+    }
+    appBarRow->AddChild(buttonNode);
     return appBarRow;
 }
 
@@ -195,6 +208,44 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
 
     buttonNode->AddChild(imageIcon);
     return buttonNode;
+}
+
+void AppBarView::BindContentCover(int32_t targetId)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    NG::ModalStyle modalStyle;
+    modalStyle.modalTransition = NG::ModalTransition::NONE;
+    auto buildNodeFunc = [targetId, overlayManager, &modalStyle]() -> RefPtr<UINode> {
+        std::string bundleName = "";
+        std::string abilityName = "";
+        SystemProperties::GetAppBarInfo(bundleName, abilityName);
+        if (bundleName.empty() || abilityName.empty()) {
+            return nullptr;
+        }
+
+        auto onRelease = [overlayManager, &modalStyle, targetId](int32_t releaseCode) {
+            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
+        };
+        auto onError = [overlayManager, &modalStyle, targetId](int32_t code, const std::string& name, const std::string& message) {
+            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
+        };
+        std::map<std::string, std::string> params;
+        params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
+        params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
+        params.try_emplace("module", Container::Current()->GetModuleName());
+        auto uiExtNode = OHOS::Ace::UIExtensionHelper::GetInstance().CreateUIExtensionNode(
+            bundleName, abilityName, params, std::move(onRelease), std::move(onError));
+        auto layoutProperty = uiExtNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, uiExtNode);
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)),
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT))));
+        uiExtNode->MarkModifyDone();
+        return uiExtNode;
+    };
+    overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, targetId);
 }
 
 } // namespace OHOS::Ace::NG

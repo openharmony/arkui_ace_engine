@@ -664,7 +664,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest015, TestSize.Level1)
     ViewAbstract::SetFrontBlur(RADIUS);
     ViewAbstract::SetInspectorId(srcimages);
 
-    Vector4F scale(1.0f, 1.0f, 2.0f, 2.0f);
+    Vector5F scale(1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
     ViewAbstract::SetRotate(scale);
     ShadowStyle style { 1 };
     Shadow shadow { RATIO, OFFSET, BLUE, style };
@@ -704,7 +704,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest016, TestSize.Level1)
     ViewAbstract::SetInspectorId(srcimages);
     ViewAbstract::SetDebugLine(srcimages);
 
-    Vector4F scale(1.0f, 1.0f, 2.0f, 2.0f);
+    Vector5F scale(1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
     ViewAbstract::SetRotate(scale);
     ShadowStyle style { 1 };
     Shadow shadow { RATIO, OFFSET, BLUE, style };
@@ -1452,7 +1452,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest035, TestSize.Level1)
     viewAbstractModelNG.SetPivot(WIDTH, HEIGHT, ZERO);
     NG::TranslateOptions values;
     ViewAbstract::SetTranslate(std::move(values));
-    Vector4F scales(1.0f, 1.0f, 2.0f, 2.0f);
+    Vector5F scales(1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
     ViewAbstract::SetRotate(scales);
     Matrix4 matrix;
     ViewAbstract::SetTransformMatrix(std::move(matrix));

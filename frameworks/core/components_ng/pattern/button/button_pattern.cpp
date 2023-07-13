@@ -90,6 +90,12 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetMaxLines().has_value()) {
         textLayoutProperty->UpdateMaxLines(layoutProperty->GetMaxLines().value());
     }
+    if (layoutProperty->GetMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+    }
+    if (layoutProperty->GetMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+    }
     if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
         textLayoutProperty->UpdateHeightAdaptivePolicy(layoutProperty->GetHeightAdaptivePolicy().value());
     }
@@ -266,4 +272,28 @@ void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
 }
 
+void ButtonPattern::OnColorConfigurationUpdate()
+{
+    auto node = GetHost();
+    if (isColorUpdateFlag_) {
+        node->SetNeedCallChildrenUpdate(false);
+        return;
+    }
+    node->SetNeedCallChildrenUpdate(false);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto buttonLayoutProperty = node->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto color = buttonTheme->GetBgColor();
+    renderContext->UpdateBackgroundColor(color);
+    auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto textStyle = buttonTheme->GetTextStyle();
+    textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
+    textNode->MarkDirtyNode();
+}
 } // namespace OHOS::Ace::NG

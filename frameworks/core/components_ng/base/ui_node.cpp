@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/base/ui_node.h"
 
 #include <memory>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -37,7 +37,7 @@ thread_local int32_t UINode::currentAccessibilityId_ = 0;
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
-    if (SystemProperties::IsPerformanceCheckEnabled()) {
+    if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
         nodeInfo_ = std::make_unique<PerformanceCheckNode>();
         nodeInfo_->codeRow = pos.first;
@@ -597,6 +597,13 @@ void UINode::SetActive(bool active)
 {
     for (const auto& child : children_) {
         child->SetActive(active);
+    }
+}
+
+void UINode::SetJSViewActive(bool active)
+{
+    for (const auto& child : children_) {
+        child->SetJSViewActive(active);
     }
 }
 

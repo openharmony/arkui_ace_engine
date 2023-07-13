@@ -261,7 +261,7 @@ private:
     void FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow = false);
     void BlurOverlayNode(bool isInSubWindow = false);
 
-    void ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
+    void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
@@ -309,7 +309,7 @@ private:
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 
-    std::list<WeakPtr<UINode>> windowSceneList_;
+    std::set<WeakPtr<UINode>> windowSceneSet_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };

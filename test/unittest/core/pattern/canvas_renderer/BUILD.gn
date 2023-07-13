@@ -20,7 +20,12 @@ ohos_unittest("canvas_renderer_test_ng") {
   sources = [ "canvas_renderer_test_ng.cpp" ]
 
   deps = [
-    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
+    "$ace_root/frameworks/base/resource:ace_resource",
+    "$ace_root/frameworks/bridge:framework_bridge_ohos",
+    "$ace_root/frameworks/core:ace_core_ohos",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
     "//third_party/googletest:gmock_main",
   ]
@@ -28,9 +33,40 @@ ohos_unittest("canvas_renderer_test_ng") {
   configs = [
     ":config_canvas_renderer_test",
     "$ace_root/test/unittest:ace_unittest_config",
+    "$ace_root:ace_coverage_config",
+    "$ace_root:ace_test_config",
   ]
+
   defines = [ "ENABLE_DRAG_FRAMEWORK" ]
-  sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
+
+  sources += [
+    "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_drag_window_old.cpp",
+    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
+    "$ace_root/test/mock/adapter/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
+  ]
+
+  if (is_ohos_standard_system) {
+    sources -= [
+      "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
+      "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
+    ]
+  }
+
+  external_deps = [
+    "ability_runtime:abilitykit_native",
+    "c_utils:utils",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
+  ]
 }
 
 config("config_canvas_renderer_test") {

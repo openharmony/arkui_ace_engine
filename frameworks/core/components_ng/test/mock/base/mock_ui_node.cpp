@@ -46,6 +46,7 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
 void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
 void UINode::Build() {}
 void UINode::SetActive(bool active) {}
+void UINode::SetJSViewActive(bool active) {}
 void UINode::OnVisibleChange(bool isVisible) {}
 
 void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */, bool /*silently*/)

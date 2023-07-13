@@ -25,6 +25,7 @@ namespace OHOS::Ace {
 
 using WindowCallback = std::function<void(void)>;
 using WindowModeCallback = std::function<WindowMode(void)>;
+using WindowTypeCallback = std::function<WindowType(void)>;
 using WindowSetMaximizeModeCallback = std::function<void(MaximizeMode)>;
 using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
 
@@ -93,6 +94,11 @@ public:
     void SetWindowGetModeCallBack(WindowModeCallback&& callback)
     {
         windowGetModeCallback_ = std::move(callback);
+    }
+
+    void SetWindowGetTypeCallBack(WindowTypeCallback&& callback)
+    {
+        windowGetTypeCallback_ = std::move(callback);
     }
 
     void SetWindowStartMoveCallBack(WindowCallback&& callback)
@@ -167,6 +173,14 @@ public:
         }
         return WindowMode::WINDOW_MODE_UNDEFINED;
     }
+
+    WindowType GetWindowType() const
+    {
+        if (windowGetTypeCallback_) {
+            return windowGetTypeCallback_();
+        }
+        return WindowType::WINDOW_TYPE_UNDEFINED;
+    }
      
     void SetWindowMaximizeMode(MaximizeMode mode)
     {
@@ -208,6 +222,7 @@ private:
     WindowSetMaximizeModeCallback windowSetMaximizeModeCallback_;
     WindowGetMaximizeModeCallback windowGetMaximizeModeCallback_;
     WindowModeCallback windowGetModeCallback_;
+    WindowTypeCallback windowGetTypeCallback_;
 };
 
 } // namespace OHOS::Ace

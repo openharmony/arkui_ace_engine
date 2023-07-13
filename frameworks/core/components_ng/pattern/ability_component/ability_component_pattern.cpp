@@ -16,8 +16,11 @@
 #include "core/components_ng/pattern/ability_component/ability_component_pattern.h"
 
 #include "session/host/include/extension_session.h"
+#include "session_manager/include/extension_session_manager.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
+#include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -39,6 +42,9 @@ void AbilityComponentPattern::OnModifyDone()
     if (adapter_) {
         UpdateWindowRect();
     } else {
+        auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+        CHECK_NULL_VOID_NOLOG(container);
+        auto callerToken = container->GetToken();
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto windowId = pipelineContext->GetWindowId();
@@ -46,6 +52,15 @@ void AbilityComponentPattern::OnModifyDone()
         CHECK_NULL_VOID(host);
         adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
         CHECK_NULL_VOID(adapter_);
+        auto wantWrap = Ace::WantWrap::CreateWantWrap(bundleName_, abilityName_);
+        auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
+        Rosen::SessionInfo extensionSessionInfo = {
+            .bundleName_ = want.GetElement().GetBundleName(),
+            .abilityName_ = want.GetElement().GetAbilityName(),
+            .callerToken_ = callerToken,
+            .want = new (std::nothrow) AAFwk::Want(want),
+        };
+        session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
         sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
         adapter_->ConnectExtension(GetHost(), windowId, extensionSession);
         pipelineContext->AddOnAreaChangeNode(host->GetId());

@@ -409,9 +409,9 @@ public:
         ViewAbstract::SetTranslate(TranslateOptions(x, y, z));
     }
 
-    void SetRotate(float x, float y, float z, float angle) override
+    void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override
     {
-        ViewAbstract::SetRotate(NG::Vector4F(x, y, z, angle));
+        ViewAbstract::SetRotate(NG::Vector5F(x, y, z, angle, perspective));
     }
 
     void SetTransformMatrix(const std::vector<float>& matrix) override
