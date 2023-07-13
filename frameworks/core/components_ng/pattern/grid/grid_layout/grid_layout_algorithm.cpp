@@ -309,13 +309,13 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, frameSize);
     layoutWrapper->RemoveAllChildInRenderTree();
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childWrapper) {
-            break;
-        }
         OffsetF childOffset;
         auto childPosition = itemsPosition_.find(index);
         if (childPosition != itemsPosition_.end()) {
+            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!childWrapper) {
+                break;
+            }
             childOffset = itemsPosition_.at(index);
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
             childWrapper->Layout();
@@ -329,20 +329,20 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (itemIndex == crossLine.second) {
                 continue;
             }
-            itemIndex = crossLine.second;
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
-            if (!wrapper) {
-                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIndex);
-                break;
-            }
-            auto layoutProperty = wrapper->GetLayoutProperty();
-            CHECK_NULL_VOID(layoutProperty);
-            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
-            CHECK_NULL_VOID(gridItemLayoutProperty);
-            gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
-            gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
+                itemIndex = crossLine.second; 
+                auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
+                if (!wrapper) {
+                    LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIndex);
+                    break;
+                }
+                auto layoutProperty = wrapper->GetLayoutProperty();
+                CHECK_NULL_VOID(layoutProperty);
+                auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+                CHECK_NULL_VOID(gridItemLayoutProperty);
+                gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
+                gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
         }
     }
 }
 
-} // namespace OHOS::Ace::NG
+}// namespace OHOS::Ace::NG
