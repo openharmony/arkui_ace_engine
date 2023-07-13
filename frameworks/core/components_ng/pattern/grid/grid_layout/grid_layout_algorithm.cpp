@@ -343,6 +343,23 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
         }
     }
+
+    RemoveChildren(layoutWrapper);
+}
+
+void GridLayoutAlgorithm::RemoveChildren(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    for (auto index = itemsPosition_.size(); index < mainCount_ * crossCount_; index++) {
+        auto childWrapper2 = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (!childWrapper2) {
+            break;
+        }
+        auto childPosition = itemsPosition_.find(index);
+        if (childPosition == itemsPosition_.end()) {
+            LayoutWrapper::RemoveChildInRenderTree(childWrapper2);
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG
