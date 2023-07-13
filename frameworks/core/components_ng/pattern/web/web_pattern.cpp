@@ -1520,40 +1520,12 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
 
 void WebPattern::RequestFullScreen()
 {
-    if (isFullScreen_) {
-        LOGE("The Web is already full screen when FullScreen");
-        return;
-    }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto fullScreenManager = context->GetFullScreenManager();
-    CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->RequestFullScreen(host);
     isFullScreen_ = true;
-    WebRequestFocus();
 }
 
 void WebPattern::ExitFullScreen()
 {
-    if (!isFullScreen_) {
-        LOGE("The Web is not full screen when ExitFullScreen");
-        return;
-    }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto fullScreenManager = context->GetFullScreenManager();
-    CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->ExitFullScreen(host);
     isFullScreen_ = false;
-
-    auto rootWidth = PipelineContext::GetCurrentRootWidth();
-    auto rootHeight = PipelineContext::GetCurrentRootHeight();
-    UpdateWebLayoutSize(rootWidth, rootHeight);
-    WebRequestFocus();
 }
 
 bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
