@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void SetSelectMinHeight(const RefPtr<FrameNode>& select)
+void SetSelectDefaultMinSize(const RefPtr<FrameNode>& select)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -36,7 +36,8 @@ void SetSelectMinHeight(const RefPtr<FrameNode>& select)
 
     auto layoutProperty = select->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinHeight()), std::nullopt));
+    layoutProperty->UpdateCalcMinSize(
+        CalcSize(CalcLength(theme->GetSelectMinWidth()), CalcLength(theme->GetSelectMinHeight())));
 }
 } // namespace
 
@@ -49,7 +50,7 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
         V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
     ViewStackProcessor::GetInstance()->Push(select);
 
-    SetSelectMinHeight(select);
+    SetSelectDefaultMinSize(select);
 
     auto pattern = select->GetPattern<SelectPattern>();
     pattern->BuildChild();
