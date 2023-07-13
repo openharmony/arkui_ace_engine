@@ -2530,7 +2530,6 @@ void TextFieldPattern::ShowSelectOverlay(
         }
         auto gesture = host->GetOrCreateGestureEventHub();
         gesture->RemoveTouchEvent(pattern->GetTouchListener());
-        selectInfo.callerFrameNode = host;
         pattern->SetSelectOverlay(
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(RawPtr(pattern))));
 

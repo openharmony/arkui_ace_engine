@@ -895,9 +895,9 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
     CHECK_NULL_RETURN(pattern, false);
 
     std::vector<RectF> rects;
-    rects.emplace_back(pattern->GetHandleRegion(true));
-    rects.emplace_back(pattern->GetHandleRegion(false));
     auto offset = GetGeometryNode() ? GetGeometryNode()->GetFrameOffset() : OffsetF();
+    rects.emplace_back(pattern->GetHandleRegion(true) + offset);
+    rects.emplace_back(pattern->GetHandleRegion(false) + offset);
     if (selectMenu_ && selectMenu_->GetGeometryNode()) {
         rects.emplace_back(selectMenu_->GetGeometryNode()->GetFrameRect() + offset);
     }
