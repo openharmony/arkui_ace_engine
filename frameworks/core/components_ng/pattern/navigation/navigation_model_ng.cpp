@@ -333,7 +333,7 @@ void UpdateToolbarItemNodeWithConfiguration(
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     bool navigationEnableStatus = CheckNavigationGroupEnableStatus();
-    if (barItem.status == NG::ToolbarItemStatus::DISABLED || !navigationEnableStatus) {
+    if (barItem.status == NG::NavToolbarItemStatus::DISABLED || !navigationEnableStatus) {
         auto renderContext = barItemNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateOpacity(theme->GetToolbarItemDisabledAlpha());
@@ -348,7 +348,7 @@ void UpdateToolbarItemNodeWithConfiguration(
     }
 
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
-    if (barItem.status == NG::ToolbarItemStatus::ACTIVE && barItem.activeIcon.has_value() &&
+    if (barItem.status == NG::NavToolbarItemStatus::ACTIVE && barItem.activeIcon.has_value() &&
         !barItem.activeIcon.value().empty() && barItem.icon.has_value() && !barItem.icon.value().empty()) {
         ImageSourceInfo initialIconInfo(barItem.icon.value());
         initialIconInfo.SetFillColor(theme->GetToolbarIconColor());

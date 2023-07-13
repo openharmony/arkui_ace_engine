@@ -55,7 +55,7 @@ void BarItemPattern::UpdateBarItemActiveStatusResource()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (status == ToolbarItemStatus::ACTIVE && iconStatus == ToolbarIconStatus::INITIAL) {
+    if (status == NavToolbarItemStatus::ACTIVE && iconStatus == ToolbarIconStatus::INITIAL) {
         imageLayoutProperty->UpdateImageSourceInfo(GetActiveIconImageSourceInfo());
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode();
@@ -63,7 +63,7 @@ void BarItemPattern::UpdateBarItemActiveStatusResource()
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
         SetCurrentIconStatus(ToolbarIconStatus::ACTIVE);
-    } else if (status == ToolbarItemStatus::ACTIVE && iconStatus == ToolbarIconStatus::ACTIVE) {
+    } else if (status == NavToolbarItemStatus::ACTIVE && iconStatus == ToolbarIconStatus::ACTIVE) {
         imageLayoutProperty->UpdateImageSourceInfo(GetInitialIconImageSourceInfo());
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode();
