@@ -26,7 +26,7 @@
 namespace OHOS::AAFwk {
 class Want;
 class WantParams;
-}
+} // namespace OHOS::AAFwk
 
 namespace OHOS::Ace::NG {
 class UIExtensionProxy;
