@@ -1516,7 +1516,7 @@ void PipelineContext::OnHide()
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
-    LOGI("WindowFocus: windowId: %{public}d, onFocus: %{public}d, onShow: %{public}d.", windowId_, onFocus_, onShow_);
+    LOGI("WindowFocus: windowId: %{public}d, onFocus: %{public}d, onShow: %{public}d.", windowId_, isFocus, onShow_);
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {

@@ -486,15 +486,16 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
 
     auto info = KeyEventInfo(keyEvent);
+    auto retCallback = false;
     auto onKeyEventCallback = GetOnKeyCallback();
-    if (!onKeyEventCallback) {
-        return retInternal;
+    if (onKeyEventCallback) {
+        onKeyEventCallback(info);
+        retCallback = info.IsStopPropagation();
     }
-    onKeyEventCallback(info);
-    auto retCallback = info.IsStopPropagation();
     LOGD("OnKeyEvent: Node %{public}s/%{public}d consume KeyEvent(code:%{public}d, action:%{public}d) return: "
          "%{public}d",
         GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
+
     if (!retInternal && !retCallback && keyEvent.action == KeyAction::DOWN) {
         switch (keyEvent.code) {
             case KeyCode::KEY_SPACE:
@@ -608,7 +609,7 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
                 LOGI("Request next focus failed becase cannot find next node by project area.");
                 return false;
             }
-            auto ret = nextFocusHub->RequestFocusImmediately();
+            auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
             LOGI("Request next focus by project area. Next focus node is %{public}s/%{public}d. Return %{public}d",
                 nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
             return ret;
@@ -626,18 +627,18 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
     focusAlgorithm_.getNextFocusNode(moveStep, lastWeakFocusNode_, nextFocusHubWeak);
     auto nextFocusHub = nextFocusHubWeak.Upgrade();
     if (!nextFocusHub) {
-        LOGI("Request next focus failed becase component focus algorithm return null.");
+        LOGI("Request next focus failed becase custom focus algorithm return null.");
         return false;
     }
-    auto ret = nextFocusHub->RequestFocusImmediately();
-    LOGI("Request next focus by component algorithm. Next focus node is %{public}s/%{public}d. Return %{public}d",
+    auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
+    LOGI("Request next focus by custom algorithm. Next focus node is %{public}s/%{public}d. Return %{public}d",
         nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
     return ret;
 }
 
 bool FocusHub::FocusToHeadOrTailChild(bool isHead)
 {
-    if (focusType_ != FocusType::SCOPE) {
+    if (focusType_ != FocusType::SCOPE && IsFocusableWholePath()) {
         return RequestFocusImmediately();
     }
     std::list<RefPtr<FocusHub>> focusNodes;
@@ -1120,32 +1121,38 @@ bool FocusHub::IsNeedPaintFocusState()
 
 bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
 {
-    if (focusType_ == FocusType::SCOPE) {
-        std::list<RefPtr<FocusHub>> focusNodes;
-        FlushChildrenFocusHub(focusNodes);
-        if (focusNodes.empty()) {
-            return false;
-        }
-        RefPtr<FocusHub> newFocusNode;
-        switch (step) {
-            case FocusStep::TAB:
-                newFocusNode = focusNodes.front();
-                break;
-            case FocusStep::SHIFT_TAB:
-                newFocusNode = focusNodes.back();
-                break;
-            default:
-                LOGI("Invalid focus step: %{public}d for %{public}s/%{public}d specify focus child.", step,
-                    GetFrameName().c_str(), GetFrameId());
-                break;
-        }
-        if (newFocusNode && newFocusNode->AcceptFocusOfSpecifyChild(step)) {
-            lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(newFocusNode));
-            return true;
-        }
-    }
     if (focusType_ == FocusType::NODE) {
         return IsFocusable();
+    }
+    if (focusType_ != FocusType::SCOPE) {
+        return false;
+    }
+    std::list<RefPtr<FocusHub>> focusNodes;
+    FlushChildrenFocusHub(focusNodes);
+    if (focusNodes.empty()) {
+        return false;
+    }
+    if (step == FocusStep::TAB) {
+        auto iterNewFocusNode = focusNodes.begin();
+        while (iterNewFocusNode != focusNodes.end()) {
+            if (*iterNewFocusNode && (*iterNewFocusNode)->AcceptFocusOfSpecifyChild(step)) {
+                lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*iterNewFocusNode));
+                return true;
+            }
+            ++iterNewFocusNode;
+        }
+    } else if (step == FocusStep::SHIFT_TAB) {
+        auto iterNewFocusNode = focusNodes.rbegin();
+        while (iterNewFocusNode != focusNodes.rend()) {
+            if (*iterNewFocusNode && (*iterNewFocusNode)->AcceptFocusOfSpecifyChild(step)) {
+                lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*iterNewFocusNode));
+                return true;
+            }
+            ++iterNewFocusNode;
+        }
+    } else {
+        LOGI("Invalid focus step: %{public}d for %{public}s/%{public}d specify focus child.", step,
+            GetFrameName().c_str(), GetFrameId());
     }
     return false;
 }
