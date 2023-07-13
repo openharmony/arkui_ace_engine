@@ -176,14 +176,14 @@ static napi_value PerfMonitorInit(napi_env env, napi_value exports)
 EXTERN_C_END
 
 /*
- * hiTraceMeter module definition
+ * performanceMonitor module definition
  */
 static napi_module perfmonitor_module = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_register_func = PerfMonitorInit,
-    .nm_modname = "perfmonitor_napi",
+    .nm_modname = "performanceMonitor",
     .nm_priv = ((void *)0),
     .reserved = {0}
 };
