@@ -35,6 +35,7 @@ ace_unittest("ability_component_test_ng") {
     "c_utils:utils",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:scene_session",
