@@ -919,8 +919,9 @@ void TextPattern::FontRegisterCallback(RefPtr<SpanNode> spanNode)
         }
     };
     auto fontManager = pipelineContext->GetFontManager();
-    if (fontManager && spanNode->GetFontFamily()) {
-        for (const auto& familyName : spanNode->GetFontFamily().value()) {
+    auto fontFamilies = spanNode->GetFontFamily();
+    if (fontManager && fontFamilies.has_value()) {
+        for (const auto& familyName : fontFamilies.value()) {
             fontManager->RegisterCallbackNG(spanNode, familyName, callback);
         }
     }
