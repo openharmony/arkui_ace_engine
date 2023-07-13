@@ -57,36 +57,6 @@ using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 using PixelMapNapiEntry = void* (*)(void*, void*);
 
-PixelMapNapiEntry GetPixelMapNapiEntry()
-{
-    static PixelMapNapiEntry pixelMapNapiEntry_ = nullptr;
-    if (!pixelMapNapiEntry_) {
-#if defined(_ARM64_) || defined(SIMULATOR_64)
-        std::string prefix = "/system/lib64/module/";
-#else
-        std::string prefix = "/system/lib/module/";
-#endif
-#ifdef OHOS_STANDARD_SYSTEM
-        std::string napiPluginName = "multimedia/libimage.z.so";
-#else
-        std::string napiPluginName = "multimedia/libimage_napi.z.so";
-#endif
-        auto napiPluginPath = prefix.append(napiPluginName);
-        void* handle = dlopen(napiPluginPath.c_str(), RTLD_LAZY);
-        if (handle == nullptr) {
-            LOGE("Failed to open shared library %{public}s, reason: %{public}s", napiPluginPath.c_str(), dlerror());
-            return nullptr;
-        }
-        pixelMapNapiEntry_ = reinterpret_cast<PixelMapNapiEntry>(dlsym(handle, "OHOS_MEDIA_GetPixelMap"));
-        if (pixelMapNapiEntry_ == nullptr) {
-            dlclose(handle);
-            LOGE("Failed to get symbol OHOS_MEDIA_GetPixelMap in %{public}s", napiPluginPath.c_str());
-            return nullptr;
-        }
-    }
-    return pixelMapNapiEntry_;
-}
-
 // the context of drag controller
 struct DragControllerAsyncCtx {
     napi_env env = nullptr;
@@ -230,7 +200,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             if (asyncCtx->unifiedData) {
                 int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
                 if (ret != 0) {
-                    return;
+                    LOGE("Udmf set data fail, error code is %{public}d", ret);
                 }
                 dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
             }
@@ -279,7 +249,7 @@ bool ParseDragItemInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMs
     // Parse the DragItemInfo
     napi_value pixelMapValue;
     napi_get_named_property(asyncCtx->env, asyncCtx->argv[0], "pixelMap", &pixelMapValue);
-    PixelMapNapiEntry pixelMapNapiEntry = GetPixelMapNapiEntry();
+    PixelMapNapiEntry pixelMapNapiEntry = Framework::JsEngine::GetPixelMapNapiEntry();
     if (pixelMapNapiEntry == nullptr) {
         LOGW("Failed to parse pixelMap from the first argument.");
     } else {
