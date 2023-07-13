@@ -366,6 +366,7 @@ public:
             theme->backgroundHoverColor_ = pattern->GetAttr<Color>("calendar_picker_background_hover_color", Color());
             theme->backgroundPressColor_ = pattern->GetAttr<Color>("calendar_picker_background_press_color", Color());
             theme->entryFontColor_ = pattern->GetAttr<Color>("calendar_picker_entry_font_color", Color());
+            theme->dialogDividerColor_ = pattern->GetAttr<Color>("calendar_picker_dialog_divider_color", Color());
             theme->entryHeight_ = pattern->GetAttr<Dimension>("calendar_picker_entry_height", 0.0_vp);
             theme->entryBorderWidth_ = pattern->GetAttr<Dimension>("calendar_picker_entry_border_width", 0.0_vp);
             theme->entryBorderRadius_ = pattern->GetAttr<Dimension>("calendar_picker_entry_border_radius", 0.0_vp);
@@ -634,6 +635,11 @@ public:
     {
         return entryFontColor_;
     }
+
+    const Color& GetDialogDividerColor() const
+    {
+        return dialogDividerColor_;
+    }
 protected:
     CalendarTheme() = default;
 
@@ -655,6 +661,7 @@ private:
     Color backgroundHoverColor_;
     Color backgroundPressColor_;
     Color entryFontColor_;
+    Color dialogDividerColor_;
     Dimension entryHeight_;
     Dimension entryBorderWidth_;
     Dimension entryBorderRadius_;

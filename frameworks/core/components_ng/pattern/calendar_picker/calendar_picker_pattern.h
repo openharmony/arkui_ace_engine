@@ -157,13 +157,16 @@ public:
         return buttonFlexId_.value();
     }
 
+    bool OnDirtyLayoutWrapperSwap(
+        const RefPtr<LayoutWrapper>& dirty, bool /* skipMeasure */, bool /* skipLayout */) override;
+
+    OffsetF CalculateDialogOffset();
 private:
     void OnModifyDone() override;
     void InitClickEvent();
     void InitOnKeyEvent();
     void InitOnHoverEvent();
     void ShowDialog();
-    OffsetF CalculateDialogOffset();
     void InitDialogProperties(DialogProperties& properties);
     void PostTaskToUI(const std::function<void()>& task);
     void HandleTaskCallback();
@@ -177,6 +180,7 @@ private:
     bool HandleMonthKeyEvent(uint32_t number);
     bool HandleDayKeyEvent(uint32_t number);
     void FireChangeEvents(const std::string& info);
+    bool IsContainerModal();
 
     std::string GetEntryDateInfo();
     void SetDate(const std::string& info);
