@@ -244,6 +244,16 @@ napi_modules = [
 if (use_mac || use_mingw_win) {
   common_bin += [
     {
+      label = "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics"
+      subsystem_name = "graphic"
+      part_name = "graphic_standard"
+    },
+    {
+      label = "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text"
+      subsystem_name = "graphic"
+      part_name = "graphic_standard"
+    },
+    {
       label = "//foundation/distributeddatamgr/preferences/interfaces/inner_api:native_preferences"
       subsystem_name = "distributeddatamgr"
       part_name = "preferences"
