@@ -24,7 +24,10 @@
 #include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr Dimension STEPPER_FOCUSED_BORDER_WIDTH = 2.0_vp;
+constexpr Dimension STEPPER_SCREEN_MARGIN = 4.0_vp;
+} // namespace
 /**
  * StepperTheme defines color and styles of StepperComponent. StepperTheme should be built
  * using StepperTheme::Builder.
@@ -79,16 +82,19 @@ public:
                 if (pattern) {
                     theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::RED));
                     theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 16.0_vp));
-                    theme->radius_ = pattern->GetAttr<Dimension>("border_radius", 0.0_vp);
+                    theme->radius_ = pattern->GetAttr<Dimension>("border_radius", 8.0_vp);
                     theme->buttonPressedColor_ = pattern->GetAttr<Color>("button_bg_color_pressed", Color::RED);
                     theme->mouseHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color::RED);
-                    theme->defaultPaddingStart_ = pattern->GetAttr<Dimension>("padding_left", 0.0_vp);
-                    theme->defaultPaddingEnd_ = pattern->GetAttr<Dimension>("padding_right", 0.0_vp);
+                    theme->defaultPaddingStart_ = pattern->GetAttr<Dimension>("padding_left", 12.0_vp);
+                    theme->defaultPaddingEnd_ = pattern->GetAttr<Dimension>("padding_right", 12.0_vp);
                     theme->arrowColor_ = pattern->GetAttr<Color>("arrorw_color", Color::RED);
                     theme->progressColor_ = pattern->GetAttr<Color>("progress_color", Color::RED);
                     theme->disabledColor_ = pattern->GetAttr<Color>("button_bg_color_disabled", Color::RED);
                     theme->disabledAlpha_ = pattern->GetAttr<double>("button_bg_color_disabled_alpha", 0.0);
                     theme->defaultAlpha_ = pattern->GetAttr<double>("attribute_alpha_content_primary", 0.9);
+                    theme->focusColor_ = pattern->GetAttr<Color>(STEPPER_FOCUS_COLOR, Color::RED);
+                    theme->focusBorderWidth_ = STEPPER_FOCUSED_BORDER_WIDTH;
+                    theme->controlMargin_ = STEPPER_SCREEN_MARGIN;
                 }
             }
             return theme;
