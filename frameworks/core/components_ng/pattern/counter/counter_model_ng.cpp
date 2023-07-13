@@ -21,7 +21,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+constexpr char sub[] = "-";
+constexpr char add[] = "+";
+} // namespace
 void CounterModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -47,7 +50,7 @@ void CounterModelNG::Create()
     auto contentId = counterPattern->GetContentId();
     auto addId = counterPattern->GetAddId();
     if (!hasSubNode) {
-        auto subNode = CreateButtonChild(subId, "-", counterTheme);
+        auto subNode = CreateButtonChild(subId, sub, counterTheme);
         subNode->MountToParent(counterNode);
     }
     if (!hasContentNode) {
@@ -55,7 +58,7 @@ void CounterModelNG::Create()
         contentNode->MountToParent(counterNode);
     }
     if (!hasAddNode) {
-        auto addNode = CreateButtonChild(addId, "+", counterTheme);
+        auto addNode = CreateButtonChild(addId, add, counterTheme);
         addNode->MountToParent(counterNode);
     }
     stack->Push(counterNode);
@@ -74,6 +77,16 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
     buttonNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
     buttonNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
     buttonNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
+    auto buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
+    if (symbol.compare(sub) == 0) {
+        BorderRadiusProperty subButtonBorder { counterTheme->GetBorderRadius().radiusTopLeft.value(), 0.0_vp, 0.0_vp,
+            counterTheme->GetBorderRadius().radiusBottomLeft.value() };
+        buttonLayoutProperty->UpdateBorderRadius(subButtonBorder);
+    } else {
+        BorderRadiusProperty addButtonBorder { 0.0_vp, counterTheme->GetBorderRadius().radiusTopRight.value(),
+            counterTheme->GetBorderRadius().radiusBottomRight.value(), 0.0_vp };
+        buttonLayoutProperty->UpdateBorderRadius(addButtonBorder);
+    }
     buttonNode->MarkModifyDone();
 
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
