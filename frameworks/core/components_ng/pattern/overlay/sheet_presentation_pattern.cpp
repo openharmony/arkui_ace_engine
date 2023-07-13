@@ -152,9 +152,6 @@ void SheetPresentationPattern::InitPanEvent()
 
 void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
 {
-    if (isAnimating_) {
-        return;
-    }
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -174,9 +171,6 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
 {
-    if (isAnimating_) {
-        return;
-    }
     // current sheet animation
     if (std::abs(dragVelocity) < SHEET_VELOCITY_THRESHOLD) {
         // Drag velocity not reached to threshold, mode based on the location.
@@ -223,7 +217,7 @@ void SheetPresentationPattern::InitialLayoutProps()
 
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn)
 {
-    isAnimating_ = true;
+    FireCallback("false");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -256,7 +250,6 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn)
                     MarginProperty margin;
                     margin.top = CalcLength(marginValue + padding.top.value());
                     layoutProperty->UpdateMargin(margin);
-                    pattern->SetIsAnimating(false);
                     pattern->SetCurrentOffset(0.0);
                 } else {
                     auto context = PipelineContext::GetCurrentContext();
