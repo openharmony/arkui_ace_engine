@@ -265,6 +265,54 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
     return hitFrameNodes.rbegin()->second;
 }
 
+std::map<int32_t, RefPtr<FrameNode>> DragDropManager::FindDragFrameNodeMapByPosition(
+    float globalX, float globalY, DragType dragType)
+{
+    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
+    std::set<WeakPtr<FrameNode>> frameNodes;
+
+    switch (dragType) {
+        case DragType::COMMON:
+            frameNodes = dragFrameNodes_;
+            break;
+        case DragType::GRID:
+            frameNodes = gridDragFrameNodes_;
+            break;
+        case DragType::LIST:
+            frameNodes = listDragFrameNodes_;
+            break;
+        case DragType::TEXT:
+            frameNodes = textFieldDragFrameNodes_;
+            break;
+        default:
+            break;
+    }
+
+    if (frameNodes.empty()) {
+        return hitFrameNodes;
+    }
+
+    PointF point(globalX, globalY);
+
+    for (const auto& weakNode : frameNodes) {
+        auto frameNode = weakNode.Upgrade();
+        if (!frameNode) {
+            continue;
+        }
+        auto geometryNode = frameNode->GetGeometryNode();
+        if (!geometryNode) {
+            continue;
+        }
+        auto globalFrameRect = geometryNode->GetFrameRect();
+        globalFrameRect.SetOffset(frameNode->GetTransformRelativeOffset());
+        if (globalFrameRect.IsInRegion(point)) {
+            hitFrameNodes.insert(std::make_pair(frameNode->GetDepth(), frameNode));
+        }
+    }
+
+    return hitFrameNodes;
+}
+
 bool DragDropManager::CheckDragDropProxy(int64_t id) const
 {
     return currentId_ == id;
@@ -364,27 +412,39 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     }
 #endif // ENABLE_DRAG_FRAMEWORK
     UpdateVelocityTrackerPoint(point, true);
-    auto dragFrameNode = FindDragFrameNodeByPosition(
+    auto frameNodes = FindDragFrameNodeMapByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON);
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool isUseDefaultDrop = false;
 #endif // ENABLE_DRAG_FRAMEWORK
-    CHECK_NULL_VOID_NOLOG(dragFrameNode);
-    auto eventHub = dragFrameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
+    for (auto iter = frameNodes.rbegin(); iter != frameNodes.rend(); ++iter) {
+        auto dragFrameNode = iter->second;
+        CHECK_NULL_VOID_NOLOG(dragFrameNode);
+        auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
 #ifdef ENABLE_DRAG_FRAMEWORK
-    isUseDefaultDrop = true;
-    InteractionManager::GetInstance()->SetDragWindowVisible(false);
+        if (!eventHub->HasOnDrop()) {
+#else
+        if (!eventHub->HasOnDrop() || dragFrameNode == draggedFrameNode_) {
 #endif // ENABLE_DRAG_FRAMEWORK
-    UpdateDragEvent(event, point);
-    eventHub->FireOnDrop(event, extraParams);
-    ClearVelocityInfo();
+            continue;
+        }
+        RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+        auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
 #ifdef ENABLE_DRAG_FRAMEWORK
-    InteractionManager::GetInstance()->StopDrag(
-        TranslateDragResult(event->GetResult()), event->IsUseCustomAnimation());
-    if (!isUseDefaultDrop) {
+        isUseDefaultDrop = true;
+        InteractionManager::GetInstance()->SetDragWindowVisible(false);
+#endif // ENABLE_DRAG_FRAMEWORK
+        UpdateDragEvent(event, point);
+        eventHub->FireOnDrop(event, extraParams);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        InteractionManager::GetInstance()->StopDrag(
+            TranslateDragResult(event->GetResult()), event->IsUseCustomAnimation());
+#endif // ENABLE_DRAG_FRAMEWORK
+        break;
+    }
+#ifdef ENABLE_DRAG_FRAMEWORK
+if (!isUseDefaultDrop) {
         LOGD("DragDropManager Not Use DefaultDrop");
         InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
     }
