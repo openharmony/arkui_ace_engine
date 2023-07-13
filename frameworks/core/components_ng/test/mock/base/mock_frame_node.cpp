@@ -266,4 +266,8 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
 void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
 {
 }
+
+void FrameNode::OnSetDepth(const int32_t depth)
+{
+}
 } // namespace OHOS::Ace::NG
