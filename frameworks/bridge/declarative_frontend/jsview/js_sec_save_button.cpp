@@ -162,6 +162,7 @@ void JSSecSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSecSaveButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
     JSClass<JSSecSaveButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
     JSClass<JSSecSaveButton>::StaticMethod("onClick", &JSSecSaveButton::JsOnClick);
+    JSClass<JSSecSaveButton>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSSecSaveButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
     JSClass<JSSecSaveButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSSecSaveButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);

@@ -36,12 +36,12 @@ public:
     static int32_t ReportSecurityComponentClickEvent(int32_t scId, RefPtr<FrameNode>& node, GestureEvent& event);
 #ifdef SECURITY_COMPONENT_ENABLE
     static bool InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node);
+    static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
+    static bool GetWindowRect(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompRect& winRect);
     static OHOS::Security::SecurityComponent::SecCompUiRegister uiRegister;
     static SecurityComponentProbe probe;
 
 private:
-    static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
-    static bool GetWindowRect(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompRect& winRect);
     static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckBrightness(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty>& layoutProperty);
