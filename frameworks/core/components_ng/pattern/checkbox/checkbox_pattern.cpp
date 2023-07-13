@@ -439,6 +439,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
         }
     } else {
         groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
+        pattern->UpdateUIStatus(false);
     }
     checkBoxGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto status = groupPaintProperty->GetSelectStatus();

@@ -68,11 +68,11 @@ constexpr int32_t MENU_ANIMATION_DURATION = 150;
 constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-constexpr float PIXELMAP_ANIMATION_WIDTH_RATE = 0.5f;
-constexpr float PIXELMAP_ANIMATION_HEIGHT_RATE = 0.2f;
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE = 0.5f;
+constexpr float SPRING_RESPONSE = 0.347f;
+constexpr float SPRING_DAMPING_FRACTION = 0.99f;
 #endif // ENABLE_DRAG_FRAMEWORK
 
 constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
@@ -709,7 +709,6 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         SetShowMenuAnimation(menu);
         menu->MarkModifyDone();
-        LOGI("menuNode mounted");
     }
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
@@ -786,7 +785,7 @@ void OverlayManager::HideAllMenus()
 {
     LOGD("OverlayManager::HideAllMenus");
     if (SystemProperties::IsSceneBoardEnabled()) {
-        for (const auto& windowScene : windowSceneList_) {
+        for (const auto& windowScene : windowSceneSet_) {
             if (!windowScene.Upgrade()) {
                 continue;
             }
@@ -1640,7 +1639,7 @@ RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
     }
     CHECK_NULL_RETURN(parent, nullptr);
     LOGI("FindWindowScene success");
-    windowSceneList_.push_back(parent);
+    windowSceneSet_.insert(parent);
     return parent;
 }
 
@@ -1714,6 +1713,8 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     CHECK_NULL_VOID(imageContext);
     auto hub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
+    auto frameNode = hub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     float scale = PIXELMAP_DRAG_SCALE;
@@ -1722,8 +1723,9 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     int32_t height = pixelMap->GetHeight();
 
     AnimationOption option;
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_RESPONSE, SPRING_DAMPING_FRACTION, 0);
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
-    option.SetCurve(Curves::SHARP);
+    option.SetCurve(motion);
     option.SetOnFinishEvent([this, id = Container::CurrentId()] {
         ContainerScope scope(id);
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
@@ -1735,14 +1737,18 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     }
     imageContext->UpdateBackShadow(shadow.value());
 
+    auto coordinateX =
+        imageNode->GetOffsetRelativeToWindow().GetX() - frameNode->GetOffsetRelativeToWindow().GetX();
+    auto coordinateY =
+        imageNode->GetOffsetRelativeToWindow().GetY() - frameNode->GetOffsetRelativeToWindow().GetY();
     AnimationUtils::Animate(
         option,
-        [imageContext, shadow, startDrag, x, y, width, height, scale]() mutable {
+        [imageContext, shadow, startDrag, x, y, width, height, scale, coordinateX, coordinateY]() mutable {
             auto color = shadow->GetColor();
             auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
             if (startDrag) {
-                imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(x - width * PIXELMAP_ANIMATION_WIDTH_RATE),
-                    Dimension(y - height * PIXELMAP_ANIMATION_HEIGHT_RATE)));
+                imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(x - (x - coordinateX) * scale),
+                    Dimension(y - (y - coordinateY) * scale)));
                 imageContext->UpdateTransformScale({ scale, scale });
                 imageContext->OnModifyDone();
             } else {

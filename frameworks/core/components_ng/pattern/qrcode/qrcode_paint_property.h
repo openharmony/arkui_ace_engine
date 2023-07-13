@@ -18,7 +18,9 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,6 +38,7 @@ public:
         paintProperty->propValue_ = CloneValue();
         paintProperty->propColor_ = CloneColor();
         paintProperty->propBackgroundColor_ = CloneBackgroundColor();
+        paintProperty->propOpacity_ = CloneOpacity();
         return paintProperty;
     }
 
@@ -45,19 +48,27 @@ public:
         ResetValue();
         ResetColor();
         ResetBackgroundColor();
+        ResetOpacity();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+        CHECK_NULL_VOID(qrCodeTheme);
         json->Put("value", propValue_.value_or("").c_str());
-        json->Put("color", propColor_.value_or(Color::BLACK).ColorToString().c_str());
-        json->Put("backgroundColor", propBackgroundColor_.value_or(Color::WHITE).ColorToString().c_str());
+        json->Put("color", propColor_.value_or(qrCodeTheme->GetQrcodeColor()).ColorToString().c_str());
+        json->Put("backgroundColor",
+            propBackgroundColor_.value_or(qrCodeTheme->GetBackgroundColor()).ColorToString().c_str());
+        json->Put("opacity", propOpacity_.value_or(1.0f));
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Opacity, double, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

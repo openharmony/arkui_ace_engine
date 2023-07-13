@@ -47,7 +47,7 @@ build_component_ng("web_pattern_ng") {
       "ability_runtime:app_manager",
       "ability_runtime:appkit_native",
       "c_utils:utils",
-      "graphic_standard:librender_service_client",
+      "graphic_2d:librender_service_client",
       "init:libbegetutil",
       "ipc:ipc_core",
       "webview:libnweb",

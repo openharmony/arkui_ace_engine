@@ -158,6 +158,7 @@ private:
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
+    Axis axis_ = Axis::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
 } // namespace OHOS::Ace::NG

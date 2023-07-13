@@ -924,7 +924,7 @@ void Scrollable::ProcessScrollSnapMotion(double position)
             touchUp_ = true;
         }
     }
-    currentPos_ = position;
+    currentPos_ = scrollSnapMotion_->GetCurrentPosition();
 }
 
 void Scrollable::OnAnimateStop()

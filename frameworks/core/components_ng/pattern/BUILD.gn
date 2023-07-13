@@ -221,6 +221,8 @@ build_component_ng("pattern_ng") {
     "navigation/title_bar_layout_algorithm.cpp",
     "navigation/title_bar_node.cpp",
     "navigation/title_bar_pattern.cpp",
+    "navigation/tool_bar_layout_algorithm.cpp",
+    "navigation/tool_bar_node.cpp",
     "navigator/navigator_event_hub.cpp",
     "navigator/navigator_model_ng.cpp",
     "navigator/navigator_pattern.cpp",
@@ -485,7 +487,7 @@ build_component_ng("pattern_ng") {
   }
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_standard:librender_service_client" ]
+    external_deps = [ "graphic_2d:librender_service_client" ]
   } else if (is_cross_platform_build) {
     deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }
@@ -518,6 +520,6 @@ build_component_ng("pattern_model_component_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_standard:librender_service_client" ]
+    external_deps = [ "graphic_2d:librender_service_client" ]
   }
 }

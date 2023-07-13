@@ -86,7 +86,7 @@ template("ace_base_source_set") {
     if (is_cross_platform_build) {
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
     } else {
-      external_deps += [ "graphic_standard:librender_service_client" ]
+      external_deps += [ "graphic_2d:librender_service_client" ]
     }
 
     # curl download manager

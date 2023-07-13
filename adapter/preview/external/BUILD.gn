@@ -54,7 +54,7 @@ ohos_source_set("preview_external_source") {
 
       # for window
       external_deps = [
-        "graphic_standard:librender_service_client",
+        "graphic_2d:librender_service_client",
         "previewer:ide_extension",
       ]
 

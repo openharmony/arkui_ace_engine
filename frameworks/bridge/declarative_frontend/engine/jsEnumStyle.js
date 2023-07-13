@@ -1552,9 +1552,9 @@ var MenuAlignType;
 
 var ToolbarItemStatus;
 (function (ToolbarItemStatus) {
-  ToolbarItemStatus[ToolbarItemStatus["ENABLE_TOOLBAR_ITEM"] = 0] = "ENABLE_TOOLBAR_ITEM";
-  ToolbarItemStatus[ToolbarItemStatus["DISABLE_TOOLBAR_ITEM"] = 1] = "DISABLE_TOOLBAR_ITEM";
-  ToolbarItemStatus[ToolbarItemStatus["ACTIVATE_TOOLBAR_ITEM"] = 2] = "ACTIVATE_TOOLBAR_ITEM";
+  ToolbarItemStatus[ToolbarItemStatus["NORMAL"] = 0] = "NORMAL";
+  ToolbarItemStatus[ToolbarItemStatus["DISABLED"] = 1] = "DISABLED";
+  ToolbarItemStatus[ToolbarItemStatus["ACTIVE"] = 2] = "ACTIVE";
 })(ToolbarItemStatus || (ToolbarItemStatus = {}));
 
 var SecurityComponentLayoutDirection;
@@ -1756,3 +1756,9 @@ var CalendarAlign;
   CalendarAlign[CalendarAlign["CENTER"] = 1] = "CENTER";
   CalendarAlign[CalendarAlign["END"] = 2] = "END";
 })(CalendarAlign || (CalendarAlign = {}));
+
+var DragBehavior;
+(function (DragBehavior) {
+  DragBehavior[DragBehavior["COPY"] = 0] = "COPY";
+  DragBehavior[DragBehavior["MOVE"] = 1] = "MOVE";
+})(DragBehavior || (DragBehavior = {}));

@@ -26,6 +26,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -44,9 +45,70 @@ void BarItemLayoutAlgorithm::MeasureIcon(LayoutWrapper* layoutWrapper, const Ref
     iconWrapper->Measure(constraint);
 }
 
+void BarItemLayoutAlgorithm::MeasureToolbarItemText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
+    const RefPtr<LayoutProperty>& barItemLayoutProperty)
+{
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto textNode = hostNode->GetTextNode();
+    CHECK_NULL_VOID(textNode);
+    auto index = hostNode->GetChildIndexById(textNode->GetId());
+    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
+    CHECK_NULL_VOID(textWrapper);
+    auto constraint = barItemLayoutProperty->CreateChildConstraint();
+
+    auto contentConstraint = textWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+    textWrapper->Measure(contentConstraint);
+    auto textWidth = textWrapper->GetGeometryNode()->GetContentSize().Width();
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+
+    if (GreatOrEqual(textWidth, constraint.maxSize.Width())) {
+        constraint.maxSize.SetWidth(textWidth);
+    }
+
+    auto barItemMaxWidth = GetBarItemMaxWidth();
+    auto barItemWidth = barItemLayoutProperty->GetLayoutConstraint()->maxSize.Width();
+    auto barItemConstraint = barItemLayoutProperty->GetLayoutConstraint().value();
+    if (GreatNotEqual(constraint.maxSize.Width(), barItemWidth) &&
+        LessOrEqual(constraint.maxSize.Width(), barItemMaxWidth)) {
+        barItemConstraint.maxSize.SetWidth(constraint.maxSize.Width());
+        barItemLayoutProperty->UpdateLayoutConstraint(barItemConstraint);
+    }
+
+    if (GreatOrEqual(constraint.maxSize.Width(), barItemMaxWidth)) {
+        constraint.maxSize.SetWidth(barItemMaxWidth);
+        barItemConstraint.maxSize.SetWidth(barItemMaxWidth);
+        barItemLayoutProperty->UpdateLayoutConstraint(barItemConstraint);
+        textLayoutProperty->UpdateAdaptMinFontSize(theme->GetToolBarItemMinFontSize());
+        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetToolBarItemFontSize());
+        textLayoutProperty->UpdateMaxLines(theme->GetToolbarItemTextMaxLines());
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+        textWrapper->Measure(constraint);
+    }
+
+    auto textHeight = textWrapper->GetGeometryNode()->GetContentSize().Height();
+    float barItemChildrenTotalHeight = textHeight + (theme->GetToolbarIconSize() + TEXT_TOP_PADDING).ConvertToPx();
+    if (GreatOrEqual(barItemChildrenTotalHeight, constraint.maxSize.Height())) {
+        constraint.maxSize.SetHeight(barItemChildrenTotalHeight);
+    }
+
+    if (GreatNotEqual(constraint.maxSize.Height(), barItemConstraint.maxSize.Height())) {
+        barItemConstraint.maxSize.SetHeight(constraint.maxSize.Height());
+        barItemLayoutProperty->UpdateLayoutConstraint(barItemConstraint);
+    }
+
+    textWrapper->Measure(constraint);
+}
+
 void BarItemLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
     const RefPtr<LayoutProperty>& barItemLayoutProperty)
 {
+    if (hostNode->IsBarItemUsedInToolbarConfiguration()) {
+        MeasureToolbarItemText(layoutWrapper, hostNode, barItemLayoutProperty);
+        return;
+    }
+
     auto textNode = hostNode->GetTextNode();
     CHECK_NULL_VOID(textNode);
     auto index = hostNode->GetChildIndexById(textNode->GetId());
@@ -66,7 +128,15 @@ float BarItemLayoutAlgorithm::LayoutIcon(LayoutWrapper* layoutWrapper, const Ref
     CHECK_NULL_RETURN(iconWrapper, 0.0f);
     auto geometryNode = iconWrapper->GetGeometryNode();
 
-    auto offset = OffsetF(0.0f, 0.0f);
+    const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(constraint, 0.0f);
+    auto offsetX = (constraint->maxSize.Width() - iconSize_.ConvertToPx()) / 2;
+
+    if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
+        offsetX = 0.0f;
+    }
+
+    auto offset = OffsetF(offsetX, 0.0f);
     geometryNode->SetMarginFrameOffset(offset);
     iconWrapper->Layout();
     return 0.0f;
@@ -82,7 +152,16 @@ void BarItemLayoutAlgorithm::LayoutText(LayoutWrapper* layoutWrapper, const RefP
     CHECK_NULL_VOID(textWrapper);
     auto geometryNode = textWrapper->GetGeometryNode();
     auto textOffsetY = iconSize_ + TEXT_TOP_PADDING;
-    auto offset = OffsetF(0.0f, iconOffsetY + static_cast<float>(textOffsetY.ConvertToPx()));
+
+    const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
+    auto textWidth = geometryNode->GetFrameSize().Width();
+    auto offsetX = (constraint->maxSize.Width() - textWidth) / 2;
+
+    if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
+        offsetX = 0.0f;
+    }
+    auto offset = OffsetF(offsetX, iconOffsetY + static_cast<float>(textOffsetY.ConvertToPx()));
     geometryNode->SetMarginFrameOffset(offset);
     textWrapper->Layout();
 }
@@ -93,16 +172,21 @@ void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(barItemLayoutProperty);
-    const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
-    CHECK_NULL_VOID(constraint);
+    bool isUsedInToolbarConfiguratuon = hostNode->IsBarItemUsedInToolbarConfiguration();
 
     // get parameters from theme
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    iconSize_ = theme->GetMenuIconSize();
+    iconSize_ = isUsedInToolbarConfiguratuon ? theme->GetToolbarIconSize() : theme->GetMenuIconSize();
     auto size = SizeF(static_cast<float>(iconSize_.ConvertToPx()), static_cast<float>(iconSize_.ConvertToPx()));
     MeasureIcon(layoutWrapper, hostNode, barItemLayoutProperty);
     MeasureText(layoutWrapper, hostNode, barItemLayoutProperty);
+
+    if (isUsedInToolbarConfiguratuon) {
+        const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
+        CHECK_NULL_VOID(constraint);
+        size = constraint->maxSize;
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 

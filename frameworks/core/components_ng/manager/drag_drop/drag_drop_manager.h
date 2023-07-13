@@ -82,7 +82,7 @@ public:
     void RestoreClipboardData();
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const RefPtr<OHOS::Ace::DragEvent>& event);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)

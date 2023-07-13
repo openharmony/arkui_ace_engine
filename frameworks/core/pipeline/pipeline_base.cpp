@@ -604,7 +604,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     auto currentContainer = Container::Current();
-    if (!currentContainer->IsSubContainer()) {
+    if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown()) {
             // subwindow is shown, main window no need to handle the keyboard event
