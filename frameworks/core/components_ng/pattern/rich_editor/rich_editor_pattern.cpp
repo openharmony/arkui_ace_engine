@@ -166,6 +166,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options)
     imageNode->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+    textSelector_.Update(-1, -1);
 
     return spanIndex;
 }
@@ -210,6 +211,7 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options)
         spanNode->UpdateTextDecorationColor(options.style.value().GetTextDecorationColor());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
     }
+    textSelector_.Update(-1, -1);
 
     return spanIndex;
 }
@@ -862,7 +864,7 @@ void RichEditorPattern::InitDragDropEvent()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragStart = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
-        const std::string& extraParams) -> NG::DragDropInfo {
+                           const std::string& extraParams) -> NG::DragDropInfo {
         NG::DragDropInfo itemInfo;
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_RETURN(pattern, itemInfo);
@@ -870,7 +872,7 @@ void RichEditorPattern::InitDragDropEvent()
     };
     eventHub->SetOnDragStart(std::move(onDragStart));
     auto onDragMove = [weakPtr = WeakClaim(this)](
-        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+                          const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnDragMove(event);
@@ -987,12 +989,11 @@ void RichEditorPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& 
         }
 
         if (resultObj.type == RichEditorSpanType::TYPEIMAGE) {
-            auto imageNode =
-                DynamicCast<FrameNode>(pattern->GetChildByIndex(resultObj.spanPosition.spanIndex));
+            auto imageNode = DynamicCast<FrameNode>(pattern->GetChildByIndex(resultObj.spanPosition.spanIndex));
             CHECK_NULL_VOID(imageNode);
             auto renderContext = imageNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateOpacity(isDragging ? (double)DRAGGED_TEXT_OPACITY/255 : 1);
+            renderContext->UpdateOpacity(isDragging ? (double)DRAGGED_TEXT_OPACITY / 255 : 1);
             imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
