@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 
 namespace OHOS::Ace::NG {
 void HyperlinkModelNG::Create(const std::string& address, const std::string& content)
@@ -28,6 +30,12 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
 
     stack->Push(hyperlinkNode);
     SetTextStyle(hyperlinkNode, content);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(theme);
+    SetDraggable(theme->GetDraggable());
 }
 
 void HyperlinkModelNG::SetColor(const Color& value)
@@ -56,16 +64,13 @@ void HyperlinkModelNG::SetTextStyle(const RefPtr<FrameNode>& hyperlinkNode, cons
 
 void HyperlinkModelNG::SetDraggable(bool draggable)
 {
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<HyperlinkPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (draggable && !pattern->IsDraggable()) {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (draggable && !frameNode->IsDraggable()) {
         auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->InitDragDropEvent();
     }
-    pattern->SetDraggable(draggable);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     frameNode->SetDraggable(draggable);
 }
 } // namespace OHOS::Ace::NG

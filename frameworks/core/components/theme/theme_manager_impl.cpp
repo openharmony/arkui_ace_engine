@@ -28,6 +28,7 @@
 #include "core/components/divider/divider_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/focus_animation/focus_animation_theme.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/indexer/indexer_theme.h"
 #include "core/components/list/list_item_theme.h"
@@ -115,6 +116,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { CardTheme::TypeId(), &ThemeBuildFunc<CardTheme::Builder> },
     { QrcodeTheme::TypeId(), &ThemeBuildFunc<QrcodeTheme::Builder> },
     { CameraTheme::TypeId(), &ThemeBuildFunc<CameraTheme::Builder> },
+    { HyperlinkTheme::TypeId(), &ThemeBuildFunc<HyperlinkTheme::Builder> },
     { ImageTheme::TypeId(), &ThemeBuildFunc<ImageTheme::Builder> },
     { CounterTheme::TypeId(), &ThemeBuildFunc<CounterTheme::Builder> },
     { DragBarTheme::TypeId(), &ThemeBuildFunc<DragBarTheme::Builder> },
