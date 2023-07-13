@@ -1291,12 +1291,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     CHECK_NULL_RETURN(frameNode, rect);
     CHECK_NULL_RETURN(rsNode_, rect);
     const auto& geometryNode = frameNode->GetGeometryNode();
-    if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
-        rect = geometryNode->GetContent() ? geometryNode->GetContent()->GetRect() : RectF();
-        rect.SetOffset(geometryNode->GetFrameOffset() + geometryNode->GetContentOffset());
-    } else {
-        rect = geometryNode->GetFrameRect();
-    }
+    rect = geometryNode->GetFrameRect();
     if (!rect.GetSize().IsPositive()) {
         LOGD("paint size is zero");
         return rect;
