@@ -26,6 +26,23 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+AbilityComponentPattern::AbilityComponentPattern(const std::string& bundleName, const std::string& abilityName)
+{
+    if (SystemProperties::IsSceneBoardEnabled()) {
+        auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+        CHECK_NULL_VOID_NOLOG(container);
+        Rosen::ExtensionSessionManager::GetInstance().Init();
+        auto wantWrap = Ace::WantWrap::CreateWantWrap(bundleName, abilityName);
+        auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
+        Rosen::SessionInfo extensionSessionInfo = {
+            .bundleName_ = bundleName,
+            .abilityName_ = abilityName,
+            .callerToken_ = container->GetToken(),
+            .want = new (std::nothrow) Want(want),
+        };
+        session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
+    }
+}
 
 void AbilityComponentPattern::OnModifyDone()
 {
@@ -38,13 +55,16 @@ void AbilityComponentPattern::OnModifyDone()
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         InitTouchEvent(gestureHub);
+        auto inputHub = hub->GetOrCreateInputEventHub();
+        CHECK_NULL_VOID(inputHub);
+        InitMouseEvent(inputHub);
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        InitOnKeyEvent(focusHub);
     }
     if (adapter_) {
         UpdateWindowRect();
     } else {
-        auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-        CHECK_NULL_VOID_NOLOG(container);
-        auto callerToken = container->GetToken();
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto windowId = pipelineContext->GetWindowId();
@@ -52,17 +72,13 @@ void AbilityComponentPattern::OnModifyDone()
         CHECK_NULL_VOID(host);
         adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
         CHECK_NULL_VOID(adapter_);
-        auto wantWrap = Ace::WantWrap::CreateWantWrap(bundleName_, abilityName_);
-        auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
-        Rosen::SessionInfo extensionSessionInfo = {
-            .bundleName_ = want.GetElement().GetBundleName(),
-            .abilityName_ = want.GetElement().GetAbilityName(),
-            .callerToken_ = callerToken,
-            .want = new (std::nothrow) AAFwk::Want(want),
-        };
-        session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-        adapter_->ConnectExtension(GetHost(), windowId, extensionSession);
+        if (SystemProperties::IsSceneBoardEnabled()) {
+            CHECK_NULL_VOID(session_);
+            sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+            CHECK_NULL_VOID(extensionSession);
+            adapter_->SetExtensionSession(extensionSession);
+        }
+        adapter_->ConnectExtension(GetHost(), windowId);
         pipelineContext->AddOnAreaChangeNode(host->GetId());
         pipelineContext->AddWindowStateChangedCallback(host->GetId());
         LOGI("connect to windows extension begin %{public}s", GetHost()->GetTag().c_str());
@@ -142,6 +158,24 @@ void AbilityComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gest
     gestureHub->AddTouchEvent(touchEvent_);
 }
 
+void AbilityComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    if (mouseEvent_) {
+        return;
+    }
+    auto callback = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(info);
+        }
+    };
+    if (mouseEvent_) {
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+    }
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(callback));
+    inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
 void AbilityComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     if (info.GetSourceDevice() != SourceType::TOUCH) {
@@ -157,4 +191,90 @@ void AbilityComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     WindowPattern::DispatchPointerEvent(pointerEvent);
 }
 
+void AbilityComponentPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    if (info.GetSourceDevice() != SourceType::MOUSE) {
+        return;
+    }
+    const auto pointerEvent = info.GetPointerEvent();
+    CHECK_NULL_VOID(pointerEvent);
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto selfGlobalOffset = host->GetTransformRelativeOffset();
+    auto scale = host->GetTransformScale();
+    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
+    WindowPattern::DispatchPointerEvent(pointerEvent);
+}
+
+void AbilityComponentPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    });
+
+    focusHub->SetOnBlurInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleBlurEvent();
+        }
+    });
+
+    focusHub->SetOnClearFocusStateInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->DisPatchFocusActiveEvent(false);
+        }
+    });
+    focusHub->SetOnPaintFocusStateInternal([weak = WeakClaim(this)]() -> bool {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->DisPatchFocusActiveEvent(true);
+            return true;
+        }
+        return false;
+    });
+
+    focusHub->SetOnKeyEventInternal([wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    });
+}
+
+void AbilityComponentPattern::HandleFocusEvent()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline->GetIsFocusActive()) {
+        WindowPattern::DisPatchFocusActiveEvent(true);
+    }
+}
+
+void AbilityComponentPattern::HandleBlurEvent()
+{
+    WindowPattern::DisPatchFocusActiveEvent(false);
+}
+
+bool AbilityComponentPattern::KeyEventConsumed(const KeyEvent& event)
+{
+    bool isConsumed = false;
+    WindowPattern::DispatchKeyEventForConsumed(event.rawKeyEvent, isConsumed);
+    return isConsumed;
+}
+
+bool AbilityComponentPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        // tab trigger consume the key event
+        return pipeline->IsTabJustTriggerOnKeyEvent();
+    } else {
+        return KeyEventConsumed(event);
+    }
+}
 } // namespace OHOS::Ace::NG

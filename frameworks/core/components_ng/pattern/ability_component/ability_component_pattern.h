@@ -23,28 +23,28 @@
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_render_property.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
-#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "frameworks/core/components_ng/property/property.h"
 #include "frameworks/core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT AbilityComponentPattern : public UIExtensionPattern {
-    DECLARE_ACE_TYPE(AbilityComponentPattern, UIExtensionPattern);
+class ACE_EXPORT AbilityComponentPattern : public WindowPattern {
+    DECLARE_ACE_TYPE(AbilityComponentPattern, WindowPattern);
 
 public:
-    AbilityComponentPattern(const std::string& bundleName, const std::string& abilityName)
-        : UIExtensionPattern(Ace::WantWrap::CreateWantWrap("AbilityComp", abilityName))
-    {
-        bundleName_ = bundleName;
-        abilityName_ = abilityName;
-    }
+    AbilityComponentPattern(const std::string& bundleName, const std::string& abilityName);
 
     ~AbilityComponentPattern() override
     {
         if (adapter_) {
             adapter_->RemoveExtension();
         }
+    }
+
+    bool HasStartingPage() override
+    {
+        return false;
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -71,7 +71,14 @@ private:
     void OnModifyDone() override;
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleMouseEvent(const MouseInfo& info);
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool KeyEventConsumed(const KeyEvent& event);
 
     void OnActive() override
     {
@@ -119,9 +126,8 @@ private:
     bool hasConnectionToAbility_ = false;
     Rect lastRect_;
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<InputEvent> touchEvent_;
     RefPtr<WindowExtensionConnectionAdapterNG> adapter_;
-    std::string bundleName_;
-    std::string abilityName_;
     ACE_DISALLOW_COPY_AND_MOVE(AbilityComponentPattern);
 };
 
