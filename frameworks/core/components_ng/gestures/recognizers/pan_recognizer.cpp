@@ -101,11 +101,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     distance_ = newDistance_;
     direction_ = newDirection_;
 
-    if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
-        return;
-    }
-
     if (fingers_ > MAX_PAN_FINGERS) {
         LOGI("fingers_ is larger than max fingers");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
