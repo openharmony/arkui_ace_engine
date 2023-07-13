@@ -17,9 +17,11 @@
 
 #include <fstream>
 #include <functional>
+#include <mutex>
 
 #include "ability_context.h"
 #include "ability_info.h"
+#include "pointer_event.h"
 #include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
@@ -1642,6 +1644,22 @@ void AceContainer::GetImageDataFromAshmem(
         // read image data from shared memory and save a copy to sharedImageManager
         sharedImageManager->AddSharedImage(picName, std::vector<uint8_t>(imageData, imageData + len));
     }
+}
+
+void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    currentPointerEvent_ = currentEvent;
+}
+
+void AceContainer::GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    MMI::PointerEvent::PointerItem pointerItem;
+    currentPointerEvent_->GetPointerItem(pointerId, pointerItem);
+    sourceType = currentPointerEvent_->GetSourceType();
+    globalX = pointerItem.GetDisplayX();
+    globalY = pointerItem.GetDisplayY();
 }
 
 // ArkTsCard end

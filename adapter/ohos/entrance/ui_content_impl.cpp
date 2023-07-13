@@ -1383,8 +1383,9 @@ bool UIContentImpl::ProcessBackPressed()
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     LOGD("UIContentImpl::ProcessPointerEvent begin");
-    auto container = AceEngine::Get().GetContainer(instanceId_);
+    auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
     CHECK_NULL_RETURN(container, false);
+    container->SetCurPointerEvent(pointerEvent);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     LOGD("UIContentImpl::ProcessPointerEvent end");
