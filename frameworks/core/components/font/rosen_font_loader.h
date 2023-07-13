@@ -37,7 +37,7 @@ private:
     void LoadFromNetwork(const RefPtr<PipelineBase>& context);
     void LoadFromResource(const RefPtr<PipelineBase>& context);
     void LoadFromAsset(const RefPtr<PipelineBase>& context);
-    void LoadFromFile(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context);
+    void LoadFromFile(const RefPtr<PipelineBase>& context);
     RefPtr<Asset> GetAssetFromFile(const std::string& fileName) const;
     std::string RemovePathHead(const std::string& uri);
     void NotifyCallbacks();

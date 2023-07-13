@@ -489,7 +489,8 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
 }
 
-void TextFieldLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode, std::vector<std::string> fontFamilies)
+void TextFieldLayoutAlgorithm::FontRegisterCallback(
+    const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies)
 {
     auto callback = [weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))] {
         auto frameNode = weakNode.Upgrade();

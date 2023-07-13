@@ -103,7 +103,7 @@ public:
         TextStyle& textStyle, bool isDisabled);
 
 private:
-    static void FontRegisterCallback(RefPtr<FrameNode> frameNode, std::vector<std::string> fontFamilies);
+    static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText, bool disableTextAlign);
     void CreateParagraph(const std::vector<TextStyle>& textStyles, const std::vector<std::string>& contents,
         const std::string& content, bool needObscureText, bool disableTextAlign);
