@@ -452,12 +452,21 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
     Dimension fontSize;
-    if (layoutProperty->HasPlaceholderFontSize() &&
-        layoutProperty->GetPlaceholderFontSize().value_or(Dimension()).IsNonNegative()) {
-        fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
+    if (layoutProperty->GetPlaceholderValue("").empty()) {
+        if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
+            fontSize = layoutProperty->GetFontSizeValue(Dimension());
+        } else {
+            fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+        }
     } else {
-        fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+        if (layoutProperty->HasPlaceholderFontSize() &&
+            layoutProperty->GetPlaceholderFontSize().value_or(Dimension()).IsNonNegative()) {
+            fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
+        } else {
+            fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+        }
     }
+
     textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
