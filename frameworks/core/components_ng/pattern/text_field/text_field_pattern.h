@@ -449,7 +449,7 @@ public:
         return isUsingMouse_;
     }
     int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove);
-    int32_t GetLineBeginPosision(int32_t originCaretPosition, bool needToCheckLineChanged = true);
+    int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
