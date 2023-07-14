@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -491,16 +492,24 @@ void SearchModelNG::SetOnChange(std::function<void(const std::string&)>&& onChan
 
 void SearchModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
 {
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnSelectionChange(std::move(func));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnSelectionChange(std::move(func));
 }
 
 void SearchModelNG::SetOnScroll(std::function<void(float, float)>&& func)
 {
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollChangeEvent(std::move(func));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnScrollChangeEvent(std::move(func));
 }
 
 void SearchModelNG::SetSelectionMenuHidden(bool selectionMenuHidden)

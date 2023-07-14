@@ -1621,14 +1621,6 @@ void TextFieldPattern::FireOnSelectionChange(int32_t start, int32_t end)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // If the parent node is a Search, the Search callback is executed.
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-        auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-        eventHub->FireOnSelectionChange(start, end);
-        textSelector_.Update(start, end);
-        return;
-    }
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnSelectionChange(start, end);
 }
