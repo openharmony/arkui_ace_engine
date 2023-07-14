@@ -213,14 +213,16 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank)
     std::lock_guard<std::mutex> Lock(mMutex);
     mVsyncTime = vsyncTime;
     int32_t skippedFrames = static_cast<int32_t> (jank);
-    for (auto it = mRecords.begin(); it != mRecords.end(); it++) {
+    for (auto it = mRecords.begin(); it != mRecords.end();) {
         if (it->second != nullptr) {
             (it->second)->RecordFrame(vsyncTime, durition, skippedFrames);
             if ((it->second)->IsTimeOut(vsyncTime + durition)) {
                 delete it->second;
-                mRecords.erase(it);
+                mRecords.erase(it++);
+                continue;
             }
         }
+        it++;
     }
 }
 
