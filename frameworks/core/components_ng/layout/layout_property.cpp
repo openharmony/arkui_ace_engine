@@ -744,6 +744,51 @@ void LayoutProperty::ResetCalcMinSize()
     calcLayoutConstraint_->minSize.reset();
 }
 
+void LayoutProperty::ResetCalcMaxSize()
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    if (calcLayoutConstraint_->maxSize.has_value()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    calcLayoutConstraint_->maxSize.reset();
+}
+
+void LayoutProperty::ResetCalcMinSize(bool resetWidth)
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    CHECK_NULL_VOID(calcLayoutConstraint_->minSize.has_value());
+    bool resetSizeHasValue = resetWidth ? calcLayoutConstraint_->minSize.value().Width().has_value()
+                                        : calcLayoutConstraint_->minSize.value().Height().has_value();
+    CHECK_NULL_VOID(resetSizeHasValue);
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    if (resetWidth) {
+        calcLayoutConstraint_->minSize.value().SetWidth(std::nullopt);
+    } else {
+        calcLayoutConstraint_->minSize.value().SetHeight(std::nullopt);
+    }
+}
+
+void LayoutProperty::ResetCalcMaxSize(bool resetWidth)
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    CHECK_NULL_VOID(calcLayoutConstraint_->maxSize.has_value());
+    bool resetSizeHasValue = resetWidth ? calcLayoutConstraint_->maxSize.value().Width().has_value()
+                                        : calcLayoutConstraint_->maxSize.value().Height().has_value();
+    CHECK_NULL_VOID(resetSizeHasValue);
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    if (resetWidth) {
+        calcLayoutConstraint_->maxSize.value().SetWidth(std::nullopt);
+    } else {
+        calcLayoutConstraint_->maxSize.value().SetHeight(std::nullopt);
+    }
+}
+
 void LayoutProperty::UpdateFlexGrow(float flexGrow)
 {
     if (!flexItemProperty_) {

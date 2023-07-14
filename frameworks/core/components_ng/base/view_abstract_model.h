@@ -66,6 +66,8 @@ public:
     virtual void SetMinHeight(const CalcDimension& minHeight) = 0;
     virtual void SetMaxWidth(const CalcDimension& maxWidth) = 0;
     virtual void SetMaxHeight(const CalcDimension& maxHeight) = 0;
+    virtual void ResetMinSize(bool resetWidth) = 0;
+    virtual void ResetMaxSize(bool resetWidth) = 0;
 
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
