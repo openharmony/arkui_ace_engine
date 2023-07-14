@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,11 @@
  * limitations under the License.
  */
 
-#include "mock_subwindow_ohos.h"
-#include "base/log/log_wrapper.h"
+#include "mock_subwindow.h"
 
 namespace OHOS::Ace {
-
 RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
 {
-    LOGI("Create Subwindow, parent container id is %{public}d", instanceId);
-    return AceType::MakeRefPtr<SubwindowOhos>(instanceId);
+    return AceType::MakeRefPtr<MockSubwindow>();
 }
-
-SubwindowOhos::SubwindowOhos(int32_t instanceId) {}
-
-void SubwindowOhos::InitContainer()
-{
-    LOGI("Subwindow::InitContainer MOCK");
-}
-
 } // namespace OHOS::Ace
