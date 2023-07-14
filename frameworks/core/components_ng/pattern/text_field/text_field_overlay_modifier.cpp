@@ -272,4 +272,9 @@ void TextFieldOverlayModifier::SetShowCounter(bool value)
 {
     showCounter_->Set(value);
 }
+
+void TextFieldOverlayModifier::SetScrollBar(const RefPtr<ScrollBar>& scrollBar)
+{
+    scrollBar_ = scrollBar;
+}
 } // namespace OHOS::Ace::NG

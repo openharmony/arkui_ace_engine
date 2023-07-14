@@ -248,15 +248,15 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
-    if (isInlineStyle && pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
-        pattern->SetSingleLineHeight(preferredHeight);
+    if (isInlineStyle && pattern->IsSelected() && paragraph_->GetLineCount() != 0) {
+        pattern->SetSingleLineHeight(preferredHeight / paragraph_->GetLineCount());
     }
     if (pattern->IsTextArea()) {
         auto paragraphHeight =
             (textContent.empty() || !showPlaceHolder) ? preferredHeight : static_cast<float>(paragraph_->GetHeight());
         auto useHeight =
             static_cast<float>(paragraphHeight + (counterParagraph_ ? counterParagraph_->GetHeight() : 0.0f));
-        if (isInlineStyle && pattern->GetTextInputFlag()) {
+        if (isInlineStyle && pattern->IsSelected()) {
             idealHeight = pattern->GetSingleLineHeight() *
                 layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
             idealWidth = paragraph_->GetActualWidth();
