@@ -1038,8 +1038,7 @@ OffsetF TextFieldPattern::MakeEmptyOffset() const
 int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localOffset)
 {
     CHECK_NULL_RETURN(paragraph_, 0);
-    return static_cast<int32_t>(
-        paragraph_->GetGlyphIndexByCoordinate(localOffset.GetX(), localOffset.GetY()).index);
+    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(localOffset.GetX(), localOffset.GetY()).index);
 }
 
 bool TextFieldPattern::DisplayPlaceHolder()
@@ -3460,6 +3459,8 @@ void TextFieldPattern::OnCursorMoveDone()
     CloseSelectOverlay();
     caretUpdateType_ = CaretUpdateType::EVENT;
     selectionMode_ = SelectionMode::NONE;
+    UpdateSelection(textEditingValue_.caretPosition);
+    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -3468,7 +3469,7 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     if (textEditingValue_.text.empty()) {
         return 0;
     }
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     if (originCaretPosition < 0 || originCaretPosition > textLength) {
         LOGD("Get word length failed, the origin caret position is out of range");
         return 0;
@@ -3503,14 +3504,14 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     return offset;
 }
 
-int32_t TextFieldPattern::GetLineBeginPosision(int32_t originCaretPosition, bool needToCheckLineChanged)
+int32_t TextFieldPattern::GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged)
 {
     if (textEditingValue_.text.empty()) {
         return 0;
     }
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     if (originCaretPosition < 0 || originCaretPosition > textLength) {
-        LOGD("Get begin posision failed, the origin caret position is out of range");
+        LOGD("Get begin position failed, the origin caret position is out of range");
         return 0;
     }
     if (originCaretPosition == 0) {
@@ -3522,8 +3523,7 @@ int32_t TextFieldPattern::GetLineBeginPosision(int32_t originCaretPosition, bool
         moveLineBeginOffset++;
         strIndex--;
         // stop moving caret if reaches \n, text head or caret line changed
-    } while ((strIndex > 0) &&
-             (textEditingValue_.text[strIndex] != '\n') &&
+    } while (((strIndex > 0) && (textEditingValue_.text[strIndex] != '\n')) ||
              (needToCheckLineChanged && !CharLineChanged(strIndex)));
     if (textEditingValue_.text[strIndex] == '\n') {
         moveLineBeginOffset--;
@@ -3539,7 +3539,7 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
     if (textEditingValue_.text.empty()) {
         return 0;
     }
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     if (originCaretPosition < 0 || originCaretPosition > textLength) {
         LOGD("Get line end position failed, the origin caret position is out of range");
         return originCaretPosition;
@@ -3549,7 +3549,7 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
     }
     int32_t moveLineEndOffset = 0;
     int32_t strIndex = 0;
-    for (strIndex = originCaretPosition + 1; textEditingValue_.text[strIndex] != '\n' && strIndex <= textLength &&
+    for (strIndex = originCaretPosition + 1; (textEditingValue_.text[strIndex] != '\n' && strIndex <= textLength) ||
                                          (needToCheckLineChanged && !CharLineChanged(strIndex));
         strIndex++) {
         moveLineEndOffset++;
@@ -3596,7 +3596,7 @@ bool TextFieldPattern::CursorMoveLeftWord()
         return true;
     }
     int32_t originCaretPosition = textEditingValue_.caretPosition;
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     int32_t leftWordLength = GetWordLength(originCaretPosition, 0);
     if (leftWordLength < 0 || leftWordLength > textLength || textEditingValue_.caretPosition - leftWordLength < 0) {
         LOGD("Get left word length faild, the left word offset is out of range");
@@ -3619,17 +3619,17 @@ bool TextFieldPattern::CursorMoveLineBegin()
         LOGW("Caret position at beginning, cannot move to left");
         return true;
     }
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     int32_t originCaretPosition = textEditingValue_.caretPosition;
-    int32_t lineBeginPosision = GetLineBeginPosision(originCaretPosition);
-    if (lineBeginPosision < 0 || lineBeginPosision > textLength) {
+    int32_t lineBeginPosition = GetLineBeginPosition(originCaretPosition);
+    if (lineBeginPosition < 0 || lineBeginPosition > textLength) {
         LOGD("Cursor move to line begin faild, the line begin offset is out of range");
         return false;
     }
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
         textEditingValue_.caretPosition = 0;
     } else if (IsTextArea()) {
-        UpdateCaretPositionWithClamp(lineBeginPosision);
+        UpdateCaretPositionWithClamp(lineBeginPosition);
     } else {
         UpdateCaretPositionWithClamp(0);
     }
@@ -3644,8 +3644,7 @@ bool TextFieldPattern::CursorMoveToParagraphBegin()
         return true;
     }
     auto originCaretPosition = textEditingValue_.caretPosition;
-    GetLineBeginPosision(originCaretPosition, false);
-    UpdateCaretPositionWithClamp(textEditingValue_.caretPosition);
+    UpdateCaretPositionWithClamp(GetLineBeginPosition(originCaretPosition, false));
     OnCursorMoveDone();
     return originCaretPosition != textEditingValue_.caretPosition;
 }
@@ -3690,7 +3689,7 @@ bool TextFieldPattern::CursorMoveRightWord()
         return true;
     }
     int32_t originCaretPosition = textEditingValue_.caretPosition;
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     int32_t rightWordLength = GetWordLength(originCaretPosition, 1);
     if (rightWordLength < 0 || rightWordLength > textLength ||
         rightWordLength + textEditingValue_.caretPosition > textLength) {
@@ -3713,7 +3712,7 @@ bool TextFieldPattern::CursorMoveLineEnd()
         return true;
     }
     int32_t originCaretPosition = textEditingValue_.caretPosition;
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     int32_t lineEndPosition = GetLineEndPosition(originCaretPosition);
     if (lineEndPosition < 0 || lineEndPosition > textLength) {
         LOGD("Handle cursor move to line end failed, the line end position is out of range");
@@ -3737,20 +3736,20 @@ bool TextFieldPattern::CursorMoveToParagraphEnd()
         return true;
     }
     auto originCaretPosition = textEditingValue_.caretPosition;
-    GetLineEndPosition(originCaretPosition, false);
-    UpdateCaretPositionWithClamp(textEditingValue_.caretPosition);
+    UpdateCaretPositionWithClamp(GetLineEndPosition(originCaretPosition, false));
     OnCursorMoveDone();
     return originCaretPosition != textEditingValue_.caretPosition;
 }
 
 bool TextFieldPattern::CursorMoveEnd()
 {
+    // ctrl end, caret to the very end
     if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
         LOGW("Caret position at the end, cannot move to right");
         return true;
     }
     int32_t originCaretPosition = textEditingValue_.caretPosition;
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     UpdateCaretPositionWithClamp(textLength);
     OnCursorMoveDone();
     return originCaretPosition != textEditingValue_.caretPosition;
@@ -4263,7 +4262,7 @@ void TextFieldPattern::HandleSelectionLeftWord()
         LOGW("Caret position at beginning, cannot update selection to left");
         return;
     }
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     int32_t leftWordLength = GetWordLength(textEditingValue_.caretPosition, 0);
     if (leftWordLength < 0 || leftWordLength > textLength || textEditingValue_.caretPosition - leftWordLength < 0) {
         LOGD("Handle select a left word failed, the left word offset is out of range");
@@ -4290,19 +4289,19 @@ void TextFieldPattern::HandleSelectionLineBegin()
         LOGW("Caret position at beginning, cannot update selection to left");
         return;
     }
-    int32_t textLength = textEditingValue_.text.length();
-    int32_t lineBeginPosision = GetLineBeginPosision(textEditingValue_.caretPosition);
-    if (lineBeginPosision < 0 || lineBeginPosision > textLength) {
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    int32_t lineBeginPosition = GetLineBeginPosition(textEditingValue_.caretPosition);
+    if (lineBeginPosition < 0 || lineBeginPosition > textLength) {
         LOGD("Handle select line begin failed, the line begin offset is out of range");
         return;
     }
     if (!InSelectMode()) {
-        textSelector_.destinationOffset = lineBeginPosision;
+        textSelector_.destinationOffset = lineBeginPosition;
         UpdateSelection(textEditingValue_.caretPosition, textSelector_.destinationOffset);
         UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
         selectionMode_ = SelectionMode::SELECT;
     } else {
-        textSelector_.destinationOffset = lineBeginPosision;
+        textSelector_.destinationOffset = lineBeginPosition;
         UpdateCaretPositionWithClamp(textSelector_.destinationOffset);
         if (textSelector_.destinationOffset == textSelector_.baseOffset) {
             selectionMode_ = SelectionMode::NONE;
@@ -4363,7 +4362,7 @@ void TextFieldPattern::HandleSelectionRight()
 
 void TextFieldPattern::HandleSelectionRightWord()
 {
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     if (textEditingValue_.caretPosition == textLength) {
         LOGW("Caret position at the end, cannot update selection to right");
         return;
@@ -4391,7 +4390,7 @@ void TextFieldPattern::HandleSelectionRightWord()
 
 void TextFieldPattern::HandleSelectionLineEnd()
 {
-    int32_t textLength = textEditingValue_.text.length();
+    int32_t textLength = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     if (textEditingValue_.caretPosition == textLength) {
         LOGW("Caret position at the end, cannot update selection to right");
         return;
@@ -4418,6 +4417,7 @@ void TextFieldPattern::HandleSelectionLineEnd()
 
 void TextFieldPattern::HandleSelectionEnd()
 {
+    // shift end, select to the end of current line
     int32_t endPos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     if (textEditingValue_.caretPosition == endPos) {
         LOGW("Caret position at the end, cannot update selection to right");
@@ -5125,7 +5125,7 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     renderContext->UpdateBorderColor(inlineBorderColor);
     auto padding = theme->GetInlineBorderWidth();
     layoutProperty->UpdatePadding(
-        { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding)});
+        { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
     ProcessInnerPadding();
     textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     MarginProperty margin;
