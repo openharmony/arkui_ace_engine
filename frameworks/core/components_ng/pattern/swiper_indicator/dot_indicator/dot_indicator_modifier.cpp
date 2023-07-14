@@ -65,9 +65,6 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.indicatorMargin = indicatorMargin_->Get();
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
     PaintBackground(context, contentProperty);
-    if (indicatorMask_) {
-        PaintMask(context);
-    }
     PaintContent(context, contentProperty);
 }
 
@@ -321,7 +318,9 @@ void DotIndicatorModifier::UpdateNormalPaintProperty(
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
-    auto backgroundColor = swiperTheme->GetHoverColor().ChangeOpacity(0);
+    auto backgroundColor = indicatorMask_ ?
+        swiperTheme->GetPressedColor() :
+        swiperTheme->GetHoverColor().ChangeOpacity(0);
     UpdateShrinkPaintProperty(margin, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     UpdateBackgroundColor(backgroundColor);
 }
