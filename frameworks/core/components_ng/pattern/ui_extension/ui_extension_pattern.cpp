@@ -488,31 +488,6 @@ void UIExtensionPattern::SetOnReceiveCallback(std::function<void(const AAFwk::Wa
     };
 }
 
-bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameRect = geometryNode->GetFrameRect();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    float density = static_cast<float>(pipeline->GetDensity());
-    Rosen::ViewPortConfig wmConfig {
-        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
-        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
-        .width_ = std::round(frameRect.Width()),
-        .height_ = std::round(frameRect.Height()),
-        .density_ = density
-    };
-
-    CHECK_NULL_RETURN(session_, false);
-    session_->UpdateViewConfig(wmConfig, Rosen::SizeChangeReason::UNDEFINED);
-    return false;
-}
-
 void UIExtensionPattern::OnVisibleChange(bool visible)
 {
     if (visible) {
