@@ -124,8 +124,8 @@ OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectL
     auto rect = host->GetGeometryNode()->GetFrameRect();
     CHECK_NULL_RETURN(paragraph_, OffsetF(0.0f, 0.0f));
     CaretMetrics metrics;
-    auto computeSuccess = paragraph_->ComputeOffsetForCaretUpstream(position, metrics) ||
-                          paragraph_->ComputeOffsetForCaretDownstream(position, metrics);
+    auto computeSuccess = paragraph_->ComputeOffsetForCaretDownstream(position, metrics) ||
+                          paragraph_->ComputeOffsetForCaretUpstream(position, metrics);
     if (!computeSuccess) {
         LOGW("Get caret offset failed, set it to text tail");
         return OffsetF(rect.Width(), 0.0f);
