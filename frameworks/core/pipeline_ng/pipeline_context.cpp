@@ -445,12 +445,13 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    appBarNode_ = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    auto atomicService = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
         MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-        rootNode_->AddChild(ContainerModalViewFactory::GetView(appBarNode_ ? appBarNode_ : stageNode, maximizeMode));
+        rootNode_->AddChild(
+            ContainerModalViewFactory::GetView(atomicService ? atomicService : stageNode, maximizeMode));
     } else {
-        rootNode_->AddChild(appBarNode_ ? appBarNode_ : stageNode);
+        rootNode_->AddChild(atomicService ? atomicService : stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard() && !isFormRender_) {
@@ -1225,10 +1226,10 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         SetIsFocusActive(false);
     }
     if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-        event.action == MouseAction::MOVE) &&
-        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
-        (SystemProperties::IsSceneBoardEnabled() && (event.pullAction == MouseAction::PULL_MOVE ||
-        event.pullAction == MouseAction::PULL_UP))) {
+             event.action == MouseAction::MOVE) &&
+            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+        (SystemProperties::IsSceneBoardEnabled() &&
+            (event.pullAction == MouseAction::PULL_MOVE || event.pullAction == MouseAction::PULL_UP))) {
         auto touchPoint = event.CreateTouchPoint();
         OnTouchEvent(touchPoint);
     }

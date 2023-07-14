@@ -55,6 +55,10 @@ const char STAGE_ETS_TAG[] = "stage";
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)
 const char CONTAINER_MODAL_ETS_TAG[] = "ContainerModal";
+
+const char ATOMIC_SERVICE_ETS_TAG[] = "AtomicService";
+const char APP_BAR_ETS_TAG[] = "AppBar";
+
 // js custom view
 const char JS_VIEW_ETS_TAG[] = "JsView";
 const char JS_VIEW_COMPONENT_TAG[] = "ProxyComponent";

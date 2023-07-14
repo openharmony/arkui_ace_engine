@@ -261,4 +261,16 @@ void PagePattern::StopPageTransition()
     FirePageTransitionFinish();
 }
 
+void PagePattern::BeforeCreateLayoutWrapper()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    // SafeArea already applied to AppBar
+    if (pipeline->GetInstallationFree()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetLayoutProperty()->UpdateSafeAreaInsets(pipeline->GetSafeArea());
+}
 } // namespace OHOS::Ace::NG
