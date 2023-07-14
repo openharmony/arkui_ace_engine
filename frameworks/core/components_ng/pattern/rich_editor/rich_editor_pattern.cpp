@@ -1269,30 +1269,18 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetEraseLength(insertValueLength);
     retInfo.SetValue(spanNode->GetSpanItem()->content);
     retInfo.SetOffsetInSpan(GetCaretPosition() - retInfo.GetSpanRangeStart());
-    if (spanNode->HasTextColor()) {
-        retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
+    retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
+    retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp());
+    retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
+    retInfo.SetFontWeight(static_cast<int32_t>(spanNode->GetFontWeightValue(FontWeight::NORMAL)));
+    std::string fontFamilyValue = "";
+    auto fontFamily = spanNode->GetFontFamilyValue({ "HarmonyOS Sans" });
+    for (const auto& str : fontFamily) {
+        fontFamilyValue += str;
     }
-    if (spanNode->HasFontSize()) {
-        retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension()).Value());
-    }
-    if (spanNode->HasItalicFontStyle()) {
-        retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
-    }
-    if (spanNode->HasFontWeight()) {
-        retInfo.SetFontWeight(static_cast<int32_t>(spanNode->GetFontWeightValue(FontWeight::NORMAL)));
-    }
-    if (spanNode->HasFontFamily()) {
-        std::string fontFamilyValue = "";
-        auto fontFamily = spanNode->GetFontFamilyValue({ "HarmonyOS Sans" });
-        for (auto str : fontFamily) {
-            fontFamilyValue += str;
-        }
-        retInfo.SetFontFamily(fontFamilyValue);
-    }
-    if (spanNode->HasTextDecoration()) {
-        retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
-        retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
-    }
+    retInfo.SetFontFamily(fontFamilyValue);
+    retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
+    retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
     eventHub->FireOnIMEInputComplete(retInfo);
 }
 
