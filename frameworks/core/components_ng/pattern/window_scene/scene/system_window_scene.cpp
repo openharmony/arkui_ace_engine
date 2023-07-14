@@ -28,9 +28,9 @@ void SystemWindowScene::OnAttachToFrameNode()
     auto pos = name.find_last_of('.');
     name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
 
-    struct Rosen::RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    rsSurfaceNodeConfig.SurfaceNodeName = name;
-    auto surfaceNode = Rosen::RSSurfaceNode::Create(rsSurfaceNodeConfig, Rosen::RSSurfaceNodeType::SELF_DRAWING_NODE);
+    Rosen::RSSurfaceNodeConfig config;
+    config.SurfaceNodeName = name;
+    auto surfaceNode = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
