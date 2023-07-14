@@ -68,9 +68,9 @@ void RosenSvgPainter::SetMask(SkCanvas* canvas)
 #else
 void RosenSvgPainter::SetMask(RSCanvas* canvas)
 {
-    auto outerFilter = RSColorFilter::CreateLumaColorFilter();
-    auto innerFilter = RSColorFilter::CreateSrgbGammaToLinear();
-    auto colorFilter = RSColorFilter::CreateComposeColorFilter(*outerFilter, *innerFilter);
+    auto outerFilter = RSRecordingColorFilter::CreateLumaColorFilter();
+    auto innerFilter = RSRecordingColorFilter::CreateSrgbGammaToLinear();
+    auto colorFilter = RSRecordingColorFilter::CreateComposeColorFilter(*outerFilter, *innerFilter);
     RSFilter filter;
     filter.SetColorFilter(colorFilter);
     RSBrush mask_filter;
@@ -204,16 +204,16 @@ void RosenSvgPainter::SetGradientStyle(RSBrush& brush, const FillState& fillStat
         auto info = gradient->GetLinearGradientInfo();
         RSPoint startPt = RSPoint(info.x1, info.y1);
         RSPoint endPt = RSPoint(info.x2, info.y2);
-        brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+        brush.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(
             startPt, endPt, colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
     }
     if (gradient->GetType() == GradientType::RADIAL) {
         auto info = gradient->GetRadialGradientInfo();
         auto center = RSPoint(info.cx, info.cy);
         auto focal = RSPoint(info.fx, info.fx);
-        return center == focal ? brush.SetShaderEffect(RSShaderEffect::CreateRadialGradient(center,
+        return center == focal ? brush.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(center,
             info.r, colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())))
-            : brush.SetShaderEffect(RSShaderEffect::CreateTwoPointConical(focal, 0, center,
+            : brush.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(focal, 0, center,
             info.r, colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
     }
 }
@@ -415,12 +415,12 @@ void RosenSvgPainter::UpdateLineDash(RSPen& pen, const StrokeState& strokeState)
 {
     if (!strokeState.GetLineDash().lineDash.empty()) {
         auto lineDashState = strokeState.GetLineDash().lineDash;
-        RSScalar intervals[lineDashState.size()];
+        std::vector<RSScalar> intervals(lineDashState.size());
         for (size_t i = 0; i < lineDashState.size(); ++i) {
             intervals[i] = static_cast<RSScalar>(lineDashState[i]);
         }
         RSScalar phase = static_cast<RSScalar>(strokeState.GetLineDash().dashOffset);
-        pen.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
+        pen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
     }
 }
 #endif
