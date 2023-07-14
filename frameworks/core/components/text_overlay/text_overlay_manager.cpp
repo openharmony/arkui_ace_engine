@@ -416,7 +416,7 @@ void TextOverlayBase::PaintSelection(RSCanvas* canvas, const Offset& globalOffse
     for (const auto& box : boxes) {
         auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
         selectedRect_.emplace_back(selectionRect + globalOffset);
-        if (box.direction == txt::TextDirection::ltr) {
+        if (box.direction == Rosen::TextDirection::LTR) {
             canvas->DrawRect(RSRect(
                 selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom()));
         } else {

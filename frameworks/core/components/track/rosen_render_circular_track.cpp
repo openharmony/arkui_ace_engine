@@ -20,6 +20,8 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkPaint.h"
 #include "include/effects/SkGradientShader.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/pipeline/base/rosen_render_context.h"

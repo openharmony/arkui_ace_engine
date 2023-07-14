@@ -20,6 +20,8 @@
 #include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/components/font/rosen_font_collection.h"

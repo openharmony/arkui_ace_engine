@@ -18,6 +18,8 @@
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/components/badge/render_badge.h"
