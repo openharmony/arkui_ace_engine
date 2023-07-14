@@ -683,7 +683,7 @@ void SideBarContainerLayoutAlgorithm::LayoutDivider(
             if (sideBarPosition == SideBarPosition::START) {
                 dividerOffsetX = -realDividerWidth_;
             } else {
-                dividerOffsetX = parentWidth + realSideBarWidth_;
+                dividerOffsetX = parentWidth;
             }
             break;
         case SideBarStatus::CHANGING:
