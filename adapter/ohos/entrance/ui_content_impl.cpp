@@ -248,6 +248,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
     auto hapModuleInfo = context->GetHapModuleInfo();
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
+    hapPath_ = hapModuleInfo->hapPath;
     auto applicationInfo = context->GetApplicationInfo();
     CHECK_NULL_VOID(applicationInfo);
     minCompatibleVersionCode_ = applicationInfo->minCompatibleVersionCode;
@@ -465,7 +466,7 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
         basePaths.emplace_back("js/");
         basePaths.emplace_back("ets/");
         auto assetProvider =
-            CreateAssetProvider("/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap", basePaths);
+            CreateAssetProvider(hapPath_, basePaths);
         if (assetProvider) {
             LOGE("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
@@ -667,7 +668,7 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     if (isFormRender_) {
         resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
-        hapPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap";
+        hapPath = hapPath_;
     }
     LOGI("CommonInitializeForm resPath = %{public}s hapPath = %{public}s", resPath.c_str(), hapPath.c_str());
     container->SetResourceConfiguration(aceResCfg);
