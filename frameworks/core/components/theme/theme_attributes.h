@@ -227,5 +227,8 @@ extern const char INLINE_BORDER_COLOR[];
 
 // linear split attributes
 extern const char LINEAR_SPLIT_CHILD_MIN_SIZE[];
+
+// stepper attributes
+extern const char STEPPER_FOCUS_COLOR[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H
