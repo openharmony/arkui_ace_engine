@@ -24,6 +24,7 @@ constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr char PROPERTY_DEVICE_TYPE_PHONE[] = "phone";
 constexpr char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
+constexpr char PROPERTY_DEVICE_TYPE_TWO_IN_ONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 
@@ -87,9 +88,12 @@ void SystemProperties::InitDeviceType(DeviceType type)
     } else if (type == DeviceType::CAR) {
         deviceType_ = DeviceType::CAR;
         paramDeviceType_ = PROPERTY_DEVICE_TYPE_CAR;
-    } else if (type == DeviceType::TABLET || type == DeviceType::TWO_IN_ONE) {
+    } else if (type == DeviceType::TABLET) {
         deviceType_ = DeviceType::TABLET;
         paramDeviceType_ = PROPERTY_DEVICE_TYPE_TABLET;
+    } else if (type == DeviceType::TWO_IN_ONE) {
+        deviceType_ = DeviceType::TWO_IN_ONE;
+        paramDeviceType_ = PROPERTY_DEVICE_TYPE_TWO_IN_ONE;
     } else {
         deviceType_ = DeviceType::PHONE;
         paramDeviceType_ = PROPERTY_DEVICE_TYPE_PHONE;

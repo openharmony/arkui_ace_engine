@@ -24,7 +24,7 @@ namespace OHOS::Ace::Framework {
 
 std::string MediaQueryInfo::GetDeviceType()
 {
-    if (SystemProperties::GetParamDeviceType() == "tablet" ) {
+    if (SystemProperties::GetParamDeviceType() == "tablet") {
         return "tablet";
     }
     if (SystemProperties::GetParamDeviceType() == "2in1") {
