@@ -35,8 +35,9 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/font_collection.h"
+#include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -188,7 +189,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             pattern->SetTextInputFlag(true);
         }
     } else {
-        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
+        UpdatePlaceholderTextStyle(frameNode, textFieldLayoutProperty,
+            textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
@@ -408,6 +410,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
+    FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
 
     Dimension fontSize;
     if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
@@ -446,18 +449,30 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
+void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
+    bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
-    textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
+    textStyle.SetFontFamilies(layoutProperty->GetPlaceholderFontFamilyValue(defaultFontFamily));
+    FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
+
     Dimension fontSize;
-    if (layoutProperty->HasPlaceholderFontSize() &&
-        layoutProperty->GetPlaceholderFontSize().value_or(Dimension()).IsNonNegative()) {
-        fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
+    if (layoutProperty->GetPlaceholderValue("").empty()) {
+        if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
+            fontSize = layoutProperty->GetFontSizeValue(Dimension());
+        } else {
+            fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+        }
     } else {
-        fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+        if (layoutProperty->HasPlaceholderFontSize() &&
+            layoutProperty->GetPlaceholderFontSize().value_or(Dimension()).IsNonNegative()) {
+            fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
+        } else {
+            fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+        }
     }
+
     textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
@@ -483,6 +498,25 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
 }
 
+void TextFieldLayoutAlgorithm::FontRegisterCallback(
+    const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies)
+{
+    auto callback = [weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))] {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        for (const auto& familyName : fontFamilies) {
+            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+        }
+        fontManager->AddVariationNodeNG(frameNode);
+    }
+}
+
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content,
     bool needObscureText, bool disableTextAlign)
 {
@@ -499,7 +533,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
-    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
     if (!content.empty() && needObscureText) {
@@ -531,7 +566,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
     if (textStyle->GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
-    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
     for (size_t i = 0; i < contents.size(); i++) {
         std::string splitStr = contents[i];
         if (splitStr.empty()) {
@@ -563,7 +599,8 @@ void TextFieldLayoutAlgorithm::CreateCounterParagraph(
     paraStyle.fontSize = countTextStyle.GetFontSize().ConvertToPx();
     paraStyle.textAlign = ToRSTextAlign(TextAlign::END);
     paraStyle.maxLines = COUNTER_TEXT_MAXLINE;
-    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), countTextStyle));
     StringUtils::TransformStrCase(counterText, static_cast<int32_t>(countTextStyle.GetTextCase()));
     builder->AppendText(StringUtils::Str8ToStr16(counterText));
@@ -581,7 +618,8 @@ void TextFieldLayoutAlgorithm::CreateErrorParagraph(const std::string& content, 
     RSParagraphStyle paraStyle;
     paraStyle.fontSize = errorTextStyle.GetFontSize().ConvertToPx();
     paraStyle.textAlign = ToRSTextAlign(TextAlign::START);
-    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), errorTextStyle));
     StringUtils::TransformStrCase(counterText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
     builder->AppendText(StringUtils::Str8ToStr16(counterText));

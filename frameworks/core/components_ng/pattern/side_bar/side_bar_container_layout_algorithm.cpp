@@ -77,7 +77,8 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         type_ = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
     }
 
-    if (type_ == SideBarContainerType::AUTO) {
+    auto type = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
+    if (type == SideBarContainerType::AUTO) {
         AutoMode(layoutProperty, parentWidth);
     }
 

@@ -22,7 +22,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-
+#include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "rosen_text/font_collection.h"
 
 namespace OHOS::Ace {
@@ -32,7 +32,8 @@ RosenFontCollection RosenFontCollection::instance;
 std::shared_ptr<Rosen::FontCollection> RosenFontCollection::GetFontCollection()
 {
     std::call_once(fontFlag_, [this]() {
-        fontCollection_ = Rosen::FontCollection::Create();
+        auto fontCollection = AceType::DynamicCast<NG::TxtFontCollection>(NG::FontCollection::Current());
+        fontCollection_ = fontCollection->GetRawFontCollection();
     });
     return fontCollection_;
 }
@@ -40,9 +41,10 @@ std::shared_ptr<Rosen::FontCollection> RosenFontCollection::GetFontCollection()
 void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName)
 {
     std::call_once(fontFlag_, [this]() {
-        fontCollection_ = Rosen::FontCollection::Create();
+        auto fontCollection = AceType::DynamicCast<NG::TxtFontCollection>(NG::FontCollection::Current());
+        fontCollection_ = fontCollection->GetRawFontCollection();
     });
-    
+
     auto it = std::find(families_.begin(), families_.end(), familyName);
     if (it != families_.end()) {
         return;

@@ -27,6 +27,7 @@ build_component_ng("ui_extension_pattern_ng") {
       "graphic_2d:librender_service_client",
       "input:libmmi-client",
       "ipc:ipc_single",
+      "napi:ace_napi",
       "window_manager:libwm",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",

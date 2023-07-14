@@ -113,7 +113,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(int32_t id, bool isAd
         borderWidth.topDimen = theme->GetEntryBorderWidth() / 2;
         borderRadius.radiusBottomRight = theme->GetEntryBorderRadius();
     }
-    buttonNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    buttonLayoutProperty->UpdateBorderRadius(borderRadius);
     buttonNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
     BorderColorProperty borderColor;
     borderColor.SetColor(theme->GetEntryBorderColor());

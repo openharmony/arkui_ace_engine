@@ -84,12 +84,12 @@ public:
         return initalInfo_;
     }
 
-    void SetToolbarItemStatus(ToolbarItemStatus status)
+    void SetToolbarItemStatus(NavToolbarItemStatus status)
     {
         status_ = status;
     }
 
-    ToolbarItemStatus GetToolbarItemStatus() const
+    NavToolbarItemStatus GetToolbarItemStatus() const
     {
         return status_;
     }
@@ -110,7 +110,7 @@ private:
     RefPtr<ClickEvent> clickListener_;
     ImageSourceInfo info_;
     ImageSourceInfo initalInfo_;
-    ToolbarItemStatus status_ = ToolbarItemStatus::NORMAL;
+    NavToolbarItemStatus status_ = NavToolbarItemStatus::NORMAL;
     ToolbarIconStatus iconStatus_ = ToolbarIconStatus::INITIAL;
 };
 

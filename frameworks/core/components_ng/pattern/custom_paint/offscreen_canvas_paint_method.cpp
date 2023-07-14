@@ -204,9 +204,16 @@ void OffscreenCanvasPaintMethod::DrawImage(
                         ? Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_, Size(width, height))
                         : Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_);
     CHECK_NULL_VOID(image);
-    InitPaintBlend(cacheBrush_);
-    const auto rsCanvas =
-        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? rsCanvas_.get() : cacheCanvas_.get();
+
+    const auto rsCanvas = rsCanvas_.get();
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        rsCanvas_->SaveLayer(slo);
+    }
+
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     if (HasImageShadow()) {
         RSRect rsRect = RSRect(canvasImage.dx, canvasImage.dy,
@@ -214,6 +221,10 @@ void OffscreenCanvasPaintMethod::DrawImage(
         RSPath path;
         path.AddRect(rsRect);
         RosenDecorationPainter::PaintShadow(path, *imageShadow_, rsCanvas);
+    }
+
+    if (globalState_.HasGlobalAlpha()) {
+        imageBrush_.SetAlphaF(globalState_.GetAlpha());
     }
     switch (canvasImage.flag) {
         case 0:
@@ -241,10 +252,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->AttachBrush(cacheBrush_);
-        rsCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
-        rsCanvas_->DetachBrush();
-        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+        rsCanvas_->Restore();
     }
 #endif
 }
@@ -319,9 +327,15 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     auto image = std::make_shared<RSImage>();
     CHECK_NULL_VOID(image->BuildFromBitmap(*rsBitmap));
 
-    InitPaintBlend(cacheBrush_);
-    const auto rsCanvas =
-        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? rsCanvas_.get() : cacheCanvas_.get();
+    const auto rsCanvas = rsCanvas_.get();
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        rsCanvas_->SaveLayer(slo);
+    }
+
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     switch (canvasImage.flag) {
         case 0:
@@ -350,10 +364,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->AttachBrush(cacheBrush_);
-        rsCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
-        rsCanvas_->DetachBrush();
-        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+        rsCanvas_->Restore();
     }
 #endif
 }
@@ -533,6 +544,7 @@ void OffscreenCanvasPaintMethod::PaintText(
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
+#ifndef USE_ROSEN_DRAWING
     double dx = x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
@@ -540,11 +552,7 @@ void OffscreenCanvasPaintMethod::PaintText(
 
     std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
-#ifndef USE_ROSEN_DRAWING
         skCanvas_->save();
-#else
-        rsCanvas_->Save();
-#endif
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
         if (scale.has_value()) {
@@ -552,20 +560,31 @@ void OffscreenCanvasPaintMethod::PaintText(
                 dx /= scale.value();
                 shadowOffsetX /= scale.value();
             }
-#ifndef USE_ROSEN_DRAWING
             skCanvas_->scale(scale.value(), 1.0);
         }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
+    }
 #else
+    double dx = x + GetAlignOffset(align, paragraph_);
+
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
+    if (hasShadow) {
+        rsCanvas_->Save();
+        auto shadowOffsetX = shadow_.GetOffset().GetX();
+        if (scale.has_value()) {
+            if (!NearZero(scale.value())) {
+                dx /= scale.value();
+                shadowOffsetX /= scale.value();
+            }
             rsCanvas_->Scale(scale.value(), 1.0);
         }
         LOGE("Drawing is not supported");
         rsCanvas_->Restore();
         return;
-#endif
     }
+#endif
     if (scale.has_value()) {
         if (!NearZero(scale.value())) {
             dx /= scale.value();
@@ -823,6 +842,7 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
 TransformParam OffscreenCanvasPaintMethod::GetTransform() const
 {
     TransformParam param;
+#ifndef USE_ROSEN_DRAWING
     if (skCanvas_ != nullptr) {
         SkMatrix matrix = skCanvas_->getTotalMatrix();
         param.scaleX = matrix.getScaleX();
@@ -832,6 +852,17 @@ TransformParam OffscreenCanvasPaintMethod::GetTransform() const
         param.translateX = matrix.getTranslateX();
         param.translateY = matrix.getTranslateY();
     }
+#else
+    if (rsCanvas_ != nullptr) {
+        RSMatrix matrix = rsCanvas_->GetTotalMatrix();
+        param.scaleX = matrix.Get(RSMatrix::SCALE_X);
+        param.scaleY = matrix.Get(RSMatrix::SCALE_Y);
+        param.skewX = matrix.Get(RSMatrix::SKEW_X);
+        param.skewY = matrix.Get(RSMatrix::SKEW_Y);
+        param.translateX = matrix.Get(RSMatrix::TRANS_X);
+        param.translateY = matrix.Get(RSMatrix::TRANS_Y);
+    }
+#endif
     return param;
 }
 } // namespace OHOS::Ace::NG

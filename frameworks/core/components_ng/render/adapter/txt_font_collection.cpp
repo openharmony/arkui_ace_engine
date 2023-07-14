@@ -22,9 +22,13 @@
 
 namespace OHOS::Ace::NG {
 
+RefPtr<TxtFontCollection> TxtFontCollection::instance;
+
 RefPtr<FontCollection> TxtFontCollection::GetInstance()
 {
-    static RefPtr<TxtFontCollection> instance = AceType::MakeRefPtr<TxtFontCollection>();
+    if (instance == nullptr) {
+        instance = AceType::MakeRefPtr<TxtFontCollection>();
+    }
     return instance;
 }
 

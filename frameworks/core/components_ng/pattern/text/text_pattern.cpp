@@ -348,7 +348,6 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     } else {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        selectInfo.callerFrameNode = GetHost();
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
         CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
@@ -920,8 +919,9 @@ void TextPattern::FontRegisterCallback(RefPtr<SpanNode> spanNode)
         }
     };
     auto fontManager = pipelineContext->GetFontManager();
-    if (fontManager && spanNode->GetFontFamily()) {
-        for (const auto& familyName : spanNode->GetFontFamily().value()) {
+    auto fontFamilies = spanNode->GetFontFamily();
+    if (fontManager && fontFamilies.has_value()) {
+        for (const auto& familyName : fontFamilies.value()) {
             fontManager->RegisterCallbackNG(spanNode, familyName, callback);
         }
     }

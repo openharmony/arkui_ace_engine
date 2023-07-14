@@ -28,7 +28,9 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr double COLOR_STOP = 0.4;
+#ifndef USE_ROSEN_DRAWING
 constexpr int32_t COLOR_NUM = 3;
+#endif
 
 void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
 {

@@ -61,16 +61,20 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
     if (config.contentSizeChange || config.frameSizeChange) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, false);
         if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
             isCanvasInit_ = !config.frameSizeChange;
         } else {
             isCanvasInit_ = false;
         }
     } else if (config.frameOffsetChange || config.contentOffsetChange) {
-        isCanvasInit_ = true;
+        if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            isCanvasInit_ = true;
+        } else {
+            isCanvasInit_ = false;
+        }
     }
 
     if (!isCanvasInit_) {

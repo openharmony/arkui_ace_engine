@@ -261,7 +261,7 @@ bool RosenRenderSvgPolygon::GetPath(RSPath* out)
         out->setFillType(SkPathFillType::kEvenOdd);
 #endif
 #else
-        out->SetFillStyle(RSPathFillType::EVEN_ODD);
+        out->SetFillStyle(RSPathFillType::EVENTODD);
 #endif
     }
     return true;
@@ -301,7 +301,7 @@ bool RosenRenderSvgPolygon::GetPathWithoutAnimate(RSPath* out)
     }
     out->AddPoly(rsPoints, rsPoints.size(), isClose_);
     if (fillState_.IsEvenodd()) {
-        out->SetFillStyle(RSPathFillType::EVEN_ODD);
+        out->SetFillStyle(RSPathFillType::EVENTODD);
     }
     return true;
 }

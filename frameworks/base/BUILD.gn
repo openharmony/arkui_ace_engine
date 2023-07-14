@@ -57,6 +57,7 @@ template("ace_base_source_set") {
       "log/dump_log.cpp",
       "log/jank_frame_report.cpp",
       "memory/memory_monitor.cpp",
+      "perfmonitor/perf_monitor.cpp",
       "ressched/ressched_report.cpp",
       "subwindow/subwindow_manager.cpp",
       "thread/background_task_executor.cpp",

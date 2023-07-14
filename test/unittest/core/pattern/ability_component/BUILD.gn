@@ -30,10 +30,12 @@ ace_unittest("ability_component_test_ng") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "ability_runtime:abilitykit_native",
     "c_utils:utils",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:scene_session",

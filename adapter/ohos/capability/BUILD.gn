@@ -70,6 +70,7 @@ template("ace_capability_ohos_source_set") {
         "hilog:libhilog",
         "input:libmmi-client",
         "ipc:ipc_core",
+        "napi:ace_napi",
         "window_manager:libwindow_extension_client",
         "window_manager:scene_session",
       ]

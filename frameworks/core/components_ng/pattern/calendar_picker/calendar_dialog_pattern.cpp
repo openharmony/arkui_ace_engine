@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -155,6 +156,12 @@ void CalendarDialogPattern::InitEntryChangeEvent()
         pattern->HandleEntryChange(info);
     };
     eventHub->SetInputChangeEvent(std::move(callback));
+    auto layoutChangeEvent = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleEntryLayoutChange();
+    };
+    eventHub->SetLayoutChangeEvent(layoutChangeEvent);
 }
 
 bool CalendarDialogPattern::HandleKeyEvent(const KeyEvent& event)
@@ -721,18 +728,17 @@ void CalendarDialogPattern::GetCalendarMonthData(int32_t year, int32_t month, Ob
 void CalendarDialogPattern::AddHotZoneRect()
 {
     CHECK_NULL_VOID_NOLOG(entryNode_);
-    auto offset = entryNode_->GetPaintRectOffset();
-    auto geometryNode = entryNode_->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
+    auto rect = entryNode_->GetPaintRectWithTransform();
+    rect.SetOffset(entryNode_->GetPaintRectOffsetToPage());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(
-        Dimension(geometryNode->GetFrameRect().Width()), Dimension(geometryNode->GetFrameRect().Height())));
+        Dimension(rect.Width()), Dimension(rect.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(
-        Dimension(offset.GetX() - dialogOffset_.GetX()), Dimension(offset.GetY() - dialogOffset_.GetY())));
+        Dimension(rect.Left() - dialogOffset_.GetX()), Dimension(rect.Top() - dialogOffset_.GetY())));
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    geometryNode = host->GetGeometryNode();
+    auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     DimensionRect hotZoneRegionHost;
     hotZoneRegionHost.SetSize(DimensionSize(
@@ -793,6 +799,24 @@ int32_t CalendarDialogPattern::GetIndexByFocusedDay()
         return it->index;
     }
     return -1;
+}
+
+void CalendarDialogPattern::HandleEntryLayoutChange()
+{
+    CHECK_NULL_VOID_NOLOG(entryNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto wrapperNode = host->GetParent();
+    CHECK_NULL_VOID(wrapperNode);
+    auto dialogNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetParent());
+    CHECK_NULL_VOID(dialogNode);
+    auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(dialogLayoutProp);
+    auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pattern);
+    dialogLayoutProp->UpdateDialogOffset(DimensionOffset(pattern->CalculateDialogOffset()));
+    dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    isFirstAddhotZoneRect_ = false;
 }
 
 void CalendarDialogPattern::HandleEntryChange(const std::string& info)

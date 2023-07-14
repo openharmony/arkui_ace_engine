@@ -72,6 +72,80 @@ void SecurityComponentPattern::InitSecurityComponentOnClick(RefPtr<FrameNode>& s
     SetNodeHitTestMode(text, HitTestMode::HTMTRANSPARENT);
 }
 
+#ifdef SECURITY_COMPONENT_ENABLE
+void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    json->Put("text", layoutProperty->GetSecurityComponentDescription().value());
+    json->Put("icon", layoutProperty->GetIconStyle().value());
+    json->Put("background", layoutProperty->GetBackgroundType().value());
+    json->Put("type", node->GetTag().c_str());
+
+    RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
+    if (iconNode != nullptr) {
+        json->Put("iconSize", static_cast<double>(
+            SystemProperties::Px2Vp(iconNode->GetGeometryNode()->GetFrameSize().Width())));
+        auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(iconProp);
+        json->Put("iconColor", static_cast<int64_t>(
+            iconProp->GetImageSourceInfo().value().GetFillColor().value().GetValue()));
+    }
+    RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
+    if (textNode != nullptr) {
+        auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textProp);
+        json->Put("fontSize", textProp->GetFontSize().value().ConvertToVp());
+        json->Put("fontColor", static_cast<int64_t>(textProp->GetTextColor().value().GetValue()));
+    }
+
+    RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
+    if (buttonNode != nullptr) {
+        const auto& renderContext = buttonNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        json->Put("bgColor", static_cast<int64_t>(renderContext->GetBackgroundColor().value().GetValue()));
+        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(bgProp);
+        const auto& borderWidth = bgProp->GetBorderWidthProperty();
+        if (borderWidth != nullptr) {
+            json->Put("borderWidth", borderWidth->leftDimen.value().ConvertToVp());
+        }
+    }
+    json->Put("nodeId", node->GetId());
+    json->Put("paddingTop", layoutProperty->GetBackgroundTopPadding().value().ConvertToVp());
+    json->Put("paddingRight", layoutProperty->GetBackgroundRightPadding().value().ConvertToVp());
+    json->Put("paddingBottom", layoutProperty->GetBackgroundBottomPadding().value().ConvertToVp());
+    json->Put("paddingLeft", layoutProperty->GetBackgroundLeftPadding().value().ConvertToVp());
+    json->Put("textIconSpace", layoutProperty->GetTextIconSpace().value().ConvertToVp());
+    ToJsonValueRect(json);
+}
+
+void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json) const
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    double offsetX;
+    double offsetY;
+    SecurityComponentHandler::GetDisplayOffset(node, offsetX, offsetY);
+    json->Put("rectX", offsetX);
+    json->Put("rectY", offsetY);
+    OHOS::Security::SecurityComponent::SecCompRect winRect;
+    SecurityComponentHandler::GetWindowRect(node, winRect);
+    json->Put("winRectX", winRect.x_);
+    json->Put("winRectY", winRect.y_);
+    json->Put("winRectWidth", winRect.width_);
+    json->Put("winRectHeight", winRect.height_);
+    auto render = node->GetRenderContext();
+    CHECK_NULL_VOID(render);
+    auto rect = render->GetPaintRectWithTransform();
+    json->Put("rectWidth", rect.Width());
+    json->Put("rectHeight", rect.Height());
+}
+#endif
+
 void SecurityComponentPattern::OnModifyDone()
 {
     auto frameNode = GetHost();

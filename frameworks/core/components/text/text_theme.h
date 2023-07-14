@@ -65,7 +65,8 @@ public:
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
                                                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color(0x33007dff));
-            theme->draggable = pattern->GetAttr<int32_t>("draggable", 0);
+            auto draggable = pattern->GetAttr<std::string>("draggable", "0");
+            theme->draggable_ = StringUtils::StringToInt(draggable);
             constexpr double childMinSize = 20.0;
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
         }
@@ -85,7 +86,7 @@ public:
 
     bool GetDraggable() const
     {
-        return draggable;
+        return draggable_;
     }
 
     double GetLinearSplitChildMinSize() const
@@ -99,7 +100,7 @@ protected:
 private:
     TextStyle textStyle_;
     Color selectedColor_;
-    bool draggable = false;
+    bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
 };
 

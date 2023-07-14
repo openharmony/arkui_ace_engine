@@ -189,7 +189,7 @@ void JSNavigation::ParseToolbarItemsConfiguration(
 
         auto itemStatusValue = itemObject->GetProperty("status");
         if (itemStatusValue->IsNumber()) {
-            toolBarItem.status = static_cast<NG::ToolbarItemStatus>(itemStatusValue->ToNumber<int32_t>());
+            toolBarItem.status = static_cast<NG::NavToolbarItemStatus>(itemStatusValue->ToNumber<int32_t>());
         }
 
         auto itemActiveIconObject = itemObject->GetProperty("activeIcon");

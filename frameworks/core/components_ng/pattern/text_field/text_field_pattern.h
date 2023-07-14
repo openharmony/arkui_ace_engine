@@ -727,6 +727,11 @@ public:
         return dragStatus_ == DragStatus::DRAGGING;
     }
 
+    bool IsTouchTestPointInArea(const Offset& touchOffset, bool isTouchPointHits) override
+    {
+        return isTouchPointHits && BetweenSelectedPosition(touchOffset);
+    }
+
     bool BetweenSelectedPosition(const Offset& globalOffset) override
     {
         if (!InSelectMode()) {

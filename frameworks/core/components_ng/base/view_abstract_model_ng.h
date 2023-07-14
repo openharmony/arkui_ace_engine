@@ -409,7 +409,7 @@ public:
         ViewAbstract::SetTranslate(TranslateOptions(x, y, z));
     }
 
-    void SetRotate(float x, float y, float z, float angle, float perspective = 1.0f) override
+    void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override
     {
         ViewAbstract::SetRotate(NG::Vector5F(x, y, z, angle, perspective));
     }

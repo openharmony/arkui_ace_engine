@@ -128,6 +128,7 @@ template("ace_ohos_standard_source_set") {
       "input:libmmi-client",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
+      "napi:ace_napi",
       "preferences:native_preferences",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
