@@ -659,7 +659,8 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
 #endif
 
     if ((SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-            SystemProperties::GetDeviceType() == DeviceType::TABLET) &&
+            SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) &&
         hasFocus_) {
         PaintFocus(offset, GetPaintRect().GetSize(), context);
     }
