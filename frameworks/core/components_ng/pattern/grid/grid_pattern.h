@@ -216,7 +216,8 @@ private:
     void SetAccessibilityAction();
 
     GridLayoutInfo gridLayoutInfo_;
-    void ProcessEvent(bool indexChanged, float finalOffset, bool offsetEnd);
+    void ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
+                      bool prevReachEnd, bool reachStart);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
     void FireOnScrollStart();

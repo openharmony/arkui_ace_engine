@@ -372,9 +372,13 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
+    float currentOffset = gridLayoutInfo_.currentOffset_;
+    bool reachEnd = gridLayoutInfo_.reachEnd_;
+    bool reachStart = gridLayoutInfo_.reachStart_;
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
-    ProcessEvent(indexChanged, gridLayoutInfo_.currentOffset_, offsetEnd);
+    ProcessEvent(indexChanged, gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, currentOffset,
+                 offsetEnd, reachEnd, reachStart);
 
     SetScrollState(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
@@ -409,7 +413,8 @@ void GridPattern::CheckScrollable()
     }
 }
 
-void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, bool offsetEnd)
+void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
+                               bool reachEnd, bool reachStart)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -455,13 +460,23 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, bool offset
     }
 
     auto onReachStart = gridEventHub->GetOnReachStart();
-    if (onReachStart && gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
+	// want to call onReachStart(), must be:
+	//    onReachStart function pointer existing,
+	//    first time to reach top: currentOffset equal to 0,
+	//    Or Spring end to reach top again: reachStart_ is true and last time reachStart_ is false.
+    if (onReachStart && gridLayoutInfo_.startIndex_ == 0 &&
+        (NearZero(gridLayoutInfo_.currentOffset_) || (gridLayoutInfo_.reachStart_ && !reachStart))) {
         onReachStart();
     }
 
     auto onReachEnd = gridEventHub->GetOnReachEnd();
+	// want to call onReachEnd(), must be:
+	//    onReachEnd function pointer existing and endIndex_ equal to sub windows count,
+	//    first time to reach bottom: reachEnd_ is true and offsetEnd_ is different from last time,
+	//    Or spring end to reach bottom again: reachEnd_ is false and offsetEnd_ is false.
     if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1) &&
-        gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) {
+        ((gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) ||
+        (!gridLayoutInfo_.reachEnd_ && !gridLayoutInfo_.offsetEnd_))) {
         onReachEnd();
     }
 
