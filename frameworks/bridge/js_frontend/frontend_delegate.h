@@ -198,7 +198,7 @@ public:
 
     virtual const RefPtr<MediaQueryInfo>& GetMediaQueryInfoInstance() = 0;
 
-    virtual void OnMediaQueryUpdate() = 0;
+    virtual void OnMediaQueryUpdate(bool isSynchronous = false) = 0;
 
     virtual void RegisterFont(const std::string& familyName, const std::string& familySrc) = 0;
 
