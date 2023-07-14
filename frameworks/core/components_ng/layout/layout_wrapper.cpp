@@ -494,20 +494,19 @@ void LayoutWrapper::ExpandSafeAreaInner()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
-    if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsValid() && frame.Left() <= safeArea.left_.end) {
+    if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
         frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
         frame.SetLeft(safeArea.left_.start);
     }
-    if ((opts->edges & SAFE_AREA_EDGE_TOP) && safeArea.top_.IsValid() && frame.Top() <= safeArea.top_.end) {
+    if ((opts->edges & SAFE_AREA_EDGE_TOP) && safeArea.top_.IsOverlapped(frame.Top())) {
         frame.SetHeight(frame.Height() + frame.Top() - safeArea.top_.start);
         frame.SetTop(safeArea.top_.start);
     }
 
-    if ((opts->edges & SAFE_AREA_EDGE_END) && safeArea.right_.IsValid() && frame.Right() >= safeArea.right_.start) {
+    if ((opts->edges & SAFE_AREA_EDGE_END) && safeArea.right_.IsOverlapped(frame.Right())) {
         frame.SetWidth(frame.Width() + (safeArea.right_.end - frame.Right()));
     }
-    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsValid() &&
-        frame.Bottom() >= safeArea.bottom_.start) {
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsOverlapped(frame.Bottom())) {
         frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
     }
 
