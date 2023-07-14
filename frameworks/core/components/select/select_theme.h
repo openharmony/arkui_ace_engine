@@ -32,6 +32,8 @@ constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
+constexpr Dimension MENU_END_ICON_WIDTH = 12.0_vp;
+constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
 
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
@@ -187,6 +189,8 @@ public:
             theme->selectMinWidth_ = pattern->GetAttr<Dimension>("select_min_width", theme->selectMinWidth_);
             theme->selectMinHeight_ = pattern->GetAttr<Dimension>("select_min_height", theme->selectMinHeight_);
             theme->iconSideLength_ = pattern->GetAttr<Dimension>("icon_side_length", theme->iconSideLength_);
+            theme->endIconWidth_ = MENU_END_ICON_WIDTH;
+            theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
             theme->contentMargin_ = pattern->GetAttr<Dimension>("content_margin", theme->contentMargin_);
         }
     };
@@ -274,6 +278,8 @@ public:
         theme->selectMinWidth_ = selectMinWidth_;
         theme->selectMinHeight_ = selectMinHeight_;
         theme->iconSideLength_ = iconSideLength_;
+        theme->endIconWidth_ = endIconWidth_;
+        theme->endIconHeight_ = endIconHeight_;
         theme->contentMargin_ = contentMargin_;
         return theme;
     }
@@ -782,6 +788,16 @@ public:
         return iconSideLength_;
     }
 
+    const Dimension& GetEndIconWidth() const
+    {
+        return endIconWidth_;
+    }
+
+    const Dimension& GetEndIconHeight() const
+    {
+        return endIconHeight_;
+    }
+
     const Dimension& GetContentMargin() const
     {
         return contentMargin_;
@@ -857,6 +873,8 @@ private:
     Dimension selectMinWidth_;
     Dimension selectMinHeight_;
     Dimension iconSideLength_;
+    Dimension endIconWidth_;
+    Dimension endIconHeight_;
     Dimension contentMargin_;
 
     Color tvFocusTextColor_;
