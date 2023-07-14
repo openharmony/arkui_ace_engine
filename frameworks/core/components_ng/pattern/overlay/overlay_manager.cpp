@@ -68,6 +68,8 @@ constexpr int32_t MENU_ANIMATION_DURATION = 150;
 constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
+constexpr float PIXELMAP_ANIMATION_WIDTH_RATE = 0.5f;
+constexpr float PIXELMAP_ANIMATION_HEIGHT_RATE = 0.2f;
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE = 0.5f;
@@ -1718,8 +1720,6 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     CHECK_NULL_VOID(imageContext);
     auto hub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
-    auto frameNode = hub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
     RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     float scale = PIXELMAP_DRAG_SCALE;
@@ -1742,18 +1742,14 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     }
     imageContext->UpdateBackShadow(shadow.value());
 
-    auto coordinateX =
-        imageNode->GetOffsetRelativeToWindow().GetX() - frameNode->GetOffsetRelativeToWindow().GetX();
-    auto coordinateY =
-        imageNode->GetOffsetRelativeToWindow().GetY() - frameNode->GetOffsetRelativeToWindow().GetY();
     AnimationUtils::Animate(
         option,
-        [imageContext, shadow, startDrag, x, y, width, height, scale, coordinateX, coordinateY]() mutable {
+        [imageContext, shadow, startDrag, x, y, width, height, scale]() mutable {
             auto color = shadow->GetColor();
             auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
             if (startDrag) {
-                imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(x - (x - coordinateX) * scale),
-                    Dimension(y - (y - coordinateY) * scale)));
+                imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(x - width * PIXELMAP_ANIMATION_WIDTH_RATE),
+                    Dimension(y - height * PIXELMAP_ANIMATION_HEIGHT_RATE)));
                 imageContext->UpdateTransformScale({ scale, scale });
                 imageContext->OnModifyDone();
             } else {
