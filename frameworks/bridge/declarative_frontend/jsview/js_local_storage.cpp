@@ -23,14 +23,31 @@ thread_local std::unordered_map<int32_t, JSRef<JSObject>> JSLocalStorage::storag
 
 JSLocalStorage::JSLocalStorage()
 {
-    LOGD("JSLocalStorage ctor");
+    LOGD("JSLocalStorage: JSLocalStorage()");
+}
+
+JSLocalStorage::~JSLocalStorage()
+{
+    LOGD("JSLocalStorage: ~JSLocalStorage()");
 }
 
 void JSLocalStorage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLocalStorage>::Declare("NativeLocalStorage");
     JSClass<JSLocalStorage>::StaticMethod("GetShared", JSLocalStorage::GetShared);
-    JSClass<JSLocalStorage>::Bind<>(globalObj);
+    JSClass<JSLocalStorage>::Bind(globalObj, ConstructorCallback, DestructorCallback);
+}
+
+void JSLocalStorage::ConstructorCallback(const JSCallbackInfo& info)
+{
+    auto* instance = new JSLocalStorage();
+    instance->IncRefCount();
+    info.SetReturnValue(instance);
+}
+
+void JSLocalStorage::DestructorCallback(JSLocalStorage* instance)
+{
+    instance->DecRefCount();
 }
 
 void JSLocalStorage::AddStorage(int32_t key, const JSRef<JSObject>& value)
