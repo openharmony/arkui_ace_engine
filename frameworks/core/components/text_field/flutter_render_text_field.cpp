@@ -511,7 +511,8 @@ void FlutterRenderTextField::Paint(RenderContext& context, const Offset& offset)
     magnifierCanvas_->scale(1.0 / (viewScale * MAGNIFIER_GAIN), 1.0 / (viewScale * MAGNIFIER_GAIN));
 
     if ((SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-            SystemProperties::GetDeviceType() == DeviceType::TABLET) &&
+            SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) &&
         hasFocus_) {
         PaintFocus(offset, GetPaintRect().GetSize(), context);
     }

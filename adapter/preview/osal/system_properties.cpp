@@ -87,7 +87,7 @@ void SystemProperties::InitDeviceType(DeviceType type)
     } else if (type == DeviceType::CAR) {
         deviceType_ = DeviceType::CAR;
         paramDeviceType_ = PROPERTY_DEVICE_TYPE_CAR;
-    } else if (type == DeviceType::TABLET) {
+    } else if (type == DeviceType::TABLET || type == DeviceType::TWO_IN_ONE) {
         deviceType_ = DeviceType::TABLET;
         paramDeviceType_ = PROPERTY_DEVICE_TYPE_TABLET;
     } else {

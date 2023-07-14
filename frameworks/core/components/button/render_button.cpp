@@ -471,7 +471,8 @@ void RenderButton::Update(const RefPtr<Component>& component)
     isWatch_ = (SystemProperties::GetDeviceType() == DeviceType::WATCH);
     isTv_ = (SystemProperties::GetDeviceType() == DeviceType::TV);
     isPhone_ = (SystemProperties::GetDeviceType() == DeviceType::PHONE);
-    isTablet_ = (SystemProperties::GetDeviceType() == DeviceType::TABLET);
+    isTablet_ = (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+        SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE);
     auto catchMode =
         buttonComponent_->GetClickedEventId().IsEmpty() || buttonComponent_->GetClickedEventId().GetCatchMode();
     static const int32_t bubbleModeVersion = 6;

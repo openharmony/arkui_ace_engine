@@ -24,8 +24,11 @@ namespace OHOS::Ace::Framework {
 
 std::string MediaQueryInfo::GetDeviceType()
 {
-    if (SystemProperties::GetParamDeviceType() == "tablet") {
+    if (SystemProperties::GetParamDeviceType() == "tablet" ) {
         return "tablet";
+    }
+    if (SystemProperties::GetParamDeviceType() == "2in1") {
+        return "2in1";
     }
     switch (SystemProperties::GetDeviceType()) {
         case DeviceType::TV:
@@ -36,6 +39,8 @@ std::string MediaQueryInfo::GetDeviceType()
             return "wearable";
         case DeviceType::TABLET:
             return "tablet";
+        case DeviceType::TWO_IN_ONE:
+            return "2in1";
         default:
             return "phone";
     }
