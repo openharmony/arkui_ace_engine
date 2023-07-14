@@ -46,8 +46,19 @@ public:
         return toolbarContainerNode_;
     }
 
+    void SetIsUseNewToolbar(bool isNewToolbar)
+    {
+        isNewToolbar_ = isNewToolbar;
+    }
+
+    bool IsUsedNewToolbar() const
+    {
+        return isNewToolbar_;
+    }
+
 private:
     RefPtr<UINode> toolbarContainerNode_;
+    bool isNewToolbar_ = false;
 };
 } // namespace OHOS::Ace::NG
 

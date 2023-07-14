@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -433,10 +434,19 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         CHECK_NULL_VOID(landscapeMenuNode);
         navBarNode->SetLandscapeMenu(landscapeMenuNode);
 
-        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-            titleBarNode->SetMenu(navBarNode->GetLandscapeMenu());
-        } else {
+        auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(navBarNode->GetParent());
+        CHECK_NULL_VOID(navigationGroupNode);
+        auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+        auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+        CHECK_NULL_VOID(navBarLayoutProperty);
+        bool isToolbarHide = navBarLayoutProperty->GetHideToolBar().value_or(false);
+
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT || isToolbarHide ||
+            navigationLayoutProperty->GetNavigationModeValue() == NavigationMode::AUTO ||
+            navigationLayoutProperty->GetNavigationModeValue() == NavigationMode::SPLIT) {
             titleBarNode->SetMenu(navBarNode->GetMenu());
+        } else {
+            titleBarNode->SetMenu(navBarNode->GetLandscapeMenu());
         }
     }
     titleBarNode->AddChild(titleBarNode->GetMenu());
@@ -519,6 +529,32 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
     } else {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
+}
+
+bool CheckWhetherHideToolbarIfDeviceRotation(const float& navbarWidth)
+{
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, false);
+    auto rotationLimitCount = theme->GetToolbarRotationLimitGridCount();
+
+    RefPtr<GridColumnInfo> columnInfo;
+    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::NAVIGATION_TOOLBAR);
+    columnInfo->GetParent()->BuildColumnWidth();
+
+    auto currentColumns = columnInfo->GetParent()->GetColumns();
+    float gridWidth = static_cast<float>(columnInfo->GetWidth(rotationLimitCount));
+    float gutterWidth = columnInfo->GetParent()->GetGutterWidth().ConvertToPx();
+    float hideLimitWidth = gridWidth + gutterWidth * 2;
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        if (currentColumns >= rotationLimitCount && GreatOrEqual(navbarWidth, hideLimitWidth)) {
+            return true;
+        }
+    } else if (SystemProperties::GetDeviceType() == DeviceType::TABLET) {
+        if (currentColumns > rotationLimitCount && GreatNotEqual(navbarWidth, hideLimitWidth)) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace
 
@@ -727,19 +763,20 @@ void NavBarPattern::OnModifyDone()
     CHECK_NULL_VOID(navBarLayoutProperty);
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBar().value_or(false);
     RegistOritationListener();
-    deviceOrientationType_ = SystemProperties::GetDeviceOrientation();
 }
 
 void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (deviceOrientationType_ == SystemProperties::GetDeviceOrientation()) {
-        return;
-    }
-    deviceOrientationType_ = SystemProperties::GetDeviceOrientation();
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(navBarNode);
-
     if (navBarNode->GetPrevMenuIsCustomValue(false) || navBarNode->GetPrevToolBarIsCustomValue(false)) {
+        return;
+    }
+
+    auto geometryNode = navBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    float navBarWidth = geometryNode->GetFrameSize().Width();
+    if (NearZero(navBarWidth)) {
         return;
     }
 
@@ -754,7 +791,7 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
     auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(toolBarLayoutProperty);
 
-    if (deviceOrientationType_ == DeviceOrientation::LANDSCAPE) {
+    if (CheckWhetherHideToolbarIfDeviceRotation(navBarWidth) && !isHideToolbar_) {
         navBarLayoutProperty->UpdateHideToolBar(true);
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         if (titleBarNode->GetMenu()) {

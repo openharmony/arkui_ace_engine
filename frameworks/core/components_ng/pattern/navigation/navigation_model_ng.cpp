@@ -1091,6 +1091,7 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     }
     auto toolBarNode = AceType::DynamicCast<ToolbarNode>(navBarNode->GetPreToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
+    toolBarNode->SetIsUseNewToolbar(true);
     auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
