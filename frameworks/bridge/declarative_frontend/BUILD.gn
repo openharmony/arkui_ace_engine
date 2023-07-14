@@ -546,14 +546,14 @@ template("declarative_js_engine") {
           config.plugin_components_support) {
         if (!use_mingw_win && !use_mac && !use_linux) {
           external_deps += [
-            "multimedia_image_framework:image",
-            "multimedia_image_framework:image_native",
+            "image_framework:image",
+            "image_framework:image_native",
           ]
         }
       } else {
         external_deps += [
-          "multimedia_image_framework:image",
-          "multimedia_image_framework:image_native",
+          "image_framework:image",
+          "image_framework:image_native",
         ]
       }
 
