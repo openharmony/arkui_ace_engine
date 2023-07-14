@@ -68,6 +68,7 @@ const double TIME_PLUS = 1 * 100.0;
 const double TIME_PLUS_LARGE = 10 * 1000.0;
 const SizeF TEST_FRAME_SIZE1 { 20, 50 };
 const SizeF TEST_FRAME_SIZE2 { 0, 0 };
+const std::string SELECTED_DATE_STRING = "{\"year\":2000,\"month\":5,\"day\":6,\"hour\":1,\"minute\":1,\"status\":-1}";
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -2535,5 +2536,49 @@ HWTEST_F(DatePickerTestNg, TossAnimationControllerTest005, TestSize.Level1)
     EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow011
+ * @tc.desc: Test GetSelectedObject.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set DatePickerSettingData with showtime.
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, CURRENT_DAY, CURRENT_DAY);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    /**
+     * @tc.steps: step2. Set DialogProperties.
+     */
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    /**
+     * @tc.step: step3. call DatePickerDialogView::Show and find DatePickerPattern call GetSelectedObject.
+     * @tc.expected: selectedDate same as setting.
+     */
+    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->SetShowTimeFlag(true);
+    pickerPattern->SetShowMonthDaysFlag(true);
+    auto selectedDate = pickerPattern->GetSelectedObject(true);
+    EXPECT_EQ(selectedDate, SELECTED_DATE_STRING);
 }
 } // namespace OHOS::Ace::NG

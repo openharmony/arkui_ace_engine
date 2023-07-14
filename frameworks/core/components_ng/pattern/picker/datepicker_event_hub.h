@@ -39,6 +39,11 @@ public:
         changeEvent_ = std::move(onChange);
     }
 
+    void SetOnDateChange(DateChangeEvent&& onChange)
+    {
+        dateChangeEvent_ = std::move(onChange);
+    }
+
     void FireChangeEvent(const BaseEventInfo* info) const
     {
         if (selectedChangeEvent_) {
@@ -46,6 +51,9 @@ public:
         }
         if (changeEvent_) {
             changeEvent_(info);
+        }
+        if (dateChangeEvent_) {
+            dateChangeEvent_(info);
         }
     }
 
@@ -59,6 +67,9 @@ public:
         if (dialogChangeEvent_) {
             dialogChangeEvent_(info);
         }
+        if (dialogDateChangeEvent_) {
+            dialogDateChangeEvent_(info);
+        }
     }
 
     void SetDialogAcceptEvent(DialogEvent&& onChange)
@@ -71,6 +82,19 @@ public:
         if (dialogAcceptEvent_) {
             dialogAcceptEvent_(info);
         }
+        if (dialogDateAcceptEvent_) {
+            dialogDateAcceptEvent_(info);
+        }
+    }
+
+    void SetDialogDateChange(DialogEvent&& onChange)
+    {
+        dialogDateChangeEvent_ = std::move(onChange);
+    }
+
+    void SetDialogDateAcceptEvent(DialogEvent&& onChange)
+    {
+        dialogDateAcceptEvent_ = std::move(onChange);
     }
 
     void SetChangeEvent(DateChangeEvent&& onChange)
@@ -80,8 +104,11 @@ public:
 
 private:
     DateChangeEvent changeEvent_;
+    DateChangeEvent dateChangeEvent_;
     DialogEvent dialogChangeEvent_;
     DialogEvent dialogAcceptEvent_;
+    DialogEvent dialogDateChangeEvent_;
+    DialogEvent dialogDateAcceptEvent_;
     DateChangeEvent selectedChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerEventHub);

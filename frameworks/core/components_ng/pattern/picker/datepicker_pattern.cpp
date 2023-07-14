@@ -584,6 +584,46 @@ void DatePickerPattern::HandleMonthDaysChange(
     resultTags.emplace_back(monthDaysNode);
 }
 
+std::string DatePickerPattern::GetSelectedObject(bool isColumnChange, int status) const
+{
+    auto date = selectedDate_;
+    if (isColumnChange) {
+        date = GetCurrentDate();
+    }
+    // W3C's month is between 0 to 11, need to reduce one.
+    date.SetMonth(date.GetMonth() - 1);
+
+    auto dateTimeString = std::string("{\"year\":") + std::to_string(date.GetYear()) + ",\"month\":" +
+        std::to_string(date.GetMonth()) + ",\"day\":" + std::to_string(date.GetDay());
+    auto pickTime = PickerTime::Current();
+    if (showTime_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, date.ToString(true, status));
+        if (showMonthDays_) {
+            auto pickerRow = host->GetParent();
+            CHECK_NULL_RETURN(pickerRow, date.ToString(true, status));
+            auto timeNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(1));
+            CHECK_NULL_RETURN(timeNode, date.ToString(true, status));
+            auto timePickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
+            CHECK_NULL_RETURN(timePickerPattern, date.ToString(true, status));
+            pickTime = timePickerPattern->GetCurrentTime();
+        } else {
+            auto pickerStack = host->GetParent();
+            CHECK_NULL_RETURN(pickerStack, date.ToString(true, status));
+            auto pickerRow = pickerStack->GetLastChild();
+            CHECK_NULL_RETURN(pickerRow, date.ToString(true, status));
+            auto timeNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(1));
+            CHECK_NULL_RETURN(timeNode, date.ToString(true, status));
+            auto timePickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
+            CHECK_NULL_RETURN(timePickerPattern, date.ToString(true, status));
+            pickTime = timePickerPattern->GetCurrentTime();
+        }
+    }
+    dateTimeString += std::string(",\"hour\":") + std::to_string(pickTime.GetHour()) + ",\"minute\":" +
+        std::to_string(pickTime.GetMinute()) + ",\"status\":" + std::to_string(status) + "}";
+    return dateTimeString;
+}
+
 void DatePickerPattern::HandleDayChange(bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags)
 {
     auto allChildNode = GetAllChildNode();
