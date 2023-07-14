@@ -22,6 +22,17 @@
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "drawing/engine_adapter/skia_adapter/skia_path.h"
 #include "image/image.h"
+#ifdef USE_ROSEN_DRAWING
+#include "recording/recording_canvas.h"
+#include "recording/recording_color_filter.h"
+#include "recording/recording_color_space.h"
+#include "recording/recording_image_filter.h"
+#include "recording/recording_mask_filter.h"
+#include "recording/recording_path_effect.h"
+#include "recording/recording_path.h"
+#include "recording/recording_region.h"
+#include "recording/recording_shader_effect.h"
+#endif
 #include "utils/camera3d.h"
 #include "utils/point3.h"
 #include "rosen_text/font_collection.h"
@@ -67,6 +78,32 @@ using RSSkPath = Rosen::Drawing::SkiaPath;
 using RSColorQuad = Rosen::Drawing::ColorQuad;
 using RSShaderEffect = Rosen::Drawing::ShaderEffect;
 using RSTileMode = Rosen::Drawing::TileMode;
+#ifdef USE_ROSEN_DRAWING
+using RSAutoCanvasRestore = Rosen::Drawing::AutoCanvasRestore;
+using RSCubicResampler = Rosen::Drawing::CubicResampler;
+using RSColorSpace = Rosen::Drawing::ColorSpace;
+using RSData = Rosen::Drawing::Data;
+using RSDrawCmdList = Rosen::Drawing::DrawCmdList;
+using RSFilterMode = Rosen::Drawing::FilterMode;
+using RSImageFilter = Rosen::Drawing::ImageFilter;
+using RSMipmapMode = Rosen::Drawing::MipmapMode;
+using RSPathDashStyle = Rosen::Drawing::PathDashStyle;
+using RSPathDirection = Rosen::Drawing::PathDirection;
+using RSPathEffect = Rosen::Drawing::PathEffect;
+using RSPicture = Rosen::Drawing::Picture;
+using RSRecordingCanvas = Rosen::Drawing::RecordingCanvas;
+using RSRecordingColorFilter = Rosen::Drawing::RecordingColorFilter;
+using RSRecordingColorSpace = Rosen::Drawing::RecordingColorSpace;
+using RSRecordingImageFilter = Rosen::Drawing::RecordingImageFilter;
+using RSRecordingMaskFilter = Rosen::Drawing::RecordingMaskFilter;
+using RSRecordingPath = Rosen::Drawing::RecordingPath;
+using RSRecordingPathEffect = Rosen::Drawing::RecordingPathEffect;
+using RSRecordingRegion = Rosen::Drawing::RecordingRegion;
+using RSRecordingShaderEffect = Rosen::Drawing::RecordingShaderEffect;
+using RSSaveLayerOps = Rosen::Drawing::SaveLayerOps;
+using RSSize = Rosen::Drawing::Size;
+using RSSrcRectConstraint = Rosen::Drawing::SrcRectConstraint;
+#endif
 
 using RSTextDirection = Rosen::TextDirection;
 using RSTextAlign = Rosen::TextAlign;

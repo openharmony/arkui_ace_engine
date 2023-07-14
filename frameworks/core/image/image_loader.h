@@ -20,9 +20,7 @@
 #include <regex>
 #include <string>
 
-#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkImage.h"
-#endif
 
 #include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
@@ -31,7 +29,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
 #ifdef USE_ROSEN_DRAWING
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #endif
 #include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"

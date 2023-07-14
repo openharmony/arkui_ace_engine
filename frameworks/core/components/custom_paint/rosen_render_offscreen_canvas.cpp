@@ -207,7 +207,7 @@ void RosenRenderOffscreenCanvas::SetFillRuleForPath(const CanvasFillRule& rule)
     if (rule == CanvasFillRule::NONZERO) {
         path_.SetFillStyle(RSPathFillType::WINDING);
     } else if (rule == CanvasFillRule::EVENODD) {
-        path_.SetFillStyle(RSPathFillType::EVEN_ODD);
+        path_.SetFillStyle(RSPathFillType::EVENTODD);
     }
 #endif
     }
@@ -233,7 +233,7 @@ void RosenRenderOffscreenCanvas::SetFillRuleForPath2D(const CanvasFillRule& rule
     if (rule == CanvasFillRule::NONZERO) {
         path2d_.SetFillStyle(RSPathFillType::WINDING);
     } else if (rule == CanvasFillRule::EVENODD) {
-        path2d_.SetFillStyle(RSPathFillType::EVEN_ODD);
+        path2d_.SetFillStyle(RSPathFillType::EVENTODD);
     }
 #endif
 }
@@ -1776,12 +1776,12 @@ void RosenRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
 
 void RosenRenderOffscreenCanvas::Path2DArcTo(const PathArgs& args)
 {
+#ifndef USE_ROSEN_DRAWING
     double x1 = args.para1;
     double y1 = args.para2;
     double x2 = args.para3;
     double y2 = args.para4;
     double r = args.para5;
-#ifndef USE_ROSEN_DRAWING
     skPath2d_.arcTo(x1, y1, x2, y2, r);
 #else
     LOGE("Drawing is not supported");
@@ -2075,12 +2075,12 @@ void RosenRenderOffscreenCanvas::UpdateLineDash(RSPen& pen)
 
 void RosenRenderOffscreenCanvas::ArcTo(const ArcToParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     double x1 = param.x1;
     double y1 = param.y1;
     double x2 = param.x2;
     double y2 = param.y2;
     double radius = param.radius;
-#ifndef USE_ROSEN_DRAWING
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
 #else
@@ -2253,13 +2253,13 @@ void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, do
     if (width_ > paragraph_->GetMaxIntrinsicWidth()) {
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
+#ifndef USE_ROSEN_DRAWING
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = x + GetAlignOffset(text, align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = y + GetBaselineOffset(baseline, paragraph_);
 
-#ifndef USE_ROSEN_DRAWING
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
@@ -2272,8 +2272,6 @@ void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, do
 #else
     if (hasShadow) {
         canvas_->Save();
-        auto shadowOffsetX = shadow_.GetOffset().GetX();
-        auto shadowOffsetY = shadow_.GetOffset().GetY();
         LOGE("Drawing is not supported");
         canvas_->Restore();
         return;

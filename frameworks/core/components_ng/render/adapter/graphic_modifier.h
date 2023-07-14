@@ -24,6 +24,9 @@
 #include "render_service_client/core/modifier/rs_property.h"
 
 #include "core/components/common/properties/color.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing_forward.h"
+#endif
 
 namespace OHOS::Ace::NG {
 using RSDrawingContext = Rosen::RSDrawingContext;

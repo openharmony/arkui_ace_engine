@@ -66,8 +66,13 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
@@ -458,7 +463,7 @@ void RosenRenderContext::PaintBackground()
     } else if (InstanceOf<SkiaImage>(bgImage_)) {
         PaintSkBgImage();
 #else
-    } else if (InstanceOf<RosenImage>(bgImage_)) {
+    } else if (InstanceOf<DrawingImage>(bgImage_)) {
         PaintRSBgImage();
 #endif
     } else {
@@ -674,7 +679,11 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
     return g_pixelMap;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderContext::GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList)
+#else
+bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList)
+#endif
 {
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
@@ -1077,12 +1086,12 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     }
 #else
     std::shared_ptr<RSImage> image;
-    if (InstanceOf<RosenImage>(bdImage_)) {
-        image = DynamicCast<RosenImage>(bdImage_)->GetImage();
+    if (InstanceOf<DrawingImage>(bdImage_)) {
+        image = DynamicCast<DrawingImage>(bdImage_)->GetImage();
     } else if (InstanceOf<PixelMapImage>(bdImage_)) {
         auto pixmap = DynamicCast<PixelMapImage>(bdImage_)->GetPixelMap();
         CHECK_NULL_VOID(pixmap);
-        image = RosenImage::MakeRSImageFromPixmap(pixmap);
+        image = DrawingImage::MakeRSImageFromPixmap(pixmap);
     } else {
         return;
     }
@@ -3014,7 +3023,7 @@ void RosenRenderContext::PaintSkBgImage()
 #else
 void RosenRenderContext::PaintRSBgImage()
 {
-    auto image = DynamicCast<NG::RosenImage>(bgImage_);
+    auto image = DynamicCast<NG::DrawingImage>(bgImage_);
 #endif
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
 

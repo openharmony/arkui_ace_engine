@@ -30,7 +30,7 @@
 #include "include/core/SkGraphics.h"
 #include "include/core/SkPixmap.h"
 #else
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #endif
 
 namespace OHOS::Ace {
