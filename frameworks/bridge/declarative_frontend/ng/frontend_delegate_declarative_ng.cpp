@@ -651,7 +651,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenu(const std::string& title, con
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
 }
 
-void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate()
+void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate(bool isSynchronous)
 {
     auto containerId = Container::CurrentId();
     if (containerId < 0) {
