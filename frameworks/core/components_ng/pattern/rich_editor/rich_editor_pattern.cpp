@@ -827,7 +827,10 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
         eventHub->FireOnSelect(&textSelectInfo);
     }
-    SetCaretPosition(selectEnd);
+    SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
+    if (richEditorOverlayModifier_) {
+        RequestKeyboard(false, true, true);
+    }
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1304,7 +1307,8 @@ void RichEditorPattern::DeleteBackward(int32_t length)
     if (textSelector_.IsValid()) {
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         SetCaretPosition(textSelector_.GetTextEnd());
-        textSelector_.Update(-1, -1);
+        CloseSelectOverlay();
+        ResetSelection();
     }
     RichEditorDeleteValue info;
     info.SetOffset(caretPosition_ - 1);
