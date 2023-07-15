@@ -265,7 +265,7 @@ void NavigationPattern::OnNavBarStateChange()
     CHECK_NULL_VOID(eventHub);
     auto currentNavigationMode = GetNavigationMode();
 
-    if (IsNavModeChange() && (!layoutProperty->GetHideNavBarValue(false))) {
+    if (GetNavModeChange() && (!layoutProperty->GetHideNavBarValue(false))) {
         if (currentNavigationMode == NavigationMode::SPLIT) {
             eventHub->FireNavBarStateChangeEvent(true);
         } else {
@@ -276,7 +276,7 @@ void NavigationPattern::OnNavBarStateChange()
         return;
     }
 
-    if (IsNavBarVisibilityChange() && (currentNavigationMode == NavigationMode::SPLIT)) {
+    if (GetNavBarVisibilityChange() && (currentNavigationMode == NavigationMode::SPLIT)) {
         if (!layoutProperty->GetHideNavBarValue(false)) {
             eventHub->FireNavBarStateChangeEvent(true);
         } else {
