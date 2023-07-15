@@ -40,6 +40,7 @@ public:
     static void SetShow(bool isShow);
     static void SetPanelMode(const JSCallbackInfo& info);
     static void SetPanelType(const JSCallbackInfo& info);
+    static void SetCustomHeight(const JSCallbackInfo& info);
     static void SetMiniHeight(const JSCallbackInfo& info);
     static void SetHalfHeight(const JSCallbackInfo& info);
     static void SetFullHeight(const JSCallbackInfo& info);
