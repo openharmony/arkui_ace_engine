@@ -419,7 +419,7 @@ ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source,
     }
     double allOffset = offset;
     ExecuteScrollFrameBegin(offset, scrollState);
-    auto remainOffset = allOffset - offset;
+    auto remainOffset = std::abs(offset) < std::abs(allOffset) ? allOffset - offset : 0;
     auto overOffsets = overScrollOffsetCallback_(offset);
     auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
     remainOffset += overOffset;
@@ -433,9 +433,9 @@ ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source,
         return { remainOffset, !NearZero(overOffset) };
     }
     if (edgeEffect_ == EdgeEffect::NONE) {
-        parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
+        result = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
     }
-    canOverScroll_ = !NearZero(overOffset);
+    canOverScroll_ = !NearZero(overOffset) || (NearZero(offset) && result.reachEdge);
     return { 0, canOverScroll_ };
 }
 
@@ -457,27 +457,26 @@ ScrollResult Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, N
     }
     double allOffset = offset;
     ExecuteScrollFrameBegin(offset, scrollState);
-    auto remainOffset = allOffset - offset;
+    auto remainOffset = std::abs(offset) < std::abs(allOffset) ? allOffset - offset : 0;
     auto overOffsets = overScrollOffsetCallback_(offset);
     auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
-    if (NearZero(overOffset)) {
+    if (NearZero(overOffset) && NearZero(remainOffset)) {
         canOverScroll_ = false;
         return { 0, false };
     }
     offset -= overOffset;
-    auto result = parent->HandleScroll(overOffset, source, NestedState::CHILD_SCROLL);
-    remainOffset += result.remain;
-    if (NearZero(remainOffset)) {
+    auto result = parent->HandleScroll(overOffset + remainOffset, source, NestedState::CHILD_SCROLL);
+    if (NearZero(result.remain)) {
         canOverScroll_ = false;
         return { 0, false };
     }
     if (state == NestedState::CHILD_SCROLL) {
         canOverScroll_ = false;
-        return { remainOffset, result.reachEdge };
+        return result;
     }
-    auto overRes = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
-    offset += overRes.remain;
-    canOverScroll_ = !NearZero(overOffset) && result.reachEdge;
+    auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL);
+    offset += std::abs(overOffset) < std::abs(result.remain) ? overOffset : overRes.remain;
+    canOverScroll_ = (!NearZero(overOffset) || NearZero(offset)) && overRes.reachEdge;
     return { 0, canOverScroll_ };
 }
 
