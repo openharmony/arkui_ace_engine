@@ -535,6 +535,10 @@ void TextPickerDialogView::SetTextProperties(
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearWeight,
         properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontFamily,
+        properties.disappearTextStyle_.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontStyle,
+        properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, properties.normalTextStyle_.fontSize.value());
@@ -545,6 +549,10 @@ void TextPickerDialogView::SetTextProperties(
         TextPickerLayoutProperty, Color, properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, Weight, properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, FontFamily, properties.normalTextStyle_.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, FontStyle, properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(
@@ -556,6 +564,10 @@ void TextPickerDialogView::SetTextProperties(
         properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight,
         properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontFamily,
+        properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontStyle,
+        properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
 void TextPickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange)

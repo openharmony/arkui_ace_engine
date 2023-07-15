@@ -233,19 +233,21 @@ void JSDatePicker::ParseTextProperties(const JSRef<JSObject>& paramObj, NG::Pick
 void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
 {
     auto fontColor = paramObj->GetProperty("color");
-    auto fontStyle = paramObj->GetProperty("font");
+    auto fontOptions = paramObj->GetProperty("font");
 
     Color textColor;
     if (JSViewAbstract::ParseJsColor(fontColor, textColor)) {
         textStyle.textColor = textColor;
     }
 
-    if (!fontStyle->IsObject()) {
+    if (!fontOptions->IsObject()) {
         return;
     }
-    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontStyle);
+    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontOptions);
     auto fontSize = fontObj->GetProperty("size");
     auto fontWeight = fontObj->GetProperty("weight");
+    auto fontFamily = fontObj->GetProperty("family");
+    auto fontStyle = fontObj->GetProperty("style");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         textStyle.fontSize = Dimension(-1);
     } else {
@@ -266,6 +268,22 @@ void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTex
             ParseJsString(fontWeight, weight);
         }
         textStyle.fontWeight = ConvertStrToFontWeight(weight);
+    }
+
+    if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
+        std::vector<std::string> families;
+        if (ParseJsFontFamilies(fontFamily, families)) {
+            textStyle.fontFamily = families;
+        }
+    }
+
+    if (fontStyle->IsNumber()) {
+        auto style = fontStyle->ToNumber<int32_t>();
+        if (style < 0 || style > 1) {
+            LOGE("Text fontStyle(%d) is invalid value", style);
+            return;
+        }
+        textStyle.fontStyle = static_cast<FontStyle>(style);
     }
 }
 
