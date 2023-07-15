@@ -167,7 +167,7 @@ void UpdateToolbarItemSize(LayoutWrapper* layoutWrapper, NG::SizeF& toolbarItemS
 
 void ToolbarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto toolbarNode = AceType::DynamicCast<ToolbarNode>(layoutWrapper->GetHostNode());
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(toolbarNode);
     auto containerNode = toolbarNode->GetToolbarContainerNode();
     auto toolbarItemNum = containerNode->GetChildren().size();
