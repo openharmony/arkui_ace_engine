@@ -1451,12 +1451,12 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         }
         modalStack_.push(WeakClaim(RawPtr(sheetNode)));
         SaveLastModalNode();
-        // create backgroundmask node
+        // create maskColor node
         auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_MASK_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
         maskNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        if (sheetStyle.backgroundMask.has_value()) {
-            maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundMask.value());
+        if (sheetStyle.maskColor.has_value()) {
+            maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.maskColor.value());
         }
         maskNode->MountToParent(rootNode);
         sheetNode->MountToParent(rootNode);
