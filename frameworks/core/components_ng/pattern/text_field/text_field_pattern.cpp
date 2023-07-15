@@ -4944,6 +4944,15 @@ void TextFieldPattern::StopEditing()
     if (!HasFocus()) {
         return;
     }
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (GetImeAttached()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnEditChanged(false);
+    }
+#endif
     HandleSetSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
     StopTwinkling();
     MarkRedrawOverlay();
