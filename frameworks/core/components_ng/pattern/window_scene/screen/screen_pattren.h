@@ -25,7 +25,7 @@ class ScreenPattern : public StackPattern {
     DECLARE_ACE_TYPE(ScreenPattern, StackPattern);
 
 public:
-    ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession) : screenSession_(screenSession) {}
+    explicit ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession) : screenSession_(screenSession) {}
     ~ScreenPattern() override = default;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
