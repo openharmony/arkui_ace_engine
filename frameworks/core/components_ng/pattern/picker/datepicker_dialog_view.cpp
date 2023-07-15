@@ -821,6 +821,10 @@ void DatePickerDialogView::SetDateTextProperties(
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     pickerProperty->UpdateDisappearWeight(
         properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    pickerProperty->UpdateDisappearFontFamily(
+        properties.disappearTextStyle_.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    pickerProperty->UpdateDisappearFontStyle(
+        properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
         pickerProperty->UpdateFontSize(properties.normalTextStyle_.fontSize.value());
@@ -829,6 +833,8 @@ void DatePickerDialogView::SetDateTextProperties(
     }
     pickerProperty->UpdateColor(properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     pickerProperty->UpdateWeight(properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+    pickerProperty->UpdateFontFamily(properties.normalTextStyle_.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    pickerProperty->UpdateFontStyle(properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
         pickerProperty->UpdateSelectedFontSize(properties.selectedTextStyle_.fontSize.value());
@@ -838,6 +844,10 @@ void DatePickerDialogView::SetDateTextProperties(
     pickerProperty->UpdateSelectedColor(properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     pickerProperty->UpdateSelectedWeight(
         properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    pickerProperty->UpdateSelectedFontFamily(
+        properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    pickerProperty->UpdateSelectedFontStyle(
+        properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
 void DatePickerDialogView::SetTimeTextProperties(
