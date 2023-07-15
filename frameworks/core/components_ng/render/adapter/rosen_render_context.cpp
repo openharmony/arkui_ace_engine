@@ -219,6 +219,15 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
             break;
         }
+        case ContextType::HARDWARE_SURFACE: {
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
+            auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+            if (surfaceNode) {
+                surfaceNode->SetHardwareEnabled(true);
+            }
+            rsNode_ = surfaceNode;
+            break;
+        }
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create();
             break;

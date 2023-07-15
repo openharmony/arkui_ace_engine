@@ -130,7 +130,8 @@ void XComponentPattern::OnAttachToFrameNode()
         scopeId_ = Container::CurrentId();
         if (type_ == XComponentType::SURFACE) {
             renderContextForSurface_ = RenderContext::Create();
-            static RenderContext::ContextParam param = { RenderContext::ContextType::SURFACE, id_ + "Surface" };
+            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
+                id_ + "Surface" };
             renderContextForSurface_->InitContext(false, param);
             renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
             if (!SystemProperties::GetExtSurfaceEnabled()) {
