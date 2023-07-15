@@ -5126,7 +5126,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto height = paramObj->GetProperty("height");
     auto showDragBar = paramObj->GetProperty("dragBar");
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
-    auto backgroundMask = paramObj->GetProperty("backgroundMask");
+    auto maskColor = paramObj->GetProperty("maskColor");
     if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
         sheetStyle.showDragBar = true;
     } else {
@@ -5176,13 +5176,13 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
-    // parse backgroundMask color
-    Color maskColor;
-    if (backgroundMask->IsNull() || backgroundMask->IsUndefined() ||
-        !JSViewAbstract::ParseJsColor(backgroundMask, maskColor)) {
-        maskColor.SetValue(0x00000000);
+    // parse maskColor
+    Color parseMaskColor;
+    if (maskColor->IsNull() || maskColor->IsUndefined() ||
+        !JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
+        parseMaskColor.SetValue(0x00000000);
     }
-    sheetStyle.backgroundMask = std::move(maskColor);
+    sheetStyle.maskColor = std::move(parseMaskColor);
 }
 
 void JSViewAbstract::ParseOverlayCallback(
