@@ -210,7 +210,7 @@ public:
         navBarVisibilityChange_ = isChange;
     }
 
-    bool IsNavBarVisibilityChange() const
+    bool GetNavBarVisibilityChange() const
     {
         return navBarVisibilityChange_;
     }
@@ -220,7 +220,7 @@ public:
         navModeChange_ = isChange;
     }
 
-    bool IsNavModeChange() const
+    bool GetNavModeChange() const
     {
         return navModeChange_;
     }
