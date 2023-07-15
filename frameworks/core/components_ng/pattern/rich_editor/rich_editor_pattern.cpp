@@ -824,10 +824,11 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-    if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
+    if (!textSelectInfo.GetSelection().resultObjects.empty()) {
         eventHub->FireOnSelect(&textSelectInfo);
     }
     SetCaretPosition(selectEnd);
+    StopTwinkling();
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
