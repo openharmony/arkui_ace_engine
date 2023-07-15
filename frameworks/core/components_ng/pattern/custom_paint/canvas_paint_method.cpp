@@ -888,6 +888,7 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkBitmap& currentBitmap)
 {
     CHECK_NULL_RETURN(rsRecordingCanvas_, false);
@@ -913,6 +914,7 @@ bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkB
     drawCmdList->Playback(currentCanvas);
     return true;
 }
+#endif
 
 std::string CanvasPaintMethod::GetJsonData(const std::string& path)
 {
