@@ -123,7 +123,6 @@ template("ace_ohos_standard_source_set") {
       "form_fwk:form_manager",
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
-      "graphic_2d:rosen_text",
       "i18n:intl_util",
       "input:libmmi-client",
       "ipc:ipc_core",

@@ -22,13 +22,9 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<TxtFontCollection> TxtFontCollection::instance;
-
 RefPtr<FontCollection> TxtFontCollection::GetInstance()
 {
-    if (instance == nullptr) {
-        instance = AceType::MakeRefPtr<TxtFontCollection>();
-    }
+    static RefPtr<TxtFontCollection> instance = AceType::MakeRefPtr<TxtFontCollection>();
     return instance;
 }
 
@@ -39,8 +35,7 @@ RefPtr<FontCollection> FontCollection::Current()
 
 TxtFontCollection::TxtFontCollection()
 {
-    collection_ = Rosen::FontCollection::Create();
-    /* texgine not support
+    collection_ = RosenFontCollection::GetInstance().GetFontCollection();
     dynamicFontManager_ = RosenFontCollection::GetInstance().GetDynamicFontManager();
     if (collection_) {
         std::string emptyLocale;
@@ -48,10 +43,9 @@ TxtFontCollection::TxtFontCollection()
         collection_->MatchFallbackFont(0x4e2d, emptyLocale);
         collection_->GetMinikinFontCollectionForFamilies({ "sans-serif" }, emptyLocale);
     }
-    */
 }
 
-TxtFontCollection::TxtFontCollection(const std::shared_ptr<Rosen::FontCollection>& fontCollection)
+TxtFontCollection::TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection)
     : collection_(fontCollection)
 {}
 

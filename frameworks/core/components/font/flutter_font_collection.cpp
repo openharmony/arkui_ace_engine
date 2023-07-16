@@ -24,19 +24,18 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "rosen_text/font_collection.h"
 
 namespace OHOS::Ace {
 
 FlutterFontCollection FlutterFontCollection::instance;
 
-std::shared_ptr<Rosen::FontCollection> FlutterFontCollection::GetFontCollection()
+std::shared_ptr<txt::FontCollection> FlutterFontCollection::GetFontCollection()
 {
     if (!isUseFlutterEngine) {
         if (!isCompleted_) {
             isCompleted_ = future_.get();
         }
-        return Rosen::FontCollection::From(fontCollection_->GetFontCollection());
+        return fontCollection_->GetFontCollection();
     }
     std::call_once(fontFlag_, [this]() {
         fontCollection_ = std::make_unique<flutter::FontCollection>();
@@ -47,7 +46,7 @@ std::shared_ptr<Rosen::FontCollection> FlutterFontCollection::GetFontCollection(
             fontCollection_->GetFontCollection()->GetMinikinFontCollectionForFamilies({ "sans-serif" }, emptyLocale);
         }
     });
-    return Rosen::FontCollection::From(fontCollection_->GetFontCollection());
+    return fontCollection_->GetFontCollection();
 }
 
 void FlutterFontCollection::LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName)

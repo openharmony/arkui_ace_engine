@@ -71,5 +71,6 @@ ohos_unittest("drag_drop_proxy_test_ng") {
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//third_party/googletest:gmock_main",
   ]
+
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

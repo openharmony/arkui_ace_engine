@@ -124,8 +124,8 @@ OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectL
     auto rect = host->GetGeometryNode()->GetFrameRect();
     CHECK_NULL_RETURN(paragraph_, OffsetF(0.0f, 0.0f));
     CaretMetrics metrics;
-    auto computeSuccess = paragraph_->ComputeOffsetForCaretDownstream(position, metrics) ||
-                          paragraph_->ComputeOffsetForCaretUpstream(position, metrics);
+    auto computeSuccess = paragraph_->ComputeOffsetForCaretUpstream(position, metrics) ||
+                          paragraph_->ComputeOffsetForCaretDownstream(position, metrics);
     if (!computeSuccess) {
         LOGW("Get caret offset failed, set it to text tail");
         return OffsetF(rect.Width(), 0.0f);
@@ -681,16 +681,16 @@ float TextPattern::GetLineHeight() const
     return selectedRects.front().Height();
 }
 
-RSTextRect TextPattern::ConvertRect(const Rect& rect)
+RSTypographyProperties::TextBox TextPattern::ConvertRect(const Rect& rect)
 {
     return { RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()), RSTextDirection::LTR };
 }
 
-std::vector<RSTextRect> TextPattern::GetTextBoxes()
+std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
 {
     std::vector<Rect> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
-    std::vector<RSTextRect> res;
+    std::vector<RSTypographyProperties::TextBox> res;
     res.reserve(selectedRects.size());
     for (auto&& rect : selectedRects) {
         res.emplace_back(ConvertRect(rect));
@@ -919,9 +919,8 @@ void TextPattern::FontRegisterCallback(RefPtr<SpanNode> spanNode)
         }
     };
     auto fontManager = pipelineContext->GetFontManager();
-    auto fontFamilies = spanNode->GetFontFamily();
-    if (fontManager && fontFamilies.has_value()) {
-        for (const auto& familyName : fontFamilies.value()) {
+    if (fontManager && spanNode->GetFontFamily()) {
+        for (const auto& familyName : spanNode->GetFontFamily().value()) {
             fontManager->RegisterCallbackNG(spanNode, familyName, callback);
         }
     }

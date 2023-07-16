@@ -17,7 +17,9 @@
 
 #include <cmath>
 
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
+#include "include/effects/SkGradientShader.h"
 #include "unicode/uchar.h"
 
 #include "base/i18n/localization.h"
@@ -31,8 +33,6 @@
 #include "core/components/font/flutter_font_collection.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
@@ -182,12 +182,11 @@ void FlutterRenderTextField::PaintSelectCaret(SkCanvas* canvas)
     int32_t start = selection.GetStart();
     int32_t end = selection.GetEnd();
 
-    const auto& boxes = paragraph_->GetTextRectsByBoundary(selection.GetStart(), selection.GetEnd(),
-        Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    const auto& boxes = paragraph_->GetRectsForRange(selection.GetStart(), selection.GetEnd(),
+        txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (!boxes.empty()) {
         Offset startCaretOffset = Offset(
-            boxes.back().rect.GetRight() - boxes.front().rect.GetLeft(),
-            boxes.back().rect.GetTop() - boxes.front().rect.GetTop());
+            boxes.back().rect.fRight - boxes.front().rect.fLeft, boxes.back().rect.fTop - boxes.front().rect.fTop);
         if (start >= GetInitIndex() && end >= GetInitIndex()) {
             startCaretRect_ = caretRect + startCaretOffset;
         } else {
@@ -278,8 +277,8 @@ void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
 void FlutterRenderTextField::DrawSelection(unsigned start, unsigned end, SkCanvas* canvas) const
 {
     using namespace Constants;
-    const auto& boxes = paragraph_->GetTextRectsByBoundary(start, end,
-        Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    const auto& boxes = paragraph_->GetRectsForRange(
+        start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (boxes.empty()) {
         return;
     }
@@ -304,12 +303,12 @@ void FlutterRenderTextField::DrawSelection(unsigned start, unsigned end, SkCanva
                 LOGE("Unknown textinput style");
                 break;
         }
-        auto rect = SkRect::MakeLTRB(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(),
-            selectionRect.Bottom());
+        auto rect =
+            SkRect::MakeLTRB(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom());
 
-        if (box.direction == Rosen::TextDirection::LTR) {
-            rect = SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
-                selectionRect.Bottom());
+        if (box.direction == txt::TextDirection::ltr) {
+            rect = SkRect::MakeLTRB(
+                selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom());
         }
         canvas->drawRect(rect, paint);
     }
@@ -358,7 +357,7 @@ void FlutterRenderTextField::PaintErrorText(SkCanvas* canvas) const
     Offset errorOffset = innerRect_.GetOffset();
     if (errorIsInner_) {
         double errorSpacing =
-            GreatOrEqual(errorParagraph_->GetActualWidth(), originInnerWidth_ - errorSpacing_) ? 0.0 : errorSpacing_;
+            GreatOrEqual(errorParagraph_->GetLongestLine(), originInnerWidth_ - errorSpacing_) ? 0.0 : errorSpacing_;
         errorOffset +=
             Offset(innerRect_.Width() + errorSpacing, (innerRect_.Height() - errorParagraph_->GetHeight()) / 2.0);
     } else {
@@ -378,7 +377,7 @@ void FlutterRenderTextField::PaintCountText(SkCanvas* canvas) const
     }
     if (ShowCounter()) {
         Offset countOffset = innerRect_.GetOffset() +
-                             Offset(innerRect_.Width() - countParagraph_->GetActualWidth(), innerRect_.Height());
+                             Offset(innerRect_.Width() - countParagraph_->GetLongestLine(), innerRect_.Height());
         if (maxLines_ == 1) {
             double bottomPadding = 0.0;
             if (decoration_) {
@@ -544,7 +543,7 @@ Size FlutterRenderTextField::Measure()
     }
 
     auto paragraphStyle = CreateParagraphStyle();
-    std::unique_ptr<Rosen::TextStyle> txtStyle;
+    std::unique_ptr<txt::TextStyle> txtStyle;
     double textAreaWidth = MeasureParagraph(paragraphStyle, txtStyle);
     ComputeExtendHeight(decorationHeight);
 
@@ -558,14 +557,15 @@ Size FlutterRenderTextField::Measure()
     }
     originInnerWidth_ = innerRect_.Width();
     if (errorParagraph_ && errorIsInner_) {
-        double deflateWidth = innerRect_.Width() - errorParagraph_->GetActualWidth() - errorSpacing_;
+        double deflateWidth = innerRect_.Width() - errorParagraph_->GetLongestLine() - errorSpacing_;
         innerRect_.SetWidth(GreatOrEqual(deflateWidth, 0.0) ? deflateWidth : 0.0);
     }
 
     // Get height of text
-    if (paragraph_ != nullptr) {
-        textHeight_ = paragraph_->GetHeight();
-        textLines_ = paragraph_->GetLineCount();
+    auto paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+    if (paragraphTxt != nullptr) {
+        textHeight_ = paragraphTxt->GetHeight();
+        textLines_ = paragraphTxt->GetLineCount();
     } else {
         textHeight_ = 0.0;
         textLines_ = 0;
@@ -579,7 +579,7 @@ Size FlutterRenderTextField::Measure()
 }
 
 double FlutterRenderTextField::MeasureParagraph(
-    const std::unique_ptr<Rosen::TypographyStyle>& paragraphStyle, std::unique_ptr<Rosen::TextStyle>& txtStyle)
+    const std::unique_ptr<txt::ParagraphStyle>& paragraphStyle, std::unique_ptr<txt::TextStyle>& txtStyle)
 {
     double maxWidth = GetLayoutParam().GetMaxSize().Width();
     // If single-line, give it infinity for layout and text will auto scroll following with caret.
@@ -615,51 +615,51 @@ double FlutterRenderTextField::MeasureParagraph(
     countParagraph_.reset(nullptr);
     placeholderParagraph_.reset(nullptr);
     if (!errorText_.empty()) {
-        std::unique_ptr<Rosen::TypographyCreate> errorBuilder =
-            Rosen::TypographyCreate::Create(*CreateParagraphStyle(true), GetFontCollection());
+        std::unique_ptr<txt::ParagraphBuilder> errorBuilder =
+            txt::ParagraphBuilder::CreateTxtBuilder(*CreateParagraphStyle(true), GetFontCollection());
         txtStyle = CreateTextStyle(errorTextStyle_);
         errorBuilder->PushStyle(*txtStyle);
-        errorBuilder->AppendText(StringUtils::Str8ToStr16(errorText_));
-        errorParagraph_ = errorBuilder->CreateTypography();
+        errorBuilder->AddText(StringUtils::Str8ToStr16(errorText_));
+        errorParagraph_ = errorBuilder->Build();
         errorParagraph_->Layout(textAreaWidth);
-        errorTextWidth = errorIsInner_ ? errorParagraph_->GetActualWidth() : 0.0;
+        errorTextWidth = errorIsInner_ ? errorParagraph_->GetLongestLine() : 0.0;
     }
     if (ShowCounter()) {
-        std::unique_ptr<Rosen::TypographyCreate> countBuilder =
-            Rosen::TypographyCreate::Create(*CreateParagraphStyle(), GetFontCollection());
+        std::unique_ptr<txt::ParagraphBuilder> countBuilder =
+            txt::ParagraphBuilder::CreateTxtBuilder(*CreateParagraphStyle(), GetFontCollection());
         if (overCount_) {
             txtStyle = CreateTextStyle(maxLines_ == 1 ? overCountStyleOuter_ : overCountStyle_);
         } else {
             txtStyle = CreateTextStyle(maxLines_ == 1 ? countTextStyleOuter_ : countTextStyle_);
         }
         countBuilder->PushStyle(*txtStyle);
-        countBuilder->AppendText(StringUtils::Str8ToStr16(
+        countBuilder->AddText(StringUtils::Str8ToStr16(
             std::to_string(GetEditingValue().GetWideText().size()) + "/" + std::to_string(maxLength_)));
-        countParagraph_ = countBuilder->CreateTypography();
+        countParagraph_ = countBuilder->Build();
         countParagraph_->Layout(textAreaWidth);
     }
     if (!showPlaceholder_) {
-        std::unique_ptr<Rosen::TypographyCreate> builder =
-            Rosen::TypographyCreate::Create(*paragraphStyle, GetFontCollection());
+        std::unique_ptr<txt::ParagraphBuilder> builder =
+            txt::ParagraphBuilder::CreateTxtBuilder(*paragraphStyle, GetFontCollection());
         txtStyle = CreateTextStyle(style_);
         builder->PushStyle(*txtStyle);
-        builder->AppendText(displayText);
-        paragraph_ = builder->CreateTypography();
+        builder->AddText(displayText);
+        paragraph_ = builder->Build();
         paragraph_->Layout(textAreaWidth - errorTextWidth);
         if ((textDirection_ == TextDirection::RTL || realTextDirection_ == TextDirection::RTL) &&
-            LessOrEqual(paragraph_->GetActualWidth(), innerRect_.Width())) {
+            LessOrEqual(paragraph_->GetLongestLine(), innerRect_.Width())) {
             paragraph_->Layout(limitWidth);
         }
     } else {
-        std::unique_ptr<Rosen::TypographyCreate> placeholderBuilder =
-            Rosen::TypographyCreate::Create(*paragraphStyle, GetFontCollection());
+        std::unique_ptr<txt::ParagraphBuilder> placeholderBuilder =
+            txt::ParagraphBuilder::CreateTxtBuilder(*paragraphStyle, GetFontCollection());
         txtStyle = CreateTextStyle(style_, true);
         placeholderBuilder->PushStyle(*txtStyle);
-        placeholderBuilder->AppendText(StringUtils::Str8ToStr16(placeholder_));
-        placeholderParagraph_ = placeholderBuilder->CreateTypography();
+        placeholderBuilder->AddText(StringUtils::Str8ToStr16(placeholder_));
+        placeholderParagraph_ = placeholderBuilder->Build();
         placeholderParagraph_->Layout(limitWidth - errorTextWidth);
         if (textDirection_ == TextDirection::RTL &&
-            LessOrEqual(placeholderParagraph_->GetActualWidth(), innerRect_.Width())) {
+            LessOrEqual(placeholderParagraph_->GetLongestLine(), innerRect_.Width())) {
             placeholderParagraph_->Layout(limitWidth);
         }
     }
@@ -820,8 +820,8 @@ sk_sp<SkShader> FlutterRenderTextField::MakeGradientShader(double shadeWidth) co
 #endif
 }
 
-void FlutterRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::TypographyStyle> paragraphStyle,
-    std::unique_ptr<Rosen::TextStyle> txtStyle, double textAreaWidth)
+void FlutterRenderTextField::SetShaderIfNeeded(
+    std::unique_ptr<txt::ParagraphStyle> paragraphStyle, std::unique_ptr<txt::TextStyle> txtStyle, double textAreaWidth)
 {
     if (maxLines_ != 1 || showPlaceholder_ || !paragraph_ || !needFade_) {
         // Not support placeHolder or multiline.
@@ -839,13 +839,13 @@ void FlutterRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::Typography
         return;
     }
 
-    std::unique_ptr<Rosen::TypographyCreate> builder =
-        Rosen::TypographyCreate::Create(*paragraphStyle, GetFontCollection());
-    txtStyle->foreground = SkPaint();
-    txtStyle->foreground->setShader(shader);
+    std::unique_ptr<txt::ParagraphBuilder> builder =
+        txt::ParagraphBuilder::CreateTxtBuilder(*paragraphStyle, GetFontCollection());
+    txtStyle->has_foreground = true;
+    txtStyle->foreground.setShader(shader);
     builder->PushStyle(*txtStyle);
-    builder->AppendText(GetTextForDisplay(GetEditingValue().text));
-    paragraph_ = builder->CreateTypography();
+    builder->AddText(GetTextForDisplay(GetEditingValue().text));
+    paragraph_ = builder->Build();
     paragraph_->Layout(textAreaWidth);
 }
 
@@ -870,24 +870,24 @@ Size FlutterRenderTextField::ComputeLayoutSize(const Size& size, double decorati
     return Size(maxWidth, innerRect_.Height() + decorationHeight);
 }
 
-std::unique_ptr<Rosen::TypographyStyle> FlutterRenderTextField::CreateParagraphStyle(bool isErrorText)
+std::unique_ptr<txt::ParagraphStyle> FlutterRenderTextField::CreateParagraphStyle(bool isErrorText)
 {
     using namespace Constants;
 
-    auto style = std::make_unique<Rosen::TypographyStyle>();
+    auto style = std::make_unique<txt::ParagraphStyle>();
     // If single-line, it shouldn't do soft-wrap for us.
     if (maxLines_ == 1 && resetToStart_) {
-        style->maxLines = 1;
+        style->max_lines = 1;
         if (showEllipsis_ && keyboard_ != TextInputType::VISIBLE_PASSWORD) {
             style->ellipsis = StringUtils::Str8ToStr16(ELLIPSIS);
         }
     }
-    style->textAlign = ConvertTxtTextAlign(textAlign_);
-    style->fontSize = NormalizeToPx(style_.GetFontSize());
+    style->text_align = ConvertTxtTextAlign(textAlign_);
+    style->font_size = NormalizeToPx(style_.GetFontSize());
 
     // If keyboard is password, don't change text_direction with first strong direction letter
     if (!isErrorText && keyboard_ == TextInputType::VISIBLE_PASSWORD && !GetEditingValue().text.empty()) {
-        style->textDirection = ConvertTxtTextDirection(textDirection_);
+        style->text_direction = ConvertTxtTextDirection(textDirection_);
         realTextDirection_ = textDirection_;
         UpdateDirectionStatus();
         return style;
@@ -907,13 +907,13 @@ std::unique_ptr<Rosen::TypographyStyle> FlutterRenderTextField::CreateParagraphS
     for (const auto& charOfShowingText : showingTextForWString) {
         auto charDirection = u_charDirection(charOfShowingText);
         if (charDirection == UCharDirection::U_LEFT_TO_RIGHT) {
-            style->textDirection = ConvertTxtTextDirection(TextDirection::LTR);
+            style->text_direction = ConvertTxtTextDirection(TextDirection::LTR);
             existStrongDirectionLetter_ = true;
             realTextDirection_ = TextDirection::LTR;
         } else if (charDirection == UCharDirection::U_RIGHT_TO_LEFT ||
                    charDirection == UCharDirection::U_RIGHT_TO_LEFT_ARABIC ||
                    charDirection == UCharDirection::U_ARABIC_NUMBER) {
-            style->textDirection = ConvertTxtTextDirection(TextDirection::RTL);
+            style->text_direction = ConvertTxtTextDirection(TextDirection::RTL);
             existStrongDirectionLetter_ = true;
             realTextDirection_ = TextDirection::RTL;
         }
@@ -922,32 +922,32 @@ std::unique_ptr<Rosen::TypographyStyle> FlutterRenderTextField::CreateParagraphS
         }
     }
     if (!existStrongDirectionLetter_) {
-        style->textDirection = ConvertTxtTextDirection(textDirection_);
+        style->text_direction = ConvertTxtTextDirection(textDirection_);
         realTextDirection_ = textDirection_;
     }
     UpdateDirectionStatus();
     if (keyboard_ != TextInputType::MULTILINE) {
-        style->wordBreakType = Rosen::WordBreakType::BREAK_ALL;
+        style->word_break_type = minikin::WordBreakType::kWordBreakType_BreakAll;
     }
     return style;
 }
 
-std::unique_ptr<Rosen::TextStyle> FlutterRenderTextField::CreateTextStyle(const TextStyle& style, bool isPlaceholder)
+std::unique_ptr<txt::TextStyle> FlutterRenderTextField::CreateTextStyle(const TextStyle& style, bool isPlaceholder)
 {
     using namespace Constants;
 
-    auto txtStyle = std::make_unique<Rosen::TextStyle>();
+    auto txtStyle = std::make_unique<txt::TextStyle>();
     if (isPlaceholder) {
         txtStyle->color = ConvertSkColor(placeholderColor_);
     } else {
         txtStyle->color = ConvertSkColor(style.GetTextColor());
     }
 
-    txtStyle->fontFamilies = style.GetFontFamilies();
-    txtStyle->fontWeight = ConvertTxtFontWeight(style.GetFontWeight());
-    txtStyle->fontSize = NormalizeToPx(style.GetFontSize());
-    txtStyle->fontStyle = ConvertTxtFontStyle(style.GetFontStyle());
-    txtStyle->baseline = ConvertTxtTextBaseline(style.GetTextBaseline());
+    txtStyle->font_families = style.GetFontFamilies();
+    txtStyle->font_weight = ConvertTxtFontWeight(style.GetFontWeight());
+    txtStyle->font_size = NormalizeToPx(style.GetFontSize());
+    txtStyle->font_style = ConvertTxtFontStyle(style.GetFontStyle());
+    txtStyle->text_baseline = ConvertTxtTextBaseline(style.GetTextBaseline());
     txtStyle->locale = Localization::GetInstance()->GetFontLocale();
     return txtStyle;
 }
@@ -963,24 +963,23 @@ double FlutterRenderTextField::GetBoundaryOfParagraph(bool isLeftBoundary) const
     if (!paragraph_ || GetEditingValue().text.empty()) {
         return 0.0;
     }
-    auto boxes = paragraph_->GetTextRectsByBoundary(0, GetEditingValue().GetWideText().length(),
-        Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    auto boxes = paragraph_->GetRectsForRange(0, GetEditingValue().GetWideText().length(),
+        txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (boxes.empty()) {
         return 0.0;
     }
-    double leftBoundaryOfParagraph = boxes.front().rect.GetLeft();
-    double rightBoundaryOfParagraph = boxes.front().rect.GetLeft();
-    double bottomBoundaryOfParagraph = boxes.front().rect.GetBottom();
+    double leftBoundaryOfParagraph = boxes.front().rect.fLeft;
+    double rightBoundaryOfParagraph = boxes.front().rect.fLeft;
+    double bottomBoundaryOfParagraph = boxes.front().rect.fBottom;
     for (const auto& box : boxes) {
-        if (cursorPositionType_ == CursorPositionType::END &&
-                !NearEqual(box.rect.GetBottom(), bottomBoundaryOfParagraph)) {
-            bottomBoundaryOfParagraph = box.rect.GetBottom();
-            leftBoundaryOfParagraph = box.rect.GetLeft();
-            rightBoundaryOfParagraph = box.rect.GetRight();
+        if (cursorPositionType_ == CursorPositionType::END && !NearEqual(box.rect.fBottom, bottomBoundaryOfParagraph)) {
+            bottomBoundaryOfParagraph = box.rect.fBottom;
+            leftBoundaryOfParagraph = box.rect.fLeft;
+            rightBoundaryOfParagraph = box.rect.fRight;
             continue;
         }
-        leftBoundaryOfParagraph = std::min(static_cast<double>(box.rect.GetLeft()), leftBoundaryOfParagraph);
-        rightBoundaryOfParagraph = std::max(static_cast<double>(box.rect.GetRight()), rightBoundaryOfParagraph);
+        leftBoundaryOfParagraph = std::min(static_cast<double>(box.rect.fLeft), leftBoundaryOfParagraph);
+        rightBoundaryOfParagraph = std::max(static_cast<double>(box.rect.fRight), rightBoundaryOfParagraph);
     }
     return isLeftBoundary ? leftBoundaryOfParagraph : rightBoundaryOfParagraph;
 }
@@ -1000,18 +999,18 @@ bool FlutterRenderTextField::ComputeOffsetForCaretUpstream(int32_t extent, Caret
     result.Reset();
     int32_t graphemeClusterLength = StringUtils::NotInUtf16Bmp(prevChar) ? 2 : 1;
     int32_t prev = extent - graphemeClusterLength;
-    auto boxes = paragraph_->GetTextRectsByBoundary(
-        prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    auto boxes = paragraph_->GetRectsForRange(
+        prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     while (boxes.empty() && !GetEditingValue().text.empty()) {
         graphemeClusterLength *= 2;
         prev = extent - graphemeClusterLength;
         if (prev < 0) {
-            boxes = paragraph_->GetTextRectsByBoundary(
-                0, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+            boxes = paragraph_->GetRectsForRange(
+                0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
             break;
         }
-        boxes = paragraph_->GetTextRectsByBoundary(
-            prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+        boxes = paragraph_->GetRectsForRange(
+            prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     }
     if (boxes.empty()) {
         return false;
@@ -1023,22 +1022,22 @@ bool FlutterRenderTextField::ComputeOffsetForCaretUpstream(int32_t extent, Caret
         // Return the start of next line.
         auto emptyOffset = MakeEmptyOffset();
         result.offset.SetX(emptyOffset.GetX());
-        result.offset.SetY(textBox.rect.GetBottom());
+        result.offset.SetY(textBox.rect.fBottom);
         result.height = caretProto_.Height();
         return true;
     }
 
-    bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
+    bool isLtr = textBox.direction == txt::TextDirection::ltr;
     // Caret is within width of the upstream glyphs.
-    double caretEnd = isLtr ? textBox.rect.GetRight() : textBox.rect.GetLeft();
+    double caretEnd = isLtr ? textBox.rect.fRight : textBox.rect.fLeft;
     if (cursorPositionType_ == CursorPositionType::END) {
         caretEnd = GetBoundaryOfParagraph(realTextDirection_ != TextDirection::LTR);
     }
     double dx = isLtr ? caretEnd : caretEnd - caretProto_.Width();
     double offsetX = std::min(dx, paragraph_->GetMaxWidth());
     result.offset.SetX(offsetX);
-    result.offset.SetY(textBox.rect.GetTop());
-    result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+    result.offset.SetY(textBox.rect.fTop);
+    result.height = textBox.rect.fBottom - textBox.rect.fTop;
     return true;
 }
 
@@ -1051,24 +1050,24 @@ bool FlutterRenderTextField::ComputeOffsetForCaretDownstream(int32_t extent, Car
     result.Reset();
     const int32_t graphemeClusterLength = 1;
     const int32_t next = extent + graphemeClusterLength;
-    auto boxes = paragraph_->GetTextRectsByBoundary(
-        extent, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    auto boxes = paragraph_->GetRectsForRange(
+        extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (boxes.empty()) {
         return false;
     }
 
     const auto& textBox = *boxes.begin();
-    bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
+    bool isLtr = textBox.direction == txt::TextDirection::ltr;
     // Caret is within width of the downstream glyphs.
-    double caretStart = isLtr ? textBox.rect.GetLeft() : textBox.rect.GetRight();
+    double caretStart = isLtr ? textBox.rect.fLeft : textBox.rect.fRight;
     if (cursorPositionType_ == CursorPositionType::END) {
         caretStart = GetBoundaryOfParagraph(realTextDirection_ != TextDirection::LTR);
     }
     double dx = isLtr ? caretStart : caretStart - caretProto_.Width();
     double offsetX = std::min(dx, paragraph_->GetMaxWidth());
     result.offset.SetX(offsetX);
-    result.offset.SetY(textBox.rect.GetTop());
-    result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+    result.offset.SetY(textBox.rect.fTop);
+    result.height = textBox.rect.fBottom - textBox.rect.fTop;
     return true;
 }
 
@@ -1127,23 +1126,23 @@ Offset FlutterRenderTextField::MakeEmptyOffset() const
 double FlutterRenderTextField::PreferredLineHeight()
 {
     if (!template_) {
-        std::unique_ptr<Rosen::TypographyCreate> builder =
-            Rosen::TypographyCreate::Create(*CreateParagraphStyle(), GetFontCollection());
+        std::unique_ptr<txt::ParagraphBuilder> builder =
+            txt::ParagraphBuilder::CreateTxtBuilder(*CreateParagraphStyle(), GetFontCollection());
         builder->PushStyle(*CreateTextStyle(style_));
         // Use a space for estimating line height if there is no placeholder.
         // Actually it has slight differ between cases.
         if (placeholder_.empty()) {
-            builder->AppendText(u" ");
+            builder->AddText(u" ");
         } else {
-            builder->AppendText(StringUtils::Str8ToStr16(placeholder_));
+            builder->AddText(StringUtils::Str8ToStr16(placeholder_));
         }
-        template_ = builder->CreateTypography();
+        template_ = builder->Build();
         template_->Layout(Size::INFINITE_SIZE);
     }
     return template_->GetHeight();
 }
 
-std::shared_ptr<Rosen::FontCollection> FlutterRenderTextField::GetFontCollection()
+std::shared_ptr<txt::FontCollection> FlutterRenderTextField::GetFontCollection()
 {
     return FlutterFontCollection::GetInstance().GetFontCollection();
 }
@@ -1167,8 +1166,10 @@ int32_t FlutterRenderTextField::GetCursorPositionForMoveUp()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
-    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).index);
+    return static_cast<int32_t>(paragraph_
+                                    ->GetGlyphPositionAtCoordinateWithCluster(
+                                        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
+                                    .position);
 }
 
 int32_t FlutterRenderTextField::GetCursorPositionForMoveDown()
@@ -1177,8 +1178,10 @@ int32_t FlutterRenderTextField::GetCursorPositionForMoveDown()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
-    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).index);
+    return static_cast<int32_t>(paragraph_
+                                    ->GetGlyphPositionAtCoordinateWithCluster(
+                                        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
+                                    .position);
 }
 
 int32_t FlutterRenderTextField::GetCursorPositionForClick(const Offset& offset)
@@ -1194,7 +1197,7 @@ int32_t FlutterRenderTextField::GetCursorPositionForClick(const Offset& offset)
         return 0;
     }
     return static_cast<int32_t>(
-        paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
+        paragraph_->GetGlyphPositionAtCoordinateWithCluster(clickOffset_.GetX(), clickOffset_.GetY()).position);
 }
 
 int32_t FlutterRenderTextField::AdjustCursorAndSelection(int32_t currentCursorPosition)
@@ -1203,7 +1206,7 @@ int32_t FlutterRenderTextField::AdjustCursorAndSelection(int32_t currentCursorPo
     // Place cursor to the right boundary of paragraph when direction is LTR,
     // place to the left boundary of paragraph when direction is RTL.
     auto paragraphStyle = CreateParagraphStyle();
-    std::unique_ptr<Rosen::TextStyle> txtStyle;
+    std::unique_ptr<txt::TextStyle> txtStyle;
     MeasureParagraph(paragraphStyle, txtStyle);
     Rect tempRect;
     GetCaretRect(currentCursorPosition, tempRect);

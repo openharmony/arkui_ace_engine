@@ -141,10 +141,7 @@ template("build_component") {
             "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
           ]
         } else {
-          external_deps += [
-            "graphic_2d:librender_service_client",
-            "graphic_2d:rosen_text",
-          ]
+          external_deps += [ "graphic_2d:librender_service_client" ]
         }
       }
       part_name = ace_engine_part
