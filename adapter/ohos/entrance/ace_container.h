@@ -413,6 +413,7 @@ public:
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
     bool IsLauncherContainer() override;
+    bool IsScenceBoardWindow() override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     void GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType) override;

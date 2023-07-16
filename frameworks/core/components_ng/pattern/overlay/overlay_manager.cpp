@@ -131,7 +131,8 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 
     auto root = rootNodeWeak_.Upgrade();
     auto dialogPattern = node->GetPattern<DialogPattern>();
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
         root = dialogPattern->GetDialogProperties().windowScene.Upgrade();
     }
     CHECK_NULL_VOID(root);
@@ -290,7 +291,9 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, const WeakP
                 auto root = rootWeak.Upgrade();
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID_NOLOG(menu && overlayManager);
-                if (SystemProperties::IsSceneBoardEnabled()) {
+                ContainerScope scope(id);
+                auto container = Container::Current();
+                if (container && container->IsScenceBoardWindow()) {
                     auto windowScene = windowSceneWeak.Upgrade();
                     if (!windowScene) {
                         auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
@@ -306,7 +309,6 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, const WeakP
                     }
                 }
                 CHECK_NULL_VOID(root);
-                ContainerScope scope(id);
                 overlayManager->CallOnHideMenuCallback();
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
                 // clear contextMenu then return
@@ -343,6 +345,11 @@ void OverlayManager::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
 {
     LOGI("OverlayManager::ShowToast");
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        SubwindowManager::GetInstance()->ShowToast(message, duration, bottom);
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
@@ -475,7 +482,8 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
 {
     popupMap_[targetId] = popupInfo;
     auto rootNode = rootNodeWeak_.Upgrade();
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
     }
     CHECK_NULL_VOID(rootNode);
@@ -575,7 +583,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
 
     auto rootNode = rootNodeWeak_.Upgrade();
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
     }
     CHECK_NULL_VOID(rootNode);
@@ -695,7 +704,8 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
         auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
         CHECK_NULL_VOID(wrapperPattern);
         auto menuChild = wrapperPattern->GetMenu();
@@ -791,7 +801,8 @@ void OverlayManager::HideMenu(int32_t targetId)
 void OverlayManager::HideAllMenus()
 {
     LOGD("OverlayManager::HideAllMenus");
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
         for (const auto& windowScene : windowSceneSet_) {
             if (!windowScene.Upgrade()) {
                 continue;
@@ -1636,7 +1647,8 @@ void OverlayManager::DestroySheetMask(const RefPtr<FrameNode>& sheetNode)
 
 RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
-    if (!SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (!container || !container->IsScenceBoardWindow()) {
         return rootNodeWeak_.Upgrade();
     }
     LOGI("FindWindowScene start");
