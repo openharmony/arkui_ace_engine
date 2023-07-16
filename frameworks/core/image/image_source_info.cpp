@@ -85,7 +85,7 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     if (head == "http" || head == "https") {
         return SrcType::NETWORK;
     } else if (head == "file") {
-        if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*/thumbnail/.*$")) {
+        if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*thumbnail.*$")) {
             return SrcType::DATA_ABILITY_DECODED;
         } else if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*")) {
             return SrcType::DATA_ABILITY;
@@ -105,8 +105,8 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     } else if (head == "resource") {
         return SrcType::RESOURCE;
     } else if (head == "dataability" || head == "datashare") {
-        if (IsUriOfDataAbilityEncoded(uri, "^dataability://.*?/media/.*/thumbnail/.*$") ||
-            IsUriOfDataAbilityEncoded(uri, "^datashare://.*?/media/.*/thumbnail/.*$")) {
+        if (IsUriOfDataAbilityEncoded(uri, "^dataability://.*?/media/.*thumbnail.*$") ||
+            IsUriOfDataAbilityEncoded(uri, "^datashare://.*?/media/.*thumbnail.*$")) {
             return SrcType::DATA_ABILITY_DECODED;
         }
         return SrcType::DATA_ABILITY;
