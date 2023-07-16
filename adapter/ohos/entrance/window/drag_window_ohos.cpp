@@ -15,6 +15,8 @@
 
 #include "drag_window_ohos.h"
 
+#include "txt/paragraph_txt.h"
+
 #ifdef NEW_SKIA
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSamplingOptions.h"
@@ -36,8 +38,6 @@
 #include "core/components_ng/render/drawing.h"
 #endif
 #include "core/pipeline_ng/pipeline_context.h"
-
-#include "rosen_text/typography.h"
 
 #ifdef USE_ROSEN_DRAWING
 using namespace OHOS::Rosen;
@@ -427,8 +427,8 @@ void DragWindowOhos::DrawImage(void* drawingImage)
 }
 #endif
 
-void DragWindowOhos::DrawText(std::shared_ptr<Rosen::Typography> paragraph,
-    const Offset& offset, const RefPtr<RenderText>& renderText)
+void DragWindowOhos::DrawText(
+    std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(paragraph);

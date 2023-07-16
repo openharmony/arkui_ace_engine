@@ -16,14 +16,15 @@
 
 #include <cstdint>
 
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
+
 #ifndef USE_ROSEN_DRAWING
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPoint.h"
-#include "third_party/skia/include/core/SkRRect.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPoint.h"
+#include "include/core/SkRRect.h"
 #endif
 
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography_style.h"
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
@@ -74,8 +75,8 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
 
     UpdateParagraph(offset, subscript_.GetVoiceContent());
     paragraph_->Layout(GetLayoutSize().Width());
-    if (paragraph_->GetActualWidth() > NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP))) {
-        width = height + (paragraph_->GetActualWidth() - NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP)));
+    if (paragraph_->GetLongestLine() > NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP))) {
+        width = height + (paragraph_->GetLongestLine() - NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP)));
     }
 #ifndef USE_ROSEN_DRAWING
     SkVector radii[] = { { corner, corner }, { 0, 0 }, { corner, corner }, { 0, 0 } };
@@ -91,8 +92,7 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
     canvas->DetachBrush();
 #endif
 
-#ifndef USE_ROSEN_DRAWING
-    auto leftOffset = paragraph_->GetActualWidth() / 2;
+    auto leftOffset = paragraph_->GetLongestLine() / 2;
     auto centerX = offset.GetX() + width / 2;
     auto centerY = offset.GetY() + height / 2;
     paragraph_->Paint(canvas, centerX - leftOffset, centerY - paragraph_->GetHeight() / 2);
@@ -104,9 +104,9 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
 void RosenRenderMultimodal::UpdateParagraph(const Offset& offset, const std::string& text)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.maxLines = 1;
-    style.ellipsis= StringUtils::Str8ToStr16(ELLIPSIS);
+    txt::ParagraphStyle style;
+    style.max_lines = 1;
+    style.ellipsis = StringUtils::Str8ToStr16(ELLIPSIS);
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
 #else
@@ -116,14 +116,14 @@ void RosenRenderMultimodal::UpdateParagraph(const Offset& offset, const std::str
         LOGW("UpdateParagraph: fontCollection is null");
         return;
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder =
-        Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
-    txtStyle.fontSize = NormalizeToPx(Dimension(FONT_SIZE, DimensionUnit::FP));
+    std::unique_ptr<txt::ParagraphBuilder> builder =
+        txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
+    txtStyle.font_size = NormalizeToPx(Dimension(FONT_SIZE, DimensionUnit::FP));
     txtStyle.color = Color::FromARGB(255, 255, 255, 255).GetValue();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    paragraph_ = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    paragraph_ = builder->Build();
 }
 } // namespace OHOS::Ace

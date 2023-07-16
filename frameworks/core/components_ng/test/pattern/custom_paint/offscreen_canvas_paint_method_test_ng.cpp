@@ -690,7 +690,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg016, 
     EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
-    std::unique_ptr<Rosen::Typography> paragraph(std::move(mockParagraph));
+    std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
 
     /**
      * @tc.steps2: Test functions GetAlignOffset.
@@ -722,7 +722,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg017, 
     EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
-    std::unique_ptr<Rosen::Typography> paragraph(std::move(mockParagraph));
+    std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
 
     /**
      * @tc.steps2: Test functions GetBaselineOffset.

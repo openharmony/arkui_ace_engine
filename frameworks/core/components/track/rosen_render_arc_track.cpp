@@ -16,18 +16,16 @@
 #include "core/components/track/rosen_render_arc_track.h"
 
 #ifndef USE_ROSEN_DRAWING
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkClipOp.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPath.h"
-#else
-#include "core/components_ng/render/drawing.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkClipOp.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
 #endif
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -104,21 +102,20 @@ void SetTextStyle(RSCanvas* canvas, const RenderRingInfo& trackInfo, const std::
 #ifndef USE_ROSEN_DRAWING
     double pathStartVertexX = trackInfo.center.GetX();
     double pathStartVertexY = trackInfo.center.GetY() - trackInfo.radius + (trackInfo.thickness / 2);
-#endif
-    Rosen::TypographyStyle style;
-    Rosen::TextStyle txtStyle;
-    txtStyle.fontSize = 80;
-    txtStyle.fontWeight = Rosen::FontWeight::W400;
+    txt::ParagraphStyle style;
+    txt::TextStyle txtStyle;
+    txtStyle.font_size = 80;
+    txtStyle.font_weight = txt::FontWeight::w400;
     txtStyle.color = markedColor.GetValue();
-    std::unique_ptr<Rosen::TypographyCreate> builder;
-    style.maxLines = 1;
-    builder = Rosen::TypographyCreate::Create(style, fontCollection);
+    std::unique_ptr<txt::ParagraphBuilder> builder;
+    style.max_lines = 1;
+    builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(markedText));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(markedText));
+    auto paragraph = builder->Build();
     paragraph->Layout(dataRegion.Width());
 #ifndef USE_ROSEN_DRAWING
-    paragraph->Paint(canvas, pathStartVertexX - txtStyle.fontSize, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
+    paragraph->Paint(canvas, pathStartVertexX - txtStyle.font_size, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
 #else
     LOGE("Drawing is not supported");
 #endif

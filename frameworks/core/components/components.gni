@@ -56,7 +56,6 @@ template("build_component") {
       deps = []
       deps += extra_deps
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
 
       if (ace_use_new_skia) {
         deps += [

@@ -44,9 +44,9 @@ public:
 #else
     void DrawImage(void* drawingImage) override;
 #endif
+    void DrawText(
+        std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText) override;
     void DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern) override;
-    void DrawText(std::shared_ptr<Rosen::Typography> paragraph,
-        const Offset& offset, const RefPtr<RenderText>& renderText) override;
 
 private:
     OHOS::sptr<Rosen::Window> dragWindow_;

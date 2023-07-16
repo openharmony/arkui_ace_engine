@@ -41,7 +41,7 @@ public:
     virtual const RectF& GetTextContentRect() const = 0;
     virtual float GetLineHeight() const = 0;
 
-    virtual std::vector<RSTextRect> GetTextBoxes() = 0;
+    virtual std::vector<RSTypographyProperties::TextBox> GetTextBoxes() = 0;
     virtual OffsetF GetParentGlobalOffset() const = 0;
 
     virtual RefPtr<FrameNode> MoveDragNode() = 0;

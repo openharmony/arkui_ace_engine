@@ -17,13 +17,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("text_test_ng") {
   module_out_path = pattern_test_output_path
 
-  include_dirs = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
-    "//foundation/graphic/graphic_2d/rosen/modules//2d_graphics/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-    "//third_party/flutter/build/skia",
-  ]
+  include_dirs =
+      [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include" ]
 
   sources = [
     "$ace_root/adapter/preview/osal/ressched_report.cpp",

@@ -97,7 +97,6 @@ template("build_component_ng") {
         "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",

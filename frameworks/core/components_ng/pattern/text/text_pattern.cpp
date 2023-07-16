@@ -681,16 +681,16 @@ float TextPattern::GetLineHeight() const
     return selectedRects.front().Height();
 }
 
-RSTextRect TextPattern::ConvertRect(const Rect& rect)
+RSTypographyProperties::TextBox TextPattern::ConvertRect(const Rect& rect)
 {
     return { RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()), RSTextDirection::LTR };
 }
 
-std::vector<RSTextRect> TextPattern::GetTextBoxes()
+std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
 {
     std::vector<Rect> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
-    std::vector<RSTextRect> res;
+    std::vector<RSTypographyProperties::TextBox> res;
     res.reserve(selectedRects.size());
     for (auto&& rect : selectedRects) {
         res.emplace_back(ConvertRect(rect));

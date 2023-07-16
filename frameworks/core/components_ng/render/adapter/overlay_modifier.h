@@ -69,23 +69,23 @@ public:
             TextStyle textStyle;
             textStyle.SetFontSize(fontSize);
             RSParagraphStyle paraStyle;
-            paraStyle.textAlign = ToRSTextAlign(textStyle.GetTextAlign());
-            paraStyle.maxLines = textStyle.GetMaxLines();
-            paraStyle.locale = Localization::GetInstance()->GetFontLocale();
-            paraStyle.wordBreakType = ToRSWordBreakType(textStyle.GetWordBreak());
-            paraStyle.fontSize = fontSize.Value();
-            auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+            paraStyle.textAlign_ = ToRSTextAlign(textStyle.GetTextAlign());
+            paraStyle.maxLines_ = textStyle.GetMaxLines();
+            paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+            paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
+            paraStyle.fontSize_ = fontSize.Value();
+            auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
             CHECK_NULL_VOID(builder);
             auto pipelineContext = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             builder->PushStyle(ToRSTextStyle(pipelineContext, textStyle));
-            builder->AppendText(StringUtils::Str8ToStr16(overlayOptions.content));
-            builder->PopStyle();
-            auto paragraph = builder->CreateTypography();
+            builder->AddText(StringUtils::Str8ToStr16(overlayOptions.content));
+            builder->Pop();
+            auto paragraph = builder->Build();
             CHECK_NULL_VOID(paragraph);
             paragraph->Layout(context.width);
             OffsetF offset = OverlayTextModifier::GetTextPosition(SizeF(context.width, context.height),
-                SizeF(paragraph->GetActualWidth(), paragraph->GetHeight()), overlayOptions);
+                SizeF(paragraph->GetLongestLine(), paragraph->GetHeight()), overlayOptions);
 #ifndef USE_ROSEN_DRAWING
             std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
             RSCanvas canvas(&skCanvas);
