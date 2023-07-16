@@ -54,7 +54,6 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paragraph.h"
@@ -3411,8 +3410,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
         TextFieldLayoutAlgorithm::UpdateTextStyle(GetHost(), layoutProperty, textFieldTheme, textStyle, false);
         textContent = "a";
     } else {
-        TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
-            GetHost(), layoutProperty, textFieldTheme, textStyle, false);
+        TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(layoutProperty, textFieldTheme, textStyle, false);
         textContent = "b";
     }
     if (textStyle.GetFontSize().IsNonPositive()) {
@@ -3431,8 +3429,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis = RSParagraphStyle::ELLIPSIS;
     }
-    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
-    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
+    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(textEditingValue_.text, static_cast<int32_t>(textStyle.GetTextCase()));
     builder->AppendText(StringUtils::Str8ToStr16(textContent));

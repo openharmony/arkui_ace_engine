@@ -139,12 +139,13 @@ bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,
     return result;
 }
 
-void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode, const TextStyle& textStyle)
+void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  const TextStyle& textStyle)
 {
     auto callback = [weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))] {
         auto frameNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (frameNode) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
     };
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
