@@ -152,7 +152,7 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> children;
-    host->GenerateOneDepthAllFrame(children);
+    host->GenerateOneDepthVisibleFrame(children);
     for (const auto& itemFrameNode : children) {
         auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(itemEvent);
