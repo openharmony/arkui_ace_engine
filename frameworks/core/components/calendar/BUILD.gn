@@ -15,6 +15,8 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
 
 build_component("calendar") {
+  include_dirs =
+      [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include" ]
   sources = [
     "calendar_component.cpp",
     "calendar_data_adapter.cpp",

@@ -20,6 +20,7 @@ config("ace_config") {
     "$ace_root",
     "$ace_root/frameworks",
     "$root_out_dir/arkui/framework",
+    "//foundation/graphic/graphcis_2d/rosen/modules/2d_engine/rosen_text/export",
     "//third_party/zlib",
   ]
 

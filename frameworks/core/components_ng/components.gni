@@ -96,6 +96,7 @@ template("build_component_ng") {
       include_dirs = [
         "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
@@ -145,7 +146,6 @@ template("build_component_ng") {
         ]
         external_deps += [
           "graphic_2d:2d_graphics",
-          "graphic_2d:rosen_text",
         ]
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
@@ -161,7 +161,6 @@ template("build_component_ng") {
         } else {
           external_deps += [
             "graphic_2d:librender_service_client",
-            "graphic_2d:rosen_text",
           ]
         }
 
