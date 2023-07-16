@@ -865,11 +865,7 @@ template("ace_core_ng_source_set") {
         "common/rosen/rosen_convert_helper.cpp",
       ]
       if (is_ohos) {
-<<<<<<< HEAD
         external_deps += [ "graphic_2d:libtexgine" ]
-=======
-        external_deps += [ "graphic_standard:libtexgine" ]
->>>>>>> parent of d5a6311d0... 部件化修改
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
@@ -878,10 +874,7 @@ template("ace_core_ng_source_set") {
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
         ]
       } else {
-        external_deps += [
-          "graphic_2d:librender_service_client",
-          "graphic_2d:rosen_text",
-        ]
+        external_deps += [ "graphic_2d:librender_service_client" ]
       }
     }
     cflags_cc = []

@@ -143,9 +143,7 @@ template("build_component_ng") {
           "//third_party/EGL:libEGL",
           "//third_party/openGLES:libGLES",
         ]
-        external_deps += [
-          "graphic_2d:2d_graphics",
-        ]
+        external_deps += [ "graphic_2d:2d_graphics" ]
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
       }
@@ -158,9 +156,7 @@ template("build_component_ng") {
             "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
           ]
         } else {
-          external_deps += [
-            "graphic_2d:librender_service_client",
-          ]
+          external_deps += [ "graphic_2d:librender_service_client" ]
         }
 
         include_dirs += [
