@@ -68,8 +68,10 @@ void AppBarTestNg::TearDown() {}
 void AppBarTestNg::ClickBtn(RefPtr<FrameNode> frameNode)
 {
     auto eventHub = frameNode->GetOrCreateGestureEventHub();
+    EXPECT_TRUE(eventHub->clickEventActuator_);
     auto clickEvents = eventHub->clickEventActuator_->clickEvents_;
     GestureEvent info;
+    EXPECT_FALSE(clickEvents.empty());
     clickEvents.front()->GetGestureEventFunc()(info);
 }
 
@@ -84,7 +86,7 @@ HWTEST_F(AppBarTestNg, Test001, TestSize.Level1)
     auto frameNode = AppBarView::Create(test);
     EXPECT_EQ(frameNode->GetChildren().size(), 2);
     auto titleBar = frameNode->GetChildAtIndex(0);
-    EXPECT_EQ(titleBar->GetChildren().size(), 2);
+    EXPECT_EQ(titleBar->GetChildren().size(), 3);
 }
 
 /**
@@ -122,12 +124,16 @@ HWTEST_F(AppBarTestNg, Test003, TestSize.Level1)
     auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     SystemProperties::SetExtSurfaceEnabled(true);
     auto frameNode = AppBarView::Create(test);
+    EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetChildren().size(), 2);
     auto titleBar = frameNode->GetChildAtIndex(0);
+    EXPECT_TRUE(titleBar);
     EXPECT_EQ(titleBar->GetChildren().size(), 3);
     auto backBtn = AceType::DynamicCast<FrameNode>(titleBar->GetChildAtIndex(0));
+    EXPECT_TRUE(backBtn);
     ClickBtn(backBtn);
     auto shareBtn = AceType::DynamicCast<FrameNode>(titleBar->GetChildAtIndex(2));
+    EXPECT_TRUE(shareBtn);
     ClickBtn(shareBtn);
     SUCCEED();
 }

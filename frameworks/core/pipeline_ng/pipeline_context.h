@@ -443,7 +443,6 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
-    RefPtr<FrameNode> appBarNode_;
 
     std::set<RefPtr<FrameNode>> needRenderNode_;
 

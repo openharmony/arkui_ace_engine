@@ -21,6 +21,7 @@ build_component_ng("pattern_ng") {
     "action_sheet/action_sheet_model_ng.cpp",
     "animator/animator_model_ng.cpp",
     "app_bar/app_bar_view.cpp",
+    "app_bar/atomic_service_pattern.cpp",
     "badge/badge_accessibility_property.cpp",
     "badge/badge_layout_algorithm.cpp",
     "badge/badge_layout_property.cpp",

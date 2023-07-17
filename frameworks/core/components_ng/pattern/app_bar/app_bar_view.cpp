@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/common/ui_extension_helper.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
+#include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -42,12 +43,12 @@ const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
 
 RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
 {
-    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto atom = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<AtomicServicePattern>());
     auto titleBar = BuildBarTitle();
-    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    column->AddChild(titleBar);
-    column->AddChild(content);
+    atom->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    atom->AddChild(titleBar);
+    atom->AddChild(content);
     content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
     content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stagePattern = content->GetPattern<StagePattern>();
@@ -64,12 +65,12 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
             backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         });
     }
-    return column;
+    return atom;
 }
 
 RefPtr<FrameNode> AppBarView::BuildBarTitle()
 {
-    auto appBarRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto appBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto layoutProperty = appBarRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);

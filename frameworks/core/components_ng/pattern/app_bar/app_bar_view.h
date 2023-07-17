@@ -21,6 +21,15 @@
 
 namespace OHOS::Ace::NG {
 
+/**
+ * The structure of Atomic Service (install free):
+ * |--AtomicService(Column)
+ *   |--AppBar(Row)
+ *
+ *   |--Stage
+ *     |--Page
+ */
+
 class ACE_EXPORT AppBarView {
 public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
