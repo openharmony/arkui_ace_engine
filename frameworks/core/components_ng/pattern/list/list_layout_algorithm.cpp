@@ -92,9 +92,13 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
         stickyStyle_ = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
-        auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
+        auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();
+        auto mainPercentRefer = GetMainAxisSize(childLayoutConstraint.percentReference, axis);
         auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
         spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
+        if (GreatOrEqual(spaceWidth_, contentMainSize_)) {
+            spaceWidth_ = 0.0f;
+        }
         if (listLayoutProperty->GetDivider().has_value()) {
             auto divider = listLayoutProperty->GetDivider().value();
             std::optional<float> dividerSpace = divider.strokeWidth.ConvertToPx();
@@ -103,11 +107,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
         spaceWidth_ += chainInterval_;
-
         CalculateLanes(listLayoutProperty, layoutConstraint, contentIdealSize.CrossSize(axis), axis);
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
         // calculate child layout constraint.
-        auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();
         UpdateListItemConstraint(axis, contentIdealSize, childLayoutConstraint);
         MeasureList(layoutWrapper, childLayoutConstraint, axis);
     } else {

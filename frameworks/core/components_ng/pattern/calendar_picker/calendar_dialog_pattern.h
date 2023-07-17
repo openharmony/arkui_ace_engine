@@ -104,6 +104,7 @@ private:
     void PaintFocusState();
     void HandleTitleArrowsClickEvent(const RefPtr<FrameNode>& buttonNode, int32_t nodeIndex);
     void HandleEntryChange(const std::string& info);
+    void HandleEntryLayoutChange();
     void ClearCalendarFocusedState();
     bool HandleCalendarNodeKeyEvent(const KeyEvent& event);
     bool ActClick(int32_t focusAreaID, int32_t focusAreaChildID);

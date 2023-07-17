@@ -37,6 +37,8 @@ public:
     void DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DisPatchFocusActiveEvent(bool isFocusActive);
     void TransferFocusWindowId(uint32_t focusWindowId);
+    void TransferFocusState(bool focusState);
+
 protected:
     void OnAttachToFrameNode() override;
 

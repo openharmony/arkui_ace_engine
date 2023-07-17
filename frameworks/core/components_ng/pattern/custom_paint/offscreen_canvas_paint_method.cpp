@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
 #include "include/core/SkMaskFilter.h"
 #include "core/components/common/properties/paint_state.h"
 #ifndef NEW_SKIA
@@ -41,8 +43,6 @@
 #include "core/components/font/flutter_font_collection.h"
 #endif
 #include "core/components/font/rosen_font_collection.h"
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography_style.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -204,9 +204,16 @@ void OffscreenCanvasPaintMethod::DrawImage(
                         ? Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_, Size(width, height))
                         : Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_);
     CHECK_NULL_VOID(image);
-    InitPaintBlend(cacheBrush_);
-    const auto rsCanvas =
-        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? rsCanvas_.get() : cacheCanvas_.get();
+
+    const auto rsCanvas = rsCanvas_.get();
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        rsCanvas_->SaveLayer(slo);
+    }
+
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     if (HasImageShadow()) {
         RSRect rsRect = RSRect(canvasImage.dx, canvasImage.dy,
@@ -214,6 +221,10 @@ void OffscreenCanvasPaintMethod::DrawImage(
         RSPath path;
         path.AddRect(rsRect);
         RosenDecorationPainter::PaintShadow(path, *imageShadow_, rsCanvas);
+    }
+
+    if (globalState_.HasGlobalAlpha()) {
+        imageBrush_.SetAlphaF(globalState_.GetAlpha());
     }
     switch (canvasImage.flag) {
         case 0:
@@ -241,10 +252,7 @@ void OffscreenCanvasPaintMethod::DrawImage(
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->AttachBrush(cacheBrush_);
-        rsCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
-        rsCanvas_->DetachBrush();
-        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+        rsCanvas_->Restore();
     }
 #endif
 }
@@ -319,9 +327,15 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     auto image = std::make_shared<RSImage>();
     CHECK_NULL_VOID(image->BuildFromBitmap(*rsBitmap));
 
-    InitPaintBlend(cacheBrush_);
-    const auto rsCanvas =
-        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? rsCanvas_.get() : cacheCanvas_.get();
+    const auto rsCanvas = rsCanvas_.get();
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+        rsCanvas_->SaveLayer(slo);
+    }
+
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     switch (canvasImage.flag) {
         case 0:
@@ -350,10 +364,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
             break;
     }
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->AttachBrush(cacheBrush_);
-        rsCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
-        rsCanvas_->DetachBrush();
-        cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+        rsCanvas_->Restore();
     }
 #endif
 }
@@ -455,18 +466,18 @@ void OffscreenCanvasPaintMethod::StrokeText(
 double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetMaxIntrinsicWidth();
 }
@@ -474,18 +485,18 @@ double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const Pa
 double OffscreenCanvasPaintMethod::MeasureTextHeight(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetHeight();
 }
@@ -494,18 +505,18 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 {
     using namespace Constants;
     TextMetrics textMetrics = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, textMetrics);
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
 
     auto textAlign = state.GetTextAlign();
@@ -533,6 +544,7 @@ void OffscreenCanvasPaintMethod::PaintText(
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
+#ifndef USE_ROSEN_DRAWING
     double dx = x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
@@ -540,11 +552,7 @@ void OffscreenCanvasPaintMethod::PaintText(
 
     std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
-#ifndef USE_ROSEN_DRAWING
         skCanvas_->save();
-#else
-        rsCanvas_->Save();
-#endif
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
         if (scale.has_value()) {
@@ -552,20 +560,31 @@ void OffscreenCanvasPaintMethod::PaintText(
                 dx /= scale.value();
                 shadowOffsetX /= scale.value();
             }
-#ifndef USE_ROSEN_DRAWING
             skCanvas_->scale(scale.value(), 1.0);
         }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
+    }
 #else
+    double dx = x + GetAlignOffset(align, paragraph_);
+
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
+    if (hasShadow) {
+        rsCanvas_->Save();
+        auto shadowOffsetX = shadow_.GetOffset().GetX();
+        if (scale.has_value()) {
+            if (!NearZero(scale.value())) {
+                dx /= scale.value();
+                shadowOffsetX /= scale.value();
+            }
             rsCanvas_->Scale(scale.value(), 1.0);
         }
         LOGE("Drawing is not supported");
         rsCanvas_->Restore();
         return;
-#endif
     }
+#endif
     if (scale.has_value()) {
         if (!NearZero(scale.value())) {
             dx /= scale.value();
@@ -589,7 +608,7 @@ void OffscreenCanvasPaintMethod::PaintText(
 #endif
 }
 
-double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph)
+double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double y = 0.0;
     switch (baseline) {
@@ -618,48 +637,48 @@ double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std:
     return y;
 }
 
-bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, bool isStroke,
-    const PaintState& state, bool hasShadow)
+bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
+    txt::ParagraphStyle style;
     if (isStroke) {
-        style.textAlign = ConvertTxtTextAlign(strokeState_.GetTextAlign());
+        style.text_align = ConvertTxtTextAlign(strokeState_.GetTextAlign());
     } else {
-        style.textAlign = ConvertTxtTextAlign(fillState_.GetTextAlign());
+        style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    style.textDirection = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
-    style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
+    style.text_direction = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
+    style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     if (!isStroke && hasShadow) {
-        Rosen::TextShadow txtShadow;
+        txt::TextShadow txtShadow;
         txtShadow.color = shadow_.GetColor().GetValue();
-        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
-        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
+        txtShadow.offset.fX = shadow_.GetOffset().GetX();
+        txtShadow.offset.fY = shadow_.GetOffset().GetY();
 #ifndef NEW_SKIA
-        txtShadow.blurRadius = shadow_.GetBlurRadius();
+        txtShadow.blur_radius = shadow_.GetBlurRadius();
 #else
+        txtShadow.blur_sigma = shadow_.GetBlurRadius();
 #endif
-        txtStyle.shadows.emplace_back(txtShadow);
+        txtStyle.text_shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateTextStyleForeground(isStroke, txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    paragraph_ = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    paragraph_ = builder->Build();
     return true;
 }
 
-void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow)
+void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
 {
 #ifndef USE_ROSEN_DRAWING
     using namespace Constants;
     if (!isStroke) {
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
-        txtStyle.fontSize = fillState_.GetTextStyle().GetFontSize().Value();
+        txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
@@ -672,11 +691,12 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(OffsetF(0, 0), paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
+            txtStyle.has_foreground = true;
         }
         if (globalState_.HasGlobalAlpha()) {
-            if (txtStyle.foreground.has_value()) {
-                txtStyle.foreground->setColor(fillState_.GetColor().GetValue());
-                txtStyle.foreground->setAlphaf(globalState_.GetAlpha()); // set alpha after color
+            if (txtStyle.has_foreground) {
+                txtStyle.foreground.setColor(fillState_.GetColor().GetValue());
+                txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
 #ifndef NEW_SKIA
@@ -688,6 +708,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground = paint;
+                txtStyle.has_foreground = true;
             }
         }
     } else {
@@ -700,8 +721,8 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
         GetStrokePaint(paint, options);
 #endif
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
-        txtStyle.fontSize = strokeState_.GetTextStyle().GetFontSize().Value();
-        if (strokeState_.GetGradient().IsValid()) {
+        txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
+        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
             UpdatePaintShader(OffsetF(0, 0), paint, strokeState_.GetGradient());
         }
         if (hasShadow) {
@@ -710,6 +731,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
                 NG::SkiaDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
         }
         txtStyle.foreground = paint;
+        txtStyle.has_foreground = true;
     }
 #else
     LOGE("Drawing is not supported");
@@ -823,6 +845,7 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
 TransformParam OffscreenCanvasPaintMethod::GetTransform() const
 {
     TransformParam param;
+#ifndef USE_ROSEN_DRAWING
     if (skCanvas_ != nullptr) {
         SkMatrix matrix = skCanvas_->getTotalMatrix();
         param.scaleX = matrix.getScaleX();
@@ -832,6 +855,17 @@ TransformParam OffscreenCanvasPaintMethod::GetTransform() const
         param.translateX = matrix.getTranslateX();
         param.translateY = matrix.getTranslateY();
     }
+#else
+    if (rsCanvas_ != nullptr) {
+        RSMatrix matrix = rsCanvas_->GetTotalMatrix();
+        param.scaleX = matrix.Get(RSMatrix::SCALE_X);
+        param.scaleY = matrix.Get(RSMatrix::SCALE_Y);
+        param.skewX = matrix.Get(RSMatrix::SKEW_X);
+        param.skewY = matrix.Get(RSMatrix::SKEW_Y);
+        param.translateX = matrix.Get(RSMatrix::TRANS_X);
+        param.translateY = matrix.Get(RSMatrix::TRANS_Y);
+    }
+#endif
     return param;
 }
 } // namespace OHOS::Ace::NG

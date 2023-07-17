@@ -23,7 +23,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_v2/list/render_list.h"
 #ifdef USE_ROSEN_DRAWING
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #endif
 
 namespace OHOS::Ace::V2 {

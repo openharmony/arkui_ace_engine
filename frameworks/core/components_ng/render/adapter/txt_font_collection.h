@@ -18,29 +18,31 @@
 
 #include <mutex>
 
+#include "txt/font_collection.h"
+
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/render/font_collection.h"
-#include "rosen_text/font_collection.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TxtFontCollection : public FontCollection {
     DECLARE_ACE_TYPE(TxtFontCollection, FontCollection)
 public:
-    explicit TxtFontCollection(const std::shared_ptr<Rosen::FontCollection>& fontCollection);
+    explicit TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection);
     TxtFontCollection();
     ~TxtFontCollection() override = default;
 
     static RefPtr<FontCollection> GetInstance();
 
-    const std::shared_ptr<Rosen::FontCollection>& GetRawFontCollection()
+    const std::shared_ptr<txt::FontCollection>& GetRawFontCollection()
     {
         return collection_;
     }
 
 private:
-    std::shared_ptr<Rosen::FontCollection> collection_;
+    std::shared_ptr<txt::FontCollection> collection_;
+    sk_sp<txt::DynamicFontManager> dynamicFontManager_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -108,7 +108,8 @@ public:
     }
     bool IsTablet() const
     {
-        return SystemProperties::GetDeviceType() == DeviceType::TABLET;
+        return SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE;
     }
     void CalculateRatingSize();
     void FireChangeEvent();

@@ -426,14 +426,13 @@ template("ace_core_source_set") {
         "common/rosen/rosen_convert_helper.cpp",
       ]
       if (is_ohos) {
-        external_deps += [ "graphic_standard:libtexgine" ]
-        external_deps += [ "graphic_standard:rosen_text" ]
+        external_deps += [ "graphic_2d:libtexgine" ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
-        external_deps += [ "graphic_standard:librender_service_client" ]
+        external_deps += [ "graphic_2d:librender_service_client" ]
       }
     }
 
@@ -866,14 +865,16 @@ template("ace_core_ng_source_set") {
         "common/rosen/rosen_convert_helper.cpp",
       ]
       if (is_ohos) {
-        external_deps += [ "graphic_standard:libtexgine" ]
-        external_deps += [ "graphic_standard:rosen_text" ]
+        external_deps += [ "graphic_2d:libtexgine" ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+        deps += [
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text_static",
+          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
+        ]
       } else {
-        external_deps += [ "graphic_standard:librender_service_client" ]
+        external_deps += [ "graphic_2d:librender_service_client" ]
       }
     }
     cflags_cc = []

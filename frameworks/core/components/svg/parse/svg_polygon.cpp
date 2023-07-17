@@ -121,7 +121,7 @@ RSPath SvgPolygon::AsPath(const Size& viewPort) const
     RSPath path;
     path.AddPoly(rsPoints, rsPoints.size(), component_->IsClose());
     if (component_->GetDeclaration()->GetClipState().IsEvenodd()) {
-        path.SetFillStyle(RSPathFillType::EVEN_ODD);
+        path.SetFillStyle(RSPathFillType::EVENTODD);
     }
     return path;
 }

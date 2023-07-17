@@ -18,8 +18,8 @@
 
 #include <stdint.h>
 
-#include "core/common/drawing.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class DrawingImage : public virtual CanvasImage {

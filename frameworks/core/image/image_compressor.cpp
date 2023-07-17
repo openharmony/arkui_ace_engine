@@ -251,8 +251,8 @@ std::shared_ptr<RSData> ImageCompressor::GpuCompress(std::string key, RSBitmap& 
 
 std::function<void()> ImageCompressor::ScheduleReleaseTask()
 {
-#ifdef ENABLE_OPENCL
     std::function<void()> task = [this]() {
+#ifdef ENABLE_OPENCL
         if (refCount_ > 0 && clOk_) {
             refCount_--;
             if (refCount_ <= 0) {
@@ -270,10 +270,8 @@ std::function<void()> ImageCompressor::ScheduleReleaseTask()
                 saveFile.close();
             }
         }
-    };
-#else
-    std::function<void()> task = []() {};
 #endif // ENABLE_OPENCL
+    };
     return task;
 }
 

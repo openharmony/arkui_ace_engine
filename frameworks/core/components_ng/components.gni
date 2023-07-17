@@ -96,7 +96,7 @@ template("build_component_ng") {
       include_dirs = [
         "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
@@ -119,7 +119,7 @@ template("build_component_ng") {
           config.enable_drag_framework) {
         external_deps += [
           "device_status:devicestatus_client",
-          "graphic_standard:librender_service_client",
+          "graphic_2d:librender_service_client",
         ]
         include_dirs += [
           "//base/msdp/device_status/interfaces/innerkits/interaction/include",
@@ -143,22 +143,20 @@ template("build_component_ng") {
           "//third_party/EGL:libEGL",
           "//third_party/openGLES:libGLES",
         ]
-        external_deps += [
-          "graphic_standard:2d_graphics",
-          "graphic_standard:rosen_text",
-        ]
+        external_deps += [ "graphic_2d:2d_graphics" ]
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
       }
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
-
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
         if (is_cross_platform_build) {
-          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+          deps += [
+            "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text_static",
+            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
+          ]
         } else {
-          external_deps += [ "graphic_standard:librender_service_client" ]
+          external_deps += [ "graphic_2d:librender_service_client" ]
         }
 
         include_dirs += [

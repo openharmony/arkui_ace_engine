@@ -45,6 +45,7 @@ extern const char THEME_PATTERN_COUNTER[];
 extern const char THEME_PATTERN_DIVIDER[];
 extern const char THEME_PATTERN_FOCUS_ANIMATION[];
 extern const char THEME_PATTERN_GRID[];
+extern const char THEME_PATTERN_HYPERLINK[];
 extern const char THEME_PATTERN_ICON[];
 extern const char THEME_PATTERN_IMAGE[];
 extern const char THEME_PATTERN_LIST[];
@@ -66,6 +67,7 @@ extern const char THEME_PATTERN_SELECT[];
 extern const char THEME_PATTERN_SLIDER[];
 extern const char THEME_PATTERN_TEXT[];
 extern const char THEME_PATTERN_TEXTFIELD[];
+extern const char THEME_PATTERN_RICH_EDITOR[];
 extern const char THEME_PATTERN_TEXT_OVERLAY[];
 extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
@@ -225,5 +227,8 @@ extern const char INLINE_BORDER_COLOR[];
 
 // linear split attributes
 extern const char LINEAR_SPLIT_CHILD_MIN_SIZE[];
+
+// stepper attributes
+extern const char STEPPER_FOCUS_COLOR[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

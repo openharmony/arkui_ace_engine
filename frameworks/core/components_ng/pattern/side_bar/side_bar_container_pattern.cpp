@@ -50,6 +50,8 @@ constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr float HOVER_OPACITY = 0.05f;
 constexpr float PRESS_OPACITY = 0.1f;
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
+constexpr static int32_t SIDE_BAR_INDEX = 2;
+constexpr static int32_t CONTENT_INDEX = 3;
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -66,6 +68,7 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
     if (newShowSideBar != showSideBar_) {
         SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
+        UpdateControlButtonIcon();
         FireChangeEvent(newShowSideBar);
     }
 }
@@ -133,6 +136,61 @@ void SideBarContainerPattern::OnUpdateShowDivider(
     dividerFrameNode->MarkModifyDone();
 }
 
+RefPtr<FrameNode> SideBarContainerPattern::GetContentNode(const RefPtr<FrameNode>& host) const
+{
+    CHECK_NULL_RETURN(host, nullptr);
+
+    const auto& children = host->GetChildren();
+    if (children.size() <= CONTENT_INDEX) {
+        return nullptr;
+    }
+
+    auto iter = children.rbegin();
+    std::advance(iter, CONTENT_INDEX);
+    auto contentNode = AceType::DynamicCast<FrameNode>(*iter);
+    CHECK_NULL_RETURN(contentNode, nullptr);
+
+    return contentNode;
+}
+
+RefPtr<FrameNode> SideBarContainerPattern::GetSideBarNode(const RefPtr<FrameNode>& host) const
+{
+    CHECK_NULL_RETURN(host, nullptr);
+
+    const auto& children = host->GetChildren();
+    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
+        return nullptr;
+    }
+
+    auto iter = children.rbegin();
+    std::advance(iter, SIDE_BAR_INDEX);
+    auto sideBarNode = AceType::DynamicCast<FrameNode>(*iter);
+    CHECK_NULL_RETURN(sideBarNode, nullptr);
+
+    return sideBarNode;
+}
+
+void SideBarContainerPattern::OnUpdateSideBarAndContent(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto sideBarNode = GetSideBarNode(host);
+    CHECK_NULL_VOID(sideBarNode);
+    auto sideBarContext = sideBarNode->GetRenderContext();
+    CHECK_NULL_VOID(sideBarContext);
+
+    if (!sideBarContext->GetClipEdge().has_value() && !sideBarContext->GetClipShape().has_value()) {
+        sideBarContext->SetClipToBounds(true);
+    }
+
+    auto contentNode = GetContentNode(host);
+    CHECK_NULL_VOID(contentNode);
+    auto contentContext = contentNode->GetRenderContext();
+    CHECK_NULL_VOID(contentContext);
+    if (!contentContext->GetClipEdge().has_value() && !contentContext->GetClipShape().has_value()) {
+        contentContext->SetClipToBounds(true);
+    }
+}
+
 void SideBarContainerPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -151,6 +209,12 @@ void SideBarContainerPattern::OnModifyDone()
     OnUpdateShowSideBar(layoutProperty);
     OnUpdateShowControlButton(layoutProperty, host);
     OnUpdateShowDivider(layoutProperty, host);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        OnUpdateSideBarAndContent(host);
+    }
 }
 
 void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -758,13 +822,13 @@ void SideBarContainerPattern::HandleMouseEvent(const MouseInfo& info)
 
     auto children = host->GetChildren();
     if (children.empty()) {
-        LOGE("UpdateControlButtonIcon: children is empty.");
+        LOGE("HandleMouseEvent: children is empty.");
         return;
     }
 
     auto controlButtonNode = children.back();
     if (controlButtonNode->GetTag() != V2::IMAGE_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
-        LOGE("UpdateControlButtonIcon: Get control button failed.");
+        LOGE("HandleMouseEvent: Get control button failed.");
         return;
     }
 

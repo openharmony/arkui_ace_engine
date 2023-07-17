@@ -57,10 +57,6 @@ SelectModel* SelectModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
-} // namespace
-
 void JSSelect::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 0) {
@@ -73,15 +69,20 @@ void JSSelect::Create(const JSCallbackInfo& info)
         for (size_t i = 0; i < size; i++) {
             std::string value;
             std::string icon;
-            JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
-            if (!indexVal->IsObject()) {
-                return;
-            }
-            auto indexObject = JSRef<JSObject>::Cast(indexVal);
-            auto selectValue = indexObject->GetProperty("value");
-            auto selectIcon = indexObject->GetProperty("icon");
-            ParseJsString(selectValue, value);
-            ParseJsMedia(selectIcon, icon);
+                JSRef<JSVal> indexVal = paramArray->GetValueAt(i);
+                if (!indexVal->IsObject()) {
+                    LOGE("element of paramArray is not an object.");
+                    return;
+                }
+                auto indexObject = JSRef<JSObject>::Cast(indexVal);
+                auto selectValue = indexObject->GetProperty("value");
+                auto selectIcon = indexObject->GetProperty("icon");
+                if (!ParseJsString(selectValue, value)) {
+                    LOGW("selectValue is null");
+                }
+                if (!ParseJsMedia(selectIcon, icon)) {
+                    LOGI("selectIcon is null");
+                }
 
             params[i] = { value, icon };
         }
@@ -152,11 +153,6 @@ void JSSelect::Selected(const JSCallbackInfo& info)
     }
 
     int32_t value = 0;
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        // default value is -1
-        value = -1;
-    }
     if (info.Length() > 0 && info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     }
@@ -207,52 +203,36 @@ void JSSelect::Font(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+
     auto param = JSRef<JSObject>::Cast(info[0]);
-    // set select value font size
     auto size = param->GetProperty("size");
     if (!size->IsNull()) {
-        CalcDimension fontSize = theme->GetFontSize();
-        if (ParseJsDimensionFp(size, fontSize) || pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        CalcDimension fontSize;
+        if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetFontSize(fontSize);
         }
     }
-    // set select value font weight
+    std::string weight;
     auto fontWeight = param->GetProperty("weight");
-    std::string weightStr;
     if (!fontWeight->IsNull()) {
-        FontWeight weight = theme->GetFontWeight();
         if (fontWeight->IsNumber()) {
-            weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
-        } else if (ParseJsString(fontWeight, weightStr)) {
-            weight = ConvertStrToFontWeight(weightStr);
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
         }
-        SelectModel::GetInstance()->SetFontWeight(weight);
+        SelectModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
     }
-    // set select value font family
+
     auto family = param->GetProperty("family");
-    if (!family->IsNull()) {
-        std::vector<std::string> fontFamily;
-        if (family->IsString()) {
-            fontFamily = ConvertStrToFontFamilies(family->ToString());
-            SelectModel::GetInstance()->SetFontFamily(fontFamily);
-        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-            SelectModel::GetInstance()->SetFontFamily(fontFamily);
-        }
+    if (!family->IsNull() && family->IsString()) {
+        auto familyVal = family->ToString();
+        SelectModel::GetInstance()->SetFontFamily(ConvertStrToFontFamilies(familyVal));
     }
-    // set select value font style
+
     auto style = param->GetProperty("style");
-    if (!style->IsNull()) {
-        FontStyle fontStyle = FontStyle::NORMAL;
-        if (style->IsNumber()) {
-            fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            SelectModel::GetInstance()->SetItalicFontStyle(fontStyle);
-        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-            SelectModel::GetInstance()->SetItalicFontStyle(fontStyle);
-        }
+    if (!style->IsNull() && style->IsNumber()) {
+        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetItalicFontStyle(styleVal);
     }
 }
 
@@ -262,13 +242,20 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
 
-    Color textColor = theme->GetFontColor();
-    ParseJsColor(info[0], textColor);
+    Color textColor;
+    if (!ParseJsColor(info[0], textColor)) {
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            textColor = theme->GetFontColor();
+        } else {
+            return;
+        }
+    }
+
     SelectModel::GetInstance()->SetFontColor(textColor);
 }
 
@@ -298,58 +285,41 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
+    auto param = JSRef<JSObject>::Cast(info[0]);
+
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-    auto param = JSRef<JSObject>::Cast(info[0]);
-    // set selected option font size
+
     auto size = param->GetProperty("size");
     if (!size->IsNull()) {
-        CalcDimension fontSize = theme->GetFontSize();
-        if (ParseJsDimensionFp(size, fontSize) || pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        CalcDimension fontSize;
+        if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
         }
     }
-    // set selected option font weight
+    std::string weight;
     auto fontWeight = param->GetProperty("weight");
-    std::string weightStr;
     if (!fontWeight->IsNull()) {
-        FontWeight weight = theme->GetFontWeight();
         if (fontWeight->IsNumber()) {
-            weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
-        } else if (ParseJsString(fontWeight, weightStr)) {
-            weight = ConvertStrToFontWeight(weightStr);
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
         }
-        SelectModel::GetInstance()->SetSelectedOptionFontWeight(weight);
+        SelectModel::GetInstance()->SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
     }
-    // set selected option font family
+
     auto family = param->GetProperty("family");
-    if (!family->IsNull()) {
-        std::vector<std::string> fontFamily;
-        if (family->IsString()) {
-            fontFamily = ConvertStrToFontFamilies(family->ToString());
-            SelectModel::GetInstance()->SetSelectedOptionFontFamily(fontFamily);
-        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-            // set theme default value
-            SelectModel::GetInstance()->SetSelectedOptionFontFamily(fontFamily);
-        }
+    if (!family->IsNull() && family->IsString()) {
+        auto familyVal = family->ToString();
+        SelectModel::GetInstance()->SetSelectedOptionFontFamily(ConvertStrToFontFamilies(familyVal));
     }
-    // set selected option font style
+
     auto style = param->GetProperty("style");
-    if (!style->IsNull()) {
-        FontStyle fontStyle = FontStyle::NORMAL;
-        if (style->IsNumber()) {
-            fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(fontStyle);
-        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-            // set theme default value
-            SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(fontStyle);
-        }
+    if (!style->IsNull() && style->IsNumber()) {
+        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(styleVal);
     }
 }
 
@@ -359,13 +329,18 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    Color textColor = theme->GetSelectedColorText();
-    ParseJsColor(info[0], textColor);
+    Color textColor;
+    if (!ParseJsColor(info[0], textColor)) {
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            textColor = theme->GetSelectedColorText();
+        } else {
+            return;
+        }
+    }
     SelectModel::GetInstance()->SetSelectedOptionFontColor(textColor);
 }
 
@@ -375,14 +350,11 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-    Color bgColor = theme->GetBackgroundColor();
-    if (!ParseJsColor(info[0], bgColor) && pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+    Color bgColor;
+    if (!ParseJsColor(info[0], bgColor)) {
         return;
     }
+
     SelectModel::GetInstance()->SetOptionBgColor(bgColor);
 }
 
@@ -391,54 +363,36 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
     auto param = JSRef<JSObject>::Cast(info[0]);
-    // set option font size
+
     auto size = param->GetProperty("size");
     if (!size->IsNull()) {
-        CalcDimension fontSize = theme->GetFontSize();
-        if (ParseJsDimensionFp(size, fontSize) || pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        CalcDimension fontSize;
+        if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetOptionFontSize(fontSize);
         }
     }
-    // set option font weight
-    std::string weightStr;
+    std::string weight;
     auto fontWeight = param->GetProperty("weight");
     if (!fontWeight->IsNull()) {
-        FontWeight weight = theme->GetFontWeight();
         if (fontWeight->IsNumber()) {
-            weight = ConvertStrToFontWeight(std::to_string(fontWeight->ToNumber<int32_t>()));
-        } else if (ParseJsString(fontWeight, weightStr)) {
-            weight = ConvertStrToFontWeight(weightStr);
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
         }
-        SelectModel::GetInstance()->SetOptionFontWeight(weight);
+        SelectModel::GetInstance()->SetOptionFontWeight(ConvertStrToFontWeight(weight));
     }
-    // set option font family
+
     auto family = param->GetProperty("family");
-    if (!family->IsNull()) {
-        std::vector<std::string> fontFamily;
-        if (family->IsString()) {
-            fontFamily = ConvertStrToFontFamilies(family->ToString());
-            SelectModel::GetInstance()->SetOptionFontFamily(fontFamily);
-        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-            // set theme default value
-            SelectModel::GetInstance()->SetOptionFontFamily(fontFamily);
-        }
+    if (!family->IsNull() && family->IsString()) {
+        auto familyVal = family->ToString();
+        SelectModel::GetInstance()->SetOptionFontFamily(ConvertStrToFontFamilies(familyVal));
     }
-    // set option font style
+
     auto style = param->GetProperty("style");
-    if (!style->IsNull()) {
-        FontStyle fontStyle = FontStyle::NORMAL;
-        if (style->IsNumber()) {
-            fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            SelectModel::GetInstance()->SetOptionItalicFontStyle(fontStyle);
-        } else if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-            // set theme default value
-            SelectModel::GetInstance()->SetOptionItalicFontStyle(fontStyle);
-        }
+    if (!style->IsNull() && style->IsNumber()) {
+        auto styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetOptionItalicFontStyle(styleVal);
     }
 }
 
@@ -448,15 +402,11 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
-
-    Color textColor = theme->GetFontColor();
-    if (!ParseJsColor(info[0], textColor) && pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+    Color textColor;
+    if (!ParseJsColor(info[0], textColor)) {
         return;
     }
+
     SelectModel::GetInstance()->SetOptionFontColor(textColor);
 }
 

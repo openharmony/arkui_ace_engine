@@ -65,6 +65,11 @@ public:
         isDisableMouseLeft_ = isDisableMouseLeft;
     }
 
+    RefPtr<LongPressRecognizer> GetLongPressRecognizer() const
+    {
+        return longPressRecognizer_;
+    }
+
     void SetDuration(int32_t duration)
     {
         if (!longPressRecognizer_) {

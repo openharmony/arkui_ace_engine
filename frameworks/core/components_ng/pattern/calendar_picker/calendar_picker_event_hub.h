@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::NG {
 using SelectedChangeEvent = std::function<void(const std::string&)>;
+using LayoutChangeEvent = std::function<void()>;
 
 class CalendarPickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(CalendarPickerEventHub, EventHub)
@@ -67,10 +68,23 @@ public:
     {
         changeEvent_ = changeEvent;
     }
+
+    void FireLayoutChangeEvent() const
+    {
+        if (layoutChangeEvent_) {
+            layoutChangeEvent_();
+        }
+    }
+
+    void SetLayoutChangeEvent(const LayoutChangeEvent& event)
+    {
+        layoutChangeEvent_ = event;
+    }
 private:
     SelectedChangeEvent inputChangeEvent_;
     SelectedChangeEvent onChangeEvent_;
     SelectedChangeEvent changeEvent_;
+    LayoutChangeEvent layoutChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPickerEventHub);
 };

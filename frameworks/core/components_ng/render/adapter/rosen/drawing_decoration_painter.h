@@ -18,9 +18,9 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "core/common/drawing.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class DrawingDecorationPainter : public virtual AceType {

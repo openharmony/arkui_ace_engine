@@ -44,14 +44,23 @@ public:
         contentRect_ = contentRect;
     }
 
+    void SetIsClip(bool isClip)
+    {
+        CHECK_NULL_VOID(isClip_);
+        isClip_->Set(isClip);
+    }
+
+protected:
+    std::optional<RectF> contentRect_;
+
 private:
     bool IsSelectedRectsChanged(const std::vector<Rect>& selectedRects);
 
     RefPtr<PropertyOffsetF> paintOffset_;
     RefPtr<PropertyInt> selectedColor_;
     RefPtr<PropertyBool> changeSelectedRects_;
+    RefPtr<PropertyBool> isClip_;;
     std::vector<Rect> selectedRects_;
-    std::optional<RectF> contentRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextOverlayModifier);
 };

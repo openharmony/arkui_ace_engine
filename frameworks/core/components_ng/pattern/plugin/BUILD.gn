@@ -29,7 +29,7 @@ build_component_ng("plugin_pattern_ng") {
       "ability_runtime:app_manager",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
-      "graphic_standard:librender_service_client",
+      "graphic_2d:librender_service_client",
       "ipc:ipc_core",
     ]
   }

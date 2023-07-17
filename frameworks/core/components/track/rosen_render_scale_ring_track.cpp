@@ -19,6 +19,8 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
 #include "include/effects/Sk1DPathEffect.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/components/theme/theme_constants.h"

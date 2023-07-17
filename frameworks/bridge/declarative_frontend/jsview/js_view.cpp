@@ -639,8 +639,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         recycleNode->ResetRecycle();
         AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
-        jsView->jsViewFunction_->ExecuteDisappear();
+        jsView->jsViewFunction_->ExecuteAboutToRecycle();
         jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
+    };
+
+    auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteSetActive(active);
     };
 
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
@@ -653,6 +660,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .completeReloadFunc = std::move(completeReloadFunc),
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
+        .setActiveFunc = std::move(setActiveFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };

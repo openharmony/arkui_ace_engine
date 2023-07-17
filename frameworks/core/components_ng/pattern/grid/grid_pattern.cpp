@@ -152,7 +152,7 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> children;
-    host->GenerateOneDepthAllFrame(children);
+    host->GenerateOneDepthVisibleFrame(children);
     for (const auto& itemFrameNode : children) {
         auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(itemEvent);
@@ -517,7 +517,7 @@ void GridPattern::FlushCurrentFocus()
         LOGE("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
         return;
     }
-    auto curCrossNum = static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.at(lastFocusItemMainIndex_).size());
+    auto curCrossNum = GetCrossCount();
     auto weakChild = SearchFocusableChildInCross(lastFocusItemMainIndex_, lastFocusItemCrossIndex_, curCrossNum);
     auto child = weakChild.Upgrade();
     if (child) {
@@ -611,7 +611,7 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             LOGE("Can not find next main index: %{public}d", nextMainIndex);
             return nullptr;
         }
-        auto nextMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
+        auto nextMaxCrossCount = GetCrossCount();
         auto weakChild =
             SearchFocusableChildInCross(nextMainIndex, nextCrossIndex, nextMaxCrossCount, curMainIndex, curCrossIndex);
         auto child = weakChild.Upgrade();
@@ -640,7 +640,7 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         LOGE("Can not find current main index: %{public}d", curMainIndex);
         return { -1, -1 };
     }
-    auto curMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[curMainIndex]).size());
+    auto curMaxCrossCount = GetCrossCount();
     LOGD("Current main index start-end: %{public}d-%{public}d, Current cross count: %{public}d, Current child "
          "index start-end: %{public}d-%{public}d, Total children count: %{public}d",
         curMainStart, curMainEnd, curMaxCrossCount, curChildStartIndex, curChildEndIndex, childrenCount);
@@ -722,13 +722,16 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         LOGE("Can not find next main index: %{public}d", nextMainIndex);
         return { -1, -1 };
     }
-    auto nextMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
+    auto nextMaxCrossCount = GetCrossCount();
     if (nextCrossIndex >= nextMaxCrossCount) {
-        LOGI("Next index return: { %{public}d,%{public}d }. Next cross index is greater than max cross count",
-            nextMainIndex, nextMaxCrossCount - 1);
+        LOGI("Next index: { %{public}d,%{public}d }. Next cross index is greater than max cross count: %{public}d.",
+            nextMainIndex, nextCrossIndex, nextMaxCrossCount - 1);
         if (nextMaxCrossCount - 1 != curCrossIndex) {
+            LOGI("Current cross index: %{public}d is not the tail item. Return to the tail: { %{public}d,%{public}d }",
+                curCrossIndex, nextMainIndex, nextMaxCrossCount - 1);
             return { nextMainIndex, nextMaxCrossCount - 1 };
         }
+        LOGW("Current cross index: %{public}d is the tail item. No next item can be found!", curCrossIndex);
         return { -1, -1 };
     }
     LOGI("Next index return: { %{public}d,%{public}d }.", nextMainIndex, nextCrossIndex);

@@ -175,7 +175,7 @@ public:
     }
     float GetLineHeight() const override;
 
-    std::vector<RSTextRect> GetTextBoxes() override;
+    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
     OffsetF GetParentGlobalOffset() const override;
 
     RefPtr<FrameNode> MoveDragNode() override
@@ -296,7 +296,7 @@ private:
     void HandlePanStart(const GestureEvent& info);
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
-    inline RSTextRect ConvertRect(const Rect& rect);
+    inline RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();

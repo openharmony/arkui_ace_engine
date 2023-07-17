@@ -81,9 +81,39 @@ public:
         return menu_;
     }
 
+    void SetToolbarContainer(const RefPtr<UINode>& menu)
+    {
+        toolbarMenu_ = menu;
+    }
+
+    const RefPtr<UINode>& GetToolbarContainer() const
+    {
+        return toolbarMenu_;
+    }
+
     void SetMenuNode(const RefPtr<UINode>& menuNode)
     {
         moreMenuNode_ = menuNode;
+    }
+
+    void SetToolbarMenuNode(const RefPtr<UINode>& menuNode)
+    {
+        toolbarMoreMenuNode_ = menuNode;
+    }
+
+    void SetLandscapeMenuNode(const RefPtr<UINode>& moreLandscapeMenuNode)
+    {
+        moreLandscapeMenuNode_ = moreLandscapeMenuNode;
+    }
+
+    void SetLandscapeMenu(const RefPtr<UINode>& menu)
+    {
+        landscapeMenu_ = menu;
+    }
+
+    const RefPtr<UINode>& GetLandscapeMenu() const
+    {
+        return landscapeMenu_;
     }
 
     void SetTitleBarNode(const RefPtr<UINode>& title)
@@ -126,6 +156,26 @@ public:
         return preToolBarNode_;
     }
 
+    void SetToolBarDividerNode(const RefPtr<UINode>& toolBarDividerNode)
+    {
+        toolBarDividerNode_ = toolBarDividerNode;
+    }
+
+    const RefPtr<UINode>& GetToolBarDividerNode() const
+    {
+        return toolBarDividerNode_;
+    }
+
+    void SetNarBarUseToolbarConfiguration(bool isNewToolbar)
+    {
+        isNewToolbar_ = isNewToolbar;
+    }
+
+    bool IsNavbarUseToolbarConfiguration() const
+    {
+        return isNewToolbar_;
+    }
+
     std::string GetTitleString() const;
     std::string GetSubtitleString() const;
     std::string GetBarItemsString(bool isMenu) const;
@@ -156,11 +206,17 @@ private:
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> menu_;
+    RefPtr<UINode> toolbarMenu_;
+    RefPtr<UINode> landscapeMenu_;
     RefPtr<UINode> moreMenuNode_;
+    RefPtr<UINode> toolbarMoreMenuNode_;
+    RefPtr<UINode> moreLandscapeMenuNode_;
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> navBarContentNode_;
     RefPtr<UINode> toolBarNode_;
     RefPtr<UINode> preToolBarNode_;
+    RefPtr<UINode> toolBarDividerNode_;
+    bool isNewToolbar_ = false;
 };
 
 } // namespace OHOS::Ace::NG

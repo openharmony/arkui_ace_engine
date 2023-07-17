@@ -128,14 +128,20 @@ template("build_component") {
         }
       }
 
+      if (ace_use_rosen_drawing) {
+        external_deps += [ "graphic_2d:2d_graphics" ]
+      }
+
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
-        external_deps += [ "graphic_standard:rosen_text" ]
         if (is_cross_platform_build) {
-          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+          deps += [
+            "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text_static",
+            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
+          ]
         } else {
-          external_deps += [ "graphic_standard:librender_service_client" ]
+          external_deps += [ "graphic_2d:librender_service_client" ]
         }
       }
       part_name = ace_engine_part

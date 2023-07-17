@@ -94,6 +94,7 @@ void WindowPattern::InitContent()
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
+
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
@@ -103,7 +104,8 @@ void WindowPattern::InitContent()
     }
 
     auto state = session_->GetSessionState();
-    LOGI("Session state is %{public}u.", state);
+    auto bundleName = session_->GetSessionInfo().bundleName_;
+    LOGI("Session state: %{public}u, bundle name: %{public}s.", state, bundleName.c_str());
     switch (state) {
         case Rosen::SessionState::STATE_DISCONNECT: {
             CreateStartingNode();
@@ -344,11 +346,11 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 bool WindowPattern::IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    return pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-        ((pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) ||
-        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) ||
-        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_UP) ||
-        (pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE));
+    return (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE)) ||
+        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_UP);
 }
 
 void WindowPattern::HandleMouseEvent(const MouseInfo& info)
@@ -416,5 +418,11 @@ void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusWindowIdEvent(focusWindowId);
+}
+
+void WindowPattern::TransferFocusState(bool focusState)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusStateEvent(focusState);
 }
 } // namespace OHOS::Ace::NG

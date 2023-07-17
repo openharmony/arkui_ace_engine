@@ -42,6 +42,7 @@ const char THEME_PATTERN_COUNTER[] = "counter_pattern";
 const char THEME_PATTERN_DIVIDER[] = "divider_pattern";
 const char THEME_PATTERN_FOCUS_ANIMATION[] = "focus_animation_pattern";
 const char THEME_PATTERN_GRID[] = "grid_pattern";
+const char THEME_PATTERN_HYPERLINK[] = "hyperlink_pattern";
 const char THEME_PATTERN_ICON[] = "icon_pattern";
 const char THEME_PATTERN_IMAGE[] = "image_pattern";
 const char THEME_PATTERN_LIST[] = "list_pattern";
@@ -63,6 +64,7 @@ const char THEME_PATTERN_SELECT[] = "select_pattern";
 const char THEME_PATTERN_SLIDER[] = "slider_pattern";
 const char THEME_PATTERN_TEXT[] = "text_pattern";
 const char THEME_PATTERN_TEXTFIELD[] = "textfield_pattern";
+const char THEME_PATTERN_RICH_EDITOR[] = "rich_editor_pattern";
 const char THEME_PATTERN_TEXT_OVERLAY[] = "text_overlay_pattern";
 const char THEME_PATTERN_VIDEO[] = "video_pattern";
 const char THEME_PATTERN_INDEXER[] = "indexer_pattern";
@@ -221,4 +223,7 @@ const char INLINE_BORDER_COLOR[] = "inline_border_color";
 
 // linear split attributes
 const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";
+
+// stepper attributes
+const char STEPPER_FOCUS_COLOR[] = "stepper_focus_color";
 } // namespace OHOS::Ace

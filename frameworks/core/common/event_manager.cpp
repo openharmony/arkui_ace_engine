@@ -163,6 +163,18 @@ void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
     CHECK_NULL_VOID_NOLOG(selectOverlayManager);
+    if (touchPoint.type == TouchType::DOWN &&
+        touchTestResults_.find(touchPoint.id) != touchTestResults_.end()) {
+        std::vector<std::string> touchTestIds;
+        const auto& resultList = touchTestResults_[touchPoint.id];
+        for (const auto& result : resultList) {
+            auto eventTarget = result->GetEventTarget();
+            if (eventTarget.has_value()) {
+                touchTestIds.emplace_back(eventTarget.value().id);
+            }
+        }
+        selectOverlayManager->SetOnTouchTestResults(touchTestIds);
+    }
     selectOverlayManager->HandleGlobalEvent(touchPoint, rootOffset);
 }
 
@@ -592,11 +604,12 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     LOGD("DispatchMouseEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
         event.action == MouseAction::MOVE || event.action == MouseAction::WINDOW_ENTER ||
-        event.action == MouseAction::WINDOW_LEAVE || event.action == MouseAction::PULL_MOVE ||
-        event.action == MouseAction::PULL_UP) {
+        event.action == MouseAction::WINDOW_LEAVE) {
         MouseTestResult handledResults;
         handledResults.clear();
-        if (event.button == MouseButton::LEFT_BUTTON) {
+        if ((event.button == MouseButton::LEFT_BUTTON && !SystemProperties::IsSceneBoardEnabled()) ||
+            (event.button == MouseButton::LEFT_BUTTON && SystemProperties::IsSceneBoardEnabled() &&
+            event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);

@@ -168,16 +168,41 @@ void DrawingImage::DrawToRSCanvas(
         canvas.DrawImageRect(*image, srcRect, dstRect, options);
     } else {
         DrawWithRecordingCanvas(canvas, radiusXY);
-        // Temporary modification, because RecordingCanvas does not support adaptive drawing
-        ImagePainterUtils::ClipRRect(canvas, dstRect, radiusXY);
-        RSSamplingOptions options;
-        RSRect rect = RSRect(0, 0, image->GetWidth(), image->GetHeight());
-        canvas.DrawImageRect(*image, rect, dstRect, options);
     }
 }
 
 bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArray& radiusXY)
 {
+#ifdef ENABLE_ROSEN_BACKEND
+    RSBrush brush;
+    auto config = GetPaintConfig();
+    RSSamplingOptions options;
+    ImagePainterUtils::AddFilter(brush, options, config);
+    auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
+    auto recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
+    std::vector<RSPoint> radius;
+    for (int ii = 0; ii < 4; ii++) {
+        RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
+        radius.emplace_back(point);
+    }
+    recordingCanvas.ClipAdaptiveRoundRect(radius);
+    recordingCanvas.Scale(config.scaleX_, config.scaleY_);
+
+    RSPoint pointRadius[4] = {};
+    for (int i = 0; i < 4; i++) {
+        pointRadius[i] = radius[i];
+    }
+    Rosen::Drawing::AdaptiveImageInfo rsImageInfo =
+        {static_cast<int32_t>(config.imageFit_), static_cast<int32_t>(config.imageRepeat_),
+         {pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3]}, 1.0, GetUniqueID(),
+        GetCompressWidth(), GetCompressHeight()};
+    auto data = GetCompressData();
+    recordingCanvas.AttachBrush(brush);
+    recordingCanvas.DrawImage(GetImage(), std::move(data), rsImageInfo, options);
+    recordingCanvas.DetachBrush();
+    return true;
+#else // !ENABLE_ROSEN_BACKEND
     return false;
+#endif
 }
 } // namespace OHOS::Ace::NG

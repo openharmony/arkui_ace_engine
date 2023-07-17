@@ -39,6 +39,11 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
         // Get from prebuild or custom color.
         theme->backgroundColor_ = themeConstants->GetColor(THEME_APP_BACKGROUND);
     }
+
+    auto color = themeConstants->GetColor(THEME_OHOS_CONTROL_FOCUSED_OUTLINE);
+    if (color != Color(0xff000000)) {
+        theme->focusColor_ = color;
+    }
     return theme;
 }
 

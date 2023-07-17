@@ -86,7 +86,7 @@ public:
     void InitializeAccessibilityCallback();
 
     void OnSurfaceChanged();
-    void OnMediaQueryUpdate() override;
+    void OnMediaQueryUpdate(bool isSynchronous = false) override;
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
     void FireExternalEvent(const std::string& eventId, const std::string& componentId, uint32_t nodeId, bool isDestroy);

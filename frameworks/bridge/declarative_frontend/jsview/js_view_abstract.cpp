@@ -269,7 +269,7 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     }
     // if specify angle
     JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
-    float perspective = 1.0f;
+    float perspective = 0.0f;
     JSViewAbstract::GetPerspective("perspective", argsPtrItem, perspective);
     rotate.perspective = perspective;
 }
@@ -1538,7 +1538,9 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsAlign", info, checkList)) {
+    if (!CheckJSCallbackInfo("JsAlign", info, checkList) && PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        ViewAbstractModel::GetInstance()->SetAlign(Alignment::CENTER);
         return;
     }
     auto value = info[0]->ToNumber<int32_t>();
@@ -5124,7 +5126,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto height = paramObj->GetProperty("height");
     auto showDragBar = paramObj->GetProperty("dragBar");
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
-    auto backgroundMask = paramObj->GetProperty("backgroundMask");
+    auto maskColor = paramObj->GetProperty("maskColor");
     if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
         sheetStyle.showDragBar = true;
     } else {
@@ -5174,13 +5176,13 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
-    // parse backgroundMask color
-    Color maskColor;
-    if (backgroundMask->IsNull() || backgroundMask->IsUndefined() ||
-        !JSViewAbstract::ParseJsColor(backgroundMask, maskColor)) {
-        maskColor.SetValue(0x00000000);
+    // parse maskColor
+    Color parseMaskColor;
+    if (maskColor->IsNull() || maskColor->IsUndefined() ||
+        !JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
+        parseMaskColor.SetValue(0x00000000);
     }
-    sheetStyle.backgroundMask = std::move(maskColor);
+    sheetStyle.maskColor = std::move(parseMaskColor);
 }
 
 void JSViewAbstract::ParseOverlayCallback(

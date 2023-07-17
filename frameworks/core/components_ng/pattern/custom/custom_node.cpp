@@ -76,6 +76,11 @@ void CustomNode::FlushReload()
     Render();
 }
 
+void CustomNode::SetJSViewActive(bool active)
+{
+    FireSetActiveFunc(active);
+}
+
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
 {
     if (parent->GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {

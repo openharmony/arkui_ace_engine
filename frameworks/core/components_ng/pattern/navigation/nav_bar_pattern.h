@@ -49,11 +49,38 @@ public:
     {
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
+
     bool GetspringEffect()
     {
         return springEffect_;
     }
+
+    void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
+    {
+        titleBarMenuItems_ = menuItems;
+    }
+
+    const std::vector<NG::BarItem>& GetTitleBarMenuItems() const
+    {
+        return titleBarMenuItems_;
+    }
+
+    void SetToolBarMenuItems(const std::vector<NG::BarItem>& menuItems)
+    {
+        toolBarMenuItems_ = menuItems;
+    }
+
+    const std::vector<NG::BarItem>& GetToolBarMenuItems() const
+    {
+        return toolBarMenuItems_;
+    }
+
+protected:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
 private:
+    void RegistOritationListener();
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleOnDragStart(float offset);
@@ -68,6 +95,11 @@ private:
     bool springEffect_ = false;
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
+    bool isOritationListenerRegisted_ = false;
+    bool isHideToolbar_ = false;
+    DeviceOrientation deviceOrientationType_ = DeviceOrientation::PORTRAIT;
+    std::vector<NG::BarItem> titleBarMenuItems_;
+    std::vector<NG::BarItem> toolBarMenuItems_;
 };
 
 } // namespace OHOS::Ace::NG

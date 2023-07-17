@@ -1409,7 +1409,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> childrens;
-    host->GenerateOneDepthAllFrame(childrens);
+    host->GenerateOneDepthVisibleFrame(childrens);
     for (const auto& item : childrens) {
         if (item->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             auto itemGroupPattern = item->GetPattern<ListItemGroupPattern>();
@@ -1448,10 +1448,12 @@ void ListPattern::HandleCardModeSelectedEvent(
 {
     CHECK_NULL_VOID(itemGroupNode);
     std::list<RefPtr<FrameNode>> childrens;
-    itemGroupNode->GenerateOneDepthAllFrame(childrens);
+    itemGroupNode->GenerateOneDepthVisibleFrame(childrens);
     for (const auto& item : childrens) {
         auto itemPattern = item->GetPattern<ListItemPattern>();
-        CHECK_NULL_VOID(itemPattern);
+        if (!itemPattern) {
+            continue;
+        }
         if (!itemPattern->Selectable()) {
             continue;
         }

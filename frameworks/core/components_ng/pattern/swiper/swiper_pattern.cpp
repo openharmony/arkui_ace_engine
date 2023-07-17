@@ -47,7 +47,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // TODO use theme.
-constexpr int32_t MIN_TURN_PAGE_VELOCITY = 180;
+constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
 constexpr Dimension SWIPER_MARGIN = 16.0_vp;
@@ -249,14 +249,22 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 if (!swiper) {
                     return;
                 }
-                if (type == WindowSizeChangeReason::ROTATION) {
-                    swiper->StopPropertyTranslateAnimation();
-                    swiper->StopTranslateAnimation();
-                    swiper->StopSpringAnimation();
-                    swiper->StopFadeAnimation();
-                    swiper->currentOffset_ = 0.0f;
-                    swiper->itemPosition_.clear();
-                    swiper->jumpIndex_ = swiper->currentIndex_;
+                swiper->StopPropertyTranslateAnimation();
+                swiper->StopTranslateAnimation();
+                swiper->StopSpringAnimation();
+                swiper->StopFadeAnimation();
+                swiper->currentOffset_ = 0.0f;
+                swiper->itemPosition_.clear();
+                swiper->jumpIndex_ = swiper->currentIndex_;
+                auto swiperNode = swiper->GetHost();
+                CHECK_NULL_VOID(swiperNode);
+                swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                for (const auto& child : swiperNode->GetChildren()) {
+                    if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
+                        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
+                        CHECK_NULL_VOID(lazyForEachNode);
+                        lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
+                    }
                 }
             });
         LOGD("Add surface changed callback id %{public}d", callbackId);
@@ -1407,8 +1415,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
         pipeline->AddAfterRenderTask([weak = WeakClaim(this), info, nextIndex = GetLoopIndex(nextIndex)]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
-            swiper->FireAnimationStartEvent(
-                swiper->GetLoopIndex(swiper->currentIndex_), nextIndex, info);
+            swiper->FireAnimationStartEvent(swiper->GetLoopIndex(swiper->currentIndex_), nextIndex, info);
         });
     }
 
@@ -1485,7 +1492,8 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion(float velocity) const
             auto interpolatingSpring = DynamicCast<InterpolatingSpring>(curve);
             // check velocity to judge if this current velocity.
             if (interpolatingSpring->GetVelocity() < 0) {
-                interpolatingSpring->UpdateVelocity(velocity);
+                return AceType::MakeRefPtr<InterpolatingSpring>(velocity, interpolatingSpring->GetMass(),
+                    interpolatingSpring->GetStiffness(), interpolatingSpring->GetDamping());
             }
         }
         return curve;
@@ -2516,7 +2524,7 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
 
     auto delayTime = GetInterval() - GetDuration();
     delayTime = std::clamp(delayTime, 0, delayTime);
-    if (NeedAutoPlay()) {
+    if (NeedAutoPlay() && isUserFinish_) {
         PostTranslateTask(delayTime);
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);

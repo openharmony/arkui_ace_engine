@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "core/components/calendar/calendar_theme.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -34,7 +35,7 @@ constexpr uint32_t MAX_YEAR = 5000;
 constexpr uint32_t DELAY_TIME = 2000;
 constexpr uint32_t MAX_MONTH = 12;
 constexpr Dimension DIALOG_HEIGHT = 348.0_vp;
-constexpr Dimension DIALOG_WIDTH = 300.0_vp;
+constexpr Dimension DIALOG_WIDTH = 320.0_vp;
 } // namespace
 void CalendarPickerPattern::OnModifyDone()
 {
@@ -43,6 +44,19 @@ void CalendarPickerPattern::OnModifyDone()
     InitOnKeyEvent();
     InitOnHoverEvent();
     FlushTextStyle();
+}
+
+bool CalendarPickerPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, bool /* skipMeasure */, bool /* skipLayout */)
+{
+    if (!IsDialogShow()) {
+        return true;
+    }
+
+    auto eventHub = GetEventHub<CalendarPickerEventHub>();
+    CHECK_NULL_RETURN(eventHub, true);
+    eventHub->FireLayoutChangeEvent();
+    return true;
 }
 
 void CalendarPickerPattern::InitClickEvent()
@@ -721,6 +735,7 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
     float x = 0.0f;
     float y = 0.0f;
     auto hostRect = host->GetTransformRectRelativeToWindow();
+    hostRect.SetOffset(host->GetPaintRectOffsetToPage());
     auto hostTop = hostRect.Top();
     auto hostBottom = hostRect.Bottom();
 
@@ -728,15 +743,10 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
 
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, OffsetF());
-    auto page = stageManager->GetLastPage();
-    CHECK_NULL_RETURN(page, OffsetF());
-
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
 
-    if (hostTop + (DIALOG_HEIGHT).ConvertToPx() > windowGlobalRect.Height()) {
+    if (!IsContainerModal() && hostTop + (DIALOG_HEIGHT).ConvertToPx() > windowGlobalRect.Height()) {
         y = std::max(static_cast<float>(hostTop - (DIALOG_HEIGHT).ConvertToPx()), 0.0f);
     } else {
         y = hostBottom + (theme->GetDialogMargin()).ConvertToPx();
@@ -894,5 +904,14 @@ void CalendarPickerPattern::SetSelectedType(CalendarPickerSelectedType type)
         default:
             break;
     }
+}
+
+bool CalendarPickerPattern::IsContainerModal()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto windowManager = pipelineContext->GetWindowManager();
+    return pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 }
 } // namespace OHOS::Ace::NG

@@ -938,6 +938,9 @@ void FrameNode::SetActive(bool active)
             parent->MarkNeedSyncRenderTree();
         }
     }
+    if (GetTag() == V2::TAB_CONTENT_ITEM_ETS_TAG) {
+        SetJSViewActive(active);
+    }
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -2147,9 +2150,9 @@ bool FrameNode::IsSecurityComponent()
            GetTag() == V2::SEC_SAVE_BUTTON_ETS_TAG;
 }
 
-void FrameNode::SetDepth(int32_t depth)
+void FrameNode::OnSetDepth(const int32_t depth)
 {
-    UINode::SetDepth(depth);
+    LOGD("Set depth = %{public}d", depth);
     if (pattern_) {
         pattern_->OnSetDepth(depth);
     }

@@ -16,13 +16,28 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, const std::string& abilityName,
+    const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease,
+    std::function<void(int32_t, const std::string&, const std::string&)>&& onError)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
+    wantWrap->SetWantParam(params);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+        [wantWrap]() { return AceType::MakeRefPtr<UIExtensionPattern>(wantWrap); });
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->SetOnReleaseCallback(std::move(onRelease));
+    pattern->SetOnErrorCallback(std::move(onError));
+    return frameNode;
+}
+
 void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     auto* stack = ViewStackProcessor::GetInstance();

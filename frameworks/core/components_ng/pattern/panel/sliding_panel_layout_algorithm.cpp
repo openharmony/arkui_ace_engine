@@ -71,7 +71,9 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
-    childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    if (layoutProperty->GetPanelType() != PanelType::CUSTOM) {
+        childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    }
     childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
     childLayoutConstraint.percentReference = childLayoutConstraint.maxSize;
     auto colunmNodeWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::COLUMN_ETS_TAG);
@@ -105,6 +107,12 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     halfHeight_ = layoutProperty->GetHalfHeight().value_or(
         Dimension((frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()) / HALF_VALUS));
     miniHeight_ = layoutProperty->GetMiniHeight().value_or(Dimension(DRAG_UP_THRESHOLD.ConvertToPx()));
+    customHeight_ = layoutProperty->GetCustomHeight().value_or(Dimension(0.0));
+    auto type = layoutProperty->GetPanelType();
+    if (type == PanelType::CUSTOM && NearEqual(customHeight_.Value(), 0.0)) {
+        customHeight_ = Dimension(columnGeometryNode->GetFrameSize().Height());
+    }
+
     auto childOffset = OffsetF();
     if (isFirstLayout_) {
         if (invisibleFlag_) {

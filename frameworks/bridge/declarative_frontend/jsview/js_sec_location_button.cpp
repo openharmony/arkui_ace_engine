@@ -186,6 +186,7 @@ void JSSecLocationButton::JSBind(BindingTarget globalObj)
     JSClass<JSSecLocationButton>::StaticMethod("backgroundPadding", &JSSecButtonBase::SetBackgroundPadding);
     JSClass<JSSecLocationButton>::StaticMethod("textIconPadding", &JSSecButtonBase::SetTextIconSpace);
     JSClass<JSSecLocationButton>::StaticMethod("onClick", &JSSecLocationButton::JsOnClick);
+    JSClass<JSSecLocationButton>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSSecLocationButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
     JSClass<JSSecLocationButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSSecLocationButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);

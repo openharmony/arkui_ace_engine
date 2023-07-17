@@ -78,11 +78,11 @@ struct RotateOptions {
     CalcDimension centerY;
     CalcDimension centerZ;
     // camera distance value
-    float perspective = 1.0f;
-    
+    float perspective = 0.0f;
+
     RotateOptions(float xDirection, float yDirection, float zDirection, float angle, const CalcDimension& centerX,
-        const CalcDimension& centerY, const CalcDimension& centerZ = CalcDimension(0.0f, DimensionUnit::PX),
-        const float perspective = 1.0f) : xDirection(xDirection), yDirection(yDirection), zDirection(zDirection),
+        const CalcDimension& centerY, const CalcDimension& centerZ = CalcDimension(0.0f, DimensionUnit::VP),
+        const float perspective = 0.0f) : xDirection(xDirection), yDirection(yDirection), zDirection(zDirection),
         angle(angle), centerX(centerX), centerY(centerY), centerZ(centerZ), perspective(perspective) {}
     RotateOptions() = default;
     bool operator==(const RotateOptions& other) const

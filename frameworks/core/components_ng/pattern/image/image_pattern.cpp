@@ -609,6 +609,13 @@ void ImagePattern::OpenSelectOverlay()
         pattern->HandleCopy();
         pattern->CloseSelectOverlay();
     };
+    info.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
+        if (closedByGlobalEvent) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CloseSelectOverlay();
+        }
+    };
 
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -622,16 +629,18 @@ void ImagePattern::OpenSelectOverlay()
 
 void ImagePattern::CloseSelectOverlay()
 {
-    if (selectOverlay_ && !selectOverlay_->IsClosed()) {
+    if (!selectOverlay_) {
+        return;
+    }
+    if (!selectOverlay_->IsClosed()) {
         LOGI("closing select overlay");
         selectOverlay_->Close();
-        selectOverlay_ = nullptr;
-
-        // remove selected mask effect
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkNeedRenderOnly();
     }
+    selectOverlay_ = nullptr;
+    // remove selected mask effect
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::HandleCopy()

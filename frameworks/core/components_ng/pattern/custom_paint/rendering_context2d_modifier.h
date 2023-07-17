@@ -21,6 +21,9 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/modifier.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Rosen {
 class RSRecordingCanvas;
@@ -43,14 +46,22 @@ public:
         needRender_->Set(!needRender_->Get());
     }
 
+#ifndef USE_ROSEN_DRAWING
     void UpdateCanvas(std::shared_ptr<OHOS::Rosen::RSRecordingCanvas> rsRecordingCanvas)
+#else
+    void UpdateCanvas(std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas)
+#endif
     {
         rsRecordingCanvas_ = rsRecordingCanvas;
     }
 
 private:
     RefPtr<PropertyBool> needRender_;
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<OHOS::Rosen::RSRecordingCanvas> rsRecordingCanvas_;
+#else
+    std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(RenderingContext2DModifier);
 };
 } // namespace OHOS::Ace::NG

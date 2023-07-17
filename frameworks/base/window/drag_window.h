@@ -20,8 +20,8 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 
-namespace OHOS::Rosen {
-class Typography;
+namespace txt {
+class Paragraph;
 }
 
 namespace OHOS::Ace {
@@ -53,10 +53,10 @@ public:
 #else
     virtual void DrawImage(void* drawingImage) = 0;
 #endif
+    virtual void DrawText(
+        std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText) = 0;
     virtual void DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern) = 0;
 
-    virtual void DrawText(std::shared_ptr<Rosen::Typography> paragraph_,
-        const Offset& offset, const RefPtr<RenderText>& renderText) = 0;
     void SetOffset(int32_t offsetX, int32_t offsetY)
     {
         offsetX_ = offsetX;

@@ -134,6 +134,8 @@ public:
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
     virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
+    virtual void OnSetDepth(const int32_t depth) {}
+
     // DFX info.
     void DumpTree(int32_t depth);
 
@@ -155,6 +157,7 @@ public:
     void SetDepth(int32_t depth)
     {
         depth_ = depth;
+        OnSetDepth(depth);
         for (auto& child : children_) {
             child->SetDepth(depth_ + 1);
         }
@@ -282,6 +285,8 @@ public:
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     virtual void SetActive(bool active);
+
+    virtual void SetJSViewActive(bool active);
 
     virtual void OnVisibleChange(bool isVisible);
 

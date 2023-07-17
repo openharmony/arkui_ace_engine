@@ -24,7 +24,11 @@
 
 #include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -50,7 +54,8 @@ RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<SkiaImageData>& data, con
     return MakeRefPtr<AnimatedSkImage>(std::move(codec), url);
 }
 #else
-RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<RosenImageData>& data, const SizeF& size, const std::string& url)
+RefPtr<CanvasImage> AnimatedImage::Create(
+    const RefPtr<DrawingImageData>& data, const SizeF& size, const std::string& url)
 {
     CHECK_NULL_RETURN(data, nullptr);
     auto rsData = data->GetRSData();
@@ -59,7 +64,7 @@ RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<RosenImageData>& data, co
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, nullptr);
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        auto src = ImageSource::Create(rsData->GetData(), rsData->GetSize());
+        auto src = ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize());
         CHECK_NULL_RETURN(src, nullptr);
         return MakeRefPtr<AnimatedPixmap>(codec, src, size, url);
     }
@@ -256,7 +261,7 @@ RefPtr<CanvasImage> AnimatedSkImage::GetCachedFrameImpl(const std::string& key)
 #else
 RefPtr<CanvasImage> AnimatedRSImage::GetCachedFrameImpl(const std::string& key)
 {
-    return RosenImage::QueryFromCache(key);
+    return DrawingImage::QueryFromCache(key);
 }
 #endif
 
@@ -270,7 +275,7 @@ void AnimatedSkImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
 void AnimatedRSImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
 {
     std::scoped_lock<std::mutex> lock(frameMtx_);
-    currentFrame_ = DynamicCast<RosenImage>(image)->GetImage();
+    currentFrame_ = DynamicCast<DrawingImage>(image)->GetImage();
 }
 #endif
 

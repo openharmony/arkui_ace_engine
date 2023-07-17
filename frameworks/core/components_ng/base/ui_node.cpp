@@ -598,6 +598,13 @@ void UINode::SetActive(bool active)
     }
 }
 
+void UINode::SetJSViewActive(bool active)
+{
+    for (const auto& child : children_) {
+        child->SetJSViewActive(active);
+    }
+}
+
 void UINode::OnVisibleChange(bool isVisible)
 {
     for (const auto& child : GetChildren()) {

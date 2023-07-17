@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/utils/macros.h"
+#include "bridge/common/utils/componentInfo.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +28,7 @@ public:
     static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key);
     static std::string GetInspectorNodeByKey(const std::string& key);
     static bool SendEventByKey(const std::string& key, int action, const std::string& params);
+    static void GetRectangleById(const std::string& key, Rectangle& rectangle);
     static std::string GetInspector(bool isLayoutInspector = false);
     static void HideAllMenus();
 };

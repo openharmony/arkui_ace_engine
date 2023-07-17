@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MULTIMODAL_ROSEN_RENDER_MULTIMODAL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MULTIMODAL_ROSEN_RENDER_MULTIMODAL_H
 
-#include "rosen_text/typography.h"
+#include "txt/paragraph.h"
 #include "core/components/multimodal/render_multimodal.h"
 
 namespace OHOS::Ace {
@@ -28,7 +28,7 @@ public:
 
 private:
     void UpdateParagraph(const Offset& offset, const std::string& text);
-    std::unique_ptr<Rosen::Typography> paragraph_;
+    std::unique_ptr<txt::Paragraph> paragraph_;
 };
 } // namespace OHOS::Ace
 

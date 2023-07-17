@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
 #include "include/core/SkImage.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/encode/SkJpegEncoder.h"
@@ -36,8 +38,6 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/flutter_image_cache.h"
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography_style.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -386,25 +386,17 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(RefPtr<RosenRend
     }
     // copy the bitmap to tempCanvas
 #ifndef USE_ROSEN_DRAWING
-    auto imageInfo =
-        SkImageInfo::Make(dirtyWidth, dirtyHeight,
-        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-    SkBitmap tempCache;
-    tempCache.allocPixels(imageInfo);
-
     SkBitmap currentBitmap;
-    CHECK_NULL_RETURN(rsRecordingCanvas_, nullptr);
-    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
-    if (!res || currentBitmap.empty()) {
-        LOGE("Bitmap is empty");
+    if (!DrawBitmap(renderContext, currentBitmap)) {
         return nullptr;
     }
-    rsRecordingCanvas_->Clear();
 
+    SkBitmap tempCache;
+    tempCache.allocPixels(SkImageInfo::Make(dirtyWidth, dirtyHeight,
+        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType));
+    SkCanvas tempCanvas(tempCache);
     int32_t size = dirtyWidth * dirtyHeight;
     const uint8_t* pixels = nullptr;
-    SkCanvas tempCanvas(tempCache);
     auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyHeight * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
 #ifndef NEW_SKIA
@@ -497,21 +489,21 @@ void CanvasPaintMethod::StrokeText(
 double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
 #else
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
 #endif
     CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetMaxIntrinsicWidth();
 }
@@ -519,21 +511,21 @@ double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState&
 double CanvasPaintMethod::MeasureTextHeight(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
 #else
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
 #endif
     CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetHeight();
 }
@@ -542,21 +534,21 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
 {
     using namespace Constants;
     TextMetrics textMetrics = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
 #else
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
 #endif
     CHECK_NULL_RETURN(fontCollection, textMetrics);
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
 
     auto textAlign = state.GetTextAlign();
@@ -650,7 +642,7 @@ void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize,
 #endif
 }
 
-double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<Rosen::Typography>& paragraph)
+double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double y = 0.0;
     switch (baseline) {
@@ -682,49 +674,50 @@ double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_p
 bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
+    txt::ParagraphStyle style;
     if (isStroke) {
-        style.textAlign = ConvertTxtTextAlign(strokeState_.GetTextAlign());
+        style.text_align = ConvertTxtTextAlign(strokeState_.GetTextAlign());
     } else {
-        style.textAlign = ConvertTxtTextAlign(fillState_.GetTextAlign());
+        style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    style.textDirection = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
-    style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
+    style.text_direction = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
+    style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
 #else
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
 #endif
     CHECK_NULL_RETURN(fontCollection, false);
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     if (!isStroke && hasShadow) {
-        Rosen::TextShadow txtShadow;
+        txt::TextShadow txtShadow;
         txtShadow.color = shadow_.GetColor().GetValue();
-        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
-        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
+        txtShadow.offset.fX = shadow_.GetOffset().GetX();
+        txtShadow.offset.fY = shadow_.GetOffset().GetY();
 #ifndef NEW_SKIA
-        txtShadow.blurRadius = shadow_.GetBlurRadius();
+        txtShadow.blur_radius = shadow_.GetBlurRadius();
 #else
+        txtShadow.blur_sigma = shadow_.GetBlurRadius();
 #endif
-        txtStyle.shadows.emplace_back(txtShadow);
+        txtStyle.text_shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateTextStyleForeground(offset, isStroke, txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    paragraph_ = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    paragraph_ = builder->Build();
     return true;
 }
 
 void CanvasPaintMethod::UpdateTextStyleForeground(
-    const OffsetF& offset, bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow)
+    const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
 {
 #ifndef USE_ROSEN_DRAWING
     using namespace Constants;
     if (!isStroke) {
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
-        txtStyle.fontSize = fillState_.GetTextStyle().GetFontSize().Value();
+        txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
@@ -737,11 +730,12 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(offset, paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
+            txtStyle.has_foreground = true;
         }
         if (globalState_.HasGlobalAlpha()) {
-            if (txtStyle.foreground.has_value()) {
-                txtStyle.foreground->setColor(fillState_.GetColor().GetValue());
-                txtStyle.foreground->setAlphaf(globalState_.GetAlpha()); // set alpha after color
+            if (txtStyle.has_foreground) {
+                txtStyle.foreground.setColor(fillState_.GetColor().GetValue());
+                txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
 #ifndef NEW_SKIA
@@ -754,6 +748,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 InitPaintBlend(paint);
                 txtStyle.foreground = paint;
+                txtStyle.has_foreground = true;
             }
         }
     } else {
@@ -767,8 +762,8 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
 #endif
         InitPaintBlend(paint);
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
-        txtStyle.fontSize = strokeState_.GetTextStyle().GetFontSize().Value();
-        if (strokeState_.GetGradient().IsValid()) {
+        txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
+        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
             UpdatePaintShader(offset, paint, strokeState_.GetGradient());
         }
         if (hasShadow) {
@@ -777,6 +772,7 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
                 RosenDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
         }
         txtStyle.foreground = paint;
+        txtStyle.has_foreground = true;
     }
 #else
     LOGE("Drawing is not supported");
@@ -832,28 +828,18 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
     double quality = GetQuality(args);
     double width = lastLayoutSize_.Width();
     double height = lastLayoutSize_.Height();
+
+    auto imageInfo = SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
+        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType);
     SkBitmap tempCache;
-    tempCache.allocPixels(SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
-        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
+    tempCache.allocPixels(imageInfo);
 
 #ifndef USE_ROSEN_DRAWING
     SkBitmap currentBitmap;
-#else
-    RSBitmap currentBitmap;
-#endif
-    CHECK_NULL_RETURN(rsRecordingCanvas_, UNSUPPORTED);
-    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
-#ifndef USE_ROSEN_DRAWING
-    if (!res || currentBitmap.empty()) {
-#else
-    if (!res || !currentBitmap.IsValid()) {
-#endif
-        LOGE("Bitmap is empty");
+    if (!DrawBitmap(renderContext, currentBitmap)) {
         return UNSUPPORTED;
     }
-#ifndef USE_ROSEN_DRAWING
-    rsRecordingCanvas_->Clear();
+
     bool success = false;
 #ifndef NEW_SKIA
     success = currentBitmap.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
@@ -862,13 +848,20 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
         tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
 #endif
 #else
+    RSBitmap currentBitmap;
+    CHECK_NULL_RETURN(rsRecordingCanvas_, UNSUPPORTED);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
+    if (!res || !currentBitmap.IsValid()) {
+        LOGE("Bitmap is empty");
+        return UNSUPPORTED;
+    }
     LOGE("Drawing is not supported");
     bool success = false;
     auto& skBitmap = currentBitmap.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
     success = skBitmap.pixmap().scalePixels(
         tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
 #endif
-
     CHECK_NULL_RETURN(success, UNSUPPORTED);
     SkPixmap src = tempCache.pixmap();
     SkDynamicMemoryWStream dst;
@@ -898,6 +891,34 @@ std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContex
 
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
+
+#ifndef USE_ROSEN_DRAWING
+bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkBitmap& currentBitmap)
+{
+    CHECK_NULL_RETURN(rsRecordingCanvas_, false);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, drawCmdList);
+    if (res) {
+        rsRecordingCanvas_->Clear();
+        return true;
+    }
+    LOGD("GetBitmap failed.");
+    if (!drawCmdList) {
+        return false;
+    }
+    if (drawCmdList->GetSize() == 0) {
+        return false;
+    }
+    currentBitmap.reset();
+    auto imageInfo = SkImageInfo::Make(lastLayoutSize_.Width(), lastLayoutSize_.Height(),
+        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+    // tryAllocPixels is more safe than allocPixels
+    currentBitmap.allocPixels(imageInfo);
+    SkCanvas currentCanvas(currentBitmap);
+    drawCmdList->Playback(currentCanvas);
+    return true;
+}
+#endif
 
 std::string CanvasPaintMethod::GetJsonData(const std::string& path)
 {

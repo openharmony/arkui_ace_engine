@@ -78,6 +78,7 @@ public:
 
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
+    void SetJSViewActive(bool active) override;
 
 private:
     std::string viewKey_;

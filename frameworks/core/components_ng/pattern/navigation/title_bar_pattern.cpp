@@ -98,6 +98,13 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
         }
     }
+
+    if (hostNode->GetSubtitle()) {
+        titleLayoutProperty->UpdateMaxLines(1);
+    } else {
+        titleLayoutProperty->UpdateMaxLines(TITLEBAR_MAX_LINES);
+    }
+
     titleNode->MarkModifyDone();
 }
 

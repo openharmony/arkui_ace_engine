@@ -125,6 +125,7 @@ public:
             const double defaultDisabledColorAlpha = 0.4;
             const double defaultSecondaryColorAlpha = 0.6;
             const double defaultTertiaryColorAlpha = 0.6;
+            const double bgColorSelectedAlpha = 0.2;
 
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, theme->fontSize_);
             theme->menuFontSize_ = pattern->GetAttr<Dimension>("menu_text_font_size", theme->menuFontSize_);
@@ -145,7 +146,9 @@ public:
             theme->disabledMenuFontColor_ = theme->menuFontColor_.BlendOpacity(
                 pattern->GetAttr<double>("menu_text_tertiary_alpha", defaultTertiaryColorAlpha));
             theme->clickedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_CLICKED, theme->clickedColor_);
-            theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, theme->selectedColor_);
+            theme->selectedColor_ =
+                pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, theme->selectedColor_)
+                    .BlendOpacity(pattern->GetAttr<double>("bg_color_selected_alpha", bgColorSelectedAlpha));
             theme->selectedColorText_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_SELECTED, theme->selectedColorText_);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
             theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);

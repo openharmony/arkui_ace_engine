@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,15 @@
  * limitations under the License.
  */
 
-#include "mock_subwindow_ohos.h"
-#include "base/log/log_wrapper.h"
+#include "core/common/ui_extension_helper.h"
 
 namespace OHOS::Ace {
 
-RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
+RefPtr<NG::FrameNode> UIExtensionHelper::CreateUIExtensionNode(const std::string& bundleName,
+    const std::string& abilityName, const std::map<std::string, std::string>& params,
+    std::function<void(int32_t)>&& onRelease)
 {
-    LOGI("Create Subwindow, parent container id is %{public}d", instanceId);
-    return AceType::MakeRefPtr<SubwindowOhos>(instanceId);
+    return nullptr;
 }
 
-SubwindowOhos::SubwindowOhos(int32_t instanceId) {}
-
-void SubwindowOhos::InitContainer()
-{
-    LOGI("Subwindow::InitContainer MOCK");
 }
-
-} // namespace OHOS::Ace

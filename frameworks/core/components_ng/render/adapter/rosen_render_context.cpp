@@ -66,8 +66,13 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
@@ -215,7 +220,7 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
     if (transitionEffect->HasRotate()) {
         xPivot = ConvertDimensionToScaleBySize(transitionEffect->GetRotateValue().centerX, frameSize.Width());
         yPivot = ConvertDimensionToScaleBySize(transitionEffect->GetRotateValue().centerY, frameSize.Height());
-        zPivot = static_cast<float>(transitionEffect->GetRotateValue().centerZ.ConvertToPx());
+        zPivot = static_cast<float>(transitionEffect->GetRotateValue().centerZ.ConvertToVp());
     } else if (transitionEffect->HasScale()) {
         xPivot = ConvertDimensionToScaleBySize(transitionEffect->GetScaleValue().centerX, frameSize.Width());
         yPivot = ConvertDimensionToScaleBySize(transitionEffect->GetScaleValue().centerY, frameSize.Height());
@@ -313,7 +318,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
         float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
         if (vec.GetZ().has_value()) {
-            float zPivot = static_cast<float>(vec.GetZ().value().ConvertToPx());
+            float zPivot = static_cast<float>(vec.GetZ().value().ConvertToVp());
             SetPivot(xPivot, yPivot, zPivot);
         } else {
             SetPivot(xPivot, yPivot);
@@ -458,7 +463,7 @@ void RosenRenderContext::PaintBackground()
     } else if (InstanceOf<SkiaImage>(bgImage_)) {
         PaintSkBgImage();
 #else
-    } else if (InstanceOf<RosenImage>(bgImage_)) {
+    } else if (InstanceOf<DrawingImage>(bgImage_)) {
         PaintRSBgImage();
 #endif
     } else {
@@ -674,7 +679,11 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
     return g_pixelMap;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderContext::GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList)
+#else
+bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList)
+#endif
 {
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
@@ -730,18 +739,16 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector5F& rotate)
 
 void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
 {
-    float zPivot = 0.0f;
-    auto& z = center.GetZ();
-    if (z.has_value()) {
-        zPivot = static_cast<float>(z.value().ConvertToPx());
-    }
     RectF rect = GetPaintRectWithoutTransform();
     if (!RectIsNull()) {
         float xPivot = ConvertDimensionToScaleBySize(center.GetX(), rect.Width());
         float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
+        float zPivot = 0.0f;
+        auto& z = center.GetZ();
+        if (z.has_value()) {
+            zPivot = static_cast<float>(z.value().ConvertToVp());
+        }
         SetPivot(xPivot, yPivot, zPivot);
-    } else {
-        rsNode_->SetPivotZ(zPivot);
     }
     RequestNextFrame();
 }
@@ -1079,12 +1086,12 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     }
 #else
     std::shared_ptr<RSImage> image;
-    if (InstanceOf<RosenImage>(bdImage_)) {
-        image = DynamicCast<RosenImage>(bdImage_)->GetImage();
+    if (InstanceOf<DrawingImage>(bdImage_)) {
+        image = DynamicCast<DrawingImage>(bdImage_)->GetImage();
     } else if (InstanceOf<PixelMapImage>(bdImage_)) {
         auto pixmap = DynamicCast<PixelMapImage>(bdImage_)->GetPixelMap();
         CHECK_NULL_VOID(pixmap);
-        image = RosenImage::MakeRSImageFromPixmap(pixmap);
+        image = DrawingImage::MakeRSImageFromPixmap(pixmap);
     } else {
         return;
     }
@@ -1293,12 +1300,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     CHECK_NULL_RETURN(frameNode, rect);
     CHECK_NULL_RETURN(rsNode_, rect);
     const auto& geometryNode = frameNode->GetGeometryNode();
-    if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
-        rect = geometryNode->GetContent() ? geometryNode->GetContent()->GetRect() : RectF();
-        rect.SetOffset(geometryNode->GetFrameOffset() + geometryNode->GetContentOffset());
-    } else {
-        rect = geometryNode->GetFrameRect();
-    }
+    rect = geometryNode->GetFrameRect();
     if (!rect.GetSize().IsPositive()) {
         LOGD("paint size is zero");
         return rect;
@@ -3016,7 +3018,7 @@ void RosenRenderContext::PaintSkBgImage()
 #else
 void RosenRenderContext::PaintRSBgImage()
 {
-    auto image = DynamicCast<NG::RosenImage>(bgImage_);
+    auto image = DynamicCast<NG::DrawingImage>(bgImage_);
 #endif
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
 
