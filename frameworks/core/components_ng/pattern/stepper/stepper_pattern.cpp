@@ -556,21 +556,19 @@ void StepperPattern::InitButtonClickEvent()
     CHECK_NULL_VOID(hostNode);
 
     if (hostNode->HasLeftButtonNode()) {
-        auto leftClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
-            auto stepperPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(stepperPattern);
-            stepperPattern->HandlingLeftButtonClickEvent();
-        };
         auto leftButtonNode =
             DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetLeftButtonId())));
         CHECK_NULL_VOID(leftButtonNode);
         auto leftGestureHub = leftButtonNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(leftGestureHub);
-        if (leftClickEvent_) {
-            leftGestureHub->RemoveClickEvent(leftClickEvent_);
+        if (leftGestureHub->IsClickEventsEmpty()) {
+            auto leftClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
+                auto stepperPattern = weak.Upgrade();
+                CHECK_NULL_VOID_NOLOG(stepperPattern);
+                stepperPattern->HandlingLeftButtonClickEvent();
+            };
+            leftGestureHub->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(leftClickEvent)));
         }
-        leftClickEvent_ = MakeRefPtr<ClickEvent>(std::move(leftClickEvent));
-        leftGestureHub->AddClickEvent(leftClickEvent_);
     }
 
     auto rightButtonNode =
@@ -578,16 +576,14 @@ void StepperPattern::InitButtonClickEvent()
     CHECK_NULL_VOID(rightButtonNode);
     auto rightGestureHub = rightButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(rightGestureHub);
-    auto rightClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto stepperPattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(stepperPattern);
-        stepperPattern->HandlingRightButtonClickEvent();
-    };
-    if (rightClickEvent_) {
-        rightGestureHub->RemoveClickEvent(rightClickEvent_);
+    if (rightGestureHub->IsClickEventsEmpty()) {
+        auto rightClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
+            auto stepperPattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(stepperPattern);
+            stepperPattern->HandlingRightButtonClickEvent();
+        };
+        rightGestureHub->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(rightClickEvent)));
     }
-    rightClickEvent_ = MakeRefPtr<ClickEvent>(std::move(rightClickEvent));
-    rightGestureHub->AddClickEvent(rightClickEvent_);
 }
 
 void StepperPattern::HandlingLeftButtonClickEvent()
