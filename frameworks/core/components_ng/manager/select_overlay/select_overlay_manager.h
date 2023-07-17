@@ -79,7 +79,7 @@ private:
 
     SelectOverlayInfo selectOverlayInfo_;
 
-    std::vector<NG::PointF> touchDownPoints_;
+    std::vector<TouchEvent> touchDownPoints_;
     std::vector<std::string> touchTestResults_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayManager);
