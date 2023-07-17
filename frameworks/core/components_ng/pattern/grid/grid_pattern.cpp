@@ -17,6 +17,8 @@
 
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
@@ -228,6 +230,7 @@ float GridPattern::GetMainContentSize() const
 
 void GridPattern::FireOnScrollStart()
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -485,6 +488,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
         if (!GetScrollAbort() && onScrollStop) {
             scrollState_ = SCROLL_FROM_NONE;
             onScrollStop();
+        }
+        if (!GetScrollAbort()) {
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         }
         scrollStop_ = false;
         SetScrollAbort(false);

@@ -18,6 +18,8 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "core/animation/bilateral_spring_node.h"
 #include "core/animation/spring_model.h"
 #include "core/components/common/layout/constants.h"
@@ -331,6 +333,9 @@ void ListPattern::ProcessEvent(
         if (!GetScrollAbort() && onScrollStop) {
             SetScrollState(SCROLL_FROM_NONE);
             onScrollStop();
+        }
+        if (!GetScrollAbort()) {
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         }
         scrollStop_ = false;
         SetScrollAbort(false);
@@ -708,6 +713,7 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 
 void ListPattern::FireOnScrollStart()
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
