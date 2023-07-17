@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UI_EXTENSION_UI_EXTENSION_HELPER_H
-#define FOUNDATION_ACE_FRAMEWORKS_BASE_UI_EXTENSION_UI_EXTENSION_HELPER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_UI_EXTENSION_HELPER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_UI_EXTENSION_HELPER_H
 
 #include <map>
 #include <string>
@@ -25,16 +25,11 @@ namespace OHOS::Ace {
 
 class ACE_EXPORT UIExtensionHelper final {
 public:
-    static UIExtensionHelper& GetInstance();
-
-    RefPtr<NG::FrameNode> CreateUIExtensionNode(const std::string& bundleName,
+    static RefPtr<NG::FrameNode> CreateUIExtensionNode(const std::string& bundleName,
         const std::string& abilityName, const std::map<std::string, std::string>& params,
         std::function<void(int32_t)>&& onRelease,
         std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
-
-private:
-    UIExtensionHelper();
-    ~UIExtensionHelper();
 };
-}
-#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UI_EXTENSION_UI_EXTENSION_HELPER_H
+
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_UI_EXTENSION_HELPER_H
