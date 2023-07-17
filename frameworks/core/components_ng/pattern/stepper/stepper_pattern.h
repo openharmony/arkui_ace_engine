@@ -88,6 +88,18 @@ public:
         return index_;
     }
 
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        return ScopeFocusAlgorithm(true, true, ScopeType::OTHERS,
+            [wp = WeakClaim(this)](
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                auto stepper = wp.Upgrade();
+                if (stepper) {
+                    nextFocusNode = stepper->GetFocusNode(step, currFocusNode);
+                }
+            });
+    }
+
     void OnModifyDone() override;
 
 private:
@@ -117,6 +129,7 @@ private:
     void ButtonTouchDownAnimation(RefPtr<FrameNode> buttonNode);
     void ButtonTouchUpAnimation(RefPtr<FrameNode> buttonNode);
     void SetAccessibilityAction();
+    WeakPtr<FocusHub> GetFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
@@ -129,6 +142,7 @@ private:
     bool rightIsHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(StepperPattern);
     bool isRightLabelDisable_ = false;
+    RefPtr<FocusHub> leftFocusHub_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

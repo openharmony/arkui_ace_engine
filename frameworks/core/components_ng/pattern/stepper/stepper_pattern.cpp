@@ -404,12 +404,6 @@ void StepperPattern::CreateWaitingRightButtonNode()
     CHECK_NULL_VOID(hostNode);
     // Create loadingProgressNode
     auto buttonId = hostNode->GetRightButtonId();
-    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
-    buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
-    buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
-    CHECK_NULL_VOID(buttonNode);
     auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(
         V2::LOADING_PROGRESS_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     loadingProgressNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -665,5 +659,58 @@ void StepperPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         pattern->HandlingLeftButtonClickEvent();
     });
+}
+
+WeakPtr<FocusHub> StepperPattern::GetFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    auto curFocusNode = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocusNode, nullptr);
+    auto hostNode = DynamicCast<StepperNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, nullptr);
+
+    auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index_)));
+    CHECK_NULL_RETURN(stepperItemNode, nullptr);
+    auto buttonFocusHub = stepperItemNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(buttonFocusHub, nullptr);
+
+    auto stepperItemLayoutProperty = stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>();
+    CHECK_NULL_RETURN(stepperItemLayoutProperty, nullptr);
+    auto labelStatus = stepperItemLayoutProperty->GetLabelStatus().value_or("normal");
+
+    if (hostNode->HasLeftButtonNode()) {
+        auto leftButtonNode =
+            DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetLeftButtonId())));
+        CHECK_NULL_RETURN(leftButtonNode, nullptr);
+        leftFocusHub_ = leftButtonNode->GetOrCreateFocusHub();
+    }
+
+    auto rightButtonNode =
+        DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetRightButtonId())));
+    CHECK_NULL_RETURN(rightButtonNode, nullptr);
+    auto rightFocusHub = rightButtonNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(rightFocusHub, nullptr);
+
+    if (labelStatus == "normal" || labelStatus == "skip") {
+        if (step == FocusStep::UP || step == FocusStep::LEFT || step == FocusStep::SHIFT_TAB) {
+            return curFocusNode == leftFocusHub_ ? buttonFocusHub : leftFocusHub_;
+        }
+
+        if (curFocusNode != leftFocusHub_ && curFocusNode != rightFocusHub) {
+            return hostNode->HasLeftButtonNode() ? leftFocusHub_ : rightFocusHub;
+        }
+
+        if (curFocusNode == rightFocusHub && !hostNode->HasLeftButtonNode()) {
+            return buttonFocusHub;
+        }
+
+        if (step == FocusStep::DOWN || step == FocusStep::RIGHT || step == FocusStep::TAB) {
+            return curFocusNode == buttonFocusHub ? leftFocusHub_ : rightFocusHub;
+        }
+    } else if (labelStatus == "disabled" || labelStatus == "waiting") {
+        return curFocusNode == leftFocusHub_ ? buttonFocusHub : leftFocusHub_;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG
