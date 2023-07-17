@@ -53,7 +53,8 @@ void MenuItemGroupPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* pain
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    auto horInterval = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx());
+    auto horInterval = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
+                       static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
     auto verInterval = static_cast<float>(selectTheme->GetDividerPaddingVertical().ConvertToPx());
     if (!isHeader) {
         verInterval = groupSize.Height() - verInterval;

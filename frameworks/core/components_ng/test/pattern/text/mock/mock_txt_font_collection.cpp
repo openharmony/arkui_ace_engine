@@ -15,15 +15,14 @@
 
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/font_collection.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-TxtFontCollection::TxtFontCollection(const std::shared_ptr<RSFontCollection>& fontCollection)
+TxtFontCollection::TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection)
     : collection_(fontCollection)
 {}
 RefPtr<FontCollection> FontCollection::Current()
 {
-    std::shared_ptr<RSFontCollection> fontCollection;
+    std::shared_ptr<txt::FontCollection> fontCollection;
     return AceType::MakeRefPtr<TxtFontCollection>(fontCollection);
 }
 } // namespace OHOS::Ace::NG

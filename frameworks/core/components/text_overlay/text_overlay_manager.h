@@ -27,8 +27,8 @@
 #include "frameworks/core/common/ime/text_editing_value.h"
 #include "frameworks/core/pipeline/base/overlay_show_option.h"
 
-namespace OHOS::Rosen {
-class Typography;
+namespace txt {
+class Paragraph;
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -151,7 +151,7 @@ public:
     bool IsSelectedText(const Offset& pos, const Offset& globalOffset);
 
 protected:
-    std::shared_ptr<Rosen::Typography> paragraph_;
+    std::shared_ptr<txt::Paragraph> paragraph_;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
     Offset clickOffset_;

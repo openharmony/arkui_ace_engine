@@ -116,7 +116,6 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
     hoverBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
     DrawTouchAndHoverBoard(canvas, hoverBoardOffset);
-
     RSRect rect;
     rect.SetLeft(xOffset);
     rect.SetTop(yOffset);

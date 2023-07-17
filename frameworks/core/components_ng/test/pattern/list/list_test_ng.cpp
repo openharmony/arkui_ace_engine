@@ -4374,15 +4374,6 @@ HWTEST_F(ListTestNg, ListItemCallEventsForCardModeTest001, TestSize.Level1)
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(pattern->GetListItemStyle(), V2::ListItemStyle::CARD);
-    auto renderContext = frameNode->GetRenderContext();
-    renderContext->UpdateBackgroundColor(Color::WHITE);
-
-    /**
-     * @tc.steps: step3. call function - InitListItemCardStyleForList.
-     * @tc.expected: step3. the function can be called.
-     */
-    pattern->InitListItemCardStyleForList();
-    EXPECT_EQ(pattern->currentBackgroundColor_, Color::WHITE);
 }
 
 /**
@@ -4450,7 +4441,6 @@ HWTEST_F(ListTestNg, ListItemHoverEventForCardModeTest002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->currentBackgroundColor_ = Color::WHITE;
 
     /**
      * @tc.steps: step3. call function HandleHoverEvent and Set hover status to false.
@@ -4490,48 +4480,38 @@ HWTEST_F(ListTestNg, ListItemPressEventForCardModeTest001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     ASSERT_NE(pattern, nullptr);
     auto renderContext = frameNode->GetRenderContext();
-    pattern->currentBackgroundColor_ = Color::WHITE;
 
     /**
      * @tc.steps: step3. call function HandlePressEvent, set TouchType to DOWN and set hover status is true.
      * @tc.expected: step3. the color is different from the initial color when the listItem is pressed with the mouse.
      */
-    TouchLocationInfo touchLocationInfo1(1);
-    touchLocationInfo1.SetTouchType(TouchType::DOWN);
-    TouchEventInfo touchEventInfo1("onTouchDown");
-    touchEventInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
     pattern->isHover_ = true;
-    pattern->HandlePressEvent(touchEventInfo1, frameNode);
-    EXPECT_NE(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
+    pattern->HandlePressEvent(true, frameNode);
+    EXPECT_EQ(pattern->isPressed_, true);
 
     /**
      * @tc.steps: step4. call function HandlePressEvent, set TouchType to DOWN and set hover status is false.
      * @tc.expected: step4. the color is different from the initial color when the listItem is pressed with gesture.
      */
     pattern->isHover_ = false;
-    pattern->HandlePressEvent(touchEventInfo1, frameNode);
-    EXPECT_NE(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
+    pattern->HandlePressEvent(true, frameNode);
+    EXPECT_EQ(pattern->isPressed_, true);
 
     /**
      * @tc.steps: step5. call function HandlePressEvent, set TouchType to UP and set hover status is true.
      * @tc.expected: step5. the color differs from the initial color when mouse hovers over listItem after pressing.
      */
-    TouchLocationInfo touchLocationInfo2(1);
-    touchLocationInfo2.SetTouchType(TouchType::UP);
-    TouchEventInfo touchEventInfo2("onTouchUp");
-    touchEventInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
     pattern->isHover_ = true;
-    pattern->HandlePressEvent(touchEventInfo2, frameNode);
-    EXPECT_NE(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
+    pattern->HandlePressEvent(false, frameNode);
+    EXPECT_EQ(pattern->isPressed_, false);
 
     /**
      * @tc.steps: step6. call function HandlePressEvent, set TouchType to UP and set hover status is false.
      * @tc.expected: step6. the color returns to its original color after pressing on listItem through gestures.
      */
     pattern->isHover_ = false;
-    renderContext->UpdateBackgroundColor(pattern->currentBackgroundColor_);
-    pattern->HandlePressEvent(touchEventInfo2, frameNode);
-    EXPECT_EQ(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
+    pattern->HandlePressEvent(false, frameNode);
+    EXPECT_EQ(pattern->isPressed_, false);
 }
 
 /**
@@ -4566,7 +4546,6 @@ HWTEST_F(ListTestNg, ListItemDisableEventForCardModeTest001, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     eventHub->SetEnabled(false);
     pattern->selectable_ = true;
-    pattern->currentBackgroundColor_ = Color::WHITE;
 
     /**
      * @tc.steps: step3. call function InitDisableEvent.
@@ -4574,7 +4553,6 @@ HWTEST_F(ListTestNg, ListItemDisableEventForCardModeTest001, TestSize.Level1)
      */
     pattern->InitDisableEvent();
     EXPECT_FALSE(pattern->selectable_);
-    EXPECT_NE(renderContext->GetBackgroundColorValue(), pattern->currentBackgroundColor_);
 }
 
 /**

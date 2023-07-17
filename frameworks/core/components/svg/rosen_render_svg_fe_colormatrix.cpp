@@ -43,9 +43,9 @@ void RosenRenderSvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>
 {
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix_);
-    auto colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+    auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix);
     if (colorFilter) {
-        imageFilter = RSImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
+        imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
     }
 }
 #endif

@@ -19,9 +19,8 @@
 #include "base/utils/measure_util.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/lib/ui/painting/path.h"
-#include "rosen_text/text_style.h"
-#include "rosen_text/typography.h"
-#include "third_party/skia/include/core/SkPath.h"
+#include "txt/paragraph.h"
+#include "include/core/SkPath.h"
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
@@ -98,14 +97,14 @@ private:
     void InitCachePaint();
     bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = false);
     void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = false);
-    double GetAlignOffset(TextAlign align, std::unique_ptr<Rosen::Typography>& paragraph);
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<Rosen::Typography>& paragraph);
+    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     SkPaint GetStrokePaint();
     bool HasShadow() const;
     void UpdatePaintShader(const Offset& offset, SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void UpdateLineDash(SkPaint& paint);
-    void UpdateTextStyleForeground(const Offset& offset, bool isStroke, Rosen::TextStyle& style, bool hasShadow);
+    void UpdateTextStyleForeground(const Offset& offset, bool isStroke, txt::TextStyle& style, bool hasShadow);
 
     void Path2DAddPath(const Offset& offset, const PathArgs& args);
     void Path2DSetTransform(const Offset& offset, const PathArgs& args);
@@ -124,7 +123,7 @@ private:
     void ParsePath2D(const Offset& offset, const RefPtr<CanvasPath2D>& path);
 
     bool antiAlias_ = false;
-    std::unique_ptr<Rosen::Typography> paragraph_;
+    std::unique_ptr<txt::Paragraph> paragraph_;
     RefPtr<Flutter::ClipLayer> layer_;
     SkPath skPath_;
     SkPath skPath2d_;

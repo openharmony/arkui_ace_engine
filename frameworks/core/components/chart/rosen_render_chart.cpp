@@ -21,8 +21,8 @@
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 #endif
-#include "rosen_text/typography.h"
-#include "rosen_text/typography_create.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
 
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
@@ -181,23 +181,23 @@ void RosenRenderChart::PaintText(RSCanvas* canvas, const Rect& paintRegion, cons
         LOGW("PaintText: fontCollection is null");
         return;
     }
-    Rosen::TypographyStyle style;
-    Rosen::TextStyle txtStyle;
-    txtStyle.fontSize = chartData.GetTextSize();
-    txtStyle.fontFamilies = chartData.GetFontFamily();
-    txtStyle.fontWeight = Rosen::FontWeight::W400;
-    std::unique_ptr<Rosen::TypographyCreate> builder;
+    txt::ParagraphStyle style;
+    txt::TextStyle txtStyle;
+    txtStyle.font_size = chartData.GetTextSize();
+    txtStyle.font_families = chartData.GetFontFamily();
+    txtStyle.font_weight = txt::FontWeight::w400;
+    std::unique_ptr<txt::ParagraphBuilder> builder;
     double paragraphSize = paintRegion.Width() / chartData.GetData().size();
-    style.maxLines = 1;
+    style.max_lines = 1;
     for (const auto& point : chartData.GetData()) {
         const TextInfo& text = point.GetTextInfo();
         const PointInfo& pointInfo = point.GetPointInfo();
         Offset pointPosition = ConvertDataToPosition(paintRegion, pointInfo);
         txtStyle.color = text.GetColor().GetValue();
-        builder = Rosen::TypographyCreate::Create(style, fontCollection);
+        builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
         builder->PushStyle(txtStyle);
-        builder->AppendText(StringUtils::Str8ToStr16(text.GetTextValue()));
-        auto paragraph = builder->CreateTypography();
+        builder->AddText(StringUtils::Str8ToStr16(text.GetTextValue()));
+        auto paragraph = builder->Build();
         paragraph->Layout(paragraphSize);
         Size textSize = Size(paragraph->GetMinIntrinsicWidth(), paragraph->GetHeight());
 #ifndef USE_ROSEN_DRAWING

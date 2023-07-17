@@ -33,13 +33,12 @@
 #include "recording/recording_region.h"
 #include "recording/recording_shader_effect.h"
 #endif
+#include "rosen_text/properties/text_style.h"
+#include "rosen_text/ui/font_collection.h"
+#include "rosen_text/ui/typography.h"
+#include "rosen_text/ui/typography_create.h"
 #include "utils/camera3d.h"
 #include "utils/point3.h"
-#include "rosen_text/font_collection.h"
-#include "rosen_text/typography.h"
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography_types.h"
-#include "rosen_text/text_style.h"
 #include "utils/scalar.h"
 
 namespace OHOS::Ace {
@@ -60,6 +59,7 @@ using RSPoint3 = Rosen::Drawing::Point3;
 using RSShadowFlags = Rosen::Drawing::ShadowFlags;
 using RSBlendMode = Rosen::Drawing::BlendMode;
 using RSSamplingOptions = Rosen::Drawing::SamplingOptions;
+using RSRoundRect = Rosen::Drawing::RoundRect;
 using RSPath = Rosen::Drawing::Path;
 using RSPathOp = Rosen::Drawing::PathOp;
 using RSBitmap = Rosen::Drawing::Bitmap;
@@ -104,25 +104,25 @@ using RSSaveLayerOps = Rosen::Drawing::SaveLayerOps;
 using RSSize = Rosen::Drawing::Size;
 using RSSrcRectConstraint = Rosen::Drawing::SrcRectConstraint;
 #endif
-
-using RSTextDirection = Rosen::TextDirection;
-using RSTextAlign = Rosen::TextAlign;
-using RSWordBreakType = Rosen::WordBreakType;
-using RSTextBaseline = Rosen::TextBaseline;
-using RSTextStyle = Rosen::TextStyle;
-using RSTextDecoration = Rosen::TextDecoration;
-using RSFontWeight = Rosen::FontWeight;
-using RSFontStyle = Rosen::FontStyle;
-using RSPathEffect = Rosen::Drawing::PathEffect;
-using RSPathDirection = Rosen::Drawing::PathDirection;
-using RSPathDashStyle = Rosen::Drawing::PathDashStyle;
-using RSParagraph = Rosen::Typography;
-using RSParagraphBuilder = Rosen::TypographyCreate;
-using RSFontCollection = Rosen::FontCollection;
-using RSParagraphStyle = Rosen::TypographyStyle;
-using RSTextRectHeightStyle = Rosen::TextRectHeightStyle;
-using RSTextRectWidthStyle = Rosen::TextRectWidthStyle;
-using RSTextRect = Rosen::TextRect;
+using RSPathEffect = rosen::PathEffect;
+using RSPathDirection = rosen::PathDirection;
+using RSPathDashStyle = rosen::PathDashStyle;
+using RSParagraph = rosen::Typography;
+using RSTypographyProperties = rosen::TypographyProperties;
+using RSParagraphBuilder = rosen::TypographyCreate;
+using RSFontCollection = rosen::FontCollection;
+using RSParagraphStyle = rosen::TypographyStyle;
+using RSColorQuad = rosen::ColorQuad;
+using RSShaderEffect = rosen::ShaderEffect;
+using RSTileMode = rosen::TileMode;
+using RSTextDirection = rosen::TextDirection;
+using RSTextAlign = rosen::TextAlign;
+using RSWordBreakType = rosen::WordBreakType;
+using RSTextStyle = rosen::TextStyle;
+using RSTextDecoration = rosen::TextDecoration;
+using RSFontWeight = rosen::FontWeight;
+using RSFontStyle = rosen::FontStyle;
+using RSTextBaseline = rosen::TextBaseline;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

@@ -23,12 +23,12 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-class ToolbarPattern : public LinearLayoutPattern {
-    DECLARE_ACE_TYPE(ToolbarPattern, LinearLayoutPattern);
+class NavToolbarPattern : public LinearLayoutPattern {
+    DECLARE_ACE_TYPE(NavToolbarPattern, LinearLayoutPattern);
 
 public:
-    ToolbarPattern() : LinearLayoutPattern(false) {};
-    ~ToolbarPattern() override = default;
+    NavToolbarPattern() : LinearLayoutPattern(false) {};
+    ~NavToolbarPattern() override = default;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {

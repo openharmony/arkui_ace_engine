@@ -20,15 +20,15 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ToolbarNode : public FrameNode {
-    DECLARE_ACE_TYPE(ToolbarNode, FrameNode)
+class ACE_EXPORT NavToolbarNode : public FrameNode {
+    DECLARE_ACE_TYPE(NavToolbarNode, FrameNode)
 public:
-    ToolbarNode(const std::string& tag, int32_t nodeId);
-    ToolbarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+    NavToolbarNode(const std::string& tag, int32_t nodeId);
+    NavToolbarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : FrameNode(tag, nodeId, pattern)
     {}
-    ~ToolbarNode() override = default;
-    static RefPtr<ToolbarNode> GetOrCreateToolbarNode(
+    ~NavToolbarNode() override = default;
+    static RefPtr<NavToolbarNode> GetOrCreateToolbarNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
     bool IsAtomicNode() const override

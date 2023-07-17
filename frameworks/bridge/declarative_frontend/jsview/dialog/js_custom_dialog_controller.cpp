@@ -176,7 +176,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.isShowInSubWindow = showInSubWindowValue->ToBoolean();
 #endif
         }
-        if (SystemProperties::IsSceneBoardEnabled()) {
+        auto container = Container::Current();
+        if (container && container->IsScenceBoardWindow()) {
             instance->dialogProperties_.isShowInSubWindow = false;
         }
 
@@ -226,7 +227,8 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         }
     });
 
-    if (SystemProperties::IsSceneBoardEnabled() && !dialogProperties_.windowScene.Upgrade()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow() && !dialogProperties_.windowScene.Upgrade()) {
         auto viewNode = this->ownerView_->GetViewNode();
         CHECK_NULL_VOID(viewNode);
         auto parentCustom = AceType::DynamicCast<NG::CustomNode>(viewNode);

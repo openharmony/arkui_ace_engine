@@ -154,7 +154,6 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
-    "//third_party/skia:skia_ohos",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

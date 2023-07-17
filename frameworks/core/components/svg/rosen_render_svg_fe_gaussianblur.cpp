@@ -35,7 +35,8 @@ void RosenRenderSvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFi
 #else
 void RosenRenderSvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const
 {
-    imageFilter = RSImageFilter::CreateBlurImageFilter(deviationX_, deviationY_, RSTileMode::DECAL, imageFilter);
+    imageFilter =
+        RSRecordingImageFilter::CreateBlurImageFilter(deviationX_, deviationY_, RSTileMode::DECAL, imageFilter);
 }
 #endif
 
