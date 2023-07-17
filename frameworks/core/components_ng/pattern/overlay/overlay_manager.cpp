@@ -260,8 +260,9 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
                     ContainerScope scope(id);
                     if (isInSubWindow) {
                         SubwindowManager::GetInstance()->RequestFocusSubwindow(id);
+                    } else {
+                        overlayManager->FocusOverlayNode(menu);
                     }
-                    overlayManager->FocusOverlayNode(menu, isInSubWindow);
                     overlayManager->CallOnShowMenuCallback();
                 },
                 TaskExecutor::TaskType::UI);
