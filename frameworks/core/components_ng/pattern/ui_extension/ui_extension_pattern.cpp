@@ -40,7 +40,6 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID_NOLOG(container);
     auto callerToken = container->GetToken();
-    Rosen::ExtensionSessionManager::GetInstance().Init();
     auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
     if (want.GetElement().GetBundleName() == "AbilityComp") {
         return;

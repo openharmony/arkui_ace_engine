@@ -48,5 +48,10 @@ RefPtr<RenderContext> RenderContext::Create()
     return MakeRefPtr<RosenRenderContext>();
 }
 
-void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& rsNode) {}
+const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
+{
+    return nullptr;
+}
+
+void RosenRenderContext::SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode) {}
 } // namespace OHOS::Ace::NG
