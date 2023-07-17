@@ -65,15 +65,13 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             // Fonsize is not set. When the font width is greater than the button width, dynamically change the font
             // size to no less than 9sp.
-            if (GreatOrEqual(childSize_.Width(), layoutConstraint.maxSize.Width())) {
-                auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
-                textLayoutProperty->UpdateAdaptMaxFontSize(
-                    buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
-                textLayoutProperty->UpdateAdaptMinFontSize(
-                    buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
-                childWrapper->Measure(layoutConstraint);
-                childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
-            }
+            auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
+            textLayoutProperty->UpdateAdaptMaxFontSize(
+                buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
+            textLayoutProperty->UpdateAdaptMinFontSize(
+                buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
+            childWrapper->Measure(layoutConstraint);
+            childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
         }
     }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
