@@ -370,13 +370,6 @@ public:
     {
         storeNode_.erase(restoreId);
     }
-
-    // ---------------- WindowScene TouchEvent Callback Handler ---------------------
-    void AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback);
-    void RemoveWindowSceneTouchEventCallback(int32_t pointId);
-    void HandleWindowSceneTouchEvent(const TouchEvent& point);
-    // ------------------------------------------------------------------------------
-
     void SetNeedRenderNode(const RefPtr<FrameNode>& node);
 
 protected:
