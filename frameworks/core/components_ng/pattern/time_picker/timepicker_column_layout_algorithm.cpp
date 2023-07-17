@@ -24,6 +24,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t DIVIDER_SIZE = 2;
+const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+const float ITEM_HEIGHT_HALF = 2.0f;
 } // namespace
 void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -33,8 +35,13 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pickerTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
-    auto height = static_cast<float>(
-        pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
+    uint32_t showCount_ = pickerTheme->GetShowOptionCount();
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
+    }
+    auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - 1) +
+        pickerTheme->GetDividerSpacing().ConvertToPx());
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
     auto width = layoutConstraint->parentIdealSize.Width();
@@ -45,6 +52,7 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
     }
 
+    pickerItemHeight_ = std::min(height, layoutConstraint->maxSize.Height());
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(std::min(height, layoutConstraint->maxSize.Height()));
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
@@ -73,15 +81,12 @@ void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     frameSize.SetWidth(size.Width());
-    auto gradientHeight = pickerTheme->GetGradientHeight().ConvertToPx();
-    auto dividerSpacingHeight = pickerTheme->GetDividerSpacing().ConvertToPx();
-    auto columnHeight = gradientHeight * (showOptionCount - 1) + dividerSpacingHeight;
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index == selectedIndex) {
-        frameSize.SetHeight(static_cast<float>(dividerSpacingHeight / columnHeight * size.Height()));
+        frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
     } else {
-        frameSize.SetHeight(static_cast<float>(gradientHeight / columnHeight * size.Height()));
+        frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
     childLayoutWrapper->Measure(layoutChildConstraint);
@@ -90,6 +95,10 @@ void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32
 void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     auto layoutProperty = AceType::DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -98,7 +107,10 @@ void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto children = layoutWrapper->GetAllChildrenWithBuild();
-    float childStartCoordinate = 0.0f;
+    uint32_t halfCount = layoutWrapper->GetTotalChildCount() / 2;
+    float childStartCoordinate = static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
+                                        pickerTheme->GetGradientHeight().ConvertToPx() * halfCount -
+                                        pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();
