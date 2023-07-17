@@ -160,6 +160,7 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     }
     auto hostNode = layoutWrapper->GetHostNode();
     if (IsNodeInAndActive(hostNode)) {
+        layoutProperty_ = hostNode->GetLayoutProperty()->Clone();
         ModifyLayoutConstraint(layoutWrapper, true);
     } else if (IsNodeOutAndActive(hostNode)) {
         ModifyLayoutConstraint(layoutWrapper, false);
@@ -181,6 +182,9 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         auto geometryNode = node->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         inNodeActiveFrameSize_ = geometryNode->GetFrameSize();
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        node->SetLayoutProperty(layoutProperty_);
+        layoutProperty_.Reset();
     } else if (IsNodeInAndIdentity(node)) {
         LOGD("GeometryTransition: node%{public}d: in and identity", node->GetId());
         state_ = State::IDLE;
