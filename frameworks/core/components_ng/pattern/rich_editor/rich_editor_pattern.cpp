@@ -1639,15 +1639,6 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 {
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
-        float selectLineHeight = 0.0f;
-        auto contentRect = GetTextRect();
-        TextPattern::CalcCursorOffsetByPosition(GetCaretPosition(), selectLineHeight);
-        if (info.GetLocalLocation().GetY() > selectLineHeight) {
-            if (!contentRect.IsInRegion(
-                PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY() + (selectLineHeight / 2)))) {
-                return;
-            }
-        }
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -1910,10 +1901,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
 
 void RichEditorPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
-    auto contentRect = GetTextRect();
-    if (!contentRect.IsInRegion(PointF(handleRect.GetX(), handleRect.GetY()))) {
-        return;
-    }
     TextPattern::OnHandleMove(handleRect, isFirstHandle);
     if (!isFirstHandle) {
         SetCaretPosition(textSelector_.destinationOffset);
