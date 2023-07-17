@@ -85,6 +85,12 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
         crossLens.push_back(crossSize);
     }
 
+    // cross count changed by auto-fill and cross size change
+    if (!layoutInfo_.waterFlowItems_.empty() && crossLens.size() != layoutInfo_.waterFlowItems_.size()) {
+        layoutInfo_.Reset();
+        LOGI("cross count changed");
+    }
+
     int32_t index = 0;
     for (const auto& len : crossLens) {
         itemsCrossSize_.try_emplace(index, len);
@@ -298,10 +304,16 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         itemWrapper->Measure(CreateChildConstraint(position.crossIndex, layoutProperty, itemWrapper));
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
-        if (layoutInfo_.waterFlowItems_[position.crossIndex].find(currentIndex) ==
-            layoutInfo_.waterFlowItems_[position.crossIndex].end()) {
+        auto item = layoutInfo_.waterFlowItems_[position.crossIndex].find(currentIndex);
+        if (item == layoutInfo_.waterFlowItems_[position.crossIndex].end()) {
             layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex] =
                 std::make_pair(position.startMainPos, itemHeight);
+        } else {
+            if (item->second.second != itemHeight) {
+                item->second.second = itemHeight;
+                layoutInfo_.ClearCacheAfterIndex(currentIndex);
+                LOGI("item size changed");
+            }
         }
         if (layoutInfo_.jumpIndex_ == currentIndex) {
             layoutInfo_.currentOffset_ = -(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex].first);
