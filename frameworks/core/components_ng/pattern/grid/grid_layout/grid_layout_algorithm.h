@@ -48,7 +48,6 @@ private:
         int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan,
         const RefPtr<LayoutProperty>& childLayoutProperty) const;
     float GetItemSize(int32_t row, int32_t col, bool height) const;
-    void RemoveChildren(LayoutWrapper* layoutWrapper);
 
     int32_t crossCount_ = 0;
     int32_t mainCount_ = 0;

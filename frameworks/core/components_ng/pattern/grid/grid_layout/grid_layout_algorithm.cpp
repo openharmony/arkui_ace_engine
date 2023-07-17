@@ -329,20 +329,20 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (itemIndex == crossLine.second) {
                 continue;
             }
-                itemIndex = crossLine.second; 
-                auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
-                if (!wrapper) {
-                    LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIndex);
-                    break;
-                }
-                auto layoutProperty = wrapper->GetLayoutProperty();
-                CHECK_NULL_VOID(layoutProperty);
-                auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
-                CHECK_NULL_VOID(gridItemLayoutProperty);
-                gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
-                gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
+            itemIndex = crossLine.second;
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
+            if (!wrapper) {
+                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIndex);
+                break;
+            }
+            auto layoutProperty = wrapper->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+            CHECK_NULL_VOID(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
+            gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
         }
     }
 }
 
-}// namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG
