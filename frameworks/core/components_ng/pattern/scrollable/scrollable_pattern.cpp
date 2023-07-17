@@ -77,7 +77,9 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
     }
     if (scrollBar_ && scrollBar_->IsDriving()) {
         offset = scrollBar_->CalcPatternOffset(offset);
-        source = SCROLL_FROM_BAR;
+        if (source == SCROLL_FROM_UPDATE) {
+            source = SCROLL_FROM_BAR;
+        }
     }
     return UpdateCurrentOffset(offset, source);
 }
