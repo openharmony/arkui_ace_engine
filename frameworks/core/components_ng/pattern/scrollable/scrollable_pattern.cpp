@@ -549,11 +549,14 @@ void ScrollablePattern::PlaySpringAnimation(
 
 void ScrollablePattern::UninitMouseEvent()
 {
+    if (!mouseEvent_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto mouseEventHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent(nullptr);
+    mouseEventHub->RemoveOnMouseEvent(mouseEvent_);
     ClearMultiSelect();
     isMouseEventInit_ = false;
 }
@@ -564,12 +567,16 @@ void ScrollablePattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto mouseEventHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEventWithoutKeyboard(info);
-        }
-    });
+    if (!mouseEvent_) {
+        auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->HandleMouseEventWithoutKeyboard(info);
+            }
+        };
+        mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    }
+    mouseEventHub->AddOnMouseEvent(mouseEvent_);
     isMouseEventInit_ = true;
 }
 
