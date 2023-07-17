@@ -1693,20 +1693,15 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         return;
     }
 
-    // TODO use theme.
-    constexpr float SPRING_SCROLL_MASS = 0.5f;
-    constexpr float SPRING_SCROLL_STIFFNESS = 100.0f;
-    constexpr float SPRING_SCROLL_DAMPING = 15.55635f;
-    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
-        AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
+    static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 228, 30);
     ExtentPair extentPair = ExtentPair(currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos,
         currentOffset_ - itemPosition_.begin()->second.startPos);
     float friction = currentOffset_ > 0
                          ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
                          : CalculateFriction((mainSize - itemPosition_.rbegin()->second.endPos) / mainSize);
-    auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
-        currentOffset_, dragVelocity * friction, extentPair, extentPair, DEFAULT_OVER_SPRING_PROPERTY);
-    scrollMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
+    auto springMotion = AceType::MakeRefPtr<SpringMotion>(
+        currentOffset_, extentPair.Trailing(), dragVelocity * friction, springProperty);
+    springMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
         auto swiper = weak.Upgrade();
         if (swiper) {
             swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentOffset_);
@@ -1722,7 +1717,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         CHECK_NULL_VOID(swiperPattern);
         swiperPattern->OnSpringAndFadeAnimationFinish();
     });
-    springController_->PlayMotion(scrollMotion);
+    springController_->PlayMotion(springMotion);
 }
 
 void SwiperPattern::PlayFadeAnimation()
