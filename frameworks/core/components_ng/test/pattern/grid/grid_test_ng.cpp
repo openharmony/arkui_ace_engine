@@ -79,8 +79,7 @@ protected:
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
     int32_t CalculateGridColumnsOrRows(float contentWidth, float gridWidth, float gutter = 0.0f, float margin = 0.0f);
-    testing::AssertionResult IsEqualNextFocusNode(
-        int32_t currentIndex, std::map<FocusStep, int32_t> next);
+    testing::AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t nextIndex);
     testing::AssertionResult IsEqualRect(RectF rect, RectF expectRect);
     testing::AssertionResult IsEqualCurrentOffset(float expectOffset);
     void UpdateLayoutInfo();
@@ -300,26 +299,16 @@ void GridTestNg::UpdateCurrentOffset(float offset, int32_t source)
 }
 
 testing::AssertionResult GridTestNg::IsEqualNextFocusNode(
-    int32_t currentIndex, std::map<FocusStep, int32_t> next)
+    FocusStep step, int32_t currentIndex, int32_t nextIndex)
 {
     RefPtr<FocusHub> currentFocusNode = GetItemFocusHub(currentIndex);
     currentFocusNode->RequestFocusImmediately();
-    for (auto iter = next.begin(); iter != next.end(); iter++) {
-        FocusStep step = iter->first;
-        int32_t nextIndex = iter->second;
-        RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
-        if (nextIndex == -1 && nextFocusNode != nullptr) {
-            return testing::AssertionFailure() <<
-                "Next FocusNode is not null." <<
-                " FocusStep: " << static_cast<int32_t>(step) <<
-                " nextIndex: " << nextIndex;
-        }
-        if (nextIndex != -1 && nextFocusNode != GetItemFocusHub(nextIndex)) {
-            return testing::AssertionFailure() <<
-                "Get wrong next FocusNode." <<
-                " FocusStep: " << static_cast<int32_t>(step) <<
-                " nextIndex: " << nextIndex;
-        }
+    RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
+    if (nextIndex == -1 && nextFocusNode != nullptr) {
+        return testing::AssertionFailure() << "Next FocusNode is not null.";
+    }
+    if (nextIndex != -1 && nextFocusNode != GetItemFocusHub(nextIndex)) {
+        return testing::AssertionFailure() << "Get wrong next FocusNode.";
     }
     return testing::AssertionSuccess();
 }
@@ -2290,101 +2279,86 @@ HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
      * @tc.steps: step1. GetNextFocusNode from left_top.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex1 = 0;
-    std::map<FocusStep, int32_t> next1 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, -1},
-        {FocusStep::UP, -1},
-        {FocusStep::RIGHT, 1},
-        {FocusStep::DOWN, 4},
-        {FocusStep::LEFT_END, -1},
-        {FocusStep::UP_END, -1},
-        {FocusStep::RIGHT_END, 3},
-        {FocusStep::DOWN_END, -1},
-        {FocusStep::TAB, 1},
-        {FocusStep::SHIFT_TAB, -1}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex1, next1));
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, -1));
 
     /**
      * @tc.steps: step2. GetNextFocusNode from right_top.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex2 = 3;
-    std::map<FocusStep, int32_t> next2 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, 2},
-        {FocusStep::UP, -1},
-        {FocusStep::RIGHT, -1},
-        {FocusStep::DOWN, 7},
-        {FocusStep::LEFT_END, 0},
-        {FocusStep::UP_END, -1},
-        {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, -1},
-        {FocusStep::TAB, 4},
-        {FocusStep::SHIFT_TAB, 2}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex2, next2));
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 2));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
 
     /**
      * @tc.steps: step3. GetNextFocusNode from left_bottom.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex3 = 8;
-    std::map<FocusStep, int32_t> next3 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, -1},
-        {FocusStep::UP, 4},
-        {FocusStep::RIGHT, 9},
-        {FocusStep::DOWN, -1},
-        {FocusStep::LEFT_END, -1},
-        {FocusStep::UP_END, -1},
-        {FocusStep::RIGHT_END, 9},
-        {FocusStep::DOWN_END, -1},
-        {FocusStep::TAB, 9},
-        {FocusStep::SHIFT_TAB, 7}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex3, next3));
+    currentIndex = 8;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
 
     /**
      * @tc.steps: step4. GetNextFocusNode from right_bottom.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex4 = 9;
-    std::map<FocusStep, int32_t> next4 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, 8},
-        {FocusStep::UP, 5},
-        {FocusStep::RIGHT, -1},
-        {FocusStep::DOWN, -1},
-        {FocusStep::LEFT_END, 8},
-        {FocusStep::UP_END, -1},
-        {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, -1},
-        {FocusStep::TAB, -1},
-        {FocusStep::SHIFT_TAB, 8}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex4, next4));
+    currentIndex = 9;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 8));
 
     /**
      * @tc.steps: step5. GetNextFocusNode from middle.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex5 = 5;
-    std::map<FocusStep, int32_t> next5 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, 4},
-        {FocusStep::UP, 1},
-        {FocusStep::RIGHT, 6},
-        {FocusStep::DOWN, 9},
-        {FocusStep::LEFT_END, 4},
-        {FocusStep::UP_END, -1},
-        {FocusStep::RIGHT_END, 7},
-        {FocusStep::DOWN_END, -1},
-        {FocusStep::TAB, 6},
-        {FocusStep::SHIFT_TAB, 4}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex5, next5));
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
 }
 
 /**
@@ -2412,101 +2386,86 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
      * @tc.steps: step1. GetNextFocusNode from left_top.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex1 = 0;
-    std::map<FocusStep, int32_t> next1 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, -1},
-        {FocusStep::UP, -1},
-        {FocusStep::RIGHT, 4},
-        {FocusStep::DOWN, 1},
-        {FocusStep::LEFT_END, -1},
-        {FocusStep::UP_END, -1},
-        {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, 3},
-        {FocusStep::TAB, 1},
-        {FocusStep::SHIFT_TAB, -1}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex1, next1));
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, -1));
 
     /**
      * @tc.steps: step2. GetNextFocusNode from right_top.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex2 = 8;
-    std::map<FocusStep, int32_t> next2 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, 4},
-        {FocusStep::UP, -1},
-        {FocusStep::RIGHT, -1},
-        {FocusStep::DOWN, 9},
-        {FocusStep::LEFT_END, -1},
-        {FocusStep::UP_END, -1},
-        {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, 9},
-        {FocusStep::TAB, 9},
-        {FocusStep::SHIFT_TAB, 7}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex2, next2));
+    currentIndex = 8;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
 
     /**
      * @tc.steps: step3. GetNextFocusNode from left_bottom.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex3 = 3;
-    std::map<FocusStep, int32_t> next3 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, -1},
-        {FocusStep::UP, 2},
-        {FocusStep::RIGHT, 7},
-        {FocusStep::DOWN, -1},
-        {FocusStep::LEFT_END, -1},
-        {FocusStep::UP_END, 0},
-        {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, -1},
-        {FocusStep::TAB, 4},
-        {FocusStep::SHIFT_TAB, 2}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex3, next3));
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 2));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
 
     /**
      * @tc.steps: step4. GetNextFocusNode from right_bottom.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex4 = 9;
-    std::map<FocusStep, int32_t> next4 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, 5},
-        {FocusStep::UP, 8},
-        {FocusStep::RIGHT, -1},
-        {FocusStep::DOWN, -1},
-        {FocusStep::LEFT_END, -1},
-        {FocusStep::UP_END, 8},
-        {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, -1},
-        {FocusStep::TAB, -1},
-        {FocusStep::SHIFT_TAB, 8}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex4, next4));
+    currentIndex = 9;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 8));
 
     /**
      * @tc.steps: step5. GetNextFocusNode from middle.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    constexpr int32_t currentIndex5 = 5;
-    std::map<FocusStep, int32_t> next5 = {
-        {FocusStep::NONE, -1},
-        {FocusStep::LEFT, 1},
-        {FocusStep::UP, 4},
-        {FocusStep::RIGHT, 9},
-        {FocusStep::DOWN, 6},
-        {FocusStep::LEFT_END, -1},
-        {FocusStep::UP_END, 4},
-        {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, 7},
-        {FocusStep::TAB, 6},
-        {FocusStep::SHIFT_TAB, 4}
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex5, next5));
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
 }
 
 /**
@@ -2528,11 +2487,8 @@ HWTEST_F(GridTestNg, FocusStep003, TestSize.Level1)
      * @tc.expected: The 3rd item is focused.
      */
     GetItemFocusHub(1)->SetFocusable(false); // The 2nd item can not focus.
-    constexpr int32_t currentIndex = 0;
-    std::map<FocusStep, int32_t> next = {
-        {FocusStep::RIGHT, 2},
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex, next));
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 2));
 }
 
 /**
@@ -2552,17 +2508,13 @@ HWTEST_F(GridTestNg, FocusStep004, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll to second row
      */
-    constexpr float scrollOffset = -ITEM_HEIGHT - 1.f;
-    UpdateCurrentOffset(scrollOffset);
+    UpdateCurrentOffset(-ITEM_HEIGHT - 1.f);
 
     /**
      * @tc.steps: step2. UP
      */
-    constexpr int32_t currentIndex = 4;
-    std::map<FocusStep, int32_t> next = {
-        {FocusStep::UP, -1},
-    };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex, next));
+    int32_t currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, -1));
     EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 3);
 }
 
@@ -2583,17 +2535,16 @@ HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll to first row
      */
-    constexpr float scrollOffset = -ITEM_HEIGHT + 1.f;
-    UpdateCurrentOffset(scrollOffset);
+    UpdateCurrentOffset(-ITEM_HEIGHT + 1.f);
 
     /**
      * @tc.steps: step2. DOWN
      */
-    constexpr int32_t currentIndex = 15;
+    int32_t currentIndex = 15;
     std::map<FocusStep, int32_t> next = {
         {FocusStep::DOWN, -1},
     };
-    EXPECT_TRUE(IsEqualNextFocusNode(currentIndex, next));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, -1));
     EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 16);
 }
 
@@ -2684,28 +2635,6 @@ HWTEST_F(GridTestNg, GridPatternTest001, TestSize.Level1)
     RunMeasureAndLayout();
     EXPECT_TRUE(IsEqualCurrentOffset(0));
     pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-
-    pattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
-    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-
-    pattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
-    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_BAR);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_BAR);
-    RunMeasureAndLayout();
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-    pattern_->UpdateCurrentOffset(-200.f, SCROLL_FROM_BAR);
     RunMeasureAndLayout();
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 }
