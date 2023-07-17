@@ -136,10 +136,7 @@ template("build_component") {
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
         if (is_cross_platform_build) {
-          deps += [
-            "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text_static",
-            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
-          ]
+          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
         } else {
           external_deps += [ "graphic_2d:librender_service_client" ]
         }
