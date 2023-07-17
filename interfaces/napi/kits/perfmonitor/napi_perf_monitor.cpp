@@ -167,7 +167,7 @@ EXTERN_C_START
 static napi_value PerfMonitorInit(napi_env env, napi_value exports)
 {
     static napi_property_descriptor desc[] = {
-        DECLARE_NAPI_FUNCTION("start", JSSceneStart),
+        DECLARE_NAPI_FUNCTION("begin", JSSceneStart),
         DECLARE_NAPI_FUNCTION("end", JSSceneEnd),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
