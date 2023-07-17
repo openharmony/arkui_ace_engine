@@ -607,8 +607,10 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         event.action == MouseAction::WINDOW_LEAVE) {
         MouseTestResult handledResults;
         handledResults.clear();
-        if ((event.button == MouseButton::LEFT_BUTTON && !SystemProperties::IsSceneBoardEnabled()) ||
-            (event.button == MouseButton::LEFT_BUTTON && SystemProperties::IsSceneBoardEnabled() &&
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, false);
+        if ((event.button == MouseButton::LEFT_BUTTON && !container->IsScenceBoardWindow()) ||
+            (event.button == MouseButton::LEFT_BUTTON && container->IsScenceBoardWindow() &&
             event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
