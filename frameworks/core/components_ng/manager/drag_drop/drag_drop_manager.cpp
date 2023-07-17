@@ -375,7 +375,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!dragFrameNode) {
         LOGD("DragDropManager Not Use DefaultDrop");
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, isMouseDragged_);
         summaryMap_.clear();
         return;
     }
@@ -393,7 +393,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     InteractionManager::GetInstance()->StopDrag(
-        TranslateDragResult(event->GetResult()), event->IsUseCustomAnimation());
+        TranslateDragResult(event->GetResult()), isMouseDragged_ ? isMouseDragged_ : event->IsUseCustomAnimation());
     summaryMap_.clear();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
@@ -769,6 +769,7 @@ void DragDropManager::DestroyDragWindow()
     }
     LOGI("DestroyDragWindow");
     isDragged_ = false;
+    isMouseDragged_ = false;
     currentId_ = -1;
 }
 
