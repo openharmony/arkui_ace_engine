@@ -166,10 +166,10 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
         return;
     }
 
-    auto rect = GetPaintRectWithoutTransform();
     isBreakingPoint_ = !recursive;
-    if (rect.IsValid()) {
+    if (isSynced_) {
         // has set size before, trigger transition directly.
+        auto rect = GetPaintRectWithoutTransform();
         NotifyTransitionInner(rect.GetSize(), true);
         return;
     }
@@ -706,7 +706,7 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
     float yValue = 0.0f;
     if (translate.x.Unit() == DimensionUnit::PERCENT || translate.y.Unit() == DimensionUnit::PERCENT) {
         auto rect = GetPaintRectWithoutTransform();
-        if (!rect.IsValid()) {
+        if (rect.IsEmpty()) {
             // size is not determined yet
             return;
         }
