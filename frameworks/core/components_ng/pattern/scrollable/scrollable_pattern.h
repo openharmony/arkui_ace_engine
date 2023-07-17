@@ -339,6 +339,7 @@ private:
     OffsetF mousePressOffset_;
     MouseInfo lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
+    RefPtr<InputEvent> mouseEvent_;
 };
 } // namespace OHOS::Ace::NG
 
