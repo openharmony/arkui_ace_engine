@@ -1063,6 +1063,20 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
     return nullptr;
 }
 
+bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    CHECK_NULL_RETURN_NOLOG(focusFrameNode, false);
+    auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_RETURN_NOLOG(focusPattern, false);
+    auto curIndex = focusPattern->GetIndexInList();
+    ScrollToIndex(curIndex, smooth_, ScrollAlign::AUTO);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
+    return true;
+}
+
 WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {

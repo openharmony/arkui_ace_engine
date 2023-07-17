@@ -146,6 +146,8 @@ public:
             });
     }
 
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
     const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
     {
         return itemPosition_;

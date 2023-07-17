@@ -890,12 +890,18 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
     auto tarCrossIndex = tarItemPattern->GetCrossIndex();
     if (gridLayoutInfo_.gridMatrix_.find(tarMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
         LOGE("Can not find target main index: %{public}d", tarMainIndex);
-        return -1;
+        if (tarMainIndex == 0) {
+            return 0;
+        }
+        return gridLayoutInfo_.childrenCount_ - 1;
     }
     if (gridLayoutInfo_.gridMatrix_[tarMainIndex].find(tarCrossIndex) ==
         gridLayoutInfo_.gridMatrix_[tarMainIndex].end()) {
         LOGE("Can not find target cross index: %{public}d", tarCrossIndex);
-        return -1;
+        if (tarMainIndex == 0) {
+            return 0;
+        }
+        return gridLayoutInfo_.childrenCount_ - 1;
     }
     return gridLayoutInfo_.gridMatrix_[tarMainIndex][tarCrossIndex];
 }
@@ -912,6 +918,23 @@ void GridPattern::ScrollToFocusNodeIndex(int32_t index)
     if (tarFocusNode) {
         tarFocusNode->RequestFocusImmediately();
     }
+}
+
+bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    CHECK_NULL_RETURN_NOLOG(focusFrameNode, false);
+    auto focusHub = focusFrameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    auto scrollToIndex = GetFocusNodeIndex(focusHub);
+    if (scrollToIndex < 0) {
+        return false;
+    }
+    auto ret = UpdateStartIndex(scrollToIndex);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
+    return ret;
 }
 
 void GridPattern::ScrollBy(float offset)
