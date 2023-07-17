@@ -146,7 +146,10 @@ template("ace_osal_ohos_source_set") {
     ]
 
     if (ability_runtime_graphics) {
-      external_deps += [ "multimedia_image_framework:image_native" ]
+      external_deps += [
+        "image_framework:image_native",
+        "window_manager:libdm",
+      ]
     }
   }
 }

@@ -57,7 +57,7 @@ ohos_unittest("custom_paint_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps += [ "multimedia_image_framework:image_native" ]
+    external_deps += [ "image_framework:image_native" ]
   }
   defines = [ "ENABLE_DRAG_FRAMEWORK" ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

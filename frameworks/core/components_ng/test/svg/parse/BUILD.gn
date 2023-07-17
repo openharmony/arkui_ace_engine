@@ -70,7 +70,10 @@ ohos_unittest("parse_g_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
   }
 }
 
@@ -91,7 +94,10 @@ ohos_unittest("parse_circle_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
   }
 }
 
@@ -112,7 +118,10 @@ ohos_unittest("parse_clippath_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
   }
 }
 
@@ -133,7 +142,10 @@ ohos_unittest("parse_ellipse_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
   }
 }
 
@@ -171,7 +183,10 @@ ohos_unittest("parse_fecolormatrix_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
   }
 }
 
@@ -192,7 +207,10 @@ ohos_unittest("parse_fecomposite_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
   }
 }
 
@@ -213,7 +231,10 @@ ohos_unittest("parse_fegaussianblur_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
   }
 }
 
@@ -234,7 +255,10 @@ ohos_unittest("parse_filter_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
   }
 }
 
@@ -272,7 +296,7 @@ ohos_unittest("parse_line_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [ "image_framework:image_native" ]
   }
 }
 
@@ -293,7 +317,7 @@ ohos_unittest("parse_mask_test_ng") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps = [ "multimedia_image_framework:image_native" ]
+    external_deps = [ "image_framework:image_native" ]
   }
 }
 

@@ -86,7 +86,7 @@ ohos_unittest("ManifestParserTest") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps += [ "multimedia_image_framework:image_native" ]
+    external_deps += [ "image_framework:image_native" ]
   }
   part_name = ace_engine_part
 }
