@@ -1065,6 +1065,8 @@ HWTEST_F(SearchTestNg, SetTextAlign001, TestSize.Level1)
     ASSERT_NE(textFieldLayoutProperty, nullptr);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
+    searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
 }
 
 /**

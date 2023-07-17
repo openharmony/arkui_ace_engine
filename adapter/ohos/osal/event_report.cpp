@@ -48,6 +48,19 @@ constexpr char EVENT_KEY_ABILITY_NAME[] = "ABILITY_NAME";
 constexpr char EVENT_KEY_PAGE_URL[] = "PAGE_URL";
 constexpr char EVENT_KEY_JANK_STATS[] = "JANK_STATS";
 constexpr char EVENT_KEY_JANK_STATS_VER[] = "JANK_STATS_VER";
+constexpr char EVENT_KEY_APP_PID[] = "APP_PID";
+constexpr char EVENT_KEY_SCENE_ID[] = "SCENE_ID";
+constexpr char EVENT_KEY_INPUT_TIME[] = "INPUT_TIME";
+constexpr char EVENT_KEY_ANIMATION_START_LATENCY[] = "ANIMATION_START_LATENCY";
+constexpr char EVENT_KEY_ANIMATION_END_LATENCY[] = "EVENT_KEY_ANIMATION_END_LATENCY";
+constexpr char EVENT_KEY_E2E_LATENCY[] = "EVENT_KEY_E2E_LATENCY";
+constexpr char EVENT_KEY_UNIQUE_ID[] = "UNIQUE_ID";
+constexpr char EVENT_KEY_MODULE_NAME[] = "MODULE_NAME";
+constexpr char EVENT_KEY_DURITION[] = "DURITION";
+constexpr char EVENT_KEY_TOTAL_FRAMES[] = "TOTAL_FRAMES";
+constexpr char EVENT_KEY_TOTAL_MISSED_FRAMES[] = "TOTAL_MISSED_FRAMES";
+constexpr char EVENT_KEY_MAX_FRAMETIME[] = "MAX_FRAMETIME";
+constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
@@ -286,4 +299,61 @@ void EventReport::SendEventInner(const EventInfo& eventInfo)
             EVENT_KEY_PACKAGE_NAME, packageName);
 }
 
+void EventReport::ReportEventComplete(DataBase& data)
+{
+    std::string eventName = "INTERACTION_COMPLETED_LATENCY";
+    const auto& appPid = data.baseInfo.pid;
+    const auto& bundleName = data.baseInfo.bundleName;
+    const auto& processName = data.baseInfo.processName;
+    const auto& abilityName = data.baseInfo.abilityName;
+    const auto& pageUrl = data.baseInfo.pageUrl;
+    const auto& sceneId = data.sceneId;
+    auto inputTime = data.inputTime;
+    ConvertUptimeToSystime(data.inputTime, inputTime);
+    const auto& animationStartLantency = (data.beginVsyncTime - data.inputTime) / NS_TO_MS;
+    const auto& animationEndLantency = (data.endVsyncTime - data.beginVsyncTime) / NS_TO_MS;
+    const auto& e2eLatency = animationStartLantency + animationEndLantency;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        EVENT_KEY_APP_PID, appPid,
+        EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_SCENE_ID, sceneId,
+        EVENT_KEY_INPUT_TIME, inputTime,
+        EVENT_KEY_ANIMATION_START_LATENCY, animationStartLantency,
+        EVENT_KEY_ANIMATION_END_LATENCY, animationEndLantency,
+        EVENT_KEY_E2E_LATENCY, e2eLatency);
+}
+
+void EventReport::ReportEventJankFrame(DataBase& data)
+{
+    std::string eventName = "INTERACTION_APP_JANK";
+    const auto& uniqueId = data.beginVsyncTime / NS_TO_MS;
+    const auto& bundleName = data.baseInfo.bundleName;
+    const auto& processName = data.baseInfo.processName;
+    const auto& abilityName = data.baseInfo.abilityName;
+    const auto& pageUrl = data.baseInfo.pageUrl;
+    auto startTime = data.beginVsyncTime;
+    ConvertUptimeToSystime(data.beginVsyncTime, startTime);
+    const auto& durition = (data.endVsyncTime - data.beginVsyncTime) / NS_TO_MS;
+    const auto& totalFrames = data.totalFrames;
+    const auto& totalMissedFrames = data.totalMissed;
+    const auto& maxFrameTime = data.maxFrameTime / NS_TO_MS;
+    const auto& maxSeqMissedFrames = data.maxSuccessiveFrames;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        EVENT_KEY_UNIQUE_ID, uniqueId,
+        EVENT_KEY_MODULE_NAME, bundleName,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_STARTTIME, startTime,
+        EVENT_KEY_DURITION, durition,
+        EVENT_KEY_TOTAL_FRAMES, totalFrames,
+        EVENT_KEY_TOTAL_MISSED_FRAMES, totalMissedFrames,
+        EVENT_KEY_MAX_FRAMETIME, maxFrameTime,
+        EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames);
+}
 } // namespace OHOS::Ace

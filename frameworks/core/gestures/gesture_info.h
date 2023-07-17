@@ -252,7 +252,7 @@ enum class DragBehavior {
 };
 #endif
 
-class DragEvent : public AceType {
+class ACE_FORCE_EXPORT DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType)
 
 public:

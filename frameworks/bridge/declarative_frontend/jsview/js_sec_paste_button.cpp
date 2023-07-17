@@ -161,6 +161,7 @@ void JSSecPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSSecPasteButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
     JSClass<JSSecPasteButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
     JSClass<JSSecPasteButton>::StaticMethod("onClick", &JSSecPasteButton::JsOnClick);
+    JSClass<JSSecPasteButton>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSSecPasteButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
     JSClass<JSSecPasteButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSSecPasteButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);

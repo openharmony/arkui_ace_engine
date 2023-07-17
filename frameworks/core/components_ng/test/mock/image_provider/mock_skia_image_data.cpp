@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 
 namespace OHOS::Ace::NG {
 static int32_t frameCount { 0 };

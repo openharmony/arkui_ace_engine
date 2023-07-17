@@ -213,7 +213,7 @@ public:
     void FireAccessibilityEvent(const AccessibilityEvent& accessibilityEvent);
     void InitializeAccessibilityCallback();
 
-    void OnMediaQueryUpdate() override;
+    void OnMediaQueryUpdate(bool isSynchronous = false) override;
     void OnSurfaceChanged();
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);

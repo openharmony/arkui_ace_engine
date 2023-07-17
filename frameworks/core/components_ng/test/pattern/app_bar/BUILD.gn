@@ -53,6 +53,7 @@ ace_unittest("app_bar_test_ng") {
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/app_bar_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",
     "app_bar_test_ng.cpp",
   ]
 }

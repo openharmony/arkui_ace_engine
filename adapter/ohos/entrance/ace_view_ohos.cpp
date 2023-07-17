@@ -96,6 +96,7 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
     CHECK_NULL_VOID_NOLOG(view);
     CHECK_NULL_VOID(pointerEvent);
     LogPointInfo(pointerEvent);
+    DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
@@ -124,6 +125,39 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
             view->ProcessTouchEvent(pointerEvent);
         }
     }
+}
+
+void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(pointerEvent);
+    static bool isFirstMove = false;
+    PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
+    if (pMonitor == nullptr) {
+        return;
+    }
+    int64_t inputTime = pointerEvent->GetSensorInputTime() * 1000;
+    if (inputTime <= 0) {
+        return;
+    }
+    PerfActionType inputType = ERROR_TYPE;
+    PerfSourceType sourceType = UNKNOWN_TYPE;
+    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        sourceType = PERF_MOUSE_EVENT;
+    } else {
+        sourceType = PERF_TOUCH_EVENT;
+    }
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        inputType = LAST_DOWN;
+        isFirstMove = true;
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP) {
+        inputType = LAST_UP;
+        isFirstMove = false;
+    } else if (isFirstMove && pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        inputType = FIRST_MOVE;
+        isFirstMove = false;
+    }
+    pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
 }
 
 bool AceViewOhos::DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent)

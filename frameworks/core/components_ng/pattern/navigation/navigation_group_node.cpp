@@ -479,6 +479,7 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
                     navDestination->GetRenderContext()->ClipWithRRect(
                         RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     ContainerScope scope(id);
+                    navigationContentNode->Clean();
                     navigationPattern->RemoveNavDestination();
                     navigationContentNode->MarkModifyDone();
                     navigationNode->MarkModifyDone();
@@ -559,6 +560,8 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
                 curNavDestination->GetRenderContext()->ClipWithRRect(
                     RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                 ContainerScope scope(id);
+                navigationContentNode->Clean();
+                navigationNode->AddNavDestinationToNavigation();
                 navigationContentNode->MarkModifyDone();
                 navigationNode->MarkModifyDone();
                 navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

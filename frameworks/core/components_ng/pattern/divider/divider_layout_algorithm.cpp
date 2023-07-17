@@ -47,12 +47,18 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
         dividerLength_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
                                                                    : contentConstraint.percentReference.Width();
         constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
+        constrainStrokeWidth_ = (contentConstraint.selfIdealSize.Height())
+                                    ? std::min(contentConstraint.selfIdealSize.Height().value(), constrainStrokeWidth_)
+                                    : constrainStrokeWidth_;
         constrainSize = SizeF(dividerLength_, constrainStrokeWidth_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     } else {
         dividerLength_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
                                                                     : contentConstraint.percentReference.Height();
         constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
+        constrainStrokeWidth_ = (contentConstraint.selfIdealSize.Width())
+                                    ? std::min(contentConstraint.selfIdealSize.Width().value(), constrainStrokeWidth_)
+                                    : constrainStrokeWidth_;
         constrainSize = SizeF(constrainStrokeWidth_, dividerLength_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     }

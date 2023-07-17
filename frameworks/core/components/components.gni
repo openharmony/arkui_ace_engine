@@ -128,6 +128,10 @@ template("build_component") {
         }
       }
 
+      if (ace_use_rosen_drawing) {
+        external_deps += [ "graphic_2d:2d_graphics" ]
+      }
+
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
@@ -137,10 +141,7 @@ template("build_component") {
             "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
           ]
         } else {
-          external_deps += [
-            "graphic_2d:librender_service_client",
-            "graphic_2d:rosen_text",
-          ]
+          external_deps += [ "graphic_2d:librender_service_client" ]
         }
       }
       part_name = ace_engine_part

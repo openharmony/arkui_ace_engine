@@ -127,7 +127,9 @@ private:
 
     // used to cache last required frame. this will be reset during looping.
     std::unique_ptr<SkBitmap> lastRequiredBitmap_;
+#ifndef USE_ROSEN_DRAWING
     int32_t lastRequiredFrameIndex_ = -1;
+#endif
 };
 
 } // namespace OHOS::Ace

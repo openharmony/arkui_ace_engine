@@ -880,6 +880,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         LOGI("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+        if (abilityContext) {
+            int32_t missionId = -1;
+            abilityContext->GetMissionId(missionId);
+            AceApplicationInfo::GetInstance().SetMissionId(abilityContext->GetMissionId(missionId));
+        }
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
@@ -1383,8 +1389,9 @@ bool UIContentImpl::ProcessBackPressed()
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     LOGD("UIContentImpl::ProcessPointerEvent begin");
-    auto container = AceEngine::Get().GetContainer(instanceId_);
+    auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
     CHECK_NULL_RETURN(container, false);
+    container->SetCurPointerEvent(pointerEvent);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     LOGD("UIContentImpl::ProcessPointerEvent end");

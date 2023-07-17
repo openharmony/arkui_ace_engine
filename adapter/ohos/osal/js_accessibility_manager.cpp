@@ -581,12 +581,31 @@ RefPtr<NG::FrameNode> GetInspectorById(const RefPtr<NG::FrameNode>& root, int32_
     return nullptr;
 }
 
+void GetFrameNodeParent(const RefPtr<NG::UINode>& uiNode, RefPtr<NG::FrameNode>& parent)
+{
+    if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+        if (!frameNode->IsInternal()) {
+            parent = frameNode;
+            return;
+        }
+    }
+    auto parentNode = uiNode->GetParent();
+    GetFrameNodeParent(parentNode, parent);
+}
+
 bool CheckFrameNodeByAccessibilityLevel(const RefPtr<NG::FrameNode>& frameNode, bool isParent)
 {
     bool ret = false;
     CHECK_NULL_RETURN(frameNode, false);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    auto parentNode = AceType::DynamicCast<NG::FrameNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    auto uiNode = frameNode->GetParent();
+    RefPtr<NG::FrameNode> parentNode;
+    if (uiNode != nullptr) {
+        GetFrameNodeParent(uiNode, parentNode);
+    }
+
     if (isParent) {
         if (accessibilityProperty->GetAccessibilityLevel() == IMPORTANT_NO_HIDE_DES) {
             ret = false;
@@ -599,7 +618,11 @@ bool CheckFrameNodeByAccessibilityLevel(const RefPtr<NG::FrameNode>& frameNode, 
                 ret = true;
             }
         } else {
-            ret = CheckFrameNodeByAccessibilityLevel(parentNode, true);
+            if (accessibilityProperty->IsAccessibilityGroup()) {
+                ret = false;
+            } else {
+                ret = CheckFrameNodeByAccessibilityLevel(parentNode, true);
+            }
         }
     } else {
         if (accessibilityProperty->GetAccessibilityLevel() == IMPORTANT_YES) {

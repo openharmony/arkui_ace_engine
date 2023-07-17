@@ -314,8 +314,6 @@ SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
     return {};
 }
 
-void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback) {}
-
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
     // top inset = 1

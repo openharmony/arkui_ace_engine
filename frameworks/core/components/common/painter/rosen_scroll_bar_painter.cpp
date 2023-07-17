@@ -20,6 +20,8 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 namespace OHOS::Ace {

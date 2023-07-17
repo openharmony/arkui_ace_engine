@@ -144,7 +144,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     [renderContext]() {
                         renderContext->UpdateOpacity(SCALE_NUMBER);
                     }, option.GetOnFinishEvent());
-                if (SystemProperties::IsSceneBoardEnabled()) {
+                auto container = Container::Current();
+                if (container && container->IsScenceBoardWindow()) {
                     auto pipelineContext = PipelineContext::GetCurrentContext();
                     CHECK_NULL_VOID(pipelineContext);
                     auto manager = pipelineContext->GetOverlayManager();
@@ -265,6 +266,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
 #ifdef ENABLE_DRAG_FRAMEWORK
+        actuator->previewLongPressRecognizer_->OnRejected();
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (!GetIsBindOverlayValue(actuator)) {
@@ -349,7 +351,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (gestureHub->GetTextDraggable()) {
             actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
         } else {
-            if (!SystemProperties::IsSceneBoardEnabled()) {
+            auto container = Container::Current();
+            if (!container || !container->IsScenceBoardWindow()) {
                 actuator->SetFilter(actuator);
             }
             auto pipeline = PipelineContext::GetCurrentContext();
@@ -507,7 +510,8 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(hub);
     hub->SetPixelMap(gestureHub->GetPixelMap());
     // mount to rootNode
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
         auto windowScene = manager->FindWindowScene(frameNode);
         manager->MountPixelMapToWindowScene(columnNode, windowScene);
     } else {
@@ -540,7 +544,8 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
     props->UpdateUserDefinedIdealSize(targetSize);
     BindClickEvent(columnNode);
     columnNode->MarkModifyDone();
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();

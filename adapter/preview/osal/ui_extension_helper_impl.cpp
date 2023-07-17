@@ -13,21 +13,11 @@
  * limitations under the License.
  */
 
-#include "base/ui_extension/ui_extension_helper.h"
+#include "core/common/ui_extension_helper.h"
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 namespace OHOS::Ace {
-
-UIExtensionHelper& UIExtensionHelper::GetInstance()
-{
-    static UIExtensionHelper instance;
-    return instance;
-}
-
-UIExtensionHelper::UIExtensionHelper() {}
-
-UIExtensionHelper::~UIExtensionHelper() {}
 
 RefPtr<NG::FrameNode> UIExtensionHelper::CreateUIExtensionNode(const std::string& bundleName,
     const std::string& abilityName, const std::map<std::string, std::string>& params,
@@ -37,4 +27,4 @@ RefPtr<NG::FrameNode> UIExtensionHelper::CreateUIExtensionNode(const std::string
     return nullptr;
 }
 
-}
+} // namespace OHOS::Ace

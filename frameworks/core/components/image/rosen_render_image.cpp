@@ -38,7 +38,11 @@
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "core/components/text_overlay/text_overlay_component.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
@@ -745,7 +749,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
     ApplyColorFilter(brush);
     ApplyInterpolation(brush);
     auto colorSpace = RSColorSpace::CreateSRGB();
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (rsImage && rsImage->GetImage()) {
         colorSpace = RSColorSpace::CreateRefImage(*rsImage->GetImage());
     }
@@ -778,7 +782,6 @@ void RosenRenderImage::ApplyBorderRadius(const Offset& offset, const Rect& paint
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     recordingCanvas->ClipAdaptiveRRect(radii_);
 #else
-    auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
     LOGE("Drawing is not supported");
 #endif
 #else
@@ -959,7 +962,7 @@ void RosenRenderImage::CanvasDrawImageRect(
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     if (!skImage || (!skImage->GetImage() && !skImage->GetCompressData())) {
 #else
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (!rsImage || (!rsImage->GetImage() && !rsImage->GetCompressData())) {
 #endif
         imageDataNotReady_ = true;
@@ -1132,7 +1135,7 @@ void RosenRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRec
     recordingCanvas->Save();
     recordingCanvas->ConcatMatrix(sampleMatrix);
 
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (rsImage && rsImage->GetImage()) {
         recordingCanvas->AttachBrush(brush);
         recordingCanvas->DrawImageRect(*rsImage->GetImage(), drSrcRect, drDstRect, sampling,
@@ -1163,7 +1166,7 @@ bool RosenRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixma
 #else
 bool RosenRenderImage::VerifyRSImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
 {
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (!rsImage || !rsImage->GetImage()) {
         LOGE("image data made from pixmap is null");
         return false;
@@ -1201,7 +1204,7 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     if (currentDstRectList_.empty() || !skImage || !skImage->GetImage()) {
 #else
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (currentDstRectList_.empty() || !rsImage || !rsImage->GetImage()) {
 #endif
         return;
@@ -1637,7 +1640,7 @@ bool RosenRenderImage::IsSourceWideGamut() const
     }
     return ImageProvider::IsWideGamut(skImage->GetImage()->refColorSpace());
 #else
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (sourceInfo_.IsSvg() || !rsImage || !rsImage->GetImage()) {
         return false;
     }
@@ -1863,7 +1866,7 @@ SkPixmap RosenRenderImage::CloneSkPixmap(SkPixmap& srcPixmap)
 #else
 RefPtr<PixelMap> RosenRenderImage::GetPixmapFromDrawingImage()
 {
-    auto rosenImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rosenImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (!rosenImage || !rosenImage->GetImage()) {
         return nullptr;
     }

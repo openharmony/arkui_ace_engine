@@ -61,6 +61,9 @@ ACE_EXPORT extern const char STAGE_ETS_TAG[];
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
+
+ACE_EXPORT extern const char ATOMIC_SERVICE_ETS_TAG[];
+ACE_EXPORT extern const char APP_BAR_ETS_TAG[];
 // js custom view
 ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_VIEW_COMPONENT_TAG[];

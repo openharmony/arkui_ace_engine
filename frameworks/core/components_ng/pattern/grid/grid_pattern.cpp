@@ -152,7 +152,7 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> children;
-    host->GenerateOneDepthAllFrame(children);
+    host->GenerateOneDepthVisibleFrame(children);
     for (const auto& itemFrameNode : children) {
         auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(itemEvent);
@@ -372,9 +372,13 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
+    float currentOffset = gridLayoutInfo_.currentOffset_;
+    bool reachEnd = gridLayoutInfo_.reachEnd_;
+    bool reachStart = gridLayoutInfo_.reachStart_;
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
-    ProcessEvent(indexChanged, gridLayoutInfo_.currentOffset_, offsetEnd);
+    ProcessEvent(indexChanged, gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, currentOffset,
+                 offsetEnd, reachEnd, reachStart);
 
     SetScrollState(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
@@ -409,7 +413,8 @@ void GridPattern::CheckScrollable()
     }
 }
 
-void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, bool offsetEnd)
+void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
+                               bool reachEnd, bool reachStart)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -455,13 +460,23 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, bool offset
     }
 
     auto onReachStart = gridEventHub->GetOnReachStart();
-    if (onReachStart && gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
+	// want to call onReachStart(), must be:
+	//    onReachStart function pointer existing,
+	//    first time to reach top: currentOffset equal to 0,
+	//    Or Spring end to reach top again: reachStart_ is true and last time reachStart_ is false.
+    if (onReachStart && gridLayoutInfo_.startIndex_ == 0 &&
+        (NearZero(gridLayoutInfo_.currentOffset_) || (gridLayoutInfo_.reachStart_ && !reachStart))) {
         onReachStart();
     }
 
     auto onReachEnd = gridEventHub->GetOnReachEnd();
+	// want to call onReachEnd(), must be:
+	//    onReachEnd function pointer existing and endIndex_ equal to sub windows count,
+	//    first time to reach bottom: reachEnd_ is true and offsetEnd_ is different from last time,
+	//    Or spring end to reach bottom again: reachEnd_ is false and offsetEnd_ is false.
     if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1) &&
-        gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) {
+        ((gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) ||
+        (!gridLayoutInfo_.reachEnd_ && !gridLayoutInfo_.offsetEnd_))) {
         onReachEnd();
     }
 
@@ -517,7 +532,7 @@ void GridPattern::FlushCurrentFocus()
         LOGE("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
         return;
     }
-    auto curCrossNum = static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.at(lastFocusItemMainIndex_).size());
+    auto curCrossNum = GetCrossCount();
     auto weakChild = SearchFocusableChildInCross(lastFocusItemMainIndex_, lastFocusItemCrossIndex_, curCrossNum);
     auto child = weakChild.Upgrade();
     if (child) {
@@ -611,7 +626,7 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             LOGE("Can not find next main index: %{public}d", nextMainIndex);
             return nullptr;
         }
-        auto nextMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
+        auto nextMaxCrossCount = GetCrossCount();
         auto weakChild =
             SearchFocusableChildInCross(nextMainIndex, nextCrossIndex, nextMaxCrossCount, curMainIndex, curCrossIndex);
         auto child = weakChild.Upgrade();
@@ -640,7 +655,7 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         LOGE("Can not find current main index: %{public}d", curMainIndex);
         return { -1, -1 };
     }
-    auto curMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[curMainIndex]).size());
+    auto curMaxCrossCount = GetCrossCount();
     LOGD("Current main index start-end: %{public}d-%{public}d, Current cross count: %{public}d, Current child "
          "index start-end: %{public}d-%{public}d, Total children count: %{public}d",
         curMainStart, curMainEnd, curMaxCrossCount, curChildStartIndex, curChildEndIndex, childrenCount);
@@ -722,13 +737,16 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         LOGE("Can not find next main index: %{public}d", nextMainIndex);
         return { -1, -1 };
     }
-    auto nextMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[nextMainIndex]).size());
+    auto nextMaxCrossCount = GetCrossCount();
     if (nextCrossIndex >= nextMaxCrossCount) {
-        LOGI("Next index return: { %{public}d,%{public}d }. Next cross index is greater than max cross count",
-            nextMainIndex, nextMaxCrossCount - 1);
+        LOGI("Next index: { %{public}d,%{public}d }. Next cross index is greater than max cross count: %{public}d.",
+            nextMainIndex, nextCrossIndex, nextMaxCrossCount - 1);
         if (nextMaxCrossCount - 1 != curCrossIndex) {
+            LOGI("Current cross index: %{public}d is not the tail item. Return to the tail: { %{public}d,%{public}d }",
+                curCrossIndex, nextMainIndex, nextMaxCrossCount - 1);
             return { nextMainIndex, nextMaxCrossCount - 1 };
         }
+        LOGW("Current cross index: %{public}d is the tail item. No next item can be found!", curCrossIndex);
         return { -1, -1 };
     }
     LOGI("Next index return: { %{public}d,%{public}d }.", nextMainIndex, nextCrossIndex);

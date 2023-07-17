@@ -86,7 +86,7 @@ void SubwindowOhos::InitContainer()
         auto windowType = parentWindow->GetType();
         LOGI("Find parent window success, name: %{public}s, windowId: %{public}u, type: %{public}u",
             parentWindow->GetWindowName().c_str(), parentWindow->GetWindowId(), static_cast<uint32_t>(windowType));
-        if (windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
+        if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_FLOAT);
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
@@ -699,6 +699,14 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
     if (!delegate) {
         LOGE("can not get delegate.");
         return;
+    }
+    ContainerScope scope(aceContainer->GetInstanceId());
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+    if (parentContainer->IsScenceBoardWindow()) {
+        ShowWindow();
+        ResizeWindow();
+        window_->SetTouchable(false);
     }
     delegate->ShowToast(message, duration, bottom);
 }

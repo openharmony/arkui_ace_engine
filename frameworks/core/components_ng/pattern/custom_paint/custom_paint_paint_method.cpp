@@ -123,9 +123,15 @@ inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t l
 
 void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
+#ifndef USE_ROSEN_DRAWING
     rsRecordingCanvas_ = std::make_shared<OHOS::Rosen::RSRecordingCanvas>(width, height);
     skCanvas_ = std::static_pointer_cast<SkCanvas>(rsRecordingCanvas_);
     contentModifier_->UpdateCanvas(rsRecordingCanvas_);
+#else
+    rsRecordingCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
+    rsCanvas_ = std::static_pointer_cast<RSCanvas>(rsRecordingCanvas_);
+    contentModifier_->UpdateCanvas(rsRecordingCanvas_);
+#endif
 }
 
 bool CustomPaintPaintMethod::HasShadow() const
@@ -649,7 +655,9 @@ void CustomPaintPaintMethod::GetStrokePaint(RSPen& pen, RSSamplingOptions& optio
         { LineCapStyle::SQUARE, RSPen::CapStyle::SQUARE_CAP },
     };
     InitImagePaint(&pen, nullptr, options);
-    pen.SetColor(strokeState_.GetColor().GetValue());
+    if (strokeState_.GetPaintStyle() == PaintStyle::Color) {
+        pen.SetColor(strokeState_.GetColor().GetValue());
+    }
     pen.SetJoinStyle(ConvertEnumToDrawingEnum(
         strokeState_.GetLineJoin(), skLineJoinTable, ArraySize(skLineJoinTable), RSPen::JoinStyle::MITER_JOIN));
     pen.SetCapStyle(ConvertEnumToDrawingEnum(
@@ -664,7 +672,6 @@ void CustomPaintPaintMethod::GetStrokePaint(RSPen& pen, RSSamplingOptions& optio
     if (globalState_.HasGlobalAlpha()) {
         pen.SetAlphaF(globalState_.GetAlpha());
     }
-    return pen;
 }
 
 void CustomPaintPaintMethod::InitImagePaint(RSPen* pen, RSBrush* brush, RSSamplingOptions& options)
@@ -1988,7 +1995,7 @@ void CustomPaintPaintMethod::Translate(double x, double y)
 #endif
 }
 
-double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph)
+double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double x = 0.0;
     TextDirection textDirection = fillState_.GetOffTextDirection();
@@ -2015,15 +2022,14 @@ double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<O
     return x;
 }
 
-OHOS::Rosen::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(
-    OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const
+txt::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const
 {
-    if (align == OHOS::Rosen::TextAlign::START) {
-        return (direction == OHOS::Rosen::TextDirection::LTR) ? OHOS::Rosen::TextAlign::LEFT
-                                                      : OHOS::Rosen::TextAlign::RIGHT;
-    } else if (align == OHOS::Rosen::TextAlign::END) {
-        return (direction == OHOS::Rosen::TextDirection::LTR) ? OHOS::Rosen::TextAlign::RIGHT
-                                                      : OHOS::Rosen::TextAlign::LEFT;
+    if (align == txt::TextAlign::start) {
+        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::left
+                                                      : txt::TextAlign::right;
+    } else if (align == txt::TextAlign::end) {
+        return (direction == txt::TextDirection::ltr) ? txt::TextAlign::right
+                                                      : txt::TextAlign::left;
     } else {
         return align;
     }

@@ -84,7 +84,7 @@ public:
     void SetScale(float x, float y, float z) override;
     void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
-    void SetRotate(float x, float y, float z, float angle, float perspective = 1.0f) override;
+    void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
 
     void SetOpacity(double opacity, bool passThrough = false) override;

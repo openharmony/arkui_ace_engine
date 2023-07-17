@@ -34,6 +34,7 @@ public:
     }
 
     void OnSetDepth(const int32_t depth) override;
+
 protected:
     void OnAttachToFrameNode() override;
 

@@ -20,13 +20,16 @@
 
 #include "flutter/fml/memory/ref_counted.h"
 #include "include/codec/SkCodec.h"
+#ifdef USE_ROSEN_DRAWING
+#include "draw/color.h"
+#endif
 
 #include "base/memory/ace_type.h"
 #include "base/resource/internal_resource.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/render/canvas_image.h"
 #ifdef USE_ROSEN_DRAWING
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #endif
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
@@ -154,8 +157,8 @@ public:
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
 #else
-    static RSColorType PixelFormatToDrawingColorType(const RefPtr<PixelMap>& pixmap);
-    static RSAlphaType AlphaTypeToDrawingAlphaType(const RefPtr<PixelMap>& pixmap);
+    static Rosen::Drawing::ColorType PixelFormatToDrawingColorType(const RefPtr<PixelMap>& pixmap);
+    static Rosen::Drawing::AlphaType AlphaTypeToDrawingAlphaType(const RefPtr<PixelMap>& pixmap);
     static RSBitmapFormat MakeRSBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static std::shared_ptr<RSColorSpace> ColorSpaceToDrawingColorSpace(const RefPtr<PixelMap>& pixmap);
 #endif

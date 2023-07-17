@@ -402,7 +402,7 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
 
     auto floatingNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().back());
     CHECK_NULL_VOID(floatingNode);
-    auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, TITLE_LABEL_INDEX));
+    auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, TITLE_LABEL_INDEX));
     floatingTitleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
     floatingTitleLabel->MarkModifyDone();
     floatingTitleLabel->MarkDirtyNode();

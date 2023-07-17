@@ -45,7 +45,7 @@ const Color WHITE = Color(0xffffffff);
 const Offset OFFSETS {2.0, 2.0};
 
 const NG::VectorF VECTOR_TEST = {10.0, 20.0};
-const NG::Vector5F VECTOR_5F_TEST = {20.0f, 40.0f, 60.0f, 80.0f, 1.0f};
+const NG::Vector5F VECTOR_5F_TEST = {20.0f, 40.0f, 60.0f, 80.0f, 0.0f};
 const NG::TranslateOptions PTTION_TEST = {OFFSET_X, OFFSET_Y, POSITION_X};
 const NG::OffsetT<Dimension> POSITION = {POSITION_X, POSITION_Y};
 const NG::OffsetT<Dimension> OFFSET_TEST = {OFFSET_X, OFFSET_Y};

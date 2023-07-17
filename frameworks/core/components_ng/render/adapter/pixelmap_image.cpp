@@ -94,13 +94,39 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
 #endif
 #else
-    LOGE("Drawing is not supported");
+    RSBrush brush;
+    auto config = GetPaintConfig();
+    RSSamplingOptions options;
+    ImagePainterUtils::AddFilter(brush, options, config);
+    auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
+    auto recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
+    std::vector<RSPoint> radius;
+    for (int ii = 0; ii < 4; ii++) {
+        RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
+        radius.emplace_back(point);
+    }
+    recordingCanvas.ClipAdaptiveRoundRect(radius);
+    recordingCanvas.Scale(config.scaleX_, config.scaleY_);
+
+    CHECK_NULL_VOID_NOLOG(pixmap->GetPixelMapSharedPtr());
+    RSPoint pointRadius[4] = {};
+    for (int i = 0; i < 4; i++) {
+        pointRadius[i] = radius[i];
+    }
+    Rosen::Drawing::AdaptiveImageInfo rsImageInfo =
+        {static_cast<int32_t>(config.imageFit_), static_cast<int32_t>(config.imageRepeat_),
+         {pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3]}, 1.0, 0, 0, 0};
+    RSSamplingOptions smapling;
+    recordingCanvas.AttachBrush(brush);
+    recordingCanvas.DrawPixelMap(pixmap->GetPixelMapSharedPtr(), rsImageInfo, smapling);
+    recordingCanvas.DetachBrush();
 #endif
 #endif
 }
 
 void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 {
+#ifndef USE_ROSEN_DRAWING
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef NEW_SKIA
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
@@ -117,6 +143,10 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
 #endif
 #else
+    LOGE("Drawing is not supported");
+#endif
+#else
+    // TODO Drawing
     LOGE("Drawing is not supported");
 #endif
 }

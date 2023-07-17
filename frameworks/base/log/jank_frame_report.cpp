@@ -19,6 +19,7 @@
 
 #include "render_service_client/core/transaction/rs_interfaces.h"
 
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/log/event_report.h"
 
 namespace OHOS::Ace {
@@ -81,6 +82,8 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
     int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
     int64_t duration = now - std::max(timeStampNanos, prevEndTimeStamp_);
     double jank = double(duration) / refreshPeriod_;
+    // perf monitor jank frame
+    PerfMonitor::GetPerfMonitor()->SetFrameTime(timeStampNanos, duration, jank);
     if (jank <= 1.0f || recordStatus_ == JANK_IDLE) {
         return;
     }

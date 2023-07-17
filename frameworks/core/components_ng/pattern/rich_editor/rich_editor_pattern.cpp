@@ -166,6 +166,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options)
     imageNode->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+    textSelector_.Update(-1, -1);
 
     return spanIndex;
 }
@@ -210,6 +211,7 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options)
         spanNode->UpdateTextDecorationColor(options.style.value().GetTextDecorationColor());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
     }
+    textSelector_.Update(-1, -1);
 
     return spanIndex;
 }
@@ -822,10 +824,15 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-    if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
+    if (!textSelectInfo.GetSelection().resultObjects.empty()) {
         eventHub->FireOnSelect(&textSelectInfo);
     }
-    SetCaretPosition(selectEnd);
+    SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
+    if (richEditorOverlayModifier_) {
+        RequestKeyboard(false, true, true);
+    }
+
+    StopTwinkling();
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -862,7 +869,7 @@ void RichEditorPattern::InitDragDropEvent()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragStart = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
-        const std::string& extraParams) -> NG::DragDropInfo {
+                           const std::string& extraParams) -> NG::DragDropInfo {
         NG::DragDropInfo itemInfo;
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_RETURN(pattern, itemInfo);
@@ -870,7 +877,7 @@ void RichEditorPattern::InitDragDropEvent()
     };
     eventHub->SetOnDragStart(std::move(onDragStart));
     auto onDragMove = [weakPtr = WeakClaim(this)](
-        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+                          const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnDragMove(event);
@@ -987,12 +994,11 @@ void RichEditorPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& 
         }
 
         if (resultObj.type == RichEditorSpanType::TYPEIMAGE) {
-            auto imageNode =
-                DynamicCast<FrameNode>(pattern->GetChildByIndex(resultObj.spanPosition.spanIndex));
+            auto imageNode = DynamicCast<FrameNode>(pattern->GetChildByIndex(resultObj.spanPosition.spanIndex));
             CHECK_NULL_VOID(imageNode);
             auto renderContext = imageNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateOpacity(isDragging ? (double)DRAGGED_TEXT_OPACITY/255 : 1);
+            renderContext->UpdateOpacity(isDragging ? (double)DRAGGED_TEXT_OPACITY / 255 : 1);
             imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
@@ -1268,30 +1274,18 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetEraseLength(insertValueLength);
     retInfo.SetValue(spanNode->GetSpanItem()->content);
     retInfo.SetOffsetInSpan(GetCaretPosition() - retInfo.GetSpanRangeStart());
-    if (spanNode->HasTextColor()) {
-        retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
+    retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
+    retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp());
+    retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
+    retInfo.SetFontWeight(static_cast<int32_t>(spanNode->GetFontWeightValue(FontWeight::NORMAL)));
+    std::string fontFamilyValue = "";
+    auto fontFamily = spanNode->GetFontFamilyValue({ "HarmonyOS Sans" });
+    for (const auto& str : fontFamily) {
+        fontFamilyValue += str;
     }
-    if (spanNode->HasFontSize()) {
-        retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension()).Value());
-    }
-    if (spanNode->HasItalicFontStyle()) {
-        retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
-    }
-    if (spanNode->HasFontWeight()) {
-        retInfo.SetFontWeight(static_cast<int32_t>(spanNode->GetFontWeightValue(FontWeight::NORMAL)));
-    }
-    if (spanNode->HasFontFamily()) {
-        std::string fontFamilyValue = "";
-        auto fontFamily = spanNode->GetFontFamilyValue({ "HarmonyOS Sans" });
-        for (auto str : fontFamily) {
-            fontFamilyValue += str;
-        }
-        retInfo.SetFontFamily(fontFamilyValue);
-    }
-    if (spanNode->HasTextDecoration()) {
-        retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
-        retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
-    }
+    retInfo.SetFontFamily(fontFamilyValue);
+    retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
+    retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
     eventHub->FireOnIMEInputComplete(retInfo);
 }
 
@@ -1303,7 +1297,8 @@ void RichEditorPattern::DeleteBackward(int32_t length)
     if (textSelector_.IsValid()) {
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         SetCaretPosition(textSelector_.GetTextEnd());
-        textSelector_.Update(-1, -1);
+        CloseSelectOverlay();
+        ResetSelection();
     }
     RichEditorDeleteValue info;
     info.SetOffset(caretPosition_ - 1);
@@ -1644,6 +1639,15 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 {
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
+        float selectLineHeight = 0.0f;
+        auto contentRect = GetTextRect();
+        TextPattern::CalcCursorOffsetByPosition(GetCaretPosition(), selectLineHeight);
+        if (info.GetLocalLocation().GetY() > selectLineHeight) {
+            if (!contentRect.IsInRegion(
+                PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY() + (selectLineHeight / 2)))) {
+                return;
+            }
+        }
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -1906,6 +1910,10 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
 
 void RichEditorPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
+    auto contentRect = GetTextRect();
+    if (!contentRect.IsInRegion(PointF(handleRect.GetX(), handleRect.GetY()))) {
+        return;
+    }
     TextPattern::OnHandleMove(handleRect, isFirstHandle);
     if (!isFirstHandle) {
         SetCaretPosition(textSelector_.destinationOffset);

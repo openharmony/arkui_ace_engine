@@ -445,12 +445,13 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    appBarNode_ = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    auto atomicService = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
         MaximizeMode maximizeMode = GetWindowManager()->GetWindowMaximizeMode();
-        rootNode_->AddChild(ContainerModalViewFactory::GetView(appBarNode_ ? appBarNode_ : stageNode, maximizeMode));
+        rootNode_->AddChild(
+            ContainerModalViewFactory::GetView(atomicService ? atomicService : stageNode, maximizeMode));
     } else {
-        rootNode_->AddChild(appBarNode_ ? appBarNode_ : stageNode);
+        rootNode_->AddChild(atomicService ? atomicService : stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard() && !isFormRender_) {
@@ -1004,17 +1005,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 #endif
 
     HandleEtsCardTouchEvent(point);
-    HandleWindowSceneTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
-    if (scalePoint.type == TouchType::DOWN || scalePoint.type == TouchType::UP) {
-        // Remove the select overlay node when mouse down or touch up.
-        auto rootOffset = GetRootRect().GetOffset();
-        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
-    }
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false);
@@ -1023,7 +1018,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
-
         for (const auto& weakContext : touchPluginPipelineContext_) {
             auto pipelineContext = DynamicCast<OHOS::Ace::PipelineBase>(weakContext.Upgrade());
             if (!pipelineContext) {
@@ -1039,6 +1033,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // restore instance Id.
         eventManager_->SetInstanceId(GetInstanceId());
     }
+
+    auto rootOffset = GetRootRect().GetOffset();
+    eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
+
     if (isSubPipe) {
         return;
     }
@@ -1074,7 +1072,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
-        RemoveWindowSceneTouchEventCallback(point.id);
     }
 
     hasIdleTasks_ = true;
@@ -1225,10 +1222,10 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         SetIsFocusActive(false);
     }
     if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-        event.action == MouseAction::MOVE) &&
-        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
-        (SystemProperties::IsSceneBoardEnabled() && (event.pullAction == MouseAction::PULL_MOVE ||
-        event.pullAction == MouseAction::PULL_UP))) {
+             event.action == MouseAction::MOVE) &&
+            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+        (SystemProperties::IsSceneBoardEnabled() &&
+            (event.pullAction == MouseAction::PULL_MOVE || event.pullAction == MouseAction::PULL_UP))) {
         auto touchPoint = event.CreateTouchPoint();
         OnTouchEvent(touchPoint);
     }
@@ -1516,7 +1513,7 @@ void PipelineContext::OnHide()
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
-    LOGI("WindowFocus: windowId: %{public}d, onFocus: %{public}d, onShow: %{public}d.", windowId_, onFocus_, onShow_);
+    LOGI("WindowFocus: windowId: %{public}d, onFocus: %{public}d, onShow: %{public}d.", windowId_, isFocus, onShow_);
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
@@ -1910,46 +1907,6 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
 }
 
-// ---------------- WindowScene pointerEvent callback handler -------------------------
-void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback)
-{
-    if (!callback || pointId < 0) {
-        return;
-    }
-
-    windowSceneTouchEventCallback_[pointId] = std::move(callback);
-}
-
-void PipelineContext::RemoveWindowSceneTouchEventCallback(int32_t pointId)
-{
-    if (pointId < 0) {
-        return;
-    }
-
-    auto iter = windowSceneTouchEventCallback_.find(pointId);
-    if (iter == windowSceneTouchEventCallback_.end()) {
-        return;
-    }
-
-    windowSceneTouchEventCallback_.erase(iter);
-}
-
-void PipelineContext::HandleWindowSceneTouchEvent(const TouchEvent& point)
-{
-    if (point.id < 0) {
-        return;
-    }
-
-    auto iter = windowSceneTouchEventCallback_.find(point.id);
-    if (iter == windowSceneTouchEventCallback_.end()) {
-        return;
-    }
-
-    if (iter->second) {
-        iter->second(point.pointerEvent);
-    }
-}
-
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node)
 {
     if (fontManager_) {
@@ -1963,6 +1920,4 @@ void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node)
         fontManager_->RemoveFontNodeNG(node);
     }
 }
-// ----------------------------------------------------------------------------------
-
 } // namespace OHOS::Ace::NG

@@ -32,14 +32,6 @@ public:
     {
         return std::make_shared<TestingFontCollection>();
     }
-
-    static std::shared_ptr<TestingFontCollection> Create()
-    {
-        return std::make_shared<TestingFontCollection>();
-    }
-
-private:
-    static std::shared_ptr<TestingFontCollection> instance;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_FONT_COLLECTION_H

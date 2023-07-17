@@ -2300,7 +2300,9 @@ HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
         {FocusStep::LEFT_END, -1},
         {FocusStep::UP_END, -1},
         {FocusStep::RIGHT_END, 3},
-        {FocusStep::DOWN_END, -1}
+        {FocusStep::DOWN_END, -1},
+        {FocusStep::TAB, 1},
+        {FocusStep::SHIFT_TAB, -1}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex1, next1));
 
@@ -2313,12 +2315,14 @@ HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
         {FocusStep::NONE, -1},
         {FocusStep::LEFT, 2},
         {FocusStep::UP, -1},
-        {FocusStep::RIGHT, 4},
+        {FocusStep::RIGHT, -1},
         {FocusStep::DOWN, 7},
         {FocusStep::LEFT_END, 0},
         {FocusStep::UP_END, -1},
         {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, -1}
+        {FocusStep::DOWN_END, -1},
+        {FocusStep::TAB, 4},
+        {FocusStep::SHIFT_TAB, 2}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex2, next2));
 
@@ -2329,14 +2333,16 @@ HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
     constexpr int32_t currentIndex3 = 8;
     std::map<FocusStep, int32_t> next3 = {
         {FocusStep::NONE, -1},
-        {FocusStep::LEFT, 7},
+        {FocusStep::LEFT, -1},
         {FocusStep::UP, 4},
         {FocusStep::RIGHT, 9},
         {FocusStep::DOWN, -1},
         {FocusStep::LEFT_END, -1},
         {FocusStep::UP_END, -1},
         {FocusStep::RIGHT_END, 9},
-        {FocusStep::DOWN_END, -1}
+        {FocusStep::DOWN_END, -1},
+        {FocusStep::TAB, 9},
+        {FocusStep::SHIFT_TAB, 7}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex3, next3));
 
@@ -2354,7 +2360,9 @@ HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
         {FocusStep::LEFT_END, 8},
         {FocusStep::UP_END, -1},
         {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, -1}
+        {FocusStep::DOWN_END, -1},
+        {FocusStep::TAB, -1},
+        {FocusStep::SHIFT_TAB, 8}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex4, next4));
 
@@ -2372,7 +2380,9 @@ HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
         {FocusStep::LEFT_END, 4},
         {FocusStep::UP_END, -1},
         {FocusStep::RIGHT_END, 7},
-        {FocusStep::DOWN_END, -1}
+        {FocusStep::DOWN_END, -1},
+        {FocusStep::TAB, 6},
+        {FocusStep::SHIFT_TAB, 4}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex5, next5));
 }
@@ -2412,7 +2422,9 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
         {FocusStep::LEFT_END, -1},
         {FocusStep::UP_END, -1},
         {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, 3}
+        {FocusStep::DOWN_END, 3},
+        {FocusStep::TAB, 1},
+        {FocusStep::SHIFT_TAB, -1}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex1, next1));
 
@@ -2424,13 +2436,15 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
     std::map<FocusStep, int32_t> next2 = {
         {FocusStep::NONE, -1},
         {FocusStep::LEFT, 4},
-        {FocusStep::UP, 7},
+        {FocusStep::UP, -1},
         {FocusStep::RIGHT, -1},
         {FocusStep::DOWN, 9},
         {FocusStep::LEFT_END, -1},
         {FocusStep::UP_END, -1},
         {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, 9}
+        {FocusStep::DOWN_END, 9},
+        {FocusStep::TAB, 9},
+        {FocusStep::SHIFT_TAB, 7}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex2, next2));
 
@@ -2444,11 +2458,13 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
         {FocusStep::LEFT, -1},
         {FocusStep::UP, 2},
         {FocusStep::RIGHT, 7},
-        {FocusStep::DOWN, 4},
+        {FocusStep::DOWN, -1},
         {FocusStep::LEFT_END, -1},
         {FocusStep::UP_END, 0},
         {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, -1}
+        {FocusStep::DOWN_END, -1},
+        {FocusStep::TAB, 4},
+        {FocusStep::SHIFT_TAB, 2}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex3, next3));
 
@@ -2466,7 +2482,9 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
         {FocusStep::LEFT_END, -1},
         {FocusStep::UP_END, 8},
         {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, -1}
+        {FocusStep::DOWN_END, -1},
+        {FocusStep::TAB, -1},
+        {FocusStep::SHIFT_TAB, 8}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex4, next4));
 
@@ -2484,7 +2502,9 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
         {FocusStep::LEFT_END, -1},
         {FocusStep::UP_END, 4},
         {FocusStep::RIGHT_END, -1},
-        {FocusStep::DOWN_END, 7}
+        {FocusStep::DOWN_END, 7},
+        {FocusStep::TAB, 6},
+        {FocusStep::SHIFT_TAB, 4}
     };
     EXPECT_TRUE(IsEqualNextFocusNode(currentIndex5, next5));
 }

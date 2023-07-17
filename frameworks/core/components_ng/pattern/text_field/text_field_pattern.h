@@ -53,7 +53,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
-#include "rosen_text/typography.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -449,7 +448,7 @@ public:
         return isUsingMouse_;
     }
     int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove);
-    int32_t GetLineBeginPosision(int32_t originCaretPosition, bool needToCheckLineChanged = true);
+    int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
@@ -477,7 +476,7 @@ public:
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
-    std::vector<RSTextRect> GetTextBoxes() override
+    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override
     {
         return textBoxes_;
     }
@@ -725,6 +724,11 @@ public:
     bool IsDragging() const
     {
         return dragStatus_ == DragStatus::DRAGGING;
+    }
+
+    bool IsTouchTestPointInArea(const Offset& touchOffset, bool isTouchPointHits) override
+    {
+        return isTouchPointHits && BetweenSelectedPosition(touchOffset);
     }
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override
@@ -993,7 +997,7 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
-    void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTextRect>& textBoxes);
+    void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     float FitCursorInSafeArea();
     bool OffsetInContentRegion(const Offset& offset);
@@ -1129,7 +1133,7 @@ private:
     TextEditingValueNG textEditingValue_;
     TextSelector textSelector_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
-    std::vector<RSTextRect> textBoxes_;
+    std::vector<RSTypographyProperties::TextBox> textBoxes_;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);

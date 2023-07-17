@@ -41,7 +41,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SWIPER_MONTHS_COUNT = 3;
 constexpr int32_t CURRENT_MONTH_INDEX = 1;
-constexpr Dimension DIALOG_WIDTH = 300.0_vp;
+constexpr Dimension DIALOG_WIDTH = 320.0_vp;
 } // namespace
 RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogProperties,
     const CalendarSettingData& settingData, std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -107,7 +107,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    layoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    layoutProps->UpdateMainAxisAlign(FlexAlign::AUTO);
     layoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     MarginProperty margin;
@@ -140,6 +140,10 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     textLayoutProperty->UpdateMargin(textMargin);
     textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateLayoutWeight(1);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textTitleNode->MarkModifyDone();
     textTitleNode->MountToParent(titleRow);
 
@@ -200,7 +204,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(resourceId);
+    imageSourceInfo.SetResourceId(resourceId, theme->GetEntryArrowColor());
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
     imageNode->MarkModifyDone();
@@ -428,11 +432,12 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    RefPtr<CalendarTheme> theme = pipeline->GetTheme<CalendarTheme>();
     auto dividerNode = FrameNode::GetOrCreateFrameNode(V2::DIVIDER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
     auto dividerRenderContext = dividerNode->GetRenderContext();
     CHECK_NULL_RETURN(dividerRenderContext, nullptr);
-    dividerRenderContext->UpdateBackgroundColor(dialogTheme->GetDividerColor());
+    dividerRenderContext->UpdateBackgroundColor(theme->GetDialogDividerColor());
 
     MarginProperty margin;
     dividerNode->GetLayoutProperty()->UpdateMargin(margin);

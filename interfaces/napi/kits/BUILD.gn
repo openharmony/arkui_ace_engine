@@ -55,6 +55,7 @@ group("napi_group") {
     deps = common_targets
     deps += [
       "$ace_root/interfaces/napi/kits/drawabledescriptor:drawabledescriptor",
+      "$ace_root/interfaces/napi/kits/perfmonitor:perfmonitor_napi",
       "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
     ]
   }

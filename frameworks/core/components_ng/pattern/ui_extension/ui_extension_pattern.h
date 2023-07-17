@@ -26,7 +26,7 @@
 namespace OHOS::AAFwk {
 class Want;
 class WantParams;
-}
+} // namespace OHOS::AAFwk
 
 namespace OHOS::Ace::NG {
 class UIExtensionProxy;
@@ -49,7 +49,6 @@ public:
     }
 
     void SetOnRemoteReadyCallback(std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback);
@@ -91,9 +90,6 @@ private:
     void UnregisterAbilityResultListener();
     void OnConnectInner();
 
-    void OnRemoteReady();
-    void OnResult(int32_t code, const AAFwk::Want& want);
-    void OnReceive(const AAFwk::WantParams& wantParams);
     void RegisterVisibleAreaChange();
 
     RefPtr<TouchEventImpl> touchEvent_;

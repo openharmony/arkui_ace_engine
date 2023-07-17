@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_ROSEN_DRAWING_IMAGE_DATA_H
 
 #include "core/components_ng/image_provider/image_data.h"
-#include "core/common/drawing.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class DrawingImageData : public ImageData {

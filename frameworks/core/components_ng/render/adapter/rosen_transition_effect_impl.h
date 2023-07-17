@@ -111,7 +111,8 @@ public:
         const Dimension& centerZ = Dimension(0.0));
     ~RosenPivotTransitionEffect() override = default;
 
-    void SetPivot(const Dimension& centerX, const Dimension& centerY, const Dimension& centerZ = Dimension(0.0));
+    void SetPivot(const Dimension& centerX, const Dimension& centerY, const Dimension& centerZ = Dimension(0.0,
+        DimensionUnit::VP));
 
 private:
     void OnUpdateTransitionContext(
@@ -119,7 +120,7 @@ private:
 
     Dimension centerX_ { 0.5_pct };
     Dimension centerY_ { 0.5_pct };
-    Dimension centerZ_ { 0.0_px };
+    Dimension centerZ_ { 0.0_vp };
     DECLARE_ACE_TYPE(RosenPivotTransitionEffect, RosenTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenPivotTransitionEffect);
 };

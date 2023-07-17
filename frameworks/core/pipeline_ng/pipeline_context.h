@@ -370,13 +370,6 @@ public:
     {
         storeNode_.erase(restoreId);
     }
-
-    // ---------------- WindowScene TouchEvent Callback Handler ---------------------
-    void AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback);
-    void RemoveWindowSceneTouchEventCallback(int32_t pointId);
-    void HandleWindowSceneTouchEvent(const TouchEvent& point);
-    // ------------------------------------------------------------------------------
-
     void SetNeedRenderNode(const RefPtr<FrameNode>& node);
 
 protected:
@@ -450,7 +443,6 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
-    RefPtr<FrameNode> appBarNode_;
 
     std::set<RefPtr<FrameNode>> needRenderNode_;
 

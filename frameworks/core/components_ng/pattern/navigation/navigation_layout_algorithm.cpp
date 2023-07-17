@@ -25,7 +25,9 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -200,6 +202,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(LayoutWrapper* layoutWrappe
     const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty,
     const SizeF& frameSize)
 {
+    auto lastNavMode = navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO);
     usrNavigationMode_ = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
     navigationMode_ = usrNavigationMode_;
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
@@ -235,6 +238,11 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(LayoutWrapper* layoutWrappe
         navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
         navigationLayoutAlgorithm->SetNavigationMode(navigationMode_);
         navigationPattern->SetNavigationMode(navigationMode_);
+    }
+    if (lastNavMode == NavigationMode::AUTO) {
+        navigationPattern->SetNavModeChange(navigationMode_ == NavigationMode::SPLIT);
+    } else {
+        navigationPattern->SetNavModeChange(navigationMode_ != lastNavMode);
     }
 }
 

@@ -82,6 +82,7 @@ public:
 
 private:
     void AddDragFrameNodeToManager() const;
+    void SetDraggable(bool draggable);
 };
 
 } // namespace OHOS::Ace::NG

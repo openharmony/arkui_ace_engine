@@ -510,6 +510,20 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
     }
+    if (options.image.has_value()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(options.image.value());
+        if (srcType == SrcType::ASSET) {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto assetManager = pipelineContext->GetAssetManager();
+            CHECK_NULL_VOID(assetManager);
+            auto assetData = assetManager->GetAsset(options.image.value());
+            if (!assetData) {
+                args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+                return;
+            }
+        }
+    }
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> imageObject = JSRef<JSObject>::Cast(args[1]);
 

@@ -38,11 +38,17 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
         } else if (HandleShiftPressedEvent(keyEvent)) {
             return true;
         } else if (keyEvent.IsDirectionalKey() || keyEvent.code == KeyCode::KEY_MOVE_HOME ||
-            keyEvent.code == KeyCode::KEY_MOVE_END) {
+                   keyEvent.code == KeyCode::KEY_MOVE_END) {
             HandleDirectionalKey(keyEvent);
             return true;
         } else if (keyEvent.IsNumberKey()) {
             appendElement = keyEvent.ConvertCodeToString();
+        } else if (keyEvent.code == KeyCode::KEY_INSERT) {
+            if (keyEvent.IsShiftWith(KeyCode::KEY_INSERT)) {
+                pattern->HandleOnPaste();
+            } else if (keyEvent.IsCtrlWith(KeyCode::KEY_INSERT)) {
+                pattern->HandleOnCopy();
+            }
         } else if (keyEvent.IsLetterKey()) {
             if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
                 keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
@@ -116,10 +122,10 @@ bool KeyEventHandler::IsCtrlShiftWith(const KeyEvent& keyEvent, const KeyCode ex
             keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, expectCode }) ||
             keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, expectCode }) ||
             keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, expectCode }) ||
-	    keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_CTRL_LEFT, expectCode }) ||
-	    keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_CTRL_RIGHT, expectCode }) ||
-	    keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_CTRL_LEFT, expectCode }) ||
-	    keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_CTRL_RIGHT, expectCode }));
+            keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_CTRL_LEFT, expectCode }) ||
+            keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_CTRL_RIGHT, expectCode }) ||
+            keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_CTRL_LEFT, expectCode }) ||
+            keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_CTRL_RIGHT, expectCode }));
 }
 
 bool KeyEventHandler::HandleDirectionalMoveKey(const KeyEvent& keyEvent)

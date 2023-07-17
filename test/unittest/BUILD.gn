@@ -43,12 +43,6 @@ config("ace_unittest_config") {
     "$ace_root",
     "$ace_root/frameworks",
     "$root_out_dir/arkui/framework",
-    "$ace_graphic/rosen/modules/2d_engine/rosen_text/export",
-    "$ace_graphic/rosen/modules/2d_graphics/include",
-    "$ace_graphic/rosen/modules/2d_graphics/src",
-    "$ace_graphic/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-    "//third_party/skia",
-    "//third_party/flutter/build/skia",
   ]
   cflags_cc = []
   defines = []

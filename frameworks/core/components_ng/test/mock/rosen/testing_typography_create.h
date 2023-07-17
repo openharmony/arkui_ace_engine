@@ -36,22 +36,11 @@ public:
         return std::make_unique<TestingTypographyCreate>();
     }
 
-    static std::unique_ptr<TestingTypographyCreate> Create(
-        const TestingTypographyStyle &style, std::shared_ptr<TestingFontCollection> collection)
-    {
-        return std::make_unique<TestingTypographyCreate>();
-    }
-
-    std::unique_ptr<TestingTypography> CreateTypography()
-    {
-        return std::make_unique<TestingTypography>();
-    }
-
     virtual void PushStyle(const TestingTextStyle& style) {}
 
-    virtual void PopStyle() {}
+    virtual void Pop() {}
 
-    virtual void AppendText(const std::u16string& text) {}
+    virtual void AddText(const std::u16string& text) {}
 
     virtual std::unique_ptr<TestingTypography> Build()
     {

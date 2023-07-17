@@ -94,6 +94,7 @@ void WindowPattern::InitContent()
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
+
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
@@ -103,7 +104,8 @@ void WindowPattern::InitContent()
     }
 
     auto state = session_->GetSessionState();
-    LOGI("Session state is %{public}u.", state);
+    auto bundleName = session_->GetSessionInfo().bundleName_;
+    LOGI("Session state: %{public}u, bundle name: %{public}s.", state, bundleName.c_str());
     switch (state) {
         case Rosen::SessionState::STATE_DISCONNECT: {
             CreateStartingNode();
@@ -416,5 +418,11 @@ void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusWindowIdEvent(focusWindowId);
+}
+
+void WindowPattern::TransferFocusState(bool focusState)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusStateEvent(focusState);
 }
 } // namespace OHOS::Ace::NG

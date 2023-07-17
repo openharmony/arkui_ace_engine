@@ -123,7 +123,7 @@ std::shared_ptr<RSImageFilter> SvgFe::MakeImageFilter(const FeInType& in, std::s
             RSColorMatrix m;
             m.SetScale(0, 0, 0, 1.0f);
             auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(m);
-            CHECK_NULL_VOID(colorFilter);
+            CHECK_NULL_RETURN(colorFilter, nullptr);
             return RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, nullptr);
 #endif
         }

@@ -157,6 +157,9 @@ public:
         navigationStack_->Remove();
     }
 
+    void DoNavigationTransitionAnimation(const RefPtr<UINode>& preTopNavDestination,
+        const RefPtr<UINode>& newTopNavDestination, int preStackSize, int newStackSize);
+
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
 
     void CleanStack()
@@ -202,6 +205,26 @@ public:
     void OnWindowHide() override;
     void OnWindowShow() override;
 
+    void SetNavBarVisibilityChange(bool isChange)
+    {
+        navBarVisibilityChange_ = isChange;
+    }
+
+    bool GetNavBarVisibilityChange() const
+    {
+        return navBarVisibilityChange_;
+    }
+
+    void SetNavModeChange(bool isChange)
+    {
+        navModeChange_ = isChange;
+    }
+
+    bool GetNavModeChange() const
+    {
+        return navModeChange_;
+    }
+
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode currentMode);
@@ -209,9 +232,6 @@ private:
     RefPtr<UINode> GetNodeAndRemoveByName(const std::string& name);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
-    bool UpdateEventHub(const RefPtr<NavigationGroupNode>& hostNode,
-        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, NavigationMode navigationMode);
-    bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
@@ -221,7 +241,8 @@ private:
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
-
+    void OnNavBarStateChange();
+    bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
@@ -235,7 +256,8 @@ private:
     float realNavBarWidth_ = 360.0f;
     float realDividerWidth_ = 2.0f;
     bool navigationStackProvided_ = false;
-
+    bool navBarVisibilityChange_ = false;
+    bool navModeChange_ = false;
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
     Dimension minNavBarWidthValue_ = 0.0_vp;
