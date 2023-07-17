@@ -540,6 +540,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (dragDropInfo.pixelMap) {
         pixelMap = dragDropInfo.pixelMap->GetPixelMapSharedPtr();
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+        dragDropManager->SetIsMouseDrag(true);
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
         if (HasThumbnailCallback()) {
