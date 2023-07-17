@@ -740,4 +740,73 @@ HWTEST_F(StepperPatternTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(stepperAccessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(stepperAccessibilityProperty->ActActionScrollBackward());
 }
+
+/**
+ * @tc.name: GetFocusNode001
+ * @tc.desc: test stepper pattern FocusNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperPatternTestNg, GetFocusNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode, pattern.
+     */
+    auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto stepperPattern = frameNode->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern, nullptr);
+
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    ASSERT_NE(swiperNode, nullptr);
+
+    StepperItemModelNG().Create();
+    auto stepperItemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(stepperItemNode, nullptr);
+    frameNode->AddChild(swiperNode);
+    swiperNode->AddChild(stepperItemNode);
+
+    auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
+    ASSERT_NE(hostNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create ButtonNode.
+     */
+    stepperPattern->CreateLeftButtonNode();
+    stepperPattern->CreateArrowRightButtonNode(INDEX, false);
+
+    /**
+     * @tc.steps: step3. Create FocusHub.
+     */
+    auto buttonFocusHub = stepperItemNode->GetFocusHub();
+    ASSERT_NE(buttonFocusHub, nullptr);
+    auto leftButtonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, hostNode->GetLeftButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(leftButtonNode, nullptr);
+    auto leftFocusHub = leftButtonNode->GetFocusHub();
+    ASSERT_NE(leftFocusHub, nullptr);
+    auto rightButtonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(rightButtonNode, nullptr);
+    auto rightFocusHub = rightButtonNode->GetFocusHub();
+    ASSERT_NE(rightFocusHub, nullptr);
+
+    /**
+     * @tc.steps: steps4. GetFocusNode
+     * @tc.expected: Check the result of GetFocusNode
+     */
+    auto focusNode = stepperPattern->GetFocusNode(FocusStep::TAB, buttonFocusHub);
+    ASSERT_NE(focusNode.Upgrade(), rightFocusHub);
+    focusNode = stepperPattern->GetFocusNode(FocusStep::SHIFT_TAB, rightFocusHub);
+    ASSERT_NE(focusNode.Upgrade(), buttonFocusHub);
+    focusNode = stepperPattern->GetFocusNode(FocusStep::LEFT, leftFocusHub);
+    ASSERT_NE(focusNode.Upgrade(), leftFocusHub);
+    focusNode = stepperPattern->GetFocusNode(FocusStep::RIGHT, leftFocusHub);
+    ASSERT_NE(focusNode.Upgrade(), leftFocusHub);
+    focusNode = stepperPattern->GetFocusNode(FocusStep::UP, rightFocusHub);
+    ASSERT_NE(focusNode.Upgrade(), rightFocusHub);
+    focusNode = stepperPattern->GetFocusNode(FocusStep::DOWN, rightFocusHub);
+    ASSERT_NE(focusNode.Upgrade(), leftFocusHub);
+}
 } // namespace OHOS::Ace::NG
