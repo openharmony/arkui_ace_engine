@@ -1663,6 +1663,16 @@ RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
+void OverlayManager::MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
+{
+    CHECK_NULL_VOID(windowScene);
+    columnNode->MountToParent(windowScene);
+    columnNode->OnMountToParentDone();
+    windowScene->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    filterColumnNodeWeak_ = columnNode;
+    hasFilter_ = true;
+}
+
 void OverlayManager::MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
 {
     CHECK_NULL_VOID(windowScene);

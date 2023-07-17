@@ -48,7 +48,7 @@ namespace {
 constexpr int32_t PAN_FINGER = 1;
 constexpr double PAN_DISTANCE = 5.0;
 constexpr int32_t LONG_PRESS_DURATION = 500;
-constexpr int32_t PREVIEW_LONG_PRESS_RECONGNIZER = 800;
+constexpr int32_t PREVIEW_LONG_PRESS_RECONGNIZER = 780;
 #ifdef ENABLE_DRAG_FRAMEWORK
 constexpr Dimension FILTER_VALUE(0.0f);
 constexpr Dimension FILTER_RADIUS(100.0f);
@@ -351,10 +351,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (gestureHub->GetTextDraggable()) {
             actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
         } else {
-            auto container = Container::Current();
-            if (!container || !container->IsScenceBoardWindow()) {
-                actuator->SetFilter(actuator);
-            }
+            actuator->SetFilter(actuator);
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto manager = pipeline->GetOverlayManager();
@@ -447,8 +444,17 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
         columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
         // set filter
         LOGI("User Device use default Filter");
-        columnNode->MountToParent(parent);
-        columnNode->OnMountToParentDone();
+        auto container = Container::Current();
+        if (container && container->IsScenceBoardWindow()) {
+            auto windowScene = manager->FindWindowScene(frameNode);
+            manager->MountFilterToWindowScene(columnNode, windowScene);
+        } else {
+            columnNode->MountToParent(parent);
+            columnNode->OnMountToParentDone();
+            manager->SetHasFilter(true);
+            manager->SetFilterColumnNode(columnNode);
+            parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        }
         AnimationOption option;
         option.SetDuration(FILTER_TIMES);
         option.SetCurve(Curves::SHARP);
@@ -458,9 +464,6 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
             [columnNode]() {
                 columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_RADIUS);
             }, option.GetOnFinishEvent());
-        manager->SetHasFilter(true);
-        manager->SetFilterColumnNode(columnNode);
-        parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
 }
 
