@@ -272,21 +272,21 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
     pattern->SetFirstShow();
 }
 
-void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, const WeakPtr<UINode>& windowScene)
+void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
 {
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([windowSceneWeak = windowScene, rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)),
-                                id = Container::CurrentId(), weak = WeakClaim(this)] {
+    option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
+                                weak = WeakClaim(this)] {
         ContainerScope scope(id);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(
-            [windowSceneWeak, rootWeak, menuWK, id, weak]() {
+            [rootWeak, menuWK, id, weak]() {
                 auto menu = menuWK.Upgrade();
                 auto root = rootWeak.Upgrade();
                 auto overlayManager = weak.Upgrade();
@@ -294,19 +294,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, const WeakP
                 ContainerScope scope(id);
                 auto container = Container::Current();
                 if (container && container->IsScenceBoardWindow()) {
-                    auto windowScene = windowSceneWeak.Upgrade();
-                    if (!windowScene) {
-                        auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
-                        CHECK_NULL_VOID(wrapperPattern);
-                        auto menuChild = wrapperPattern->GetMenu();
-                        CHECK_NULL_VOID(menuChild);
-                        auto menuPattern = AceType::DynamicCast<MenuPattern>(menuChild->GetPattern());
-                        CHECK_NULL_VOID(menuPattern);
-                        root = overlayManager->FindWindowScene(
-                            FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId()));
-                    } else {
-                        root = windowScene;
-                    }
+                    root = overlayManager->FindWindowScene(menu);
                 }
                 CHECK_NULL_VOID(root);
                 overlayManager->CallOnHideMenuCallback();
@@ -810,7 +798,7 @@ void OverlayManager::HideAllMenus()
             for (const auto& child : windowScene.Upgrade()->GetChildren()) {
                 auto node = DynamicCast<FrameNode>(child);
                 if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-                    PopMenuAnimation(node, windowScene);
+                    PopMenuAnimation(node);
                     BlurOverlayNode();
                 }
             }
@@ -1645,12 +1633,19 @@ void OverlayManager::DestroySheetMask(const RefPtr<FrameNode>& sheetNode)
     root->RemoveChild(*sheetChild);
 }
 
+// This function will be used in SceneBoard Thread only.
+// if need to show the pop-up component,
+//   it expects to receive the target component bound by the pop-up component to find the windowScene component.
+// if need to hide the pop-up component,
+//   it expects to receive the the pop-up component to return the parent component.
+//   And the parent component will be the windowScene component exactly.
 RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
     auto container = Container::Current();
     if (!container || !container->IsScenceBoardWindow()) {
         return rootNodeWeak_.Upgrade();
     }
+    CHECK_NULL_RETURN(targetNode, nullptr);
     LOGI("FindWindowScene start");
     auto parent = targetNode->GetParent();
     while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
