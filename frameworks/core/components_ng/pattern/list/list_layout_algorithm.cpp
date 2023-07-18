@@ -715,6 +715,11 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
             }
         }
         predictEndPos = index * itemHeight;
+        if (LessNotEqual(predictEndPos, 0.0f)) {
+            predictEndPos = 0.0f;
+        } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
+            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
+        }
     }
 
     predictSnapOffset_ = totalOffset_ - predictEndPos;
@@ -739,6 +744,13 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
             }
         }
         predictEndPos = index * itemHeight + itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
+        if (LessNotEqual(predictEndPos, itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
+            predictEndPos = itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
+        } else if (GreatNotEqual(
+            predictEndPos + contentMainSize_ / 2.0f, itemHeight * totalItemCount_ - itemHeight / 2.0f)) {
+            predictEndPos =
+                itemHeight * totalItemCount_ - itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
+        }
     }
 
     predictSnapOffset_ = totalOffset_ - predictEndPos;
@@ -761,6 +773,11 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
             }
         }
         predictEndPos = index * itemHeight - contentMainSize_ - spaceWidth_;
+        if (LessNotEqual(predictEndPos, 0.0f)) {
+            predictEndPos = 0.0f;
+        } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
+            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
+        }
     }
 
     predictSnapOffset_ = totalOffset_ - predictEndPos;
