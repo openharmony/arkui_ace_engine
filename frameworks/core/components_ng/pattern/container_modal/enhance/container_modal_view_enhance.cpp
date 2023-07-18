@@ -75,7 +75,9 @@ const Dimension MENU_FLOAT_X = 226.0_vp;
 const Dimension MENU_FLOAT_Y = 28.0_vp;
 const int32_t MENU_ITEM_MAXLINES = 1;
 const int32_t MENU_TASK_DELAY_TIME = 1000;
-const Color MENU_ITEM_CHOOSE_COLOR = Color(0x0c000000);
+const Color MENU_ITEM_HOVER_COLOR = Color(0x0c000000);
+const Color MENU_ITEM_PRESS_COLOR = Color(0x1a000000);
+const Color MENU_ITEM_COLOR = Color(0xffffff);
 }
 bool ContainerModalViewEnhance::sIsHovering = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
@@ -481,13 +483,36 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItem(std::string title, In
         PaddingProperty chooseIconLeftPadding;
         chooseIconLeftPadding.left = CalcLength(MENU_ITEM_TEXT_PADDING);
         containerTitleRow->AddChild(BuildMenuItemPadding(chooseIconLeftPadding, chooseIcon));
-        auto renderContext = containerTitleRow->GetRenderContext();
-        renderContext->UpdateBackgroundColor(MENU_ITEM_CHOOSE_COLOR);
     }
     auto hub = containerTitleRow->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
     hub->AddClickEvent(event);
+    BondingMenuItemEvent(containerTitleRow);
     return containerTitleRow;
+}
+
+void ContainerModalViewEnhance::BondingMenuItemEvent(RefPtr<FrameNode> item)
+{
+    auto inputHub = item->GetOrCreateInputEventHub();
+    auto hoverFunc = [item](bool isHover) {
+        auto renderContext = item->GetRenderContext();
+        if (isHover) {
+            renderContext->UpdateBackgroundColor(MENU_ITEM_HOVER_COLOR);
+        } else {
+            renderContext->UpdateBackgroundColor(MENU_ITEM_COLOR);
+        }
+    };
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverFunc));
+    inputHub->AddOnHoverEvent(hoverEvent);
+
+    auto clickFunc = [item](MouseInfo& info)-> void {
+        if (MouseAction::PRESS == info.GetAction()) {
+            auto renderContext = item->GetRenderContext();
+            renderContext->UpdateBackgroundColor(MENU_ITEM_PRESS_COLOR);
+        }
+    };
+    auto clickEvent = AceType::MakeRefPtr<InputEvent>(std::move(clickFunc));
+    inputHub->AddOnMouseEvent(clickEvent);
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemIcon(InternalResource::ResourceId resourceId)

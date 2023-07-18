@@ -76,14 +76,6 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     return paint;
 }
 
-void GridPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
-    host->GetRenderContext()->UpdateClipEdge(true);
-}
-
 void GridPattern::InitScrollableEvent()
 {
     auto host = GetHost();
@@ -152,7 +144,7 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> children;
-    host->GenerateOneDepthAllFrame(children);
+    host->GenerateOneDepthVisibleFrame(children);
     for (const auto& itemFrameNode : children) {
         auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(itemEvent);
@@ -372,9 +364,13 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
+    float currentOffset = gridLayoutInfo_.currentOffset_;
+    bool reachEnd = gridLayoutInfo_.reachEnd_;
+    bool reachStart = gridLayoutInfo_.reachStart_;
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
-    ProcessEvent(indexChanged, gridLayoutInfo_.currentOffset_, offsetEnd);
+    ProcessEvent(indexChanged, gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, currentOffset,
+                 offsetEnd, reachEnd, reachStart);
 
     SetScrollState(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
@@ -409,7 +405,8 @@ void GridPattern::CheckScrollable()
     }
 }
 
-void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, bool offsetEnd)
+void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
+                               bool reachEnd, bool reachStart)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -455,13 +452,23 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, bool offset
     }
 
     auto onReachStart = gridEventHub->GetOnReachStart();
-    if (onReachStart && gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
+	// want to call onReachStart(), must be:
+	//    onReachStart function pointer existing,
+	//    first time to reach top: currentOffset equal to 0,
+	//    Or Spring end to reach top again: reachStart_ is true and last time reachStart_ is false.
+    if (onReachStart && gridLayoutInfo_.startIndex_ == 0 &&
+        (NearZero(gridLayoutInfo_.currentOffset_) || (gridLayoutInfo_.reachStart_ && !reachStart))) {
         onReachStart();
     }
 
     auto onReachEnd = gridEventHub->GetOnReachEnd();
+	// want to call onReachEnd(), must be:
+	//    onReachEnd function pointer existing and endIndex_ equal to sub windows count,
+	//    first time to reach bottom: reachEnd_ is true and offsetEnd_ is different from last time,
+	//    Or spring end to reach bottom again: reachEnd_ is false and offsetEnd_ is false.
     if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1) &&
-        gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) {
+        ((gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) ||
+        (!gridLayoutInfo_.reachEnd_ && !gridLayoutInfo_.offsetEnd_))) {
         onReachEnd();
     }
 
@@ -890,12 +897,18 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
     auto tarCrossIndex = tarItemPattern->GetCrossIndex();
     if (gridLayoutInfo_.gridMatrix_.find(tarMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
         LOGE("Can not find target main index: %{public}d", tarMainIndex);
-        return -1;
+        if (tarMainIndex == 0) {
+            return 0;
+        }
+        return gridLayoutInfo_.childrenCount_ - 1;
     }
     if (gridLayoutInfo_.gridMatrix_[tarMainIndex].find(tarCrossIndex) ==
         gridLayoutInfo_.gridMatrix_[tarMainIndex].end()) {
         LOGE("Can not find target cross index: %{public}d", tarCrossIndex);
-        return -1;
+        if (tarMainIndex == 0) {
+            return 0;
+        }
+        return gridLayoutInfo_.childrenCount_ - 1;
     }
     return gridLayoutInfo_.gridMatrix_[tarMainIndex][tarCrossIndex];
 }
@@ -912,6 +925,23 @@ void GridPattern::ScrollToFocusNodeIndex(int32_t index)
     if (tarFocusNode) {
         tarFocusNode->RequestFocusImmediately();
     }
+}
+
+bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    CHECK_NULL_RETURN_NOLOG(focusFrameNode, false);
+    auto focusHub = focusFrameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    auto scrollToIndex = GetFocusNodeIndex(focusHub);
+    if (scrollToIndex < 0) {
+        return false;
+    }
+    auto ret = UpdateStartIndex(scrollToIndex);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
+    return ret;
 }
 
 void GridPattern::ScrollBy(float offset)

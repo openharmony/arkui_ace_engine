@@ -146,6 +146,8 @@ public:
             });
     }
 
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
     const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
     {
         return itemPosition_;
@@ -208,7 +210,6 @@ private:
     void OnScrollEndCallback() override;
 
     void OnModifyDone() override;
-    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     float CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType);
 

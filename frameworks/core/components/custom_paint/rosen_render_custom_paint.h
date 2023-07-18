@@ -21,8 +21,7 @@
 #else
 #include "experimental/svg/model/SkSVGDOM.h"
 #endif
-#include "rosen_text/text_style.h"
-#include "rosen_text/typography.h"
+#include "txt/paragraph.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
@@ -119,8 +118,8 @@ private:
 #endif
     bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = false);
     void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = false);
-    double GetAlignOffset(TextAlign align, std::unique_ptr<Rosen::Typography>& paragraph);
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<Rosen::Typography>& paragraph);
+    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
 #ifndef USE_ROSEN_DRAWING
     SkPaint GetStrokePaint();
 #else
@@ -136,7 +135,7 @@ private:
     void UpdatePaintShader(const Pattern& pattern, RSPen* pen, RSBrush* brush);
     void UpdateLineDash(RSPen& paint);
 #endif
-    void UpdateTextStyleForeground(const Offset& offset, bool isStroke, Rosen::TextStyle& style, bool hasShadow);
+    void UpdateTextStyleForeground(const Offset& offset, bool isStroke, txt::TextStyle& style, bool hasShadow);
 
     void Path2DAddPath(const Offset& offset, const PathArgs& args);
     void Path2DSetTransform(const Offset& offset, const PathArgs& args);
@@ -166,7 +165,7 @@ private:
     bool CreateSurface(double viewScale);
 
     bool antiAlias_ = false;
-    std::unique_ptr<Rosen::Typography> paragraph_;
+    std::unique_ptr<txt::Paragraph> paragraph_;
 #ifndef USE_ROSEN_DRAWING
     SkPath skPath_;
     // Specifically refers to the class Path2D in canvas.d.ts

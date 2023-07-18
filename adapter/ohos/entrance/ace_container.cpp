@@ -1558,6 +1558,18 @@ void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExe
     }
 }
 
+void AceContainer::ReloadForm()
+{
+    // Reload theme and resource
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    pipelineContext_->SetThemeManager(themeManager);
+    themeManager->InitResource(resourceInfo_);
+    themeManager->SetColorScheme(colorScheme_);
+    themeManager->LoadCustomTheme(assetManager_);
+    themeManager->LoadResourceThemes();
+}
+
 void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
 {
     if (picNameArray.empty()) {
@@ -1644,6 +1656,12 @@ void AceContainer::GetImageDataFromAshmem(
         // read image data from shared memory and save a copy to sharedImageManager
         sharedImageManager->AddSharedImage(picName, std::vector<uint8_t>(imageData, imageData + len));
     }
+}
+
+bool AceContainer::IsScenceBoardWindow()
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
 }
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)

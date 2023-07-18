@@ -68,6 +68,8 @@ constexpr int32_t CURRENT_INDEX = 1;
 constexpr int32_t CACHED_COUNT = 1;
 constexpr int32_t DISPLAY_COUNT = 3;
 constexpr Dimension ITEM_SPACE = Dimension(20, DimensionUnit::PX);
+constexpr Dimension SWIPER_MARGIN = 16.0_vp;
+constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 constexpr Dimension PREVIOUS_MARGIN = Dimension(50, DimensionUnit::PX);
 constexpr Dimension NEXT_MARGIN = Dimension(50, DimensionUnit::PX);
 constexpr Dimension NEXT_MARGIN_EXTRA_LARGE = Dimension(600, DimensionUnit::PX);
@@ -735,6 +737,26 @@ HWTEST_F(SwiperTestNg, SwiperPropertyTest0016, TestSize.Level1)
     auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
     EXPECT_FALSE(swiperNode == nullptr);
     EXPECT_EQ(swiperNode->GetInspectorId().value_or(""), V2::SWIPER_ETS_TAG);
+}
+
+/**
+ * @tc.name: SwiperPropertyTest0017
+ * @tc.desc: set minSize into Swiper and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPropertyTest0017, TestSize.Level1)
+{
+    constexpr Dimension SWIPER_MINSIZE = 300.0_vp;
+    SwiperModelNG swiper;
+    swiper.Create();
+    swiper.SetMinSize(SWIPER_MINSIZE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    EXPECT_FALSE(swiperNode == nullptr);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    EXPECT_FALSE(swiperLayoutProperty == nullptr);
+    EXPECT_EQ(swiperLayoutProperty->GetMinSize().value_or(Dimension(0.0, DimensionUnit::VP)), SWIPER_MINSIZE);
 }
 
 /**
@@ -7176,5 +7198,70 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap002, TestSize.Level1
     swiperPattern->isDragging_ = true;
     swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
     EXPECT_NE(swiperPattern->swiperController_->GetTurnPageRateCallback(), nullptr);
+}
+
+/**
+ * @tc.name: SwiperPatternGetDisplayCount002
+ * @tc.desc: GetDisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternGetDisplayCount002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto swiperController = swiperPattern->GetSwiperController();
+
+    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    swiperPattern->leftButtonId_.reset();
+
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize = OptionalSize(SizeF(SWIPER_IDEAL_WIDTH, SWIPER_IDEAL_HEIGHT));
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    swiperLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    swiperLayoutProperty->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step2. Set the FrameSize of the swiper.
+     */
+    swiperNode->GetGeometryNode()->SetFrameSize(CONTAINER_SIZE);
+    Dimension SWIPER_MINSIZE = 50.0_vp;
+
+    for (int i = 0; i < 4; i++) {
+        /**
+         * @tc.steps: step3. Update the MinSize of one swiper item.
+         * @tc.expected: Related function runs ok.
+         */
+        swiperLayoutProperty->UpdateMinSize(SWIPER_MINSIZE);
+        EXPECT_EQ(swiperLayoutProperty->GetMinSize().value_or(Dimension(0.0, DimensionUnit::VP)), SWIPER_MINSIZE);
+
+        /**
+         * @tc.steps: step4. Call GetDisplayCount.
+         * @tc.expected: The return value is correct.
+         */
+        float displaycount = static_cast<int32_t>(
+            floor((CONTAINER_SIZE.Width() - 2 * SWIPER_MARGIN.ConvertToPx() + SWIPER_GUTTER.ConvertToPx()) /
+                  (SWIPER_MINSIZE.ConvertToPx() + SWIPER_GUTTER.ConvertToPx())));
+        displaycount = displaycount > 0 ? displaycount : 1;
+        displaycount = displaycount > swiperPattern->TotalCount() ? swiperPattern->TotalCount() : displaycount;
+        EXPECT_EQ(swiperPattern->GetDisplayCount(), displaycount);
+
+        constexpr Dimension delta = 200.0_vp;
+        SWIPER_MINSIZE += delta;
+    }
 }
 } // namespace OHOS::Ace::NG

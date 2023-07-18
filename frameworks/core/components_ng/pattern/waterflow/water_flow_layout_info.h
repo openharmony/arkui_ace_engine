@@ -45,6 +45,7 @@ public:
     void Reset();
     int32_t GetCrossCount() const;
     int32_t GetMainCount() const;
+    void ClearCacheAfterIndex(int32_t currentIndex);
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;

@@ -31,7 +31,7 @@ protected:
     static void SetDuration(const JSCallbackInfo& info);
     static void SetIndex(const JSCallbackInfo& info);
     static void SetInterval(const JSCallbackInfo& info);
-    static void SetLoop(bool loop);
+    static void SetLoop(const JSCallbackInfo& info);
     static void SetVertical(bool isVertical);
     static void SetIndicator(const JSCallbackInfo& info);
     static void SetWidth(const JSCallbackInfo& info);

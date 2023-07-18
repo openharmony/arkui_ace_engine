@@ -357,7 +357,12 @@ public:
 
     void SetAccessibilityLevel(const std::string& accessibilityLevel)
     {
-        accessibilityLevel_ = accessibilityLevel;
+        if (accessibilityLevel == "auto" || accessibilityLevel == "yes" || accessibilityLevel == "no" ||
+            accessibilityLevel == "no-hide-descendants") {
+            accessibilityLevel_ = accessibilityLevel;
+        } else {
+            accessibilityLevel_ = "auto";
+        }
     }
 
     bool IsAccessibilityGroup() const

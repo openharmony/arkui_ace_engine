@@ -97,7 +97,6 @@ private:
     WeakPtr<FrameNode> scrollableNode_;
     bool isOritationListenerRegisted_ = false;
     bool isHideToolbar_ = false;
-    DeviceOrientation deviceOrientationType_ = DeviceOrientation::PORTRAIT;
     std::vector<NG::BarItem> titleBarMenuItems_;
     std::vector<NG::BarItem> toolBarMenuItems_;
 };

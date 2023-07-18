@@ -18,8 +18,8 @@
 #include <cmath>
 #include <sstream>
 
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography_style.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkColor.h"
@@ -59,7 +59,6 @@
 #include "core/components_ng/render/drawing.h"
 #endif
 #include "core/image/image_provider.h"
-#include "unicode/ubidi.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -2147,9 +2146,9 @@ void RosenRenderOffscreenCanvas::StrokeText(const std::string& text, double x, d
 double RosenRenderOffscreenCanvas::MeasureText(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
 #ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
@@ -2163,13 +2162,13 @@ double RosenRenderOffscreenCanvas::MeasureText(const std::string& text, const Pa
         LOGW("MeasureText: fontCollection is null");
         return 0.0;
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), pipelineContext_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetMaxIntrinsicWidth();
 }
@@ -2177,9 +2176,9 @@ double RosenRenderOffscreenCanvas::MeasureText(const std::string& text, const Pa
 double RosenRenderOffscreenCanvas::MeasureTextHeight(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
 #ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
@@ -2193,13 +2192,13 @@ double RosenRenderOffscreenCanvas::MeasureTextHeight(const std::string& text, co
         LOGW("MeasureText: fontCollection is null");
         return 0.0;
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), pipelineContext_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetHeight();
 }
@@ -2207,9 +2206,9 @@ double RosenRenderOffscreenCanvas::MeasureTextHeight(const std::string& text, co
 TextMetrics RosenRenderOffscreenCanvas::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
 #ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
@@ -2223,13 +2222,13 @@ TextMetrics RosenRenderOffscreenCanvas::MeasureTextMetrics(const std::string& te
         LOGW("MeasureText: fontCollection is null");
         return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), pipelineContext_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
 
     auto textAlign = state.GetTextAlign();
@@ -2281,7 +2280,7 @@ void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, do
 }
 
 double RosenRenderOffscreenCanvas::GetAlignOffset(const std::string& text, TextAlign align,
-    std::unique_ptr<Rosen::Typography>& paragraph)
+    std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double x = 0.0;
     switch (align) {
@@ -2338,13 +2337,13 @@ bool RosenRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, boo
     const PaintState& state, bool hasShadow)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
+    txt::ParagraphStyle style;
     if (isStroke) {
-        style.textAlign = ConvertTxtTextAlign(strokeState_.GetTextAlign());
+        style.text_align = ConvertTxtTextAlign(strokeState_.GetTextAlign());
     } else {
-        style.textAlign = ConvertTxtTextAlign(fillState_.GetTextAlign());
+        style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
 #ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
@@ -2357,58 +2356,61 @@ bool RosenRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, boo
     if (!fontCollection) {
         return false;
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     if (!isStroke && hasShadow) {
-        Rosen::TextShadow txtShadow;
+        txt::TextShadow txtShadow;
         txtShadow.color = shadow_.GetColor().GetValue();
-        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
-        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
+        txtShadow.offset.fX = shadow_.GetOffset().GetX();
+        txtShadow.offset.fY = shadow_.GetOffset().GetY();
 #ifndef NEW_SKIA
-        txtShadow.blurRadius = shadow_.GetBlurRadius();
+        txtShadow.blur_radius = shadow_.GetBlurRadius();
 #else
+        txtShadow.blur_sigma = shadow_.GetBlurRadius();
 #endif
-        txtStyle.shadows.emplace_back(txtShadow);
+        txtStyle.text_shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateTextStyleForeground(isStroke, txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    paragraph_ = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    paragraph_ = builder->Build();
     return true;
 }
 
 void RosenRenderOffscreenCanvas::UpdateTextStyleForeground(
-    bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow)
+    bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
 {
     using namespace Constants;
 #ifndef USE_ROSEN_DRAWING
     if (!isStroke) {
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
-        txtStyle.fontSize = fillState_.GetTextStyle().GetFontSize().Value();
+        txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
         ConvertTxtStyle(fillState_.GetTextStyle(), pipelineContext_, txtStyle);
         if (fillState_.GetGradient().IsValid()) {
             SkPaint paint;
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
+            txtStyle.has_foreground = true;
         }
         if (globalState_.HasGlobalAlpha()) {
-            if (txtStyle.foreground.has_value()) {
-                txtStyle.foreground->setColor(fillState_.GetColor().GetValue());
-                txtStyle.foreground->setAlphaf(globalState_.GetAlpha()); // set alpha after color
+            if (txtStyle.has_foreground) {
+                txtStyle.foreground.setColor(fillState_.GetColor().GetValue());
+                txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground = paint;
+                txtStyle.has_foreground = true;
             }
         }
     } else {
         // use foreground to draw stroke
         SkPaint paint = GetStrokePaint();
         ConvertTxtStyle(strokeState_.GetTextStyle(), pipelineContext_, txtStyle);
-        txtStyle.fontSize = strokeState_.GetTextStyle().GetFontSize().Value();
+        txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
         if (strokeState_.GetGradient().IsValid()) {
             UpdatePaintShader(paint, strokeState_.GetGradient());
         }
@@ -2423,6 +2425,7 @@ void RosenRenderOffscreenCanvas::UpdateTextStyleForeground(
 #endif
         }
         txtStyle.foreground = paint;
+        txtStyle.has_foreground = true;
     }
 #else
     LOGE("Drawing is not supported");
@@ -2430,7 +2433,7 @@ void RosenRenderOffscreenCanvas::UpdateTextStyleForeground(
 }
 
 double RosenRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline,
-    std::unique_ptr<Rosen::Typography>& paragraph)
+    std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double y = 0.0;
     switch (baseline) {

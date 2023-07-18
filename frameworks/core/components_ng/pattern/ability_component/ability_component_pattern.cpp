@@ -21,15 +21,16 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 void AbilityComponentPattern::OnModifyDone()
 {
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
         Pattern::OnModifyDone();
         auto host = GetHost();
         CHECK_NULL_VOID(host);

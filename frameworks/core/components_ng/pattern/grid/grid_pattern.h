@@ -104,6 +104,8 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<GridEventHub>();
@@ -188,7 +190,6 @@ private:
     bool IsOutOfBoundary();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
-    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     float GetMainContentSize() const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -216,7 +217,8 @@ private:
     void SetAccessibilityAction();
 
     GridLayoutInfo gridLayoutInfo_;
-    void ProcessEvent(bool indexChanged, float finalOffset, bool offsetEnd);
+    void ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
+                      bool prevReachEnd, bool reachStart);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
     void FireOnScrollStart();

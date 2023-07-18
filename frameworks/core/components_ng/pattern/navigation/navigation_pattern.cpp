@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 #include "base/mousestyle/mouse_style.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
@@ -248,6 +250,42 @@ void NavigationPattern::OnModifyDone()
     }
 }
 
+void NavigationPattern::OnNavBarStateChange()
+{
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto visibilityValue = layoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    if (visibilityValue != VisibleType::VISIBLE) {
+        return;
+    }
+
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto currentNavigationMode = GetNavigationMode();
+
+    if (GetNavModeChange() && (!layoutProperty->GetHideNavBarValue(false))) {
+        if (currentNavigationMode == NavigationMode::SPLIT) {
+            eventHub->FireNavBarStateChangeEvent(true);
+        } else {
+            eventHub->FireNavBarStateChangeEvent(false);
+        }
+        SetNavModeChange(false);
+        SetNavBarVisibilityChange(false);
+        return;
+    }
+
+    if (GetNavBarVisibilityChange() && (currentNavigationMode == NavigationMode::SPLIT)) {
+        if (!layoutProperty->GetHideNavBarValue(false)) {
+            eventHub->FireNavBarStateChangeEvent(true);
+        } else {
+            eventHub->FireNavBarStateChangeEvent(false);
+        }
+        SetNavBarVisibilityChange(false);
+    }
+}
+
 void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<UINode>& preTopNavDestination,
     const RefPtr<UINode>& newTopNavDestination, int preStackSize, int newStackSize)
 {
@@ -333,8 +371,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             navigationMode_ = currentMode;
         }
     }
-    navigationLayoutProperty->UpdateNavigationMode(navigationLayoutAlgorithm->GetNavigationMode());
-    UpdateEventHub(hostNode, navigationLayoutProperty, navigationLayoutAlgorithm->GetNavigationMode());
+    OnNavBarStateChange();
     UpdateResponseRegion(navigationLayoutAlgorithm->GetRealDividerWidth(),
         navigationLayoutAlgorithm->GetRealNavBarWidth(), navigationLayoutAlgorithm->GetRealNavBarHeight(),
         navigationLayoutAlgorithm->GetNavBarOffset());
@@ -342,31 +379,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     AddDividerHotZoneRect(navigationLayoutAlgorithm);
     ifNeedInit_ = false;
     return false;
-}
-
-bool NavigationPattern::UpdateEventHub(const RefPtr<NavigationGroupNode>& hostNode,
-    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, NavigationMode navigationMode)
-{
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_RETURN(navBarNode, false);
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_RETURN(navBarLayoutProperty, false);
-    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    if (navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
-        eventHub->FireNavBarStateChangeEvent(false);
-    } else {
-        if (navigationMode == NavigationMode::SPLIT) {
-            if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-                navBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                eventHub->FireNavBarStateChangeEvent(false);
-            } else {
-                navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                eventHub->FireNavBarStateChangeEvent(true);
-            }
-        }
-    }
-    return true;
 }
 
 bool NavigationPattern::CheckExistPreStack(const std::string& name)

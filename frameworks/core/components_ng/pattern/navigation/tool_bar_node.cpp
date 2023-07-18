@@ -20,16 +20,17 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
-ToolbarNode::ToolbarNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, MakeRefPtr<ToolbarPattern>())
+NavToolbarNode::NavToolbarNode(const std::string& tag, int32_t nodeId)
+    : FrameNode(tag, nodeId, MakeRefPtr<NavToolbarPattern>())
 {}
 
-RefPtr<ToolbarNode> ToolbarNode::GetOrCreateToolbarNode(
+RefPtr<NavToolbarNode> NavToolbarNode::GetOrCreateToolbarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<ToolbarNode>(frameNode));
+    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavToolbarNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
-    auto toolbarNode = AceType::MakeRefPtr<ToolbarNode>(tag, nodeId, pattern);
+    auto toolbarNode = AceType::MakeRefPtr<NavToolbarNode>(tag, nodeId, pattern);
     toolbarNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(toolbarNode);
     return toolbarNode;

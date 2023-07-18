@@ -17,10 +17,11 @@
 
 #include <map>
 
-#include "base/ui_extension/ui_extension_helper.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
+#include "core/common/ui_extension_helper.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
+#include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -42,12 +43,12 @@ const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
 
 RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
 {
-    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto atom = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<AtomicServicePattern>());
     auto titleBar = BuildBarTitle();
-    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    column->AddChild(titleBar);
-    column->AddChild(content);
+    atom->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    atom->AddChild(titleBar);
+    atom->AddChild(content);
     content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
     content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stagePattern = content->GetPattern<StagePattern>();
@@ -64,12 +65,12 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
             backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         });
     }
-    return column;
+    return atom;
 }
 
 RefPtr<FrameNode> AppBarView::BuildBarTitle()
 {
-    auto appBarRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto appBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto layoutProperty = appBarRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
@@ -229,14 +230,19 @@ void AppBarView::BindContentCover(int32_t targetId)
         auto onRelease = [overlayManager, &modalStyle, targetId](int32_t releaseCode) {
             overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
         };
-        auto onError = [overlayManager, &modalStyle, targetId](int32_t code, const std::string& name, const std::string& message) {
-            overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
-        };
+        auto onError =
+            [overlayManager, &modalStyle, targetId](int32_t code, const std::string& name, const std::string& message) {
+                overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
+            };
+        auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
         std::map<std::string, std::string> params;
         params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
         params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
         params.try_emplace("module", Container::Current()->GetModuleName());
-        auto uiExtNode = OHOS::Ace::UIExtensionHelper::GetInstance().CreateUIExtensionNode(
+        if (missionId != -1) {
+            params.try_emplace("missionId", std::to_string(missionId));
+        }
+        auto uiExtNode = OHOS::Ace::UIExtensionHelper::CreateUIExtensionNode(
             bundleName, abilityName, params, std::move(onRelease), std::move(onError));
         auto layoutProperty = uiExtNode->GetLayoutProperty();
         CHECK_NULL_RETURN(layoutProperty, uiExtNode);

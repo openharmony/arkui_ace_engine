@@ -30,4 +30,9 @@ build_component_ng("image_provider_ng") {
     "static_image_object.cpp",
     "svg_image_object.cpp",
   ]
+
+  if (ace_use_rosen_drawing) {
+    sources -= [ "adapter/skia_image_data.cpp" ]
+    rosen_sources = [ "adapter/rosen/drawing_image_data.cpp" ]
+  }
 }

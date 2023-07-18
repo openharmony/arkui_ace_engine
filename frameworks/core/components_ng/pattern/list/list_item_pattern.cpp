@@ -211,6 +211,11 @@ void ListItemPattern::OnModifyDone()
     CHECK_NULL_VOID(listItemEventHub);
     Pattern::OnModifyDone();
     InitListItemCardStyleForList();
+    if (!listItemEventHub->HasStateStyle(UI_STATE_SELECTED)) {
+        auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->BlendBgColor(GetBlendGgColor());
+    }
     if (HasStartNode() || HasEndNode() || listItemEventHub->GetStartOnDelete() || listItemEventHub->GetEndOnDelete()) {
         auto axis = GetAxis();
         bool axisChanged = axis_ != axis;
@@ -618,11 +623,6 @@ void ListItemPattern::SwiperReset()
 
 void ListItemPattern::MarkIsSelected(bool isSelected)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto listItemTheme = pipeline->GetTheme<ListItemTheme>();
-    CHECK_NULL_VOID(listItemTheme);
-    auto selectColor = listItemTheme->GetItemSelectedColor();
     if (isSelected_ != isSelected) {
         isSelected_ = isSelected;
         auto eventHub = GetEventHub<ListItemEventHub>();
@@ -637,15 +637,9 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
             host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
         }
         if (!eventHub->HasStateStyle(UI_STATE_SELECTED)) {
-            auto geometryNode = host->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
             auto context = host->GetRenderContext();
             CHECK_NULL_VOID(context);
-            if (listItemStyle_ == V2::ListItemStyle::CARD) {
-                context->OnMouseSelectUpdate(isSelected, selectColor, selectColor);
-            } else {
-                context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
-            }
+            context->BlendBgColor(GetBlendGgColor());
         }
     }
 }
@@ -695,11 +689,6 @@ void ListItemPattern::InitListItemCardStyleForList()
 {
     if (listItemStyle_ == V2::ListItemStyle::CARD) {
         UpdateListItemAlignToCenter();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        currentBackgroundColor_ = renderContext->GetBackgroundColorValue();
         InitHoverEvent();
         InitPressEvent();
         InitDisableEvent();
@@ -715,6 +704,28 @@ void ListItemPattern::UpdateListItemAlignToCenter()
     if (!layoutProperty->HasListItemAlign()) {
         layoutProperty->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     }
+}
+
+Color ListItemPattern::GetBlendGgColor()
+{
+    Color color = Color::TRANSPARENT;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, color);
+    auto theme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_RETURN(theme, color);
+    if (isSelected_) {
+        auto eventHub = GetEventHub<ListItemEventHub>();
+        CHECK_NULL_RETURN(eventHub, color);
+        if (!eventHub->HasStateStyle(UI_STATE_SELECTED)) {
+            color = theme->GetItemSelectedColor();
+        }
+    }
+    if (isPressed_) {
+        color = color.BlendColor(theme->GetItemPressColor());
+    } else if (isHover_) {
+        color = color.BlendColor(theme->GetItemHoverColor());
+    }
+    return color;
 }
 
 void ListItemPattern::InitHoverEvent()
@@ -748,15 +759,9 @@ void ListItemPattern::HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>
     CHECK_NULL_VOID(theme);
 
     isHover_ = isHover;
-    auto hoverColor = theme->GetItemHoverColor();
-
-    if (isHover) {
-        AnimationUtils::BlendBgColorAnimation(
-            renderContext, hoverColor, theme->GetHoverAnimationDuration(), Curves::FRICTION);
-    } else {
-        AnimationUtils::BlendBgColorAnimation(
-            renderContext, currentBackgroundColor_, theme->GetHoverAnimationDuration(), Curves::FRICTION);
-    }
+    auto hoverColor = GetBlendGgColor();
+    AnimationUtils::BlendBgColorAnimation(
+        renderContext, hoverColor, theme->GetHoverAnimationDuration(), Curves::FRICTION);
 }
 
 void ListItemPattern::InitPressEvent()
@@ -771,46 +776,27 @@ void ListItemPattern::InitPressEvent()
     auto touchCallback = [weak = WeakClaim(this), host](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandlePressEvent(info, host);
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
+            pattern->HandlePressEvent(touchType == TouchType::DOWN, host);
+        }
     };
     auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
 }
 
-void ListItemPattern::HandlePressEvent(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& itemNode)
+void ListItemPattern::HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
     auto renderContext = itemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);
-
-    auto pressColor = theme->GetItemPressColor();
-    auto hoverColor = theme->GetItemHoverColor();
-
-    if (touchType == TouchType::DOWN) {
-        if (isHover_) {
-            // hover to press
-            AnimationUtils::BlendBgColorAnimation(
-                renderContext, pressColor, theme->GetHoverToPressAnimationDuration(), Curves::SHARP);
-        } else {
-            // normal to press
-            AnimationUtils::BlendBgColorAnimation(
-                renderContext, pressColor, theme->GetHoverAnimationDuration(), Curves::SHARP);
-        }
-    } else if (touchType == TouchType::UP) {
-        if (isHover_) {
-            // press to hover
-            AnimationUtils::BlendBgColorAnimation(
-                renderContext, hoverColor, theme->GetHoverToPressAnimationDuration(), Curves::SHARP);
-        } else {
-            // press to normal
-            AnimationUtils::BlendBgColorAnimation(
-                renderContext, currentBackgroundColor_, theme->GetHoverAnimationDuration(), Curves::SHARP);
-        }
-    }
+    auto duration = isHover_ ? theme->GetHoverToPressAnimationDuration() : theme->GetHoverAnimationDuration();
+    isPressed_ = isPressed;
+    Color color = GetBlendGgColor();
+    AnimationUtils::BlendBgColorAnimation(renderContext, color, duration, Curves::SHARP);
 }
 
 void ListItemPattern::InitDisableEvent()

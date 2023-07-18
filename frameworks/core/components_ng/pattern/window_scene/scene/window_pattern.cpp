@@ -31,6 +31,16 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
+    { "default",              Rosen::RSAnimationTimingCurve::DEFAULT },
+    { "linear",               Rosen::RSAnimationTimingCurve::LINEAR },
+    { "ease",                 Rosen::RSAnimationTimingCurve::EASE },
+    { "easeIn",               Rosen::RSAnimationTimingCurve::EASE_IN },
+    { "easeOut",              Rosen::RSAnimationTimingCurve::EASE_OUT },
+    { "easeInOut",            Rosen::RSAnimationTimingCurve::EASE_IN_OUT },
+    { "spring",               Rosen::RSAnimationTimingCurve::SPRING },
+    { "interactiveSpring",    Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
+};
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -208,9 +218,27 @@ void WindowPattern::BufferAvailableCallback()
 {
     ContainerScope scope(instanceId_);
 
+    const auto& config =
+        Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
+    if (config.enabled_) {
+        CHECK_NULL_VOID(startingNode_);
+        auto context = AceType::DynamicCast<RosenRenderContext>(startingNode_->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        auto rsNode = context->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
+        rsNode->SetTransitionEffect(effect);
+        Rosen::RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(config.duration_);
+        auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
+            Rosen::RSAnimationTimingCurve::DEFAULT;
+        Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
+            rsNode->NotifyTransition(effect, false);
+        });
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     host->RemoveChild(startingNode_);
     startingNode_.Reset();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

@@ -39,6 +39,7 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
 } // namespace
 
 namespace OHOS::Ace::NG {
+#ifndef USE_ROSEN_DRAWING
 std::unique_ptr<SkVector[]> ImagePainterUtils::ToSkRadius(const BorderRadiusArray& radiusXY)
 {
     auto radii = std::make_unique<SkVector[]>(RADIUS_POINTS_SIZE);
@@ -58,6 +59,29 @@ std::unique_ptr<SkVector[]> ImagePainterUtils::ToSkRadius(const BorderRadiusArra
     }
     return radii;
 }
+#else
+std::unique_ptr<RSPoint[]> ImagePainterUtils::ToRSRadius(const BorderRadiusArray& radiusXY)
+{
+    auto radii = std::make_unique<RSPoint[]>(RADIUS_POINTS_SIZE);
+    if (radiusXY.size() == RADIUS_POINTS_SIZE) {
+        radii[RSRoundRect::TOP_LEFT_POS] = RSPoint(
+            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_LEFT_POS].GetX(), 0.0f)),
+            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_LEFT_POS].GetY(), 0.0f)));
+        radii[RSRoundRect::TOP_RIGHT_POS] = RSPoint(
+            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_RIGHT_POS].GetX(), 0.0f)),
+            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_RIGHT_POS].GetY(), 0.0f)));
+        radii[RSRoundRect::BOTTOM_RIGHT_POS] = RSPoint(
+            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_RIGHT_POS].GetX(), 0.0f)),
+            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_RIGHT_POS].GetY(), 0.0f)));
+        radii[RSRoundRect::BOTTOM_LEFT_POS] = RSPoint(
+            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_LEFT_POS].GetX(), 0.0f)),
+            static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_LEFT_POS].GetY(), 0.0f)));
+    }
+    return radii;
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
 void ImagePainterUtils::AddFilter(SkPaint& paint, const ImagePaintConfig& config)
 {
@@ -94,6 +118,40 @@ void ImagePainterUtils::AddFilter(SkPaint& paint, SkSamplingOptions& options, co
     } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
         paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
     }
+}
+#endif
+#else
+void ImagePainterUtils::AddFilter(RSBrush& brush, RSSamplingOptions& options, const ImagePaintConfig& config)
+{
+    switch (config.imageInterpolation_) {
+        case ImageInterpolation::LOW: {
+            options = RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::NONE);
+            break;
+        }
+        case ImageInterpolation::MEDIUM: {
+            options = RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::LINEAR);
+            break;
+        }
+        case ImageInterpolation::HIGH: {
+            options = RSSamplingOptions(RSCubicResampler::Mitchell());
+            break;
+        }
+        default:
+            options = RSSamplingOptions();
+            break;
+    }
+
+    auto filter = brush.GetFilter();
+    if (config.colorFilter_) {
+        RSColorMatrix colorMatrix;
+        colorMatrix.SetArray(config.colorFilter_->data());
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+    } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
+        RSColorMatrix colorMatrix;
+        colorMatrix.SetArray(GRAY_COLOR_MATRIX);
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+    }
+    brush.SetFilter(filter);
 }
 #endif
 

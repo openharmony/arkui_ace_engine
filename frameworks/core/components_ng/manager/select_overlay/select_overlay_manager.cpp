@@ -143,21 +143,37 @@ void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const
     NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     // handle global touch event.
     if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::TOUCH) {
-        if (!IsTouchInCallerArea() && !IsInSelectedOrSelectOverlayArea(point)) {
-            touchDownPoints_.push_back(point);
+        if (touchDownPoints_.empty() && !IsTouchInCallerArea() && !IsInSelectedOrSelectOverlayArea(point)) {
+            touchDownPoints_.emplace_back(touchPoint);
         }
         return;
     }
     if (touchPoint.type == TouchType::MOVE && touchPoint.sourceType == SourceType::TOUCH) {
-        touchDownPoints_.clear();
+        if (touchDownPoints_.empty()) {
+            return;
+        }
+        auto lastTouchDownPoint = touchDownPoints_.back();
+        if (lastTouchDownPoint.id != touchPoint.id) {
+            return;
+        }
+        auto deltaOffset = touchPoint.GetOffset() - lastTouchDownPoint.GetOffset();
+        auto deltaDistance = deltaOffset.GetDistance();
+        auto context = PipelineBase::GetCurrentContext();
+        auto thresholdDistance = context ? context->NormalizeToPx(Dimension(5, DimensionUnit::VP)) : 5;
+        if (deltaDistance > thresholdDistance) {
+            touchDownPoints_.clear();
+        }
         return;
     }
     bool acceptTouchUp = !touchDownPoints_.empty();
     if (touchPoint.type == TouchType::UP && touchPoint.sourceType == SourceType::TOUCH && acceptTouchUp) {
         auto lastTouchDownPoint = touchDownPoints_.back();
+        if (lastTouchDownPoint.id != touchPoint.id) {
+            return;
+        }
         touchDownPoints_.pop_back();
-        point.SetX(lastTouchDownPoint.GetX());
-        point.SetY(lastTouchDownPoint.GetY());
+        point.SetX(lastTouchDownPoint.x - rootOffset.GetX());
+        point.SetY(lastTouchDownPoint.y - rootOffset.GetY());
     }
 
     // handle global mouse event.
@@ -165,6 +181,7 @@ void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const
         return;
     }
     if (!IsInSelectedOrSelectOverlayArea(point)) {
+        LOGD("[SelectOverlay] closed by global event %{public}d", touchPoint.sourceType);
         NotifyOverlayClosed(true);
         DestroySelectOverlay();
     }

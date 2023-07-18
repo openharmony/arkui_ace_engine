@@ -40,7 +40,7 @@ enum class TestingTextDecoration {
     NONE = 0x0,
     UNDERLINE = 0x1,
     OVERLINE = 0x2,
-    LINE_THROUGH = 0x4,
+    LINETHROUGH = 0x4,
 };
 
 enum class TestingTextDecorationStyle {
@@ -71,9 +71,9 @@ public:
         return false;
     }
 
-    TestingColor color;
-    TestingPoint offset;
-    double blurRadius = 0.0;
+    TestingColor color_;
+    TestingPoint offset_;
+    double blurRadius_ = 0.0;
 };
 
 class TestingFontFeatures {
@@ -92,28 +92,28 @@ public:
         return false;
     }
 
-    double decorationThicknessMultiplier = 1.0;
-    double fontSize = 14.0;
-    double letterSpacing = 0.0;
-    double wordSpacing = 0.0;
-    double heightScale = 1.0;
-    bool heightOnly = false;
-    bool hasBackground = false;
-    bool hasForeground = false;
-    std::u16string ellipsis;
-    std::string locale;
-    std::vector<std::string> fontFamilies;
-    TestingColor color;
-    TestingTextDecoration decoration = TestingTextDecoration::NONE;
-    TestingColor decorationColor;
-    TestingPen background;
-    TestingPen foreground;
-    TestingTextDecorationStyle decorationStyle = TestingTextDecorationStyle::SOLID;
-    TestingFontWeight fontWeight = TestingFontWeight::W400;
-    TestingFontStyle fontStyle = TestingFontStyle::NORMAL;
-    TestingTextBaseline baseline = TestingTextBaseline::ALPHABETIC;
-    std::vector<TestingTextShadow> textShadows;
-    TestingFontFeatures fontFeatures;
+    double decorationThicknessMultiplier_ = 1.0;
+    double fontSize_ = 14.0;
+    double letterSpacing_ = 0.0;
+    double wordSpacing_ = 0.0;
+    double height_ = 1.0;
+    bool hasHeightOverride_ = false;
+    bool hasBackground_ = false;
+    bool hasForeground_ = false;
+    std::u16string ellipsis_;
+    std::string locale_;
+    std::vector<std::string> fontFamilies_;
+    TestingColor color_;
+    TestingTextDecoration decoration_ = TestingTextDecoration::NONE;
+    TestingColor decorationColor_;
+    TestingPen background_;
+    TestingPen foreground_;
+    TestingTextDecorationStyle decorationStyle_ = TestingTextDecorationStyle::SOLID;
+    TestingFontWeight fontWeight_ = TestingFontWeight::W400;
+    TestingFontStyle fontStyle_ = TestingFontStyle::NORMAL;
+    TestingTextBaseline textBaseline_ = TestingTextBaseline::ALPHABETIC;
+    std::vector<TestingTextShadow> textShadows_;
+    TestingFontFeatures fontFeatures_;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TEXT_STYLE_H

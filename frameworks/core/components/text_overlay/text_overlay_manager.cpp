@@ -21,13 +21,12 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text_overlay/text_overlay_component.h"
+#include "txt/paragraph_txt.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #else
 #include "core/components_ng/render/drawing.h"
 #endif
-#include "rosen_text/typography.h"
-#include "unicode/uchar.h"
 
 namespace OHOS::Ace {
 
@@ -88,24 +87,23 @@ double TextOverlayBase::GetBoundaryOfParagraph(bool isLeftBoundary) const
     if (!paragraph_ || textValue_.text.empty()) {
         return 0.0;
     }
-    auto boxes = paragraph_->GetTextRectsByBoundary(0, textValue_.GetWideText().length(),
-        Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    auto boxes = paragraph_->GetRectsForRange(0, textValue_.GetWideText().length(),
+        txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (boxes.empty()) {
         return 0.0;
     }
-    double leftBoundaryOfParagraph = boxes.front().rect.GetLeft();
-    double rightBoundaryOfParagraph = boxes.front().rect.GetLeft();
-    double bottomBoundaryOfParagraph = boxes.front().rect.GetBottom();
+    double leftBoundaryOfParagraph = boxes.front().rect.fLeft;
+    double rightBoundaryOfParagraph = boxes.front().rect.fLeft;
+    double bottomBoundaryOfParagraph = boxes.front().rect.fBottom;
     for (const auto& box : boxes) {
-        if (cursorPositionType_ == CursorPositionType::END &&
-            !NearEqual(box.rect.GetBottom(), bottomBoundaryOfParagraph)) {
-            bottomBoundaryOfParagraph = box.rect.GetBottom();
-            leftBoundaryOfParagraph = box.rect.GetLeft();
-            rightBoundaryOfParagraph = box.rect.GetRight();
+        if (cursorPositionType_ == CursorPositionType::END && !NearEqual(box.rect.fBottom, bottomBoundaryOfParagraph)) {
+            bottomBoundaryOfParagraph = box.rect.fBottom;
+            leftBoundaryOfParagraph = box.rect.fLeft;
+            rightBoundaryOfParagraph = box.rect.fRight;
             continue;
         }
-        leftBoundaryOfParagraph = std::min(static_cast<double>(box.rect.GetLeft()), leftBoundaryOfParagraph);
-        rightBoundaryOfParagraph = std::max(static_cast<double>(box.rect.GetRight()), rightBoundaryOfParagraph);
+        leftBoundaryOfParagraph = std::min(static_cast<double>(box.rect.fLeft), leftBoundaryOfParagraph);
+        rightBoundaryOfParagraph = std::max(static_cast<double>(box.rect.fRight), rightBoundaryOfParagraph);
     }
     return isLeftBoundary ? leftBoundaryOfParagraph : rightBoundaryOfParagraph;
 }
@@ -125,18 +123,18 @@ bool TextOverlayBase::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics
     result.Reset();
     int32_t graphemeClusterLength = StringUtils::NotInUtf16Bmp(prevChar) ? 2 : 1;
     int32_t prev = extent - graphemeClusterLength;
-    auto boxes = paragraph_->GetTextRectsByBoundary(
-        prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    auto boxes = paragraph_->GetRectsForRange(
+        prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     while (boxes.empty() && !textValue_.text.empty()) {
         graphemeClusterLength *= 2;
         prev = extent - graphemeClusterLength;
         if (prev < 0) {
-            boxes = paragraph_->GetTextRectsByBoundary(
-                0, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+            boxes = paragraph_->GetRectsForRange(
+                0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
             break;
         }
-        boxes = paragraph_->GetTextRectsByBoundary(
-            prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+        boxes = paragraph_->GetRectsForRange(
+            prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     }
     if (boxes.empty()) {
         return false;
@@ -148,22 +146,22 @@ bool TextOverlayBase::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics
         // Return the start of next line.
         auto emptyOffset = MakeEmptyOffset();
         result.offset.SetX(emptyOffset.GetX());
-        result.offset.SetY(textBox.rect.GetBottom());
+        result.offset.SetY(textBox.rect.fBottom);
         result.height = caretProto_.Height();
         return true;
     }
 
-    bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
+    bool isLtr = textBox.direction == txt::TextDirection::ltr;
     // Caret is within width of the upstream glyphs.
-    double caretEnd = isLtr ? textBox.rect.GetRight() : textBox.rect.GetLeft();
+    double caretEnd = isLtr ? textBox.rect.fRight : textBox.rect.fLeft;
     if (cursorPositionType_ == CursorPositionType::END) {
         caretEnd = GetBoundaryOfParagraph(realTextDirection_ != TextDirection::LTR);
     }
     double dx = isLtr ? caretEnd : caretEnd - caretProto_.Width();
     double offsetX = std::min(dx, paragraph_->GetMaxWidth());
     result.offset.SetX(offsetX);
-    result.offset.SetY(textBox.rect.GetTop());
-    result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+    result.offset.SetY(textBox.rect.fTop);
+    result.height = textBox.rect.fBottom - textBox.rect.fTop;
 
     return true;
 }
@@ -177,24 +175,24 @@ bool TextOverlayBase::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetri
     result.Reset();
     const int32_t graphemeClusterLength = 1;
     const int32_t next = extent + graphemeClusterLength;
-    auto boxes = paragraph_->GetTextRectsByBoundary(
-        extent, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    auto boxes = paragraph_->GetRectsForRange(
+        extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (boxes.empty()) {
         return false;
     }
 
     const auto& textBox = *boxes.begin();
-    bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
+    bool isLtr = textBox.direction == txt::TextDirection::ltr;
     // Caret is within width of the downstream glyphs.
-    double caretStart = isLtr ? textBox.rect.GetLeft() : textBox.rect.GetRight();
+    double caretStart = isLtr ? textBox.rect.fLeft : textBox.rect.fRight;
     if (cursorPositionType_ == CursorPositionType::END) {
         caretStart = GetBoundaryOfParagraph(realTextDirection_ != TextDirection::LTR);
     }
     double dx = isLtr ? caretStart : caretStart - caretProto_.Width();
     double offsetX = std::min(dx, paragraph_->GetMaxWidth());
     result.offset.SetX(offsetX);
-    result.offset.SetY(textBox.rect.GetTop());
-    result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+    result.offset.SetY(textBox.rect.fTop);
+    result.height = textBox.rect.fBottom - textBox.rect.fTop;
 
     return true;
 }
@@ -288,18 +286,18 @@ int32_t TextOverlayBase::GetCursorPositionForClick(const Offset& offset, const O
     if (GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
 #ifndef NEW_SKIA
         int32_t rightBoundaryPosition =
-            static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-                rightBoundary - cursorWidth_, clickOffset_.GetY()).index);
+            static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
+                rightBoundary - cursorWidth_, clickOffset_.GetY()).position);
 #else
         int32_t rightBoundaryPosition =
-            static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-                rightBoundary - cursorWidth_, clickOffset_.GetY()).index);
+            static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(
+                rightBoundary - cursorWidth_, clickOffset_.GetY()).position);
 #endif
         return realTextDirection_ == TextDirection::RTL ? 0 : rightBoundaryPosition;
     }
 
     return static_cast<int32_t>(
-        paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
+        paragraph_->GetGlyphPositionAtCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).position);
 }
 
 int32_t TextOverlayBase::GetGraphemeClusterLength(int32_t extend, bool isPrefix) const
@@ -383,8 +381,8 @@ void TextOverlayBase::PaintSelection(RSCanvas* canvas, const Offset& globalOffse
     if (textValue_.text.empty() || selection.GetStart() == selection.GetEnd()) {
         return;
     }
-    const auto& boxes = paragraph_->GetTextRectsByBoundary(selection.GetStart(), selection.GetEnd(),
-        Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    const auto& boxes = paragraph_->GetRectsForRange(selection.GetStart(), selection.GetEnd(),
+        txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (boxes.empty()) {
         return;
     }
@@ -396,7 +394,7 @@ void TextOverlayBase::PaintSelection(RSCanvas* canvas, const Offset& globalOffse
     for (const auto& box : boxes) {
         auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
         selectedRect_.emplace_back(selectionRect + globalOffset);
-        if (box.direction == Rosen::TextDirection::LTR) {
+        if (box.direction == txt::TextDirection::ltr) {
             canvas->drawRect(SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
                                  selectionRect.Bottom()),
                 paint);

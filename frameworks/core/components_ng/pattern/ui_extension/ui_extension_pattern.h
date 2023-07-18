@@ -90,9 +90,6 @@ private:
     void UnregisterAbilityResultListener();
     void OnConnectInner();
 
-    void OnRemoteReady();
-    void OnResult(int32_t code, const AAFwk::Want& want);
-    void OnReceive(const AAFwk::WantParams& wantParams);
     void RegisterVisibleAreaChange();
 
     RefPtr<TouchEventImpl> touchEvent_;

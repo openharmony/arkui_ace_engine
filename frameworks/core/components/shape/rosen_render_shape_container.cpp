@@ -123,16 +123,8 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
     if (!canvas_) {
         return;
     }
+    auto tmpCanvas = std::make_unique<RSRecordingCanvas>(GetLayoutSize().Width(), GetLayoutSize().Height());
     if (mesh_.size() == 0) {
-        RSBitmapFormat format {
-            RSColorType::COLORTYPE_RGBA_8888,
-            RSAlphaType::ALPHATYPE_UNPREMUL,
-        };
-        offBitmap_.Build(GetLayoutSize().Width(), GetLayoutSize().Height(), format);
-        offBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
-        offCanvas_ = std::make_unique<RSCanvas>();
-        offCanvas_->Bind(offBitmap_);
-
         double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
         double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
         double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
@@ -141,20 +133,31 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
             double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
             double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
             double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
-            offCanvas_->Scale(scale, scale);
-            offCanvas_->Translate(tx, ty);
+            tmpCanvas->Scale(scale, scale);
+            tmpCanvas->Translate(tx, ty);
         }
         const auto& children = GetChildren();
         for (const auto& item : SortChildrenByZIndex(children)) {
             Offset childOffset = offset;
             RefPtr<RosenRenderShape> renderShape = GetShapeChild(item, childOffset);
+            //type
             if (renderShape) {
-                renderShape->PaintOnCanvas(offCanvas_.get(), childOffset);
+                renderShape->PaintOnCanvas(tmpCanvas.get(), childOffset);
                 continue;
             }
             RenderNode::Paint(context, offset);
         }
         if (column_ == 0 && row_ == 0) {
+            RSBitmapFormat format {
+                RSColorType::COLORTYPE_RGBA_8888,
+                RSAlphaType::ALPHATYPE_UNPREMUL,
+            };
+            offBitmap_.Build(GetLayoutSize().Width(), GetLayoutSize().Height(), format);
+            offBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+            offCanvas_ = std::make_unique<RSCanvas>();
+            offCanvas_->Bind(offBitmap_);
+            auto cmdList = tmpCanvas->GetDrawCmdList();
+            cmdList->Playback(*offCanvas_);
             canvas_->DrawBitmap(offBitmap_, 0, 0);
         }
     } else {

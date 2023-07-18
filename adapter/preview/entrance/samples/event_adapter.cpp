@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,18 @@
  * limitations under the License.
  */
 
-#include "adapter/preview/entrance/samples/key_input_handler.h"
+#include "adapter/preview/entrance/samples/event_adapter.h"
 
+#include <GLFW/glfw3.h>
 #include <map>
+#include <memory>
 
-#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
-#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
-#include "adapter/preview/entrance/event_dispatcher.h"
-#include "base/log/log.h"
-#include "core/common/clipboard/clipboard_proxy.h"
+#include "base/utils/utils.h"
+#include "frameworks/base/log/log.h"
 
-using OHOS::MMI::KeyAction;
-using OHOS::MMI::KeyCode;
-using OHOS::MMI::KeyEvent;
+namespace OHOS::Ace::Sample {
 
-namespace OHOS::Ace::Platform {
 namespace {
-
 const std::map<int, KeyAction> ACTION_MAP = {
     { GLFW_RELEASE, KeyAction::UP },
     { GLFW_PRESS, KeyAction::DOWN },
@@ -67,55 +62,76 @@ const std::map<int, KeyCode> CODE_MAP = {
     { GLFW_KEY_KP_EQUAL, KeyCode::KEY_NUMPAD_EQUALS },
     { GLFW_KEY_NUM_LOCK, KeyCode::KEY_NUM_LOCK },
 };
-
 } // namespace
 
-std::shared_ptr<OHOS::MMI::KeyEvent> KeyInputHandler::keyEvent_ = std::make_shared<OHOS::MMI::KeyEvent>();
-
-#ifndef ENABLE_ROSEN_BACKEND
-void KeyInputHandler::InitialTextInputCallback(FlutterDesktopWindowControllerRef controller)
+EventAdapter::EventAdapter()
 {
-    // Register clipboard callback functions.
-    auto callbackSetClipboardData = [controller](const std::string& data) {
-        FlutterDesktopSetClipboardData(controller, data.c_str());
+    keyEvent_ = std::make_shared<KeyEvent>();
+    pointerEvent_ = std::make_shared<PointerEvent>();
+}
+
+EventAdapter::~EventAdapter() = default;
+
+void EventAdapter::Initialize(std::shared_ptr<GlfwRenderContext>& glfwRenderContext)
+{
+    // keyboard callback
+    auto&& keyboardCbk = [this](int key, int scancode, int action, int mods) {
+        if (RunSpecialOperations(key, action, mods)) {
+            LOGI("Some special shortcut keys are intercepted for performing specific operations.");
+            return;
+        }
+        if (keyEventCallback_ && RecognizeKeyEvent(key, action, mods)) {
+            keyEventCallback_(keyEvent_);
+        } else {
+            LOGW("Unrecognized key type.");
+        }
     };
-    auto callbackGetClipboardData = [controller]() { return FlutterDesktopGetClipboardData(controller); };
-    ClipboardProxy::GetInstance()->SetDelegate(
-        std::make_unique<ClipboardProxyImpl>(callbackSetClipboardData, callbackGetClipboardData));
-    // Register key event and input method callback functions.
-    FlutterDesktopAddKeyboardHookHandler(controller, std::make_unique<KeyInputHandler>());
+    glfwRenderContext->OnKey(keyboardCbk);
+
+    // mouse button callback
+    auto&& mouseButtonCbk = [this](int button, bool pressed, int mods) {
+        {
+            std::lock_guard lock(mouseMutex_);
+            isMousePressed_ = pressed;
+        }
+        if (pointerEventCallback_) {
+            RecognizePointerEvent(pressed ? TouchType::DOWN : TouchType::UP);
+            pointerEventCallback_(pointerEvent_);
+        }
+    };
+    glfwRenderContext->OnMouseButton(mouseButtonCbk);
+
+    // cursor position callback
+    auto&& cursorPosCbk = [this](double x, double y) {
+        {
+            std::lock_guard lock(mouseMutex_);
+            posX_ = x;
+            posY_ = y;
+        }
+        if (isMousePressed_ && pointerEventCallback_) {
+            RecognizePointerEvent(TouchType::MOVE);
+            pointerEventCallback_(pointerEvent_);
+        }
+    };
+    glfwRenderContext->OnCursorPos(cursorPosCbk);
 }
-#else
-void KeyInputHandler::InitialTextInputCallback(const std::shared_ptr<OHOS::Rosen::GlfwRenderContext>& controller)
+
+void EventAdapter::RegisterKeyEventCallback(MMIKeyEventCallback&& callback)
 {
-    // clipboard
-    auto callbackSetClipboardData = [controller](const std::string& data) { controller->SetClipboardData(data); };
-    auto callbackGetClipboardData = [controller]() { return controller->GetClipboardData(); };
-    ClipboardProxy::GetInstance()->SetDelegate(
-        std::make_unique<ClipboardProxyImpl>(callbackSetClipboardData, callbackGetClipboardData));
-
-    // key: key_event(normal, modifier), char: unicode char input
-    controller->OnKey(
-        [](int key, int scancode, int action, int mods) { KeyboardHook(nullptr, key, scancode, action, mods); });
+    keyEventCallback_ = std::move(callback);
 }
-#endif
 
-void KeyInputHandler::KeyboardHook(GLFWwindow* window, int key, int scancode, int action, int mods)
+void EventAdapter::RegisterPointerEventCallback(MMIPointerEventCallback&& callback)
 {
-    if (RecognizeKeyEvent(key, action, mods)) {
-        EventDispatcher::GetInstance().DispatchKeyEvent(keyEvent_);
-    } else {
-        LOGW("Unrecognized key type.");
-    }
+    pointerEventCallback_ = std::move(callback);
 }
 
-void KeyInputHandler::CharHook(GLFWwindow* window, unsigned int code_point)
+void EventAdapter::RegisterInspectorCallback(InspectorCallback&& callback)
 {
-    // The input characters are converted from the key event and this function is not used now.
-    EventDispatcher::GetInstance().DispatchInputMethodEvent(code_point);
+    inspectorCallback_ = std::move(callback);
 }
 
-bool KeyInputHandler::RecognizeKeyEvent(int key, int action, int mods)
+bool EventAdapter::RecognizeKeyEvent(int key, int action, int mods)
 {
     auto iterAction = ACTION_MAP.find(action);
     if (iterAction == ACTION_MAP.end()) {
@@ -160,4 +176,31 @@ bool KeyInputHandler::RecognizeKeyEvent(int key, int action, int mods)
     return true;
 }
 
-} // namespace OHOS::Ace::Platform
+void EventAdapter::RecognizePointerEvent(const TouchType type)
+{
+    std::lock_guard lock(mouseMutex_);
+    pointerEvent_->id = 1;
+    pointerEvent_->x = posX_;
+    pointerEvent_->y = posY_;
+    pointerEvent_->screenX = 0;
+    pointerEvent_->screenY = 0;
+    pointerEvent_->type = type;
+    pointerEvent_->time = std::chrono::high_resolution_clock::now();
+    pointerEvent_->size = sizeof(PointerEvent);
+    pointerEvent_->force = 0;
+    pointerEvent_->deviceId = 0;
+    pointerEvent_->sourceType = SourceType::TOUCH;
+    pointerEvent_->pointers = {};
+}
+
+bool EventAdapter::RunSpecialOperations(int key, int action, int mods)
+{
+    // Add specific operations which driven by some special shortcut keys.
+    if (inspectorCallback_ && (action == GLFW_PRESS) && (mods & GLFW_MOD_CONTROL) && (key == GLFW_KEY_I)) {
+        inspectorCallback_();
+        return true;
+    }
+    return false;
+}
+
+} // namespace OHOS::Ace::Sample

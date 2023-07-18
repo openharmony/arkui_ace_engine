@@ -75,17 +75,17 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {
-            if (NearEqual<float>(box.rect.GetLeft(), rect.Left()) &&
-                NearEqual<float>(box.rect.GetRight(), rect.Right()) &&
-                NearEqual<float>(box.rect.GetTop(), rect.Top()) &&
-                NearEqual<float>(box.rect.GetBottom(), rect.Bottom())) {
+            if (NearEqual<float>(box.rect_.GetLeft(), rect.Left()) &&
+                NearEqual<float>(box.rect_.GetRight(), rect.Right()) &&
+                NearEqual<float>(box.rect_.GetTop(), rect.Top()) &&
+                NearEqual<float>(box.rect_.GetBottom(), rect.Bottom())) {
                 realImageChildren.emplace_back(child);
                 realRectsForPlaceholders.emplace_back(rect);
             }
         }
         ++index;
     }
-    dragPattern->SetLastLineHeight(boxes.back().rect.GetHeight());
+    dragPattern->SetLastLineHeight(boxes.back().rect_.GetHeight());
     dragPattern->InitSpanImageLayout(realImageChildren, realRectsForPlaceholders);
     return dragNode;
 }
@@ -105,10 +105,10 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
     CHECK_NULL_RETURN(!boxes.empty(), {});
     auto boxFirst = boxes.front();
     auto boxLast = boxes.back();
-    float leftHandleX = boxFirst.rect.GetLeft() + textStartX;
-    float leftHandleY = boxFirst.rect.GetTop() + textStartY;
-    float rightHandleX = boxLast.rect.GetRight() + textStartX;
-    float rightHandleY = boxLast.rect.GetTop() + textStartY;
+    float leftHandleX = boxFirst.rect_.GetLeft() + textStartX;
+    float leftHandleY = boxFirst.rect_.GetTop() + textStartY;
+    float rightHandleX = boxLast.rect_.GetRight() + textStartX;
+    float rightHandleY = boxLast.rect_.GetTop() + textStartY;
     bool oneLineSelected = (leftHandleY == rightHandleY);
     if (oneLineSelected) {
         if (leftHandleX < contentRect.Left()) {
@@ -122,7 +122,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
             leftHandleX = contentRect.Left();
             leftHandleY = contentRect.Top();
         }
-        if (boxLast.rect.GetBottom() > contentRect.Bottom()) {
+        if (boxLast.rect_.GetBottom() > contentRect.Bottom()) {
             rightHandleX = contentRect.Right();
             rightHandleY = contentRect.Bottom() - lineHeight;
         }
@@ -138,13 +138,13 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
             width += delta;
             globalX -= delta / 2; // 2 : half
         }
-        dragPattern->SetContentOffset(OffsetF(boxes.front().rect.GetLeft() - TEXT_DRAG_OFFSET.ConvertToPx(),
-            boxes.front().rect.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
+        dragPattern->SetContentOffset(OffsetF(boxes.front().rect_.GetLeft() - TEXT_DRAG_OFFSET.ConvertToPx(),
+            boxes.front().rect_.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
     } else {
         globalX = contentRect.Left() + hostGlobalOffset.GetX() - TEXT_DRAG_OFFSET.ConvertToPx();
         width = contentRect.Width();
         dragPattern->SetContentOffset(
-            OffsetF(0 - TEXT_DRAG_OFFSET.ConvertToPx(), boxes.front().rect.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
+            OffsetF(0 - TEXT_DRAG_OFFSET.ConvertToPx(), boxes.front().rect_.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
     }
     dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalX), Dimension(globalY)));
     RectF dragTextRect(

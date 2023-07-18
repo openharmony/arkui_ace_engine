@@ -195,4 +195,18 @@ int32_t WaterFlowLayoutInfo::GetMainCount() const
     }
     return maxMainCount;
 }
+
+void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
+{
+    for (auto& crossItems : waterFlowItems_) {
+        if (crossItems.second.empty()) {
+            continue;
+        }
+        auto clearFrom = std::find_if(crossItems.second.begin(), crossItems.second.end(),
+            [currentIndex](const std::pair<const int, std::pair<float, float>>& crossItem) {
+                return crossItem.first > currentIndex;
+            });
+        crossItems.second.erase(clearFrom, crossItems.second.end());
+    }
+}
 } // namespace OHOS::Ace::NG

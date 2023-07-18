@@ -77,7 +77,9 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
     }
     if (scrollBar_ && scrollBar_->IsDriving()) {
         offset = scrollBar_->CalcPatternOffset(offset);
-        source = SCROLL_FROM_BAR;
+        if (source == SCROLL_FROM_UPDATE) {
+            source = SCROLL_FROM_BAR;
+        }
     }
     return UpdateCurrentOffset(offset, source);
 }
@@ -547,13 +549,24 @@ void ScrollablePattern::PlaySpringAnimation(
     animator_->PlayMotion(springMotion_);
 }
 
+void ScrollablePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
+}
+
 void ScrollablePattern::UninitMouseEvent()
 {
+    if (!mouseEvent_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto mouseEventHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent(nullptr);
+    mouseEventHub->RemoveOnMouseEvent(mouseEvent_);
     ClearMultiSelect();
     isMouseEventInit_ = false;
 }
@@ -564,12 +577,16 @@ void ScrollablePattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto mouseEventHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEventWithoutKeyboard(info);
-        }
-    });
+    if (!mouseEvent_) {
+        auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->HandleMouseEventWithoutKeyboard(info);
+            }
+        };
+        mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    }
+    mouseEventHub->AddOnMouseEvent(mouseEvent_);
     isMouseEventInit_ = true;
 }
 

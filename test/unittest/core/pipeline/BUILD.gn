@@ -124,6 +124,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/app_bar_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",

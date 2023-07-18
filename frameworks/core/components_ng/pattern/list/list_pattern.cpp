@@ -44,14 +44,6 @@ constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 } // namespace
 
-void ListPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
-    host->GetRenderContext()->UpdateClipEdge(true);
-}
-
 void ListPattern::OnModifyDone()
 {
     if (!isInitialized_) {
@@ -1063,6 +1055,20 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
     return nullptr;
 }
 
+bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    CHECK_NULL_RETURN_NOLOG(focusFrameNode, false);
+    auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_RETURN_NOLOG(focusPattern, false);
+    auto curIndex = focusPattern->GetIndexInList();
+    ScrollToIndex(curIndex, smooth_, ScrollAlign::AUTO);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
+    return true;
+}
+
 WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {
@@ -1409,7 +1415,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> childrens;
-    host->GenerateOneDepthAllFrame(childrens);
+    host->GenerateOneDepthVisibleFrame(childrens);
     for (const auto& item : childrens) {
         if (item->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             auto itemGroupPattern = item->GetPattern<ListItemGroupPattern>();
@@ -1448,10 +1454,12 @@ void ListPattern::HandleCardModeSelectedEvent(
 {
     CHECK_NULL_VOID(itemGroupNode);
     std::list<RefPtr<FrameNode>> childrens;
-    itemGroupNode->GenerateOneDepthAllFrame(childrens);
+    itemGroupNode->GenerateOneDepthVisibleFrame(childrens);
     for (const auto& item : childrens) {
         auto itemPattern = item->GetPattern<ListItemPattern>();
-        CHECK_NULL_VOID(itemPattern);
+        if (!itemPattern) {
+            continue;
+        }
         if (!itemPattern->Selectable()) {
             continue;
         }

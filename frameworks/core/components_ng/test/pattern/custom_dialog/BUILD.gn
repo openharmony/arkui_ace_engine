@@ -22,7 +22,7 @@ ohos_unittest("custom_dialog_test_ng") {
   include_dirs = [
     "$ace_hitrace/interfaces/native/innerkits/include/hitrace_meter",
     "$ace_graphic/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-    "$ace_graphic/rosen/modules/2d_engine/rosen_text/export",
+    "$ace_graphic/rosen/modules/2d_engine/rosen_text",
     "$ace_graphic/rosen/modules/2d_engine/rosen_text/properties",
     "$ace_graphic/rosen/modules/2d_engine",
     "$ace_root/frameworks/base/log",

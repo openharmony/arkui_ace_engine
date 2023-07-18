@@ -97,7 +97,7 @@ frameworks/core/components_ng/pattern/rich_editor/  @cc520bf
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
-frameworks/core/components_ng/pattern/scrollable/  @rongShao-Z
+frameworks/core/components_ng/pattern/scrollable/  @yeyinglong_admin
 frameworks/core/components_ng/pattern/search/  @zhang-xiao150
 frameworks/core/components_ng/pattern/security_component/  @
 frameworks/core/components_ng/pattern/select/  @zhao-xinyu007
@@ -107,7 +107,7 @@ frameworks/core/components_ng/pattern/side_bar/  @xuzhidan
 frameworks/core/components_ng/pattern/slider/  @cheng-feiwang
 frameworks/core/components_ng/pattern/stack/  @nickyjd
 frameworks/core/components_ng/pattern/stage/  @yan-shuifeng
-frameworks/core/components_ng/pattern/stepper/  @woodyangwt
+frameworks/core/components_ng/pattern/stepper/  @xuzhidan
 frameworks/core/components_ng/pattern/swiper/  @xuzhidan @zhou-chaobo
 frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan @zhou-chaobo
 frameworks/core/components_ng/pattern/tabs/  @zhou-chaobo
@@ -146,7 +146,7 @@ frameworks/core/components/counter/  @zhang-xiao150
 frameworks/core/components/coverage/  @
 frameworks/core/components/custom_dialog/  @zhao-xinyu007
 frameworks/core/components/custom_paint/  @zhangbingce
-frameworks/core/components/data_panel/  @zcdqs
+frameworks/core/components/data_panel/  @jinweiliu
 frameworks/core/components/declaration/  @cc520bf
 frameworks/core/components/dialog/  @zhao-xinyu007
 frameworks/core/components/dialog_modal/  @zhao-xinyu007
@@ -197,8 +197,8 @@ frameworks/core/components/remote_window/  @liuchao92
 frameworks/core/components/rich_text/  @LongLie
 frameworks/core/components/root/  @yan-shuifeng
 frameworks/core/components/scene_viewer/  @
-frameworks/core/components/scoring/  @rongShao-Z
-frameworks/core/components/scroll/  @rongShao-Z
+frameworks/core/components/scoring/  @yeyinglong_admin
+frameworks/core/components/scroll/  @yeyinglong_admin
 frameworks/core/components/scroll_bar/  @rongShao-Z
 frameworks/core/components/search/  @zhang-xiao150
 frameworks/core/components/select/  @zhao-xinyu007
@@ -213,7 +213,7 @@ frameworks/core/components/slider/  @cheng-feiwang
 frameworks/core/components/split_container/  @
 frameworks/core/components/stack/  @nickyjd
 frameworks/core/components/stage/  @yan-shuifeng
-frameworks/core/components/stepper/  @woodyangwt
+frameworks/core/components/stepper/  @xuzhidan
 frameworks/core/components/svg/  @zhoutianer
 frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @zhou-chaobo
@@ -309,8 +309,8 @@ test/mock/  @liyujie43
 test/unittest/  @liyujie43
 frameworks/core/components_ng/test/pattern/ability_component/  @lushi1202
 frameworks/core/components_ng/test/pattern/action_sheet/  @zhao-xinyu007
-frameworks/core/components_ng/test/pattern/animator/  @hehongyang9
-frameworks/core/components_ng/test/pattern/app_bar/  @cc520bf
+frameworks/core/components_ng/test/pattern/animator/  @suiwuyue
+frameworks/core/components_ng/test/pattern/app_bar/  @suiwuyue
 frameworks/core/components_ng/test/pattern/badge/  @nickyjd
 frameworks/core/components_ng/test/pattern/blank/  @xiexiyun
 frameworks/core/components_ng/test/pattern/bubble/  @zhao-xinyu007
@@ -321,7 +321,7 @@ frameworks/core/components_ng/test/pattern/canvas_renderer/  @zhangbingce
 frameworks/core/components_ng/test/pattern/checkbox/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/checkboxgroup/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/common_view/  @yangfan229
-frameworks/core/components_ng/test/pattern/container_modal/  @cc520bf
+frameworks/core/components_ng/test/pattern/container_modal/  @suiwuyue
 frameworks/core/components_ng/test/pattern/counter/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/custom/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/custom_paint/  @zhangbingce
@@ -333,17 +333,17 @@ frameworks/core/components_ng/test/pattern/flex/  @yangfan229
 frameworks/core/components_ng/test/pattern/form/  @wangchensu1
 frameworks/core/components_ng/test/pattern/gauge/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/gesture/  @zheng-qiyi
-frameworks/core/components_ng/test/pattern/grid/  @zcdqs
+frameworks/core/components_ng/test/pattern/grid/  @suiwuyue
 frameworks/core/components_ng/test/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/test/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/test/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/test/pattern/hyperlink/  @jinweiliu
 frameworks/core/components_ng/test/pattern/image/  @zhoutianer
-frameworks/core/components_ng/test/pattern/image_animator/  @zhoutianer
-frameworks/core/components_ng/test/pattern/indexer/  @aryawang
+frameworks/core/components_ng/test/pattern/image_animator/  @suiwuyue
+frameworks/core/components_ng/test/pattern/indexer/  @suiwuyue
 frameworks/core/components_ng/test/pattern/linear_layout/  @xiexiyun
 frameworks/core/components_ng/test/pattern/linear_split/  @xiexiyun
-frameworks/core/components_ng/test/pattern/list/  @yeyinglong_admin
+frameworks/core/components_ng/test/pattern/list/  @suiwuyue
 frameworks/core/components_ng/test/pattern/loading_progress/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/marquee/  @aryawang
 frameworks/core/components_ng/test/pattern/menu/  @zhao-xinyu007
@@ -363,15 +363,15 @@ frameworks/core/components_ng/test/pattern/qrcode/  @jinweiliu
 frameworks/core/components_ng/test/pattern/radio/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/rating/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/recycle_view/  @guozejun
-frameworks/core/components_ng/test/pattern/refresh/  @aryawang
+frameworks/core/components_ng/test/pattern/refresh/  @suiwuyue
 frameworks/core/components_ng/test/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/test/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/test/pattern/rendering_context/  @zhangbingce
 frameworks/core/components_ng/test/pattern/rich_editor/  @cc520bf
 frameworks/core/components_ng/test/pattern/root/  @yan-shuifeng
-frameworks/core/components_ng/test/pattern/scroll/  @rongShao-Z
-frameworks/core/components_ng/test/pattern/scroll_bar/  @rongShao-Z
-frameworks/core/components_ng/test/pattern/scrollable/  @rongShao-Z
+frameworks/core/components_ng/test/pattern/scroll/  @suiwuyue
+frameworks/core/components_ng/test/pattern/scroll_bar/  @suiwuyue
+frameworks/core/components_ng/test/pattern/scrollable/  @suiwuyue
 frameworks/core/components_ng/test/pattern/search/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/security_component/ @
 frameworks/core/components_ng/test/pattern/select/  @zhao-xinyu007
@@ -381,7 +381,7 @@ frameworks/core/components_ng/test/pattern/side_bar/  @xuzhidan
 frameworks/core/components_ng/test/pattern/slider/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/stack/  @nickyjd
 frameworks/core/components_ng/test/pattern/stage/  @yan-shuifeng
-frameworks/core/components_ng/test/pattern/stepper/  @woodyangwt
+frameworks/core/components_ng/test/pattern/stepper/  @xuzhidan
 frameworks/core/components_ng/test/pattern/swiper/  @xuzhidan
 frameworks/core/components_ng/test/pattern/swiper_indicator/  @xuzhidan
 frameworks/core/components_ng/test/pattern/tabs/  @zhou-chaobo
@@ -397,7 +397,7 @@ frameworks/core/components_ng/test/pattern/toggle/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/ui_extension/  @lushi1202
 frameworks/core/components_ng/test/pattern/video/  @jinweiliu
 frameworks/core/components_ng/test/pattern/view_context/  @hehongyang9
-frameworks/core/components_ng/test/pattern/waterflow/  @zcdqs
+frameworks/core/components_ng/test/pattern/waterflow/  @suiwuyue
 frameworks/core/components_ng/test/pattern/web/  @LongLie
 frameworks/core/components_ng/test/pattern/window_scene/  @liuchao92
 frameworks/core/components_ng/test/pattern/xcomponent/  @sunbees
@@ -405,4 +405,4 @@ frameworks/core/components_ng/test/event/  @zhaojian2021 @catpoison
 frameworks/core/components_ng/test/syntax/  @yan-shuifeng @lightningHo
 frameworks/core/components_ng/test/svg/  @zhoutianer
 frameworks/core/components_ng/test/image_provider/  @zhoutianer
-frameworks/core/components_ng/test/animation/  @hehongyang9
+frameworks/core/components_ng/test/animation/  @suiwuyue

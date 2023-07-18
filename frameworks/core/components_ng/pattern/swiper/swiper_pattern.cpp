@@ -249,14 +249,22 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 if (!swiper) {
                     return;
                 }
-                if (type == WindowSizeChangeReason::ROTATION) {
-                    swiper->StopPropertyTranslateAnimation();
-                    swiper->StopTranslateAnimation();
-                    swiper->StopSpringAnimation();
-                    swiper->StopFadeAnimation();
-                    swiper->currentOffset_ = 0.0f;
-                    swiper->itemPosition_.clear();
-                    swiper->jumpIndex_ = swiper->currentIndex_;
+                swiper->StopPropertyTranslateAnimation();
+                swiper->StopTranslateAnimation();
+                swiper->StopSpringAnimation();
+                swiper->StopFadeAnimation();
+                swiper->currentOffset_ = 0.0f;
+                swiper->itemPosition_.clear();
+                swiper->jumpIndex_ = swiper->currentIndex_;
+                auto swiperNode = swiper->GetHost();
+                CHECK_NULL_VOID(swiperNode);
+                swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                for (const auto& child : swiperNode->GetChildren()) {
+                    if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
+                        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
+                        CHECK_NULL_VOID(lazyForEachNode);
+                        lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
+                    }
                 }
             });
         LOGD("Add surface changed callback id %{public}d", callbackId);
@@ -468,13 +476,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         OnIndexChange();
     }
 
-    auto curChild = dirty->GetOrCreateChildByIndex(GetLoopIndex(currentIndex_));
-    if (curChild) {
-        auto curChildFrame = curChild->GetHostNode();
-        CHECK_NULL_RETURN(curChildFrame, false);
-        FlushFocus(curChildFrame);
-    }
-
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
@@ -501,6 +502,12 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (jumpIndex_) {
         isJump = true;
         UpdateCurrentIndex(swiperLayoutAlgorithm->GetCurrentIndex());
+        auto curChild = dirty->GetOrCreateChildByIndex(GetLoopIndex(currentIndex_));
+        if (curChild) {
+            auto curChildFrame = curChild->GetHostNode();
+            CHECK_NULL_RETURN(curChildFrame, false);
+            FlushFocus(curChildFrame);
+        }
         currentIndexOffset_ = 0.0f;
         if (isNotInit) {
             OnIndexChange();
@@ -1290,6 +1297,14 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         nextIndex = std::clamp(nextIndex, 0, TotalCount() - GetDisplayCount());
         if (currentIndex_ != nextIndex) {
             UpdateCurrentIndex(nextIndex);
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto curChild = host->GetChildAtIndex(currentIndex_);
+            if (curChild) {
+                auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+                CHECK_NULL_VOID(curChildFrame);
+                FlushFocus(curChildFrame);
+            }
             OnIndexChange();
             oldIndex_ = currentIndex_;
         }
@@ -1400,8 +1415,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
         pipeline->AddAfterRenderTask([weak = WeakClaim(this), info, nextIndex = GetLoopIndex(nextIndex)]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
-            swiper->FireAnimationStartEvent(
-                swiper->GetLoopIndex(swiper->currentIndex_), nextIndex, info);
+            swiper->FireAnimationStartEvent(swiper->GetLoopIndex(swiper->currentIndex_), nextIndex, info);
         });
     }
 
@@ -1640,6 +1654,14 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     auto nextIndex = firstItemInfoInVisibleArea.first;
     if (GetLoopIndex(currentIndex_) != GetLoopIndex(nextIndex)) {
         UpdateCurrentIndex(nextIndex);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto curChild = host->GetChildAtIndex(currentIndex_);
+        if (curChild) {
+            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+            CHECK_NULL_VOID(curChildFrame);
+            FlushFocus(curChildFrame);
+        }
         OnIndexChange();
         oldIndex_ = currentIndex_;
     }
@@ -1686,20 +1708,15 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         return;
     }
 
-    // TODO use theme.
-    constexpr float SPRING_SCROLL_MASS = 0.5f;
-    constexpr float SPRING_SCROLL_STIFFNESS = 100.0f;
-    constexpr float SPRING_SCROLL_DAMPING = 15.55635f;
-    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
-        AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
+    static const auto springProperty = AceType::MakeRefPtr<SpringProperty>(1, 228, 30);
     ExtentPair extentPair = ExtentPair(currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos,
         currentOffset_ - itemPosition_.begin()->second.startPos);
     float friction = currentOffset_ > 0
                          ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
                          : CalculateFriction((mainSize - itemPosition_.rbegin()->second.endPos) / mainSize);
-    auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
-        currentOffset_, dragVelocity * friction, extentPair, extentPair, DEFAULT_OVER_SPRING_PROPERTY);
-    scrollMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
+    auto springMotion = AceType::MakeRefPtr<SpringMotion>(
+        currentOffset_, extentPair.Trailing(), dragVelocity * friction, springProperty);
+    springMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
         auto swiper = weak.Upgrade();
         if (swiper) {
             swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentOffset_);
@@ -1715,7 +1732,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         CHECK_NULL_VOID(swiperPattern);
         swiperPattern->OnSpringAndFadeAnimationFinish();
     });
-    springController_->PlayMotion(scrollMotion);
+    springController_->PlayMotion(springMotion);
 }
 
 void SwiperPattern::PlayFadeAnimation()
@@ -2360,6 +2377,14 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
             // swipe to right
             TriggerAnimationEndOnSwipeToRight();
         }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto curChild = host->GetChildAtIndex(currentIndex_);
+        if (curChild) {
+            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+            CHECK_NULL_VOID(curChildFrame);
+            FlushFocus(curChildFrame);
+        }
 
         OnIndexChange();
         oldIndex_ = currentIndex_;
@@ -2385,6 +2410,12 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
             isFinishAnimation_ = false;
         } else {
             UpdateCurrentIndex(nextIndex);
+            auto curChild = host->GetChildAtIndex(currentIndex_);
+            if (curChild) {
+                auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+                CHECK_NULL_VOID(curChildFrame);
+                FlushFocus(curChildFrame);
+            }
             oldIndex_ = nextIndex;
             currentFirstIndex_ = GetLoopIndex(nextIndex);
             turnPageRate_ = 0.0f;
@@ -2488,7 +2519,7 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
 
     auto delayTime = GetInterval() - GetDuration();
     delayTime = std::clamp(delayTime, 0, delayTime);
-    if (NeedAutoPlay()) {
+    if (NeedAutoPlay() && isUserFinish_) {
         PostTranslateTask(delayTime);
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);

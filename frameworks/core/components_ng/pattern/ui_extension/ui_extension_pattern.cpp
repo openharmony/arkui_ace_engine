@@ -40,7 +40,6 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID_NOLOG(container);
     auto callerToken = container->GetToken();
-    Rosen::ExtensionSessionManager::GetInstance().Init();
     auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
     if (want.GetElement().GetBundleName() == "AbilityComp") {
         return;
@@ -54,6 +53,7 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     RegisterLifecycleListener();
+    LOGI("UIExtension request UIExtensionAbility start");
     RequestExtensionSessionActivation();
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
@@ -87,8 +87,7 @@ void UIExtensionPattern::OnConnect()
 
 void UIExtensionPattern::OnConnectInner()
 {
-    LOGI("UIExtensionPattern OnConnectInner called");
-    CHECK_NULL_VOID_NOLOG(session_);
+    ContainerScope scope(instanceId_);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID_NOLOG(surfaceNode);
     CHECK_NULL_VOID_NOLOG(contentNode_);
@@ -102,7 +101,9 @@ void UIExtensionPattern::OnConnectInner()
     surfaceNode->CreateNodeInRenderThread();
     auto pipeline = PipelineBase::GetCurrentContext();
     TransferFocusWindowId(pipeline->GetFocusWindowId());
-    OnRemoteReady();
+    if (onRemoteReadyCallback_) {
+        onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(session_));
+    }
     RegisterVisibleAreaChange();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -123,63 +124,6 @@ void UIExtensionPattern::OnDisconnect()
             CHECK_NULL_VOID_NOLOG(extensionPattern);
             if (extensionPattern->onReleaseCallback_) {
                 extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
-            }
-        },
-        TaskExecutor::TaskType::UI);
-}
-
-void UIExtensionPattern::OnRemoteReady()
-{
-    LOGI("UIExtensionPattern OnRemoteReady called");
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)]() {
-            auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(extensionPattern);
-            if (extensionPattern->onRemoteReadyCallback_) {
-                extensionPattern->onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(extensionPattern->session_));
-            }
-        },
-        TaskExecutor::TaskType::UI);
-}
-
-void UIExtensionPattern::OnResult(int32_t code, const AAFwk::Want& want)
-{
-    LOGI("UIExtensionPattern OnResult called");
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this), code, want]() {
-            auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(extensionPattern);
-            if (extensionPattern->onResultCallback_) {
-                extensionPattern->onResultCallback_(code, want);
-            }
-        },
-        TaskExecutor::TaskType::UI);
-}
-
-void UIExtensionPattern::OnReceive(const AAFwk::WantParams& wantParams)
-{
-    LOGI("UIExtensionPattern OnReceive called");
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this), wantParams]() {
-            auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(extensionPattern);
-            if (extensionPattern->onReceiveCallback_) {
-                extensionPattern->onReceiveCallback_(wantParams);
             }
         },
         TaskExecutor::TaskType::UI);
@@ -435,14 +379,24 @@ void UIExtensionPattern::UnregisterAbilityResultListener()
 void UIExtensionPattern::SetOnRemoteReadyCallback(std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
 {
     onRemoteReadyCallback_ = std::move(callback);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
-    extSessionEventCallback->notifyRemoteReadyFunc_ = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnRemoteReady();
-        }
-    };
+    extSessionEventCallback->notifyRemoteReadyFunc_ =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor]() {
+            taskExecutor->PostTask([weak, instanceId]() {
+                ContainerScope scope(instanceId);
+                LOGI("UIExtensionPattern OnRemoteReady called");
+                auto pattern = weak.Upgrade();
+                if (pattern && pattern->onRemoteReadyCallback_) {
+                    pattern->onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_));
+                }
+            }, TaskExecutor::TaskType::UI);
+        };
 }
 
 void UIExtensionPattern::SetOnReleaseCallback(std::function<void(int32_t)>&& callback)
@@ -464,28 +418,47 @@ void UIExtensionPattern::SetOnErrorCallback(
 void UIExtensionPattern::SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback)
 {
     onResultCallback_ = std::move(callback);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
-    extSessionEventCallback->transferAbilityResultFunc_ = [weak = WeakClaim(this)](
-                                                              int32_t code, const AAFwk::Want& want) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnResult(code, want);
-        }
-    };
+    extSessionEventCallback->transferAbilityResultFunc_ =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor](int32_t code, const AAFwk::Want& want) {
+            taskExecutor->PostTask([weak, instanceId, code, want]() {
+                ContainerScope scope(instanceId);
+                LOGI("UIExtensionPattern OnResult called");
+                auto pattern = weak.Upgrade();
+                if (pattern && pattern->onResultCallback_) {
+                    pattern->onResultCallback_(code, want);
+                }
+            }, TaskExecutor::TaskType::UI);
+        };
 }
 
 void UIExtensionPattern::SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback)
 {
     onReceiveCallback_ = std::move(callback);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
-    extSessionEventCallback->transferExtensionDataFunc_ = [weak = WeakClaim(this)](const AAFwk::WantParams& params) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnReceive(params);
-        }
-    };
+    extSessionEventCallback->transferExtensionDataFunc_ =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor](const AAFwk::WantParams& params) {
+            taskExecutor->PostTask([weak, instanceId, params]() {
+                ContainerScope scope(instanceId);
+                LOGI("UIExtensionPattern OnReceive called");
+                auto pattern = weak.Upgrade();
+                if (pattern && pattern->onReceiveCallback_) {
+                    pattern->onReceiveCallback_(params);
+                }
+            }, TaskExecutor::TaskType::UI);
+        };
 }
 
 void UIExtensionPattern::OnVisibleChange(bool visible)

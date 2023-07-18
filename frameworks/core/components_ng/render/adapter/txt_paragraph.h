@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 
+#include "txt/font_collection.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_txt.h"
+
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/paragraph.h"
-#include "rosen_text/typography_create.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,7 +30,7 @@ class TxtParagraph : public Paragraph {
     DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph)
 
 public:
-    TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
+    TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<txt::FontCollection> fontCollection)
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
     ~TxtParagraph() override = default;
@@ -71,9 +73,9 @@ public:
 private:
     void CreateBuilder();
     ParagraphStyle paraStyle_;
-    std::unique_ptr<RSParagraph> paragraph_;
-    std::unique_ptr<RSParagraphBuilder> builder_;
-    std::shared_ptr<RSFontCollection> fontCollection_;
+    std::unique_ptr<txt::Paragraph> paragraph_;
+    std::unique_ptr<txt::ParagraphBuilder> builder_;
+    std::shared_ptr<txt::FontCollection> fontCollection_;
     std::u16string text_;
     int32_t placeHolderIndex_ = -1;
 

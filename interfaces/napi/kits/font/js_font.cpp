@@ -39,30 +39,62 @@ constexpr int32_t FONT_INFO_INDEX_SYMBOLIC = 9;
 constexpr int32_t FONT_INFO_INDEX_MAX = 10;
 }
 
-static bool ParseFamilyNameOrSrc(
-    napi_env env, napi_value familyNameOrSrcNApi, std::string& familyNameOrSrc, napi_valuetype valueType)
+static bool ParseFamilyName(napi_env env, napi_value familyNameNApi, std::string& familyName, napi_valuetype valueType)
 {
-    napi_typeof(env, familyNameOrSrcNApi, &valueType);
+    napi_typeof(env, familyNameNApi, &valueType);
     if (valueType == napi_string) {
         size_t nameLen = 0;
-        napi_get_value_string_utf8(env, familyNameOrSrcNApi, nullptr, 0, &nameLen);
+        napi_get_value_string_utf8(env, familyNameNApi, nullptr, 0, &nameLen);
         std::unique_ptr<char[]> name = std::make_unique<char[]>(nameLen + 1);
-        napi_get_value_string_utf8(env, familyNameOrSrcNApi, name.get(), nameLen + 1, &nameLen);
-        familyNameOrSrc = name.get();
+        napi_get_value_string_utf8(env, familyNameNApi, name.get(), nameLen + 1, &nameLen);
+        familyName = name.get();
     } else if (valueType == napi_object) {
         int32_t id = 0;
         int32_t type = 0;
         std::vector<std::string> params;
-        if (!ParseResourceParam(env, familyNameOrSrcNApi, id, type, params)) {
+        if (!ParseResourceParam(env, familyNameNApi, id, type, params)) {
             LOGE("can not parse resource info from input params.");
+            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
-        if (!ParseString(id, type, params, familyNameOrSrc)) {
-            LOGE("can not get family name or src from resource manager.");
+        if (!ParseString(id, type, params, familyName)) {
+            LOGE("can not get message from resource manager.");
+            NapiThrow(env, "Can not get familyName from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
     } else {
-        LOGE("The parameter type of family name or src is incorrect.");
+        LOGE("The parameter type of familyName is incorrect.");
+        return false;
+    }
+    return true;
+}
+
+static bool ParseFamilySrc(napi_env env, napi_value familySrcNApi, std::string& familySrc, napi_valuetype& valueType)
+{
+    napi_typeof(env, familySrcNApi, &valueType);
+    if (valueType == napi_string) {
+        size_t srcLen = 0;
+        napi_get_value_string_utf8(env, familySrcNApi, nullptr, 0, &srcLen);
+        std::unique_ptr<char[]> src = std::make_unique<char[]>(srcLen + 1);
+        napi_get_value_string_utf8(env, familySrcNApi, src.get(), srcLen + 1, &srcLen);
+        familySrc = src.get();
+    } else if (valueType == napi_object) {
+        int32_t id = 0;
+        int32_t type = 0;
+        std::vector<std::string> params;
+        if (!ParseResourceParam(env, familySrcNApi, id, type, params)) {
+            LOGE("can not parse resource info from input params.");
+            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            return false;
+        }
+
+        if (!ParseString(id, type, params, familySrc)) {
+            LOGE("can not get familySrc from resource manager.");
+            NapiThrow(env, "Can not get familySrc from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            return false;
+        }
+    } else {
+        LOGE("The parameter type of familySrc is incorrect.");
         return false;
     }
     return true;
@@ -90,11 +122,11 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
         return nullptr;
     }
     
-    if (!ParseFamilyNameOrSrc(env, familyNameNApi, familyName, valueType)) {
+    if (!ParseFamilyName(env, familyNameNApi, familyName, valueType)) {
         return nullptr;
     }
 
-    if (!ParseFamilyNameOrSrc(env, familySrcNApi, familySrc, valueType)) {
+    if (!ParseFamilySrc(env, familySrcNApi, familySrc, valueType)) {
         return nullptr;
     }
 

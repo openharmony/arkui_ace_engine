@@ -50,6 +50,11 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
 
 void ListPattern::OnScrollEndCallback() {}
 
+bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    return false;
+}
+
 bool ListPattern::IsAtBottom() const
 {
     return false;
