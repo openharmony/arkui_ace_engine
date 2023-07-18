@@ -183,7 +183,7 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
 #endif // ENABLE_DRAG_FRAMEWORK
 
 RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
-    const RefPtr<UINode> parentNode, std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes)
+    const RefPtr<UINode> parentNode, std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes, bool findDrop)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
     auto children = parentNode->GetChildren();
@@ -194,7 +194,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             LOGW("when findding target in child nodes, find child is nullptr");
             continue;
         }
-        auto childFindResult = FindTargetInChildNodes(child, hitFrameNodes);
+        auto childFindResult = FindTargetInChildNodes(child, hitFrameNodes, findDrop);
         if (childFindResult) {
             return childFindResult;
         }
@@ -204,13 +204,18 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     CHECK_NULL_RETURN(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
         if (parentFrameNode == iter.second) {
-            return parentFrameNode;
+            auto eventHub = parentFrameNode->GetEventHub<EventHub>();
+            CHECK_NULL_RETURN(eventHub, nullptr);
+            if ((findDrop && eventHub->HasOnDrop()) || (!findDrop && eventHub->HasOnDragMove())) {
+                return parentFrameNode;
+            }
         }
     }
     return nullptr;
 }
 
-RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType)
+RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
+    float globalX, float globalY, DragType dragType, bool findDrop)
 {
     std::set<WeakPtr<FrameNode>> frameNodes;
     switch (dragType) {
@@ -259,7 +264,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
     while (rootNode->GetParent()) {
         rootNode = rootNode->GetParent();
     }
-    auto result = FindTargetInChildNodes(rootNode, hitFrameNodes);
+    auto result = FindTargetInChildNodes(rootNode, hitFrameNodes, findDrop);
     if (result) {
         return result;
     }
@@ -312,7 +317,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
     UpdateVelocityTrackerPoint(point, false);
 
     auto dragFrameNode = FindDragFrameNodeByPosition(
-        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON);
+        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON, false);
     if (!dragFrameNode) {
         if (preTargetFrameNode_) {
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
@@ -372,7 +377,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #endif // ENABLE_DRAG_FRAMEWORK
     UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
-        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON);
+        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON, true);
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!dragFrameNode) {
         LOGD("DragDropManager Not Use DefaultDrop");
@@ -423,7 +428,7 @@ void DragDropManager::ClearSummary()
 
 void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo)
 {
-    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, DragType::TEXT);
+    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, DragType::TEXT, true);
     if (dragFrameNode) {
         auto textFieldPattern = dragFrameNode->GetPattern<TextFieldPattern>();
         if (textFieldPattern) {
@@ -512,7 +517,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
         return (dragType == DragType::GRID) ? (eventGrid == draggedGrid ? draggedIndex : -1) : draggedIndex;
     };
 
-    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
+    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType, false);
     if (!dragFrameNode) {
         if (preGridTargetFrameNode_) {
             FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE,
@@ -547,7 +552,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
-    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
+    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType, true);
     if (!dragFrameNode) {
         // drag on one grid and drop on other area
         if (draggedGridFrameNode_) {
