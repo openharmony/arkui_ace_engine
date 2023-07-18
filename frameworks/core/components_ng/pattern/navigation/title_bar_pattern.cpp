@@ -656,7 +656,6 @@ bool TitleBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     initialSubtitleOffsetY_ = titleBarLayoutAlgorithm->GetInitialSubtitleOffsetY();
     isInitialSubtitle_ = titleBarLayoutAlgorithm->IsInitialSubtitle();
     minTitleHeight_ = titleBarLayoutAlgorithm->GetMinTitleHeight();
-    titleMode_ = titleBarLayoutAlgorithm->GetNavigationTitleMode();
     return true;
 }
 
