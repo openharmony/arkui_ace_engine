@@ -1180,10 +1180,20 @@ bool RichEditorPattern::HasConnection() const
 
 void RichEditorPattern::InsertValue(const std::string& insertValue)
 {
+    bool isSelector = false;
+    if (textSelector_.IsValid()) {
+        SetCaretPosition(textSelector_.GetTextStart());
+        isSelector = true;
+    }
     auto isInsert = BeforeIMEInsertValue(insertValue);
     CHECK_NULL_VOID(isInsert);
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
+    if (isSelector) {
+        auto length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+        textSelector_.Update(-1, -1);
+        DeleteForward(length);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
@@ -1315,6 +1325,9 @@ void RichEditorPattern::DeleteBackward(int32_t length)
             eventHub->FireOndeleteComplete();
         }
     }
+    if (!caretVisible_) {
+        StartTwinkling();
+    }
 }
 
 void RichEditorPattern::DeleteForward(int32_t length)
@@ -1336,6 +1349,9 @@ void RichEditorPattern::DeleteForward(int32_t length)
             DeleteByDeleteValueInfo(info);
             eventHub->FireOndeleteComplete();
         }
+    }
+    if (!caretVisible_) {
+        StartTwinkling();
     }
 }
 
