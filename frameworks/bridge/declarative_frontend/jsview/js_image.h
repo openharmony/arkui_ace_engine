@@ -55,7 +55,6 @@ public:
     static void JsSetDraggable(bool draggable);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
-    static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
 
 protected:
     static void SetBorder(const Border& border);

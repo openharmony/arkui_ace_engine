@@ -41,6 +41,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 
@@ -69,7 +70,7 @@ public:
 
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
-    virtual void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) = 0;
+    virtual void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
