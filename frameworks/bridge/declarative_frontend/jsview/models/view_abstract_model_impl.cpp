@@ -35,6 +35,7 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/gestures/long_press_gesture.h"
+#include "core/image/image_source_info.h"
 
 // avoid windows build error about macro defined in winuser.h
 #ifdef GetMessage
@@ -278,7 +279,7 @@ void ViewAbstractModelImpl::SetBackgroundColor(const Color& color)
     }
 }
 
-void ViewAbstractModelImpl::SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant)
+void ViewAbstractModelImpl::SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant)
 {
     auto decoration = GetBackDecoration();
     auto image = decoration->GetImage();
@@ -287,9 +288,9 @@ void ViewAbstractModelImpl::SetBackgroundImage(const std::string& src, RefPtr<Th
     }
 
     if (themeConstant) {
-        image->SetSrc(src, themeConstant);
+        image->SetSrc(src.GetSrc(), themeConstant);
     } else {
-        image->SetParsedSrc(src);
+        image->SetParsedSrc(src.GetSrc());
     }
 
     decoration->SetImage(image);

@@ -204,14 +204,13 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
-void ViewAbstract::SetBackgroundImage(const std::string& src)
+void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
         return;
     }
-    ImageSourceInfo imageSourceInfo(src);
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, imageSourceInfo);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
 void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)

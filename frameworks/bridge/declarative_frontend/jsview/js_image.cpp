@@ -228,23 +228,6 @@ void JSImage::Create(const JSCallbackInfo& info)
     ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName);
 }
 
-// Interim programme
-void JSImage::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
-{
-    if (!jsValue->IsObject() || jsValue->IsString()) {
-        return;
-    }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    if (!jsObj->IsUndefined()) {
-        JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
-        JSRef<JSVal> module = jsObj->GetProperty("moduleName");
-        if (bundle->IsString() && module->IsString()) {
-            bundleName = bundle->ToString();
-            moduleName = module->ToString();
-        }
-    }
-}
-
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
 {
     if (!jsValue->IsObject()) {
