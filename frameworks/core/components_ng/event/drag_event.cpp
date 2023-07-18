@@ -672,6 +672,7 @@ void DragEventActuator::GetTextPixelMap(bool startDrag)
         return;
     }
     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+    gestureHub->SetPixelMap(nullptr);
 }
 
 void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation)
@@ -719,7 +720,8 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     CHECK_NULL_VOID(pattern);
     auto pixelMap = gestureHub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    auto removeColumnNode = [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern)] {
+    auto removeColumnNode = [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern),
+                                weakEvent = gestureEventHub_] {
         ContainerScope scope(id);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -732,6 +734,9 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
             pattern->CreateHandles();
         }
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        auto gestureHub = weakEvent.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetPixelMap(nullptr);
     };
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
