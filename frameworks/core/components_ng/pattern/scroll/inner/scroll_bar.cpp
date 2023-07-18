@@ -326,7 +326,6 @@ void ScrollBar::SetGestureEvent()
                     inRegion = scrollBar->InBarActiveRegion(point);
                 }
                 scrollBar->SetPressed(inRegion);
-                scrollBar->SetDriving(inRegion);
                 if (inRegion && !scrollBar->IsHover()) {
                     scrollBar->PlayGrowAnimation();
                 }
@@ -350,6 +349,9 @@ void ScrollBar::SetGestureEvent()
     }
     if (!touchAnimator_) {
         touchAnimator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+    }
+    if (!panRecognizer_) {
+        InitPanRecognizer();
     }
 }
 
@@ -480,12 +482,15 @@ void ScrollBar::PlayShrinkAnimation()
 
 void ScrollBar::PlayBarEndAnimation()
 {
+    if (opacity_ == 0) {
+        return;
+    }
     if (scrollEndAnimator_) {
         if (!scrollEndAnimator_->IsStopped()) {
             scrollEndAnimator_->Stop();
         }
         if (IsHover() || IsPressed()) {
-            return ;
+            return;
         }
         scrollEndAnimator_->Play();
         return;
@@ -563,5 +568,105 @@ void ScrollBar::CalcReservedHeight()
     LOGD("scrollBar calculate reservedHeight, startReservedHeight_:%{public}f, endReservedHeight_:%{public}f",
         startReservedHeight_.Value(), endReservedHeight_.Value());
     SetReservedHeightUpdate(true);
+}
+
+void ScrollBar::InitPanRecognizer()
+{
+    PanDirection panDirection;
+    panDirection.type = positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, DEFAULT_PAN_DISTANCE);
+    panRecognizer_->SetOnActionUpdate([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->HandleDragUpdate(info);
+        }
+    });
+    panRecognizer_->SetOnActionEnd([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->HandleDragEnd(info);
+        }
+    });
+    panRecognizer_->SetOnActionStart([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->HandleDragStart(info);
+        }
+    });
+}
+
+void ScrollBar::HandleDragStart(const GestureEvent& info)
+{
+    if (scrollPositionCallback_) {
+        scrollPositionCallback_(0, SCROLL_FROM_START);
+    }
+    isDriving_ = true;
+}
+
+void ScrollBar::HandleDragUpdate(const GestureEvent& info)
+{
+    if (scrollPositionCallback_) {
+        auto offset = CalcPatternOffset(info.GetMainDelta());
+        scrollPositionCallback_(offset, SCROLL_FROM_BAR);
+    }
+}
+
+void ScrollBar::HandleDragEnd(const GestureEvent& info)
+{
+    auto velocity = info.GetMainVelocity();
+    if (NearZero(velocity)) {
+        if (scrollEndCallback_) {
+            scrollEndCallback_();
+        }
+        isDriving_ = false;
+        return;
+    }
+    frictionPosition_ = 0.0;
+    if (frictionMotion_) {
+        frictionMotion_->Reset(friction_, 0, velocity);
+    } else {
+        frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity);
+        frictionMotion_->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
+            auto scrollBar = weakBar.Upgrade();
+            CHECK_NULL_VOID_NOLOG(scrollBar);
+            scrollBar->ProcessFrictionMotion(value);
+        });
+    }
+    if (!frictionController_) {
+        frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+        frictionController_->AddStopListener([weakBar = AceType::WeakClaim(this)]() {
+            auto scrollBar = weakBar.Upgrade();
+            CHECK_NULL_VOID_NOLOG(scrollBar);
+            scrollBar->ProcessFrictionMotionStop();
+        });
+    }
+    frictionController_->PlayMotion(frictionMotion_);
+}
+
+void ScrollBar::ProcessFrictionMotion(double value)
+{
+    if (scrollPositionCallback_) {
+        auto offset = CalcPatternOffset(value - frictionPosition_);
+        scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING);
+    }
+    frictionPosition_ = value;
+}
+
+void ScrollBar::ProcessFrictionMotionStop()
+{
+    if (scrollEndCallback_) {
+        scrollEndCallback_();
+    }
+    isDriving_ = false;
+}
+
+void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+{
+    if (panRecognizer_) {
+        panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+        result.emplace_front(panRecognizer_);
+    }
 }
 } // namespace OHOS::Ace::NG

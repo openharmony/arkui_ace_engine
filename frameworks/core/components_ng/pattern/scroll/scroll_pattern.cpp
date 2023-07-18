@@ -90,10 +90,6 @@ void ScrollPattern::RegisterScrollEventTask()
     CHECK_NULL_VOID(scrollableEvent);
     auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto onScrollEvent = eventHub->GetOnScrollEvent();
-    if (onScrollEvent) {
-        scrollableEvent->SetOnScrollCallback(std::move(onScrollEvent));
-    }
     auto scrollBeginEvent = eventHub->GetScrollBeginEvent();
     if (scrollBeginEvent) {
         scrollableEvent->SetScrollBeginCallback(std::move(scrollBeginEvent));
@@ -202,11 +198,6 @@ bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
             return false;
         }
         auto adjustOffset = static_cast<float>(offset);
-        auto scrollBar = GetScrollBar();
-        if (scrollBar && scrollBar->IsDriving()) {
-            adjustOffset = scrollBar->CalcPatternOffset(adjustOffset);
-            source = SCROLL_FROM_BAR;
-        }
         AdjustOffset(adjustOffset, source);
         return UpdateCurrentOffset(adjustOffset, source);
     } else {
@@ -356,9 +347,9 @@ void ScrollPattern::ValidateOffset(int32_t source)
 
 void ScrollPattern::HandleScrollPosition(float scroll, int32_t scrollState)
 {
-    auto scrollableEvent = GetScrollableEvent();
-    CHECK_NULL_VOID_NOLOG(scrollableEvent);
-    const auto& onScroll = scrollableEvent->GetOnScrollCallback();
+    auto eventHub = GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onScroll = eventHub->GetOnScrollEvent();
     CHECK_NULL_VOID_NOLOG(onScroll);
     // not consider async call
     Dimension scrollX(0, DimensionUnit::VP);

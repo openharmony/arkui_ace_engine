@@ -1346,7 +1346,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 TouchTestResult finalResult;
                 const auto coordinateOffset = globalPoint - localPoint;
                 preventBubbling = gestureHub->ProcessTouchTestHit(
-                    coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId);
+                    coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId, localPoint);
                 newComingTargets.swap(finalResult);
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {

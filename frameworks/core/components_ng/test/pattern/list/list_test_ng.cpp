@@ -23,6 +23,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#define private public
+#define protected public
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -30,8 +32,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#define private public
-#define protected public
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -3902,7 +3902,6 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
      * @tc.expected:
      */
     ASSERT_NE(pattern_->GetScrollBar(), nullptr);
-    pattern_->GetScrollBar()->SetDriving(true);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
     const Offset expectOffset2 = Offset(0, 100.f);
     IsEqualCurrentOffset(expectOffset2);
@@ -3911,7 +3910,6 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
      * @tc.steps: step3. Offset is 0, ProcessDragUpdate do nothing.
      * @tc.expected: CurrentOffset unchange.
      */
-    pattern_->GetScrollBar()->SetDriving(false);
     pattern_->OnScrollCallback(0, SCROLL_FROM_UPDATE);
     const Offset expectOffset3 = Offset(0, 100.f);
     IsEqualCurrentOffset(expectOffset3);
