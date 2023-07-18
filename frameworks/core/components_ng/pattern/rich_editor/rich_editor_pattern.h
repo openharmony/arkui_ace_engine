@@ -139,7 +139,8 @@ public:
     int32_t GetTextIndexAtCursor();
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
-
+    void OnAreaChangedInner() override;
+    void CreateHandles() override;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif
@@ -224,6 +225,7 @@ private:
     bool isRichEditorInit_ = false;
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
+    OffsetF parentGlobalOffset_;
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;

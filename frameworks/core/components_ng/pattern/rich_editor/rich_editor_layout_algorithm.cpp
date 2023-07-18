@@ -24,4 +24,12 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(
 {}
 
 RichEditorLayoutAlgorithm::~RichEditorLayoutAlgorithm() = default;
+
+void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    auto context = layoutWrapper->GetHostNode()->GetContext();
+    CHECK_NULL_VOID(context);
+    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    TextLayoutAlgorithm::Layout(layoutWrapper);
+}
 } // namespace OHOS::Ace::NG
