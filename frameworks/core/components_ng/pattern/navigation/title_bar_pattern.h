@@ -170,6 +170,7 @@ private:
     float GetSubTitleOffsetY();
     void UpdateTitleFontSize(const Dimension& tempTitleFontSize);
     void UpdateSubTitleOpacity(const double &value);
+    void UpdateTitleModeChange();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<SpringMotion> springMotion_;

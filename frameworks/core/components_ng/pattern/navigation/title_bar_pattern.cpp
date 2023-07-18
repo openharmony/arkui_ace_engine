@@ -649,6 +649,7 @@ bool TitleBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto titleBarLayoutAlgorithm = DynamicCast<TitleBarLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(titleBarLayoutAlgorithm, false);
+    UpdateTitleModeChange();
 
     initialTitleOffsetY_ = titleBarLayoutAlgorithm->GetInitialTitleOffsetY();
     isInitialTitle_ = titleBarLayoutAlgorithm->IsInitialTitle();
@@ -657,6 +658,25 @@ bool TitleBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     minTitleHeight_ = titleBarLayoutAlgorithm->GetMinTitleHeight();
     titleMode_ = titleBarLayoutAlgorithm->GetNavigationTitleMode();
     return true;
+}
+
+void UpdateTitleModeChange() {
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto geometryNode = titleBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto titleBarHeight = geometry->GetFrameSize().Height();
+    if ((titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) &&
+        !NearZero(maxTitleBarHeight_)) {
+        if (titleBarHeight >= maxTitleBarHeight_) {
+            titleMode_ = NavigationTitleMode::FULL;
+        } else if (NearEqual(titleBarHeight, static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()))) {
+            titleMode_ = NavigationTitleMode::MINI;
+        }
+    }
 }
 
 void TitleBarPattern::OnAttachToFrameNode()

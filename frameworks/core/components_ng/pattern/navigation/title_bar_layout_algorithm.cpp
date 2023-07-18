@@ -153,20 +153,6 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         return;
     }
 
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
-        auto title = AceType::DynamicCast<FrameNode>(titleNode);
-        CHECK_NULL_VOID(title);
-        auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
-        if (textLayoutProperty) {
-            Dimension fontSize;
-            if (textLayoutProperty->GetFontSizeValue(fontSize) == MAX_TITLE_FONT_SIZE) {
-                titleMode_ = NavigationTitleMode::FULL;
-            } else if (textLayoutProperty->GetFontSizeValue(fontSize) == MIN_TITLE_FONT_SIZE) {
-                titleMode_ = NavigationTitleMode::MINI;
-            }
-        }
-    }
-
     // navBar title bar
     auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
     CHECK_NULL_VOID(navBarNode);

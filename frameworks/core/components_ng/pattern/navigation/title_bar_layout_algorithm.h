@@ -83,11 +83,6 @@ public:
         return minTitleHeight_;
     }
 
-    NavigationTitleMode GetNavigationTitleMode() const
-    {
-        return titleMode_;
-    }
-
 private:
     void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
@@ -127,8 +122,6 @@ private:
     float initialSubtitleOffsetY_ = 0.0f;
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
-
-    NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
     ACE_DISALLOW_COPY_AND_MOVE(TitleBarLayoutAlgorithm);
 };
