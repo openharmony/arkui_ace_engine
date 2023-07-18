@@ -210,7 +210,6 @@ private:
     void OnScrollEndCallback() override;
 
     void OnModifyDone() override;
-    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     float CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType);
 
