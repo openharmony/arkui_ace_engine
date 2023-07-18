@@ -236,7 +236,12 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         paint->SetEdgeEffect(scrollEffect);
     }
     if (!listContentModifier_) {
-        listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, paint);
+        const auto& geometryNode = host->GetGeometryNode();
+        auto size = geometryNode->GetPaddingSize();
+        OffsetF offset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+        listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
 
     paint->SetLaneGutter(laneGutter_);
