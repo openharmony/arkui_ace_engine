@@ -183,7 +183,8 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         return;
     }
 
-    auto occupiedWidth = defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L * 2 + defaultPaddingStart_;
+    auto occupiedWidth = defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L * 2 +
+        defaultPaddingStart_;
     constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
     titleWrapper->Measure(constraint);
 }
