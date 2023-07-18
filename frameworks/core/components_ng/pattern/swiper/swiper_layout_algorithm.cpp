@@ -79,13 +79,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto contentConstraint = swiperLayoutProperty->GetContentLayoutConstraint().value();
     bool hasMinSize = swiperLayoutProperty->GetMinSize().has_value() &&
                       !LessOrEqual(swiperLayoutProperty->GetMinSizeValue().Value(), 0);
-    bool hasPrevmargin = swiperLayoutProperty->GetPrevMargin().has_value() &&
+    bool hasPrevMargin = swiperLayoutProperty->GetPrevMargin().has_value() &&
                       !LessOrEqual(swiperLayoutProperty->GetPrevMarginValue().ConvertToPx(), 0);
-    bool hasNextmargin = swiperLayoutProperty->GetNextMargin().has_value() &&
+    bool hasNextMargin = swiperLayoutProperty->GetNextMargin().has_value() &&
                       !LessOrEqual(swiperLayoutProperty->GetNextMarginValue().ConvertToPx(), 0);
 
     auto isSingleCase =
-        !hasMinSize && (!hasPrevmargin && !hasNextmargin) &&
+        !hasMinSize && (!hasPrevMargin && !hasNextMargin) &&
         ((swiperLayoutProperty->GetDisplayCount().has_value() && swiperLayoutProperty->GetDisplayCountValue() == 1) ||
             (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
 
@@ -312,7 +312,8 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
 bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
     Axis axis, int32_t& currentIndex, float startPos, float& endPos)
 {
-    if (currentIndex + 1 >= totalItemCount_ && !isLoop_) {
+    if ((currentIndex + 1 >= totalItemCount_ && !isLoop_) ||
+        (static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_)) {
         return false;
     }
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetLoopIndex(currentIndex + 1));
@@ -351,7 +352,7 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
 bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
     Axis axis, int32_t& currentIndex, float endPos, float& startPos)
 {
-    if (currentIndex - 1 < 0 && !isLoop_) {
+    if ((currentIndex - 1 < 0 && !isLoop_) || static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_) {
         return false;
     }
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetLoopIndex(currentIndex - 1));
@@ -408,12 +409,12 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         }
         bool hasMinSize = swiperLayoutProperty->GetMinSize().has_value() &&
                           !LessOrEqual(swiperLayoutProperty->GetMinSizeValue().Value(), 0);
-        bool hasPrevmargin = swiperLayoutProperty->GetPrevMargin().has_value() &&
+        bool hasPrevMargin = swiperLayoutProperty->GetPrevMargin().has_value() &&
                         !LessOrEqual(swiperLayoutProperty->GetPrevMarginValue().ConvertToPx(), 0);
-        bool hasNextmargin = swiperLayoutProperty->GetNextMargin().has_value() &&
+        bool hasNextMargin = swiperLayoutProperty->GetNextMargin().has_value() &&
                         !LessOrEqual(swiperLayoutProperty->GetNextMarginValue().ConvertToPx(), 0);
         auto isSingleCase =
-            !hasMinSize && (!hasPrevmargin && !hasNextmargin) &&
+            !hasMinSize && (!hasPrevMargin && !hasNextMargin) &&
             ((swiperLayoutProperty->GetDisplayCount().has_value() &&
                  swiperLayoutProperty->GetDisplayCountValue() == 1) ||
                 (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
@@ -460,7 +461,9 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         } else {
             // adjust offset. If edgeEffect is SPRING, jump adjust to allow swiper scroll through boundary
             if (!canOverScroll_ || jumpIndex_.has_value()) {
-                currentOffset_ = currentEndPos - contentMainSize_;
+                auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f;
+                auto nextMarginMontage = Positive(nextMargin_) ? nextMargin_ + spaceWidth_ : 0.0f;
+                currentOffset_ = currentEndPos - contentMainSize_ + prevMarginMontage + nextMarginMontage;
                 LOGD("LayoutForward: adjust offset to %{public}f", currentOffset_);
             }
             startMainPos_ = currentEndPos - contentMainSize_;
