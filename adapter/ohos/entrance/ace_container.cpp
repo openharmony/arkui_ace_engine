@@ -1558,6 +1558,18 @@ void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExe
     }
 }
 
+void AceContainer::ReloadForm()
+{
+    // Reload theme and resource
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    pipelineContext_->SetThemeManager(themeManager);
+    themeManager->InitResource(resourceInfo_);
+    themeManager->SetColorScheme(colorScheme_);
+    themeManager->LoadCustomTheme(assetManager_);
+    themeManager->LoadResourceThemes();
+}
+
 void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
 {
     if (picNameArray.empty()) {
