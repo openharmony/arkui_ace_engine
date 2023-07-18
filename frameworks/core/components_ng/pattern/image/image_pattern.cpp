@@ -204,7 +204,9 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
         geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
-
+    if (!host->IsActive()) {
+        return;
+    }
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;

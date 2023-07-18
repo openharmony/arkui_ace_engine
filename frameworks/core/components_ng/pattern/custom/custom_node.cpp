@@ -46,7 +46,6 @@ void CustomNode::Render()
 {
     if (renderFunction_) {
         auto renderFunction = std::move(renderFunction_);
-        needMarkParent_ = false;
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
@@ -60,7 +59,6 @@ void CustomNode::Render()
                 child->MountToParent(Claim(this));
             }
         }
-        needMarkParent_ = true;
     }
     {
         FireRecycleRenderFunc();
@@ -81,7 +79,7 @@ void CustomNode::SetJSViewActive(bool active)
     FireSetActiveFunc(active);
 }
 
-void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
+void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     if (parent->GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {
         Render();
@@ -94,8 +92,8 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent
         return;
     }
 
-    parent->AppendChild(MakeRefPtr<LayoutWrapperNode>(
-        [weak = AceType::WeakClaim(this), forceMeasure, forceLayout](RefPtr<LayoutWrapperNode> layoutWrapper) {
+    parent->AppendChild(MakeRefPtr<LayoutWrapper>(
+        [weak = AceType::WeakClaim(this), forceMeasure, forceLayout](RefPtr<LayoutWrapper> layoutWrapper) {
             auto customNode = weak.Upgrade();
             CHECK_NULL_VOID(customNode);
 
@@ -121,22 +119,10 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent
         }));
 }
 
-RefPtr<LayoutWrapperNode> CustomNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
+RefPtr<LayoutWrapper> CustomNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     Build();
     return UINode::CreateLayoutWrapper(forceMeasure, forceLayout);
 }
 
-void CustomNode::MarkNeedSyncRenderTree(bool needRebuild)
-{
-    if (needMarkParent_) {
-        UINode::MarkNeedSyncRenderTree(needRebuild);
-    }
-}
-
-RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index)
-{
-    Render();
-    return UINode::GetFrameChildByIndex(index);
-}
 } // namespace OHOS::Ace::NG

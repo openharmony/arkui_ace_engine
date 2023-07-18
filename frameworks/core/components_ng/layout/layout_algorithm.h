@@ -113,16 +113,6 @@ public:
         layoutAlgorithm_->Layout(layoutWrapper);
     }
 
-    void SetSkipMeasure()
-    {
-        skipMeasure_ = true;
-    }
-
-    void SetSkipLayout()
-    {
-        skipLayout_ = true;
-    }
-
     void SetNeedMeasure()
     {
         skipMeasure_ = false;
@@ -153,17 +143,11 @@ public:
         layoutAlgorithm_ = std::move(algorithm);
     }
 
-    bool IsExpire() const
-    {
-        return frameId != UITaskScheduler::GetFrameId();
-    }
-
 private:
     RefPtr<LayoutAlgorithm> layoutAlgorithm_;
 
     bool skipMeasure_ = false;
     bool skipLayout_ = false;
-    uint64_t frameId = UITaskScheduler::GetFrameId();
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithmWrapper);
 };

@@ -23,7 +23,6 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 class LayoutWrapper;
-class LayoutProperty;
 
 class GeometryTransition : public AceType {
     DECLARE_ACE_TYPE(GeometryTransition, AceType);
@@ -67,7 +66,6 @@ private:
     RectF outNodeTargetAbsRect_;
     OffsetF outNodePos_;
     OffsetF outNodeParentPos_;
-    RefPtr<LayoutProperty> layoutProperty_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GeometryTransition);
 };

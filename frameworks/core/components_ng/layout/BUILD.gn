@@ -20,6 +20,5 @@ build_component_ng("layout_ng") {
     "layout_property.cpp",
     "layout_wrapper.cpp",
     "layout_wrapper_builder.cpp",
-    "layout_wrapper_node.cpp",
   ]
 }
