@@ -329,9 +329,24 @@ void JSSwiper::SetInterval(const JSCallbackInfo& info)
     SwiperModel::GetInstance()->SetAutoPlayInterval(interval);
 }
 
-void JSSwiper::SetLoop(bool loop)
+void JSSwiper::SetLoop(const JSCallbackInfo& info)
 {
-    SwiperModel::GetInstance()->SetLoop(loop);
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        SwiperModel::GetInstance()->SetLoop(info[0]->ToBoolean());
+        return;
+    }
+
+    if (info[0]->IsBoolean()) {
+        SwiperModel::GetInstance()->SetLoop(info[0]->ToBoolean());
+    } else {
+        SwiperModel::GetInstance()->SetLoop(true);
+    }
 }
 
 void JSSwiper::SetVertical(bool isVertical)
@@ -428,17 +443,13 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
     swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(itemWidthValue, dimPosition);
-    SetIsIndicatorCustomSize(dimPosition, parseOk);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(itemHeightValue, dimPosition);
-    SetIsIndicatorCustomSize(dimPosition, parseOk);
     swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(selectedItemWidthValue, dimPosition);
-    SetIsIndicatorCustomSize(dimPosition, parseOk);
     swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(selectedItemHeightValue, dimPosition);
-    SetIsIndicatorCustomSize(dimPosition, parseOk);
     swiperParameters.selectedItemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
@@ -449,6 +460,7 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = ParseJsColor(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
     return swiperParameters;
 }
 
