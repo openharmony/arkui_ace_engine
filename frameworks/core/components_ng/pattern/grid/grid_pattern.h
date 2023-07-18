@@ -190,7 +190,6 @@ private:
     bool IsOutOfBoundary();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
-    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     float GetMainContentSize() const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

@@ -297,6 +297,8 @@ private:
     bool OnScrollPosition(double offset, int32_t source);
     void SetParentScrollable();
 
+    void OnAttachToFrameNode() override;
+
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};

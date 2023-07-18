@@ -549,6 +549,14 @@ void ScrollablePattern::PlaySpringAnimation(
     animator_->PlayMotion(springMotion_);
 }
 
+void ScrollablePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
+}
+
 void ScrollablePattern::UninitMouseEvent()
 {
     if (!mouseEvent_) {

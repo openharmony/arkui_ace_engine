@@ -59,14 +59,6 @@ float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 
 } // namespace
 
-void ScrollPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
-    host->GetRenderContext()->UpdateClipEdge(true);
-}
-
 void ScrollPattern::OnModifyDone()
 {
     auto host = GetHost();
