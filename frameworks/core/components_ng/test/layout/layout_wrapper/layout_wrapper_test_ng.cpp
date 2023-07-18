@@ -1576,10 +1576,21 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest041, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
 
     /**
-     * @tc.steps: step4. call ExpandSafeArea on a frame that has user defined size.
+     * @tc.steps: step5. call ExpandSafeArea on a frame that completely covers SafeAreaInset.
+     * @tc.expected: frame is not expanded.
+     */
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, -1 });
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT + 2 });
+    layoutWrapper->ExpandSafeAreaInner();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, -1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT + 2));
+
+    /**
+     * @tc.steps: step6. call ExpandSafeArea on a frame that has user defined size.
      * @tc.expected: frame is moved but size remains the same.
      */
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
     layoutWrapper->layoutProperty_->UpdateUserDefinedIdealSize({ CalcLength(RK356_WIDTH), CalcLength(RK356_HEIGHT) });
     layoutWrapper->ExpandSafeAreaInner();
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
