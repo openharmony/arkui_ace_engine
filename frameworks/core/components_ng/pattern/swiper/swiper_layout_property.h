@@ -144,14 +144,14 @@ public:
         }
     }
 
-    void UpdatePrevMarginWithoutMeasure(Dimension value)
+    void UpdatePrevMarginWithoutMeasure(const Dimension& value)
     {
         if (propPrevMargin_ != value) {
             propPrevMargin_ = value;
         }
     }
 
-    void UpdateNextMarginWithoutMeasure(Dimension value)
+    void UpdateNextMarginWithoutMeasure(const Dimension& value)
     {
         if (propNextMargin_ != value) {
             propNextMargin_ = value;
