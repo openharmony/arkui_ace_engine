@@ -104,6 +104,8 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<GridEventHub>();

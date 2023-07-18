@@ -518,8 +518,7 @@ public:
     void RemoveSelf();
     void RemoveChild(const RefPtr<FocusHub>& focusNode);
     bool GoToNextFocusLinear(FocusStep step, const RectF& rect = RectF());
-    bool TryRequestFocus(
-        const RefPtr<FocusHub>& focusNode, const RectF& rect, FocusStep step = FocusStep::NONE);
+    bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect, FocusStep step = FocusStep::NONE);
 
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
