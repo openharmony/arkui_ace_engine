@@ -159,8 +159,7 @@ void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& layoutWrapper = host->GetLayoutWrapper().Upgrade();
-    const auto& geometryNode = layoutWrapper == nullptr ? host->GetGeometryNode() : layoutWrapper->GetGeometryNode();
+    const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     // update src data
     image_ = loadingCtx_->MoveCanvasImage();

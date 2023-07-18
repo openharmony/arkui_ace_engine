@@ -38,20 +38,13 @@ void LayoutWrapperNode::Update(
     hostNode_ = std::move(hostNode);
     geometryNode_ = std::move(geometryNode);
     layoutProperty_ = std::move(layoutProperty);
-    auto host = hostNode_.Upgrade();
-    CHECK_NULL_VOID(host);
-    host->RecordLayoutWrapper(WeakClaim(this));
 }
 
 LayoutWrapperNode::LayoutWrapperNode(
     WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
     : LayoutWrapper(std::move(hostNode)), geometryNode_(std::move(geometryNode)),
       layoutProperty_(std::move(layoutProperty))
-{
-    auto host = hostNode_.Upgrade();
-    CHECK_NULL_VOID(host);
-    host->RecordLayoutWrapper(WeakClaim(this));
-}
+{}
 
 void LayoutWrapperNode::AppendChild(const RefPtr<LayoutWrapperNode>& child, bool isOverlayNode)
 {
@@ -255,14 +248,6 @@ void LayoutWrapperNode::Layout()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(layoutAlgorithm_);
 
-    auto&& expandOpts = layoutProperty_->GetSafeAreaExpandOpts();
-    if ((expandOpts && expandOpts->Expansive()) || host->GetTag() == V2::PAGE_ETS_TAG) {
-        // record expansive wrappers during Layout traversal to speed up SafeArea expansion
-        // Page node needs to avoid keyboard, record it too.
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->GetSafeAreaManager()->AddWrapper(WeakClaim(this));
-    }
     OffsetNodeToSafeArea();
 
     if (layoutAlgorithm_->SkipLayout()) {
