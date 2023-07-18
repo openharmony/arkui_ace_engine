@@ -48,8 +48,8 @@ public:
         const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent) override;
     void AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) override;
     void AddImageRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& uri) override;
-    void AddTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) override;
-    std::string GetSingleTextRecord(const RefPtr<UnifiedData>& unifiedData) override;
+    void AddPlainTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) override;
+    std::string GetSinglePlainTextRecord(const RefPtr<UnifiedData>& unifiedData) override;
     int32_t GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData, std::string& uri) override;
 };
 
