@@ -467,7 +467,9 @@ void TitleBarPattern::UpdateScaleByDragOverDragOffset(float overDragOffset)
 
 void TitleBarPattern::TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto renderCtx = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderCtx);
     auto scaleRatio = overDragOffset / static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx());
     VectorF scaleValue = VectorF(scaleRatio * 0.1f + 1.0f, scaleRatio * 0.1f + 1.0f);
     renderCtx->UpdateTransformScale(scaleValue);
