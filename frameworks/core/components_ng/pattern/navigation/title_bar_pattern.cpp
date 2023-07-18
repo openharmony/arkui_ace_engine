@@ -669,7 +669,7 @@ void TitleBarPattern::UpdateTitleModeChange()
     auto geometryNode = titleBarNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
-    auto titleBarHeight = geometry->GetFrameSize().Height();
+    auto titleBarHeight = geometryNode->GetFrameSize().Height();
     if ((titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) &&
         !NearZero(maxTitleBarHeight_)) {
         if (titleBarHeight >= maxTitleBarHeight_) {
