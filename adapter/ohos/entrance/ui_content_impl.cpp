@@ -884,7 +884,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         if (abilityContext) {
             int32_t missionId = -1;
             abilityContext->GetMissionId(missionId);
-            AceApplicationInfo::GetInstance().SetMissionId(abilityContext->GetMissionId(missionId));
+            AceApplicationInfo::GetInstance().SetMissionId(missionId);
         }
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
