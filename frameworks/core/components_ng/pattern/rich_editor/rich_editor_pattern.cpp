@@ -903,14 +903,15 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
     auto selectEnd = textSelector_.GetTextEnd();
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
-    if (dragResultObjects_.empty()) {
-        return itemInfo;
-    }
-    UpdateSpanItemDragStatus(dragResultObjects_, true);
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-    auto resultProcesser = [unifiedData](const ResultObject& result) {
+    auto resultProcesser = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         if (result.type == RichEditorSpanType::TYPESPAN) {
-            UdmfClient::GetInstance()->AddTextRecord(unifiedData, result.valueString);
+            auto data = pattern->GetSelectedSpanText(StringUtils::ToWstring(result.valueString),
+                result.offsetInSpan[RichEditorSpanRange::RANGESTART],
+                result.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+            UdmfClient::GetInstance()->AddTextRecord(unifiedData, data);
             return;
         }
         if (result.type == RichEditorSpanType::TYPEIMAGE) {
@@ -954,6 +955,9 @@ void RichEditorPattern::OnDragEnd()
 
 void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
+    if (!dragResultObjects_.empty()) {
+        UpdateSpanItemDragStatus(dragResultObjects_, true);
+    }
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
