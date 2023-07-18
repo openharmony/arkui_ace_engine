@@ -54,6 +54,11 @@ public:
         return MakeRefPtr<DividerRenderProperty>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
