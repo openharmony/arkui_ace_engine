@@ -36,10 +36,6 @@ constexpr uint32_t TRANSFORM_DUAL = 2;
 constexpr int32_t DIRECTION_ANGLE = 1;
 constexpr int32_t DIRECTION_SIDE = 2;
 constexpr int32_t DIRECTION_CORNER = 3;
-constexpr int32_t ZERO = 0;
-constexpr int32_t ONE = 1;
-constexpr int32_t TWO = 2;
-constexpr int32_t THREE = 3;
 constexpr int32_t MS_TO_S = 1000;
 constexpr uint32_t COMMON_METHOD_FOCUS_ARGS_SIZE = 1;
 constexpr Dimension TRANSFORM_ORIGIN_DEFAULT = 0.5_pct;
@@ -2126,31 +2122,31 @@ void Declaration::SetBorderImageWidthForFourEdges(const std::string& value, Decl
     StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ZERO]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[0]));
             declaration.backDecoration_->SetHasBorderImageWidth(true);
             break;
         case 2:
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ONE]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[1]));
             declaration.backDecoration_->SetHasBorderImageWidth(true);
             break;
         case 3:
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[TWO]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ONE]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[2]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[1]));
             declaration.backDecoration_->SetHasBorderImageWidth(true);
             break;
         case 4:
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[TWO]));
-            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[THREE]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[2]));
+            bgStyle.borderImage->SetEdgeWidth(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[3]));
             declaration.backDecoration_->SetHasBorderImageWidth(true);
             break;
         default:
@@ -2176,31 +2172,31 @@ void Declaration::SetBorderImageSliceForFourEdges(const std::string& value, Decl
     StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[ZERO]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[0]));
             declaration.backDecoration_->SetHasBorderImageSlice(true);
             break;
         case 2:
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[ZERO]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[0]));
             declaration.backDecoration_->SetHasBorderImageSlice(true);
             break;
         case 3:
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[TWO]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[2]));
             declaration.backDecoration_->SetHasBorderImageSlice(true);
             break;
         case 4:
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[THREE]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[TWO]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[3]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[2]));
             declaration.backDecoration_->SetHasBorderImageSlice(true);
             break;
         default:
@@ -2226,31 +2222,31 @@ void Declaration::SetBorderImageOutSetForFourEdges(const std::string& value, Dec
     StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[ZERO]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[0]));
             declaration.backDecoration_->SetHasBorderImageOutset(true);
             break;
         case 2:
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[ONE]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[1]));
             declaration.backDecoration_->SetHasBorderImageOutset(true);
             break;
         case 3:
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[TWO]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[ONE]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[2]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[1]));
             declaration.backDecoration_->SetHasBorderImageOutset(true);
             break;
         case 4:
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::TOP, declaration.ParseDimension(offsets[ZERO]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[ONE]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[TWO]));
-            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[THREE]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::TOP, declaration.ParseDimension(offsets[0]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, declaration.ParseDimension(offsets[1]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, declaration.ParseDimension(offsets[2]));
+            bgStyle.borderImage->SetEdgeOutset(BorderImageDirection::LEFT, declaration.ParseDimension(offsets[3]));
             declaration.backDecoration_->SetHasBorderImageOutset(true);
             break;
         default:
