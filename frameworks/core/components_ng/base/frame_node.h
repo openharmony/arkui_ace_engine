@@ -376,6 +376,7 @@ public:
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
     {
         builderFunc_ = buildFunc;
+        backgroundNode_ = nullptr;
     }
 
     bool IsDraggable() const
@@ -528,6 +529,7 @@ private:
     // only valid during layout task
     WeakPtr<LayoutWrapper> layoutWrapper_;
 
+    RefPtr<FrameNode> backgroundNode_;
     std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
