@@ -1262,7 +1262,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
     EXPECT_EQ(minuteColumnPattern->gradientHeight_, gradientHeight - TEXT_HOUR24_HEIGHT_NUMBER);
 
     minuteColumnPattern->SetDividerHeight(OPTION_COUNT_PHONE_LANDSCAPE);
-    EXPECT_EQ(minuteColumnPattern->gradientHeight_, gradientHeight);
+    EXPECT_EQ(minuteColumnPattern->gradientHeight_, gradientHeight - TEXT_HOUR24_HEIGHT_NUMBER);
 }
 
 /**
