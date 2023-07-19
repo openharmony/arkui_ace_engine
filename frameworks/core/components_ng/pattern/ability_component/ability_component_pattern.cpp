@@ -31,7 +31,6 @@ AbilityComponentPattern::AbilityComponentPattern(const std::string& bundleName, 
     if (SystemProperties::IsSceneBoardEnabled()) {
         auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
         CHECK_NULL_VOID_NOLOG(container);
-        Rosen::ExtensionSessionManager::GetInstance().Init();
         auto wantWrap = Ace::WantWrap::CreateWantWrap(bundleName, abilityName);
         auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
         Rosen::SessionInfo extensionSessionInfo = {
