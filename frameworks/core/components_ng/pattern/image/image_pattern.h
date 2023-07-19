@@ -75,7 +75,7 @@ public:
         return image_;
     }
 
-    void CreateObscuredImageIfNeed();
+    void CreateObscuredImage();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
