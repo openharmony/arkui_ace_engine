@@ -111,8 +111,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto matchChildren = GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>());
     if (!matchChildren) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
-        MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     }
+    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
         layoutInfo_.Reset();
