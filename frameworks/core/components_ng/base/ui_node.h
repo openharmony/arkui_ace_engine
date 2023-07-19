@@ -30,7 +30,6 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
@@ -52,7 +51,7 @@ public:
 
     virtual int32_t FrameCount() const;
 
-    virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
+    virtual RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
@@ -85,7 +84,7 @@ public:
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
-    virtual const std::list<RefPtr<UINode>>& GetChildren() const
+    const std::list<RefPtr<UINode>>& GetChildren() const
     {
         return children_;
     }
@@ -132,7 +131,7 @@ public:
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
-    virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
+    virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout);
 
     virtual void OnSetDepth(const int32_t depth) {}
 
@@ -267,7 +266,7 @@ public:
         }
     }
 
-    virtual void MarkNeedSyncRenderTree(bool needRebuild = false);
+    virtual void MarkNeedSyncRenderTree();
 
     virtual void RebuildRenderContextTree();
 
@@ -355,7 +354,6 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
-    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index);
 
 #ifdef PREVIEW
     void SetDebugLine(const std::string& line)
@@ -464,9 +462,6 @@ public:
     }
 
     // --------------------------------------------------------------------------------
-
-    virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
-    virtual void OnSetCacheCount(int32_t cacheCount);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()

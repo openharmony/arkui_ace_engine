@@ -126,7 +126,6 @@ RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& cust
 
     auto rootNode = FrameNode::CreateFrameNodeWithTree(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
-    rootNode->SetActive(true);
     rootNode->SetHostRootId(pipeline->GetInstanceId());
     rootNode->SetHostPageId(-1);
     rootNode->AddChild(customNode);
