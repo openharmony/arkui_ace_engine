@@ -50,6 +50,7 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto rowWidth = textSize.Width() + space + spinnerSize.Width();
     auto rowHeight = std::max(textSize.Height(), spinnerSize.Height());
     rowGeometry->SetFrameSize(SizeF(rowWidth, rowHeight));
+    rowWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
 
     // Measure same as box, base on the child row.
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);

@@ -97,8 +97,8 @@ template("ace_osal_ohos_source_set") {
       external_deps += [
         "ability_base:want",
         "ability_runtime:abilitykit_native",
+        "image_framework:image",
         "input:libmmi-client",
-        "multimedia_image_framework:image",
         "napi:ace_napi",
         "resource_management:global_resmgr",
       ]

@@ -201,6 +201,9 @@ TextFieldPattern::~TextFieldPattern()
 
 bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+        return false;
+    }
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     if (!inlineState_.saveInlineState) {
@@ -2154,12 +2157,14 @@ void TextFieldPattern::OnModifyDone()
         operationRecords_.clear();
         redoOperationRecords_.clear();
     }
+#if defined(ENABLE_STANDARD_INPUT)
     auto maxLength = GetMaxLength();
     if (GreatOrEqual(textWidth, maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
         UpdateCaretPositionWithClamp(textEditingValue_.caretPosition);
         SetEditingValueToProperty(textEditingValue_.text);
     }
+#endif
     FireOnChangeIfNeeded();
     if (IsTextArea() || paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
         SetAxis(Axis::VERTICAL);
@@ -2985,6 +2990,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             config.type = keyboard_;
             config.action = GetTextInputActionValue(GetDefaultTextInputAction());
             config.inputFilter = GetInputFilter();
+            config.maxLength = GetMaxLength();
             config.obscureText = textObscured_;
             LOGI("Request keyboard configuration: type=%{private}d action=%{private}d obscureText=%{private}d",
                 keyboard_, config.action, textObscured_);
@@ -4852,11 +4858,6 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
         return true;
-    }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && scrollBar->IsDriving()) {
-        offset = scrollBar->CalcPatternOffset(offset);
-        source = SCROLL_FROM_BAR;
     }
     OnTextInputScroll(offset);
     OnTextAreaScroll(offset);

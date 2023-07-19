@@ -277,7 +277,7 @@ public:
 
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId);
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -410,6 +410,7 @@ public:
         return static_cast<bool>(callback_);
     }
 
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f) const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);

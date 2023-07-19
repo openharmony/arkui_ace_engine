@@ -185,7 +185,7 @@ private:
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
     WeakPtr<NG::PipelineContext> context_;
-    int32_t scopeId_;
+    int32_t instanceId_;
     SizeF initSize_;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;

@@ -75,6 +75,7 @@ struct TestProperty {
     std::optional<bool> ringSweepEffect;
     std::optional<bool> linearSweepEffect;
     std::optional<bool> showText;
+    std::optional<bool> smoothEffect;
 };
 
 namespace {
@@ -269,6 +270,10 @@ RefPtr<FrameNode> ProgressTestNg::CreateProgressParagraph(const TestProperty& te
         progressModel.SetShowText(testProperty.showText.value());
     }
 
+    if (testProperty.smoothEffect.has_value()) {
+        progressModel.SetSmoothEffect(testProperty.smoothEffect.value());
+    }
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
 
     return frameNode;
@@ -360,6 +365,10 @@ void ProgressTestNg::CheckValue(const RefPtr<FrameNode>& frameNode, const TestPr
 
     if (testProperty.showText.has_value()) {
         EXPECT_EQ(progresspaintProperty->GetEnableShowText(), testProperty.showText.value());
+    }
+
+    if (testProperty.smoothEffect.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetEnableSmoothEffect(), testProperty.smoothEffect.value());
     }
 }
 
@@ -1449,6 +1458,7 @@ HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level1)
     testProperty.ringSweepEffect = std::make_optional(true);
     testProperty.linearSweepEffect = std::make_optional(true);
     testProperty.showText = std::make_optional(true);
+    testProperty.smoothEffect = std::make_optional(false);
 
     /**
      * @tc.steps: step2. create progress frameNode and check the progress properties with expected value .
@@ -2014,6 +2024,8 @@ HWTEST_F(ProgressTestNg, RingProgressModifier001, TestSize.Level1)
     progressModifier->SetPaintShadow(true);
     progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetSmoothEffect(false);
+    EXPECT_EQ(progressModifier->smoothEffect_->Get(), false);
     float value = 50.0f;
     progressModifier->SetValue(value);
     EXPECT_EQ(progressModifier->value_->Get(), value);

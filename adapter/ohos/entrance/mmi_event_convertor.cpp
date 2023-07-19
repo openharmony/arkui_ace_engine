@@ -149,7 +149,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     return event;
 }
 
-void GetMouseEventAction(int32_t action, MouseEvent& events)
+void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardWindow)
 {
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
@@ -170,19 +170,19 @@ void GetMouseEventAction(int32_t action, MouseEvent& events)
 #ifdef ENABLE_DRAG_FRAMEWORK
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
             events.action = MouseAction::PRESS;
-            if (SystemProperties::IsSceneBoardEnabled()) {
+            if (isScenceBoardWindow) {
                 events.pullAction = MouseAction::PULL_DOWN;
             }
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             events.action = MouseAction::MOVE;
-            if (SystemProperties::IsSceneBoardEnabled()) {
+            if (isScenceBoardWindow) {
                 events.pullAction = MouseAction::PULL_MOVE;
             }
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             events.action = MouseAction::RELEASE;
-            if (SystemProperties::IsSceneBoardEnabled()) {
+            if (isScenceBoardWindow) {
                 events.pullAction = MouseAction::PULL_UP;
             }
             break;
@@ -217,7 +217,8 @@ void GetMouseEventButton(int32_t button, MouseEvent& events)
     }
 }
 
-void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events)
+void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MouseEvent& events, bool isScenceBoardWindow)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
@@ -232,7 +233,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     events.screenX = item.GetDisplayX();
     events.screenY = item.GetDisplayY();
     int32_t orgAction = pointerEvent->GetPointerAction();
-    GetMouseEventAction(orgAction, events);
+    GetMouseEventAction(orgAction, events, isScenceBoardWindow);
     int32_t orgButton = pointerEvent->GetButtonId();
     GetMouseEventButton(orgButton, events);
     int32_t orgDevice = pointerEvent->GetSourceType();

@@ -45,12 +45,7 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor,
                enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
-        auto datePickerPattern = DynamicCast<DatePickerPattern>(pattern.Upgrade());
-        CHECK_NULL_VOID_NOLOG(datePickerPattern);
         auto height = dividerSpacing;
-        if (datePickerPattern->GetResizeFlag()) {
-            height = datePickerPattern->GetResizePickerItemHeight();
-        }
         double upperLine = (frameRect.Height() - height) / 2.0;
         double downLine = (frameRect.Height() + height) / 2.0;
 

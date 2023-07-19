@@ -62,6 +62,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // inActive means updates are delayed
   private isActive_ : boolean = true;
 
+  // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
+  private isDeleting_: boolean = false;
+
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
 
@@ -176,6 +179,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
       removedElmtIds.push(key);
     });
     this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
+    if (this.hasRecycleManager()) {
+      this.getRecycleManager().purgeAllCachedRecycleNode();
+    }
 
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
@@ -185,6 +191,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.parent_.removeChild(this);
     }
     this.localStoragebackStore_ = undefined;
+    this.isDeleting_ = true;
   }
 
   
@@ -655,7 +662,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // add current JS object to it's parent recycle manager
   public recycleSelf(name: string): void {
-    if (this.parent_) {
+    if (this.parent_ && !this.parent_.isDeleting_) {
       this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
     } else {
       this.resetRecycleCustomNode();

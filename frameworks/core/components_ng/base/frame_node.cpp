@@ -1181,6 +1181,9 @@ void FrameNode::RebuildRenderContextTree()
     std::list<RefPtr<FrameNode>> children;
     // generate full children list, including disappear children.
     GenerateOneDepthVisibleFrameWithTransition(children);
+    if (overlayNode_) {
+        children.push_back(overlayNode_);
+    }
     frameChildren_ = { children.begin(), children.end() };
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
@@ -1534,7 +1537,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 TouchTestResult finalResult;
                 const auto coordinateOffset = globalPoint - localPoint;
                 preventBubbling = gestureHub->ProcessTouchTestHit(
-                    coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId);
+                    coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId, localPoint);
                 newComingTargets.swap(finalResult);
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
@@ -2164,6 +2167,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     RestoreGeoState();
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
+    if (!oldGeometryNode_) {
+        oldGeometryNode_ = geometryNode_->Clone();
+    }
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         layoutAlgorithm_->SetSkipMeasure();
         layoutAlgorithm_->SetSkipLayout();
@@ -2224,6 +2230,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         geometryNode_->SetContentSize(size.value());
     }
     layoutAlgorithm_->Measure(this);
+    if (overlayNode_) {
+        overlayNode_->Measure(layoutProperty_->CreateChildConstraint());
+    }
     // check aspect radio.
     if (pattern_ && pattern_->IsNeedAdjustByAspectRatio()) {
         const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
@@ -2271,6 +2280,9 @@ void FrameNode::Layout()
             layoutProperty_->UpdateContentConstraint();
         }
         GetLayoutAlgorithm()->Layout(this);
+        if (overlayNode_) {
+            LayoutOverlay();
+        }
         time = GetSysTimestamp() - time;
         AddNodeFlexLayouts();
         AddNodeLayoutTime(time);
@@ -2295,10 +2307,10 @@ void FrameNode::SyncGeometryNode()
     }
 
     // update layout size.
-    bool frameSizeChange = false;
-    bool frameOffsetChange = false;
-    bool contentSizeChange = false;
-    bool contentOffsetChange = false;
+    bool frameSizeChange = true;
+    bool frameOffsetChange = true;
+    bool contentSizeChange = true;
+    bool contentOffsetChange = true;
     if (oldGeometryNode_) {
         frameSizeChange = geometryNode_->GetFrameSize() != oldGeometryNode_->GetFrameSize();
         frameOffsetChange = geometryNode_->GetFrameOffset() != oldGeometryNode_->GetFrameOffset();
@@ -2460,9 +2472,6 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 {
     if ((!layoutAlgorithm_ || (needReset && layoutAlgorithm_->IsExpire())) && pattern_) {
         layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
-        if (!oldGeometryNode_) {
-            oldGeometryNode_ = geometryNode_->Clone();
-        }
     }
     return layoutAlgorithm_;
 }
@@ -2470,6 +2479,29 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 void FrameNode::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
 {
     frameProxy_->SetCacheCount(cacheCount);
+}
+
+void FrameNode::LayoutOverlay()
+{
+    auto size = geometryNode_->GetMarginFrameSize();
+    auto align = Alignment::TOP_LEFT;
+    Dimension offsetX, offsetY;
+    auto childLayoutProperty = overlayNode_->GetLayoutProperty();
+    childLayoutProperty->GetOverlayOffset(offsetX, offsetY);
+    auto offset = OffsetF(offsetX.ConvertToPx(), offsetY.ConvertToPx());
+    if (childLayoutProperty->GetPositionProperty()) {
+        align = childLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+    }
+
+    auto childSize = overlayNode_->GetGeometryNode()->GetMarginFrameSize();
+    auto translate = Alignment::GetAlignPosition(size, childSize, align) + offset;
+    overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
+    overlayNode_->Layout();
+}
+
+void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
+{
+    isActive_ = false;
 }
 
 } // namespace OHOS::Ace::NG

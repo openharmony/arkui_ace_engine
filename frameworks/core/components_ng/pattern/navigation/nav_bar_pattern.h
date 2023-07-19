@@ -75,6 +75,32 @@ public:
         return toolBarMenuItems_;
     }
 
+    int32_t GetMenuNodeId()
+    {
+        if (!menuNodeId_.has_value()) {
+            menuNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return menuNodeId_.value();
+    }
+
+    int32_t GetLandscapeMenuNodeId()
+    {
+        if (!landscapeMenuNodeId_.has_value()) {
+            landscapeMenuNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return landscapeMenuNodeId_.value();
+    }
+
+    bool HasMenuNode() const
+    {
+        return menuNodeId_.has_value();
+    }
+
+    bool HasLandscapeMenuNode() const
+    {
+        return landscapeMenuNodeId_.has_value();
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -99,6 +125,8 @@ private:
     bool isHideToolbar_ = false;
     std::vector<NG::BarItem> titleBarMenuItems_;
     std::vector<NG::BarItem> toolBarMenuItems_;
+    std::optional<int32_t> menuNodeId_;
+    std::optional<int32_t> landscapeMenuNodeId_;
 };
 
 } // namespace OHOS::Ace::NG

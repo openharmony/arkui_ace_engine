@@ -18,6 +18,8 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "core/animation/bilateral_spring_node.h"
 #include "core/animation/spring_model.h"
 #include "core/components/common/layout/constants.h"
@@ -236,7 +238,12 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         paint->SetEdgeEffect(scrollEffect);
     }
     if (!listContentModifier_) {
-        listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, paint);
+        const auto& geometryNode = host->GetGeometryNode();
+        auto size = geometryNode->GetPaddingSize();
+        OffsetF offset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+        listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
 
     paint->SetLaneGutter(laneGutter_);
@@ -268,7 +275,7 @@ void ListPattern::ProcessEvent(
                 onScroll(offsetVP, ScrollState::SCROLL);
                 onScroll(0.0_vp, ScrollState::IDLE);
             } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-                source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
                 onScroll(offsetVP, ScrollState::FLING);
                 onScroll(0.0_vp, ScrollState::IDLE);
             } else {
@@ -286,7 +293,7 @@ void ListPattern::ProcessEvent(
         if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
             onScroll(offsetVP, ScrollState::SCROLL);
         } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-            source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+            source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
             onScroll(offsetVP, ScrollState::FLING);
         } else {
             onScroll(offsetVP, ScrollState::IDLE);
@@ -323,6 +330,9 @@ void ListPattern::ProcessEvent(
         if (!GetScrollAbort() && onScrollStop) {
             SetScrollState(SCROLL_FROM_NONE);
             onScrollStop();
+        }
+        if (!GetScrollAbort()) {
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         }
         scrollStop_ = false;
         SetScrollAbort(false);
@@ -700,6 +710,7 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 
 void ListPattern::FireOnScrollStart()
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -723,15 +734,7 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
         return true;
     }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && scrollBar->IsDriving()) {
-        offset = scrollBar->CalcPatternOffset(offset);
-        if (source == SCROLL_FROM_UPDATE) {
-            source = SCROLL_FROM_BAR;
-        }
-    } else {
-        ProcessDragUpdate(offset, source);
-    }
+    ProcessDragUpdate(offset, source);
     return UpdateCurrentOffset(offset, source);
 }
 

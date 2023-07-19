@@ -1293,6 +1293,11 @@ void RosenRenderContext::OnModifyDone()
     }
 }
 
+RectF RosenRenderContext::GetPropertyOfPosition()
+{
+    return AdjustPaintRect();
+}
+
 RectF RosenRenderContext::AdjustPaintRect()
 {
     RectF rect;

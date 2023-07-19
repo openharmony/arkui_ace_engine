@@ -32,10 +32,10 @@
 namespace OHOS::Ace::NG {
 void OptionPattern::OnAttachToFrameNode()
 {
+    RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
-    RegisterOnKeyEvent();
 }
 
 void OptionPattern::OnModifyDone()

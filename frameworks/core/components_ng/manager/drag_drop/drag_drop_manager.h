@@ -113,6 +113,11 @@ public:
         isDragCancel_ = isDragCancel;
     }
 
+    void SetIsMouseDrag(bool isMouseDragged)
+    {
+        isMouseDragged_ = isMouseDragged;
+    }
+
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
 
@@ -153,6 +158,7 @@ private:
     int64_t currentId_ = -1;
 
     bool isDragged_ = false;
+    bool isMouseDragged_ = false;
     VelocityTracker velocityTracker_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);

@@ -968,8 +968,11 @@ void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
     CHECK_NULL_VOID(renderContext);
     auto paddingOffset = geometryNode->GetPaddingOffset();
     auto webContentSize = geometryNode->GetContentSize();
+
+    auto positionProperty = renderContext->GetPropertyOfPosition();
     renderContext->SetBounds(
-        paddingOffset.GetX(), paddingOffset.GetY(), webContentSize.Width(), webContentSize.Height());
+        paddingOffset.GetX() +  positionProperty.GetX(), paddingOffset.GetY() + positionProperty.GetY(),
+        webContentSize.Width(), webContentSize.Height());
 }
 
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

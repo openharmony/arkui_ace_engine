@@ -1223,11 +1223,12 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false);
     }
+    auto container = Container::Current();
     if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-             event.action == MouseAction::MOVE) &&
-            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
-        (SystemProperties::IsSceneBoardEnabled() &&
-            (event.pullAction == MouseAction::PULL_MOVE || event.pullAction == MouseAction::PULL_UP))) {
+        event.action == MouseAction::MOVE) &&
+        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+        (container && container->IsScenceBoardWindow() && (event.pullAction == MouseAction::PULL_MOVE ||
+        event.pullAction == MouseAction::PULL_UP))) {
         auto touchPoint = event.CreateTouchPoint();
         OnTouchEvent(touchPoint);
     }

@@ -1016,7 +1016,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
     //         Radio()
     //     length = min(theme.Width(), theme.Height()), size = (length, length)
     */
-    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
@@ -1039,7 +1039,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
-    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
@@ -1061,7 +1061,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
-    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
@@ -1082,7 +1082,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RadioTheme>()));
-    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);

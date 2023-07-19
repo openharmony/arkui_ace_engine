@@ -20,7 +20,7 @@ ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEv
     : gestureEventHub_(gestureEventHub)
 {}
 
-void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const PointF& localPoint,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {}
 

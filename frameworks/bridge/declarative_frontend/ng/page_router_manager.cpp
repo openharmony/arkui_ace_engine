@@ -537,6 +537,13 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
 std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()
 {
     auto jsonRouterStack = JsonUtil::CreateArray(false);
+    auto restoreIter = restorePageStack_.begin();
+    while (restoreIter != restorePageStack_.end()) {
+        auto jsonItem = JsonUtil::Create(false);
+        jsonItem->Put("url", restoreIter->c_str());
+        jsonRouterStack->Put(jsonItem);
+        ++restoreIter;
+    }
     auto iter = pageRouterStack_.begin();
     while (iter != pageRouterStack_.end()) {
         auto pageNode = iter->Upgrade();

@@ -45,6 +45,7 @@ public:
     void SetShowText(bool value) override {};
     void SetRingSweepingEffect(bool value) override {};
     void SetLinearSweepingEffect(bool value) override {};
+    void SetSmoothEffect(bool value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

@@ -48,9 +48,9 @@ ohos_unittest("ui_content_test") {
 
   external_deps = [
     "ability_runtime:abilitykit_native",
+    "image_framework:image",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:scene_session",
@@ -137,8 +137,8 @@ ohos_unittest("drawable_descriptor_test") {
   ]
 
   external_deps = [
-    "multimedia_image_framework:image",
-    "multimedia_image_framework:image_native",
+    "image_framework:image",
+    "image_framework:image_native",
     "napi:ace_napi",
     "resource_management:global_resmgr",
   ]
