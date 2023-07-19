@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <optional>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -233,6 +234,15 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
+    }
+    if (jumpIndex_) {
+        targetIndex_.reset();
+        if (usePropertyAnimation_) {
+            StopPropertyTranslateAnimation();
+            if (indicatorController_) {
+                indicatorController_->Stop();
+            }
+        }
     }
 }
 
@@ -535,7 +545,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             velocity_.reset();
         }
         pauseTargetIndex_ = targetIndex_;
-        targetIndex_.reset();
     }
     mainSizeIsMeasured_ = swiperLayoutAlgorithm->GetMainSizeIsMeasured();
     contentCrossSize_ = swiperLayoutAlgorithm->GetContentCrossSize();
@@ -1360,8 +1369,6 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity) const
 
 void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity)
 {
-    StopPropertyTranslateAnimation();
-
 #ifdef OHOS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
 #endif
@@ -1375,6 +1382,46 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
     } else {
         offset.AddY(translate);
     }
+    if (usePropertyAnimation_) {
+        auto startNewAnimationFlag = false;
+        if (itemPositionInAnimation_.empty()) {
+            startNewAnimationFlag = true;
+        }
+        if (!startNewAnimationFlag) {
+            for (const auto& animaitonItem : itemPositionInAnimation_) {
+                auto iter = itemPosition_.find(animaitonItem.first);
+                if (iter == itemPosition_.end()) {
+                    startNewAnimationFlag = true;
+                    break;
+                }
+                if (animaitonItem.second.finialOffset != offset ||
+                    !NearEqual(animaitonItem.second.startPos, iter->second.startPos) ||
+                    !NearEqual(animaitonItem.second.endPos, iter->second.endPos)) {
+                    startNewAnimationFlag = true;
+                    break;
+                }
+            }
+        }
+        if (!startNewAnimationFlag) {
+            return;
+        }
+        std::optional<int32_t> targetIndex;
+        if (targetIndex_) {
+            targetIndex = targetIndex_;
+        }
+        StopPropertyTranslateAnimation();
+        itemPositionInAnimation_.clear();
+        if (indicatorController_) {
+            indicatorController_->Stop();
+        }
+        if (targetIndex) {
+            targetIndex_ = targetIndex;
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            return;
+        }
+    }
     auto finishCallback = [id = Container::CurrentId(), weak = WeakClaim(this), offset]() {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
@@ -1382,6 +1429,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
         auto task = [weak, offset]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
+            swiper->targetIndex_.reset();
             swiper->OnPropertyTranslateAnimationFinish(offset);
         };
         context->PostSyncEvent(task);
@@ -1390,7 +1438,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
     for (auto& item : itemPosition_) {
         auto frameNode = item.second.node;
         if (frameNode) {
-            frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+            frameNode->GetRenderContext()->UpdateTranslateInXY(item.second.finialOffset);
         }
     }
     // property callback will call immediately.
@@ -1402,6 +1450,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
                 item.second.finialOffset = offset;
             }
         }
+        itemPositionInAnimation_ = itemPosition_;
     };
     usePropertyAnimation_ = true;
     propertyAnimationIndex_ = nextIndex;
@@ -1439,13 +1488,17 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
         // force stop.
         return;
     }
+    if (indicatorController_) {
+        indicatorController_->Stop();
+    }
     usePropertyAnimation_ = false;
     // reset translate.
-    for (auto& item : itemPosition_) {
+    for (auto& item : itemPositionInAnimation_) {
         auto frameNode = item.second.node;
         if (frameNode) {
             frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
         }
+        item.second.finialOffset = OffsetF();
     }
     // update postion info.
     UpdateOffsetAfterPropertyAnimation(offset.GetMainOffset(GetDirection()));
@@ -1460,7 +1513,7 @@ void SwiperPattern::StopPropertyTranslateAnimation()
     usePropertyAnimation_ = false;
     // Stop CurrentAnimationProperty.
     OffsetF currentOffset;
-    for (auto& item : itemPosition_) {
+    for (auto& item : itemPositionInAnimation_) {
         auto frameNode = item.second.node;
         if (!frameNode) {
             continue;
