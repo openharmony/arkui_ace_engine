@@ -1193,7 +1193,8 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     napi_create_int32(env, 0, &temp);
     napi_set_named_property(env, napiValue, "index", temp);
 #endif
-
+#else
+    LOGW("[Engine Log] The function 'getPixelMap' is not supported on the current platform.");
 #endif
 }
 
