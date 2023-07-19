@@ -115,6 +115,7 @@ ohos_unittest("overlay_manager_test_ng") {
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_measure_util.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",

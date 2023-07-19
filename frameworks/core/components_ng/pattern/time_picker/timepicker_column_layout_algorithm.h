@@ -38,16 +38,6 @@ public:
     void ChangeAmPmTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper);
 
-    float GetCurrentOffset() const
-    {
-        return currentOffset_;
-    }
-
-    void SetCurrentOffset(float currentOffset)
-    {
-        currentOffset_ = currentOffset;
-    }
-
     void SetHour24(bool value)
     {
         hour24_ = value;
@@ -57,10 +47,19 @@ public:
     {
         return hour24_;
     }
+    std::vector<int32_t> GetCurrentOffset() const
+    {
+        return currentOffset_;
+    }
+
+    void SetCurrentOffset(const std::vector<int32_t>& currentOffset)
+    {
+        currentOffset_ = currentOffset;
+    }
 
 private:
-    float currentOffset_ = 0.0f;
     float pickerItemHeight_ = 0.0f;
+    std::vector<int32_t> currentOffset_;
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnLayoutAlgorithm);
