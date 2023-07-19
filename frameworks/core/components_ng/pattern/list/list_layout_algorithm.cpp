@@ -817,9 +817,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
         SetListItemIndex(wrapper, index);
-        if (!overScrollFeature_ || wrapper->CheckNeedForceMeasureAndLayout()) {
-            wrapper->Layout();
-        }
+        wrapper->Layout();
     }
 }
 
@@ -965,7 +963,7 @@ void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)
     for (const auto& item : itemPosition_) {
         if (item.second.isGroup) {
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(item.first);
-            itemGroupList_.push_back(wrapper->GetWeakHostNode());
+            itemGroupList_.push_back(WeakClaim(RawPtr(wrapper->GetHostNode())));
         }
     }
 }
