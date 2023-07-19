@@ -15,6 +15,10 @@
 
 #include "core/common/ui_extension_helper.h"
 
+#include "bundlemgr/bundle_mgr_interface.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 namespace OHOS::Ace {
@@ -25,6 +29,27 @@ RefPtr<NG::FrameNode> UIExtensionHelper::CreateUIExtensionNode(const std::string
     std::function<void(int32_t, const std::string&, const std::string&)>&& onError)
 {
     return NG::UIExtensionModelNG::Create(bundleName, abilityName, params, std::move(onRelease), std::move(onError));
+}
+
+std::string UIExtensionHelper::QueryAppGalleryBundleName()
+{
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHECK_NULL_RETURN(systemAbilityMgr, "");
+
+    auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    CHECK_NULL_RETURN(bundleObj, "");
+
+    auto bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
+    CHECK_NULL_RETURN(bundleMgr, "");
+
+    std::string bundleName = "";
+    auto result = bundleMgr->QueryAppGalleryBundleName(bundleName);
+    if (!result) {
+        LOGE("Query BundleName fail!");
+    } else {
+        LOGI("BundleName: %{public}s", bundleName.c_str());
+    }
+    return bundleName;
 }
 
 } // namespace OHOS::Ace

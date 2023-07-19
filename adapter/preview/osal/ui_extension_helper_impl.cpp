@@ -27,4 +27,9 @@ RefPtr<NG::FrameNode> UIExtensionHelper::CreateUIExtensionNode(const std::string
     return nullptr;
 }
 
+std::string UIExtensionHelper::QueryAppGalleryBundleName()
+{
+    return "";
+}
+
 } // namespace OHOS::Ace

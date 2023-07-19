@@ -236,7 +236,7 @@ void AppBarView::BindContentCover(int32_t targetId)
             };
         auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
         std::map<std::string, std::string> params;
-        params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
+        params.try_emplace("bundleName", OHOS::Ace::UIExtensionHelper::QueryAppGalleryBundleName());
         params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
         params.try_emplace("module", Container::Current()->GetModuleName());
         if (missionId != -1) {

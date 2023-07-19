@@ -29,6 +29,8 @@ public:
         const std::string& abilityName, const std::map<std::string, std::string>& params,
         std::function<void(int32_t)>&& onRelease,
         std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
+
+    static std::string QueryAppGalleryBundleName();
 };
 
 } // namespace OHOS::Ace
