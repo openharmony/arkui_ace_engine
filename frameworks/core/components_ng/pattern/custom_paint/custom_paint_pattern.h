@@ -98,7 +98,7 @@ public:
     double GetWidth();
     double GetHeight();
 
-    const LineDashParam& GetLineDash() const;
+    LineDashParam GetLineDash() const;
     void UpdateLineDash(const std::vector<double>& segments);
 
     void Save();
