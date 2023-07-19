@@ -42,7 +42,6 @@ namespace {
 // TODO datepicker style modification
 constexpr float PADDING_WEIGHT = 10.0f;
 const Dimension FONT_SIZE = Dimension(2.0);
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
 const int32_t ANIMATION_ZERO_TO_OUTER = 200;
@@ -93,11 +92,7 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RefPtr<FrameNode> middleChild = nullptr;
-    if (GetShowCount() != OPTION_COUNT_PHONE_LANDSCAPE) {
-        middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(MINDDLE_CHILD_INDEX));
-    } else {
-        middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
-    }
+    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(MINDDLE_CHILD_INDEX));
     CHECK_NULL_VOID(middleChild);
     auto eventHub = middleChild->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -364,11 +359,7 @@ void DatePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE) {
-        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
-    } else {
-        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value());
-    }
+    gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
     dividerHeight_ = static_cast<float>(
         gradientHeight_ + pickerTheme->GetDividerSpacing().Value() + pickerTheme->GetGradientHeight().Value());
     dividerSpacingWidth_ = static_cast<float>(pickerTheme->GetDividerSpacing().Value() * TEXT_WEIGHT_NUMBER);
