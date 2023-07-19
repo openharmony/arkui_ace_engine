@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -26,7 +27,6 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
@@ -119,36 +119,47 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(bubbleProp);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
-    CHECK_NULL_VOID(bubblePattern);
-    if (!bubblePattern->IsExiting()) {
-        InitTargetSizeAndPosition(bubbleProp);
-    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
     }
-    selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // window's size
     auto child = children.front();
-    childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
-    childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's offset
-    bool useCustom = bubbleProp->GetUseCustom().value_or(false);
+    child->Layout();
+}
+
+/*
+    Because of bubble's position depends on targetNode,
+    The position of the bubble needs to be calculated after the targetNode layout is complete.
+*/
+OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, OffsetT<Dimension> {});
+    auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(bubbleProp, OffsetT<Dimension> {});
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, OffsetT<Dimension> {});
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_RETURN(bubblePattern, OffsetT<Dimension> {});
+    auto ShowInSubWindow = bubbleProp->GetShowInSubWindow().value_or(false);
+    if (!bubblePattern->IsExiting()) {
+        InitTargetSizeAndPosition(ShowInSubWindow);
+        // subtract the global offset of the overlay node,
+        // because the final node position is set relative to the overlay node.
+        auto overlayGlobalOffset = frameNode->GetPaintRectOffset();
+        targetOffset_ -= overlayGlobalOffset;
+    }
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    auto childWrapper = children.front();
+    if (children.empty()) {
+        return OffsetT<Dimension> {};
+    }
+    selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize();       // window's size
+    childSize_ = childWrapper->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
+    childOffset_ = GetChildPosition(childSize_, bubbleProp);            // bubble's offset
     UpdateChildPosition(bubbleProp);
     UpdateTouchRegion();
-    child->GetGeometryNode()->SetMarginFrameOffset(childOffset_);
-    child->Layout();
-    auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childLayoutWrapper);
-    const auto& columnChild = childLayoutWrapper->GetAllChildrenWithBuild();
-    if (columnChild.size() > 1 && !useCustom) {
-        auto buttonRow = columnChild.back();
-        buttonRowSize_ = buttonRow->GetGeometryNode()->GetMarginFrameSize();
-        buttonRowOffset_ = buttonRow->GetGeometryNode()->GetMarginFrameOffset() + childOffset_;
-    }
+
+    // If bubble displayed in subwindow, set the hotarea of subwindow.
     if (bubbleProp->GetShowInSubWindowValue(false)) {
         std::vector<Rect> rects;
         if (!bubbleProp->GetBlockEventValue(true)) {
@@ -162,6 +173,11 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId());
     }
+
+    Dimension childOffsetX(childOffset_.GetX());
+    Dimension childOffsetY(childOffset_.GetY());
+    OffsetT<Dimension> childRenderOffset(childOffsetX, childOffsetY);
+    return childRenderOffset;
 }
 
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp)
@@ -473,7 +489,7 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
     touchRegion_ = RectF(topLeft, topLeft + bottomRight);
 }
 
-void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutProperty>& layoutProp)
+void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
@@ -483,22 +499,11 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     targetSize_ = geometryNode->GetFrameSize();
-    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-                            pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    targetOffset_ = targetNode->GetPaintRectOffsetToPage();
+    targetOffset_ = targetNode->GetPaintRectOffset();
     // Show in SubWindow
     if (showInSubWindow) {
-        if (isContainerModal) {
-            // popup show in subwindow need add container modal.
-            auto newOffsetX = targetOffset_.GetX() + static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
-                              static_cast<float>(CONTENT_PADDING.ConvertToPx());
-            auto newOffsetY = targetOffset_.GetY() + static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
-            targetOffset_.SetX(newOffsetX);
-            targetOffset_.SetY(newOffsetY);
-        }
         auto overlayManager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
@@ -509,7 +514,6 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
             auto subwindowRect = currentSubwindow->GetRect();
             targetOffset_ -= subwindowRect.GetOffset();
         }
-        auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
     }
 }
 
