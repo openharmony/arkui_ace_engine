@@ -542,6 +542,7 @@ private:
     void OnSpringAndFadeAnimationFinish();
     void OnFadeAnimationStart();
     int32_t TotalDisPlayCount() const;
+    void StopAndResetSpringAnimation();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

@@ -127,6 +127,16 @@ void SwiperPattern::OnIndexChange() const
     }
 }
 
+void SwiperPattern::StopAndResetSpringAnimation()
+{
+    if (springController_ && !springController_->IsStopped()) {
+        springController_->Stop();
+        currentDelta_ = 0.0f;
+        itemPosition_.clear();
+        jumpIndex_ = currentIndex_;
+    }
+}
+
 void SwiperPattern::OnModifyDone()
 {
     currentOffset_ = 0.0f;
@@ -146,6 +156,7 @@ void SwiperPattern::OnModifyDone()
     InitSwiperController();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
+    StopAndResetSpringAnimation();
     if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
         StopPropertyTranslateAnimation();
         StopTranslateAnimation();
@@ -1063,6 +1074,9 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     auto edgeEffect = GetEdgeEffect();
     if (!IsLoop() && IsOutOfBoundary() && edgeEffect == EdgeEffect::SPRING) {
         LOGD("Swiper has reached boundary, can't drag any more, effect spring.");
+
+        targetIndex_.reset();
+
         auto visibleSize = CalculateVisibleSize();
         if (LessOrEqual(visibleSize, 0.0)) {
             return;
