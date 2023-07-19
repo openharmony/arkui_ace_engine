@@ -29,7 +29,7 @@ const char AUTO_CORRECT[] = "autoCorrect";
 const char CAPITALIZATION[] = "capitalization";
 const char KEYBOARD_APPEARANCE[] = "keyboardAppearance";
 const char INPUT_FILTER[] = "inputFilter";
-
+const char MAX_LENGTH[] = "maxLength";
 } // namespace
 
 std::string TextInputConfiguration::ToJsonString() const
@@ -52,6 +52,7 @@ std::string TextInputConfiguration::ToJsonString() const
     if (!inputFilter.empty()) {
         json->Put(INPUT_FILTER, inputFilter.c_str());
     }
+    json->Put(MAX_LENGTH, static_cast<int32_t>(maxLength));
     return json->ToString();
 }
 
