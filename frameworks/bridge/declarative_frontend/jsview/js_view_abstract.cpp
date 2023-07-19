@@ -2030,12 +2030,10 @@ void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-
-    if (!info[0]->IsNumber()) {
-        LOGE("The arg is not a number");
-        return;
+    auto radio = 0.0;
+    if (info[0]->IsNumber()) {
+        radio = info[0]->ToNumber<double>();
     }
-    auto radio = info[0]->ToNumber<double>();
     ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0, 1.0));
 }
 
@@ -2047,7 +2045,9 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to be a object");
+        PixStretchEffectOption option;
+        option.ResetValue();
+        ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
         return;
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
@@ -2097,11 +2097,10 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    if (!info[0]->IsNumber()) {
-        LOGE("The arg is wrong,it is supposed to be a number!");
-        return;
+    auto radio = 1.0;
+    if (info[0]->IsNumber()) {
+        radio = info[0]->ToNumber<double>();
     }
-    auto radio = info[0]->ToNumber<double>();
     ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
