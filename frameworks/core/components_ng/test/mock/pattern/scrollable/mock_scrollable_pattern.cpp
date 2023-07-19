@@ -47,6 +47,8 @@ void ScrollablePattern::ScrollTo(float position) {}
 
 void ScrollablePattern::StopAnimate() {}
 
+void ScrollablePattern::OnAttachToFrameNode() {}
+
 void ScrollablePattern::InitMouseEvent() {}
 
 void ScrollablePattern::UninitMouseEvent() {}

@@ -17,7 +17,6 @@
 
 namespace OHOS::Ace::NG {
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
-void GridPattern::OnAttachToFrameNode() {}
 void GridPattern::OnModifyDone() {}
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
