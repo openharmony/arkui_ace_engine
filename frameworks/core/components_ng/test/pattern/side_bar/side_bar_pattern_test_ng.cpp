@@ -649,7 +649,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg022, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(hostNode, geometryNode, layoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(
         AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>());

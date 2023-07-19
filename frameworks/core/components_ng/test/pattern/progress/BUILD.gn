@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("progress_test_ng") {
   ace_animation = true
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/progress/progress_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/progress/progress_layout_algorithm.cpp",

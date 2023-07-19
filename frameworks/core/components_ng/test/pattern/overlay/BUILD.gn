@@ -18,11 +18,14 @@ ohos_unittest("overlay_manager_test_ng") {
   module_out_path = pattern_test_output_path
 
   sources = [
+    # other
     # inner
+    "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/chain_animation.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
+    "$ace_root/frameworks/core/animation/friction_motion.cpp",
     "$ace_root/frameworks/core/animation/spring_curve.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
@@ -33,9 +36,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
-
-    # other
-    "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
@@ -96,7 +97,9 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/toast/toast_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toast/toast_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toast/toast_view.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # scroll
     "$ace_root/frameworks/core/components_ng/pattern/scroll/effect/scroll_fade_controller.cpp",

@@ -83,8 +83,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg001, TestSize.Level1)
     EXPECT_FALSE(sideBarFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> sideBarLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> sideBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(sideBarLayoutWrapper == nullptr);
     auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
     SizeF size(SIDE_BAR_SIZE, 0.0);
@@ -111,8 +111,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg002, TestSize.Level1)
     EXPECT_FALSE(sideBarFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> sideBarLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> sideBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(sideBarLayoutWrapper == nullptr);
     auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
     SizeF size(SIDE_BAR_SIZE, 0.0);
@@ -140,8 +140,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg003, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> sideBarLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> sideBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(sideBarLayoutWrapper == nullptr);
     auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
     SizeF size(SIDE_BAR_SIZE, 0.0);
@@ -169,8 +169,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg004, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> sideBarLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> sideBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(sideBarLayoutWrapper == nullptr);
     auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
     EXPECT_FALSE(sideBarPattern == nullptr);
@@ -195,8 +195,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg005, TestSize.Level1)
     EXPECT_FALSE(sideBarFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(layoutWrapper == nullptr);
     auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
     EXPECT_FALSE(sideBarPattern == nullptr);
@@ -228,8 +228,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg006, TestSize.Level1)
     EXPECT_FALSE(sideBarFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(layoutWrapper == nullptr);
     auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
     EXPECT_FALSE(sideBarPattern == nullptr);
@@ -261,8 +261,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg007, TestSize.Level1)
     EXPECT_FALSE(sideBarFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(layoutWrapper == nullptr);
     auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
     EXPECT_FALSE(sideBarPattern == nullptr);
@@ -294,8 +294,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg008, TestSize.Level1)
     ASSERT_NE(sideBarFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
@@ -335,8 +335,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg009, TestSize.Level1)
     EXPECT_FALSE(sideBarFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(layoutWrapper == nullptr);
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
@@ -370,8 +370,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg010, TestSize.Level1)
     EXPECT_FALSE(sideBarFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(layoutWrapper == nullptr);
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
@@ -607,8 +607,8 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg013, TestSize.Level1)
     EXPECT_FALSE(sideBarFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     EXPECT_FALSE(layoutWrapper == nullptr);
     auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
     EXPECT_FALSE(layoutAlgorithm == nullptr);

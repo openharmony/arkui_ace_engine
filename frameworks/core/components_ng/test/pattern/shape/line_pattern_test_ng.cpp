@@ -158,8 +158,8 @@ public:
         EXPECT_NE(geometryNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty();
         EXPECT_EQ(layoutProperty == nullptr, false);
-        RefPtr<LayoutWrapper> layoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+        RefPtr<LayoutWrapperNode> layoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
         EXPECT_EQ(frameNode == nullptr, false);
         auto pattern = frameNode->GetPattern<LinePattern>();
         EXPECT_EQ(pattern == nullptr, false);

@@ -99,12 +99,12 @@ HWTEST_F(CustomTestNg, CustomTest001, TestSize.Level1)
     EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
 
     /**
-     * @tc.steps: step3. Create Parent LayoutWrapper.
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. Invoke Build and AdjustLayoutWrapperTree.
      * @tc.expected: parentLayoutWrapper's childCount is zero.
@@ -146,12 +146,12 @@ HWTEST_F(CustomTestNg, CustomTest002, TestSize.Level1)
     EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
 
     /**
-     * @tc.steps: step3. Create Parent LayoutWrapper.
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. Invoke Build and AdjustLayoutWrapperTree.
      * @tc.expected: parentLayoutWrapper's childCount is zero.
@@ -199,11 +199,11 @@ HWTEST_F(CustomTestNg, CustomTest003, TestSize.Level1)
     textFrameNode->MountToParent(customNode);
 
     /**
-     * @tc.steps: step3. Create Parent LayoutWrapper.
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto parentLayoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto parentLayoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. set measureFuncation and layoutFuncation and FireOnMeasure and FireOnLayout.
      * @tc.expected: FireOnMeasure and FireOnLayout return correct value.
@@ -222,7 +222,7 @@ HWTEST_F(CustomTestNg, CustomTest003, TestSize.Level1)
     auto customLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(customLayoutAlgorithm, nullptr);
     auto customLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(customNode, geometryNode, customNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(customNode, geometryNode, customNode->GetLayoutProperty());
 
     EXPECT_FALSE(customLayoutWrapper == nullptr);
     customLayoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(customLayoutAlgorithm));
@@ -269,12 +269,12 @@ HWTEST_F(CustomTestNg, CustomTest004, TestSize.Level1)
     EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
 
     /**
-     * @tc.steps: step3. Create Parent LayoutWrapper.
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. set DestroyFunction and UpdateFunction, invoke Update and MarkNeedUpdate function.
      * @tc.expected: parentLayoutWrapper's childCount is zero.
@@ -312,7 +312,7 @@ HWTEST_F(CustomTestNg, CustomTest005, TestSize.Level1)
     EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
 
     /**
-     * @tc.steps: step3. Create Parent LayoutWrapper.
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
      */
     auto pattern = frameNode->GetPattern<Pattern>();
     ASSERT_NE(pattern, nullptr);
@@ -321,7 +321,7 @@ HWTEST_F(CustomTestNg, CustomTest005, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. set renderFunction, add child to customNode and invoke Measure function.
      * @tc.expected: parentLayoutWrapper's childCount is one.
@@ -368,7 +368,7 @@ HWTEST_F(CustomTestNg, CustomTest006, TestSize.Level1)
     childCustomNode->MountToParent(customNode);
 
     /**
-     * @tc.steps: step3. Create Parent LayoutWrapper.
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
      */
     auto pattern = frameNode->GetPattern<Pattern>();
     ASSERT_NE(pattern, nullptr);
@@ -377,7 +377,7 @@ HWTEST_F(CustomTestNg, CustomTest006, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. set renderFunction, add child to customNode and invoke Measure function.
      * @tc.expected: parentLayoutWrapper's childCount is one.
@@ -426,7 +426,7 @@ HWTEST_F(CustomTestNg, CustomTest007, TestSize.Level1)
     grandChildCustomNode->MountToParent(childCustomNode);
 
     /**
-     * @tc.steps: step3. Create Parent LayoutWrapper.
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
      */
     auto pattern = frameNode->GetPattern<Pattern>();
     ASSERT_NE(pattern, nullptr);
@@ -435,7 +435,7 @@ HWTEST_F(CustomTestNg, CustomTest007, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. set renderFunction, add child to customNode and invoke Measure function.
      * @tc.expected: parentLayoutWrapper's childCount is one.
@@ -479,7 +479,7 @@ HWTEST_F(CustomTestNg, CustomTest008, TestSize.Level1)
     textFrameNode->MountToParent(customNode);
 
     /**
-     * @tc.steps: step3. Create Parent LayoutWrapper.
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
      */
     auto pattern = frameNode->GetPattern<Pattern>();
     ASSERT_NE(pattern, nullptr);
@@ -488,7 +488,7 @@ HWTEST_F(CustomTestNg, CustomTest008, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     EXPECT_FALSE(parentLayoutWrapper == nullptr);
     /**
      * @tc.steps: step4. set renderFunction, add child to customNode and invoke Measure function.
@@ -508,7 +508,7 @@ HWTEST_F(CustomTestNg, CustomTest008, TestSize.Level1)
     auto customLayoutAlgorithm = customPattern->CreateLayoutAlgorithm();
     ASSERT_NE(customLayoutAlgorithm, nullptr);
     auto customLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(customNode, geometryNode, customNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(customNode, geometryNode, customNode->GetLayoutProperty());
     EXPECT_FALSE(customLayoutWrapper == nullptr);
     customLayoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(customLayoutAlgorithm));
     parentLayoutWrapper->AppendChild(customLayoutWrapper);

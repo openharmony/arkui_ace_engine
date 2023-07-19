@@ -94,7 +94,7 @@ protected:
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
-    RefPtr<LayoutWrapper> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
+    RefPtr<LayoutWrapperNode> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     static void SetWidth(const Dimension& width);
     static void SetHeight(const Dimension& height);
     void CreateList(int32_t number = TOTAL_NUMBER, Axis axis = Axis::VERTICAL);
@@ -184,9 +184,9 @@ void ListTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ListAccessibilityProperty>();
 }
 
-RefPtr<LayoutWrapper> ListTestNg::RunMeasureAndLayout(float width, float height)
+RefPtr<LayoutWrapperNode> ListTestNg::RunMeasureAndLayout(float width, float height)
 {
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     layoutWrapper->SetRootMeasureNode();
     LayoutConstraintF LayoutConstraint;

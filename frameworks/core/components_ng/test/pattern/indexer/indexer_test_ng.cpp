@@ -111,7 +111,7 @@ void IndexerTestNg::GetInstance()
 
 void IndexerTestNg::RunMeasureAndLayout()
 {
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
@@ -533,7 +533,8 @@ HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
     GetInstance();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
@@ -1022,7 +1023,7 @@ HWTEST_F(IndexerTestNg, IndexerAlgorithmTest001, TestSize.Level1)
      * @tc.steps: step1. selfIdealSize is (0, 0).
      * @tc.expected: The layoutAlgorithm value is correct.
      */
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
@@ -1136,7 +1137,7 @@ HWTEST_F(IndexerTestNg, IndexerAlgorithmCoverage001, TestSize.Level1)
      * has no condition that itemSize_ is 0.
      */
     layoutProperty_->UpdateItemSize(Dimension(0));
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };

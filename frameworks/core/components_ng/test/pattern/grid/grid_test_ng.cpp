@@ -67,10 +67,10 @@ protected:
     void CreateGridItem(int32_t count = 10, float width = -1, float height = -1, bool focusable = false);
     void CreateSingleGridItem(int32_t rowStart = -1, int32_t rowEnd = -1, int32_t colStart = -1,
         int32_t colEnd = -1, float width = -1, float height = -1);
-    RefPtr<LayoutWrapper> RunMeasureAndLayout(
+    RefPtr<LayoutWrapperNode> RunMeasureAndLayout(
         float width = DEVICE_WIDTH, float height = GRID_HEIGHT);
     void UpdateLayoutWrapper(
-        RefPtr<LayoutWrapper>& layoutWrapper, float width = DEVICE_WIDTH, float height = GRID_HEIGHT);
+        RefPtr<LayoutWrapperNode>& layoutWrapper, float width = DEVICE_WIDTH, float height = GRID_HEIGHT);
     RefPtr<FrameNode> GetItemFrameNode(int32_t index);
     RectF GetItemRect(int32_t index);
     RefPtr<GridItemPattern> GetItemPattern(int32_t index);
@@ -216,9 +216,9 @@ void GridTestNg::CreateSingleGridItem(
         ViewStackProcessor::GetInstance()->Pop();
 }
 
-RefPtr<LayoutWrapper> GridTestNg::RunMeasureAndLayout(float width, float height)
+RefPtr<LayoutWrapperNode> GridTestNg::RunMeasureAndLayout(float width, float height)
 {
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     layoutWrapper->SetRootMeasureNode();
     LayoutConstraintF LayoutConstraint;
@@ -232,7 +232,7 @@ RefPtr<LayoutWrapper> GridTestNg::RunMeasureAndLayout(float width, float height)
     return layoutWrapper;
 }
 
-void GridTestNg::UpdateLayoutWrapper(RefPtr<LayoutWrapper>& layoutWrapper, float width, float height)
+void GridTestNg::UpdateLayoutWrapper(RefPtr<LayoutWrapperNode>& layoutWrapper, float width, float height)
 {
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };

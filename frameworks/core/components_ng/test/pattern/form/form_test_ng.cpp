@@ -117,7 +117,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
     geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
     geometryNode->SetFrameOffset(OffsetF(0, 0));
     RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
     ASSERT_NE(layoutWrapper, nullptr);
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
@@ -289,7 +289,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
             pattern->cardInfo_.bundleName = "";
             geometryNode->SetFrameSize(SizeF(length[i], length[j]));
             RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
-            auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, nullptr);
+            auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
             ASSERT_NE(layoutWrapper, nullptr);
             auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
             layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
@@ -313,7 +313,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
             pattern->cardInfo_.height = Dimension(NORMAL_LENGTH);
             geometryNode->SetFrameSize(SizeF(length[i], length[j]));
             RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
-            auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, nullptr);
+            auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
             ASSERT_NE(layoutWrapper, nullptr);
             auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
             layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
@@ -360,7 +360,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
 
     geometryNode->SetFrameSize(SizeF(NORMAL_LENGTH, NORMAL_LENGTH));
     RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
     ASSERT_NE(layoutWrapper, nullptr);
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);

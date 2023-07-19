@@ -283,8 +283,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg003, TestSize.Level1)
     frameNode->SetGeometryNode(geometryNode);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     EXPECT_NE(sliderLayoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, sliderLayoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, sliderLayoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
     layoutWrapper->skipMeasureContent_ = false;
     /**
@@ -300,24 +300,24 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg003, TestSize.Level1)
      * @tc.expected: step4. OnDirtyLayoutWrapperSwap success and result correct.
      */
     /**
-     *     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     *     case 1: LayoutWrapperNode::SkipMeasureContent = true , skipMeasure = true;
      */
     bool firstCase = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(firstCase);
     /**
-     *     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = false;
+     *     case 2: LayoutWrapperNode::SkipMeasureContent = true , skipMeasure = false;
      */
     bool secondCase = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(secondCase);
     /**
-     *    case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     *    case 3: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = true;
      */
     layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sliderLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     bool thirdCase = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(thirdCase);
     /**
-     *    case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false, and directions is HORIZONTAL,
+     *    case 4: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = false, and directions is HORIZONTAL,
      *            sliderMode is OUTSET.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -797,7 +797,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm001, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, sliderLayoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, sliderLayoutProperty);
     auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
     EXPECT_NE(sliderLayoutAlgorithm, nullptr);
     /**
@@ -858,12 +858,12 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm002, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
-    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, geometryNode, sliderLayoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(nullptr, geometryNode, sliderLayoutProperty);
     RefPtr<GeometryNode> bubbleGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(bubbleGeometryNode, nullptr);
     bubbleGeometryNode->SetFrameSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
-    RefPtr<LayoutWrapper> bubbleLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(nullptr, bubbleGeometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> bubbleLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, bubbleGeometryNode, nullptr);
     EXPECT_NE(bubbleLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(bubbleLayoutWrapper));
     WeakPtr<FrameNode> hostNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
@@ -914,7 +914,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm003, TestSize.Level1)
     auto sliderLayoutProperty = AceType::MakeRefPtr<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     sliderLayoutProperty->UpdateThickness(Dimension(40.0));
-    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, sliderLayoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(nullptr, nullptr, sliderLayoutProperty);
     auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
     ASSERT_NE(sliderLayoutAlgorithm, nullptr);
     LayoutConstraintF contentConstraint;
@@ -1769,11 +1769,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest003, TestSize.Level1)
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function.
      */
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, sliderLayoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, sliderLayoutProperty);
     layoutWrapper->skipMeasureContent_ = false;
-    RefPtr<LayoutWrapper> secondLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, sliderLayoutProperty);
+    RefPtr<LayoutWrapperNode> secondLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, sliderLayoutProperty);
 
     RefPtr<SliderLayoutAlgorithm> sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
@@ -1889,7 +1889,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, sliderLayoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, sliderLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
     ASSERT_NE(sliderLayoutAlgorithm, nullptr);
@@ -2226,10 +2226,10 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest001, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
 
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, geometryNode, sliderLayoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, sliderLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
-    RefPtr<LayoutWrapper> childLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(nullptr, geometryNode, sliderLayoutProperty);
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, sliderLayoutProperty);
     ASSERT_NE(childLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(childLayoutWrapper);
     WeakPtr<FrameNode> hostNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
@@ -2287,10 +2287,10 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest002, TestSize.Level1)
     // set reverse true
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     sliderLayoutProperty->UpdateReverse(true);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, geometryNode, sliderLayoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, sliderLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
-    RefPtr<LayoutWrapper> childLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(nullptr, geometryNode, sliderLayoutProperty);
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, sliderLayoutProperty);
     ASSERT_NE(childLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(childLayoutWrapper);
     WeakPtr<FrameNode> hostNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
@@ -2353,10 +2353,10 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest003, TestSize.Level1)
     ASSERT_NE(sliderLayoutProperty, nullptr);
     sliderLayoutProperty->UpdateReverse(true);
 
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, geometryNode, sliderLayoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, sliderLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
-    RefPtr<LayoutWrapper> childLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(nullptr, geometryNode, sliderLayoutProperty);
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, sliderLayoutProperty);
     ASSERT_NE(childLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(childLayoutWrapper);
     WeakPtr<FrameNode> hostNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
@@ -2399,7 +2399,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest004, TestSize.Level1)
     ASSERT_NE(sliderLayoutProperty, nullptr);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, geometryNode, sliderLayoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, sliderLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     SliderLayoutAlgorithm sliderLayoutAlgorithm;
     // No child node would be layout

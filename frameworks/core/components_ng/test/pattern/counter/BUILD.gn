@@ -40,6 +40,8 @@ ohos_unittest("counter_pattern_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/border_image.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_content_modifier.cpp",
@@ -49,6 +51,7 @@ ohos_unittest("counter_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
     "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
