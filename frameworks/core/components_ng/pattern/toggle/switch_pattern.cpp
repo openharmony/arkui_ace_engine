@@ -44,7 +44,7 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    if (isOn_.value()) {
+    if (isOn_.value_or(false)) {
         currentOffset_ = GetSwitchWidth();
     }
 
