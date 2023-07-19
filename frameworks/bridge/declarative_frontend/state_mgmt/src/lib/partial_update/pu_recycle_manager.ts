@@ -42,11 +42,10 @@ class RecycleManager {
   }
 
   // When parent JS View is deleted, release all cached nodes
-  public purgeAllCachedRecycleNode(removedElmtIds: number[]): void {
+  public purgeAllCachedRecycleNode(): void {
     this.cachedRecycleNodes.forEach((nodes, _) => {
       nodes.forEach((node) => {
         node.resetRecycleCustomNode();
-        removedElmtIds.push(node.id__());
       })
     })
     this.cachedRecycleNodes.clear();
