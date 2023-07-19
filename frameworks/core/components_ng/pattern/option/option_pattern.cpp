@@ -400,7 +400,7 @@ Color OptionPattern::GetFontColor()
     return props->GetTextColorValue(defaultColor);
 }
 
-const std::string& OptionPattern::GetText()
+std::string OptionPattern::GetText()
 {
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
