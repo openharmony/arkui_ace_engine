@@ -62,6 +62,7 @@ public:
         return MakeRefPtr<AbilityComponentLayoutAlgorithm>();
     }
 
+    FocusPattern GetFocusPattern() const override;
     void FireConnect();
     void FireDisConnect();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
