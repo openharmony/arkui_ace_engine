@@ -257,6 +257,7 @@ RefPtr<FrameNode> CreateToolbarItemTextNode(const std::string& text)
     textLayoutProperty->UpdateFontSize(theme->GetToolBarItemFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetToolBarItemFontColor());
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     return textNode;
 }
 
@@ -1103,7 +1104,7 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     } else {
         auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
         auto containerNode = toolbarNode->GetToolbarContainerNode();
-        if (toolbarNode && containerNode && static_cast<int32_t>(containerNode->GetChildren().size()) != 0) {
+        if (toolbarNode && containerNode) {
             navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
             auto preToolbarNode = navBarNode->GetPreToolBarNode();
             preToolbarNode->RemoveChild(containerNode);
