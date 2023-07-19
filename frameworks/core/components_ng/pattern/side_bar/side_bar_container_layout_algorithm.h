@@ -131,6 +131,16 @@ public:
         pattern_ = pattern;
     }
 
+    void SetControlImageWidth(const Dimension& width)
+    {
+        controlImageWidth_ = width;
+    }
+
+    void SetControlImageHeight(const Dimension& height)
+    {
+        controlImageHeight_ = height;
+    }
+
 private:
     void MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth);
@@ -180,6 +190,8 @@ private:
 
     Dimension adjustMaxSideBarWidth_;
     Dimension adjustMinSideBarWidth_;
+    Dimension controlImageWidth_;
+    Dimension controlImageHeight_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerLayoutAlgorithm);
 };

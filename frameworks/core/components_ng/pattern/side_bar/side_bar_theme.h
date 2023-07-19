@@ -61,6 +61,7 @@ public:
 
             theme->controlImageColor_ = sideBarPattern->GetAttr<Color>("control_image_color", Color::BLACK);
             theme->sideBarBackgroundColor_ = sideBarPattern->GetAttr<Color>("side_bar_background_color", Color::WHITE);
+            theme->controlButtonRadius_ = sideBarPattern->GetAttr<Dimension>("control_button_radius", 0.0_vp);
         }
     };
 
@@ -76,12 +77,18 @@ public:
         return sideBarBackgroundColor_;
     }
 
+    const Dimension& GetControlButtonRadius() const
+    {
+        return controlButtonRadius_;
+    }
+
 protected:
     SideBarTheme() = default;
 
 private:
     Color controlImageColor_ = Color::BLACK;
     Color sideBarBackgroundColor_ = Color::WHITE;
+    Dimension controlButtonRadius_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SIDE_BAR_SIDE_BAR_THEME_H
