@@ -2164,6 +2164,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     RestoreGeoState();
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
+    if (!oldGeometryNode_) {
+        oldGeometryNode_ = geometryNode_->Clone();
+    }
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         layoutAlgorithm_->SetSkipMeasure();
         layoutAlgorithm_->SetSkipLayout();
@@ -2295,10 +2298,10 @@ void FrameNode::SyncGeometryNode()
     }
 
     // update layout size.
-    bool frameSizeChange = false;
-    bool frameOffsetChange = false;
-    bool contentSizeChange = false;
-    bool contentOffsetChange = false;
+    bool frameSizeChange = true;
+    bool frameOffsetChange = true;
+    bool contentSizeChange = true;
+    bool contentOffsetChange = true;
     if (oldGeometryNode_) {
         frameSizeChange = geometryNode_->GetFrameSize() != oldGeometryNode_->GetFrameSize();
         frameOffsetChange = geometryNode_->GetFrameOffset() != oldGeometryNode_->GetFrameOffset();
@@ -2460,9 +2463,6 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 {
     if ((!layoutAlgorithm_ || (needReset && layoutAlgorithm_->IsExpire())) && pattern_) {
         layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
-        if (!oldGeometryNode_) {
-            oldGeometryNode_ = geometryNode_->Clone();
-        }
     }
     return layoutAlgorithm_;
 }
