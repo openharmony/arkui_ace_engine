@@ -23,18 +23,20 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
 
@@ -224,13 +226,11 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     usrNavigationMode_ = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
     navigationMode_ = usrNavigationMode_;
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
-    
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
 
     auto navigationWidth = 0.0f;
-
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
         navigationWidth = static_cast<float>(minNavBarWidthValue.ConvertToPx() + minContentWidthValue.ConvertToPx());
     } else {
@@ -256,9 +256,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         navigationLayoutAlgorithm->SetNavigationMode(navigationMode_);
         navigationPattern->SetNavigationMode(navigationMode_);
     }
-
     auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
         auto minNavBarWidth = minNavBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
         auto maxNavBarWidth = maxNavBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
@@ -272,7 +270,6 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
             realNavBarWidth_ = navBarWidth;
         }
-
         if (realNavBarWidth_ + static_cast<float>(DIVIDER_WIDTH.ConvertToPx()) + minContentWidth > size.Width()) {
             realNavBarWidth_ = size.Width() - minContentWidth - static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
             if (realNavBarWidth_ <= minNavBarWidth) {
@@ -283,13 +280,11 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             navBarWidth = realNavBarWidth_;
         }
     }
-
     auto navBarSize = size;
     auto contentSize = size;
     auto dividerSize = SizeF(0.0f, 0.0f);
     float contentWidth = 0.0f;
     float dividerWidth = 0.0f;
-
     if (navigationLayoutProperty->GetNavigationModeValue(navigationMode_) == NavigationMode::SPLIT) {
         if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
             contentWidth = size.Width();

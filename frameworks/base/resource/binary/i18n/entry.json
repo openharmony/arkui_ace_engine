@@ -35,6 +35,9 @@
             "exitFullScreen":"退出全屏显示",
             "leftSide":"窗口显示在屏幕左侧",
             "rightSide":"窗口显示在屏幕右侧"
+        },
+        "datepicker":{
+            "lunarSwitch":"显示农历"
         }
     },
     "en-US":{
@@ -73,6 +76,9 @@
             "exitFullScreen":"Exit Full Screen",
             "leftSide":"Show On Left",
             "rightSide":"Show On Right"
+        },
+        "datepicker":{
+            "lunarSwitch":"Display Lunar"
         }
     },
     "ml":{

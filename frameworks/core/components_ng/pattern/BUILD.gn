@@ -21,6 +21,7 @@ build_component_ng("pattern_ng") {
     "action_sheet/action_sheet_model_ng.cpp",
     "animator/animator_model_ng.cpp",
     "app_bar/app_bar_view.cpp",
+    "app_bar/atomic_service_pattern.cpp",
     "badge/badge_accessibility_property.cpp",
     "badge/badge_layout_algorithm.cpp",
     "badge/badge_layout_property.cpp",
@@ -45,6 +46,10 @@ build_component_ng("pattern_ng") {
     "calendar/calendar_month_pattern.cpp",
     "calendar/calendar_paint_method.cpp",
     "calendar/calendar_pattern.cpp",
+    "calendar_picker/calendar_dialog_pattern.cpp",
+    "calendar_picker/calendar_dialog_view.cpp",
+    "calendar_picker/calendar_picker_model_ng.cpp",
+    "calendar_picker/calendar_picker_pattern.cpp",
     "canvas_context/offscreen_context_model_ng.cpp",
     "canvas_renderer/canvas_renderer_model_ng.cpp",
     "checkbox/checkbox_accessibility_property.cpp",
@@ -217,6 +222,8 @@ build_component_ng("pattern_ng") {
     "navigation/title_bar_layout_algorithm.cpp",
     "navigation/title_bar_node.cpp",
     "navigation/title_bar_pattern.cpp",
+    "navigation/tool_bar_layout_algorithm.cpp",
+    "navigation/tool_bar_node.cpp",
     "navigator/navigator_event_hub.cpp",
     "navigator/navigator_model_ng.cpp",
     "navigator/navigator_pattern.cpp",
@@ -481,7 +488,7 @@ build_component_ng("pattern_ng") {
   }
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_standard:librender_service_client" ]
+    external_deps = [ "graphic_2d:librender_service_client" ]
   } else if (is_cross_platform_build) {
     deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }
@@ -495,7 +502,9 @@ build_component_ng("pattern_ability_component_ng") {
   ]
 
   external_deps = [
+    "ability_runtime:abilitykit_native",
     "input:libmmi-client",
+    "napi:ace_napi",
     "window_manager:scene_session",
   ]
 
@@ -514,6 +523,6 @@ build_component_ng("pattern_model_component_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_standard:librender_service_client" ]
+    external_deps = [ "graphic_2d:librender_service_client" ]
   }
 }

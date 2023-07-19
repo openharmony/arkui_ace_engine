@@ -59,7 +59,11 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components/text/text_theme.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_provider.h"
@@ -196,7 +200,9 @@ void RosenRenderCustomPaint::CreateBitmap(double viewScale)
     cacheBitmap_.Build(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale, format);
     canvasCache_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    drawingCanvas_ = std::make_unique<RSCanvas>();
     drawingCanvas_->Bind(canvasCache_);
+    cacheCanvas_ = std::make_unique<RSCanvas>();
     cacheCanvas_->Bind(cacheBitmap_);
 #endif
 }
@@ -797,13 +803,13 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
     if (GetLayoutSize().Width() > paragraph_->GetMaxIntrinsicWidth()) {
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
+#ifndef USE_ROSEN_DRAWING
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
-#ifndef USE_ROSEN_DRAWING
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
@@ -817,8 +823,6 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
 #else
     if (hasShadow) {
         drawingCanvas_->Save();
-        auto shadowOffsetX = shadow_.GetOffset().GetX();
-        auto shadowOffsetY = shadow_.GetOffset().GetY();
         LOGE("Drawing is not supported");
         drawingCanvas_->Restore();
         return;
@@ -985,12 +989,12 @@ void RosenRenderCustomPaint::Arc(const Offset& offset, const ArcParam& param)
 
 void RosenRenderCustomPaint::ArcTo(const Offset& offset, const ArcToParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     double x1 = param.x1 + offset.GetX();
     double y1 = param.y1 + offset.GetY();
     double x2 = param.x2 + offset.GetX();
     double y2 = param.y2 + offset.GetY();
     double radius = param.radius;
-#ifndef USE_ROSEN_DRAWING
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
 #else
@@ -1100,7 +1104,7 @@ void RosenRenderCustomPaint::SetFillRuleForPath(const CanvasFillRule& rule)
     if (rule == CanvasFillRule::NONZERO) {
         drawingPath_.SetFillStyle(RSPathFillType::WINDING);
     } else if (rule == CanvasFillRule::EVENODD) {
-        drawingPath_.SetFillStyle(RSPathFillType::EVEN_ODD);
+        drawingPath_.SetFillStyle(RSPathFillType::EVENTODD);
     }
 #endif
 }
@@ -1125,7 +1129,7 @@ void RosenRenderCustomPaint::SetFillRuleForPath2D(const CanvasFillRule& rule)
     if (rule == CanvasFillRule::NONZERO) {
         drawingPath2d_.SetFillStyle(RSPathFillType::WINDING);
     } else if (rule == CanvasFillRule::EVENODD) {
-        drawingPath2d_.SetFillStyle(RSPathFillType::EVEN_ODD);
+        drawingPath2d_.SetFillStyle(RSPathFillType::EVENTODD);
     }
 #endif
 }
@@ -1443,12 +1447,12 @@ void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& arg
 
 void RosenRenderCustomPaint::Path2DArcTo(const Offset& offset, const PathArgs& args)
 {
+#ifndef USE_ROSEN_DRAWING
     double x1 = args.para1 + offset.GetX();
     double y1 = args.para2 + offset.GetY();
     double x2 = args.para3 + offset.GetX();
     double y2 = args.para4 + offset.GetY();
     double r = args.para5;
-#ifndef USE_ROSEN_DRAWING
     skPath2d_.arcTo(x1, y1, x2, y2, r);
 #else
     LOGE("Drawing is not supported");

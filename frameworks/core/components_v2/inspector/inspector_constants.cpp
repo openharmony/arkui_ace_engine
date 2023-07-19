@@ -55,6 +55,10 @@ const char STAGE_ETS_TAG[] = "stage";
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)
 const char CONTAINER_MODAL_ETS_TAG[] = "ContainerModal";
+
+const char ATOMIC_SERVICE_ETS_TAG[] = "AtomicService";
+const char APP_BAR_ETS_TAG[] = "AppBar";
+
 // js custom view
 const char JS_VIEW_ETS_TAG[] = "JsView";
 const char JS_VIEW_COMPONENT_TAG[] = "ProxyComponent";
@@ -287,6 +291,10 @@ const char SCROLL_ETS_TAG[] = "Scroll";
 // calendar
 const char CALENDAR_COMPONENT_TAG[] = "calendar";
 const char CALENDAR_ETS_TAG[] = "Calendar";
+
+// calendarPicker
+const char CALENDAR_PICKER_COMPONENT_TAG[] = "CalendarPickerComponent";
+const char CALENDAR_PICKER_ETS_TAG[] = "CalendarPicker";
 
 // badge
 const char BADGE_COMPONENT_TAG[] = "BadgeComponent";

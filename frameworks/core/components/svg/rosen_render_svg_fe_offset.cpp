@@ -35,7 +35,7 @@ void RosenRenderSvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) 
 #else
 void RosenRenderSvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const
 {
-    imageFilter = RSImageFilter::CreateOffsetImageFilter(dx_, dy_, imageFilter);
+    imageFilter = RSRecordingImageFilter::CreateOffsetImageFilter(dx_, dy_, imageFilter);
 }
 #endif
 

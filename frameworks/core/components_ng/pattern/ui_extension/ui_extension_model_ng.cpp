@@ -16,13 +16,28 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, const std::string& abilityName,
+    const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease,
+    std::function<void(int32_t, const std::string&, const std::string&)>&& onError)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
+    wantWrap->SetWantParam(params);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+        [wantWrap]() { return AceType::MakeRefPtr<UIExtensionPattern>(wantWrap); });
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->SetOnReleaseCallback(std::move(onRelease));
+    pattern->SetOnErrorCallback(std::move(onError));
+    return frameNode;
+}
+
 void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -33,6 +48,15 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
+}
+
+void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnRemoteReadyCallback(std::move(onRemoteReady));
 }
 
 void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease)
@@ -58,5 +82,14 @@ void UIExtensionModelNG::SetOnReceive(std::function<void(const AAFwk::WantParams
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     pattern->SetOnReceiveCallback(std::move(onReceive));
+}
+
+void UIExtensionModelNG::SetOnError(
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    pattern->SetOnErrorCallback(std::move(onError));
 }
 } // namespace OHOS::Ace::NG

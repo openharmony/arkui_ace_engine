@@ -62,9 +62,9 @@ void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) cons
                                                 .value_or(CalcLength(Infinity<double>(), DimensionUnit::VP))
                                                 .ToString()
                                                 .c_str());
-        json->Put("constraintSize", jsonConstraintSize->ToString().c_str());
+        json->Put("itemConstraintSize", jsonConstraintSize->ToString().c_str());
     } else {
-        json->Put("constraintSize", "0");
+        json->Put("itemConstraintSize", "0");
     }
     json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
 }

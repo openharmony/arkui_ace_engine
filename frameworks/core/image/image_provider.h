@@ -19,14 +19,18 @@
 #include <string>
 
 #include "flutter/fml/memory/ref_counted.h"
-#ifndef USE_ROSEN_DRAWING
 #include "include/codec/SkCodec.h"
+#ifdef USE_ROSEN_DRAWING
+#include "draw/color.h"
 #endif
 
 #include "base/memory/ace_type.h"
 #include "base/resource/internal_resource.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/render/canvas_image.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing_forward.h"
+#endif
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
@@ -62,37 +66,28 @@ public:
     static void TryLoadImageInfo(const RefPtr<PipelineBase>& context, const std::string& src,
         std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 
-#ifndef USE_ROSEN_DRAWING
     static void GetSVGImageDOMAsyncFromSrc(const std::string& src, std::function<void(const sk_sp<SkSVGDOM>&)> callback,
         std::function<void()> failedCallback, const WeakPtr<PipelineBase> context, uint64_t svgThemeColor = 0,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
 
+#ifndef USE_ROSEN_DRAWING
     static void GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
         std::function<void(const sk_sp<SkSVGDOM>&)> callback, std::function<void()> failedCallback,
         const WeakPtr<PipelineBase> context, uint64_t svgThemeColor = 0,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
+#else
+    static void GetSVGImageDOMAsyncFromData(const std::shared_ptr<RSData>& data,
+        std::function<void(const sk_sp<SkSVGDOM>&)> callback, std::function<void()> failedCallback,
+        const WeakPtr<PipelineBase> context, uint64_t svgThemeColor = 0,
+        OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
+#endif
 
+#ifndef USE_ROSEN_DRAWING
     // upload image data to gpu context for painting asynchronously.
     static void UploadImageToGPUForRender(const WeakPtr<PipelineBase> context, const sk_sp<SkImage>& image,
         const sk_sp<SkData>& data, const std::function<void(sk_sp<SkImage>, sk_sp<SkData>)>&& callback,
         const std::string src);
 #else
-    static void GetSVGImageDOMAsyncFromSrc(
-        const std::string& src,
-        std::function<void(const std::shared_ptr<RSSVGDOM>&)> callback,
-        std::function<void()> failedCallback,
-        const WeakPtr<PipelineBase> context,
-        uint64_t svgThemeColor = 0,
-        OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
-
-    static void GetSVGImageDOMAsyncFromData(
-        const std::shared_ptr<RSData>& data,
-        std::function<void(const std::shared_ptr<RSSVGDOM>&)> callback,
-        std::function<void()> failedCallback,
-        const WeakPtr<PipelineBase> context,
-        uint64_t svgThemeColor = 0,
-        OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
-
     // upload image data to gpu context for painting asynchronously.
     static void UploadImageToGPUForRender(const WeakPtr<PipelineBase> context,
         const std::shared_ptr<RSImage>& image,
@@ -118,18 +113,13 @@ public:
     static bool IsWideGamut(const sk_sp<SkColorSpace>& colorSpace);
 #else
     static std::shared_ptr<RSImage> ResizeDrawingImage(
-        const std::shared_ptr<RSImage>& rawImage,
-        const std::string& src,
-        Size imageSize,
-        bool forceResize = false);
+        const std::shared_ptr<RSImage>& rawImage, const std::string& src, Size imageSize, bool forceResize = false);
 
     static std::shared_ptr<RSImage> ApplySizeToDrawingImage(
-        const std::shared_ptr<RSImage>& rawImage,
-        int32_t dstWidth,
-        int32_t dstHeight,
+        const std::shared_ptr<RSImage>& rawRSImage, int32_t dstWidth, int32_t dstHeight,
         const std::string& srcKey = std::string());
 
-    static bool IsWideGamut(const std::shared_ptr<RSColorSpace>& colorSpace);
+    static bool IsWideGamut(const std::shared_ptr<RSColorSpace>& rsColorSpace);
 #endif
 
     static bool NeedExchangeWidthAndHeight(SkEncodedOrigin origin);
@@ -140,9 +130,7 @@ public:
         const std::string& src, const WeakPtr<PipelineBase> context, Size targetSize = Size());
 #else
     static std::shared_ptr<RSImage> GetDrawingImage(
-        const std::string& src,
-        const WeakPtr<PipelineBase> context,
-        Size targetSize = Size());
+        const std::string& src, const WeakPtr<PipelineBase> context, Size targetSize = Size());
 #endif
 
     static RefPtr<ImageObject> GeneratorAceImageObject(
@@ -169,9 +157,9 @@ public:
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
 #else
-    static RSColorType PixelFormatToDrawingColorType(const RefPtr<PixelMap>& pixmap);
-    static RSAlphaType AlphaTypeToDrawingAlphaType(const RefPtr<PixelMap>& pixmap);
-    // TODO Drawing : MakeSkImageInfoFromPixelMap
+    static Rosen::Drawing::ColorType PixelFormatToDrawingColorType(const RefPtr<PixelMap>& pixmap);
+    static Rosen::Drawing::AlphaType AlphaTypeToDrawingAlphaType(const RefPtr<PixelMap>& pixmap);
+    static RSBitmapFormat MakeRSBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static std::shared_ptr<RSColorSpace> ColorSpaceToDrawingColorSpace(const RefPtr<PixelMap>& pixmap);
 #endif
 

@@ -186,6 +186,15 @@ void ViewAbstract::SetAspectRatio(float ratio)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio);
 }
 
+void ViewAbstract::SetBackgroundAlign(const Alignment& align)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundAlign, align);
+}
+
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -968,7 +977,7 @@ void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformTranslate, value);
 }
 
-void ViewAbstract::SetRotate(const NG::Vector4F& value)
+void ViewAbstract::SetRotate(const NG::Vector5F& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
@@ -1004,7 +1013,7 @@ void ViewAbstract::BindPopup(
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     // windowScene will not use subwindow
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    if (container->IsScenceBoardWindow()) {
         param->SetShowInSubWindow(false);
     }
     auto showInSubWindow = param->IsShowInSubWindow();
@@ -1149,7 +1158,8 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     isContextMenu = false;
 #endif
     // windowScene will not use subwindow
-    if (SystemProperties::IsSceneBoardEnabled()) {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
         isContextMenu = false;
     }
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;

@@ -105,9 +105,14 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     baselineOffset_ = static_cast<float>(baselineOffset);
 
-    float heightFinal =
-        std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-
+    float heightFinal = static_cast<float>(height + std::fabs(baselineOffset));
+    if (contentConstraint.selfIdealSize.Height().has_value()) {
+        heightFinal = std::min(
+            static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.selfIdealSize.Height().value());
+    } else {
+        heightFinal =
+            std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
+    }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
 
@@ -322,6 +327,16 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
         ++index;
     }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitSpanImageLayout(placeHolderIndex, rectsForPlaceholders, contentOffset);
+#endif
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,

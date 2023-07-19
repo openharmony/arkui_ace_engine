@@ -34,11 +34,11 @@ void DateTimeAnimationController::PlayTitleInAnimation()
     animationOption.SetDuration(TRIANGLE_DURATION);
     animationOption.SetCurve(Curves::SHARP);
 
-    renderContext->UpdateTransformRotate(Vector4F(0, 0, 1, 0));
+    renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0, 0));
     AnimationUtils::Animate(animationOption,
         [renderContext]() {
             CHECK_NULL_VOID_NOLOG(renderContext);
-            renderContext->UpdateTransformRotate(Vector4F(0, 0, 1, 0 - SEMI_CIRCLE_ANGEL));
+            renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0 - SEMI_CIRCLE_ANGEL, 0));
         });
 }
 
@@ -50,11 +50,11 @@ void DateTimeAnimationController::PlayTitleOutAnimation()
     animationOption.SetDuration(TRIANGLE_DURATION);
     animationOption.SetCurve(Curves::SHARP);
 
-    renderContext->UpdateTransformRotate(Vector4F(0, 0, 1, 0 - SEMI_CIRCLE_ANGEL));
+    renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0 - SEMI_CIRCLE_ANGEL, 0));
     AnimationUtils::Animate(animationOption,
         [renderContext]() {
             CHECK_NULL_VOID_NOLOG(renderContext);
-            renderContext->UpdateTransformRotate(Vector4F(0, 0, 1, 0));
+            renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0, 0));
         });
 }
 
@@ -213,6 +213,9 @@ void DateTimeAnimationController::PlayButtonOpacityInAnimation()
         auto layoutProperty = buttonNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        auto focusHub = buttonNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(false);
     });
     buttonRender->OpacityAnimation(animationOption, 1.0f, 0.0f);
 }
@@ -312,6 +315,9 @@ void DateTimeAnimationController::PlayButtonOpacityOutAnimation()
         auto layoutProperty = buttonNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        auto focusHub = buttonNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(true);
     });
     buttonRender->OpacityAnimation(animationOption, 0.0f, 1.0f);
 }

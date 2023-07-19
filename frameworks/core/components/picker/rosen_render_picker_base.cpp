@@ -18,6 +18,8 @@
 #include "render_service_client/core/ui/rs_node.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/effects/SkGradientShader.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 namespace OHOS::Ace {
@@ -66,7 +68,6 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     recordingCanvas->MultiplyAlpha((disabled_ ? 102.0 / 255 : 1));
 #else
-    auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
     LOGE("Drawing is not supported");
 #endif
 #endif

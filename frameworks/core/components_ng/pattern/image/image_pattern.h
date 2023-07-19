@@ -70,6 +70,11 @@ public:
         return { FocusType::NODE, false };
     }
 
+    const RefPtr<CanvasImage>& GetCanvasImage()
+    {
+        return image_;
+    }
+
     void CreateObscuredImageIfNeed();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;

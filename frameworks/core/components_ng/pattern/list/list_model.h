@@ -38,7 +38,7 @@ public:
     virtual RefPtr<ScrollControllerBase> CreateScrollController() = 0;
     virtual void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) = 0;
     virtual void SetListDirection(Axis axis) = 0;
-    virtual void SetScrollBar(DisplayMode scrollBar) = 0;
+    virtual void SetScrollBar(Ace::DisplayMode scrollBar) = 0;
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
     virtual void SetEditMode(bool editMode) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
@@ -48,6 +48,7 @@ public:
     virtual void SetLaneConstrain(const Dimension& laneMinLength, const Dimension& laneMaxLength) = 0;
     virtual void SetLaneMinLength(const Dimension& laneMinLength) = 0;
     virtual void SetLaneMaxLength(const Dimension& laneMaxLength) = 0;
+    virtual void SetLaneGutter(const Dimension& laneGutter) = 0;
     virtual void SetListItemAlign(V2::ListItemAlign listItemAlign) = 0;
     virtual void SetMultiSelectable(bool selectable) = 0;
     virtual void SetCachedCount(int32_t cachedCount) = 0;

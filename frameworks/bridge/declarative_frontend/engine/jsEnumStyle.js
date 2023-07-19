@@ -286,7 +286,13 @@ var PanelType;
   PanelType[PanelType["Minibar"] = 0] = "Minibar";
   PanelType[PanelType["Foldable"] = 1] = "Foldable";
   PanelType[PanelType["Temporary"] = 2] = "Temporary";
+  PanelType[PanelType["CUSTOM"] = 3] = "CUSTOM";
 })(PanelType || (PanelType = {}));
+
+var PanelHeight;
+(function (PanelHeight) {
+  PanelHeight[PanelHeight["WRAP_CONTENT"] = 0] = "WRAP_CONTENT";
+})(PanelHeight || (PanelHeight = {}));
 
 var PanelMode;
 (function (PanelMode) {
@@ -1552,9 +1558,9 @@ var MenuAlignType;
 
 var ToolbarItemStatus;
 (function (ToolbarItemStatus) {
-  ToolbarItemStatus[ToolbarItemStatus["ENABLE_TOOLBAR_ITEM"] = 0] = "ENABLE_TOOLBAR_ITEM";
-  ToolbarItemStatus[ToolbarItemStatus["DISABLE_TOOLBAR_ITEM"] = 1] = "DISABLE_TOOLBAR_ITEM";
-  ToolbarItemStatus[ToolbarItemStatus["ACTIVATE_TOOLBAR_ITEM"] = 2] = "ACTIVATE_TOOLBAR_ITEM";
+  ToolbarItemStatus[ToolbarItemStatus["NORMAL"] = 0] = "NORMAL";
+  ToolbarItemStatus[ToolbarItemStatus["DISABLED"] = 1] = "DISABLED";
+  ToolbarItemStatus[ToolbarItemStatus["ACTIVE"] = 2] = "ACTIVE";
 })(ToolbarItemStatus || (ToolbarItemStatus = {}));
 
 var SecurityComponentLayoutDirection;
@@ -1744,3 +1750,21 @@ var RenderFit;
   RenderFit[RenderFit["RESIZE_COVER_TOP_LEFT"] = 14] = "RESIZE_COVER_TOP_LEFT";
   RenderFit[RenderFit["RESIZE_COVER_BOTTOM_RIGHT"] = 15] = "RESIZE_COVER_BOTTOM_RIGHT";
 })(RenderFit || (RenderFit = {}));
+
+var WebCaptureMode;
+(function (WebCaptureMode) {
+  WebCaptureMode[WebCaptureMode["HOME_SCREEN"] = 0] = "HOME_SCREEN";
+})(WebCaptureMode || (WebCaptureMode = {}));
+
+var CalendarAlign;
+(function (CalendarAlign) {
+  CalendarAlign[CalendarAlign["START"] = 0] = "START";
+  CalendarAlign[CalendarAlign["CENTER"] = 1] = "CENTER";
+  CalendarAlign[CalendarAlign["END"] = 2] = "END";
+})(CalendarAlign || (CalendarAlign = {}));
+
+var DragBehavior;
+(function (DragBehavior) {
+  DragBehavior[DragBehavior["COPY"] = 0] = "COPY";
+  DragBehavior[DragBehavior["MOVE"] = 1] = "MOVE";
+})(DragBehavior || (DragBehavior = {}));

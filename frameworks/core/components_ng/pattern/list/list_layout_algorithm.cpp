@@ -92,9 +92,13 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
         stickyStyle_ = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
-        auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
+        auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();
+        auto mainPercentRefer = GetMainAxisSize(childLayoutConstraint.percentReference, axis);
         auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
         spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
+        if (GreatOrEqual(spaceWidth_, contentMainSize_)) {
+            spaceWidth_ = 0.0f;
+        }
         if (listLayoutProperty->GetDivider().has_value()) {
             auto divider = listLayoutProperty->GetDivider().value();
             std::optional<float> dividerSpace = divider.strokeWidth.ConvertToPx();
@@ -103,11 +107,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
         spaceWidth_ += chainInterval_;
-
         CalculateLanes(listLayoutProperty, layoutConstraint, contentIdealSize.CrossSize(axis), axis);
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
         // calculate child layout constraint.
-        auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();
         UpdateListItemConstraint(axis, contentIdealSize, childLayoutConstraint);
         MeasureList(layoutWrapper, childLayoutConstraint, axis);
     } else {
@@ -175,6 +177,7 @@ void ListLayoutAlgorithm::CalculateEstimateOffset(ScrollAlign align)
         float averageHeight = itemsHeight / static_cast<float>(lines);
         switch (align) {
             case ScrollAlign::START:
+            case ScrollAlign::NONE:
                 estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes());
                 break;
             case ScrollAlign::CENTER:
@@ -370,6 +373,7 @@ void ListLayoutAlgorithm::MeasureList(
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         switch (scrollAlign_) {
             case ScrollAlign::START:
+            case ScrollAlign::NONE:
             case ScrollAlign::CENTER:
                 jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
                 if (scrollAlign_ == ScrollAlign::START) {
@@ -798,8 +802,10 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 laneIndex = (index - startIndex) % GetLanes();
             }
+
+            float laneGutter = GetLaneGutter();
             crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize * GetLanes());
-            crossOffset += crossSize / GetLanes() * laneIndex;
+            crossOffset += ((crossSize + laneGutter) / GetLanes() - laneGutter) * laneIndex + laneGutter * laneIndex;
         } else {
             crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
         }
@@ -811,9 +817,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
         SetListItemIndex(wrapper, index);
-        if (!overScrollFeature_ || wrapper->CheckNeedForceMeasureAndLayout()) {
-            wrapper->Layout();
-        }
+        wrapper->Layout();
     }
 }
 
@@ -959,7 +963,7 @@ void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)
     for (const auto& item : itemPosition_) {
         if (item.second.isGroup) {
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(item.first);
-            itemGroupList_.push_back(wrapper->GetWeakHostNode());
+            itemGroupList_.push_back(WeakClaim(RawPtr(wrapper->GetHostNode())));
         }
     }
 }

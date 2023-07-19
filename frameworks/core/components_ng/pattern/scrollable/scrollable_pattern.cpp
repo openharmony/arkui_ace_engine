@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+
 #include "base/geometry/axis.h"
 #include "base/geometry/point.h"
 #include "base/memory/ace_type.h"
@@ -21,8 +22,14 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
+constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
+} // namespace
+
 void ScrollablePattern::SetAxis(Axis axis)
 {
     if (axis_ == axis) {
@@ -67,10 +74,6 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
         return true;
-    }
-    if (scrollBar_ && scrollBar_->IsDriving()) {
-        offset = scrollBar_->CalcPatternOffset(offset);
-        source = SCROLL_FROM_BAR;
     }
     return UpdateCurrentOffset(offset, source);
 }
@@ -143,7 +146,6 @@ void ScrollablePattern::OnScrollEnd()
         }
     }
     if (scrollBar_) {
-        scrollBar_->SetDriving(false);
         scrollBar_->OnScrollEnd();
     }
     StartScrollBarAnimatorByProxy();
@@ -173,12 +175,6 @@ void ScrollablePattern::AddScrollEvent()
         pattern->OnScrollEndCallback();
     };
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
-    auto mouseLeftButtonScroll = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        return pattern->IsScrollBarPressed();
-    };
-    scrollableEvent_->SetMouseLeftButtonScroll(std::move(mouseLeftButtonScroll));
     scrollableEvent_->SetFriction(friction_);
     gestureHub->AddScrollableEvent(scrollableEvent_);
 
@@ -200,6 +196,21 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->OnScrollSnapCallback(targetOffset, velocity);
     };
     scrollable->SetOnScrollSnapCallback(scrollSnap);
+
+    auto calePredictSnapOffsetCallback = [weak = WeakClaim(this)](float delta) -> std::optional<float> {
+        auto pattern = weak.Upgrade();
+        std::optional<float> predictSnapOffset;
+        CHECK_NULL_RETURN_NOLOG(pattern, predictSnapOffset);
+        return pattern->CalePredictSnapOffset(delta);
+    };
+    scrollable->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
+
+    auto needScrollSnapToSideCallback = [weak = WeakClaim(this)](float delta) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->NeedScrollSnapToSide(delta);
+    };
+    scrollable->SetNeedScrollSnapToSideCallback(std::move(needScrollSnapToSideCallback));
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
@@ -280,8 +291,22 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         CHECK_NULL_VOID(host);
         host->MarkNeedRenderOnly();
     });
+    auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnScrollCallback(static_cast<float>(offset), source);
+    };
+    scrollBar_->SetScrollPositionCallback(std::move(scrollCallback));
+    auto scrollEnd = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnScrollEndCallback();
+    };
+    scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
+    CHECK_NULL_VOID(scrollableEvent_);
+    scrollableEvent_->SetScrollBar(scrollBar_);
 }
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
@@ -523,5 +548,241 @@ void ScrollablePattern::PlaySpringAnimation(
         }
     });
     animator_->PlayMotion(springMotion_);
+}
+
+void ScrollablePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
+}
+
+void ScrollablePattern::UninitMouseEvent()
+{
+    if (!mouseEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    mouseEventHub->RemoveOnMouseEvent(mouseEvent_);
+    ClearMultiSelect();
+    isMouseEventInit_ = false;
+}
+
+void ScrollablePattern::InitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    if (!mouseEvent_) {
+        auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->HandleMouseEventWithoutKeyboard(info);
+            }
+        };
+        mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    }
+    mouseEventHub->AddOnMouseEvent(mouseEvent_);
+    isMouseEventInit_ = true;
+}
+
+void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
+{
+    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        if (mousePressed_) {
+            OnMouseRelease();
+        }
+        return;
+    }
+
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    if (info.GetAction() == MouseAction::PRESS) {
+        if (!IsItemSelected(info)) {
+            ClearMultiSelect();
+        }
+        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressed_ = true;
+        // do not select when click
+    } else if (info.GetAction() == MouseAction::MOVE) {
+        if (!mousePressed_) {
+            return;
+        }
+        lastMouseMove_ = info;
+        const static double FRAME_SELECTION_DISTANCE =
+            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
+        auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
+        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
+            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+        }
+        SelectWithScroll();
+    } else if (info.GetAction() == MouseAction::RELEASE) {
+        OnMouseRelease();
+    }
+}
+
+void ScrollablePattern::SelectWithScroll()
+{
+    auto offset = GetOutOfScrollableOffset();
+    if (NearZero(offset)) {
+        return;
+    }
+
+    if (AnimateRunning()) {
+        return;
+    }
+    if (!animator_) {
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(pattern);
+            pattern->OnAnimateStop();
+        });
+    } else if (!animator_->IsStopped()) {
+        scrollAbort_ = true;
+        animator_->Stop();
+    }
+
+    if (!selectMotion_) {
+        selectMotion_ = AceType::MakeRefPtr<SelectMotion>(offset, [weak = WeakClaim(this)]() -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN_NOLOG(pattern, true);
+            return pattern->ShouldSelectScrollBeStopped();
+        });
+        selectMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
+            auto pattern = weakScroll.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
+        });
+    } else {
+        selectMotion_->Reset(offset);
+    }
+
+    animator_->PlayMotion(selectMotion_);
+}
+
+void ScrollablePattern::OnMouseRelease()
+{
+    mouseStartOffset_.Reset();
+    mouseEndOffset_.Reset();
+    mousePressed_ = false;
+    ClearSelectedZone();
+    lastMouseMove_.SetLocalLocation(Offset::Zero());
+}
+
+void ScrollablePattern::ClearSelectedZone()
+{
+    DrawSelectedZone(RectF());
+}
+
+RectF ScrollablePattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset)
+{
+    RectF selectedZone;
+    if (startOffset.GetX() <= endOffset.GetX()) {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom right
+            selectedZone = RectF(startOffset.GetX(), startOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
+        } else {
+            // top right
+            selectedZone = RectF(startOffset.GetX(), endOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
+        }
+    } else {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom left
+            selectedZone = RectF(endOffset.GetX(), startOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
+        } else {
+            // top left
+            selectedZone = RectF(endOffset.GetX(), endOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
+        }
+    }
+
+    return selectedZone;
+}
+
+void ScrollablePattern::DrawSelectedZone(const RectF& selectedZone)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostContext = host->GetRenderContext();
+    CHECK_NULL_VOID(hostContext);
+    hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+void ScrollablePattern::MarkSelectedItems()
+{
+    if (multiSelectable_ && mousePressed_) {
+        auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+        if (!selectedZone.IsEmpty()) {
+            MultiSelectWithoutKeyboard(selectedZone);
+        }
+    }
+}
+
+bool ScrollablePattern::ShouldSelectScrollBeStopped()
+{
+    if (!mousePressed_) {
+        return true;
+    }
+    auto offset = GetOutOfScrollableOffset();
+    if (NearZero(offset)) {
+        return true;
+    }
+    if (axis_ == Axis::VERTICAL) {
+        mouseStartOffset_.AddY(offset);
+    } else {
+        mouseStartOffset_.AddX(offset);
+    }
+    if (selectMotion_) {
+        selectMotion_->Reset(offset);
+    }
+    return false;
+};
+
+float ScrollablePattern::GetOutOfScrollableOffset() const
+{
+    auto offset = 0.0f;
+    auto mouseMainOffset = static_cast<float>(
+        axis_ == Axis::VERTICAL ? lastMouseMove_.GetLocalLocation().GetY() : lastMouseMove_.GetLocalLocation().GetX());
+    auto hostSize = GetHostFrameSize();
+    CHECK_NULL_RETURN_NOLOG(hostSize.has_value(), offset);
+    auto mainTop = 0.0f;
+    auto mainBottom = hostSize->MainSize(axis_);
+    if (GreatOrEqual(mouseMainOffset, mainTop) && LessOrEqual(mouseMainOffset, mainBottom)) {
+        return offset;
+    }
+    if (GreatNotEqual(mouseMainOffset, mainBottom)) {
+        if (IsAtBottom()) {
+            return offset;
+        }
+        offset = mainBottom - mouseMainOffset;
+    }
+    if (LessNotEqual(mouseMainOffset, mainTop)) {
+        if (IsAtTop()) {
+            return offset;
+        }
+        offset = mainTop - mouseMainOffset;
+    }
+    return offset;
 }
 } // namespace OHOS::Ace::NG

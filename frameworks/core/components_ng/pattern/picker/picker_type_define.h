@@ -64,6 +64,7 @@ struct TextCascadePickerOptionsAttr {
 
 struct DatePickerSettingData {
     bool isLunar;
+    bool lunarswitch;
     bool showTime;
     bool useMilitary;
     std::map<std::string, PickerDate> datePickerProperty;

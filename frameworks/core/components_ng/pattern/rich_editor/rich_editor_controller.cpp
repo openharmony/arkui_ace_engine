@@ -65,11 +65,13 @@ void RichEditorController::UpdateSpanStyle(
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
     auto length = richEditorPattern->GetTextContentLength();
+    start = std::max(0, start);
+    if (end < 0 || end > length) {
+        end = length;
+    }
     if (start > end) {
         std::swap(start, end);
     }
-    start = std::max(0, start);
-    end = std::min(end, length);
     if (start > length || end < 0 || start == end) {
         LOGI("params error , return");
         return;

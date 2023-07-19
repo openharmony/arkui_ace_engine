@@ -110,7 +110,7 @@ public:
     void FireAccessibilityEvent(const AccessibilityEvent& accessibilityEvent);
     void InitializeAccessibilityCallback();
 
-    void OnMediaQueryUpdate() override;
+    void OnMediaQueryUpdate(bool isSynchronous = false) override;
     void OnSurfaceChanged();
     // JSEventHandler delegate functions.
     void FireAsyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);

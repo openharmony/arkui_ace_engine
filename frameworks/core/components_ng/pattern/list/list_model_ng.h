@@ -28,7 +28,7 @@ public:
     RefPtr<ScrollControllerBase> CreateScrollController() override;
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
     void SetListDirection(Axis axis) override;
-    void SetScrollBar(DisplayMode scrollBar) override;
+    void SetScrollBar(Ace::DisplayMode scrollBar) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
@@ -38,6 +38,7 @@ public:
     void SetLaneConstrain(const Dimension& laneMinLength, const Dimension& laneMaxLength) override;
     void SetLaneMinLength(const Dimension& laneMinLength) override;
     void SetLaneMaxLength(const Dimension& laneMaxLength) override;
+    void SetLaneGutter(const Dimension& laneGutter) override;
     void SetListItemAlign(V2::ListItemAlign listItemAlign) override;
     void SetCachedCount(int32_t cachedCount) override;
     void SetMultiSelectable(bool selectable) override;

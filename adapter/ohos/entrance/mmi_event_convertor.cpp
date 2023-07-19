@@ -103,7 +103,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         touchPoint.sourceTool };
     event.pointerEvent = pointerEvent;
 #ifdef SECURITY_COMPONENT_ENABLE
-    event.enhanceData_ = pointerEvent->GetEnhanceData();
+    event.enhanceData = pointerEvent->GetEnhanceData();
 #endif
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
@@ -169,13 +169,22 @@ void GetMouseEventAction(int32_t action, MouseEvent& events)
             break;
 #ifdef ENABLE_DRAG_FRAMEWORK
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
-            events.action = MouseAction::PULL_DOWN;
+            events.action = MouseAction::PRESS;
+            if (SystemProperties::IsSceneBoardEnabled()) {
+                events.pullAction = MouseAction::PULL_DOWN;
+            }
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
-            events.action = MouseAction::PULL_MOVE;
+            events.action = MouseAction::MOVE;
+            if (SystemProperties::IsSceneBoardEnabled()) {
+                events.pullAction = MouseAction::PULL_MOVE;
+            }
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
-            events.action = MouseAction::PULL_UP;
+            events.action = MouseAction::RELEASE;
+            if (SystemProperties::IsSceneBoardEnabled()) {
+                events.pullAction = MouseAction::PULL_UP;
+            }
             break;
 #endif // ENABLE_DRAG_FRAMEWORK
         default:
@@ -217,7 +226,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
         LOGE("get pointer: %{public}d item failed.", pointerID);
         return;
     }
-
+    events.id = pointerID;
     events.x = item.GetWindowX();
     events.y = item.GetWindowY();
     events.screenX = item.GetDisplayX();
@@ -247,9 +256,12 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     TimeStamp time(microseconds);
     events.time = time;
     events.pointerEvent = pointerEvent;
-    LOGD("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
+#ifdef SECURITY_COMPONENT_ENABLE
+    events.enhanceData = pointerEvent->GetEnhanceData();
+#endif
+    LOGD("ConvertMouseEvent: id: %{public}d (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
-        events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
+        events.id, events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
         (long long)pointerEvent->GetActionTime());
 }
 

@@ -27,6 +27,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
@@ -67,9 +68,13 @@ public:
     void HideAllPopups();
     void HideCustomPopups();
 
-    const PopupInfo& GetPopupInfo(int32_t targetId)
+    PopupInfo GetPopupInfo(int32_t targetId) const
     {
-        return popupMap_[targetId];
+        auto it = popupMap_.find(targetId);
+        if (it == popupMap_.end()) {
+            return {};
+        }
+        return it->second;
     }
 
     bool HasPopupInfo(int32_t targetId) const
@@ -103,6 +108,9 @@ public:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     void ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
         std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    void ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
+        std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
 
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
@@ -214,7 +222,9 @@ public:
     {
         filterColumnNodeWeak_ = columnNode;
     }
-
+    void MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
+    void MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
+    void MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
     void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
@@ -252,7 +262,7 @@ private:
     void FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow = false);
     void BlurOverlayNode(bool isInSubWindow = false);
 
-    void ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
+    void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
@@ -300,7 +310,7 @@ private:
     CancelableCallback<void()> continuousTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 
-    std::list<WeakPtr<UINode>> windowSceneList_;
+    std::set<WeakPtr<UINode>> windowSceneSet_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };

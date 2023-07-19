@@ -263,13 +263,15 @@ std::wstring TextPattern::GetWideText() const
 std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
 {
     auto wideText = GetWideText();
-    if (start < 0 || end > static_cast<int32_t>(wideText.length()) || start >= end) {
-        LOGI("Get selected boundary is invalid");
-        return "";
-    }
-    auto min = std::min(start, end);
-    auto max = std::max(start, end);
+    auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
+    auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
+        static_cast<int32_t>(wideText.length()));
     return StringUtils::ToString(wideText.substr(min, max - min));
+}
+
+bool TextPattern::IsSelected() const
+{
+    return textSelector_.IsValid() && !textSelector_.StartEqualToDest();
 }
 
 void TextPattern::HandleOnCopy()
@@ -346,7 +348,6 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     } else {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        selectInfo.callerFrameNode = GetHost();
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
         CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
@@ -1113,15 +1114,9 @@ void TextPattern::SetAccessibilityAction()
 
 void TextPattern::OnColorConfigurationUpdate()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
+    auto context = GetHost()->GetContext();
     auto theme = context->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
-    host->MarkDirtyNode();
 }
 } // namespace OHOS::Ace::NG

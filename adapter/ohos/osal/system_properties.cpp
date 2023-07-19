@@ -47,14 +47,6 @@ constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
 std::shared_mutex mutex_;
-constexpr int32_t PAGE_NODES = 1000;
-constexpr int32_t PAGE_DEPTH = 30;
-constexpr int32_t NODE_CHILDREN = 100;
-constexpr int32_t FUNCTION_TIMEOUT = 15;
-constexpr int32_t VSYNC_TIMEOUT = 500;
-constexpr int32_t NODE_TIMEOUT = 15;
-constexpr int32_t FOREACH_ITEMS = 50;
-constexpr int32_t FLEX_LAYOUTS = 8;
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
@@ -242,7 +234,6 @@ int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
-ACE_WEAK_SYM PerformancePtr SystemProperties::performanceProps_ = nullptr;
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -251,72 +242,6 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #else
     return false;
 #endif
-}
-
-ACE_WEAK_SYM void SystemProperties::InitPerformanceParameters()
-{
-    auto enable = system::GetBoolParameter("arkui.performancecheck.enable", false);
-    if (!enable) {
-        LOGI("Performance detection mode is not turned on");
-        return;
-    }
-    LOGI("SystemProperties::InitPerformanceParameters");
-    SystemProperties::performanceProps_ = std::make_unique<PerformanceCheckParameter>();
-    SystemProperties::performanceProps_->pageNodes =
-        system::GetIntParameter<int>("arkui.performancecheck.9901.pagenodes", PAGE_NODES);
-    SystemProperties::performanceProps_->pageDepth =
-        system::GetIntParameter<int>("arkui.performancecheck.9901.pagedepth", PAGE_DEPTH);
-    SystemProperties::performanceProps_->nodeChildren =
-        system::GetIntParameter<int>("arkui.performancecheck.9901.nodechildren", NODE_CHILDREN);
-    SystemProperties::performanceProps_->functionTimeout =
-        system::GetIntParameter<int>("arkui.performancecheck.9902.functiontimeout", FUNCTION_TIMEOUT);
-    SystemProperties::performanceProps_->vsyncTimeout =
-        system::GetIntParameter<int>("arkui.performancecheck.9903.vsynctimeout", VSYNC_TIMEOUT);
-    SystemProperties::performanceProps_->nodeTimeout =
-        system::GetIntParameter<int>("arkui.performancecheck.9903.nodetimeout", NODE_TIMEOUT);
-    SystemProperties::performanceProps_->foreachItems =
-        system::GetIntParameter<int>("arkui.performancecheck.9904.foreachitems", FOREACH_ITEMS);
-    SystemProperties::performanceProps_->flexLayouts =
-        system::GetIntParameter<int>("arkui.performancecheck.9905.flexlayouts", FLEX_LAYOUTS);
-}
-
-ACE_WEAK_SYM bool SystemProperties::IsPerformanceCheckEnabled()
-{
-    return SystemProperties::performanceProps_ != nullptr;
-}
-
-ACE_WEAK_SYM int32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType type)
-{
-    int32_t result = 0;
-    switch (type) {
-        case PerformanceParameterType::PAGE_NODES:
-            result = SystemProperties::performanceProps_->pageNodes;
-            break;
-        case PerformanceParameterType::PAGE_DEPTH:
-            result = SystemProperties::performanceProps_->pageDepth;
-            break;
-        case PerformanceParameterType::NODE_CHILDREN:
-            result = SystemProperties::performanceProps_->nodeChildren;
-            break;
-        case PerformanceParameterType::FUNCTION_TIMEOUT:
-            result = SystemProperties::performanceProps_->functionTimeout;
-            break;
-        case PerformanceParameterType::VSYNC_TIMEOUT:
-            result = SystemProperties::performanceProps_->vsyncTimeout;
-            break;
-        case PerformanceParameterType::NODE_TIMEOUT:
-            result = SystemProperties::performanceProps_->nodeTimeout;
-            break;
-        case PerformanceParameterType::FOREACH_ITEMS:
-            result = SystemProperties::performanceProps_->foreachItems;
-            break;
-        case PerformanceParameterType::FLEX_LAYOUTS:
-            result = SystemProperties::performanceProps_->flexLayouts;
-            break;
-        default:
-            result = -1;
-    }
-    return result;
 }
 
 void SystemProperties::InitDeviceType(DeviceType)
@@ -519,6 +444,12 @@ bool SystemProperties::IsFormAnimationLimited()
 bool SystemProperties::IsSceneBoardEnabled()
 {
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
+}
+
+void SystemProperties::GetAppBarInfo(std::string& bundleName, std::string& abilityName)
+{
+    bundleName = system::GetParameter("persist.ace.appbar.bundlename", "");
+    abilityName = system::GetParameter("persist.ace.appbar.abilityname", "");
 }
 
 } // namespace OHOS::Ace

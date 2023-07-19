@@ -22,11 +22,11 @@
 #endif
 
 #include "base/geometry/rect.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing_forward.h"
+#endif
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_node.h"
-#ifdef USE_ROSEN_DRAWING
-#include "core/components_ng/render/drawing.h"
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 class SkImage;

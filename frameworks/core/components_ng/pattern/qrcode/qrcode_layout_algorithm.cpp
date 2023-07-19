@@ -27,6 +27,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension DEFAULT_SIZE = 240.0_vp;
+} // namespace
 
 std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -34,14 +37,35 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
     auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
-    auto idealSize = CreateIdealSize(contentConstraint, Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
-    if (LessNotEqual(idealSize.Width(), idealSize.Height())) {
-        idealSize.SetHeight(idealSize.Width());
-    } else if (LessNotEqual(idealSize.Height(), idealSize.Width())) {
-        idealSize.SetWidth(idealSize.Height());
+
+    auto topPadding = 0.0f;
+    auto bottomPadding = 0.0f;
+    auto leftPadding = 0.0f;
+    auto rightPadding = 0.0f;
+    const auto& padding = layoutProperty->GetPaddingProperty();
+    if (padding) {
+        topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
     }
-    qrCodeSize_ = idealSize.Width();
-    return idealSize;
+    auto width = DEFAULT_SIZE.ConvertToPx() - leftPadding - rightPadding;
+    if (Negative(width)) {
+        width = 0.0f;
+    }
+    if (contentConstraint.selfIdealSize.Width().has_value()) {
+        width = contentConstraint.selfIdealSize.Width().value();
+    }
+    auto height = DEFAULT_SIZE.ConvertToPx() - topPadding - bottomPadding;
+    if (Negative(height)) {
+        height = 0.0f;
+    }
+    if (contentConstraint.selfIdealSize.Height().has_value()) {
+        height = contentConstraint.selfIdealSize.Height().value();
+    }
+    auto qrCodeSize = std::min(width, height);
+    qrCodeSize_ = qrCodeSize;
+    return SizeF(qrCodeSize, qrCodeSize);
 }
 
 } // namespace OHOS::Ace::NG

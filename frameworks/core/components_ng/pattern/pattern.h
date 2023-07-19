@@ -361,13 +361,9 @@ public:
     {
         return -1;
     }
-    
+
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
-    virtual bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
-    {
-        return true;
-    }
 
     virtual void OnSetDepth(const int32_t depth) {}
 protected:

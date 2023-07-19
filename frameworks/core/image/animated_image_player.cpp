@@ -24,6 +24,9 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/render/canvas_image.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/image/image_provider.h"
 
 namespace OHOS::Ace {

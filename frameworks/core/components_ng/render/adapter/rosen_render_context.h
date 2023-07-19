@@ -40,6 +40,7 @@
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+class BackgroundModifier;
 class BorderImageModifier;
 class DebugBoundaryModifier;
 class MouseSelectModifier;
@@ -223,6 +224,10 @@ public:
         return needDebugBoundary_;
     }
 
+    void OnBackgroundAlignUpdate(const Alignment& align) override;
+    void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) override;
+    void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
+
     void OnBackgroundColorUpdate(const Color& value) override;
 
     void MarkContentChanged(bool isChanged) override;
@@ -230,7 +235,11 @@ public:
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
+#ifndef USE_ROSEN_DRAWING
     bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
+#else
+    bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
+#endif
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
 
@@ -263,7 +272,7 @@ private:
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
-    void OnTransformRotateUpdate(const Vector4F& value) override;
+    void OnTransformRotateUpdate(const Vector5F& value) override;
 
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
@@ -311,7 +320,7 @@ private:
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
-    void SetPivot(float xPivot, float yPivot);
+    void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
 
     RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
@@ -327,7 +336,11 @@ private:
     void PaintGraphics();
     void PaintOverlayText();
     void PaintBorderImage();
+#ifndef USE_ROSEN_DRAWING
     void PaintSkBgImage();
+#else
+    void PaintRSBgImage();
+#endif
     void PaintPixmapBgImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
@@ -396,6 +409,7 @@ private:
 
     RefPtr<RosenTransitionEffect> transitionEffect_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
+    std::shared_ptr<BackgroundModifier> backgroundModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     std::shared_ptr<MoonProgressModifier> moonProgressModifier_;

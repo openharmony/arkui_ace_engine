@@ -146,6 +146,8 @@ public:
             });
     }
 
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
     const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
     {
         return itemPosition_;
@@ -208,7 +210,6 @@ private:
     void OnScrollEndCallback() override;
 
     void OnModifyDone() override;
-    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     float CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType);
 
@@ -244,13 +245,9 @@ private:
     void RegistOritationListener();
 
     // multiSelectable
-    void UninitMouseEvent();
-    void InitMouseEvent();
-    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
-    void ClearMultiSelect();
-    void ClearSelectedZone();
-    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
-    void MultiSelectWithoutKeyboard(const RectF& selectedZone);
+    void ClearMultiSelect() override;
+    bool IsItemSelected(const MouseInfo& info) override;
+    void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void HandleCardModeSelectedEvent(
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
 
@@ -295,22 +292,14 @@ private:
     std::list<WeakPtr<FrameNode>> itemGroupList_;
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
-
+    float laneGutter_ = 0.0f;
     // chain animation
     RefPtr<ChainAnimation> chainAnimation_;
     bool dragFromSpring_ = false;
     RefPtr<SpringProperty> springProperty_;
     std::optional<ChainAnimationOptions> chainAnimationOptions_;
 
-    // multiSelectable
-    bool multiSelectable_ = false;
-    bool isMouseEventInit_ = false;
-    bool mousePressed_ = false;
-
     bool isOritationListenerRegisted_ = false;
-    OffsetF mouseStartOffset_;
-    OffsetF mouseEndOffset_;
-    OffsetF mousePressOffset_;
 
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;

@@ -21,6 +21,15 @@
 
 namespace OHOS::Ace::NG {
 
+/**
+ * The structure of Atomic Service (install free):
+ * |--AtomicService(Column)
+ *   |--AppBar(Row)
+ *
+ *   |--Stage
+ *     |--Page
+ */
+
 class ACE_EXPORT AppBarView {
 public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
@@ -29,6 +38,7 @@ private:
     static RefPtr<FrameNode> BuildBarTitle();
     static RefPtr<FrameNode> BuildIconButton(
         InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton);
+    static void BindContentCover(int32_t targetId);
 };
 
 } // namespace OHOS::Ace::NG

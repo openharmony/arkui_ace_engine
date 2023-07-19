@@ -163,7 +163,7 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
     if (crossSizeOptional.has_value()) {
         float crossSize = crossSizeOptional.value();
         if (lanes_ > 1) {
-            crossSize /= lanes_;
+            crossSize = (crossSize + laneGutter_) / lanes_ - laneGutter_;
         }
         if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
             crossSize = maxLaneLength_.value();
@@ -509,11 +509,13 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
         float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
         float laneCrossOffset = CalculateLaneCrossOffset(crossSize / lanes_, childCrossSize);
         if (axis_ == Axis::VERTICAL) {
-            offset = offset + OffsetF(0, pos.second.first) + OffsetF(laneCrossOffset, 0) +
-                OffsetF(crossSize / lanes_ * laneIndex, 0);
+            offset =
+                offset + OffsetF(0, pos.second.first) + OffsetF(laneCrossOffset, 0) +
+                OffsetF(((crossSize + laneGutter_) / lanes_ - laneGutter_) * laneIndex + laneGutter_ * laneIndex, 0);
         } else {
-            offset = offset + OffsetF(pos.second.first, 0) + OffsetF(0, laneCrossOffset) +
-                OffsetF(0, crossSize / lanes_ * laneIndex);
+            offset =
+                offset + OffsetF(pos.second.first, 0) + OffsetF(0, laneCrossOffset) +
+                OffsetF(0, ((crossSize + laneGutter_) / lanes_ - laneGutter_) * laneIndex + laneGutter_ * laneIndex);
         }
         SetListItemIndex(layoutWrapper, wrapper, pos.first);
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
@@ -615,8 +617,14 @@ void ListItemGroupLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutPropert
             maxLaneLength_ = ConvertToPx(layoutProperty->GetLaneMaxLength().value(),
                 layoutConstraint.scaleProperty, crossSizeOptional.value());
         }
+        if (layoutProperty->GetLaneGutter().has_value()) {
+            auto laneGutter = ConvertToPx(
+                layoutProperty->GetLaneGutter().value(), layoutConstraint.scaleProperty, crossSizeOptional.value());
+            laneGutter_ = laneGutter.value();
+        }
     }
-    lanes_ = ListLanesLayoutAlgorithm::CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional);
+    lanes_ = ListLanesLayoutAlgorithm::CalculateLanesParam(
+        minLaneLength_, maxLaneLength_, lanes, crossSizeOptional, laneGutter_);
 }
 
 void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,

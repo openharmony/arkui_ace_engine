@@ -1065,6 +1065,8 @@ HWTEST_F(SearchTestNg, SetTextAlign001, TestSize.Level1)
     ASSERT_NE(textFieldLayoutProperty, nullptr);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
+    searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
 }
 
 /**
@@ -1367,6 +1369,12 @@ HWTEST_F(SearchTestNg, Pattern011, TestSize.Level1)
      * @tc.step: step2. call GetOnHoverEventFunc()(false).
      * @tc.expected: isHover_ is false.
      */
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<SearchTheme>();
+    checkboxTheme->searchButtonSpace_ = 0.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
     pattern->hoverEvent_->GetOnHoverEventFunc()(false);
     EXPECT_FALSE(pattern->isHover_);
     MouseInfo mouseInfo;

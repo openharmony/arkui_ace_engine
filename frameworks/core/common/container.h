@@ -333,6 +333,13 @@ public:
         return false;
     }
 
+    virtual bool IsScenceBoardWindow()
+    {
+        return false;
+    }
+
+    virtual void GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType) {}
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;

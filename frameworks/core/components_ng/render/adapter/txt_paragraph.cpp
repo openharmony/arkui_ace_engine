@@ -214,6 +214,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     }
     if (boxes.empty()) {
+        LOGD("boxes is empty.");
         return false;
     }
 

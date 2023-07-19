@@ -83,6 +83,10 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
                     LOGE("Parameter out of range, use default value.");
                 }
             }
+            if (count->IsUndefined() || count->IsNull()) {
+                TextTimerModel::GetInstance()->SetInputCount(TIME_DEFAULT_COUNT);
+                LOGE("Parameter is undefined or null, use default value.");
+            }
         }
     }
 

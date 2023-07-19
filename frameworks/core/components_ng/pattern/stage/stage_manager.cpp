@@ -18,9 +18,11 @@
 #include <unordered_map>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
@@ -76,9 +78,11 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             });
         return;
     }
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "NA");
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
             ContainerScope scope(instanceId);
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
             LOGI("pageTransition in finish");
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
@@ -170,7 +174,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
-    if (SystemProperties::IsPerformanceCheckEnabled()) {
+    if (AceChecker::IsPerformanceCheckEnabled()) {
         // After completing layout tasks at all nodes on the page, perform performance testing and management
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakNode = WeakPtr<FrameNode>(node), startTime]() {
             auto stage = weakStage.Upgrade();

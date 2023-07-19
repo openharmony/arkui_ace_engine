@@ -65,6 +65,11 @@ public:
         return lanes_;
     }
 
+    float GetLaneGutter() const
+    {
+        return laneGutter_;
+    }
+
     int32_t GetLanesFloor(int32_t index) const
     {
         if (lanes_ <= 1) {
@@ -182,6 +187,7 @@ private:
     PositionMap itemPosition_;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
+    float laneGutter_ = 0.0f;
     std::optional<float> minLaneLength_;
     std::optional<float> maxLaneLength_;
     V2::ListItemAlign itemAlign_ = V2::ListItemAlign::START;

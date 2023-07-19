@@ -50,6 +50,11 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
 
 void ListPattern::OnScrollEndCallback() {}
 
+bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    return false;
+}
+
 bool ListPattern::IsAtBottom() const
 {
     return false;
@@ -95,4 +100,13 @@ void ListPattern::FireOnScrollStart() {}
 void ListPattern::OnAnimateStop() {}
 
 void ListPattern::ScrollTo(float position) {}
+
+void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
+
+void ListPattern::ClearMultiSelect() {};
+
+bool ListPattern::IsItemSelected(const MouseInfo& info)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

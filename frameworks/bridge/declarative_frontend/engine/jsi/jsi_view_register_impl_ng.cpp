@@ -35,6 +35,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_image_data.h"
@@ -322,6 +323,7 @@ void JsBindViews(BindingTarget globalObj)
     JSNavigator::JSBind(globalObj);
     JSToggle::JSBind(globalObj);
     JSCounter::JSBind(globalObj);
+    JSCalendarPicker::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
@@ -355,6 +357,7 @@ void JsBindViews(BindingTarget globalObj)
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);
     JSUIExtension::JSBind(globalObj);
+    JSUIExtensionProxy::JSBind(globalObj);
 #endif
     JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);

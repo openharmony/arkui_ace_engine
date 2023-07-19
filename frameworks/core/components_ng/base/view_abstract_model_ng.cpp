@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t LONG_PRESS_DURATION = 280;
+constexpr int32_t LONG_PRESS_DURATION = 800;
 
 void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode, bool isContextMenu,
     const NG::OffsetF& offset, const MenuParam& menuParam = MenuParam())
@@ -171,6 +171,19 @@ void ViewAbstractModelNG::BindContextMenu(
         overlayManager->DeleteMenu(id);
     };
     targetNode->PushDestroyCallback(destructor);
+}
+
+void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, const Alignment& align)
+{
+    auto buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    targetNode->SetBackgroundFunction(std::move(buildNodeFunc));
+    NG::ViewAbstract::SetBackgroundAlign(align);
 }
 
 void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const Dimension& z)

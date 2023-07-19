@@ -69,7 +69,7 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(inputHub);
     InitInputEvent(inputHub);
 
-    if (draggable_) {
+    if (host->IsDraggable()) {
         EnableDrag();
     }
 }

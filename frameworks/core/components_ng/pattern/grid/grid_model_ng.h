@@ -61,6 +61,13 @@ public:
     void SetOnItemDragMove(ItemDragMoveFunc&& value) override;
     void SetOnItemDragLeave(ItemDragLeaveFunc&& value) override;
     void SetOnItemDrop(ItemDropFunc&& value) override;
+    void SetOnScroll(OnScrollEvent&& onScroll) override;
+    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
+    void SetOnScrollStart(OnScrollStartEvent&& onScrollStart) override;
+    void SetOnScrollStop(OnScrollStopEvent&& onScrollStop) override;
+    void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex) override;
+    void SetOnReachStart(OnReachEvent&& onReachStart) override;
+    void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
 

@@ -211,12 +211,15 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     } else {
         auto badgePositionX = layoutProperty->GetBadgePositionX();
         auto badgePositionY = layoutProperty->GetBadgePositionY();
-        textOffset = OffsetF(
-            offset.GetX() + badgePositionX->ConvertToPx(), offset.GetY() + badgePositionY->ConvertToPx());
+        textOffset =
+            OffsetF(offset.GetX() + badgePositionX->ConvertToPx(), offset.GetY() + badgePositionY->ConvertToPx());
     }
 
-    textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
+    textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
     auto textFrameSize = textGeometryNode->GetFrameSize();
+    if (GreatNotEqual(circleSize->ConvertToPx(), 0)) {
+        textFrameSize += SizeF(borderWidth.ConvertToPx() * 2, borderWidth.ConvertToPx() * 2);
+    }
     textGeometryNode->SetFrameSize(textFrameSize);
     textWrapper->Layout();
 

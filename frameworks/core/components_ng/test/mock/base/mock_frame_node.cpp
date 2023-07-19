@@ -267,7 +267,7 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
 {
 }
 
-void FrameNode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
+void FrameNode::OnSetDepth(const int32_t depth)
 {
 }
 } // namespace OHOS::Ace::NG

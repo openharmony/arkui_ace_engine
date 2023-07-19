@@ -55,6 +55,7 @@ enum class ScrollAlign {
     CENTER,
     END,
     AUTO,
+    NONE,
 };
 
 class ACE_EXPORT ScrollControllerBase : public AceType {
@@ -64,7 +65,7 @@ public:
     ScrollControllerBase() = default;
     ~ScrollControllerBase() override = default;
 
-    virtual void JumpTo(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+    virtual void JumpTo(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::NONE,
         int32_t source = 3) {}
 
     virtual Axis GetScrollDirection() const

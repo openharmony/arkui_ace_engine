@@ -39,7 +39,9 @@ constexpr int32_t MAX_ALPHA = 255;
 constexpr int32_t FOCUS_ANIMATION_OFFSET = 3;
 constexpr int32_t PHONE_FOCUS_OFFSET = 3;
 constexpr int32_t PHONE_INDENTED_FOCUS_OFFSET = 1;
+#ifndef USE_ROSEN_DRAWING
 constexpr int32_t ARRAY_LENGTH = 6;
+#endif
 constexpr float RIGHT_ANGLE = 90.0f;
 constexpr float MAX_TRANSPARENCY = 153.0f;
 constexpr float MIN_TRANSPARENCY = 26.0f;

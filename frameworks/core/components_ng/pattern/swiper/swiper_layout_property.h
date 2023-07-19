@@ -144,6 +144,20 @@ public:
         }
     }
 
+    void UpdatePrevMarginWithoutMeasure(const Dimension& value)
+    {
+        if (propPrevMargin_ != value) {
+            propPrevMargin_ = value;
+        }
+    }
+
+    void UpdateNextMarginWithoutMeasure(const Dimension& value)
+    {
+        if (propNextMargin_ != value) {
+            propNextMargin_ = value;
+        }
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemSpace, Dimension, PROPERTY_UPDATE_MEASURE);

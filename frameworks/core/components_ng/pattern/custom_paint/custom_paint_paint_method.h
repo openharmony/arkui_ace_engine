@@ -479,7 +479,11 @@ protected:
     FailedCallback failedCallback_;
 
     RefPtr<RenderingContext2DModifier> contentModifier_;
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<OHOS::Rosen::RSRecordingCanvas> rsRecordingCanvas_;
+#else
+    std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
+#endif
 
     SizeF lastLayoutSize_;
 };

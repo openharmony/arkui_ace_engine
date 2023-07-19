@@ -84,12 +84,11 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
             CHECK_NULL_VOID(searchPattern);
             auto textFieldOffset = searchPattern->GetTextFieldOffset();
             auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-            eventHub->FireOnScrollChangeEvent(
-                currentTextRectOffsetX + textFieldOffset.GetX(), currentTextRectOffsetY + textFieldOffset.GetY());
-        } else {
-            auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-            eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
+            currentTextRectOffsetX += textFieldOffset.GetX();
+            currentTextRectOffsetY += textFieldOffset.GetY();
         }
+        auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+        eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
     }
     textFieldContentModifier_->SetContentOffset(contentOffset);
     textFieldContentModifier_->SetContentSize(contentSize);

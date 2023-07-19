@@ -63,17 +63,12 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     auto confirmNode = buttonConfirmNode->GetFirstChild();
     auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
     confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
-    
+
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
     CHECK_NULL_VOID(buttonCancelNode);
     auto cancelNode = buttonCancelNode->GetFirstChild();
     auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
-}
-
-bool TextPickerPattern::NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
-{
-    return false;
 }
 
 void TextPickerPattern::SetButtonIdeaSize()
@@ -819,5 +814,36 @@ std::string TextPickerPattern::GetOptionsMultiStr() const
         result = GetOptionsMultiStrInternal();
     }
     return result;
+}
+
+void TextPickerPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string tag = host->GetTag();
+    auto child = host->GetChildren();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto dialogContext = host->GetRenderContext();
+    CHECK_NULL_VOID(dialogContext);
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerProperty->UpdateColor(normalStyle.GetTextColor());
+    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    if (isPicker_) {
+        host->SetNeedCallChildrenUpdate(false);
+        return;
+    }
+    dialogContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    auto contentChildren = contentRowNode_->GetChildren();
+    auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    host->SetNeedCallChildrenUpdate(false);
+    OnModifyDone();
 }
 } // namespace OHOS::Ace::NG

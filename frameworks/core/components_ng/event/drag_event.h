@@ -97,7 +97,7 @@ public:
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
-    void SetEventColumn();
+    void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
     void HideEventColumn();
@@ -123,12 +123,23 @@ public:
         }
     }
 
+    void SetIsNotInPreviewState(bool isNotInPreviewState)
+    {
+        isNotInPreviewState_ = isNotInPreviewState;
+    }
+
+    bool GetIsNotInPreviewState() const
+    {
+        return isNotInPreviewState_;
+    }
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
     RefPtr<DragEvent> customCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     std::function<void(GestureEvent&)> actionStart_;
 
@@ -136,6 +147,7 @@ private:
     std::function<void()> actionCancel_;
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
+    bool isNotInPreviewState_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

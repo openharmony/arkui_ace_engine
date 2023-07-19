@@ -249,6 +249,11 @@ public:
         return false;
     }
 
+    int32_t GetDragRecordSize() override
+    {
+        return 1;
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -329,6 +334,7 @@ public:
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
+    bool IsImageDrag();
     DragRet GetDragAcceptableStatus();
 
 private:
@@ -404,6 +410,7 @@ private:
     void HandleDragStart(int32_t x, int32_t y);
     void HandleDragEnd(int32_t x, int32_t y);
     void HandleDragCancel();
+    void ClearDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);

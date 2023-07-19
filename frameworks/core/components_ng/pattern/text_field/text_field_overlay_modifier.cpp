@@ -125,7 +125,8 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     RSRect clipInnerRect;
     if (inputStyle_ == InputStyle::DEFAULT || isTextArea) {
         clipInnerRect = RSRect(
-            paintOffset.GetX(), paintOffset.GetY(), paintOffset.GetX() + contentSize_->Get().Width(), clipRectHeight);
+            paintOffset.GetX(), paintOffset.GetY(), paintOffset.GetX() + contentSize_->Get().Width() +
+            textFieldPattern->GetInlinePadding(), clipRectHeight);
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     } else {
         clipInnerRect = RSRect(paintOffset.GetX(), 0.0f, paintOffset.GetX() + contentSize_->Get().Width(),

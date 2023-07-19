@@ -137,7 +137,7 @@ RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geomet
     ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     bool imageRepeatX = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_X;
     bool imageRepeatY = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_Y;
-    
+
     if (loadingCtx_->GetSourceInfo().IsSvg()) {
         const float invalidValue = -1;
         paintSize.SetWidth(dstRect_.IsValid() ? dstRect_.Width() : invalidValue);
@@ -149,8 +149,8 @@ RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geomet
     } else {
         paintSize.SetWidth(imageRepeatX ? geometryNode->GetContentSize().Width() : dstRect_.Width());
         paintSize.SetHeight(imageRepeatY ? geometryNode->GetContentSize().Height() : dstRect_.Height());
-        paintSize.SetLeft(imageRepeatX ? 0 : dstRect_.GetX() + geometryNode->GetContentOffset().GetX());
-        paintSize.SetTop(imageRepeatY ? 0 : dstRect_.GetY() + geometryNode->GetContentOffset().GetY());
+        paintSize.SetLeft((imageRepeatX ? 0 : dstRect_.GetX()) + geometryNode->GetContentOffset().GetX());
+        paintSize.SetTop((imageRepeatY ? 0 : dstRect_.GetY()) + geometryNode->GetContentOffset().GetY());
     }
     return paintSize;
 }
@@ -204,9 +204,7 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
         geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
-    if (!host->IsActive()) {
-        return;
-    }
+
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -611,6 +609,13 @@ void ImagePattern::OpenSelectOverlay()
         pattern->HandleCopy();
         pattern->CloseSelectOverlay();
     };
+    info.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
+        if (closedByGlobalEvent) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CloseSelectOverlay();
+        }
+    };
 
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -624,16 +629,18 @@ void ImagePattern::OpenSelectOverlay()
 
 void ImagePattern::CloseSelectOverlay()
 {
-    if (selectOverlay_ && !selectOverlay_->IsClosed()) {
+    if (!selectOverlay_) {
+        return;
+    }
+    if (!selectOverlay_->IsClosed()) {
         LOGI("closing select overlay");
         selectOverlay_->Close();
-        selectOverlay_ = nullptr;
-
-        // remove selected mask effect
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkNeedRenderOnly();
     }
+    selectOverlay_ = nullptr;
+    // remove selected mask effect
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::HandleCopy()

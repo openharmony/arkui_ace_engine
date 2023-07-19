@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+uint64_t UITaskScheduler::frameId_ = 0;
 
 UITaskScheduler::~UITaskScheduler() = default;
 
@@ -76,17 +77,18 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             continue;
         }
         time = GetSysTimestamp();
+        frameId_++;
         auto task = node->CreateLayoutTask(forceUseMainThread);
         if (task) {
             if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
                 (*task)();
                 time = GetSysTimestamp() - time;
-                if (frameInfo_ != nullptr) {
-                    frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
-                }
             } else {
                 LOGW("need to use multithread feature");
             }
+        }
+        if (frameInfo_ != nullptr) {
+            frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
     }
 }

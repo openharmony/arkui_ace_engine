@@ -61,6 +61,9 @@ ACE_EXPORT extern const char STAGE_ETS_TAG[];
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
+
+ACE_EXPORT extern const char ATOMIC_SERVICE_ETS_TAG[];
+ACE_EXPORT extern const char APP_BAR_ETS_TAG[];
 // js custom view
 ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_VIEW_COMPONENT_TAG[];
@@ -297,6 +300,10 @@ ACE_EXPORT extern const char SCROLL_ETS_TAG[];
 // calendar
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[];
 ACE_EXPORT extern const char CALENDAR_ETS_TAG[];
+
+// calendarPicker
+ACE_EXPORT extern const char CALENDAR_PICKER_COMPONENT_TAG[];
+ACE_EXPORT extern const char CALENDAR_PICKER_ETS_TAG[];
 
 // badge
 ACE_EXPORT extern const char BADGE_COMPONENT_TAG[];

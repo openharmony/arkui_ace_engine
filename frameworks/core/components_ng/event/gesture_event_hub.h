@@ -277,7 +277,7 @@ public:
 
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId);
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -388,6 +388,12 @@ public:
     RefPtr<PixelMap> GetPixelMap()
     {
         return pixelMap_;
+    }
+
+    RefPtr<LongPressRecognizer> GetLongPressRecognizer() const
+    {
+        CHECK_NULL_RETURN(longPressEventActuator_, nullptr);
+        return longPressEventActuator_->GetLongPressRecognizer();
     }
 
 #ifdef ENABLE_DRAG_FRAMEWORK

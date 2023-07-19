@@ -192,6 +192,14 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() >= 2 && !(info[1]->IsNull())) { /* 2: parameter count */
+        CalcDimension laneGutter;
+        if (!JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
+            ListModel::GetInstance()->SetLaneGutter(0.0_vp);
+        }
+        ListModel::GetInstance()->SetLaneGutter(laneGutter);
+    }
+
     int32_t laneNum = 1;
     if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
@@ -296,9 +304,9 @@ void JSList::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSList::SetScrollEnabled(bool scrollEnabled)
+void JSList::SetScrollEnabled(const JSCallbackInfo& args)
 {
-    ListModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+    ListModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
 }
 
 void JSList::ScrollCallback(const JSCallbackInfo& args)

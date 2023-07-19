@@ -199,6 +199,9 @@ public:
     // acquire first menu node in wrapper node by submenu node
     RefPtr<MenuPattern> GetMainMenuPattern() const;
     uint32_t GetInnerMenuCount() const;
+    void OnColorConfigurationUpdate() override;
+
+    RefPtr<FrameNode> GetMenuWrapper() const;
 
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
@@ -214,7 +217,6 @@ private:
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void UpdateMenuHotArea();
     void UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty);
 
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
@@ -225,8 +227,6 @@ private:
     bool OnKeyEvent(const KeyEvent& event) const;
 
     void DisableTabInMenu();
-
-    RefPtr<FrameNode> GetMenuWrapper() const;
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;

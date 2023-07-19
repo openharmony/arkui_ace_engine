@@ -125,14 +125,10 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textfieldLayoutProperty);
 
     if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
-        if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
-            calcLayoutConstraint->maxSize.value().Width().has_value()) {
-            frameSize.SetWidth(std::max(layoutConstraint->maxSize.Width(), layoutConstraint->minSize.Width()));
-        } else if (!calcLayoutConstraint) {
-            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
-        } else {
-            frameSize.SetWidth(layoutConstraint->minSize.Width());
-        }
+        auto width =
+            std::max(std::min(layoutConstraint->maxSize.Width(), contentWidth + pattern->GetHorizontalPaddingSum()),
+                layoutConstraint->minSize.Width());
+        frameSize.SetWidth(width);
     }
     frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     if (layoutConstraint->maxSize.Height() < layoutConstraint->minSize.Height()) {
@@ -187,7 +183,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
-        if (isInlineStyle && !pattern->IsTextArea()) {
+        if (!pattern->IsTextArea()) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
             pattern->SetTextInputFlag(true);
         }
@@ -265,12 +261,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
                 layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
             idealWidth = paragraph_->GetLongestLine();
         }
-        if (isInlineStyle) {
-            textRect_.SetSize(SizeF(idealWidth, paragraph_->GetHeight()));
-        } else {
-            textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
-                paragraph_->GetHeight()));
-        }
+        textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
+            paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     // check password image size.
@@ -387,6 +379,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         textRect_.SetOffset(OffsetF(textRectOffsetX, textOffset.GetY()));
     }
+
     // update image rect.
     if (!imageRect_.IsEmpty()) {
         auto imageOffset = Alignment::GetAlignPosition(size, imageRect_.GetSize(), Alignment::CENTER_RIGHT);
@@ -459,12 +452,21 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
     Dimension fontSize;
-    if (layoutProperty->HasPlaceholderFontSize() &&
-        layoutProperty->GetPlaceholderFontSize().value_or(Dimension()).IsNonNegative()) {
-        fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
+    if (layoutProperty->GetPlaceholderValue("").empty()) {
+        if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
+            fontSize = layoutProperty->GetFontSizeValue(Dimension());
+        } else {
+            fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+        }
     } else {
-        fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+        if (layoutProperty->HasPlaceholderFontSize() &&
+            layoutProperty->GetPlaceholderFontSize().value_or(Dimension()).IsNonNegative()) {
+            fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
+        } else {
+            fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+        }
     }
+
     textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));

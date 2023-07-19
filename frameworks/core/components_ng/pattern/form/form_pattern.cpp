@@ -40,7 +40,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
-constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 5000;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT = 10000;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -199,6 +199,12 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 
 void FormPattern::TakeSurfaceCaptureForUI()
 {
+    if (isDynamic_) {
+        LOGI("Now it's a dynamic card");
+        formLinkInfos_.clear();
+        return;
+    }
+
     LOGI("TakeSurfaceCaptureForUI");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -216,7 +222,7 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
     CHECK_NULL_VOID(pixelMap);
     pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     UpdateStaticCard();
-    isDynamic_ = false;
+    isSnapshot_ = true;
 }
 
 void FormPattern::UpdateStaticCard()
@@ -330,7 +336,7 @@ void FormPattern::ReleaseRenderer()
 
 void FormPattern::OnRebuildFrame()
 {
-    if (!isDynamic_) {
+    if (isSnapshot_) {
         LOGI("Do not need reAddChild");
         return;
     }
@@ -515,7 +521,7 @@ void FormPattern::InitFormManagerDelegate()
     });
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
-        [weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node) {
+        [weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic) {
             LOGI("Form surface node callback");
             ContainerScope scope(instanceID);
             CHECK_NULL_VOID(node);
@@ -543,6 +549,7 @@ void FormPattern::InitFormManagerDelegate()
             formComponent->isLoaded_ = true;
 
             formComponent->SetIsUnTrust(false);
+            formComponent->SetIsDynamic(isDynamic);
             formComponent->HideImageNode();
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             auto parent = host->GetParent();
@@ -771,7 +778,7 @@ void FormPattern::OnLoadEvent()
 {
     LOGI("OnLoadEvent");
     ACE_FUNCTION_TRACE();
-    isDynamic_ = true;
+    isSnapshot_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto uiTaskExecutor = SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);

@@ -48,6 +48,8 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
     void SetScrollEnabled(bool scrollEnabled) override {};
     void SetFriction(double friction) override {};
+    void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override {};
 };
 
 } // namespace OHOS::Ace::Framework

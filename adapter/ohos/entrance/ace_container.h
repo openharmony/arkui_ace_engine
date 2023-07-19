@@ -405,6 +405,7 @@ public:
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
+    void ReloadForm();
 
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
@@ -413,6 +414,10 @@ public:
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
     bool IsLauncherContainer() override;
+    bool IsScenceBoardWindow() override;
+
+    void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
+    void GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType) override;
 
 private:
     void InitializeFrontend();
@@ -468,6 +473,9 @@ private:
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
+    // For custom drag event
+    std::mutex pointerEventMutex_;
+    std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
 

@@ -107,6 +107,7 @@ private:
     SafeAreaInsets::Inset keyboardInset_;
     std::set<WeakPtr<FrameNode>> geoRestoreNodes_;
     std::vector<WeakPtr<LayoutWrapper>> wrappersToAdjust_;
+    // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;
     static constexpr float SAFE_AREA_MASS = 1.0f;

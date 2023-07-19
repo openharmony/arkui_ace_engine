@@ -1089,6 +1089,7 @@ void VideoPattern::SetMethodCall()
                 CHECK_NULL_VOID(fullScreenNode);
                 auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
                 CHECK_NULL_VOID(fullScreenPattern);
+                videoPattern->ResetLastBoundsRect();
                 fullScreenPattern->ExitFullScreen();
             }
             
@@ -1102,6 +1103,7 @@ void VideoPattern::SetMethodCall()
             CHECK_NULL_VOID(fullScreenNode);
             auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
             CHECK_NULL_VOID(fullScreenPattern);
+            pattern->ResetLastBoundsRect();
             fullScreenPattern->ExitFullScreen();
             return;
         }
@@ -1112,6 +1114,7 @@ void VideoPattern::SetMethodCall()
             CHECK_NULL_VOID(fullScreenNode);
             auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
             CHECK_NULL_VOID(fullScreenPattern);
+            pattern->ResetLastBoundsRect();
             fullScreenPattern->ExitFullScreen();
         });
     });
@@ -1250,6 +1253,7 @@ void VideoPattern::SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn)
         if (InstanceOf<VideoFullScreenPattern>(videoPattern)) {
             auto pattern = AceType::DynamicCast<VideoFullScreenPattern>(videoPattern);
             CHECK_NULL_VOID(pattern);
+            videoPattern->ResetLastBoundsRect();
             pattern->ExitFullScreen();
         } else {
             videoPattern->FullScreen();
@@ -1338,6 +1342,7 @@ void VideoPattern::FullScreen()
     if (fullScreenNodeId_.has_value()) {
         return;
     }
+    ResetLastBoundsRect();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto videoNode = AceType::DynamicCast<VideoNode>(host);

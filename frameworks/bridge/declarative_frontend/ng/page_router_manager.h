@@ -141,7 +141,7 @@ private:
     // page id manage
     int32_t GenerateNextPageId();
 
-    std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url);
+    std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url, bool needIgnoreBegin = false);
 
     void LoadOhmUrl(const RouterPageInfo& target);
     void PushOhmUrl(const RouterPageInfo& target);

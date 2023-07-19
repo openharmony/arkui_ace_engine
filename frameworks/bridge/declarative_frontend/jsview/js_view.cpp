@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
+#include "bridge/declarative_frontend/jsview/js_view.h"
 
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
@@ -22,7 +23,11 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/ui_node.h"
@@ -33,10 +38,6 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/element_register.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
 
 namespace OHOS::Ace {
 
@@ -638,8 +639,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         recycleNode->ResetRecycle();
         AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
-        jsView->jsViewFunction_->ExecuteDisappear();
+        jsView->jsViewFunction_->ExecuteAboutToRecycle();
         jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
+    };
+
+    auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteSetActive(active);
     };
 
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
@@ -652,6 +660,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .completeReloadFunc = std::move(completeReloadFunc),
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
+        .setActiveFunc = std::move(setActiveFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };
@@ -684,7 +693,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     }
 #endif
 
-    if (SystemProperties::IsPerformanceCheckEnabled()) {
+    if (AceChecker::IsPerformanceCheckEnabled()) {
         auto uiNode = AceType::DynamicCast<NG::UINode>(node);
         if (uiNode) {
             auto codeInfo = EngineHelper::GetPositionOnJsCode();
@@ -830,8 +839,10 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
         auto node = view->GetCachedRecycleNode();
         node->SetRecycleRenderFunc(std::move(recycleUpdateFunc));
         auto newElmtId = ViewStackModel::GetInstance()->GetElmtIdToAccountFor();
-        ElementRegister::GetInstance()->UpdateRecycleElmtId(AceType::DynamicCast<NG::UINode>(node)->GetId(), newElmtId);
-        AceType::DynamicCast<NG::UINode>(node)->UpdateRecycleElmtId(newElmtId);
+        auto uiNode = AceType::DynamicCast<NG::UINode>(node);
+        ElementRegister::GetInstance()->UpdateRecycleElmtId(uiNode->GetId(), newElmtId);
+        uiNode->UpdateRecycleElmtId(newElmtId);
+        NG::LayoutProperty::UpdateAllGeometryTransition(uiNode);
         ViewStackModel::GetInstance()->Push(node, true);
     } else {
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);

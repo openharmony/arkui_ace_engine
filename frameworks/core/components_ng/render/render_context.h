@@ -139,6 +139,8 @@ public:
 
     virtual void ClearFocusState() {}
 
+    virtual void CreateBackgroundPixelMap(const RefPtr<FrameNode>& value) {}
+
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
     // clip node without padding
@@ -326,7 +328,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, TranslateOptions);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector5F);
 
     // Foreground
     ACE_DEFINE_PROPERTY_GROUP(Foreground, ForegroundProperty);
@@ -354,6 +356,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
+
+    // CustomBackground
+    ACE_DEFINE_PROPERTY_GROUP(CustomBackground, CustomBackgroundProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundPixelMap, RefPtr<PixelMap>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundAlign, Alignment);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -443,6 +450,9 @@ protected:
     virtual void OnForegroundColorUpdate(const Color& value) {}
     virtual void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) {}
 
+    virtual void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) {}
+    virtual void OnBackgroundAlignUpdate(const Alignment& align) {}
+
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}
     virtual void OnHasBorderImageSliceUpdate(bool tag) {}
@@ -457,7 +467,7 @@ protected:
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
 
-    virtual void OnTransformRotateUpdate(const Vector4F& value) {}
+    virtual void OnTransformRotateUpdate(const Vector5F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}

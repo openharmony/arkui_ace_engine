@@ -1453,7 +1453,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
      * @tc.expected: the return is same as expectation.
      */
     context_->textFieldManager_ = nullptr;
-    // the first arg is rootHeigth_, the second arg is the parameter of founction,
+    // the first arg is rootHeight_, the second arg is the parameter of function,
     // the third arg is the expectation returns
     std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, -100 } };
     for (int turn = 0; turn < params.size(); turn++) {
@@ -1471,7 +1471,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     ASSERT_NE(context_->rootNode_, nullptr);
     // the first arg is manager->height_, the second arg is manager->position_.deltaY_
     // the third arg is rootHeight_, the forth arg is context_->rootNode_->geometryNode_->frame_.rect_.y_
-    // the fifth arg is the parameter of founction, the sixth arg is the expectation returns
+    // the fifth arg is the parameter of function, the sixth arg is the expectation returns
     params = { { 10, 100, 300, 0, 50, 0 }, { 10, 100, 300, 100, 100, 100 }, { 30, 100, 300, 100, 50, 100 },
         { 50, 290, 400, 100, 200, -145 }, { -1000, 290, 400, 100, 200, 100 } };
     for (int turn = 0; turn < params.size(); turn++) {

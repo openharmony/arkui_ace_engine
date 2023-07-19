@@ -20,8 +20,10 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -160,6 +162,7 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
 
 void RosenRenderSurface::ConsumeBuffer()
 {
+    ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(consumerSurface_);
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
@@ -169,6 +172,7 @@ void RosenRenderSurface::ConsumeBuffer()
     LOGD("paintRect = %{public}s", paintRect.ToString().c_str());
     auto width = static_cast<int32_t>(paintRect.Width());
     auto height = static_cast<int32_t>(paintRect.Height());
+    ACE_SCOPED_TRACE("RosenRenderSurface::ConsumeBuffer (%d, %d)", width, height);
 
     sptr<SurfaceBuffer> surfaceBuffer = nullptr;
     int32_t fence = -1;
@@ -184,12 +188,21 @@ void RosenRenderSurface::ConsumeBuffer()
     auto rsNode = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
     rsNode->DrawOnNode(
+#ifndef USE_ROSEN_DRAWING
         Rosen::RSModifierType::CONTENT_STYLE, [surfaceBuffer, width, height](const std::shared_ptr<SkCanvas>& canvas) {
             Rosen::RSSurfaceBufferInfo info { surfaceBuffer, 0, 0, width, height };
             auto* recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas.get());
             recordingCanvas->DrawSurfaceBuffer(info);
+#else
+        Rosen::RSModifierType::CONTENT_STYLE,
+        [surfaceBuffer, width, height](const std::shared_ptr<RSCanvas>& canvas) {
+            CHECK_NULL_VOID(canvas);
+#endif
         });
     rosenRenderContext->StopRecordingIfNeeded();
+    auto host = rosenRenderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
 
     surfaceErr = consumerSurface_->ReleaseBuffer(surfaceBuffer, fence);
     if (surfaceErr != SURFACE_ERROR_OK) {

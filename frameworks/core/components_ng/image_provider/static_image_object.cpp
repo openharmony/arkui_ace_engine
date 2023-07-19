@@ -19,7 +19,11 @@
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
+#ifndef USE_ROSEN_DRAWING
 #include "frameworks/core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 namespace OHOS::Ace::NG {
 
 void StaticImageObject::MakeCanvasImage(
@@ -30,7 +34,11 @@ void StaticImageObject::MakeCanvasImage(
     if (SystemProperties::GetImageFrameworkEnabled()) {
         cachedImage = PixelMapImage::QueryFromCache(key);
     } else {
+#ifndef USE_ROSEN_DRAWING
         cachedImage = SkiaImage::QueryFromCache(key);
+#else
+        cachedImage = DrawingImage::QueryFromCache(key);
+#endif
     }
     if (cachedImage) {
         ctx->SuccessCallback(cachedImage);

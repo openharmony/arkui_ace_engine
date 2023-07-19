@@ -125,6 +125,11 @@ void SlidingPanelModelNG::SetHasDragBar(bool hasDragBar)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, hasDragBar);
 }
 
+void SlidingPanelModelNG::SetCustomHeight(const Dimension& customHeight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, customHeight);
+}
+
 void SlidingPanelModelNG::SetMiniHeight(const Dimension& miniHeight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight);

@@ -45,6 +45,8 @@ public:
     {
         return IfElseModel::GetInstance()->GetBranchId();
     }
+
+    static void CanRetake(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

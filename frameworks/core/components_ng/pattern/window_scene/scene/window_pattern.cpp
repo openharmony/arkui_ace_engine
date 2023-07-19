@@ -31,6 +31,16 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
+    { "default",              Rosen::RSAnimationTimingCurve::DEFAULT },
+    { "linear",               Rosen::RSAnimationTimingCurve::LINEAR },
+    { "ease",                 Rosen::RSAnimationTimingCurve::EASE },
+    { "easeIn",               Rosen::RSAnimationTimingCurve::EASE_IN },
+    { "easeOut",              Rosen::RSAnimationTimingCurve::EASE_OUT },
+    { "easeInOut",            Rosen::RSAnimationTimingCurve::EASE_IN_OUT },
+    { "spring",               Rosen::RSAnimationTimingCurve::SPRING },
+    { "interactiveSpring",    Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
+};
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -94,6 +104,7 @@ void WindowPattern::InitContent()
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
+
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
@@ -103,7 +114,8 @@ void WindowPattern::InitContent()
     }
 
     auto state = session_->GetSessionState();
-    LOGI("Session state is %{public}u.", state);
+    auto bundleName = session_->GetSessionInfo().bundleName_;
+    LOGI("Session state: %{public}u, bundle name: %{public}s.", state, bundleName.c_str());
     switch (state) {
         case Rosen::SessionState::STATE_DISCONNECT: {
             CreateStartingNode();
@@ -206,9 +218,27 @@ void WindowPattern::BufferAvailableCallback()
 {
     ContainerScope scope(instanceId_);
 
+    const auto& config =
+        Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
+    if (config.enabled_) {
+        CHECK_NULL_VOID(startingNode_);
+        auto context = AceType::DynamicCast<RosenRenderContext>(startingNode_->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        auto rsNode = context->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
+        rsNode->SetTransitionEffect(effect);
+        Rosen::RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(config.duration_);
+        auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
+            Rosen::RSAnimationTimingCurve::DEFAULT;
+        Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
+            rsNode->NotifyTransition(effect, false);
+        });
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     host->RemoveChild(startingNode_);
     startingNode_.Reset();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -344,11 +374,11 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 bool WindowPattern::IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    return pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-        ((pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) ||
-        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) ||
-        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_UP) ||
-        (pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE));
+    return (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE)) ||
+        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_UP);
 }
 
 void WindowPattern::HandleMouseEvent(const MouseInfo& info)
@@ -416,5 +446,11 @@ void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusWindowIdEvent(focusWindowId);
+}
+
+void WindowPattern::TransferFocusState(bool focusState)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusStateEvent(focusState);
 }
 } // namespace OHOS::Ace::NG

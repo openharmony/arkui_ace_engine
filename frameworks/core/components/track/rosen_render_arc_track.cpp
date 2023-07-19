@@ -99,6 +99,7 @@ void SetTextStyle(RSCanvas* canvas, const RenderRingInfo& trackInfo, const std::
         LOGW("PaintText: fontCollection is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     double pathStartVertexX = trackInfo.center.GetX();
     double pathStartVertexY = trackInfo.center.GetY() - trackInfo.radius + (trackInfo.thickness / 2);
     txt::ParagraphStyle style;
@@ -113,7 +114,6 @@ void SetTextStyle(RSCanvas* canvas, const RenderRingInfo& trackInfo, const std::
     builder->AddText(StringUtils::Str8ToStr16(markedText));
     auto paragraph = builder->Build();
     paragraph->Layout(dataRegion.Width());
-#ifndef USE_ROSEN_DRAWING
     paragraph->Paint(canvas, pathStartVertexX - txtStyle.font_size, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
 #else
     LOGE("Drawing is not supported");

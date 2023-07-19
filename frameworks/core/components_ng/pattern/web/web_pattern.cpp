@@ -489,6 +489,7 @@ void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
     }
 
     CHECK_NULL_VOID(delegate_);
+    delegate_->OnContextMenuHide("");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -547,6 +548,7 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
         if (!pattern->isDragging_) {
             return;
         }
+        pattern->OnQuickMenuDismissed();
 
         // update drag status
         info->SetResult(pattern->GetDragAcceptableStatus());
@@ -596,6 +598,14 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
     eventHub->SetOnDrop(std::move(onDragDropId));
 }
 
+bool WebPattern::IsImageDrag()
+{
+    if (delegate_) {
+        return delegate_->IsImageDrag();
+    }
+    return false;
+}
+
 DragRet WebPattern::GetDragAcceptableStatus()
 {
     OHOS::NWeb::NWebDragData::DragOperation status = delegate_->GetDragAcceptableStatus();
@@ -624,7 +634,11 @@ bool WebPattern::NotifyStartDragTask()
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
-    gestureHub->StartLongPressActionForWeb();
+    if (!isMouseEvent_) {
+        // mouse drag does not need long press action
+        LOGI("is not mouse drag, do not need to do long press action");
+        gestureHub->StartLongPressActionForWeb();
+    }
     gestureHub->StartDragTaskForWeb();
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -744,6 +758,7 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
     // fake drag data when enter
     delegate_->GetOrCreateDragData();
     // use summary to set fake data
+    ClearDragData();
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_ENTER);
 }
 
@@ -818,6 +833,7 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
 
     isDragging_ = false;
     isW3cDragEvent_ = false;
+    ClearDragData();
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
 }
 
@@ -831,7 +847,22 @@ void WebPattern::HandleDragCancel()
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
     isW3cDragEvent_ = false;
+    ClearDragData();
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
+}
+
+void WebPattern::ClearDragData()
+{
+    std::string plain = "";
+    std::string htmlContent = "";
+    std::string linkUrl = "";
+    std::string linkTitle = "";
+    if (delegate_->dragData_) {
+        delegate_->dragData_->SetFragmentText(plain);
+        delegate_->dragData_->SetFragmentHtml(htmlContent);
+        delegate_->dragData_->SetLinkURL(linkUrl);
+        delegate_->dragData_->SetLinkTitle(linkTitle);
+    }
 }
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
@@ -1532,40 +1563,12 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
 
 void WebPattern::RequestFullScreen()
 {
-    if (isFullScreen_) {
-        LOGE("The Web is already full screen when FullScreen");
-        return;
-    }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto fullScreenManager = context->GetFullScreenManager();
-    CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->RequestFullScreen(host);
     isFullScreen_ = true;
-    WebRequestFocus();
 }
 
 void WebPattern::ExitFullScreen()
 {
-    if (!isFullScreen_) {
-        LOGE("The Web is not full screen when ExitFullScreen");
-        return;
-    }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto fullScreenManager = context->GetFullScreenManager();
-    CHECK_NULL_VOID(fullScreenManager);
-    fullScreenManager->ExitFullScreen(host);
     isFullScreen_ = false;
-
-    auto rootWidth = PipelineContext::GetCurrentRootWidth();
-    auto rootHeight = PipelineContext::GetCurrentRootHeight();
-    UpdateWebLayoutSize(rootWidth, rootHeight);
-    WebRequestFocus();
 }
 
 bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)

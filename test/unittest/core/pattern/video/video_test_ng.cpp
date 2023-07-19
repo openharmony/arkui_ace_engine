@@ -136,6 +136,8 @@ void VideoTestNg::SetUpTestSuite()
     MockPipelineBase::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineBase::GetCurrent()->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<VideoTheme>()));
 }
 
@@ -498,7 +500,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest007, TestSize.Level1)
 
 /**
  * @tc.name: VideoPatternTest008
- * @tc.desc: Test UpdateMediaPlayer
+ * @tc.desc: Test UpdateMediaPlayerOnBg
  * @tc.type: FUNC
  */
 HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
@@ -514,27 +516,27 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     ASSERT_TRUE(pattern);
 
     /**
-     * @tc.steps: step2. Call UpdateMediaPlayer
+     * @tc.steps: step2. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always false
      * @tc.expected: step2. IsMediaPlayerValid will be called two times
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(2)
         .WillRepeatedly(Return(false));
-    pattern->UpdateMediaPlayer();
+    pattern->UpdateMediaPlayerOnBg();
 
     /**
-     * @tc.steps: step3. Call UpdateMediaPlayer
+     * @tc.steps: step3. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has not set VideoSource
      * @tc.expected: step3. IsMediaPlayerValid will be called 4 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(4)
         .WillRepeatedly(Return(true));
-    pattern->UpdateMediaPlayer();
+    pattern->UpdateMediaPlayerOnBg();
 
     /**
-     * @tc.steps: step4. Call UpdateMediaPlayer
+     * @tc.steps: step4. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has set VideoSource
      * @tc.expected: step4. IsMediaPlayerValid will be called 5 times
      */
@@ -544,21 +546,21 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .Times(5)
         .WillRepeatedly(Return(true));
 
-    pattern->UpdateMediaPlayer();
+    pattern->UpdateMediaPlayerOnBg();
 
     /**
-     * @tc.steps: step5. Call UpdateMediaPlayer
+     * @tc.steps: step5. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has set VideoSource & has set src_
      * @tc.expected: step5. IsMediaPlayerValid will be called 4 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(5)
         .WillRepeatedly(Return(true));
-    pattern->UpdateMediaPlayer();
+    pattern->UpdateMediaPlayerOnBg();
 
     /**
-     * @tc.steps: step6. Call UpdateMediaPlayer
-     *            case: first prepare and UpdateMediaPlayer successfully
+     * @tc.steps: step6. Call UpdateMediaPlayerOnBg
+     *            case: first prepare and UpdateMediaPlayerOnBg successfully
      * @tc.expected: step6. IsMediaPlayerValid will be called 6 times
      *                      other function will be called once and return right value when preparing MediaPlayer
      *                      firstly
@@ -573,11 +575,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(true));
 
-    pattern->UpdateMediaPlayer();
+    pattern->UpdateMediaPlayerOnBg();
 
     /**
-     * @tc.steps: step7. Call UpdateMediaPlayer several times
-     *            cases: first prepare and UpdateMediaPlayer fail
+     * @tc.steps: step7. Call UpdateMediaPlayerOnBg several times
+     *            cases: first prepare and UpdateMediaPlayerOnBg fail
      * @tc.expected: step7. IsMediaPlayerValid will be called 5 + 5 + 6 times totally.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
@@ -604,11 +606,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(true));
     pattern->src_.clear();
-    pattern->UpdateMediaPlayer();
+    pattern->UpdateMediaPlayerOnBg();
     pattern->src_.clear();
-    pattern->UpdateMediaPlayer();
+    pattern->UpdateMediaPlayerOnBg();
     pattern->src_.clear();
-    pattern->UpdateMediaPlayer();
+    pattern->UpdateMediaPlayerOnBg();
 
     // CreateMediaPlayer success but PrepareMediaPlayer fail for mediaPlayer is invalid
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
@@ -620,12 +622,12 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(false))
         .WillOnce(Return(false));
     pattern->src_.clear();
-    pattern->UpdateMediaPlayer();
+    pattern->UpdateMediaPlayerOnBg();
 }
 
 /**
  * @tc.name: VideoPatternTest009
- * @tc.desc: Test functions in UpdateMediaPlayer
+ * @tc.desc: Test functions in UpdateMediaPlayerOnBg
  * @tc.type: FUNC
  */
 HWTEST_F(VideoTestNg, VideoPatternTest009, TestSize.Level1)
@@ -967,10 +969,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     auto frameNode = CreateVideoNode(testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
-    auto rootNode = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
-    EXPECT_FALSE(rootNode == nullptr);
-    frameNode->SetHostRootId(rootNode->GetId());
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1064,8 +1062,6 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
      * @tc.expected: step1. Create Video successfully
      */
     MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
-    auto rootNode = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     VideoModelNG video;
     auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
     video.Create(videoController);
@@ -1079,7 +1075,6 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
-    frameNode->SetHostRootId(rootNode->GetId());
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     EXPECT_FALSE(videoLayoutProperty == nullptr);
 
@@ -1652,10 +1647,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
     auto frameNode = CreateVideoNode(testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
-    auto rootNode = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
-    EXPECT_FALSE(rootNode == nullptr);
-    frameNode->SetHostRootId(rootNode->GetId());
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
@@ -1729,6 +1720,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
      * @tc.expected: step4. ExitFullScreen() will be called
      */
     // construct a FullScreenManager
+    auto rootNode = MockPipelineBase::GetCurrent()->rootNode_;
     auto fullScreenManager = AceType::MakeRefPtr<FullScreenManager>(rootNode);
 
     auto flag = fullScreenManager->OnBackPressed(); // will on videoPattern->OnBackPressed()

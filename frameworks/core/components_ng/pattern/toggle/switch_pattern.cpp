@@ -331,15 +331,6 @@ void SwitchPattern::InitMouseEvent()
 
 void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
-        auto pattern = wp.Upgrade();
-        if (!pattern) {
-            return false;
-        }
-        return pattern->OnKeyEvent(event);
-    };
-    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
-
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -347,18 +338,6 @@ void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
-}
-
-bool SwitchPattern::OnKeyEvent(const KeyEvent& event)
-{
-    if (event.action != KeyAction::DOWN) {
-        return false;
-    }
-    if (event.code == KeyCode::KEY_ENTER) {
-        OnClick();
-        return true;
-    }
-    return false;
 }
 
 void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -467,5 +446,21 @@ void SwitchPattern::OnRestoreInfo(const std::string& restoreInfo)
     auto jsonIsOn = info->GetValue("IsOn");
     switchPaintProperty->UpdateIsOn(jsonIsOn->GetBool());
     OnModifyDone();
+}
+
+void SwitchPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(switchPaintProperty);
+    switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
+
+    host->MarkDirtyNode();
+    host->SetNeedCallChildrenUpdate(false);
 }
 } // namespace OHOS::Ace::NG

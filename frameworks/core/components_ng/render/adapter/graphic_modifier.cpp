@@ -17,9 +17,11 @@
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkRect.h"
-#endif
 
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
+#endif
 
 namespace OHOS::Ace::NG {
 void GraphicModifier::SetCornerRadius(const Rosen::Vector4f& radius)
@@ -64,10 +66,10 @@ RSRoundRect GraphicModifier::MakeRRect(const RSDrawingContext& context) const
     RSRect rect(0, 0, context.width, context.height);
     std::vector<RSPoint> radii(4);
     if (radius_) {
-        radii[RSRoundRect::TOP_LEFT_POS] = (radius_->Get().x_, radius_->Get().x_);
-        radii[RSRoundRect::TOP_RIGHT_POS] = (radius_->Get().y_, radius_->Get().y_);
-        radii[RSRoundRect::BOTTOM_RIGHT_POS] = (radius_->Get().z_, radius_->Get().z_);
-        radii[RSRoundRect::BOTTOM_LEFT_POS] = (radius_->Get().w_, radius_->Get().w_);
+        radii[RSRoundRect::TOP_LEFT_POS] = {radius_->Get().x_, radius_->Get().x_};
+        radii[RSRoundRect::TOP_RIGHT_POS] = {radius_->Get().y_, radius_->Get().y_};
+        radii[RSRoundRect::BOTTOM_RIGHT_POS] = {radius_->Get().z_, radius_->Get().z_};
+        radii[RSRoundRect::BOTTOM_LEFT_POS] = {radius_->Get().w_, radius_->Get().w_};
     }
     return RSRoundRect(rect, radii);
 }

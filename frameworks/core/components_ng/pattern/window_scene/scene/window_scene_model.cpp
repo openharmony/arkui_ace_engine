@@ -38,6 +38,7 @@ void WindowSceneModel::Create(uint64_t persistentId)
         auto node = FrameNode::GetOrCreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
             [sceneSession]() { return AceType::MakeRefPtr<SystemWindowScene>(sceneSession); });
         stack->Push(node);
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
         return;
     }
 
@@ -45,11 +46,13 @@ void WindowSceneModel::Create(uint64_t persistentId)
     auto nodeId = stack->ClaimNodeId();
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
+    stack->Push(windowNode);
+
+    auto windowScene = windowNode->GetPattern<WindowScene>();
+    windowScene->UpdateSession(sceneSession);
+
     if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);
     }
-    stack->Push(windowNode);
-    auto windowScene = windowNode->GetPattern<WindowScene>();
-    windowScene->UpdateSession(sceneSession);
 }
 } // namespace OHOS::Ace::NG

@@ -54,7 +54,7 @@ void WindowEventProcess::ProcessWindowDragEvent(const RefPtr<WindowNode>& window
     std::shared_ptr<MMI::PointerEvent> event = std::make_shared<MMI::PointerEvent>(*pointerEvent);
     auto lastWindowNode = lastDragWindowNode_.Upgrade();
     if ((lastWindowNode != nullptr) && (windowNode->GetId() != lastWindowNode->GetId())) {
-        LOGD("Window switching, enter window:%{public}d, leave window:%{public}d",
+        LOGD("Window switching, pull in window:%{public}d, pull out window:%{public}d",
             windowNode->GetId(), lastWindowNode->GetId());
         if (lastDragPointEvent_ != nullptr) {
             lastDragPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);

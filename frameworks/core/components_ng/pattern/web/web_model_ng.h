@@ -57,6 +57,7 @@ public:
     void SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetJsEnabled(bool isJsEnabled) override;
     void SetFileAccessEnabled(bool isFileAccessEnabled) override;
     void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled) override;
@@ -79,6 +80,7 @@ public:
     void SetScaleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetPermissionRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetBackgroundColor(Color backgroundColor) override;
     void InitialScale(float scale) override;
     void SetSearchResultReceiveEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;

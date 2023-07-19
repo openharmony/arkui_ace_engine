@@ -35,7 +35,7 @@ public:
     static void SetScrollBar(int32_t displayMode);
     static void SetScrollBarColor(const std::string& color);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
-    static void JsOnScrollIndex(const JSCallbackInfo& info);
+
     static void JsOnScrollBarUpdate(const JSCallbackInfo& info);
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetEditMode(const JSCallbackInfo& info);
@@ -55,8 +55,16 @@ public:
     static void JsOnGridDrop(const JSCallbackInfo& info);
     static void JsGridHeight(const JSCallbackInfo& info);
     static void SetNestedScroll(const JSCallbackInfo& args);
-    static void SetScrollEnabled(bool scrollEnabled);
+    static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetFriction(const JSCallbackInfo& info);
+
+    static void JsOnScroll(const JSCallbackInfo& args);
+    static void JsOnReachStart(const JSCallbackInfo& args);
+    static void JsOnReachEnd(const JSCallbackInfo& args);
+    static void JsOnScrollStart(const JSCallbackInfo& args);
+    static void JsOnScrollStop(const JSCallbackInfo& args);
+    static void JsOnScrollIndex(const JSCallbackInfo& args);
+    static void JsOnScrollFrameBegin(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

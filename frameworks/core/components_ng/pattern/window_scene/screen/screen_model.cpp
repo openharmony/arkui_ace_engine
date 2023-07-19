@@ -36,5 +36,6 @@ void ScreenModel::Create(uint64_t screenId)
         [&screenSession]() { return AceType::MakeRefPtr<ScreenPattern>(screenSession); });
     stack->Push(frameNode);
     frameNode->SetExclusiveEventForChild(true);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
 }
 } // namespace OHOS::Ace::NG

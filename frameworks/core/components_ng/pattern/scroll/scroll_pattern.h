@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/scroll/scroll_position_controller.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -188,12 +189,88 @@ public:
     void AdjustOffset(float& delta, int32_t source);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    // scrollSnap
+    std::optional<float> CalePredictSnapOffset(float delta) override;
+    bool NeedScrollSnapToSide(float delta) override;
+    void CaleSnapOffsets();
+    void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
+    void CaleSnapOffsetsByPaginations();
+
+    bool IsSnapToInterval() const
+    {
+        return snapPaginations_.empty();
+    }
+
+    std::vector<float> GetSnapOffsets() const
+    {
+        return snapOffsets_;
+    }
+
+    void SetSnapOffsets(const std::vector<float>& snapOffset)
+    {
+        snapOffsets_ = snapOffset;
+    }
+
+    void SetIntervalSize(const Dimension& intervalSize)
+    {
+        if (intervalSize_ != intervalSize) {
+            intervalSize_ = intervalSize;
+            scrollSnapUpdate_ = true;
+        }
+    }
+
+    Dimension GetIntervalSize() const
+    {
+        return intervalSize_;
+    }
+
+    void SetSnapPaginations(const std::vector<Dimension>& snapPaginations)
+    {
+        if (snapPaginations_ != snapPaginations) {
+            snapPaginations_ = snapPaginations;
+            scrollSnapUpdate_ = true;
+        }
+    }
+
+    std::vector<Dimension> GetSnapPaginations() const
+    {
+        return snapPaginations_;
+    }
+
+    void SetEnableSnapToSide(const std::pair<bool, bool>& enableSnapToSide)
+    {
+        enableSnapToSide_ = enableSnapToSide;
+    }
+
+    std::pair<bool, bool> GetEnableSnapToSide() const
+    {
+        return enableSnapToSide_;
+    }
+
+    void SetScrollSnapUpdate(bool scrollSnapUpdate)
+    {
+        scrollSnapUpdate_ = scrollSnapUpdate;
+    }
+
+    bool GetScrollSnapUpdate() const
+    {
+        return scrollSnapUpdate_;
+    }
+
+    ScrollSnapAlign GetScrollSnapAlign() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN_NOLOG(host, ScrollSnapAlign::NONE);
+        auto scrollLayoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_RETURN_NOLOG(scrollLayoutProperty, ScrollSnapAlign::NONE);
+        return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
+    }
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
 private:
     void OnModifyDone() override;
-    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     bool IsCrashTop() const;
@@ -223,10 +300,18 @@ private:
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;
     SizeF viewPort_;
+    SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
     bool scrollStop_ = false;
     int32_t source_ = SCROLL_FROM_NONE;
+
+    // scrollSnap
+    std::vector<float> snapOffsets_;
+    std::vector<Dimension> snapPaginations_;
+    std::pair<bool, bool> enableSnapToSide_ = { true, true };
+    Dimension intervalSize_;
+    bool scrollSnapUpdate_ = false;
 };
 
 } // namespace OHOS::Ace::NG

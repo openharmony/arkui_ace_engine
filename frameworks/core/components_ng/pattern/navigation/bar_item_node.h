@@ -20,6 +20,7 @@
 #include <optional>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,6 +55,36 @@ public:
         return icon_;
     }
 
+    void SetBarItemUsedInToolbarConfiguration(bool isInToolbar)
+    {
+        isInToolbar_ = isInToolbar;
+    }
+
+    bool IsBarItemUsedInToolbarConfiguration() const
+    {
+        return isInToolbar_;
+    }
+
+    void SetIsMoreItemNode(bool isMoreItemNode)
+    {
+        isMoreItemNode_ = isMoreItemNode;
+    }
+
+    bool IsMoreItemNode() const
+    {
+        return isMoreItemNode_;
+    }
+
+    void SetIsTitleMenuNodeShowing(bool isTitleMenuNodeShowing)
+    {
+        isTitleMenuNodeShowing_ = isTitleMenuNodeShowing;
+    }
+
+    bool IsTitleMenuNodeShowing() const
+    {
+        return isTitleMenuNodeShowing_;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(IconSrc, std::string);
     void OnIconSrcUpdate(const std::string& value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Text, std::string);
@@ -62,6 +93,9 @@ public:
 private:
     RefPtr<UINode> text_;
     RefPtr<UINode> icon_;
+    bool isInToolbar_ = false;
+    bool isMoreItemNode_ = false;
+    bool isTitleMenuNodeShowing_ = false;
 };
 
 } // namespace OHOS::Ace::NG

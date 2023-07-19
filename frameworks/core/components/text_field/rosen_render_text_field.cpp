@@ -372,7 +372,7 @@ void RosenRenderTextField::PaintSelection(RSCanvas* canvas) const
 #else
         auto rect = RSRect(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom());
 
-        if (box.direction == txt::TextDirection::ltr) {
+        if (box.direction == Rosen::TextDirection::LTR) {
             rect = RSRect(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom());
         }
         canvas->AttachBrush(brush);
@@ -658,7 +658,8 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
 #endif
 
     if ((SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-            SystemProperties::GetDeviceType() == DeviceType::TABLET) &&
+            SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) &&
         hasFocus_) {
         PaintFocus(offset, GetPaintRect().GetSize(), context);
     }

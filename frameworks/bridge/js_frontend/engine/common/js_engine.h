@@ -20,6 +20,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "base/utils/macros.h"
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
@@ -77,7 +78,7 @@ public:
 private:
     InspectorFunc callback_;
 };
-class JsEngine : public AceType {
+class ACE_FORCE_EXPORT JsEngine : public AceType {
     DECLARE_ACE_TYPE(JsEngine, AceType);
 
 public:

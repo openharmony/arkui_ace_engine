@@ -18,6 +18,8 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "core/animation/bilateral_spring_node.h"
 #include "core/animation/spring_model.h"
 #include "core/components/common/layout/constants.h"
@@ -40,19 +42,9 @@ constexpr Dimension CHAIN_INTERVAL_DEFAULT = 20.0_vp;
 constexpr double CHAIN_SPRING_MASS = 1.0;
 constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
-constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
-constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 } // namespace
-
-void ListPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
-    host->GetRenderContext()->UpdateClipEdge(true);
-}
 
 void ListPattern::OnModifyDone()
 {
@@ -124,6 +116,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             float targetPos = 0.0f;
             switch (scrollAlign_) {
                 case ScrollAlign::START:
+                case ScrollAlign::NONE:
                     targetPos = iter->second.startPos;
                     break;
                 case ScrollAlign::CENTER:
@@ -178,6 +171,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
         lanes_ = lanesLayoutAlgorithm->GetLanes();
+        laneGutter_ = lanesLayoutAlgorithm->GetLaneGutter();
     }
     CheckScrollable();
 
@@ -206,6 +200,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     SetScrollState(SCROLL_FROM_NONE);
     isInitialized_ = true;
+    MarkSelectedItems();
     return true;
 }
 
@@ -243,8 +238,15 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         paint->SetEdgeEffect(scrollEffect);
     }
     if (!listContentModifier_) {
-        listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, paint);
+        const auto& geometryNode = host->GetGeometryNode();
+        auto size = geometryNode->GetPaddingSize();
+        OffsetF offset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+        listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
+
+    paint->SetLaneGutter(laneGutter_);
     listContentModifier_->SetItemsPosition(itemPosition_);
     paint->SetContentModifier(listContentModifier_);
     return paint;
@@ -273,7 +275,7 @@ void ListPattern::ProcessEvent(
                 onScroll(offsetVP, ScrollState::SCROLL);
                 onScroll(0.0_vp, ScrollState::IDLE);
             } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-                source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
                 onScroll(offsetVP, ScrollState::FLING);
                 onScroll(0.0_vp, ScrollState::IDLE);
             } else {
@@ -291,7 +293,7 @@ void ListPattern::ProcessEvent(
         if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
             onScroll(offsetVP, ScrollState::SCROLL);
         } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-            source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+            source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
             onScroll(offsetVP, ScrollState::FLING);
         } else {
             onScroll(offsetVP, ScrollState::IDLE);
@@ -326,7 +328,11 @@ void ListPattern::ProcessEvent(
     if (scrollStop_) {
         auto onScrollStop = listEventHub->GetOnScrollStop();
         if (!GetScrollAbort() && onScrollStop) {
+            SetScrollState(SCROLL_FROM_NONE);
             onScrollStop();
+        }
+        if (!GetScrollAbort()) {
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         }
         scrollStop_ = false;
         SetScrollAbort(false);
@@ -704,6 +710,7 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 
 void ListPattern::FireOnScrollStart()
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -727,15 +734,7 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
         return true;
     }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && scrollBar->IsDriving()) {
-        offset = scrollBar->CalcPatternOffset(offset);
-        if (source == SCROLL_FROM_UPDATE) {
-            source = SCROLL_FROM_BAR;
-        }
-    } else {
-        ProcessDragUpdate(offset, source);
-    }
+    ProcessDragUpdate(offset, source);
     return UpdateCurrentOffset(offset, source);
 }
 
@@ -938,7 +937,8 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             moveStep = -1;
             nextIndex = maxListItemIndex_;
             nextIndexInGroup = -1;
-        } else if ((isVertical && step == FocusStep::DOWN) || (!isVertical && step == FocusStep::RIGHT)) {
+        } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT) ||
+                (step == FocusStep::TAB)) {
             moveStep = 1;
             if ((curIndexInGroup == -1) || (curIndexInGroup >= curListItemGroupPara.itemEndIndex)) {
                 nextIndex = curIndex + moveStep;
@@ -946,7 +946,8 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             } else {
                 nextIndexInGroup = curIndexInGroup + moveStep;
             }
-        } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
+        } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT) ||
+                (step == FocusStep::SHIFT_TAB)) {
             moveStep = -1;
             if ((curIndexInGroup == -1) || (curIndexInGroup <= 0)) {
                 nextIndex = curIndex + moveStep;
@@ -982,7 +983,8 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
                 moveStep = -curListItemGroupPara.lanes;
                 nextIndexInGroup = curIndexInGroup + moveStep;
             }
-        } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN)) {
+        } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN) ||
+                   (step == FocusStep::TAB)) {
             moveStep = 1;
             if (((curIndexInGroup == -1) && ((curIndex - (lanes_ - 1)) % lanes_ != 0)) || ((curIndexInGroup != -1) &&
                 ((curIndexInGroup - (curListItemGroupPara.lanes - 1)) % curListItemGroupPara.lanes == 0))) {
@@ -992,7 +994,8 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
                 ((curIndexInGroup - (curListItemGroupPara.lanes - 1)) % curListItemGroupPara.lanes != 0)) {
                 nextIndexInGroup = curIndexInGroup + moveStep;
             }
-        } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP)) {
+        } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP) ||
+                   (step == FocusStep::SHIFT_TAB)) {
             moveStep = -1;
             if (((curIndexInGroup == -1) && (curIndex % lanes_ != 0)) || ((curIndexInGroup != -1) &&
                 (curIndexInGroup % curListItemGroupPara.lanes == 0))) {
@@ -1055,6 +1058,20 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
     return nullptr;
 }
 
+bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    CHECK_NULL_RETURN_NOLOG(focusFrameNode, false);
+    auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_RETURN_NOLOG(focusPattern, false);
+    auto curIndex = focusPattern->GetIndexInList();
+    ScrollToIndex(curIndex, smooth_, ScrollAlign::AUTO);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
+    return true;
+}
+
 WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {
@@ -1070,7 +1087,7 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
     auto isScrollIndex = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, isScrollIndex);
-    if (nextIndex < curIndex && nextIndex < startIndex_) {
+    if (nextIndex < startIndex_) {
         if (nextIndexInGroup == -1) {
             isScrollIndex = true;
             ScrollToIndex(nextIndex, smooth_, ScrollAlign::START);
@@ -1079,7 +1096,7 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
             ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::START);
             pipeline->FlushUITasks();
         }
-    } else if (nextIndex > curIndex && nextIndex > endIndex_) {
+    } else if (nextIndex > endIndex_) {
         if (nextIndexInGroup == -1) {
             isScrollIndex = true;
             ScrollToIndex(nextIndex, smooth_, ScrollAlign::END);
@@ -1091,6 +1108,7 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
     }
     return isScrollIndex;
 }
+
 bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
     int32_t moveStep, FocusStep step, bool isScrollIndex)
 {
@@ -1368,6 +1386,23 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     if (NearZero(dragOffset)) {
         return;
     }
+    if (NeedScrollSnapAlignEffect()) {
+        auto delta = 0.0f;
+        if (chainAnimation_->GetControlIndex() < startIndex_ - 1) {
+            delta = chainAnimation_->SetControlIndex(std::max(startIndex_ - 1, 0));
+        }
+        if (chainAnimation_->GetControlIndex() > endIndex_ + 1) {
+            delta = chainAnimation_->SetControlIndex(std::min(endIndex_ + 1, maxListItemIndex_));
+        }
+        if (!NearZero(delta)) {
+            auto scrollableEvent = GetScrollableEvent();
+            CHECK_NULL_VOID(scrollableEvent);
+            auto scrollable = scrollableEvent->GetScrollable();
+            CHECK_NULL_VOID(scrollable);
+            scrollable->UpdateScrollSnapStartOffset(delta);
+            currentDelta_ -= delta;
+        }
+    }
     bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
     chainAnimation_->SetDelta(-dragOffset, overDrag);
 }
@@ -1376,75 +1411,6 @@ float ListPattern::GetChainDelta(int32_t index) const
 {
     CHECK_NULL_RETURN_NOLOG(chainAnimation_, 0.0f);
     return chainAnimation_->GetValue(index);
-}
-
-void ListPattern::UninitMouseEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto mouseEventHub = host->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent(nullptr);
-    ClearMultiSelect();
-    isMouseEventInit_ = false;
-}
-
-void ListPattern::InitMouseEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto mouseEventHub = host->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEventWithoutKeyboard(info);
-        }
-    });
-    isMouseEventInit_ = true;
-}
-
-void ListPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
-{
-    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
-        return;
-    }
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-    if (manager->IsDragged()) {
-        return;
-    }
-
-    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
-    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-    if (info.GetAction() == MouseAction::PRESS) {
-        ClearMultiSelect();
-        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        mousePressed_ = true;
-        // do not select when click
-    } else if (info.GetAction() == MouseAction::MOVE) {
-        if (!mousePressed_) {
-            return;
-        }
-        const static double FRAME_SELECTION_DISTANCE =
-            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
-        auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
-        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
-            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-            MultiSelectWithoutKeyboard(selectedZone);
-        }
-    } else if (info.GetAction() == MouseAction::RELEASE) {
-        mouseStartOffset_.Reset();
-        mouseEndOffset_.Reset();
-        mousePressed_ = false;
-        ClearSelectedZone();
-    }
 }
 
 void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
@@ -1483,9 +1449,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
         }
     }
 
-    auto hostContext = host->GetRenderContext();
-    CHECK_NULL_VOID(hostContext);
-    hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+    DrawSelectedZone(selectedZone);
 }
 
 void ListPattern::HandleCardModeSelectedEvent(
@@ -1496,7 +1460,9 @@ void ListPattern::HandleCardModeSelectedEvent(
     itemGroupNode->GenerateOneDepthVisibleFrame(childrens);
     for (const auto& item : childrens) {
         auto itemPattern = item->GetPattern<ListItemPattern>();
-        CHECK_NULL_VOID(itemPattern);
+        if (!itemPattern) {
+            continue;
+        }
         if (!itemPattern->Selectable()) {
             continue;
         }
@@ -1520,55 +1486,53 @@ void ListPattern::ClearMultiSelect()
     CHECK_NULL_VOID(host);
     std::list<RefPtr<FrameNode>> children;
     host->GenerateOneDepthAllFrame(children);
-    for (const auto& item : children) {
-        if (!AceType::InstanceOf<FrameNode>(item)) {
+    for (const auto& child : children) {
+        if (!child) {
             continue;
         }
-
-        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
-        auto itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
-        CHECK_NULL_VOID(itemPattern);
-        itemPattern->MarkIsSelected(false);
+        auto itemPattern = child->GetPattern<ListItemPattern>();
+        if (itemPattern) {
+            itemPattern->MarkIsSelected(false);
+            continue;
+        }
+        auto itemGroupPattern = child->GetPattern<ListItemGroupPattern>();
+        if (itemGroupPattern) {
+            std::list<RefPtr<FrameNode>> itemChildren;
+            child->GenerateOneDepthAllFrame(itemChildren);
+            for (const auto& item : itemChildren) {
+                if (!item) {
+                    continue;
+                }
+                itemPattern = item->GetPattern<ListItemPattern>();
+                if (itemPattern) {
+                    itemPattern->MarkIsSelected(false);
+                }
+            }
+        }
     }
 
     ClearSelectedZone();
 }
 
-void ListPattern::ClearSelectedZone()
+bool ListPattern::IsItemSelected(const MouseInfo& info)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hostContext = host->GetRenderContext();
-    CHECK_NULL_VOID(hostContext);
-    hostContext->UpdateMouseSelectWithRect(RectF(), SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
-}
-
-RectF ListPattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset)
-{
-    RectF selectedZone;
-    if (startOffset.GetX() <= endOffset.GetX()) {
-        if (startOffset.GetY() <= endOffset.GetY()) {
-            // bottom right
-            selectedZone = RectF(startOffset.GetX(), startOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
-                endOffset.GetY() - startOffset.GetY());
-        } else {
-            // top right
-            selectedZone = RectF(startOffset.GetX(), endOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
-                startOffset.GetY() - endOffset.GetY());
-        }
-    } else {
-        if (startOffset.GetY() <= endOffset.GetY()) {
-            // bottom left
-            selectedZone = RectF(endOffset.GetX(), startOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
-                endOffset.GetY() - startOffset.GetY());
-        } else {
-            // top left
-            selectedZone = RectF(endOffset.GetX(), endOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
-                startOffset.GetY() - endOffset.GetY());
-        }
+    CHECK_NULL_RETURN(host, false);
+    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    CHECK_NULL_RETURN_NOLOG(node, false);
+    auto itemPattern = node->GetPattern<ListItemPattern>();
+    if (itemPattern) {
+        return itemPattern->IsSelected();
     }
-
-    return selectedZone;
+    auto itemGroupPattern = node->GetPattern<ListItemGroupPattern>();
+    if (itemGroupPattern) {
+        auto itemNode = node->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        CHECK_NULL_RETURN_NOLOG(itemNode, false);
+        itemPattern = itemNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_RETURN_NOLOG(itemPattern, false);
+        return itemPattern->IsSelected();
+    }
+    return false;
 }
 
 void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)

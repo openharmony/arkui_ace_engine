@@ -210,6 +210,11 @@ public:
 
     void OnResolutionChange() const;
 
+    void ResetLastBoundsRect()
+    {
+        lastBoundsRect_.SetRect(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
     void RegisterMediaPlayerEvent();

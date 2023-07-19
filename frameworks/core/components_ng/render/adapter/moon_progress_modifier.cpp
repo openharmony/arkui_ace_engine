@@ -139,7 +139,7 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas, const SizeF& frameS
 #ifndef USE_ROSEN_DRAWING
     path.SetFillStyle(RSPathFillType::EVENTODD);
 #else
-    path.SetFillStyle(RSPathFillType::EVEN_ODD);
+    path.SetFillStyle(RSPathFillType::EVENTODD);
 #endif
     path.AddCircle(centerPt.GetX(), centerPt.GetY(), bigRadius, RSPathDirection::CW_DIRECTION);
     if (angle < FLOAT_ONE_ZERO) {

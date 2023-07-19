@@ -215,6 +215,36 @@ public:
         onClick_ = std::move(onClick);
     }
     void OnColorConfigurationUpdate() override;
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+    void InitDragEvent();
+    virtual std::function<void(Offset)> GetThumbnailCallback();
+#endif
+
+    void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+        const std::vector<Rect>& rectsForPlaceholders, OffsetF contentOffset) override
+    {
+        placeHolderIndex_ = placeHolderIndex;
+        imageOffset_ = contentOffset;
+        rectsForPlaceholders_ = rectsForPlaceholders;
+    }
+
+    const std::vector<int32_t>& GetPlaceHolderIndex()
+    {
+        return placeHolderIndex_;
+    }
+
+    const std::vector<Rect>& GetRectsForPlaceholders()
+    {
+        return rectsForPlaceholders_;
+    }
+
+    OffsetF GetContentOffset() override
+    {
+        return imageOffset_;
+    }
+
 protected:
     void HandleOnCopy();
     void InitMouseEvent();
@@ -226,30 +256,37 @@ protected:
     bool IsDraggable(const Offset& localOffset);
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
+    virtual void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool IsSelected() const;
     virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    virtual void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     std::wstring GetWideText() const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
     RectF contentRect_;
+    WeakPtr<FrameNode> dragNodeWk_;
+    RefPtr<FrameNode> dragNode_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     CopyOptions copyOption_ = CopyOptions::None;
+    
+    OffsetF imageOffset_;
     std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::vector<MenuOptionsParam> menuOptionItems_;
+    std::vector<int32_t> placeHolderIndex_;
     TextSelector textSelector_;
     float baselineOffset_ = 0.0f;
     bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
-    
+    std::vector<Rect> rectsForPlaceholders_;
+
 private:
-    void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -259,11 +296,6 @@ private:
     void HandlePanStart(const GestureEvent& info);
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
-#ifdef ENABLE_DRAG_FRAMEWORK
-    DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
-    void InitDragEvent();
-    std::function<void(Offset)> GetThumbnailCallback();
-#endif
     inline RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
@@ -271,11 +303,10 @@ private:
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
     void FontRegisterCallback(RefPtr<SpanNode> spanNode);
     // to check if drag is in progress
+
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
-    WeakPtr<FrameNode> dragNodeWk_;
     bool panEventInitialized_ = false;
-    RefPtr<FrameNode> dragNode_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;

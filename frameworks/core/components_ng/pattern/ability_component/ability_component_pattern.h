@@ -34,8 +34,11 @@ class ACE_EXPORT AbilityComponentPattern : public UIExtensionPattern {
 
 public:
     AbilityComponentPattern(const std::string& bundleName, const std::string& abilityName)
-        : UIExtensionPattern(Ace::WantWrap::CreateWantWrap(bundleName, abilityName))
-    {}
+        : UIExtensionPattern(Ace::WantWrap::CreateWantWrap("AbilityComp", abilityName))
+    {
+        bundleName_ = bundleName;
+        abilityName_ = abilityName;
+    }
 
     ~AbilityComponentPattern() override
     {
@@ -117,7 +120,8 @@ private:
     Rect lastRect_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<WindowExtensionConnectionAdapterNG> adapter_;
-
+    std::string bundleName_;
+    std::string abilityName_;
     ACE_DISALLOW_COPY_AND_MOVE(AbilityComponentPattern);
 };
 

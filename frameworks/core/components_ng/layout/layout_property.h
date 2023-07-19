@@ -215,6 +215,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsBindOverlay, bool, PROPERTY_UPDATE_MEASURE);
 #endif // ENABLE_DRAG_FRAMEWORK
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(GeometryTransitionId, std::string);
 
 public:
     void UpdateVisibility(const VisibleType& value, bool allowTransition = false);
@@ -260,6 +261,8 @@ public:
         const std::optional<Dimension>& overlayOffsetX, const std::optional<Dimension>& overlayOffsetY);
 
     void GetOverlayOffset(Dimension& overlayOffsetX, Dimension& overlayOffsetY);
+
+    static void UpdateAllGeometryTransition(const RefPtr<UINode>& parent);
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);

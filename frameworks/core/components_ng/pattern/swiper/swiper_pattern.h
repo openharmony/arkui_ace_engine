@@ -181,7 +181,7 @@ public:
 
     int32_t GetCurrentShownIndex() const
     {
-        return currentIndex_;
+        return GetLoopIndex(currentIndex_);
     }
 
     RefPtr<SwiperController> GetSwiperController() const
@@ -201,9 +201,7 @@ public:
 
     int32_t GetCurrentIndex()
     {
-        currentIndex_ = currentIndex_ < 0 || currentIndex_ > (TotalCount() - 1) ? 0 : currentIndex_;
-        currentIndex_ = IsLoop() ? currentIndex_ : std::clamp(currentIndex_, 0, TotalCount() - GetDisplayCount());
-        return currentIndex_;
+        return GetLoopIndex(currentIndex_);
     }
 
     float GetTurnPageRate() const
@@ -522,7 +520,6 @@ private:
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
     WeakPtr<FocusHub> PreviousFocus(const RefPtr<FocusHub>& curFocusNode);
     WeakPtr<FocusHub> NextFocus(const RefPtr<FocusHub>& curFocusNode);
-    int32_t ComputeLoadCount(int32_t cacheCount);
     void SetAccessibilityAction();
     bool NeedStartAutoPlay() const;
     void CheckAndSetArrowHoverState(const PointF& mousePoint);
@@ -535,9 +532,16 @@ private:
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
     bool IsChildrenSizeLessThanSwiper();
+    void BeforeCreateLayoutWrapper() override;
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
+    int32_t ComputeNextIndexByVelocity(float velocity) const;
+    void UpdateCurrentIndex(int32_t index);
+    void OnSpringAnimationStart(float velocity);
+    void OnSpringAndFadeAnimationFinish();
+    void OnFadeAnimationStart();
+    int32_t TotalDisPlayCount() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -572,6 +576,7 @@ private:
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
+    int32_t autoPlayCurrentIndex_ = 0;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -620,6 +625,7 @@ private:
 
     bool usePropertyAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
+    bool isUserFinish_ = true;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
 };

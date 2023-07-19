@@ -56,6 +56,22 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    bool IsMeasureBoundary() const override
+    {
+        // May be optimized later by not using DynamicCast.
+        auto property = GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_RETURN(property, false);
+        bool isVertical = false;
+        if (property->GetFlexDirection().has_value()) {
+            isVertical = property->GetFlexDirection().value() == FlexDirection::COLUMN ||
+                         property->GetFlexDirection().value() == FlexDirection::COLUMN_REVERSE;
+        }
+        if (isVertical) {
+            return property->HasFixedWidth();
+        }
+        return property->HasFixedHeight();
+    }
+
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         auto property = GetLayoutProperty<FlexLayoutProperty>();

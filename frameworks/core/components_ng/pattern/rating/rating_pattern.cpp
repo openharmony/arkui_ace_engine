@@ -103,8 +103,6 @@ LoadFailNotifyTask RatingPattern::CreateLoadFailCallback(int32_t imageFlag)
 
 void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (imageFlag == 0b001) {
         foregroundImageCanvas_ = foregroundImageLoadingCtx_->MoveCanvasImage();
         foregroundConfig_.srcRect_ = foregroundImageLoadingCtx_->GetSrcRect();
@@ -126,20 +124,18 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
     if (imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
         LOGD("Rating foreground, secondary and background image are loaded successfully.");
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
 void RatingPattern::OnImageDataReady(int32_t imageFlag)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     imageReadyStateCode_ = imageReadyStateCode_ | imageFlag;
 
     // 3 images are ready, invoke to update layout to calculate single star size.
     if (imageReadyStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
         LOGD("Rating foreground, secondary and background image are ready.");
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
 }
 
@@ -199,7 +195,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
             secondaryImageCanvas_->IsStatic())) {
         ratingModifier_->SetNeedDraw(true);
     }
-    return MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_);
+    auto paintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_);
+    paintMethod->UpdateFocusState(isfocus_, focusRatingScore_);
+    return paintMethod;
 }
 
 bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -259,7 +257,7 @@ void RatingPattern::ConstrainsRatingScore()
     // if ratingScore < 0, assign the value defined in theme.
     if (ratingRenderProperty->HasRatingScore()) {
         if (LessOrEqual(ratingRenderProperty->GetRatingScore().value(), 0.0)) {
-            ratingRenderProperty->UpdateRatingScore(GetRatingScoreFromTheme().value_or(0.0));
+            UpdateRatingScore(GetRatingScoreFromTheme().value_or(0.0));
         }
     }
 
@@ -289,7 +287,7 @@ void RatingPattern::ConstrainsRatingScore()
     if (!hasInit_) {
         hasInit_ = true;
     }
-    ratingRenderProperty->UpdateRatingScore(drawScore);
+    UpdateRatingScore(drawScore);
     lastRatingScore_ = drawScore;
 }
 
@@ -322,13 +320,11 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     CHECK_NULL_VOID_NOLOG(!NearEqual(newDrawScore, oldDrawScore));
 
     // step4: Update the ratingScore saved in renderProperty and update render.
-    ratingRenderProperty->UpdateRatingScore(newDrawScore);
+    UpdateRatingScore(newDrawScore);
     if (isDrag) {
         ratingRenderProperty->UpdateTouchStar(static_cast<int32_t>(wholeStarNum));
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool RatingPattern::IsIndicator()
@@ -420,9 +416,7 @@ void RatingPattern::HandleTouchUp()
 {
     CHECK_NULL_VOID_NOLOG(!IsIndicator());
     state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
@@ -505,7 +499,7 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     const auto& content = host->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto singleStarHeight = content->GetRect().Height();
-    auto ratingScore = property->GetRatingScoreValue();
+    auto ratingScore = focusRatingScore_;
     auto wholeStarNum = fmax(ceil(ratingScore) - 1, 0.0);
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -530,7 +524,8 @@ void RatingPattern::PaintFocusState(double ratingScore)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    isfocus_ = true;
+    focusRatingScore_ = ratingScore;
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
 
@@ -547,21 +542,35 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
-    double ratingScore = ratingRenderProperty->GetRatingScoreValue();
+    double ratingScore = focusRatingScore_;
+    auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    double starNum =
+        ratingLayoutProperty->GetStarsValue(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(
         GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE));
     if (event.code == KeyCode::KEY_DPAD_LEFT) {
         ratingScore = fmax(ratingScore - stepSize, 0.0);
-        ratingRenderProperty->UpdateRatingScore(ratingScore);
         PaintFocusState(ratingScore);
         return true;
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT) {
-        ratingScore =
-            fmin(ratingScore + stepSize, GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
-                                             GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)));
-        ratingRenderProperty->UpdateRatingScore(ratingScore);
+        ratingScore = fmin(ratingScore + stepSize, starNum);
         PaintFocusState(ratingScore);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_MOVE_HOME) {
+        ratingScore = 1;
+        PaintFocusState(ratingScore);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_MOVE_END) {
+        ratingScore = starNum;
+        PaintFocusState(ratingScore);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+        ratingRenderProperty->UpdateRatingScore(ratingScore);
+        FireChangeEvent();
         return true;
     }
     return false;
@@ -583,6 +592,30 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+
+    auto onBlur = [wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->OnBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(std::move(onBlur));
+}
+
+void RatingPattern::OnBlurEvent()
+{
+    isfocus_ = false;
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RatingPattern::UpdateRatingScore(double ratingScore)
+{
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    ratingRenderProperty->UpdateRatingScore(ratingScore);
+    focusRatingScore_ = ratingScore;
 }
 
 void RatingPattern::InitMouseEvent()
@@ -617,9 +650,7 @@ void RatingPattern::HandleHoverEvent(bool isHover)
 {
     isHover_ = isHover;
     state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVER : RatingModifier::RatingAnimationType::NONE;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RatingPattern::HandleMouseEvent(MouseInfo& info)
@@ -783,6 +814,13 @@ void RatingPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
+}
+
+void RatingPattern::MarkDirtyNode(const PropertyChangeFlag& flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(flag);
 }
 
 void RatingPattern::PrepareAnimation(const RefPtr<CanvasImage>& image)

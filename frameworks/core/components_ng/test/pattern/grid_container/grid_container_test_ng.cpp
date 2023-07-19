@@ -37,7 +37,7 @@ constexpr float DEFAULT_WIDTH = 800.0f;
 constexpr int32_t DEFAULT_COLUMN_NUM = 8;
 constexpr float DEFAULT_COLUMN_WIDTH = 100.0f;
 
-void MeasureLayout(RefPtr<LayoutWrapper>& container, RefPtr<LayoutWrapper>& text)
+void MeasureLayout(RefPtr<LayoutWrapperNode>& container, RefPtr<LayoutWrapperNode>& text)
 {
     auto algorithm = container->GetLayoutAlgorithm();
     algorithm->Measure(AceType::RawPtr(container));
@@ -56,7 +56,7 @@ void MeasureLayout(RefPtr<LayoutWrapper>& container, RefPtr<LayoutWrapper>& text
 
 class GridContainerTestNg : public testing::Test {
 public:
-    RefPtr<LayoutWrapper> CreateGridContainerWithChild()
+    RefPtr<LayoutWrapperNode> CreateGridContainerWithChild()
     {
         GridContainerInfo::Builder builder;
         GridContainerModelNG modelNG;

@@ -20,6 +20,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
@@ -31,7 +32,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
-class GridScrollBar;
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
@@ -104,6 +104,8 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<GridEventHub>();
@@ -129,8 +131,6 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-
-    void OnMouseSelectAll();
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
@@ -159,6 +159,8 @@ public:
 
     bool UpdateStartIndex(int32_t index);
 
+    bool UpdateStartIndex(int32_t index, ScrollAlign align);
+
     float GetTotalOffset() const override
     {
         return EstimateHeight();
@@ -178,6 +180,7 @@ public:
     int32_t GetChildrenCount() const;
     void MoveItems(int32_t itemIndex, int32_t insertIndex);
     void ClearDragState();
+    float EstimateHeight() const;
 
 private:
     float GetMainGap();
@@ -187,7 +190,6 @@ private:
     bool IsOutOfBoundary();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
-    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     float GetMainContentSize() const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -206,38 +208,36 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-    void UninitMouseEvent();
-    void InitMouseEvent();
-    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
-    void ClearMultiSelect();
-    void ClearSelectedZone();
-    void OnMouseRelease();
-    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
-    void MultiSelectWithoutKeyboard(const RectF& selectedZone);
+
+    void ClearMultiSelect() override;
+    bool IsItemSelected(const MouseInfo& info) override;
+    void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
-    float EstimateHeight() const;
 
     GridLayoutInfo gridLayoutInfo_;
+    void ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
+                      bool prevReachEnd, bool reachStart);
+    void MarkDirtyNodeSelf();
+    void OnScrollEndCallback() override;
+    void FireOnScrollStart();
+    void InitScrollableEvent();
+
     RefPtr<GridPositionController> positionController_;
     float animatorOffset_ = 0.0f;
+    bool scrollStop_ = false;
 
-    bool multiSelectable_ = false;
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
-    bool isMouseEventInit_ = false;
+
     bool scrollable_ = true;
     int32_t scrollState_ = SCROLL_FROM_NONE;
-    bool mousePressed_ = false;
+
     bool firstShow_ = true;
 
     int32_t lastFocusItemMainIndex_ = 0;
     int32_t lastFocusItemCrossIndex_ = 0;
-
-    OffsetF mouseStartOffset_;
-    OffsetF mouseEndOffset_;
-    OffsetF mousePressOffset_;
 
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
 

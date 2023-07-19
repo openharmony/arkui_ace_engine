@@ -72,7 +72,8 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     V2::ItemDivider itemDivider;
     auto divider = layoutProperty->GetDivider().value_or(itemDivider);
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
-    return MakeRefPtr<ListItemGroupPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
+    ListItemGroupPaintInfo listItemGroupPaintInfo { drawVertical, lanes_, spaceWidth_, laneGutter_ };
+    return MakeRefPtr<ListItemGroupPaintMethod>(divider, listItemGroupPaintInfo, itemPosition_);
 }
 
 bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -88,6 +89,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
     lanes_ = layoutAlgorithm->GetLanes();
     axis_ = layoutAlgorithm->GetAxis();
+    laneGutter_ = layoutAlgorithm->GetLaneGutter();
     itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
     itemDiasplayStartIndex_ = layoutAlgorithm->GetStartIndex();
     itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();

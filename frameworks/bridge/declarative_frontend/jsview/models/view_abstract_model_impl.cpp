@@ -670,7 +670,7 @@ void ViewAbstractModelImpl::SetTranslate(const Dimension& x, const Dimension& y,
     transform->Translate(x, y, z, option);
 }
 
-void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle)
+void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle, float perspective)
 {
     RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
@@ -1434,6 +1434,8 @@ RefPtr<SelectTheme> GetSelectTheme()
     CHECK_NULL_RETURN(context, nullptr);
     return context->GetTheme<SelectTheme>();
 }
+
+void ViewAbstractModelImpl::BindBackground(std::function<void()>&& buildFunc, const Alignment& align) {}
 
 GestureEventFunc CreateMenuEventWithParams(
     const WeakPtr<OHOS::Ace::MenuComponent>& weak, std::vector<NG::OptionParam>&& params)

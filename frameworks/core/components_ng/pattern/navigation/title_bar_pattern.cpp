@@ -43,6 +43,9 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         CHECK_NULL_VOID(backButtonImageNode);
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
+        if (titleBarLayoutProperty->HasNoPixMap() && titleBarLayoutProperty->HasImageSource()) {
+            backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
+        }
         auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
         CHECK_NULL_VOID(navBarNode);
         auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
@@ -98,6 +101,13 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
         }
     }
+
+    if (hostNode->GetSubtitle()) {
+        titleLayoutProperty->UpdateMaxLines(1);
+    } else {
+        titleLayoutProperty->UpdateMaxLines(TITLEBAR_MAX_LINES);
+    }
+
     titleNode->MarkModifyDone();
 }
 

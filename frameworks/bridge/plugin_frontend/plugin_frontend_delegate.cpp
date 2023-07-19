@@ -1148,7 +1148,7 @@ void PluginFrontendDelegate::OnSurfaceChanged()
     OnMediaQueryUpdate();
 }
 
-void PluginFrontendDelegate::OnMediaQueryUpdate()
+void PluginFrontendDelegate::OnMediaQueryUpdate(bool isSynchronous)
 {
     if (mediaQueryInfo_->GetIsInit()) {
         return;

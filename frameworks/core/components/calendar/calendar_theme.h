@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,6 @@ constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_DAY_COLOR = Color(0xff555e6b);
 constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR = Color(0xff555e6b);
 constexpr Color DEFAULT_CALENDAR_FOCUS_AREA_BACKGROUND_COLOR = Color(0xff5ea1ff);
 constexpr Color DEFAULT_CALENDAR_BLUR_AREA_BACKGROUND_COLOR = Color(0xffffffff);
-
 } // namespace
 
 struct CalendarThemeStructure {
@@ -341,6 +340,74 @@ public:
                 CALENDAR_FOCUS_AREA_BACKGROUND_COLOR, DEFAULT_CALENDAR_FOCUS_AREA_BACKGROUND_COLOR);
             theme->calendarTheme_.blurAreaBackgroundColor = pattern->GetAttr<Color>(
                 CALENDAR_BLUR_AREA_BACKGROUND_COLOR, DEFAULT_CALENDAR_BLUR_AREA_BACKGROUND_COLOR);
+            // calendar picker
+            theme->entryBorderColor_ = pattern->GetAttr<Color>("calendar_picker_entry_border_color", Color());
+            theme->entryArrowColor_ = pattern->GetAttr<Color>("calendar_picker_entry_arrow_color", Color());
+            theme->selectBackgroundColor_ = pattern->GetAttr<Color>(
+                "calendar_picker_select_background_color", Color());
+            theme->dialogBackgroundColor_ = pattern->GetAttr<Color>(
+                "calendar_picker_dialog_background_color", Color());
+            theme->calendarTitleFontColor_ = pattern->GetAttr<Color>("calendar_picker_title_font_color", Color());
+            Color currentMonthColor = pattern->GetAttr<Color>("calendar_picker_title_font_color", Color());
+            theme->textCurrentMonthColor_ = currentMonthColor.BlendOpacity(
+                pattern->GetAttr<double>("calendar_picker_attribute_alpha_content_primary", 0.0));
+            theme->textNonCurrentMonthColor_ = currentMonthColor.BlendOpacity(
+                pattern->GetAttr<double>("calendar_picker_attribute_alpha_content_tertiary", 0.0));
+            theme->textSelectedDayColor_ = pattern->GetAttr<Color>(
+                "calendar_picker_text_selected_day_color", Color());
+            theme->textCurrentDayColor_ = pattern->GetAttr<Color>("calendar_picker_text_current_day_color", Color());
+            theme->backgroundKeyFocusedColor_ = pattern->GetAttr<Color>(
+                "calendar_picker_background_key_focused_color", Color());
+            Color backgroundSelectedTodayColor = pattern->GetAttr<Color>(
+                "calendar_picker_background_selected_focused_color", Color());
+            theme->backgroundSelectedTodayColor_ = backgroundSelectedTodayColor;
+            theme->backgroundSelectedNotTodayColor_ = backgroundSelectedTodayColor.BlendOpacity(
+                pattern->GetAttr<double>("calendar_picker_attribute_alpha_highlight_bg", 0.0));
+            theme->backgroundHoverColor_ = pattern->GetAttr<Color>("calendar_picker_background_hover_color", Color());
+            theme->backgroundPressColor_ = pattern->GetAttr<Color>("calendar_picker_background_press_color", Color());
+            theme->entryFontColor_ = pattern->GetAttr<Color>("calendar_picker_entry_font_color", Color());
+            theme->dialogDividerColor_ = pattern->GetAttr<Color>("calendar_picker_dialog_divider_color", Color());
+            theme->entryHeight_ = pattern->GetAttr<Dimension>("calendar_picker_entry_height", 0.0_vp);
+            theme->entryBorderWidth_ = pattern->GetAttr<Dimension>("calendar_picker_entry_border_width", 0.0_vp);
+            theme->entryBorderRadius_ = pattern->GetAttr<Dimension>("calendar_picker_entry_border_radius", 0.0_vp);
+            theme->entryButtonWidth_ = pattern->GetAttr<Dimension>("calendar_picker_entry_button_width", 0.0_vp);
+            theme->entryArrowHeight_ = pattern->GetAttr<Dimension>("calendar_picker_entry_arrow_height", 0.0_vp);
+            theme->entryArrowwidth_ = pattern->GetAttr<Dimension>("calendar_picker_entry_arrow_width", 0.0_vp);
+            theme->entryDateLeftRightMargin_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_entry_date_left_right_margin", 0.0_vp);
+            theme->entryDateTopBottomMargin_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_entry_date_top_bottom_margin", 0.0_vp);
+            theme->dialogMargin_ = pattern->GetAttr<Dimension>("calendar_picker_dialog_margin", 0.0_vp);
+            theme->calendarPickerDayWidthOrHeight_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_day_width_height", 0.0_vp);
+            theme->calendarDayFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_day_font_size", 0.0_vp);
+            theme->distanceBetweenContainterAndDate_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_distance_between_container_and_date", 0.0_vp);
+            theme->distanceBetweenTitleAndDate_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_distance_between_title_and_date", 0.0_vp);
+            theme->dalendarContainerHeight_ = pattern->GetAttr<Dimension>("calendar_picker_container_height", 0.0_vp);
+            theme->calendarTitleFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_title_font_size", 0.0_vp);
+            theme->calendarTitleRowHeight_ = pattern->GetAttr<Dimension>("calendar_picker_title_row_height", 0.0_vp);
+            theme->calendarTitleRowTopPadding_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_title_row_top_padding", 0.0_vp);
+            theme->calendarTitleRowLeftRightPadding_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_title_row_left_right_padding", 0.0_vp);
+            theme->calendarTitleTextPadding_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_title_text_padding", 0.0_vp);
+            theme->calendarTitleImagePadding_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_title_image_padding", 0.0_vp);
+            theme->calendarImageWidthHeight_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_image_width_height", 0.0_vp);
+            theme->calendarActionRowTopPadding_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_action_row_top_padding", 0.0_vp);
+            theme->calendarActionRowBottomLeftRightPadding_ = pattern->GetAttr<Dimension>(
+                "calendar_picker_action_row_bottom_left_right_padding", 0.0_vp);
+            theme->calendarActionRowHeight_ = pattern->GetAttr<Dimension>("calendar_picker_action_row_height", 0.0_vp);
+            theme->calendarDayRadius_ = pattern->GetAttr<Dimension>("calendar_picker_day_radius", 0.0_vp);
+            theme->calendarDayKeyFocusedWidth_ = pattern->GetAttr<Dimension>("calendar_day_key_focused_width", 0.0_vp);
+            theme->calendarDayKeyFocusedPenWidth_ = pattern->GetAttr<Dimension>(
+                "calendar_day_key_focused_pen_width", 0.0_vp);
+            theme->entryFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_entry_font_size", 0.0_fp);
         }
     };
 
@@ -354,12 +421,275 @@ public:
         return cardCalendarTheme_;
     }
 
+    const Dimension& GetEntryHeight() const
+    {
+        return entryHeight_;
+    }
+
+    const Dimension& GetEntryBorderWidth() const
+    {
+        return entryBorderWidth_;
+    }
+
+    const Color& GetEntryBorderColor() const
+    {
+        return entryBorderColor_;
+    }
+
+    const Dimension& GetEntryBorderRadius() const
+    {
+        return entryBorderRadius_;
+    }
+
+    const Dimension& GetEntryButtonWidth() const
+    {
+        return entryButtonWidth_;
+    }
+
+    const Dimension& GetEntryDateTopBottomMargin() const
+    {
+        return entryDateTopBottomMargin_;
+    }
+
+    const Dimension& GetEntryDateLeftRightMargin() const
+    {
+        return entryDateLeftRightMargin_;
+    }
+
+    const Dimension& GetEntryArrowWidth() const
+    {
+        return entryArrowwidth_;
+    }
+
+    const Dimension& GetEntryArrowHeight() const
+    {
+        return entryArrowHeight_;
+    }
+
+    const Color& GetEntryArrowColor() const
+    {
+        return entryArrowColor_;
+    }
+
+    const Dimension& GetDialogMargin() const
+    {
+        return dialogMargin_;
+    }
+
+    const Color& GetSelectBackgroundColor() const
+    {
+        return selectBackgroundColor_;
+    }
+
+    const Dimension& GetCalendarPickerDayWidthOrHeight() const
+    {
+        return calendarPickerDayWidthOrHeight_;
+    }
+
+    const Dimension& GetCalendarDayFontSize() const
+    {
+        return calendarDayFontSize_;
+    }
+
+    const Dimension& GetDistanceBetweenContainterAndDate() const
+    {
+        return distanceBetweenContainterAndDate_;
+    }
+
+    const Dimension& GetDistanceBetweenTitleAndDate() const
+    {
+        return distanceBetweenTitleAndDate_;
+    }
+
+    const Dimension& GetCalendarContainerHeight() const
+    {
+        return dalendarContainerHeight_;
+    }
+
+    const Dimension& GetCalendarTitleFontSize() const
+    {
+        return calendarTitleFontSize_;
+    }
+
+    const Dimension& GetCalendarTitleRowHeight() const
+    {
+        return calendarTitleRowHeight_;
+    }
+
+    const Dimension& GetCalendarTitleRowTopPadding() const
+    {
+        return calendarTitleRowTopPadding_;
+    }
+
+    const Dimension& GetCalendarTitleRowLeftRightPadding() const
+    {
+        return calendarTitleRowLeftRightPadding_;
+    }
+
+    const Dimension& GetCalendarTitleTextPadding() const
+    {
+        return calendarTitleTextPadding_;
+    }
+
+    const Dimension& GetCalendarTitleImagePadding() const
+    {
+        return calendarTitleImagePadding_;
+    }
+
+    const Dimension& GetCalendarImageWidthHeight() const
+    {
+        return calendarImageWidthHeight_;
+    }
+
+    const Dimension& GetCalendarActionRowTopPadding() const
+    {
+        return calendarActionRowTopPadding_;
+    }
+
+    const Dimension& GetCalendarActionRowBottomLeftRightPadding() const
+    {
+        return calendarActionRowBottomLeftRightPadding_;
+    }
+
+    const Dimension& GetCalendarActionRowHeight() const
+    {
+        return calendarActionRowHeight_;
+    }
+
+    const Dimension& GetCalendarDayRadius() const
+    {
+        return calendarDayRadius_;
+    }
+
+    const Dimension& GetCalendarDayKeyFocusedWidth() const
+    {
+        return calendarDayKeyFocusedWidth_;
+    }
+
+    const Dimension& GetCalendarDayKeyFocusedPenWidth() const
+    {
+        return calendarDayKeyFocusedPenWidth_;
+    }
+
+    const Dimension& GetEntryFontSize() const
+    {
+        return entryFontSize_;
+    }
+
+    const Color& GetDialogBackgroundColor() const
+    {
+        return dialogBackgroundColor_;
+    }
+
+    const Color& GetCalendarTitleFontColor() const
+    {
+        return calendarTitleFontColor_;
+    }
+
+    const Color& GetTextCurrentMonthColor() const
+    {
+        return textCurrentMonthColor_;
+    }
+
+    const Color& GetTextNonCurrentMonthColor() const
+    {
+        return textNonCurrentMonthColor_;
+    }
+
+    const Color& GetTextSelectedDayColor() const
+    {
+        return textSelectedDayColor_;
+    }
+
+    const Color& GetTextCurrentDayColor() const
+    {
+        return textCurrentDayColor_;
+    }
+
+    const Color& GetBackgroundKeyFocusedColor() const
+    {
+        return backgroundKeyFocusedColor_;
+    }
+
+    const Color& GetBackgroundSelectedTodayColor() const
+    {
+        return backgroundSelectedTodayColor_;
+    }
+
+    const Color& GetBackgroundSelectedNotTodayColor() const
+    {
+        return backgroundSelectedNotTodayColor_;
+    }
+
+    const Color& GetBackgroundHoverColor() const
+    {
+        return backgroundHoverColor_;
+    }
+
+    const Color& GetBackgroundPressColor() const
+    {
+        return backgroundPressColor_;
+    }
+
+    const Color& GetEntryFontColor() const
+    {
+        return entryFontColor_;
+    }
+
+    const Color& GetDialogDividerColor() const
+    {
+        return dialogDividerColor_;
+    }
 protected:
     CalendarTheme() = default;
 
 private:
     CalendarThemeStructure calendarTheme_;
     CalendarThemeStructure cardCalendarTheme_;
+    Color entryBorderColor_;
+    Color entryArrowColor_;
+    Color selectBackgroundColor_;
+    Color dialogBackgroundColor_;
+    Color calendarTitleFontColor_;
+    Color textCurrentMonthColor_;
+    Color textNonCurrentMonthColor_;
+    Color textSelectedDayColor_;
+    Color textCurrentDayColor_;
+    Color backgroundKeyFocusedColor_;
+    Color backgroundSelectedTodayColor_;
+    Color backgroundSelectedNotTodayColor_;
+    Color backgroundHoverColor_;
+    Color backgroundPressColor_;
+    Color entryFontColor_;
+    Color dialogDividerColor_;
+    Dimension entryHeight_;
+    Dimension entryBorderWidth_;
+    Dimension entryBorderRadius_;
+    Dimension entryButtonWidth_;
+    Dimension entryArrowHeight_;
+    Dimension entryArrowwidth_;
+    Dimension entryDateLeftRightMargin_;
+    Dimension entryDateTopBottomMargin_;
+    Dimension dialogMargin_;
+    Dimension calendarPickerDayWidthOrHeight_;
+    Dimension calendarDayFontSize_;
+    Dimension distanceBetweenContainterAndDate_;
+    Dimension distanceBetweenTitleAndDate_;
+    Dimension dalendarContainerHeight_;
+    Dimension calendarTitleFontSize_;
+    Dimension calendarTitleRowHeight_;
+    Dimension calendarTitleRowTopPadding_;
+    Dimension calendarTitleRowLeftRightPadding_;
+    Dimension calendarTitleTextPadding_;
+    Dimension calendarTitleImagePadding_;
+    Dimension calendarImageWidthHeight_;
+    Dimension calendarActionRowTopPadding_;
+    Dimension calendarActionRowBottomLeftRightPadding_;
+    Dimension calendarActionRowHeight_;
+    Dimension calendarDayRadius_;
+    Dimension calendarDayKeyFocusedWidth_;
+    Dimension calendarDayKeyFocusedPenWidth_;
+    Dimension entryFontSize_;
 };
 
 } // namespace OHOS::Ace
