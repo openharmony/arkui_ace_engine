@@ -1643,6 +1643,7 @@ void PipelineContext::Destroy()
     nodesToNotifyMemoryLevel_.clear();
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
+    needRenderNode_.clear();
     PipelineBase::Destroy();
     LOGI("PipelineContext::Destroy end.");
 }
