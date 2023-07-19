@@ -190,6 +190,9 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
+    // get position property
+    RectF GetPropertyOfPosition() override;
+
     // append translate value and return origin value.
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;

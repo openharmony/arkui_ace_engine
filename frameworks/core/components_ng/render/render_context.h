@@ -224,6 +224,12 @@ public:
         return {};
     }
 
+    // get position property
+    virtual RectF GetPropertyOfPosition()
+    {
+        return {};
+    }
+
     // stop the property animation and get the current paint rect.
     virtual OffsetF GetShowingTranslateProperty()
     {
