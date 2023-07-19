@@ -134,6 +134,10 @@ void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
     animationOption.SetOnFinishEvent([weak = AceType::WeakClaim(this)] {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
+        if (ref->isOutAnimationPlaying_) {
+            ref->isInAnimationPlaying_ = false;
+            return;
+        }
         auto monthDaysNode = ref->monthDays_;
         CHECK_NULL_VOID(monthDaysNode);
         auto layoutProperty = monthDaysNode->GetLayoutProperty<LayoutProperty>();
@@ -145,6 +149,7 @@ void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
         layoutProperty = timePickerNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::GONE);
+        ref->isInAnimationPlaying_ = false;
     });
     monthDaysRender->UpdateOpacity(1);
     timePickerRender->UpdateOpacity(1);
@@ -154,7 +159,7 @@ void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
             CHECK_NULL_VOID_NOLOG(timePickerRender);
             monthDaysRender->UpdateOpacity(0);
             timePickerRender->UpdateOpacity(0);
-        });
+        }, animationOption.GetOnFinishEvent());
 }
 
 void DateTimeAnimationController::PlayNewColumnOpacityInAnimation()
@@ -241,11 +246,16 @@ void DateTimeAnimationController::PlayOldColumnOpacityOutAnimation()
     animationOption.SetOnFinishEvent([weak = AceType::WeakClaim(this)] {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
+        if (ref->isInAnimationPlaying_) {
+            ref->isOutAnimationPlaying_ = false;
+            return;
+        }
         auto datePickerNode = ref->datePicker_;
         CHECK_NULL_VOID(datePickerNode);
         auto layoutProperty = datePickerNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::GONE);
+        ref->isOutAnimationPlaying_ = false;
     });
 
     monthDaysRender->UpdateOpacity(0);
@@ -256,7 +266,7 @@ void DateTimeAnimationController::PlayOldColumnOpacityOutAnimation()
             CHECK_NULL_VOID_NOLOG(timePickerRender);
             monthDaysRender->UpdateOpacity(1);
             timePickerRender->UpdateOpacity(1);
-        });
+        }, animationOption.GetOnFinishEvent());
 }
 
 void DateTimeAnimationController::PlayNewColumnOpacityOutAnimation()
@@ -338,6 +348,7 @@ void DateTimeAnimationController::StopOldColumnOpacityOutAnimation()
 
 void DateTimeAnimationController::PlayInAnimation()
 {
+    isInAnimationPlaying_ = true;
     PlayTitleInAnimation();
     PlayMovingInAnimation();
 
@@ -350,6 +361,7 @@ void DateTimeAnimationController::PlayInAnimation()
 
 void DateTimeAnimationController::PlayOutAnimation()
 {
+    isOutAnimationPlaying_ = true;
     PlayTitleOutAnimation();
     PlayMovingOutAnimation();
 
