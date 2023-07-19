@@ -1227,7 +1227,7 @@ void NavigationModelNG::SetOnTitleModeChange(std::function<void(NG::NavigationTi
     CHECK_NULL_VOID(navigationGroupNode);
     auto eventHub = navigationGroupNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnTitleModeChange(std::move(onTitleModeChange));
+    eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
 
 void NavigationModelNG::SetUsrNavigationMode(NavigationMode mode)
