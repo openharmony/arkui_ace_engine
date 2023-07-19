@@ -28,10 +28,10 @@
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
-#include "core/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -477,6 +477,39 @@ std::shared_ptr<Media::PixelMap> CreatePixelMapFromString(const std::string& fil
     std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errCode);
     return pixelMap;
 }
+
+OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale) const
+{
+    OffsetF result = OffsetF(-1.0f, -1.0f);
+    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+        return result;
+    }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, result);
+    auto frameTag = frameNode->GetTag();
+    if (frameTag == V2::WEB_ETS_TAG) {
+        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
+        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
+    } else if (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
+               frameTag == V2::TEXTINPUT_ETS_TAG) {
+        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
+        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
+    } else {
+        auto frameNodeOffset = frameNode->GetOffsetRelativeToWindow();
+        auto coordinateX = frameNodeOffset.GetX() > SystemProperties::GetDeviceWidth()
+                               ? frameNodeOffset.GetX() - SystemProperties::GetDeviceWidth()
+                               : frameNodeOffset.GetX();
+        auto coordinateY = frameNodeOffset.GetY();
+        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
+        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
+    }
+    if (result.GetX() >= 0.0f || result.GetX() + size.Width() < 0.0f || result.GetY() >= 0.0f ||
+        result.GetY() + size.Height() < 0.0f) {
+        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
+        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
+    }
+    return result;
+}
 #endif
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
@@ -567,11 +600,13 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     } else if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
-    int32_t width = pixelMap->GetWidth();
-    int32_t height = pixelMap->GetHeight();
-    DragData dragData { { pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE }, {}, udKey,
-        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetTargetDisplayId(), true };
+    uint32_t width = pixelMap->GetWidth();
+    uint32_t height = pixelMap->GetHeight();
+    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
+    Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
+    DragData dragData { shadowInfo, {}, udKey, static_cast<int32_t>(info.GetSourceDevice()), recordsSize,
+        info.GetPointerId(), info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(),
+        info.GetTargetDisplayId(), true };
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
