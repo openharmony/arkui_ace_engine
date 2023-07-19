@@ -1013,6 +1013,7 @@ void GridPattern::SetPositionController(const RefPtr<ScrollableController>& cont
 
 void GridPattern::ScrollPage(bool reverse)
 {
+    StopAnimate();
     if (!isConfigScrollable_) {
         return;
     }
