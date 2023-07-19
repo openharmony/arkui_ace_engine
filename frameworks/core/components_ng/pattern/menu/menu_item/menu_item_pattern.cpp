@@ -111,10 +111,10 @@ void MenuItemPattern::OnMountToParentDone()
 
 void MenuItemPattern::OnAttachToFrameNode()
 {
+    RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
-    RegisterOnKeyEvent();
 }
 
 void CustomMenuItemPattern::OnAttachToFrameNode()

@@ -54,10 +54,10 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
 void SelectPattern::OnAttachToFrameNode()
 {
+    RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnPress();
     RegisterOnHover();
-    RegisterOnKeyEvent();
 }
 
 void SelectPattern::OnModifyDone()
