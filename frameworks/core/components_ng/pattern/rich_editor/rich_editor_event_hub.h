@@ -88,8 +88,6 @@ public:
     const std::string& GetFontColor() const;
     void SetFontSize(double fontSize);
     double GetFontSize() const;
-    void SetFontStyle(FontStyle fontStyle);
-    FontStyle GetFontStyle() const;
     void SetFontWeight(int32_t fontWeigth);
     int32_t GetFontWeight() const;
     void SetFontFamily(const std::string& fontFamily);
@@ -110,6 +108,16 @@ public:
     VerticalAlign GetVerticalAlign() const;
     void SetImageFit(ImageFit objectFit);
     ImageFit GetObjectFit() const;
+
+    void SetFontStyle(FontStyle fontStyle)
+    {
+        fontStyle_ = fontStyle;
+    }
+
+    FontStyle GetFontStyle() const
+    {
+        return fontStyle_;
+    }
 
 private:
     int32_t spanIndex_ = 0;
@@ -173,6 +181,7 @@ public:
     bool FireAboutToDelete(const RichEditorDeleteValue& info);
     void SetOnDeleteComplete(std::function<void()>&& func);
     void FireOndeleteComplete();
+    std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type) override;
 
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
     {
@@ -186,7 +195,13 @@ public:
         }
     }
 
+    void SetTimestamp(long long timestamp)
+    {
+        timestamp_ = timestamp;
+    }
+
 private:
+    long long timestamp_;
     std::function<void()> onReady_;
     std::function<void(const BaseEventInfo*)> onSelect_;
     std::function<bool(const RichEditorInsertValue&)> aboutToIMEInput_;
