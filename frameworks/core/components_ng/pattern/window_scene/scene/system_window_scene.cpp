@@ -39,6 +39,27 @@ void SystemWindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
 }
 
+bool SystemWindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    CHECK_NULL_RETURN(dirty, false);
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameRect = geometryNode->GetFrameRect();
+    Rosen::WSRect windowRect {
+        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
+        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
+        .width_ = std::round(frameRect.Width()),
+        .height_ = std::round(frameRect.Height())
+    };
+
+    CHECK_NULL_RETURN(session_, false);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    return false;
+}
+
 void SystemWindowScene::OnSetDepth(const int32_t depth)
 {
     CHECK_NULL_VOID(session_);
