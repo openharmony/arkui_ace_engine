@@ -112,6 +112,11 @@ bool AbilityComponentPattern::OnDirtyLayoutWrapperSwap(
     return false;
 }
 
+FocusPattern AbilityComponentPattern::GetFocusPattern() const
+{
+    return { FocusType::NODE, true, FocusStyleType::NONE };
+}
+
 void AbilityComponentPattern::UpdateWindowRect()
 {
     if (!hasConnectionToAbility_) {
