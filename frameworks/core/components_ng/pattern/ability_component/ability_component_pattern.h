@@ -127,7 +127,7 @@ private:
     bool hasConnectionToAbility_ = false;
     Rect lastRect_;
     RefPtr<TouchEventImpl> touchEvent_;
-    RefPtr<InputEvent> touchEvent_;
+    RefPtr<InputEvent> mouseEvent_;
     RefPtr<WindowExtensionConnectionAdapterNG> adapter_;
     ACE_DISALLOW_COPY_AND_MOVE(AbilityComponentPattern);
 };
