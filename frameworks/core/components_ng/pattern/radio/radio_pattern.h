@@ -155,8 +155,6 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
-    RefPtr<Animator> onController_;
-    RefPtr<Animator> offController_;
 
     bool isFirstCreated_ = true;
     bool preCheck_ = false;
