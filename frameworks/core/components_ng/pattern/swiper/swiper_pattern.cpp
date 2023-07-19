@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -1971,7 +1972,7 @@ RefPtr<Curve> SwiperPattern::GetCurve() const
 
 bool SwiperPattern::IsLoop() const
 {
-    if (GetDisplayCount() >= TotalCount()) {
+    if (TotalDisPlayCount() >= TotalCount()) {
         return false;
     }
     auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
@@ -2269,7 +2270,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             if (childrenSize <= 0 || displayCount <= 0 || swiper->itemPosition_.empty()) {
                 return;
             }
-            if (!swiper->IsLoop() && (swiper->itemPosition_.begin()->first + 1) > (childrenSize - displayCount)) {
+            if (!swiper->IsLoop() && (swiper->autoPlayCurrentIndex_ + 1) > (childrenSize - displayCount)) {
                 return;
             }
             swiper->targetIndex_ = swiper->autoPlayCurrentIndex_ + 1;
@@ -2752,5 +2753,21 @@ float SwiperPattern::GetCurrentFirstIndexStartPos() const
     }
 
     return itemPosition_.begin()->second.startPos;
+}
+
+int32_t SwiperPattern::TotalDisPlayCount() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 1);
+    auto displayCount = GetDisplayCount();
+    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
+        if (Positive(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx())) {
+            displayCount++;
+        }
+        if (Positive(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())) {
+            displayCount++;
+        }
+    }
+    return displayCount;
 }
 } // namespace OHOS::Ace::NG
