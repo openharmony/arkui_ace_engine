@@ -96,6 +96,11 @@ public:
         richEditorController_ = controller;
     }
 
+    long long GetTimestamp() const
+    {
+        return timestamp_;
+    }
+
     void OnVisibleChange(bool isVisible) override;
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
@@ -225,6 +230,7 @@ private:
     bool isRichEditorInit_ = false;
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
+    long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;
