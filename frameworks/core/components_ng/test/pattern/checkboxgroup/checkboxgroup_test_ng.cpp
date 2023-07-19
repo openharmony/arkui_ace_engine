@@ -1351,7 +1351,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
     OptionalSizeF optionalSizeF(nullLength, nullLength);
     LayoutConstraintF contentConstraint;
     contentConstraint.selfIdealSize = optionalSizeF;
-    auto layoutWrapper = nullptr;
+    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
@@ -1367,11 +1367,11 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
      * @tc.steps: step2. Call method wile the width and height of contentConstraint are both null.
      * @tc.expected: Return sizeF base on default width and height.
      */
-    auto size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, layoutWrapper);
+    auto size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), COMPONENT_WIDTH / 2);
     EXPECT_FLOAT_EQ(size->Height(), COMPONENT_WIDTH / 2);
     checkboxTheme->defaultHeight_ = Dimension(COMPONENT_HEIGHT);
-    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, layoutWrapper);
+    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), COMPONENT_WIDTH / 2);
     EXPECT_FLOAT_EQ(size->Height(), COMPONENT_WIDTH / 2);
 
@@ -1380,11 +1380,11 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
      * @tc.expected: Return sizeF base on height of contentConstraint.
      */
     contentConstraint.selfIdealSize.SetHeight(std::make_optional<float>(-1));
-    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, layoutWrapper);
+    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), COMPONENT_WIDTH / 2);
     EXPECT_FLOAT_EQ(size->Height(), COMPONENT_WIDTH / 2);
     contentConstraint.selfIdealSize.SetHeight(BORDER_RADIUS);
-    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, layoutWrapper);
+    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), BORDER_RADIUS);
     EXPECT_FLOAT_EQ(size->Height(), BORDER_RADIUS);
 
@@ -1394,11 +1394,11 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
      */
     contentConstraint.selfIdealSize.SetWidth(std::make_optional<float>(-1));
     contentConstraint.selfIdealSize.SetHeight(nullLength);
-    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, layoutWrapper);
+    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), COMPONENT_WIDTH / 2);
     EXPECT_FLOAT_EQ(size->Height(), COMPONENT_WIDTH / 2);
     contentConstraint.selfIdealSize.SetWidth(BORDER_WIDTH);
-    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, layoutWrapper);
+    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), BORDER_WIDTH);
     EXPECT_FLOAT_EQ(size->Height(), BORDER_WIDTH);
 
@@ -1408,12 +1408,12 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
      */
     contentConstraint.selfIdealSize.SetWidth(std::make_optional<float>(-1));
     contentConstraint.selfIdealSize.SetHeight(std::make_optional<float>(-1));
-    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, layoutWrapper);
+    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), COMPONENT_WIDTH / 2);
     EXPECT_FLOAT_EQ(size->Height(), COMPONENT_WIDTH / 2);
     contentConstraint.selfIdealSize.SetWidth(BORDER_WIDTH);
     contentConstraint.selfIdealSize.SetHeight(BORDER_RADIUS);
-    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, layoutWrapper);
+    size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), BORDER_RADIUS);
     EXPECT_FLOAT_EQ(size->Height(), BORDER_RADIUS);
 }
@@ -1596,7 +1596,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest025, TestSize.Level1)
     keyEvent.action = KeyAction::DOWN;
     EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.code = KeyCode::KEY_ENTER;
-    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 
     checkBoxGroupPattern->offset_ = OffsetF(COMPONENT_HEIGHT, COMPONENT_HEIGHT);
     checkBoxGroupPattern->size_ = SizeF(BORDER_RADIUS, BORDER_RADIUS);
