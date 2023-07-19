@@ -28,8 +28,6 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 
 void ListPattern::OnModifyDone() {}
 
-void ListPattern::OnAttachToFrameNode() {}
-
 bool ListPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
 {
