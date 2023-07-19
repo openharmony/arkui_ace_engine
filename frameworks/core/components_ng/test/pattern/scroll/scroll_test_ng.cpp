@@ -1690,7 +1690,6 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
      * @tc.expected: Trigger UpdateCurrentOffset()
      */
     CreateScroll();
-    pattern_->GetScrollBar()->SetDriving(true);
     EXPECT_TRUE(pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, -100.f / pattern_->GetScrollBar()->offsetScale_)));
 

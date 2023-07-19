@@ -469,7 +469,7 @@ void TextFieldModelNG::SetShowCounter(bool value)
 
 void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, static_cast<DisplayMode>(value));
 }
 
 void TextFieldModelNG::SetMaxViewLines(uint32_t value)

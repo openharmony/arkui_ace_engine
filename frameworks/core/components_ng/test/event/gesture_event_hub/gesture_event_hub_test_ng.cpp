@@ -148,8 +148,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest002, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult innerTargets;
     TouchTestResult finalResult;
-    auto flag =
-        gestureEventHub->ProcessTouchTestHit(COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID);
+    auto flag = gestureEventHub->ProcessTouchTestHit(
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF());
     EXPECT_FALSE(flag);
     auto sizeOfInnerTargets = static_cast<int32_t>(innerTargets.size());
     auto sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
@@ -175,7 +175,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest002, TestSize.Level1)
      *            case: eventHub is not null && touchEventActuator_ is not null
      * @tc.expected: ProcessTouchTestHit return false,  innerTargets & finalResult have one element
      */
-    flag = gestureEventHub->ProcessTouchTestHit(COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID);
+    flag = gestureEventHub->ProcessTouchTestHit(
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF());
     EXPECT_FALSE(flag);
     sizeOfInnerTargets = static_cast<int32_t>(innerTargets.size());
     sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
@@ -253,8 +254,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest003, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult innerTargets;
     TouchTestResult finalResult;
-    auto flag =
-        gestureEventHub->ProcessTouchTestHit(COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID);
+    auto flag = gestureEventHub->ProcessTouchTestHit(
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF());
     EXPECT_FALSE(flag);
     auto sizeOfInnerTargets = static_cast<int32_t>(innerTargets.size());
     auto sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
@@ -268,7 +269,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest003, TestSize.Level1)
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     eventHub->AttachHost(frameNode);
-    flag = gestureEventHub->ProcessTouchTestHit(COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID);
+    flag = gestureEventHub->ProcessTouchTestHit(
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF());
     EXPECT_FALSE(flag);
     sizeOfInnerTargets = static_cast<int32_t>(innerTargets.size());
     sizeOfFinalResult = static_cast<int32_t>(finalResult.size());

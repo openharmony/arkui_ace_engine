@@ -75,12 +75,6 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
     if (source == SCROLL_FROM_START) {
         return true;
     }
-    if (scrollBar_ && scrollBar_->IsDriving()) {
-        offset = scrollBar_->CalcPatternOffset(offset);
-        if (source == SCROLL_FROM_UPDATE) {
-            source = SCROLL_FROM_BAR;
-        }
-    }
     return UpdateCurrentOffset(offset, source);
 }
 
@@ -152,7 +146,6 @@ void ScrollablePattern::OnScrollEnd()
         }
     }
     if (scrollBar_) {
-        scrollBar_->SetDriving(false);
         scrollBar_->OnScrollEnd();
     }
     StartScrollBarAnimatorByProxy();
@@ -182,12 +175,6 @@ void ScrollablePattern::AddScrollEvent()
         pattern->OnScrollEndCallback();
     };
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
-    auto mouseLeftButtonScroll = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        return pattern->IsScrollBarPressed();
-    };
-    scrollableEvent_->SetMouseLeftButtonScroll(std::move(mouseLeftButtonScroll));
     scrollableEvent_->SetFriction(friction_);
     gestureHub->AddScrollableEvent(scrollableEvent_);
 
@@ -304,8 +291,22 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         CHECK_NULL_VOID(host);
         host->MarkNeedRenderOnly();
     });
+    auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnScrollCallback(static_cast<float>(offset), source);
+    };
+    scrollBar_->SetScrollPositionCallback(std::move(scrollCallback));
+    auto scrollEnd = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnScrollEndCallback();
+    };
+    scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
+    CHECK_NULL_VOID(scrollableEvent_);
+    scrollableEvent_->SetScrollBar(scrollBar_);
 }
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
