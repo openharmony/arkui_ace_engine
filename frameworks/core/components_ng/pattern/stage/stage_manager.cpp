@@ -330,6 +330,8 @@ bool StageManager::CleanPageStack()
     auto popSize = static_cast<int32_t>(children.size() - 1);
     for (int32_t count = 1; count <= popSize; ++count) {
         auto pageNode = children.front();
+        // mark pageNode child as destroying
+        pageNode->SetChildrenInDestroying();
         stageNode_->RemoveChild(pageNode);
     }
     stageNode_->RebuildRenderContextTree();
