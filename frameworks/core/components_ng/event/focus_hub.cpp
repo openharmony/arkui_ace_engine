@@ -595,6 +595,13 @@ void FocusHub::RequestFocus() const
     context->AddDirtyFocus(GetFrameNode());
 }
 
+void FocusHub::RequestFocusWithDefaultFocusFirstly() const
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddDirtyDefaultFocus(GetFrameNode());
+}
+
 bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
 {
     LOGI("Request next focus on node: %{public}s/%{public}d by step: %{public}d.", GetFrameName().c_str(), GetFrameId(),
@@ -1448,13 +1455,10 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id)
         LOGI("Request focus id: %{public}s can not found.", id.c_str());
         return false;
     }
-    if (!focusNode->IsFocusableWholePath()) {
-        LOGI("Request focus id: %{public}s is not focusable.", id.c_str());
-        return false;
-    }
     LOGI("Request focus immediately by id: %{public}s. The node is %{public}s/%{public}d.", id.c_str(),
         focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
-    return focusNode->RequestFocusImmediately();
+    focusNode->RequestFocus();
+    return true;
 }
 
 int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes)
