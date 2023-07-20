@@ -111,11 +111,11 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     if ((*iter)->OnRemoveFromParent(allowTransition)) {
         // OnRemoveFromParent returns true means the child can be removed from tree immediately.
         RemoveDisappearingChild(child);
+        MarkNeedSyncRenderTree();
     } else {
         // else move child into disappearing children, skip syncing render tree
         AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
-    MarkNeedSyncRenderTree(true);
     auto result = children_.erase(iter);
     return result;
 }
@@ -198,7 +198,9 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
         ++index;
     }
     children_.clear();
-    MarkNeedSyncRenderTree(true);
+    if (needSyncRenderTree) {
+        MarkNeedSyncRenderTree();
+    }
 }
 
 void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
@@ -254,7 +256,7 @@ void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UI
     if (!silently && onMainTree_) {
         child->AttachToMainTree();
     }
-    MarkNeedSyncRenderTree(true);
+    MarkNeedSyncRenderTree();
 }
 
 RefPtr<FrameNode> UINode::GetFocusParent() const
@@ -380,7 +382,7 @@ void UINode::MovePosition(int32_t slot)
         children.remove(self);
     }
     children.insert(it, self);
-    parentNode->MarkNeedSyncRenderTree(true);
+    parentNode->MarkNeedSyncRenderTree();
 }
 
 void UINode::UpdateLayoutPropertyFlag()
@@ -412,11 +414,11 @@ void UINode::MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag)
     }
 }
 
-void UINode::MarkNeedSyncRenderTree(bool needRebuild)
+void UINode::MarkNeedSyncRenderTree()
 {
     auto parent = parent_.Upgrade();
     if (parent) {
-        parent->MarkNeedSyncRenderTree(needRebuild);
+        parent->MarkNeedSyncRenderTree();
     }
 }
 
@@ -443,12 +445,12 @@ void UINode::DumpTree(int32_t depth)
         DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(children_.size()));
     }
 
-    for (const auto& item : GetChildren()) {
+    for (const auto& item : children_) {
         item->DumpTree(depth + 1);
     }
 }
 
-void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
+void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     for (const auto& child : children_) {
         child->AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
@@ -457,7 +459,7 @@ void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bo
 
 void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
-    for (const auto& child : GetChildren()) {
+    for (const auto& child : children_) {
         child->OnGenerateOneDepthVisibleFrame(visibleList);
     }
 }
@@ -465,7 +467,7 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
 void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {
     // normal child
-    for (const auto& child : GetChildren()) {
+    for (const auto& child : children_) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
     // disappearing children
@@ -476,7 +478,7 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
 
 void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
-    for (const auto& child : GetChildren()) {
+    for (const auto& child : children_) {
         child->OnGenerateOneDepthAllFrame(visibleList);
     }
 }
@@ -564,7 +566,7 @@ int32_t UINode::GetChildIndexById(int32_t id)
     return -1;
 }
 
-RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
+RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     if (GetChildren().empty()) {
         return nullptr;
@@ -705,7 +707,7 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
 void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
 {
     // populating with visible children
-    for (const auto& child : GetChildren()) {
+    for (const auto& child : children_) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
     // inserting disappearing children
@@ -771,41 +773,4 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
     }
     return nullptr;
 }
-
-RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index)
-{
-    for (const auto& child : children_) {
-        uint32_t count = static_cast<uint32_t>(child->FrameCount());
-        if (count > index) {
-            return child->GetFrameChildByIndex(index);
-        }
-        index -= count;
-    }
-    return nullptr;
-}
-
-void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
-{
-    if (isAll) {
-        for (const auto& child : children_) {
-            child->DoRemoveChildInRenderTree(index, isAll);
-        }
-        return;
-    }
-    for (const auto& child : children_) {
-        uint32_t count = static_cast<uint32_t>(child->FrameCount());
-        if (count > index) {
-            return child->DoRemoveChildInRenderTree(index);
-        }
-        index -= count;
-    }
-}
-
-void UINode::OnSetCacheCount(int32_t cacheCount)
-{
-    for (const auto& child : GetChildren()) {
-        child->OnSetCacheCount(cacheCount);
-    }
-}
-
 } // namespace OHOS::Ace::NG

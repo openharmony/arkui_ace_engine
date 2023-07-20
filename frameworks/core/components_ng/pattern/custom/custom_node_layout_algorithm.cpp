@@ -39,11 +39,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             renderFunction_ = nullptr;
             CHECK_NULL_VOID(child);
             buildItem_ = child;
-
-            auto layoutWrapperNode = DynamicCast<LayoutWrapperNode>(Claim(layoutWrapper));
-            if (layoutWrapperNode) {
-                child->AdjustLayoutWrapperTree(layoutWrapperNode, true, true);
-            }
+            child->AdjustLayoutWrapperTree(Claim(layoutWrapper), true, true);
         }
     }
 
