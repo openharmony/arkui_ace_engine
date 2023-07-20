@@ -60,6 +60,11 @@ void RichEditorOverlayModifier::SetCaretVisible(bool value)
     caretVisible_->Set(value);
 }
 
+float RichEditorOverlayModifier::GetCareHeight() const
+{
+    return caretHeight_->Get();
+}
+
 void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
 {
     if (!caretVisible_->Get()) {
