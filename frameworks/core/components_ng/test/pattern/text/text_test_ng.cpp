@@ -760,7 +760,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     pattern->selectOverlayProxy_ = nullptr;
     DirtySwapConfig config;
     config.skipMeasure = true;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -787,7 +787,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
     pattern->selectOverlayProxy_ = nullptr;
     DirtySwapConfig config;
     config.skipMeasure = false;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -815,7 +815,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
 
     DirtySwapConfig config;
     config.skipMeasure = false;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
 
@@ -851,7 +851,7 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
     LayoutConstraintF contentConstraint;
     auto ret = rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, nullptr);
     EXPECT_TRUE(ret);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
@@ -877,7 +877,7 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper002, TestSize.Level1)
     pattern->selectOverlayProxy_ = nullptr;
 
     auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
@@ -909,7 +909,8 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper003, TestSize.Level1)
 
     DirtySwapConfig config;
     config.skipMeasure = false;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, AceType::MakeRefPtr<GeometryNode>(), nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, AceType::MakeRefPtr<GeometryNode>(), nullptr);
     ASSERT_NE(layoutWrapper, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -941,7 +942,7 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper004, TestSize.Level1)
     pattern->selectOverlayProxy_ = nullptr;
 
     auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
@@ -1010,8 +1011,8 @@ HWTEST_F(TextTestNg, TextCreatParagraphTest001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1062,8 +1063,8 @@ HWTEST_F(TextTestNg, TextLayoutTest001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1113,8 +1114,8 @@ HWTEST_F(TextTestNg, TextLayoutTest002, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1160,8 +1161,8 @@ HWTEST_F(TextTestNg, TextLayoutTest003, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1213,8 +1214,8 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1267,8 +1268,8 @@ HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1321,8 +1322,8 @@ HWTEST_F(TextTestNg, TextLayoutTest006, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1373,8 +1374,8 @@ HWTEST_F(TextTestNg, TextLayoutTest007, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1425,8 +1426,8 @@ HWTEST_F(TextTestNg, TextLayoutTest008, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1478,8 +1479,8 @@ HWTEST_F(TextTestNg, ToJsonValue001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1506,8 +1507,8 @@ HWTEST_F(TextTestNg, ToJsonValue002, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1539,8 +1540,8 @@ HWTEST_F(TextTestNg, ToJsonValue003, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1572,8 +1573,8 @@ HWTEST_F(TextTestNg, ToJsonValue004, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1605,8 +1606,8 @@ HWTEST_F(TextTestNg, ToJsonValue005, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1638,8 +1639,8 @@ HWTEST_F(TextTestNg, ToJsonValue006, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1672,8 +1673,8 @@ HWTEST_F(TextTestNg, DidExceedMaxLines001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1723,8 +1724,8 @@ HWTEST_F(TextTestNg, DidExceedMaxLines002, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1774,8 +1775,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textPattern->textContentModifier_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
@@ -1826,8 +1827,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textLayoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textLayoutProperty);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
 
@@ -1885,8 +1886,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest003, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1931,8 +1932,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest004, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1976,8 +1977,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest005, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -2021,8 +2022,8 @@ HWTEST_F(TextTestNg, TextPaintMethodTest001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -2077,8 +2078,8 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -2137,8 +2138,8 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -2197,8 +2198,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -2240,8 +2241,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest007, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -2285,8 +2286,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -2390,8 +2391,8 @@ HWTEST_F(TextTestNg, TextPaintMethodTest002, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
@@ -2699,7 +2700,7 @@ HWTEST_F(TextTestNg, CreateParagraph001, TestSize.Level1)
 
     DirtySwapConfig config;
     config.skipMeasure = false;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
@@ -2728,7 +2729,7 @@ HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
 
     DirtySwapConfig config;
     config.skipMeasure = false;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
 
@@ -2769,7 +2770,7 @@ HWTEST_F(TextTestNg, ApplyIndents001, TestSize.Level1)
 
     DirtySwapConfig config;
     config.skipMeasure = false;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
@@ -2799,7 +2800,7 @@ HWTEST_F(TextTestNg, AddChildSpanItem001, TestSize.Level1)
 
     DirtySwapConfig config;
     config.skipMeasure = false;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());

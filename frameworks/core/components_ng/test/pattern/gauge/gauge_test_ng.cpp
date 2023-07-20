@@ -199,7 +199,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto gaugePattern = frameNode->GetPattern<GaugePattern>();
     EXPECT_NE(gaugePattern, nullptr);
     auto gaugeLayoutAlgorithm = gaugePattern->CreateLayoutAlgorithm();
@@ -368,7 +368,8 @@ HWTEST_F(GaugeTestNg, GaugePaintPropertyTest005, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
 
     /**
@@ -386,13 +387,13 @@ HWTEST_F(GaugeTestNg, GaugePaintPropertyTest005, TestSize.Level1)
      */
 
     /**
-     *      case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     *      case 1: LayoutWrapperNode::SkipMeasureContent = true , skipMeasure = true;
      */
     bool first_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(first_case);
 
     /**
-     *     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     *     case 2: LayoutWrapperNode::SkipMeasureContent = true , skipMeasure = true;
      */
     bool second_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(second_case);
@@ -401,13 +402,13 @@ HWTEST_F(GaugeTestNg, GaugePaintPropertyTest005, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     /**
-     *     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     *     case 3: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = true;
      */
     bool third_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(third_case);
 
     /**
-     *     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
+     *     case 4: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = false;
      */
     bool forth_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forth_case);

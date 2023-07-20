@@ -18,6 +18,9 @@ ohos_unittest("search_test_ng") {
   module_out_path = pattern_test_output_path
 
   sources = [
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
@@ -29,6 +32,8 @@ ohos_unittest("search_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_property.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",

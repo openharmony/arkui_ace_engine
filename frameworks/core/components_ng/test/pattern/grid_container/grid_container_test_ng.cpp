@@ -122,7 +122,7 @@ HWTEST_F(GridContainerTestNg, DefaultProperty001, TestSize.Level1)
 HWTEST_F(GridContainerTestNg, BuildContainer001, TestSize.Level1)
 {
     auto layoutWrapper = CreateGridContainerWithChild();
-    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto textWrapper = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper->GetOrCreateChildByIndex(0));
 
     /* update property to mark-dirty children */
     GridContainerInfo::Builder builder;

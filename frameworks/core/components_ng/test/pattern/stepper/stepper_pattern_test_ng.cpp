@@ -63,8 +63,8 @@ class StepperPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    static RefPtr<LayoutWrapper> CreateChildLayoutWrapper(
-        RefPtr<LayoutWrapper> layoutWrapper, RefPtr<FrameNode> parentNode, RefPtr<FrameNode> childNode);
+    static RefPtr<LayoutWrapperNode> CreateChildLayoutWrapper(
+        RefPtr<LayoutWrapperNode> layoutWrapper, RefPtr<FrameNode> parentNode, RefPtr<FrameNode> childNode);
 };
 
 void StepperPatternTestNg::SetUpTestCase()
@@ -81,12 +81,12 @@ void StepperPatternTestNg::TearDownTestCase()
     MockPipelineBase::TearDown();
 }
 
-RefPtr<LayoutWrapper> StepperPatternTestNg::CreateChildLayoutWrapper(
-    RefPtr<LayoutWrapper> layoutWrapper, RefPtr<FrameNode> parentNode, RefPtr<FrameNode> childNode)
+RefPtr<LayoutWrapperNode> StepperPatternTestNg::CreateChildLayoutWrapper(
+    RefPtr<LayoutWrapperNode> layoutWrapper, RefPtr<FrameNode> parentNode, RefPtr<FrameNode> childNode)
 {
     RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     childGeometryNode->Reset();
-    RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         childNode, childGeometryNode, childNode->GetLayoutProperty());
     parentNode->AddChild(childNode);
     layoutWrapper->AppendChild(childLayoutWrapper);
@@ -572,7 +572,7 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest001, TestSize.Level1)
     ASSERT_NE(stepperPattern, nullptr);
     auto stepperFrameNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(stepperFrameNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(stepperFrameNode,
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(stepperFrameNode,
         AceType::MakeRefPtr<GeometryNode>(), stepperFrameNode->GetLayoutProperty());
     auto stepperLayoutAlgorithm = stepperPattern->CreateLayoutAlgorithm();
     ASSERT_NE(stepperLayoutAlgorithm, nullptr);
@@ -587,35 +587,35 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest001, TestSize.Level1)
 
     auto swiperNode = FrameNode::GetOrCreateFrameNode(SWIPER_NODE_TAG,
         stepperFrameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    RefPtr<LayoutWrapper> swiperLayoutWrapper = CreateChildLayoutWrapper(layoutWrapper,
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper = CreateChildLayoutWrapper(layoutWrapper,
                                                         stepperFrameNode, swiperNode);
 
     auto leftButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         stepperFrameNode->GetLeftButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    RefPtr<LayoutWrapper> leftButtonLayoutWrapper = CreateChildLayoutWrapper(layoutWrapper,
+    RefPtr<LayoutWrapperNode> leftButtonLayoutWrapper = CreateChildLayoutWrapper(layoutWrapper,
                                                         stepperFrameNode, leftButtonNode);
     
     auto rightButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         stepperFrameNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    RefPtr<LayoutWrapper> rightButtonLayoutWrapper = CreateChildLayoutWrapper(layoutWrapper,
+    RefPtr<LayoutWrapperNode> rightButtonLayoutWrapper = CreateChildLayoutWrapper(layoutWrapper,
                                                         stepperFrameNode, rightButtonNode);
 
     auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
         rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    RefPtr<LayoutWrapper> rowLayoutWrapper = CreateChildLayoutWrapper(leftButtonLayoutWrapper,
+    RefPtr<LayoutWrapperNode> rowLayoutWrapper = CreateChildLayoutWrapper(leftButtonLayoutWrapper,
                                                         leftButtonNode, rowNode);
     rightButtonNode->AddChild(rowNode);
     rightButtonLayoutWrapper->AppendChild(rowLayoutWrapper);
 
     auto rightTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    RefPtr<LayoutWrapper> rightTextLayoutWrapper = CreateChildLayoutWrapper(rowLayoutWrapper,
+    RefPtr<LayoutWrapperNode> rightTextLayoutWrapper = CreateChildLayoutWrapper(rowLayoutWrapper,
                                                         rowNode, rightTextNode);
 
     auto leftTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    RefPtr<LayoutWrapper> leftTextLayoutWrapper = CreateChildLayoutWrapper(rowLayoutWrapper,
+    RefPtr<LayoutWrapperNode> leftTextLayoutWrapper = CreateChildLayoutWrapper(rowLayoutWrapper,
                                                         rowNode, leftTextNode);
 
     stepperLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
@@ -637,8 +637,8 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest002, TestSize.Level1)
     ASSERT_NE(stepperPattern, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(stepperFrameNode, geometryNode, stepperFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(stepperFrameNode, geometryNode, stepperFrameNode->GetLayoutProperty());
     auto stepperLayoutAlgorithm = stepperPattern->CreateLayoutAlgorithm();
     ASSERT_NE(stepperLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(stepperLayoutAlgorithm));
@@ -667,8 +667,8 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest003, TestSize.Level1)
     ASSERT_NE(stepperPattern, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(stepperFrameNode, geometryNode, stepperFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(stepperFrameNode, geometryNode, stepperFrameNode->GetLayoutProperty());
     auto stepperLayoutAlgorithm = stepperPattern->CreateLayoutAlgorithm();
     ASSERT_NE(stepperLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(stepperLayoutAlgorithm));

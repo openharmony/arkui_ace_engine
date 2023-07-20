@@ -295,12 +295,12 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureTest004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. Create LayoutWrapper and set CheckBoxGroupLayoutAlgorithm.
+     * @tc.steps: step2. Create LayoutWrapperNode and set CheckBoxGroupLayoutAlgorithm.
      */
-    // Create LayoutWrapper and set CheckBoxGroupLayoutAlgorithm.
+    // Create LayoutWrapperNode and set CheckBoxGroupLayoutAlgorithm.
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     ASSERT_NE(checkBoxGroupPattern, nullptr);
     auto checkBoxGroupLayoutAlgorithm = checkBoxGroupPattern->CreateLayoutAlgorithm();
@@ -1351,7 +1351,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
     OptionalSizeF optionalSizeF(nullLength, nullLength);
     LayoutConstraintF contentConstraint;
     contentConstraint.selfIdealSize = optionalSizeF;
-    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();

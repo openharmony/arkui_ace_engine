@@ -86,8 +86,8 @@ protected:
         int32_t backgroundType, std::string type);
     static void CreateSecurityComponentNotFinish(int32_t text, int32_t icon,
         int32_t backgroundType, std::string type);
-    static RefPtr<LayoutWrapper> CreateLayoutWrapper(RefPtr<FrameNode>& node);
-    static RefPtr<LayoutWrapper> CreateSecurityComponentLayoutWrapper(RefPtr<FrameNode>& node);
+    static RefPtr<LayoutWrapperNode> CreateLayoutWrapper(RefPtr<FrameNode>& node);
+    static RefPtr<LayoutWrapperNode> CreateSecurityComponentLayoutWrapper(RefPtr<FrameNode>& node);
     static void CheckSecurityComponentDefaultProp(RefPtr<FrameNode>& node);
     static void InitDefaultTheme(RefPtr<SecurityComponentTheme>& theme);
     static void SetLocationUserDefinedPropty();
@@ -243,16 +243,16 @@ void SecurityComponentModelTestNg::SetSaveUserDefinedPropty()
     sc.SetlayoutOrder(SecSecurityComponentLayoutOrder::TEXT_FIRST);
 }
 
-RefPtr<LayoutWrapper> SecurityComponentModelTestNg::CreateLayoutWrapper(RefPtr<FrameNode>& node)
+RefPtr<LayoutWrapperNode> SecurityComponentModelTestNg::CreateLayoutWrapper(RefPtr<FrameNode>& node)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     if (geometryNode == nullptr) {
         return nullptr;
     }
-    return AceType::MakeRefPtr<LayoutWrapper>(node, geometryNode, node->GetLayoutProperty());
+    return AceType::MakeRefPtr<LayoutWrapperNode>(node, geometryNode, node->GetLayoutProperty());
 }
 
-RefPtr<LayoutWrapper> SecurityComponentModelTestNg::CreateSecurityComponentLayoutWrapper(RefPtr<FrameNode>& node)
+RefPtr<LayoutWrapperNode> SecurityComponentModelTestNg::CreateSecurityComponentLayoutWrapper(RefPtr<FrameNode>& node)
 {
     auto layoutWrapper = CreateLayoutWrapper(node);
     auto buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);

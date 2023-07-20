@@ -964,7 +964,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern007, TestSize.Level1)
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto weakNode = AceType::WeakClaim(AceType::RawPtr(buttonNode));
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         weakNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     DirtySwapConfig dirtySwapConfig;
     EXPECT_FALSE(minuteColumnPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
@@ -1350,7 +1350,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
     ASSERT_NE(timePickerRowPattern, nullptr);
 
     frameNode->GetGeometryNode()->frame_.rect_.SetWidth(EXTRA_WIDTH);
-    auto dirty = AceType::MakeRefPtr<LayoutWrapper>(
+    auto dirty = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     DirtySwapConfig config;
     config.frameSizeChange = true;

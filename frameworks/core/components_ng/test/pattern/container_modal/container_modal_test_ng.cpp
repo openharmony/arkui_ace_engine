@@ -51,7 +51,7 @@ protected:
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
-    RefPtr<LayoutWrapper> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
+    RefPtr<LayoutWrapperNode> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     static void SetWidth(const Dimension& width);
     static void SetHeight(const Dimension& height);
     RefPtr<FrameNode> CreateContent();
@@ -108,9 +108,9 @@ void ContainerModelTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ContainerModalAccessibilityProperty>();
 }
 
-RefPtr<LayoutWrapper> ContainerModelTestNg::RunMeasureAndLayout(float width, float height)
+RefPtr<LayoutWrapperNode> ContainerModelTestNg::RunMeasureAndLayout(float width, float height)
 {
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };

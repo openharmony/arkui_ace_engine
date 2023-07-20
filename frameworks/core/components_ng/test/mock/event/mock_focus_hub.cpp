@@ -36,4 +36,10 @@ bool FocusHub::RequestFocusImmediately()
 }
 
 void FocusHub::OnClick(const KeyEvent& event) {}
+
+bool FocusHub::PaintFocusState(bool isNeedStateStyles)
+{
+    return false;
+}
+void FocusHub::ClearFocusState(bool isNeedStateStyles) {}
 } // namespace OHOS::Ace::NG

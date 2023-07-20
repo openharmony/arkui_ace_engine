@@ -40,6 +40,9 @@ common_sources = [
   "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
   "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
   "$ace_root/frameworks/core/components/common/properties/color.cpp",
+  "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+  "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
   "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
   "$ace_root/frameworks/core/pipeline/base/constants.cpp",
 
@@ -124,6 +127,7 @@ common_sources = [
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
   "$ace_root/test/mock/core/common/mock_container.cpp",
   "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
+  "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
   "$ace_root/test/unittest/core/pipeline/mock_drag_drop_manager.cpp",
 
   # text

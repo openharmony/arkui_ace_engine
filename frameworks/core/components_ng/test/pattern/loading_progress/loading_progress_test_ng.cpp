@@ -124,7 +124,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
     auto loadingProgressLayoutAlgorithm = AceType::MakeRefPtr<LoadingProgressLayoutAlgorithm>();
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(loadingProgressLayoutAlgorithm);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);

@@ -71,7 +71,7 @@ protected:
     static void SetWidth(const Dimension& width);
     static void SetHeight(const Dimension& height);
     void CreateWaterFlowItem(int32_t number = 10);
-    RefPtr<LayoutWrapper> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEFAULT_WATER_FLOW_HEIGHT);
+    RefPtr<LayoutWrapperNode> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEFAULT_WATER_FLOW_HEIGHT);
     RefPtr<FrameNode> GetItemFrameNode(int32_t index);
     RefPtr<WaterFlowItemPattern> GetItemPattern(int32_t index);
     RefPtr<FocusHub> GetItemFocusHub(int32_t index);
@@ -148,9 +148,9 @@ void WaterFlowTestNg::CreateWaterFlowItem(int32_t number)
     }
 }
 
-RefPtr<LayoutWrapper> WaterFlowTestNg::RunMeasureAndLayout(float width, float height)
+RefPtr<LayoutWrapperNode> WaterFlowTestNg::RunMeasureAndLayout(float width, float height)
 {
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
@@ -465,7 +465,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest001, TestSize.Level1)
      * @tc.steps: step1. When setting fixed rows and columns, check the status of child nodes in the waterFlow.
      * @tc.expected: All child nodes are active.
      */
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout();
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout();
     for (int32_t i = 0; i < 9; ++i) {
         EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -488,7 +488,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest002, TestSize.Level1)
      * @tc.steps: step1. When setting fixed rows and columns, check the status of child nodes in the waterFlow.
      * @tc.expected: All child nodes are active.
      */
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout();
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout();
     for (int32_t i = 0; i < 9; ++i) {
         EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -507,7 +507,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest003, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     for (int32_t i = 0; i < 6; ++i) {
         EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -526,7 +526,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest004, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 250.f);
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 250.f);
     for (int32_t i = 0; i < 9; ++i) {
         EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
     }
@@ -545,7 +545,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest005, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     pattern_->UpdateCurrentOffset(-50.f, SCROLL_FROM_UPDATE);
     layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     for (int32_t i = 0; i < 9; ++i) {
@@ -566,7 +566,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest006, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     for (int32_t i = 3; i < 9; ++i) {
@@ -587,7 +587,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     pattern_->UpdateStartIndex(8);
     layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     for (int32_t i = 0; i < 3; ++i) {
@@ -608,7 +608,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest008, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     pattern_->UpdateStartIndex(1);
     layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     for (int32_t i = 6; i < 9; ++i) {
@@ -629,7 +629,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest009, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     pattern_->UpdateStartIndex(3);
     layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     for (int32_t i = 0; i < 6; ++i) {
@@ -650,7 +650,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest010, TestSize.Level1)
     CreateWaterFlowItem(10);
     GetInstance();
 
-    RefPtr<LayoutWrapper> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
+    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     pattern_->UpdateStartIndex(9);
     layoutWrapper = RunMeasureAndLayout(DEVICE_WIDTH, 200.f);
     EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());

@@ -178,7 +178,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest003, TestSize.Level1)
     textProps->UpdateMargin(margin);
     textProps->UpdateUserDefinedIdealSize(TEXT_IDEAL_SIZE);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(text, geometryNode, text->GetLayoutProperty());
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(text, geometryNode, text->GetLayoutProperty());
 
     LayoutConstraintF constraint;
     constraint.maxSize = FULL_SCREEN_SIZE;
@@ -464,7 +464,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest005, TestSize.Level1)
      * @tc.expected: the function exits normally
      */
     auto layoutProperty = frameNode->GetLayoutProperty();
-    LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<SelectLayoutAlgorithm>();
     layoutAlgorithm->Measure(layoutWrapper);
     auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);

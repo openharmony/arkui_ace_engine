@@ -728,7 +728,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest0010, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
 
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto childWrapper = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper->GetOrCreateChildByIndex(0));
     ASSERT_NE(childWrapper, nullptr);
     auto iter = layoutWrapper->childrenMap_.find(0);
     if (iter == layoutWrapper->childrenMap_.end()) {
