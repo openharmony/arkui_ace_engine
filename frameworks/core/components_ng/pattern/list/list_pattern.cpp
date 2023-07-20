@@ -56,6 +56,9 @@ void ListPattern::OnModifyDone()
 {
     if (!isInitialized_) {
         jumpIndex_ = GetLayoutProperty<ListLayoutProperty>()->GetInitialIndex().value_or(0);
+        if (NeedScrollSnapAlignEffect()) {
+            scrollAlign_ = GetScrollAlignByScrollSnapAlign();
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -89,10 +92,6 @@ void ListPattern::OnModifyDone()
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
-    RegistOritationListener();
-    if (NeedScrollSnapAlignEffect()) {
-        UpdateScrollSnap();
-    }
 }
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -208,6 +207,20 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     isInitialized_ = true;
     MarkSelectedItems();
     return true;
+}
+
+ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
+{
+    auto scrollAlign = ScrollAlign::START;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, scrollAlign);
+    auto listProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, scrollAlign);
+    auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
+    if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
+        scrollAlign = ScrollAlign::CENTER;
+    }
+    return scrollAlign;
 }
 
 float ListPattern::CalculateTargetPos(float startPos, float endPos, ScrollAutoType scrollAutoType)
@@ -779,31 +792,6 @@ bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
     scrollSnapVelocity_ = velocity;
     MarkDirtyNodeSelf();
     return true;
-}
-
-void ListPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
-{
-    if (!NeedScrollSnapAlignEffect() || type != WindowSizeChangeReason::ROTATION) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    jumpIndex_ = GetLayoutProperty<ListLayoutProperty>()->GetInitialIndex().value_or(0);
-    UpdateScrollSnap();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void ListPattern::RegistOritationListener()
-{
-    if (isOritationListenerRegisted_) {
-        return;
-    }
-    isOritationListenerRegisted_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowSizeChangeCallback(host->GetId());
 }
 
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
