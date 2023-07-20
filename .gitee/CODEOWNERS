@@ -101,7 +101,7 @@ frameworks/core/components_ng/pattern/scrollable/  @yeyinglong_admin
 frameworks/core/components_ng/pattern/search/  @zhang-xiao150
 frameworks/core/components_ng/pattern/security_component/  @
 frameworks/core/components_ng/pattern/select/  @zhao-xinyu007
-frameworks/core/components_ng/pattern/select_overlay/  @zhao-xinyu007
+frameworks/core/components_ng/pattern/select_overlay/  @lijuan124
 frameworks/core/components_ng/pattern/shape/  @sunbees
 frameworks/core/components_ng/pattern/side_bar/  @xuzhidan
 frameworks/core/components_ng/pattern/slider/  @cheng-feiwang
@@ -118,7 +118,7 @@ frameworks/core/components_ng/pattern/text_field/  @xiexiyun
 frameworks/core/components_ng/pattern/text_picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/texttimer/  @lijuan124
 frameworks/core/components_ng/pattern/time_picker/  @cheng-feiwang
-frameworks/core/components_ng/pattern/toast/  @makangcheng
+frameworks/core/components_ng/pattern/toast/  @zhao-xinyu007
 frameworks/core/components_ng/pattern/toggle/  @zhang-xiao150
 frameworks/core/components_ng/pattern/ui_extension/  @lushi1202
 frameworks/core/components_ng/pattern/video/  @jinweiliu
