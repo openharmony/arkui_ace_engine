@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -68,7 +69,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     totalHeight += headerPadding;
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
-        auto headerHeight = headerWrapper->GetGeometryNode()->GetFrameSize().Height();
+        auto headerHeight = headerWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
         totalHeight += (minItemHeight > headerHeight) ? minItemHeight : headerHeight;
     }
     // measure menu item
@@ -76,9 +77,10 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int32_t currentIndex = itemStartIndex_;
     while (currentIndex < totalItemCount) {
         auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
-        auto childSize = item->GetGeometryNode()->GetFrameSize();
+        auto childSize = item->GetGeometryNode()->GetMarginFrameSize();
         // set minimum size
         childSize.SetWidth(maxChildrenWidth);
+        MinusPaddingToSize(item->GetLayoutProperty()->CreateMargin(), childSize);
         item->GetGeometryNode()->SetFrameSize(childSize);
 
         float itemHeight = childSize.Height();
@@ -90,7 +92,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (footerIndex_ >= 0) {
         auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
-        auto footerHeight = footerWrapper->GetGeometryNode()->GetFrameSize().Height();
+        auto footerHeight = footerWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
         totalHeight += (minItemHeight > footerHeight) ? minItemHeight : footerHeight;
     }
     // set menu size
