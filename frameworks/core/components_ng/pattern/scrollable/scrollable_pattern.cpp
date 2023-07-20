@@ -52,7 +52,7 @@ void ScrollablePattern::SetAxis(Axis axis)
     }
 }
 
-const RefPtr<GestureEventHub>& ScrollablePattern::GetGestureHub()
+RefPtr<GestureEventHub> ScrollablePattern::GetGestureHub()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -61,7 +61,7 @@ const RefPtr<GestureEventHub>& ScrollablePattern::GetGestureHub()
     return hub->GetOrCreateGestureEventHub();
 }
 
-const RefPtr<InputEventHub>& ScrollablePattern::GetInputHub()
+RefPtr<InputEventHub> ScrollablePattern::GetInputHub()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
