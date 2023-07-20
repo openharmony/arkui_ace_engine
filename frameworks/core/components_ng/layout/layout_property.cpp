@@ -355,6 +355,9 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
     }
 
     RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame();
+    if (!parent) {
+        return false;
+    }
     auto parentOffset = parent->GetOffsetRelativeToWindow();
     auto globalOffset = gridProperty_->GetContainerPosition();
 
