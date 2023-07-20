@@ -22,11 +22,14 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/utils/utils.h"
+#include "core/animation/friction_motion.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,6 +38,7 @@ constexpr double DEFAULT_TOPANGLE = 60.0;
 constexpr double DEFAULT_BOTTOMANGLE = 120.0;
 constexpr double DEFAULT_MINANGLE = 10.0;
 constexpr double STRAIGHT_ANGLE = 180.0;
+constexpr double BAR_FRICTION = 0.9;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 
 enum class ShapeMode {
@@ -303,16 +307,6 @@ public:
         return isHover_;
     }
 
-    void SetDriving(bool isDriving)
-    {
-        isDriving_ = isDriving;
-    }
-
-    bool IsDriving() const
-    {
-        return isDriving_;
-    }
-
     uint8_t GetOpacity() const
     {
         return opacity_;
@@ -396,6 +390,26 @@ public:
     {
         return hostBorderRadius_;
     }
+    
+    void SetScrollPositionCallback(ScrollPositionCallback&& callback)
+    {
+        scrollPositionCallback_ = std::move(callback);
+    }
+
+    const ScrollPositionCallback& GetScrollPositionCallback() const
+    {
+        return scrollPositionCallback_;
+    }
+
+    void SetScrollEndCallback(ScrollEndCallback&& scrollEndCallback)
+    {
+        scrollEndCallback_ = std::move(scrollEndCallback);
+    }
+
+    const ScrollEndCallback& GetScrollEndCallback() const
+    {
+        return scrollEndCallback_;
+    }
 
     void SetGestureEvent();
     void SetMouseEvent();
@@ -405,6 +419,8 @@ public:
     void PlayShrinkAnimation();
     void PlayBarEndAnimation();
     void CalcReservedHeight();
+    void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result);
 
 protected:
     void InitTheme();
@@ -416,6 +432,12 @@ private:
     void UpdateActiveRectSize(double activeSize);
     void UpdateActiveRectOffset(double activeMainOffset);
     double NormalizeToPx(const Dimension& dimension) const;
+    void InitPanRecognizer();
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info);
+    void ProcessFrictionMotion(double value);
+    void ProcessFrictionMotionStop();
 
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
@@ -447,6 +469,8 @@ private:
     double offsetScale_ = 1.0f;
     double scrollableOffset_ = 0.0;
     double barRegionSize_ = 0.0;
+    double friction_ = BAR_FRICTION;
+    double frictionPosition_ = 0.0;
 
     bool isScrollable_ = false;
 
@@ -466,10 +490,15 @@ private:
     uint8_t opacity_ = UINT8_MAX;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<Animator> touchAnimator_;
     RefPtr<Animator> scrollEndAnimator_;
     RefPtr<Animator> adaptAnimator_;
+    RefPtr<Animator> frictionController_;
+    RefPtr<FrictionMotion> frictionMotion_;
     std::function<void()> markNeedRenderFunc_;
+    ScrollPositionCallback scrollPositionCallback_;
+    ScrollEndCallback scrollEndCallback_;
 };
 
 } // namespace OHOS::Ace::NG

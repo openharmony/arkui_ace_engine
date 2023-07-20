@@ -2332,7 +2332,6 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback002, TestSize.Level1)
     const int32_t source = 0;
     bool ret = false;
     textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
-    textFieldPattern->scrollBar_->SetDriving(true);
 
     /**
      * @tc.steps: step2. call OnScrollCallback function.
@@ -2358,7 +2357,6 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback003, TestSize.Level1)
     const int32_t source = 0;
     bool ret = false;
     textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
-    textFieldPattern->scrollBar_->SetDriving(false);
 
     /**
      * @tc.steps: step2. call OnScrollCallback function.

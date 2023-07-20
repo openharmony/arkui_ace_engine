@@ -151,14 +151,6 @@ public:
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
     }
 
-    bool IsScrollBarPressed() const
-    {
-        if (scrollBar_) {
-            return scrollBar_->IsPressed();
-        }
-        return false;
-    }
-
     bool IsScrollableSpringEffect() const
     {
         CHECK_NULL_RETURN_NOLOG(scrollEffect_, false);
@@ -273,12 +265,6 @@ protected:
     RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
     {
         return scrollBarProxy_;
-    }
-    void SetScrollBarDriving(bool Driving)
-    {
-        if (scrollBar_) {
-            scrollBar_->SetDriving(Driving);
-        }
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
