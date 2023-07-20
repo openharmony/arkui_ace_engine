@@ -26,8 +26,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t DIVIDER_SIZE = 2;
-const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const float ITEM_HEIGHT_HALF = 2.0f;
 } // namespace
 void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -39,13 +37,8 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
-    uint32_t showCount_ = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
-    auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - 1) +
-        pickerTheme->GetDividerSpacing().ConvertToPx());
+    auto height = static_cast<float>(
+        pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
     auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
@@ -74,15 +67,15 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                 dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2)
                                    .ConvertToPx());
         pickerMaxHeight -= (dialogTitleHeight + dialogButtonHeight);
+        auto totalChild = layoutWrapper->GetTotalChildCount();
         auto gradientHeight = pickerTheme->GetGradientHeight().ConvertToPx();
         auto dividerSpacingHeight = pickerTheme->GetDividerSpacing().ConvertToPx();
-        auto columnHeight = gradientHeight * (showCount_ - 1) + dividerSpacingHeight;
+        auto columnHeight = gradientHeight * (totalChild - 1) + dividerSpacingHeight;
         datePickerPattern->SetResizePickerItemHeight(
             dividerSpacingHeight / columnHeight * std::min(height, pickerMaxHeight));
         datePickerPattern->SetResizeFlag(true);
     }
 
-    pickerItemHeight_ = std::min(height, pickerMaxHeight);
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(std::min(height, pickerMaxHeight));
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
@@ -111,12 +104,15 @@ void DatePickerColumnLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t s
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     frameSize.SetWidth(size.Width());
+    auto gradientHeight = pickerTheme->GetGradientHeight().ConvertToPx();
+    auto dividerSpacingHeight = pickerTheme->GetDividerSpacing().ConvertToPx();
+    auto columnHeight = gradientHeight * (showOptionCount - 1) + dividerSpacingHeight;
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index == selectedIndex) {
-        frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
+        frameSize.SetHeight(static_cast<float>(dividerSpacingHeight / columnHeight * size.Height()));
     } else {
-        frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
+        frameSize.SetHeight(static_cast<float>(gradientHeight / columnHeight * size.Height()));
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
     childLayoutWrapper->Measure(layoutChildConstraint);
@@ -125,10 +121,6 @@ void DatePickerColumnLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t s
 void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(pickerTheme);
     auto layoutProperty = AceType::DynamicCast<DataPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -138,10 +130,8 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
 
     auto children = layoutWrapper->GetAllChildrenWithBuild();
-    uint32_t halfCount = layoutWrapper->GetTotalChildCount() / 2;
-    float childStartCoordinate = static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
-                                            pickerTheme->GetGradientHeight().ConvertToPx() * halfCount -
-                                            pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
+
+    float childStartCoordinate = 0.0;
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();

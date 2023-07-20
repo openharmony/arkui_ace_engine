@@ -49,7 +49,6 @@ public:
 
 private:
     double currentOffset_ = 0.0;
-    float pickerItemHeight_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnLayoutAlgorithm);
 };

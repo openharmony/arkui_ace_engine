@@ -32,6 +32,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+} // namespace
+
 void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -51,6 +55,10 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 
     CHECK_NULL_VOID(pickerTheme);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
+    }
     datePickerPattern->SetShowCount(showCount);
 
     auto yearColumnNode = FrameNode::GetOrCreateFrameNode(

@@ -29,6 +29,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const int32_t MARGIN_HALF = 2;
 } // namespace
 
@@ -52,6 +53,10 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(pickerTheme, nullptr);
 
     uint32_t showCount = pickerTheme->GetShowOptionCount();
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
+    }
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetShowCount(showCount);

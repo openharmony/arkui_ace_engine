@@ -60,7 +60,6 @@ public:
 
 private:
     float currentOffset_ = 0.0f;
-    float pickerItemHeight_ = 0.0f;
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnLayoutAlgorithm);

@@ -34,6 +34,7 @@ namespace {
 // TODO timepicker style modification
 constexpr Dimension PADDING_WEIGHT = 10.0_vp;
 const Dimension FONT_SIZE = Dimension(2.0);
+const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const int32_t CHILD_SIZE = 3;
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_HOUR24_HEIGHT_NUMBER = 9.0f;
@@ -705,10 +706,12 @@ void TimePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto childSize = host->GetChildren().size();
-    if (childSize != CHILD_SIZE) {
+    if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE && childSize != CHILD_SIZE) {
         gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
-    } else {
+    } else if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE && childSize == CHILD_SIZE) {
         gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() - TEXT_HOUR24_HEIGHT_NUMBER);
+    } else {
+        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value());
     }
     dividerHeight_ = static_cast<float>(
         gradientHeight_ + pickerTheme->GetDividerSpacing().Value() + pickerTheme->GetGradientHeight().Value());
