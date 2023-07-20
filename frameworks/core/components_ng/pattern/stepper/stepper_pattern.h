@@ -134,8 +134,6 @@ private:
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
-    RefPtr<ClickEvent> leftClickEvent_;
-    RefPtr<ClickEvent> rightClickEvent_;
     RefPtr<InputEvent> buttonOnHoverListenr_;
     RefPtr<TouchEventImpl> buttonTouchListenr_;
     bool leftIsHover_ = false;
