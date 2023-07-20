@@ -39,7 +39,7 @@ public:
     void SetMaxHeight(const CalcDimension& maxHeight) override;
 
     void SetBackgroundColor(const Color& color) override;
-    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override;
+    void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
     void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
