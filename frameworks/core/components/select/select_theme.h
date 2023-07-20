@@ -131,6 +131,7 @@ public:
             theme->menuFontSize_ = pattern->GetAttr<Dimension>("menu_text_font_size", theme->menuFontSize_);
             theme->menuTitleFontSize_ =
                 pattern->GetAttr<Dimension>("menu_title_text_font_size", theme->menuTitleFontSize_);
+            theme->menuTitleFontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuTitleFontColor_);
             theme->menuTitleHeight_ = pattern->GetAttr<Dimension>("menu_title_height", theme->menuTitleHeight_);
             theme->fontColor_ =
                 pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
@@ -252,6 +253,7 @@ public:
         theme->innerBorderRadius_ = innerBorderRadius_;
         theme->menuFontSize_ = menuFontSize_;
         theme->menuTitleFontSize_ = menuTitleFontSize_;
+        theme->menuTitleFontColor_ = menuTitleFontColor_;
         theme->menuTitleHeight_ = menuTitleHeight_;
         theme->menuFontColor_ = menuFontColor_;
         theme->disabledMenuFontColor_ = disabledMenuFontColor_;
@@ -678,6 +680,11 @@ public:
         return menuTitleFontSize_;
     }
 
+    const Color& GetMenuTitleFontColor() const
+    {
+        return menuTitleFontColor_;
+    }
+
     const Dimension& GetMenuTitleHeight() const
     {
         return menuTitleHeight_;
@@ -802,6 +809,7 @@ private:
     Color menuIconColor_ = Color(0x99182431);
     Color menuFontColor_;
     Color disabledMenuFontColor_;
+    Color menuTitleFontColor_;
 
     bool allowScale_ = true;
     Dimension fontSize_;
