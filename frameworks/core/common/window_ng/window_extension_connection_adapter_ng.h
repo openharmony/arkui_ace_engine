@@ -32,16 +32,10 @@ public:
     virtual void Show() {}
     virtual void Hide() {}
     virtual void RequestFocus() {}
-    virtual void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId) = 0;
+    virtual void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId,
+        sptr<Rosen::ExtensionSession>& extensionSession) = 0;
     virtual void UpdateRect(const Rect& rect) = 0;
     virtual void RemoveExtension() = 0;
-    void SetExtensionSession(sptr<Rosen::ExtensionSession>& extensionSession)
-    {
-        extensionSession_ = extensionSession;
-    }
-
-protected:
-    sptr<Rosen::ExtensionSession> extensionSession_;
 };
 } // namespace OHOS::Ace
 
