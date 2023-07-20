@@ -17,31 +17,31 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
+#include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/event/mouse_event.h"
-#include "core/components_ng/base/frame_node.h"
-#include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -78,7 +78,7 @@ const int32_t MENU_TASK_DELAY_TIME = 1000;
 const Color MENU_ITEM_HOVER_COLOR = Color(0x0c000000);
 const Color MENU_ITEM_PRESS_COLOR = Color(0x1a000000);
 const Color MENU_ITEM_COLOR = Color(0xffffff);
-}
+} // namespace
 bool ContainerModalViewEnhance::sIsHovering = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
 CancelableCallback<void()> ContainerModalViewEnhance::sContextTimer_;
@@ -202,7 +202,9 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& max
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     // add click event
-    auto event = [containerNode, windowManager](GestureEvent &info) {
+    auto event = [containerNode, wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+        auto windowManager = wk.Upgrade();
+        CHECK_NULL_VOID(windowManager);
         ResetHoverTimer();
         auto mode = windowManager->GetWindowMode();
         auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
@@ -223,7 +225,7 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& max
         LOGD("maximize btn long press,call showMaxMenu func");
         auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
         auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
-        OffsetF menuPosition {menuPosX, menuPosY};
+        OffsetF menuPosition { menuPosX, menuPosY };
         ShowMaxMenu(maximizeBtn, menuPosition);
     };
     // diable mouse left!

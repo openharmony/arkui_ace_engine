@@ -170,7 +170,8 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
         CHECK_NULL_RETURN(eventHub, nullptr);
         PanDirection panDirection;
         panDirection.type = PanDirection::ALL;
-        auto panActionStart = [windowManager](const GestureEvent&) {
+        auto panActionStart = [wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](const GestureEvent&) {
+            auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID_NOLOG(windowManager);
             if (windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
                 LOGI("container window start move.");
@@ -192,13 +193,15 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& conta
  
     // add leftSplit / maxRecover / minimize / close button
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
-        [windowManager](GestureEvent& info) {
+        [wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+            auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
             LOGI("left split button clicked");
             windowManager->FireWindowSplitCallBack();
         }));
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
-        [windowManager](GestureEvent& info) {
+        [wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+            auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID_NOLOG(windowManager);
             auto mode = windowManager->GetWindowMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
@@ -210,14 +213,16 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& conta
             }
         }));
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
-        [windowManager] (GestureEvent& info) {
+        [wk = AceType::WeakClaim(AceType::RawPtr(windowManager))] (GestureEvent& info) {
+            auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
             LOGI("minimize button clicked");
             windowManager->WindowMinimize();
         }));
     containerTitleRow->AddChild(BuildControlButton(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
-        [windowManager](GestureEvent& info) {
+        [wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+            auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
             LOGI("close button clicked");
             windowManager->WindowClose();
