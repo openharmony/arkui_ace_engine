@@ -241,8 +241,7 @@ private:
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
     bool NeedScrollSnapAlignEffect() const;
-    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void RegistOritationListener();
+    ScrollAlign GetScrollAlignByScrollSnapAlign() const;
 
     // multiSelectable
     void ClearMultiSelect() override;
