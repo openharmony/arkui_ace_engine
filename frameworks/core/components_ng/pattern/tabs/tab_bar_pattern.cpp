@@ -301,7 +301,7 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetIsFocusActive()) {
-        return true;
+        return false;
     }
     isFirstFocus_ = false;
     if (event.action != KeyAction::DOWN) {
