@@ -164,6 +164,7 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
         float crossSize = crossSizeOptional.value();
         if (lanes_ > 1) {
             crossSize = (crossSize + laneGutter_) / lanes_ - laneGutter_;
+            crossSize = crossSize <= 0 ? 1 : crossSize;
         }
         if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
             crossSize = maxLaneLength_.value();
