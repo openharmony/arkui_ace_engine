@@ -425,18 +425,18 @@ void TextContentModifier::SetTextShadow(const Shadow& value)
 
 void TextContentModifier::SetTextDecoration(const TextDecoration& type)
 {
-    if (oldTextDecoration_ == type) {
+    auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
+    if (oldTextDecoration == type) {
         return;
     }
 
-    if ((oldTextDecoration_ == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
-        (oldTextDecoration_ == TextDecoration::UNDERLINE && type == TextDecoration::NONE)) {
+    if ((oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
+        (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE)) {
         textDecorationAnimatable_ = true;
     } else {
         textDecorationAnimatable_ = false;
     }
 
-    oldTextDecoration_ = textDecoration_.value_or(TextDecoration::NONE);
     textDecoration_ = type;
     CHECK_NULL_VOID(textDecorationColorAlpha_);
 
