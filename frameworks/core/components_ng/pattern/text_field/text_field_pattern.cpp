@@ -850,7 +850,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
         auto secondHandleHeight = 0.0f;
         auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
         auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
-        if (GreatNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
+        if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
             firstHandleHeight = firstHandle->Height();
         }
         if (LessNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY() + firstHandle->Height(),
@@ -858,7 +858,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
             firstHandleHeight = firstHandle->Height();
         }
         if (!isSingleHandle_) {
-            if (GreatNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
+            if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
                 secondHandleHeight = secondHandle->Height();
             }
             if (LessNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY() + secondHandle->Height(),
