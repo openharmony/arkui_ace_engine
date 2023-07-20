@@ -270,7 +270,16 @@ void JSGrid::SetScrollBar(int32_t displayMode)
 
 void JSGrid::SetScrollBarColor(const std::string& color)
 {
-    GridModel::GetInstance()->SetScrollBarColor(color);
+    if (!color.empty()) {
+        GridModel::GetInstance()->SetScrollBarColor(color);
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    Color defaultColor(theme->GetForegroundColor());
+    GridModel::GetInstance()->SetScrollBarColor(defaultColor.ColorToString());
 }
 
 void JSGrid::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
