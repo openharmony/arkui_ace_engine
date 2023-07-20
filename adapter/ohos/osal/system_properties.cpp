@@ -446,10 +446,4 @@ bool SystemProperties::IsSceneBoardEnabled()
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
 }
 
-void SystemProperties::GetAppBarInfo(std::string& bundleName, std::string& abilityName)
-{
-    bundleName = system::GetParameter("persist.ace.appbar.bundlename", "");
-    abilityName = system::GetParameter("persist.ace.appbar.abilityname", "");
-}
-
 } // namespace OHOS::Ace
