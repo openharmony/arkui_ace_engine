@@ -53,6 +53,10 @@ template("build_component") {
         configs += invoker.configs
       }
 
+      include_dirs = []
+      if (defined(invoker.include_dirs)) {
+        include_dirs += invoker.include_dirs
+      }
       deps = []
       deps += extra_deps
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
@@ -128,10 +132,6 @@ template("build_component") {
         }
       }
 
-      if (ace_use_rosen_drawing) {
-        external_deps += [ "graphic_2d:2d_graphics" ]
-      }
-
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
@@ -139,6 +139,14 @@ template("build_component") {
           deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
         } else {
           external_deps += [ "graphic_2d:librender_service_client" ]
+          if (ace_use_rosen_drawing) {
+            include_dirs += [
+              "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+              "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+            ]
+
+            external_deps += [ "graphic_2d:2d_graphics" ]
+          }
         }
       }
       part_name = ace_engine_part
