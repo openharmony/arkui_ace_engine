@@ -34,7 +34,7 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
     if (!CheckInShowArea(*info_)) {
-        menu->SetActive(false);
+        LayoutWrapper::RemoveChildInRenderTree(menu);
         return;
     }
     auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
