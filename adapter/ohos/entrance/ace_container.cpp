@@ -634,13 +634,14 @@ void AceContainer::InitializeCallback()
             }
         };
         auto container = Container::Current();
-        if (!container) {
-            return;
-        }
-        if (container->IsUseStageModel() && type == WindowSizeChangeReason::ROTATION) {
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if ((container->IsUseStageModel() && type == WindowSizeChangeReason::ROTATION) ||
+            taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
         } else {
-            context->GetTaskExecutor()->PostTask(callback, TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI);
         }
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
