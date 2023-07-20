@@ -506,7 +506,6 @@ build_component_ng("pattern_ability_component_ng") {
     "input:libmmi-client",
     "napi:ace_napi",
     "window_manager:scene_session",
-    "window_manager:scene_session_manager",
   ]
 
   part_name = ace_engine_part
