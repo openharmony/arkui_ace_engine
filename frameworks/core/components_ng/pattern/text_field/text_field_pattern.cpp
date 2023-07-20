@@ -2199,6 +2199,9 @@ void TextFieldPattern::OnModifyDone()
         }
         HandleCounterBorder();
     }
+    if (!IsTextArea()) {
+        isTextInput_ = true;
+    }
     if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !inlineFocusState_) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();

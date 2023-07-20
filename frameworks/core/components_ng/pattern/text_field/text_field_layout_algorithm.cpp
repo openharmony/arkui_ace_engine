@@ -185,7 +185,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         textContent = textFieldLayoutProperty->GetValueValue("");
         if (!pattern->IsTextArea()) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-            pattern->SetTextInputFlag(true);
         }
     } else {
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
