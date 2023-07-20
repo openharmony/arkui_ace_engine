@@ -21,14 +21,15 @@ namespace {
 
 // key : define aosp key event code, value : define ace key string
 constexpr int32_t KEYCODE_SIZE = 289;
-const char* g_aospKeycode2String[KEYCODE_SIZE] = { "Unknown", "SoftLeft", "SoftRight", "Home", "Back", "Call",
-    "EndCall", "Digit0", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9",
-    "Star", "Pound", "DpadUp", "DpadDown", "DpadLeft", "DpadRight", "DpadCenter", "VolumeUp", "VolumeDown", "Power",
-    "Camera", "Clear", "KeyA", "KeyB", "KeyC", "KeyD", "KeyE", "KeyF", "KeyG", "KeyH", "KeyI", "KeyJ", "KeyK", "KeyL",
-    "KeyM", "KeyN", "KeyO", "KeyP", "KeyQ", "KeyR", "KeyS", "KeyT", "KeyU", "KeyV", "KeyW", "KeyX", "KeyY", "KeyZ",
-    "Comma", "Period", "AltLeft", "AltRight", "ShiftLeft", "ShiftRight", "Tab", "Space", "Sym", "Explorer", "Envelope",
-    "Enter", "Del", "Grave", "Minus", "Equals", "LeftBracket", "RightBracket", "BackSlash", "Semicolon", "Apostrophe",
-    "Slash", "At", "Num", "HeadsetHook", "Focus", "Plus", "Menu", "Notification", "Search", "MediaPlayPause",
+const char* g_aospKeycode2String[KEYCODE_SIZE] = {
+    "Unknown", "SoftLeft", "SoftRight", "Home", "Back", "Call", "EndCall", "Digit0", "Digit1", "Digit2", "Digit3",
+    "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Star", "Pound", "DpadUp", "DpadDown", "DpadLeft",
+    "DpadRight", "DpadCenter", "VolumeUp", "VolumeDown", "Power", "Camera", "Clear", "KeyA", "KeyB", "KeyC",
+    "KeyD", "KeyE", "KeyF", "KeyG", "KeyH", "KeyI", "KeyJ", "KeyK", "KeyL", "KeyM", "KeyN", "KeyO", "KeyP",
+    "KeyQ", "KeyR", "KeyS", "KeyT", "KeyU", "KeyV", "KeyW", "KeyX", "KeyY", "KeyZ", "Comma", "Period", "AltLeft",
+    "AltRight", "ShiftLeft", "ShiftRight", "Tab", "Space", "Sym", "Explorer", "Envelope", "Enter", "Del", "Grave",
+    "Minus", "Equals", "LeftBracket", "RightBracket", "BackSlash", "Semicolon", "Apostrophe", "Slash", "At",
+    "Num", "HeadsetHook", "Focus", "Plus", "Menu", "Notification", "Search", "MediaPlayPause",
     "MediaStop", "MediaNext", "MediaPrevious", "MediaRewind", "MediaFastForward", "Mute", "PageUp", "PageDown",
     "PictSymbols", "SwitchCharset", "ButtonA", "ButtonB", "ButtonC", "ButtonX", "ButtonY", "ButtonZ", "ButtonL1",
     "ButtonR1", "ButtonL2", "ButtonR2", "ButtonThumbl", "ButtonThumbr", "ButtonStart", "ButtonSelect", "ButtonMode",
@@ -53,7 +54,8 @@ const char* g_aospKeycode2String[KEYCODE_SIZE] = { "Unknown", "SoftLeft", "SoftR
     "StemPrimary", "Stem1", "Stem2", "Stem3", "DpadUpLeft", "DpadDownLeft", "DpadUpRight", "DpadDownRight",
     "MediaSkipForward", "MediaSkipBackward", "MediaStepForward", "MediaStepBackward", "SoftSleep", "Cut", "Copy",
     "Paste", "SystemNavigationUp", "SystemNavigationDown", "SystemNavigationLeft", "SystemNavigationRight", "AllApps",
-    "Refresh", "ThumbsUp", "ThumbsDown", "ProfileSwitch" };
+    "Refresh", "ThumbsUp", "ThumbsDown", "ProfileSwitch"
+};
 
 } // namespace
 
@@ -64,36 +66,6 @@ const char* KeyToString(int32_t code)
     } else {
         return g_aospKeycode2String[0]; // "UnKnown"
     }
-}
-
-std::string KeyEvent::ConvertInputCodeToString() const
-{
-    static const std::map<KeyCode, std::string> VISIBILITY_CODE = { { KeyCode::KEY_0, "0)" }, { KeyCode::KEY_1, "1!" },
-        { KeyCode::KEY_2, "2@" }, { KeyCode::KEY_3, "3#" }, { KeyCode::KEY_4, "4$" }, { KeyCode::KEY_5, "5%" },
-        { KeyCode::KEY_6, "6^" }, { KeyCode::KEY_7, "7&" }, { KeyCode::KEY_8, "8*" }, { KeyCode::KEY_9, "9(" },
-        { KeyCode::KEY_COMMA, ",<" }, { KeyCode::KEY_PERIOD, ".>" }, { KeyCode::KEY_GRAVE, "`~" },
-        { KeyCode::KEY_MINUS, "-_" }, { KeyCode::KEY_EQUALS, "=+" }, { KeyCode::KEY_LEFT_BRACKET, "[{" },
-        { KeyCode::KEY_RIGHT_BRACKET, "]}" }, { KeyCode::KEY_BACKSLASH, "\\|" }, { KeyCode::KEY_SEMICOLON, ";:" },
-        { KeyCode::KEY_APOSTROPHE, "\'\"" }, { KeyCode::KEY_SLASH, "/?" }, { KeyCode::KEY_AT, "@" },
-        { KeyCode::KEY_PLUS, "+=" }, { KeyCode::KEY_NUMPAD_DIVIDE, "/" }, { KeyCode::KEY_NUMPAD_MULTIPLY, "*" },
-        { KeyCode::KEY_NUMPAD_SUBTRACT, "-" }, { KeyCode::KEY_NUMPAD_ADD, "+" }, { KeyCode::KEY_NUMPAD_DOT, "." },
-        { KeyCode::KEY_NUMPAD_COMMA, "," }, { KeyCode::KEY_NUMPAD_EQUALS, "=" }, { KeyCode::KEY_TAB, "\t" },
-        { KeyCode::KEY_SPACE, " " }, { KeyCode::KEY_ESCAPE, "ESC" }, { KeyCode::KEY_F1, "F1" },
-        { KeyCode::KEY_F2, "F2" }, { KeyCode::KEY_F3, "F3" }, { KeyCode::KEY_F4, "F4" }, { KeyCode::KEY_F5, "F5" },
-        { KeyCode::KEY_F6, "F6" }, { KeyCode::KEY_F7, "F7" }, { KeyCode::KEY_F8, "F8" }, { KeyCode::KEY_F9, "F9" },
-        { KeyCode::KEY_F10, "F10" }, { KeyCode::KEY_F11, "F11" }, { KeyCode::KEY_F12, "F12" } };
-    if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
-        return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_NUMPAD_0));
-    }
-    if (IsLetterKey()) {
-        int32_t codeValue = static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_A);
-        return std::string(1, static_cast<char>(codeValue + ASCII_START_UPPER_CASE_LETTER));
-    }
-    auto iter = VISIBILITY_CODE.find(code);
-    if (iter != VISIBILITY_CODE.end()) {
-        return iter->second;
-    }
-    return "";
 }
 
 } // namespace OHOS::Ace
