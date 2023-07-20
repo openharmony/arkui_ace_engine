@@ -176,10 +176,6 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.isShowInSubWindow = showInSubWindowValue->ToBoolean();
 #endif
         }
-        auto container = Container::Current();
-        if (container && container->IsScenceBoardWindow()) {
-            instance->dialogProperties_.isShowInSubWindow = false;
-        }
 
         info.SetReturnValue(instance);
     } else {

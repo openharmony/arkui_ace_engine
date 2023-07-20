@@ -1012,10 +1012,6 @@ void ViewAbstract::BindPopup(
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
-    // windowScene will not use subwindow
-    if (container->IsScenceBoardWindow()) {
-        param->SetShowInSubWindow(false);
-    }
     auto showInSubWindow = param->IsShowInSubWindow();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
@@ -1157,11 +1153,6 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     // unable to use the subWindow in the Previewer.
     isContextMenu = false;
 #endif
-    // windowScene will not use subwindow
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        isContextMenu = false;
-    }
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
