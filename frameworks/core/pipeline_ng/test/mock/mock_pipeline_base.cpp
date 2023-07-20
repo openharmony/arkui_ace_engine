@@ -212,6 +212,8 @@ bool PipelineContext::OnBackPressed()
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
+void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
