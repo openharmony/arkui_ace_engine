@@ -54,6 +54,7 @@ ohos_unittest("grid_test_ng") {
     "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/test_ng.cpp",
     "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # self
