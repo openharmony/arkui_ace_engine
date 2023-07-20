@@ -21,12 +21,12 @@
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "jsnapi.h"
 #include "napi/native_common.h"
 #include "native_value.h"
 #include "node_api.h"
 
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
-#include "jsnapi.h"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 
