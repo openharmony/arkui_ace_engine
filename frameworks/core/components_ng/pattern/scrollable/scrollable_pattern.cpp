@@ -306,7 +306,20 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
     CHECK_NULL_VOID(scrollableEvent_);
-    scrollableEvent_->SetScrollBar(scrollBar_);
+    scrollableEvent_->SetInBarRegionCallback(
+        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point) {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_RETURN_NOLOG(scrollBar, false);
+            return scrollBar->InBarTouchRegion(Point(point.GetX(), point.GetY()));
+        }
+    );
+    scrollableEvent_->SetBarCollectTouchTargetCallback([weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))]
+        (const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(scrollBar);
+            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+        }
+    );
 }
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
