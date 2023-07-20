@@ -70,9 +70,8 @@ public:
 
     virtual void SetIsFullScreen(bool isFullScreen) {}
 
-    virtual void SetInstanceId(int32_t instanceId) {}
-
 protected:
+
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };
 } // namespace OHOS::Ace::NG

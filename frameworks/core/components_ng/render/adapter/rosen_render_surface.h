@@ -58,12 +58,7 @@ public:
     {
         isTexture_ = isTexture;
     }
-
-    void SetInstanceId(int32_t instanceId) override
-    {
-        instanceId_ = instanceId;
-    }
-
+    
     void ConsumeBuffer();
 
 #ifdef OHOS_PLATFORM
@@ -88,7 +83,6 @@ private:
     WeakPtr<NG::RenderContext> renderContext_ = nullptr;
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallbackInterface_ = nullptr;
     bool isTexture_ = false;
-    int32_t instanceId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderSurface);
 };

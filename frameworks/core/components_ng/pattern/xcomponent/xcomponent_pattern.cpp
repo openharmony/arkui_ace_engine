@@ -127,8 +127,7 @@ void XComponentPattern::OnAttachToFrameNode()
         renderContext->SetClipToFrame(true);
         renderContext->SetClipToBounds(true);
         renderSurface_ = RenderSurface::Create();
-        instanceId_ = Container::CurrentId();
-        renderSurface_->SetInstanceId(instanceId_);
+        scopeId_ = Container::CurrentId();
         if (type_ == XComponentType::SURFACE) {
             renderContextForSurface_ = RenderContext::Create();
             static RenderContext::ContextParam param = { RenderContext::ContextType::SURFACE, id_ + "Surface" };
@@ -349,7 +348,7 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 
 void XComponentPattern::XComponentSizeInit()
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(scopeId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
@@ -368,7 +367,7 @@ void XComponentPattern::XComponentSizeInit()
 
 void XComponentPattern::XComponentSizeChange(float textureWidth, float textureHeight)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(scopeId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto viewScale = context->GetViewScale();
@@ -679,9 +678,9 @@ std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPo
 
 ExternalEvent XComponentPattern::CreateExternalEvent()
 {
-    return [weak = AceType::WeakClaim(this), instanceId = instanceId_](
+    return [weak = AceType::WeakClaim(this), scopeId = scopeId_](
                const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
-        ContainerScope scope(instanceId);
+        ContainerScope scope(scopeId);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
