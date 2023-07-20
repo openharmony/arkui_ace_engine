@@ -287,6 +287,8 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     if (IsTextArea()) {
         CheckScrollable();
+    } else {
+        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
     }
     UpdateScrollBarOffset();
     caretUpdateType_ = CaretUpdateType::NONE;
