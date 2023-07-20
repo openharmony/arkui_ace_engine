@@ -737,7 +737,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     bool mainAxisInf =
         GreaterOrEqualToInfinity(direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                      ? layoutConstraint->maxSize.Width()
-                                     : layoutConstraint->maxSize.Height());
+                                     : layoutConstraint->maxSize.Height()) && NearEqual(mainAxisSize_, -1.0f);
     if (NearEqual(mainAxisSize_, -1.0f)) {
         if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
             mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
