@@ -1070,11 +1070,14 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     NG::TimePickerSettingData settingData;
     PickerDialogInfo pickerDialog;
     settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
-    pickerDialog.pickerTime = ParseTime(selectedTime);
     pickerDialog.isUseMilitaryTime = useMilitaryTime->ToBoolean();
     if (selectedTime->IsObject()) {
-        settingData.dialogTitleDate = ParseDate(selectedTime);
-        pickerDialog.isSelectedTime = true;
+        PickerDate dialogTitleDate = ParseDate(selectedTime);
+        if (dialogTitleDate.GetYear() != 0) {
+            settingData.dialogTitleDate = dialogTitleDate;
+            pickerDialog.isSelectedTime = true;
+            pickerDialog.pickerTime = ParseTime(selectedTime);
+        }
     }
     JSDatePicker::ParseTextProperties(paramObject, settingData.properties);
     TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(
