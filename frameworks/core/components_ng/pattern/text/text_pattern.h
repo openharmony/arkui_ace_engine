@@ -245,6 +245,8 @@ public:
         return imageOffset_;
     }
 
+    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo);
+
 protected:
     void HandleOnCopy();
     void InitMouseEvent();
@@ -271,8 +273,9 @@ protected:
     RefPtr<Paragraph> paragraph_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
+    RefPtr<Clipboard> clipboard_;
     CopyOptions copyOption_ = CopyOptions::None;
-    
+
     OffsetF imageOffset_;
     std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
@@ -285,6 +288,7 @@ protected:
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     std::vector<Rect> rectsForPlaceholders_;
+    int32_t imageCount_ = 0;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -307,7 +311,6 @@ private:
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
     bool panEventInitialized_ = false;
-    RefPtr<Clipboard> clipboard_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     RefPtr<TextContentModifier> textContentModifier_;

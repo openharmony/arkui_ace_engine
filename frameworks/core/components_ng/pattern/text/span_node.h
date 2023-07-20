@@ -147,7 +147,7 @@ public:
     {
         children.clear();
     }
-    int32_t position;
+    int32_t position = -1;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle;
     std::unique_ptr<TextLineStyle> textLineStyle;
