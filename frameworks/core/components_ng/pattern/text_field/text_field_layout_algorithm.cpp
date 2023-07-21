@@ -503,7 +503,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
     paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
-    paraStyle.fontFamily_ = textStyle.GetFontFamilies().at(0);
+    auto fontFamilies = textStyle.GetFontFamilies();
+    if (!fontFamilies.empty()) {
+        paraStyle.fontFamily_ = fontFamilies.at(0);
+    }
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
@@ -535,7 +538,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle->GetWordBreak());
     paraStyle.fontSize_ = textStyle->GetFontSize().ConvertToPx();
-    paraStyle.fontFamily_ = textStyle->GetFontFamilies().at(0);
+    auto fontFamilies = textStyle->GetFontFamilies();
+    if (!fontFamilies.empty()) {
+        paraStyle.fontFamily_ = fontFamilies.at(0);
+    }
     if (textStyle->GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
