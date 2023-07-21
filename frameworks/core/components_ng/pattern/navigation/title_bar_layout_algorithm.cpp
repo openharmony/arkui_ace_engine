@@ -39,7 +39,7 @@ namespace {
 constexpr int32_t MAX_MENU_ITEMS_NUM = 3;
 constexpr int32_t MENU_OFFSET_RATIO = 9;
 
-} // namespace
+}
 
 void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
