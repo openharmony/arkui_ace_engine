@@ -253,7 +253,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
-    if (isInlineStyle && pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
+    if (pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
         pattern->SetSingleLineHeight(preferredHeight);
     }
     if (pattern->IsTextArea()) {
