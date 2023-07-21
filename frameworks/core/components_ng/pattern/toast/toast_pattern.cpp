@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 
 #include "base/utils/utils.h"
@@ -117,5 +116,22 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
     auto minWidth = Dimension(toastTheme->GetMinWidth().ConvertToPx());
     auto minHeight = Dimension(toastTheme->GetMinHeight().ConvertToPx());
     textLayoutProperty->UpdateCalcMinSize(CalcSize(NG::CalcLength(minWidth), NG::CalcLength(minHeight)));
+}
+
+void ToastPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textContext = host->GetRenderContext();
+    CHECK_NULL_VOID(textContext);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+    auto textColor = toastTheme->GetTextStyle().GetTextColor();
+    auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(textColor);
+    host->SetNeedCallChildrenUpdate(false);
 }
 } // namespace OHOS::Ace::NG
