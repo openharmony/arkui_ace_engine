@@ -33,21 +33,6 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
-
-constexpr int32_t SCROLL_FROM_NONE = 0;
-constexpr int32_t SCROLL_FROM_UPDATE = 1;
-constexpr int32_t SCROLL_FROM_ANIMATION = 2;
-constexpr int32_t SCROLL_FROM_JUMP = 3;
-constexpr int32_t SCROLL_FROM_ANIMATION_SPRING = 4;
-constexpr int32_t SCROLL_FROM_CHILD = 5;
-constexpr int32_t SCROLL_FROM_BAR = 6;
-constexpr int32_t SCROLL_FROM_FOCUS_JUMP = 7;
-constexpr int32_t SCROLL_FROM_ROTATE = 8;
-constexpr int32_t SCROLL_FROM_INDEXER = 9;
-constexpr int32_t SCROLL_FROM_START = 10; // from drag start
-constexpr int32_t SCROLL_FROM_AXIS = 11;
-constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
-
 enum class NestedState {
     GESTURE = 0,
     CHILD_SCROLL,
@@ -64,7 +49,6 @@ struct ScrollResult {
     bool reachEdge;
 };
 
-using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEventCallback = std::function<void()>;
 using OutBoundaryCallback = std::function<bool()>;
 using ScrollOverCallback = std::function<void(double velocity)>;
@@ -261,19 +245,6 @@ public:
     const DragCancelRefreshCallback& GetDragCancelCallback() const
     {
         return dragCancelCallback_;
-    }
-
-    void SetMouseLeftButtonScroll(const MouseLeftButtonScroll& mouseLeftButtonScroll)
-    {
-        mouseLeftButtonScroll_ = mouseLeftButtonScroll;
-    }
-
-    bool NeedMouseLeftButtonScroll() const
-    {
-        if (mouseLeftButtonScroll_) {
-            return mouseLeftButtonScroll_();
-        }
-        return true;
     }
 
     void SetWatchFixCallback(const WatchFixCallback& watchFixCallback)
@@ -473,7 +444,6 @@ private:
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     ContinuousSlidingCallback continuousSlidingCallback_;
-    MouseLeftButtonScroll mouseLeftButtonScroll_;
     Axis axis_;
     RefPtr<PanRecognizer> panRecognizer_;
 

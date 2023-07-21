@@ -46,10 +46,10 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto offset = paintWrapper->GetContentOffset();
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    auto contentSize = paintWrapper->GetContentSize();
     RenderRingInfo data;
-    data.radius = std::min(frameSize.Width(), frameSize.Height()) / 2.0f;
-    data.center = Offset(frameSize.Width() / 2.0f + offset.GetX(), frameSize.Height() / 2.0f + offset.GetY());
+    data.radius = std::min(contentSize.Width(), contentSize.Height()) / 2.0f;
+    data.center = Offset(contentSize.Width() / 2.0f + offset.GetX(), contentSize.Height() / 2.0f + offset.GetY());
     float startAngle = DEFAULT_START_DEGREE;
     float endAngle = DEFAULT_END_DEGREE;
     if (paintProperty->GetStartAngle().has_value() && !std::isnan(paintProperty->GetStartAngle().value())) {

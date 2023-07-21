@@ -63,12 +63,12 @@ RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 }
 
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId)
+    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint)
 {
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
-        scrollableActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+        scrollableActuator_->CollectTouchTarget(coordinateOffset, localPoint, getEventTargetImpl, innerTargets);
     }
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
@@ -540,6 +540,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (dragDropInfo.pixelMap) {
         pixelMap = dragDropInfo.pixelMap->GetPixelMapSharedPtr();
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+        dragDropManager->SetIsMouseDrag(true);
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
         if (HasThumbnailCallback()) {

@@ -1232,6 +1232,27 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest020, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ButtonPatternTest021
+ * @tc.desc: Test HandleHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest021, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->SetEnabled(false);
+    buttonPattern->HandleHoverEvent(true);
+    EXPECT_EQ(buttonPattern->isHover_, true);
+    eventHub->SetEnabled(true);
+    buttonPattern->HandleHoverEvent(false);
+    EXPECT_EQ(buttonPattern->isHover_, false);
+}
+
+/**
  * @tc.name: ButtonAccessibilityPropertyTest001
  * @tc.desc: Test button property
  * @tc.type: FUNC

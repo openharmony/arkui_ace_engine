@@ -68,13 +68,13 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 
         // check if owner object is set
         JSView* ownerView = ownerObj->Unwrap<JSView>();
+        auto instance = new JSCustomDialogController(ownerView);
         if (ownerView == nullptr) {
+            info.SetReturnValue(instance);
+            instance = nullptr;
             LOGE("JSCustomDialogController creation with invalid arguments. Missing \'ownerView\'");
             return;
         }
-
-        auto instance = new JSCustomDialogController(ownerView);
-        instance->ownerView_ = ownerView;
 
         // Process builder function.
         JSRef<JSVal> builderCallback = constructorArg->GetProperty("builder");
@@ -203,6 +203,10 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         return;
     }
 
+    if (this->ownerView_ == nullptr) {
+        LOGE("JSCustomDialogController(JsOpenDialog) Missing \'ownerView\'");
+        return;
+    }
     auto containerId = this->ownerView_->GetInstanceId();
     ContainerScope containerScope(containerId);
 
@@ -251,6 +255,10 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(JsCloseDialog)");
 
+    if (this->ownerView_ == nullptr) {
+        LOGE("JSCustomDialogController(JsCloseDialog) Missing \'ownerView\'");
+        return;
+    }
     auto containerId = this->ownerView_->GetInstanceId();
     ContainerScope containerScope(containerId);
 

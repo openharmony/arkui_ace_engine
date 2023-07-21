@@ -268,7 +268,7 @@ void ListPattern::ProcessEvent(
                 onScroll(offsetVP, ScrollState::SCROLL);
                 onScroll(0.0_vp, ScrollState::IDLE);
             } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-                source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
                 onScroll(offsetVP, ScrollState::FLING);
                 onScroll(0.0_vp, ScrollState::IDLE);
             } else {
@@ -286,7 +286,7 @@ void ListPattern::ProcessEvent(
         if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
             onScroll(offsetVP, ScrollState::SCROLL);
         } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-            source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+            source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
             onScroll(offsetVP, ScrollState::FLING);
         } else {
             onScroll(offsetVP, ScrollState::IDLE);
@@ -723,15 +723,7 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
         return true;
     }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && scrollBar->IsDriving()) {
-        offset = scrollBar->CalcPatternOffset(offset);
-        if (source == SCROLL_FROM_UPDATE) {
-            source = SCROLL_FROM_BAR;
-        }
-    } else {
-        ProcessDragUpdate(offset, source);
-    }
+    ProcessDragUpdate(offset, source);
     return UpdateCurrentOffset(offset, source);
 }
 

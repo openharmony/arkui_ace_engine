@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
+#include <chrono>
+
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -874,6 +876,10 @@ void RichEditorPattern::InitDragDropEvent()
         NG::DragDropInfo itemInfo;
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_RETURN(pattern, itemInfo);
+        pattern->timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
+        auto eventHub = pattern->GetEventHub<RichEditorEventHub>();
+        eventHub->SetTimestamp(pattern->GetTimestamp());
+        CHECK_NULL_RETURN(eventHub, itemInfo);
         return pattern->OnDragStart(event);
     };
     eventHub->SetOnDragStart(std::move(onDragStart));
@@ -903,6 +909,9 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
     auto selectEnd = textSelector_.GetTextEnd();
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
+    if (dragResultObjects_.empty()) {
+        return itemInfo;
+    }
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     auto resultProcesser = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
         auto pattern = weak.Upgrade();

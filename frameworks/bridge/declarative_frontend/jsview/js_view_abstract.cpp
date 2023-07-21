@@ -59,6 +59,7 @@
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
+#include "core/image/image_source_info.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -1938,6 +1939,9 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
         LOGE("can not parse image src.");
         return;
     }
+    std::string bundle;
+    std::string module;
+    GetJsMediaBundleInfo(info[0], bundle, module);
 
     int32_t repeatIndex = 0;
     if (info.Length() == 2 && info[1]->IsNumber()) {
@@ -1945,9 +1949,10 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
     if (info[0]->IsString()) {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(src, GetThemeConstants());
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(
+            ImageSourceInfo { src, bundle, module }, GetThemeConstants());
     } else {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(src, nullptr);
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
     }
     ViewAbstractModel::GetInstance()->SetBackgroundImageRepeat(repeat);
 }
@@ -2030,12 +2035,10 @@ void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-
-    if (!info[0]->IsNumber()) {
-        LOGE("The arg is not a number");
-        return;
+    auto radio = 0.0;
+    if (info[0]->IsNumber()) {
+        radio = info[0]->ToNumber<double>();
     }
-    auto radio = info[0]->ToNumber<double>();
     ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0, 1.0));
 }
 
@@ -2047,7 +2050,9 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to be a object");
+        PixStretchEffectOption option;
+        option.ResetValue();
+        ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
         return;
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
@@ -2097,11 +2102,10 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    if (!info[0]->IsNumber()) {
-        LOGE("The arg is wrong,it is supposed to be a number!");
-        return;
+    auto radio = 1.0;
+    if (info[0]->IsNumber()) {
+        radio = info[0]->ToNumber<double>();
     }
-    auto radio = info[0]->ToNumber<double>();
     ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
@@ -6277,4 +6281,19 @@ void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetRenderFit(renderFit);
 }
 
+void JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
+{
+    if (!jsValue->IsObject() || jsValue->IsString()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (!jsObj->IsUndefined()) {
+        JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
+        JSRef<JSVal> module = jsObj->GetProperty("moduleName");
+        if (bundle->IsString() && module->IsString()) {
+            bundleName = bundle->ToString();
+            moduleName = module->ToString();
+        }
+    }
+}
 } // namespace OHOS::Ace::Framework
