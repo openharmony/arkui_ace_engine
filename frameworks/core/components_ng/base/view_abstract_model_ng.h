@@ -37,6 +37,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -108,7 +109,7 @@ public:
         ViewAbstract::SetBackgroundColor(color);
     }
 
-    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override
+    void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override
     {
         ViewAbstract::SetBackgroundImage(src);
     }
