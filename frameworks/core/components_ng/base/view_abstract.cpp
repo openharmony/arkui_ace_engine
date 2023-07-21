@@ -257,6 +257,20 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
 }
 
+void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateBackgroundEffect(effectOption);
+    }
+}
+
 void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
