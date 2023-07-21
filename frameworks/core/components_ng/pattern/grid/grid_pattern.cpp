@@ -453,8 +453,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
 
     auto onReachStart = gridEventHub->GetOnReachStart();
     if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
-        if (scrollState_ == SCROLL_FROM_UPDATE && gridLayoutInfo_.reachStart_ && !reachStart &&
-            !NearZero(gridLayoutInfo_.currentOffset_)) {
+        if ((scrollState_ == SCROLL_FROM_UPDATE || scrollState_ == SCROLL_FROM_ANIMATION_SPRING ||
+                scrollState_ == SCROLL_FROM_ANIMATION) &&
+            gridLayoutInfo_.reachStart_ && !reachStart && !NearZero(gridLayoutInfo_.currentOffset_)) {
             onReachStart();
             initialIndex_ = true;
         }
@@ -464,8 +465,6 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
         }
         if (!NearZero(gridLayoutInfo_.currentOffset_)) {
             offsetCount_++;
-        } else {
-            offsetCount_ = 0;
         }
         if (scrollState_ == SCROLL_FROM_NONE && reachStart && NearZero(gridLayoutInfo_.currentOffset_) &&
             offsetCount_ > 1) {
