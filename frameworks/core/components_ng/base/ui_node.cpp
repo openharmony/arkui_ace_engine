@@ -803,10 +803,10 @@ void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void UINode::OnSetCacheCount(int32_t cacheCount)
+void UINode::OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
 {
     for (const auto& child : GetChildren()) {
-        child->OnSetCacheCount(cacheCount);
+        child->OnSetCacheCount(cacheCount, itemConstraint);
     }
 }
 

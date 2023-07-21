@@ -60,7 +60,6 @@ public:
         std::list<std::optional<std::string>>&& nodeIds,
         std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems);
 
-
     void OnDataReloaded() override;
     void OnDataAdded(size_t index) override;
     void OnDataDeleted(size_t index) override;
@@ -97,9 +96,10 @@ public:
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
 
     const std::list<RefPtr<UINode>>& GetChildren() const override;
-    void OnSetCacheCount(int32_t cacheCount) override
+    void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
         cacheCount_ = cacheCount;
+        itemConstraint_ = itemConstraint;
     }
 
 private:
@@ -138,7 +138,6 @@ private:
     std::list<int32_t> predictItems_;
     std::optional<LayoutConstraintF> itemConstraint_;
     bool requestLongPredict_ = false;
-    bool useLongPredictTask_ = false;
     bool isRegisterListener_ = false;
     bool isLoop_ = false;
 
