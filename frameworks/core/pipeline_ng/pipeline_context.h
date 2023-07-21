@@ -408,6 +408,9 @@ private:
 
     void SyncSafeArea();
 
+    // only used for static form.
+    void UpdateFormLinkInfos();
+
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
