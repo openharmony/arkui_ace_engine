@@ -123,6 +123,7 @@ common_sources = [
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
+  "$ace_root/frameworks/core/components_ng/test/pattern/test_ng.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
   "$ace_root/test/mock/core/common/mock_container.cpp",
