@@ -715,8 +715,10 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     bool outOfStart = (startIndex_ == 0) && Positive(startPos) && GreatNotEqual(endPos, contentMainSize_);
     bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, contentMainSize_) && Negative(startPos);
     if (IsScrollSnapAlignCenter()) {
-        outOfStart = outOfStart &&  Positive(startPos - contentMainSize_ / 2.0f);
-        outOfEnd = outOfEnd &&  LessNotEqual(endPos, contentMainSize_ / 2.0f);
+        auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        outOfStart = (startIndex_ == 0) && Positive(startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f);
+        outOfEnd = (endIndex_ == maxListItemIndex_) &&
+            LessNotEqual(endPos - itemHeight / 2.0f, contentMainSize_ / 2.0f);
     }
     return outOfStart || outOfEnd;
 }
