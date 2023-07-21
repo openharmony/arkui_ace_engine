@@ -1322,12 +1322,14 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         if (currentIndex_ != nextIndex) {
             UpdateCurrentIndex(nextIndex);
             auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            auto curChild = host->GetChildAtIndex(currentIndex_);
-            if (curChild) {
-                auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
-                CHECK_NULL_VOID(curChildFrame);
-                FlushFocus(curChildFrame);
+            if (host) {
+                auto curChild = host->GetChildAtIndex(currentIndex_);
+                if (curChild) {
+                    auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+                    if (curChildFrame) {
+                        FlushFocus(curChildFrame);
+                    } 
+                }
             }
             OnIndexChange();
             oldIndex_ = currentIndex_;
@@ -1723,12 +1725,14 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     if (GetLoopIndex(currentIndex_) != GetLoopIndex(nextIndex)) {
         UpdateCurrentIndex(nextIndex);
         auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto curChild = host->GetChildAtIndex(currentIndex_);
-        if (curChild) {
-            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
-            CHECK_NULL_VOID(curChildFrame);
-            FlushFocus(curChildFrame);
+        if (host) {
+            auto curChild = host->GetChildAtIndex(currentIndex_);
+            if (curChild) {
+                auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+                if (curChildFrame) {
+                    FlushFocus(curChildFrame);
+                } 
+            }
         }
         OnIndexChange();
         oldIndex_ = currentIndex_;
@@ -2446,14 +2450,15 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
             TriggerAnimationEndOnSwipeToRight();
         }
         auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto curChild = host->GetChildAtIndex(currentIndex_);
-        if (curChild) {
-            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
-            CHECK_NULL_VOID(curChildFrame);
-            FlushFocus(curChildFrame);
+        if (host) {
+            auto curChild = host->GetChildAtIndex(currentIndex_);
+            if (curChild) {
+                auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+                if (curChildFrame) {
+                    FlushFocus(curChildFrame);
+                } 
+            }
         }
-
         OnIndexChange();
         oldIndex_ = currentIndex_;
     }
@@ -2481,8 +2486,9 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
             auto curChild = host->GetChildAtIndex(currentIndex_);
             if (curChild) {
                 auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
-                CHECK_NULL_VOID(curChildFrame);
-                FlushFocus(curChildFrame);
+                if (curChildFrame) {
+                    FlushFocus(curChildFrame);
+                } 
             }
             oldIndex_ = nextIndex;
             currentFirstIndex_ = GetLoopIndex(nextIndex);
