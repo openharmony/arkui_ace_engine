@@ -415,7 +415,7 @@ void LayoutWrapperNode::LayoutOverlay()
         return;
     }
     overlayChild_->Layout();
-    auto size = GetGeometryNode()->GetMarginFrameSize();
+    auto size = GetGeometryNode()->GetFrameSize();
     auto align = Alignment::TOP_LEFT;
     Dimension offsetX, offsetY;
     auto childLayoutProperty = overlayChild_->GetLayoutProperty();
