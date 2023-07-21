@@ -185,7 +185,7 @@ void RosenRenderSvgPath::GetPath(RSPath& out)
         }
     }
     if (fillState_.IsEvenodd()) {
-        out.SetFillStyle(RSPathFillType::EVEN_ODD);
+        out.SetFillStyle(RSPathFillType::EVENTODD);
     }
 }
 #endif

@@ -65,7 +65,7 @@ RSRecordingPath SvgPath::AsPath(const Size& /* viewPort */) const
     if (!pathD.empty()) {
         out.BuildFromSVGString(pathD);
         if (declaration->GetClipState().IsEvenodd()) {
-            out.SetFillStyle(RSPathFillType::EVEN_ODD);
+            out.SetFillStyle(RSPathFillType::EVENTODD);
         }
     }
     return out;

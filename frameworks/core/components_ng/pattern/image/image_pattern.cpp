@@ -17,6 +17,7 @@
 
 #include <array>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -128,24 +129,52 @@ void ImagePattern::RegisterVisibleAreaChange()
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 }
 
+RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode)
+{
+    RectF paintSize;
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, paintSize);
+    ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+    bool imageRepeatX = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_X;
+    bool imageRepeatY = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_Y;
+
+    if (loadingCtx_->GetSourceInfo().IsSvg()) {
+        const float invalidValue = -1;
+        paintSize.SetWidth(dstRect_.IsValid() ? dstRect_.Width() : invalidValue);
+        paintSize.SetHeight(dstRect_.IsValid() ? dstRect_.Height() : invalidValue);
+        paintSize.SetLeft(dstRect_.IsValid() ? dstRect_.GetX() + geometryNode->GetContentOffset().GetX() :
+            invalidValue);
+        paintSize.SetTop(dstRect_.IsValid() ? dstRect_.GetY() + geometryNode->GetContentOffset().GetY() :
+            invalidValue);
+    } else {
+        paintSize.SetWidth(imageRepeatX ? geometryNode->GetContentSize().Width() : dstRect_.Width());
+        paintSize.SetHeight(imageRepeatY ? geometryNode->GetContentSize().Height() : dstRect_.Height());
+        paintSize.SetLeft((imageRepeatX ? 0 : dstRect_.GetX()) + geometryNode->GetContentOffset().GetX());
+        paintSize.SetTop((imageRepeatY ? 0 : dstRect_.GetY()) + geometryNode->GetContentOffset().GetY());
+    }
+    return paintSize;
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& geometryNode = host->GetGeometryNode();
+    const auto& layoutWrapper = host->GetLayoutWrapper().Upgrade();
+    const auto& geometryNode = layoutWrapper == nullptr ? host->GetGeometryNode() : layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto imageEventHub = GetEventHub<ImageEventHub>();
-    CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
-        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 1, geometryNode->GetContentSize().Width(),
-        geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
-        geometryNode->GetContentOffset().GetY());
-    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
     // update src data
     image_ = loadingCtx_->MoveCanvasImage();
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
+
+    RectF paintRect = CalcImageContentPaintSize(geometryNode);
+    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
+        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
+        geometryNode->GetFrameSize().Height(), 1, paintRect.Width(), paintRect.Height(),
+        paintRect.GetX(), paintRect.GetY());
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     PrepareAnimation(image_);
@@ -175,9 +204,7 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
         geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
-    if (!host->IsActive()) {
-        return;
-    }
+
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -222,7 +249,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     if (altImage_ && altDstRect_ && altSrcRect_) {
         return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
     }
-    CreateObscuredImageIfNeed();
+    CreateObscuredImage();
     if (obscuredImage_) {
         return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_);
     }
@@ -237,15 +264,15 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     return image_;
 }
 
-void ImagePattern::CreateObscuredImageIfNeed()
+void ImagePattern::CreateObscuredImage()
 {
-    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto layoutConstraint = imageLayoutProperty->GetLayoutConstraint();
-    CHECK_NULL_VOID(layoutConstraint);
+    auto props = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto layoutConstraint = props->GetLayoutConstraint();
+    CHECK_NULL_VOID_NOLOG(layoutConstraint);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    auto sourceInfo = props->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     auto reasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
         if (!obscuredImage_) {
@@ -465,7 +492,9 @@ void ImagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(false);
+    auto renderCtx = host->GetRenderContext();
+    renderCtx->SetClipToBounds(false);
+    renderCtx->SetUsingContentRectForRenderFrame(true);
 
     // register image frame node to pipeline context to receive memory level notification and window state change
     // notification
@@ -580,6 +609,13 @@ void ImagePattern::OpenSelectOverlay()
         pattern->HandleCopy();
         pattern->CloseSelectOverlay();
     };
+    info.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
+        if (closedByGlobalEvent) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CloseSelectOverlay();
+        }
+    };
 
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -593,16 +629,18 @@ void ImagePattern::OpenSelectOverlay()
 
 void ImagePattern::CloseSelectOverlay()
 {
-    if (selectOverlay_ && !selectOverlay_->IsClosed()) {
+    if (!selectOverlay_) {
+        return;
+    }
+    if (!selectOverlay_->IsClosed()) {
         LOGI("closing select overlay");
         selectOverlay_->Close();
-        selectOverlay_ = nullptr;
-
-        // remove selected mask effect
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkNeedRenderOnly();
     }
+    selectOverlay_ = nullptr;
+    // remove selected mask effect
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::HandleCopy()

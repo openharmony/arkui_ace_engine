@@ -3536,6 +3536,12 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // need to overwrite impl of base class with empty function.
     }
 }
+ObservedPropertyAbstractPU.DelayedNotifyChangesEnum = (_a = class {
+    },
+    _a.do_not_delay = 0,
+    _a.delay_none_pending = 1,
+    _a.delay_notification_pending = 2,
+    _a);
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3588,12 +3594,6 @@ class ObservedPropertySimpleAbstractPU extends ObservedPropertyAbstractPU {
         super(owningView, propertyName);
     }
 }
-ObservedPropertyAbstractPU.DelayedNotifyChangesEnum = (_a = class {
-    },
-    _a.do_not_delay = 0,
-    _a.delay_none_pending = 1,
-    _a.delay_notification_pending = 2,
-    _a);
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4584,6 +4584,8 @@ class ViewPU extends NativeViewPartialUpdate {
         // flag if active of inActive
         // inActive means updates are delayed
         this.isActive_ = true;
+        // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
+        this.isDeleting_ = false;
         this.watchedProps = new Map();
         this.recycleManager = undefined;
         // Set of dependent elmtIds that need partial update
@@ -4606,9 +4608,8 @@ class ViewPU extends NativeViewPartialUpdate {
         this.localStoragebackStore_ = undefined;
         if (parent) {
             // this View is not a top-level View
-            
             this.setCardId(parent.getCardId());
-            this.localStorage_ = parent.localStorage_;
+            // Call below will set this.parent_ to parent as well
             parent.addChild(this);
         }
         else if (localStorage) {
@@ -4619,6 +4620,10 @@ class ViewPU extends NativeViewPartialUpdate {
         
     }
     get localStorage_() {
+        if (!this.localStoragebackStore_ && this.parent_) {
+            
+            this.localStoragebackStore_ = this.parent_.localStorage_;
+        }
         if (!this.localStoragebackStore_) {
             
             this.localStoragebackStore_ = new LocalStorage({ /* empty */});
@@ -4654,6 +4659,9 @@ class ViewPU extends NativeViewPartialUpdate {
             removedElmtIds.push(key);
         });
         this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
+        if (this.hasRecycleManager()) {
+            this.getRecycleManager().purgeAllCachedRecycleNode();
+        }
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
@@ -4661,6 +4669,8 @@ class ViewPU extends NativeViewPartialUpdate {
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
+        this.localStoragebackStore_ = undefined;
+        this.isDeleting_ = true;
     }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
@@ -4674,13 +4684,13 @@ class ViewPU extends NativeViewPartialUpdate {
         
         this.isActive_ = active;
         if (this.isActive_) {
-            this.onActive();
+            this.onActiveInternal();
         }
         else {
-            this.onInactive();
+            this.onInactiveInternal();
         }
     }
-    onActive() {
+    onActiveInternal() {
         if (!this.isActive_) {
             return;
         }
@@ -4693,7 +4703,7 @@ class ViewPU extends NativeViewPartialUpdate {
             }
         }
     }
-    onInactive() {
+    onInactiveInternal() {
         if (this.isActive_) {
             return;
         }
@@ -5065,7 +5075,7 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     // add current JS object to it's parent recycle manager
     recycleSelf(name) {
-        if (this.parent_) {
+        if (this.parent_ && !this.parent_.isDeleting_) {
             this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
         }
         else {
@@ -5254,11 +5264,10 @@ class RecycleManager {
         return (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
     }
     // When parent JS View is deleted, release all cached nodes
-    purgeAllCachedRecycleNode(removedElmtIds) {
+    purgeAllCachedRecycleNode() {
         this.cachedRecycleNodes.forEach((nodes, _) => {
             nodes.forEach((node) => {
                 node.resetRecycleCustomNode();
-                removedElmtIds.push(node.id__());
             });
         });
         this.cachedRecycleNodes.clear();

@@ -28,15 +28,36 @@ void SystemWindowScene::OnAttachToFrameNode()
     auto pos = name.find_last_of('.');
     name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
 
-    struct Rosen::RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    rsSurfaceNodeConfig.SurfaceNodeName = name;
-    auto surfaceNode = Rosen::RSSurfaceNode::Create(rsSurfaceNodeConfig, Rosen::RSSurfaceNodeType::SELF_DRAWING_NODE);
+    Rosen::RSSurfaceNodeConfig config;
+    config.SurfaceNodeName = name;
+    auto surfaceNode = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
+}
+
+bool SystemWindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    CHECK_NULL_RETURN(dirty, false);
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameRect = geometryNode->GetFrameRect();
+    Rosen::WSRect windowRect {
+        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
+        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
+        .width_ = std::round(frameRect.Width()),
+        .height_ = std::round(frameRect.Height())
+    };
+
+    CHECK_NULL_RETURN(session_, false);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    return false;
 }
 
 void SystemWindowScene::OnSetDepth(const int32_t depth)

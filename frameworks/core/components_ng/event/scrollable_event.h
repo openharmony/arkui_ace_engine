@@ -24,11 +24,9 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
 namespace OHOS::Ace::NG {
-
-using OnScrollCallback = std::function<void(Dimension, Dimension)>;
-using ScrollEndCallback = std::function<void()>;
 
 class GestureEventHub;
 
@@ -77,19 +75,6 @@ public:
         return scrollFrameBeginCallback_;
     }
 
-    void SetOnScrollCallback(OnScrollCallback&& onScrollCallback)
-    {
-        if (!onScrollCallback) {
-            return;
-        }
-        onScrollCallback_ = std::move(onScrollCallback);
-    }
-
-    const OnScrollCallback& GetOnScrollCallback() const
-    {
-        return onScrollCallback_;
-    }
-
     void SetScrollEndCallback(ScrollEndCallback&& scrollEndCallback)
     {
         if (!scrollEndCallback) {
@@ -114,19 +99,6 @@ public:
     const OutBoundaryCallback& GetOutBoundaryCallback() const
     {
         return outBoundaryCallback_;
-    }
-
-    void SetMouseLeftButtonScroll(MouseLeftButtonScroll&& mouseLeftButtonScroll)
-    {
-        mouseLeftButtonScroll_ = std::move(mouseLeftButtonScroll);
-        if (scrollable_) {
-            scrollable_->SetMouseLeftButtonScroll(mouseLeftButtonScroll_);
-        }
-    }
-
-    const MouseLeftButtonScroll& GetMouseLeftButtonScroll() const
-    {
-        return mouseLeftButtonScroll_;
     }
 
     Axis GetAxis() const
@@ -183,18 +155,27 @@ public:
         return friction_;
     }
 
+    RefPtr<ScrollBar> GetScrollBar(void) const
+    {
+        return scrollBar_.Upgrade();
+    }
+
+    void SetScrollBar(const RefPtr<ScrollBar>& scrollBar)
+    {
+        scrollBar_ = AceType::WeakClaim<ScrollBar>(AceType::RawPtr<ScrollBar>(scrollBar));
+    }
+
 private:
     ScrollPositionCallback callback_;
-    OnScrollCallback onScrollCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     ScrollFrameBeginCallback scrollFrameBeginCallback_;
     ScrollEndCallback scrollEndCallback_;
     OutBoundaryCallback outBoundaryCallback_;
-    MouseLeftButtonScroll mouseLeftButtonScroll_;
 
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
     RefPtr<Scrollable> scrollable_;
+    WeakPtr<ScrollBar> scrollBar_;
     double friction_ = -1.0;
 };
 
@@ -218,8 +199,8 @@ public:
     void AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect);
     bool RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect);
 
-    void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
+    void CollectTouchTarget(const OffsetF& coordinateOffset, const PointF& localPoint,
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
 
 private:
     void InitializeScrollable(RefPtr<ScrollableEvent> event);

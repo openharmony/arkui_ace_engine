@@ -126,8 +126,8 @@ private:
         auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
         if (GreatNotEqual(prevMargin, childCalcIdealLength) ||
             GreatNotEqual(nextMargin, childCalcIdealLength)) {
-            property->UpdatePrevMargin(0.0_px);
-            property->UpdateNextMargin(0.0_px);
+            property->UpdatePrevMarginWithoutMeasure(0.0_px);
+            property->UpdateNextMarginWithoutMeasure(0.0_px);
             return true;
         }
         return false;

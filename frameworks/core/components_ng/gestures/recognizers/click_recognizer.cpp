@@ -310,7 +310,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
 #ifdef SECURITY_COMPONENT_ENABLE
         info.SetDisplayX(touchPoint.screenX);
         info.SetDisplayY(touchPoint.screenY);
-        info.SetEnhanceData(touchPoint.enhanceData_);
+        info.SetEnhanceData(touchPoint.enhanceData);
 #endif
         (*onAction)(info);
     }

@@ -29,7 +29,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 namespace OHOS::Ace::NG {
-enum class ComponentButtonType { POPUP, BUTTON };
+enum class ComponentButtonType { POPUP, BUTTON, STEPPER, NAVIGATION };
 class ButtonPattern : public Pattern {
     DECLARE_ACE_TYPE(ButtonPattern, Pattern);
 
@@ -60,9 +60,15 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        if (buttonType_ == ComponentButtonType::POPUP) {
+        if (buttonType_ == ComponentButtonType::POPUP || buttonType_ == ComponentButtonType::STEPPER) {
             FocusPaintParam focusPaintParam;
-            focusPaintParam.SetPaintColor(FocusBorderColor_);
+            focusPaintParam.SetPaintColor(focusBorderColor_);
+            return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
+        }
+        if (buttonType_ == ComponentButtonType::NAVIGATION) {
+            FocusPaintParam focusPaintParam;
+            focusPaintParam.SetPaintColor(focusBorderColor_);
+            focusPaintParam.SetPaintWidth(focusBorderWidth_);
             return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
         }
         return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
@@ -86,7 +92,12 @@ public:
 
     void SetFocusBorderColor(const Color& color)
     {
-        FocusBorderColor_ = color;
+        focusBorderColor_ = color;
+    }
+
+    void SetFocusBorderWidth(const Dimension& width)
+    {
+        focusBorderWidth_ = width;
     }
 
     void setComponentButtonType(const ComponentButtonType& buttonType)
@@ -202,6 +213,13 @@ public:
         return isInHover_;
     }
 
+    void OnColorConfigurationUpdate() override;
+
+    void SetSkipColorConfigurationUpdate()
+    {
+        isColorUpdateFlag_ = true;
+    }
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -221,7 +239,7 @@ private:
     static void UpdateTextLayoutProperty(
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     Color backgroundColor_;
-    Color FocusBorderColor_;
+    Color focusBorderColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
 
@@ -231,7 +249,9 @@ private:
 
     bool isInHover_ = false;
     Offset localLocation_;
+    Dimension focusBorderWidth_;
 
+    bool isColorUpdateFlag_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };
 } // namespace OHOS::Ace::NG

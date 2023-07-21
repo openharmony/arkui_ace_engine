@@ -99,8 +99,8 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
         clipRectHeight = contentOffset.GetY() + contentSize.Height() + errorViewHeight;
     }
     canvas.Save();
-    RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(),
-        contentSize.Width() + contentOffset.GetX() - textFieldPattern->GetUnitWidth(), clipRectHeight);
+    RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(), contentSize.Width() + contentOffset.GetX() -
+        textFieldPattern->GetUnitWidth() + textFieldPattern->GetInlinePadding(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
         paragraph->Paint(
@@ -182,7 +182,8 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
 
     textObscured_ = AceType::MakeRefPtr<PropertyBool>(textFieldPattern->GetTextObscured());
     dragStatus_ = AceType::MakeRefPtr<PropertyBool>(false);
-    contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(
+        OffsetF(textFieldPattern->GetTextRect().GetX(), textFieldPattern->GetTextRect().GetY()));
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
     errorTextValue_ = AceType::MakeRefPtr<PropertyString>("");
@@ -281,6 +282,11 @@ void TextFieldContentModifier::SetContentOffset(OffsetF& value)
     if (contentOffset_) {
         contentOffset_->Set(value);
     }
+}
+
+float TextFieldContentModifier::GetContentOffsetY()
+{
+    return contentOffset_->Get().GetY();
 }
 
 void TextFieldContentModifier::SetContentSize(SizeF& value)

@@ -91,7 +91,7 @@ public:
     static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color& color);
-    static void SetBackgroundImage(const std::string& src);
+    static void SetBackgroundImage(const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat);
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
@@ -122,6 +122,9 @@ public:
     static void SetHasBorderImageOutset(bool tag);
     static void SetHasBorderImageRepeat(bool tag);
     static void SetBorderImageGradient(const NG::Gradient& gradient);
+
+    // customBackground
+    static void SetBackgroundAlign(const Alignment& align);
 
     // decoration
     static void SetBackdropBlur(const Dimension& radius);
@@ -167,7 +170,7 @@ public:
     static void SetScale(const NG::VectorF& value);
     static void SetPivot(const DimensionOffset& value);
     static void SetTranslate(const NG::TranslateOptions& value);
-    static void SetRotate(const NG::Vector4F& value);
+    static void SetRotate(const NG::Vector5F& value);
 
     static void SetTransformMatrix(const Matrix4& matrix);
 

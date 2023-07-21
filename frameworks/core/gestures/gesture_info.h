@@ -246,9 +246,13 @@ enum class DragRet {
     ENABLE_DROP,
     DISABLE_DROP,
 };
+enum class DragBehavior {
+    COPY = 0,
+    MOVE = 1,
+};
 #endif
 
-class DragEvent : public AceType {
+class ACE_FORCE_EXPORT DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType)
 
 public:
@@ -355,6 +359,16 @@ public:
     bool IsCopy();
 #endif
 
+    void SetVelocity(const Velocity& velocity)
+    {
+        velocity_ = velocity;
+    }
+
+    const Velocity& GetVelocity() const
+    {
+        return velocity_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -372,6 +386,7 @@ private:
     RefPtr<UnifiedData> dragInfo_;
     bool copy_ = true;
 #endif
+    Velocity velocity_;
 };
 
 struct FingerInfo {

@@ -38,7 +38,11 @@
 #include "core/components/flex/render_flex.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/rosen_render_image.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/components_ng/render/canvas_image.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -184,7 +188,7 @@ void RosenRenderBox::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image)
     auto skiaImage = AceType::DynamicCast<NG::SkiaImage>(image);
     image_ = skiaImage->GetImage();
 #else
-    auto rosenImage = AceType::DynamicCast<NG::RosenImage>(image);
+    auto rosenImage = AceType::DynamicCast<NG::DrawingImage>(image);
     image_ = rosenImage->GetImage();
 #endif
     MarkNeedLayout();

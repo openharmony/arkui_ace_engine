@@ -33,7 +33,7 @@ public:
    
     // only supported by NG, unimplemented here
     void Create() override;
-    const std::list<std::string>& GetCurrentIdList(int32_t nodeId) override;
+    std::list<std::string> GetCurrentIdList(int32_t nodeId) override;
     void SetNewIds(std::list<std::string>&& newIds) override;
     void CreateNewChildStart(const std::string& id) override;
     void CreateNewChildFinish(const std::string& id) override;

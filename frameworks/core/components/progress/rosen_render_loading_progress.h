@@ -20,6 +20,9 @@
 
 #include "base/geometry/offset.h"
 #include "core/components/progress/render_loading_progress.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/rosen_render_context.h"
 

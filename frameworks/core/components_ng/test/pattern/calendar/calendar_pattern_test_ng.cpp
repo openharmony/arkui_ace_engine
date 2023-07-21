@@ -798,7 +798,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPatternTest001, TestSize.Level1)
     auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
     ASSERT_NE(calendarPattern, nullptr);
 
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     EXPECT_FALSE(calendarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true));
 }
@@ -1081,7 +1081,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest001, TestSize.Level1)
     auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
     ASSERT_NE(calendarMonthPattern, nullptr);
 
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     DirtySwapConfig config;
     config.skipMeasure = true;
@@ -1246,8 +1246,8 @@ HWTEST_F(CalendarPatternTestNg, CalendarLayoutAlgorithmTest001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     auto pipeline = frameNode->GetContext();
     ASSERT_NE(pipeline, nullptr);

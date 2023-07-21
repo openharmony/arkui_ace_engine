@@ -35,7 +35,25 @@ ohos_unittest("custom_paint_test_ng") {
   if (is_ohos_standard_system) {
     deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
   }
-  sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_runtime:abilitykit_native",
+    "c_utils:utils",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
+  ]
+
+  sources += [
+    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
+  ]
   defines = [ "ENABLE_DRAG_FRAMEWORK" ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

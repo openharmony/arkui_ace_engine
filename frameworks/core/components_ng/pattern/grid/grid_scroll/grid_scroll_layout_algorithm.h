@@ -17,10 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -83,7 +83,7 @@ private:
         const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
     bool IsIndexInMatrix(int32_t index, int32_t& startLine);
     void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize);
-    void GetTargetIndexInfoWithBenchMark(LayoutWrapper* layoutWrapper, int32_t targetIndex);
+    void GetTargetIndexInfoWithBenchMark(LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex);
 
     void UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize);
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
@@ -101,6 +101,9 @@ private:
         int32_t currentIndex, int32_t lineIndex, LayoutWrapper* layoutWrapper);
     void CalculateLineHeightForLargeItem(int32_t lineIndex, int32_t currentLineIndex,
         std::map<int32_t, std::map<int32_t, int32_t>>::iterator gridMatrixIter, LayoutWrapper* layoutWrapper);
+    void ScrollToIndexStart(LayoutWrapper* layoutWrapper, int32_t targetIndex);
+    void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
+    void UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize);
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;

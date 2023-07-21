@@ -42,12 +42,6 @@ void BadgeModelImpl::Create(BadgeParameters& badgeParameters)
         badge->SetMaxCount(badgeParameters.badgeMaxCount.value());
     }
 
-    if (badgeParameters.badgePosition.has_value()) {
-        badge->SetBadgePosition(static_cast<BadgePosition>(badgeParameters.badgePosition.value()));
-    } else {
-        badge->SetBadgePosition(badgeTheme->GetBadgePosition());
-    }
-
     if (badgeParameters.badgeColor.has_value()) {
         badge->SetBadgeColor(badgeParameters.badgeColor.value());
     } else {
@@ -72,7 +66,40 @@ void BadgeModelImpl::Create(BadgeParameters& badgeParameters)
         badge->SetBadgeCircleSize(badgeTheme->GetBadgeCircleSize());
     }
 
+    SetPositionForBadge(badgeParameters);
     ViewStackProcessor::GetInstance()->ClaimElementId(badge);
     ViewStackProcessor::GetInstance()->Push(badge);
+}
+
+void BadgeModelImpl::SetPositionForBadge(BadgeParameters& badgeParameters)
+{
+    auto badge = AceType::MakeRefPtr<OHOS::Ace::BadgeComponent>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+
+    if (badgeParameters.badgePosition.has_value()) {
+        badge->SetBadgePosition(static_cast<BadgePosition>(badgeParameters.badgePosition.value()));
+    } else {
+        badge->SetBadgePosition(badgeTheme->GetBadgePosition());
+    }
+
+    if (badgeParameters.badgePositionX.has_value()) {
+        badge->SetBadgePositionX(badgeParameters.badgePositionX.value());
+    } else {
+        badge->SetBadgePositionX(badgeTheme->GetBadgePositionX());
+    }
+
+    if (badgeParameters.badgePositionY.has_value()) {
+        badge->SetBadgePositionY(badgeParameters.badgePositionY.value());
+    } else {
+        badge->SetBadgePositionY(badgeTheme->GetBadgePositionY());
+    }
+
+    if (badgeParameters.isPositionXy.has_value()) {
+        badge->SetIsPositionXy(badgeParameters.isPositionXy.value());
+    } else {
+        badge->SetIsPositionXy(badgeTheme->GetIsPositionXy());
+    }
 }
 } // namespace OHOS::Ace::Framework

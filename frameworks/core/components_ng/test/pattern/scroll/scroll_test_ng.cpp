@@ -74,17 +74,17 @@ public:
     void GetInstance();
     static void SetWidth(const Dimension& width);
     static void SetHeight(const Dimension& height);
-    RefPtr<LayoutWrapper> CreateScroll(Axis axis = Axis::VERTICAL);
-    RefPtr<LayoutWrapper> CreateScroll(NG::DisplayMode displayMode);
-    RefPtr<LayoutWrapper> CreateScroll(Color color);
-    RefPtr<LayoutWrapper> CreateScroll(Dimension barWidth, Axis axis = Axis::VERTICAL);
-    RefPtr<LayoutWrapper> CreateScroll(EdgeEffect edgeEffect);
-    RefPtr<LayoutWrapper> CreateScroll(Axis axis, NG::ScrollEvent&& event);
-    RefPtr<LayoutWrapper> CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event);
-    RefPtr<LayoutWrapper> CreateScroll(Axis axis, OnScrollStartEvent&& event);
-    RefPtr<LayoutWrapper> CreateScroll(bool isScrollEnabled);
+    RefPtr<LayoutWrapperNode> CreateScroll(Axis axis = Axis::VERTICAL);
+    RefPtr<LayoutWrapperNode> CreateScroll(NG::DisplayMode displayMode);
+    RefPtr<LayoutWrapperNode> CreateScroll(Color color);
+    RefPtr<LayoutWrapperNode> CreateScroll(Dimension barWidth, Axis axis = Axis::VERTICAL);
+    RefPtr<LayoutWrapperNode> CreateScroll(EdgeEffect edgeEffect);
+    RefPtr<LayoutWrapperNode> CreateScroll(Axis axis, NG::ScrollEvent&& event);
+    RefPtr<LayoutWrapperNode> CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event);
+    RefPtr<LayoutWrapperNode> CreateScroll(Axis axis, OnScrollStartEvent&& event);
+    RefPtr<LayoutWrapperNode> CreateScroll(bool isScrollEnabled);
     void CreateContent(Axis axis = Axis::VERTICAL);
-    RefPtr<LayoutWrapper> RunMeasureAndLayout(float width = ROOT_WIDTH, float height = ROOT_HEIGHT);
+    RefPtr<LayoutWrapperNode> RunMeasureAndLayout(float width = ROOT_WIDTH, float height = ROOT_HEIGHT);
     RefPtr<FrameNode> GetContentChild(int32_t index);
     void Touch(TouchLocationInfo locationInfo, SourceType sourceType);
     void Touch(TouchType touchType, Offset offset, SourceType sourceType);
@@ -156,7 +156,7 @@ void ScrollTestNg::SetHeight(const Dimension& height)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Axis axis)
+RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -166,7 +166,7 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Axis axis)
     return RunMeasureAndLayout();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(NG::DisplayMode displayMode)
+RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(NG::DisplayMode displayMode)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -176,7 +176,7 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(NG::DisplayMode displayMode)
     return RunMeasureAndLayout();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Color color)
+RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Color color)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -186,7 +186,7 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Color color)
     return RunMeasureAndLayout();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Dimension barWidth, Axis axis)
+RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Dimension barWidth, Axis axis)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -197,7 +197,7 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Dimension barWidth, Axis axis)
     return RunMeasureAndLayout();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(EdgeEffect edgeEffect)
+RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(EdgeEffect edgeEffect)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -207,7 +207,7 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(EdgeEffect edgeEffect)
     return RunMeasureAndLayout();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEvent&& event)
+RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEvent&& event)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -218,7 +218,7 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEvent&& ev
     return RunMeasureAndLayout();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event)
+RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -229,7 +229,7 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEdgeEvent&
     return RunMeasureAndLayout();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Axis axis, OnScrollStartEvent&& event)
+RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis, OnScrollStartEvent&& event)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -242,7 +242,7 @@ RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(Axis axis, OnScrollStartEvent&&
     return RunMeasureAndLayout();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::CreateScroll(bool isScrollEnabled)
+RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(bool isScrollEnabled)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -282,9 +282,9 @@ void ScrollTestNg::CreateContent(Axis axis)
     ViewStackProcessor::GetInstance()->Pop();
 }
 
-RefPtr<LayoutWrapper> ScrollTestNg::RunMeasureAndLayout(float width, float height)
+RefPtr<LayoutWrapperNode> ScrollTestNg::RunMeasureAndLayout(float width, float height)
 {
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     layoutWrapper->SetRootMeasureNode();
     LayoutConstraintF LayoutConstraint;
@@ -1613,7 +1613,7 @@ HWTEST_F(ScrollTestNg, Measure001, TestSize.Level1)
      * @tc.steps: step1. Do not set idealSize
      * @tc.expected: The idealSize would be child size
      */
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     layoutWrapper->SetRootMeasureNode();
     LayoutConstraintF LayoutConstraint;
@@ -1690,7 +1690,6 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
      * @tc.expected: Trigger UpdateCurrentOffset()
      */
     CreateScroll();
-    pattern_->GetScrollBar()->SetDriving(true);
     EXPECT_TRUE(pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, -100.f / pattern_->GetScrollBar()->offsetScale_)));
 

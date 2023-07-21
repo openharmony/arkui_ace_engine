@@ -21,7 +21,11 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/image_provider/adapter/image_decoder.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -29,7 +33,11 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -272,11 +280,18 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
         return PixelMapImageObject::Create(src, data);
     }
 
+#ifndef USE_ROSEN_DRAWING
     // standard skia image object
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
     auto [size, frameCount] = skiaImageData->Parse();
-    CHECK_NULL_RETURN(size.IsPositive() && frameCount >= 0, nullptr);
+#else
+    // standard drawing image object
+    auto rosenImageData = DynamicCast<DrawingImageData>(data);
+    CHECK_NULL_RETURN(rosenImageData, nullptr);
+    auto [size, frameCount] = rosenImageData->Parse();
+#endif
+    CHECK_NULL_RETURN(size.IsPositive(), nullptr);
 
     if (frameCount > 1) {
         return MakeRefPtr<AnimatedImageObject>(src, size, data);
@@ -315,7 +330,11 @@ void ImageProvider::MakeCanvasImageHelper(
     if (SystemProperties::GetImageFrameworkEnabled()) {
         image = decoder.MakePixmapImage();
     } else {
+#ifndef USE_ROSEN_DRAWING
         image = decoder.MakeSkiaImage();
+#else
+        image = decoder.MakeDrawingImage();
+#endif
     }
 
     if (image) {

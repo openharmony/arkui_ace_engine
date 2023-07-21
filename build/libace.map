@@ -66,8 +66,11 @@
       OHOS::Ace::ThemeConstants::*;
       OHOS::Ace::UIContentImpl::*;
       OHOS::Ace::MemoryMonitor::*;
+      OHOS::Ace::PerfMonitor::*;
       OHOS::Ace::DumpLog::*;
       OHOS::Ace::AceEngine::*;
+      OHOS::Ace::UdmfClient::*;
+      OHOS::Ace::DragEvent::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

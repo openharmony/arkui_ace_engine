@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -43,4 +45,49 @@ bool TextFieldManagerNG::OnBackPressed()
     return textfieldPattern->OnBackPressed();
 }
 
+std::pair<RefPtr<FrameNode>, OffsetF> TextFieldManagerNG::FindScrollableOfFocusedTextField(
+    const RefPtr<FrameNode>& textField)
+{
+    CHECK_NULL_RETURN(textField, {});
+    auto parent = textField->GetAncestorNodeOfFrame();
+    auto offset = textField->GetGeometryNode()->GetFrameOffset();
+    while (parent) {
+        auto pattern = parent->GetPattern<ScrollablePattern>();
+        if (pattern) {
+            return { parent, offset };
+        }
+        offset += parent->GetGeometryNode()->GetFrameOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return {};
+}
+
+void TextFieldManagerNG::ScrollTextFieldToSafeArea(const SafeAreaInsets::Inset& bottomInset)
+{
+    auto textPattern = onFocusTextField_.Upgrade();
+    CHECK_NULL_VOID(textPattern);
+    auto textField = textPattern->GetHost();
+    CHECK_NULL_VOID(textField);
+
+    auto [scrollable, textFieldOffsetToScrollable] = FindScrollableOfFocusedTextField(textField);
+    CHECK_NULL_VOID_NOLOG(scrollable);
+
+    // global offset
+    RectF scrollableRect = scrollable->GetGeometryNode()->GetFrameRect();
+    scrollableRect.SetOffset(scrollable->GetPaintRectOffset());
+    CHECK_NULL_VOID_NOLOG(scrollableRect.Top() < bottomInset.start);
+
+    // global offset
+    auto textFieldRect = textField->GetGeometryNode()->GetFrameRect();
+    textFieldRect.SetOffset(textFieldOffsetToScrollable + scrollableRect.GetOffset());
+
+    // offset relative to textRect
+    auto caretRect = DynamicCast<TextFieldPattern>(textPattern)->GetCaretRect();
+    auto diff = bottomInset.start - (textFieldRect.GetY() + caretRect.Bottom() + textFieldRect.Height() / 2);
+
+    CHECK_NULL_VOID_NOLOG(diff < 0);
+    auto scrollPattern = scrollable->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diff);
+}
 } // namespace OHOS::Ace::NG

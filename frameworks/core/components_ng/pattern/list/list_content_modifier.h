@@ -44,7 +44,7 @@ class ListContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ListContentModifier, ContentModifier);
 public:
     using PositionMap = ListLayoutAlgorithm::PositionMap;
-    ListContentModifier();
+    ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize);
     ~ListContentModifier() override = default;
     void onDraw(DrawingContext& context) override;
 

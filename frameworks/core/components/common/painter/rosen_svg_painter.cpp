@@ -15,7 +15,6 @@
 
 #include "core/components/common/painter/rosen_svg_painter.h"
 
-#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkColor.h"
 #include "include/core/SkPathMeasure.h"
 #include "include/core/SkRSXform.h"
@@ -24,7 +23,6 @@
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkLumaColorFilter.h"
 #include "include/utils/SkParsePath.h"
-#endif
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "frameworks/core/components/svg/rosen_render_svg_pattern.h"
@@ -40,7 +38,6 @@ const char ROTATE_TYPE_REVERSE[] = "auto-reverse";
 
 } // namespace
 
-#ifndef USE_ROSEN_DRAWING
 #if !defined(PREVIEW)
 const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
 const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
@@ -49,7 +46,6 @@ sk_sp<SkTypeface> RosenSvgPainter::fontTypeNormal_ = SkTypeface::MakeFromFile(FO
 #else
 sk_sp<SkTypeface> RosenSvgPainter::fontTypeChinese_;
 sk_sp<SkTypeface> RosenSvgPainter::fontTypeNormal_;
-#endif
 #endif
 
 #ifndef USE_ROSEN_DRAWING
@@ -72,14 +68,14 @@ void RosenSvgPainter::SetMask(SkCanvas* canvas)
 #else
 void RosenSvgPainter::SetMask(RSCanvas* canvas)
 {
-    auto outerFilter = RSColorFilter::CreateLumaColorFilter();
-    auto innerFilter = RSColorFilter::CreateSrgbGammaToLinear();
-    auto colorFilter = RSColorFilter::CreateComposeColorFilter(*outerFilter, *innerFilter);
+    auto outerFilter = RSRecordingColorFilter::CreateLumaColorFilter();
+    auto innerFilter = RSRecordingColorFilter::CreateSrgbGammaToLinear();
+    auto colorFilter = RSRecordingColorFilter::CreateComposeColorFilter(*outerFilter, *innerFilter);
     RSFilter filter;
     filter.SetColorFilter(colorFilter);
     RSBrush mask_filter;
     mask_filter.SetFilter(filter);
-    RSSaveLayerRec saveLayerRec(nullptr, &mask_filter);
+    RSSaveLayerOps saveLayerRec(nullptr, &mask_filter);
     canvas->SaveLayer(saveLayerRec);
 }
 #endif
@@ -208,16 +204,16 @@ void RosenSvgPainter::SetGradientStyle(RSBrush& brush, const FillState& fillStat
         auto info = gradient->GetLinearGradientInfo();
         RSPoint startPt = RSPoint(info.x1, info.y1);
         RSPoint endPt = RSPoint(info.x2, info.y2);
-        brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+        brush.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(
             startPt, endPt, colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
     }
     if (gradient->GetType() == GradientType::RADIAL) {
         auto info = gradient->GetRadialGradientInfo();
         auto center = RSPoint(info.cx, info.cy);
         auto focal = RSPoint(info.fx, info.fx);
-        return center == focal ? brush.SetShaderEffect(RSShaderEffect::CreateRadialGradient(center,
+        return center == focal ? brush.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(center,
             info.r, colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())))
-            : brush.SetShaderEffect(RSShaderEffect::CreateTwoPointConical(focal, 0, center,
+            : brush.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(focal, 0, center,
             info.r, colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
     }
 }
@@ -260,7 +256,7 @@ void RosenSvgPainter::SetFillStyle(RSCanvas* canvas,
     if (!pattern) {
         return;
     }
-    if (!pattern->OnAsPaint(renderInfo.offset, renderInfo.node->GetPaintBounds(renderInfo.offset), &brush, nullptr)) {
+    if (!pattern->OnAsPaint(renderInfo.offset, renderInfo.node->GetPaintBounds(renderInfo.offset), nullptr, &brush)) {
         return;
     }
     brush.SetAlphaF(fillState.GetOpacity().GetValue() * renderInfo.opacity * (1.0f / UINT8_MAX));
@@ -391,7 +387,7 @@ void RosenSvgPainter::SetStrokeStyle(RSCanvas* canvas,
         if (!pattern) {
             return;
         }
-        if (!pattern->OnAsPaint(renderInfo.offset, renderInfo.node->GetPaintBounds(renderInfo.offset), nullptr, &pen)) {
+        if (!pattern->OnAsPaint(renderInfo.offset, renderInfo.node->GetPaintBounds(renderInfo.offset), &pen, nullptr)) {
             return;
         }
         canvas->AttachPen(pen);
@@ -419,12 +415,12 @@ void RosenSvgPainter::UpdateLineDash(RSPen& pen, const StrokeState& strokeState)
 {
     if (!strokeState.GetLineDash().lineDash.empty()) {
         auto lineDashState = strokeState.GetLineDash().lineDash;
-        RSScalar intervals[lineDashState.size()];
+        std::vector<RSScalar> intervals(lineDashState.size());
         for (size_t i = 0; i < lineDashState.size(); ++i) {
             intervals[i] = static_cast<RSScalar>(lineDashState[i]);
         }
         RSScalar phase = static_cast<RSScalar>(strokeState.GetLineDash().dashOffset);
-        pen.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
+        pen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
     }
 }
 #endif
@@ -476,8 +472,8 @@ Offset RosenSvgPainter::GetPathOffset(const std::string& path, double current)
     RSRecordingPath drawPath;
     drawPath.BuildFromSVGString(path.c_str());
     RSPoint position;
-    RSVector tangent;
-    if (!drawPath.GetPosTan(current, position, tangent, false)) {
+    RSPoint tangent;
+    if (!drawPath.GetPositionAndTangent(current, position, tangent, false)) {
         return Offset(0.0, 0.0);
     }
     return Offset(position.GetX(), position.GetY());
@@ -506,12 +502,12 @@ bool RosenSvgPainter::GetMotionPathPosition(const std::string& path, double perc
     RSRecordingPath motion;
     motion.BuildFromSVGString(path.c_str());
     RSPoint position;
-    RSScalar degrees;
-    bool ret = motion.GetPosTan(motion.GetLength() * percent, position, degrees, false);
+    RSPoint tangent;
+    bool ret = motion.GetPositionAndTangent(motion.GetLength(false) * percent, position, tangent, false);
     if (!ret) {
         return false;
     }
-    result.rotate = ConvertRadiansToDegrees(std::atan2(tangent.y(), tangent.x()));
+    result.rotate = Rosen::Drawing::ConvertRadiansToDegrees(std::atan2(tangent.GetY(), tangent.GetX()));
     result.offset.SetX(position.GetX());
     result.offset.SetY(position.GetY());
 #endif
@@ -520,6 +516,9 @@ bool RosenSvgPainter::GetMotionPathPosition(const std::string& path, double perc
 
 #ifndef USE_ROSEN_DRAWING
 Offset RosenSvgPainter::UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo)
+#else
+Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo)
+#endif
 {
     Offset offset = textDrawInfo.offset;
     if (!canvas) {
@@ -536,10 +535,17 @@ Offset RosenSvgPainter::UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextI
     SkScalar y = SkDoubleToScalar(offset.GetY());
     std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     SkPaint strokePaint;
     RosenSvgPainter::SetFillStyle(paint, svgTextInfo.fillState, svgTextInfo.opacity);
     RosenSvgPainter::SetStrokeStyle(strokePaint, svgTextInfo.strokeState, svgTextInfo.opacity);
+#else
+    RSBrush brush;
+    RSPen strokePen;
+    RosenSvgPainter::SetFillStyle(brush, svgTextInfo.fillState, svgTextInfo.opacity);
+    RosenSvgPainter::SetStrokeStyle(strokePen, svgTextInfo.strokeState, svgTextInfo.opacity);
+#endif
 
     for (int i = 0; i < (int)data.size(); i++) {
         wchar_t temp = data[i];
@@ -556,6 +562,7 @@ Offset RosenSvgPainter::UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextI
         auto width = font.measureText(&temp, sizeof(temp), SkTextEncoding::kUTF16);
 #endif
 
+#ifndef USE_ROSEN_DRAWING
         canvas->save();
         canvas->rotate(textDrawInfo.rotate, x, y);
         canvas->drawTextBlob(blob.get(), x, y, paint);
@@ -563,18 +570,32 @@ Offset RosenSvgPainter::UpdateText(SkCanvas* canvas, const SvgTextInfo& svgTextI
             canvas->drawTextBlob(blob.get(), x, y, strokePaint);
         }
         canvas->restore();
+#else
+        canvas->Save();
+        canvas->Rotate(textDrawInfo.rotate, x, y);
+        canvas->AttachBrush(brush);
+        LOGE("Drawing is not supported");
+        canvas->DetachBrush();
+        if (svgTextInfo.strokeState.HasStroke() && !NearZero(svgTextInfo.strokeState.GetLineWidth().Value())) {
+            canvas->AttachPen(strokePen);
+            LOGE("Drawing is not supported");
+            canvas->DetachPen();
+        }
+        canvas->Restore();
+#endif
         x = x + width + space;
     }
 
     return Offset(x, y);
 }
-#else
-    // TODO Drawing ： about txt SkTextBlob
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 double RosenSvgPainter::UpdateTextPath(
     SkCanvas* canvas, const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo)
+#else
+double RosenSvgPainter::UpdateTextPath(
+    RSCanvas* canvas, const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo)
+#endif
 {
     double offset = pathDrawInfo.offset;
     if (!canvas) {
@@ -588,6 +609,7 @@ double RosenSvgPainter::UpdateTextPath(
     double space = 0.0;
     std::wstring data = StringUtils::ToWstring(svgTextInfo.data);
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     SkPaint strokePaint;
     RosenSvgPainter::SetFillStyle(paint, svgTextInfo.fillState, svgTextInfo.opacity);
@@ -597,6 +619,16 @@ double RosenSvgPainter::UpdateTextPath(
     SkParsePath::FromSVGString(pathDrawInfo.path.c_str(), &path);
     SkPathMeasure pathMeasure(path, false);
     SkScalar length = pathMeasure.getLength();
+#else
+    RSBrush brush;
+    RSPen strokePen;
+    RosenSvgPainter::SetFillStyle(brush, svgTextInfo.fillState, svgTextInfo.opacity);
+    RosenSvgPainter::SetStrokeStyle(strokePen, svgTextInfo.strokeState, svgTextInfo.opacity);
+
+    RSPath path;
+    path.BuildFromSVGString(pathDrawInfo.path);
+    RSScalar length = path.GetLength(false);
+#endif
 
     for (int i = 0; i < (int)data.size(); i++) {
         wchar_t temp = data[i];
@@ -620,6 +652,7 @@ double RosenSvgPainter::UpdateTextPath(
             continue;
         }
 
+#ifndef USE_ROSEN_DRAWING
         SkPoint position;
         SkVector tangent;
         if (!pathMeasure.getPosTan(offset + width / 2.0, &position, &tangent)) {
@@ -638,16 +671,37 @@ double RosenSvgPainter::UpdateTextPath(
             canvas->drawTextBlob(blob.get(), 0.0, 0.0, strokePaint);
         }
         canvas->restore();
+#else
+        RSPoint position;
+        RSPoint tangent;
+        if (!path.GetPositionAndTangent(offset + width / 2.0, position, tangent, false)) {
+            break;
+        }
+        RSPoint tempTangent;
+        if (!path.GetPositionAndTangent(offset, position, tempTangent, false)) {
+            break;
+        }
+        SkRSXform rsxForm = SkRSXform::Make(tangent.GetX(), tangent.GetY(), position.GetX(), position.GetY());
+        auto blob = SkTextBlob::MakeFromRSXform(&temp, sizeof(wchar_t), &rsxForm, font, SkTextEncoding::kUTF16);
+
+        canvas->Save();
+        canvas->Rotate(pathDrawInfo.rotate, position.GetX(), position.GetY());
+        canvas->AttachBrush(brush);
+        LOGE("Drawing is not supported");
+        canvas->DetachBrush();
+        if (svgTextInfo.strokeState.HasStroke() && !NearZero(svgTextInfo.strokeState.GetLineWidth().Value())) {
+            canvas->AttachPen(strokePen);
+            LOGE("Drawing is not supported");
+            canvas->DetachPen();
+        }
+        canvas->Restore();
+#endif
         offset = offset + width + space;
     }
 
     return offset;
 }
-#else
-    // TODO Drawing ： about txt SkTextBlob
-#endif
 
-#ifndef USE_ROSEN_DRAWING
 Offset RosenSvgPainter::MeasureTextBounds(
     const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo, Rect& bounds)
 {
@@ -677,11 +731,7 @@ Offset RosenSvgPainter::MeasureTextBounds(
 
     return Offset(x, y);
 }
-#else
-    // TODO Drawing ： about txt SkFont
-#endif
 
-#ifndef USE_ROSEN_DRAWING
 double RosenSvgPainter::MeasureTextPathBounds(
     const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo, Rect& bounds)
 {
@@ -719,9 +769,6 @@ double RosenSvgPainter::MeasureTextPathBounds(
     bounds.SetHeight(fmax(pathBounds.bottom(), bounds.Height()));
     return offset;
 }
-#else
-    // TODO Drawing ： about txt SkFont
-#endif
 
 static const char* SkipSpace(const char str[])
 {
@@ -819,16 +866,16 @@ void RosenSvgPainter::UpdateMotionMatrix(
     RSRecordingPath motion;
     motion.BuildFromSVGString(path.c_str());
     RSPoint position;
-    RSVector tangent;
-    bool ret = motion.GetPosTan(motion.GetLength() * percent, position, tangent, false);
+    RSPoint tangent;
+    bool ret = motion.GetPositionAndTangent(motion.GetLength(false) * percent, position, tangent, false);
     if (!ret) {
         return;
     }
     float degrees = 0.0f;
     if (rotate == ROTATE_TYPE_AUTO) {
-        degrees = ConvertRadiansToDegrees(std::atan2(tangent.GetY(), tangent.GetX()));
+        degrees = Rosen::Drawing::ConvertRadiansToDegrees(std::atan2(tangent.GetY(), tangent.GetX()));
     } else if (rotate == ROTATE_TYPE_REVERSE) {
-        degrees = ConvertRadiansToDegrees(std::atan2(tangent.GetY(), tangent.GetX())) + FLAT_ANGLE;
+        degrees = Rosen::Drawing::ConvertRadiansToDegrees(std::atan2(tangent.GetY(), tangent.GetX())) + FLAT_ANGLE;
     } else {
         degrees = StringUtils::StringToDouble(rotate);
     }
@@ -886,9 +933,9 @@ RSMatrix RosenSvgPainter::ToDrawingMatrix(const Matrix4& matrix4)
     for (std::size_t i = 0; i < ArraySize(K_DRAWING_MATRIX_INDEX_TO_MATRIX4_INDEX); ++i) {
         int32_t matrixIndex = K_DRAWING_MATRIX_INDEX_TO_MATRIX4_INDEX[i];
         if (matrixIndex < matrix4.Count())
-            matrix[i] = matrix4[matrixIndex];
+            matrix.Set(static_cast<RSMatrix::Index>(i), matrix4[matrixIndex]);
         else
-            matrix[i] = 0.0;
+            matrix.Set(static_cast<RSMatrix::Index>(i), 0.0);
     }
     return matrix;
 }

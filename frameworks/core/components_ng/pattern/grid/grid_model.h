@@ -71,6 +71,14 @@ public:
     virtual void SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>&& value) = 0;
     virtual RefPtr<ScrollControllerBase> CreatePositionController();
     virtual RefPtr<ScrollProxy> CreateScrollBarProxy();
+    virtual void SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll) = 0;
+    virtual void SetOnScrollFrameBegin(
+        std::function<ScrollFrameResult(Dimension, ScrollState)>&& onScrollFrameBegin) = 0;
+    virtual void SetOnScrollStart(std::function<void()>&& onScrollStart) = 0;
+    virtual void SetOnScrollStop(std::function<void()>&& onScrollStop) = 0;
+    virtual void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) = 0;
+    virtual void SetOnReachStart(std::function<void()>&& onReachStart) = 0;
+    virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
 
 private:
     static std::unique_ptr<GridModel> instance_;

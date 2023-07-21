@@ -95,6 +95,11 @@ public:
         geoRestoreNodes_.erase(node);
     }
 
+    RefPtr<InterpolatingSpring> GetSafeAreaCurve() const
+    {
+        return safeAreaCurve_;
+    }
+
 private:
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
@@ -102,7 +107,14 @@ private:
     SafeAreaInsets::Inset keyboardInset_;
     std::set<WeakPtr<FrameNode>> geoRestoreNodes_;
     std::vector<WeakPtr<LayoutWrapper>> wrappersToAdjust_;
+    // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
+    static constexpr float SAFE_AREA_VELOCITY = 0.0f;
+    static constexpr float SAFE_AREA_MASS = 1.0f;
+    static constexpr float SAFE_AREA_STIFFNESS = 228.0f;
+    static constexpr float SAFE_AREA_DAMPING = 30.0f;
+    RefPtr<InterpolatingSpring> safeAreaCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(
+        SAFE_AREA_VELOCITY, SAFE_AREA_MASS, SAFE_AREA_STIFFNESS, SAFE_AREA_DAMPING);
 
     ACE_DISALLOW_COPY_AND_MOVE(SafeAreaManager);
 };

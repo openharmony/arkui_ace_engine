@@ -461,6 +461,13 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow002, TestSize.Level1)
 
     ASSERT_NE(dialogNode, nullptr);
     auto titleNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild());
+    ASSERT_NE(titleNode, nullptr);
+    DatePickerDialogView::HandleMouseEvent(titleNode, true);
+    auto renderContext = titleNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+    DatePickerDialogView::HandleMouseEvent(titleNode, false);
+    renderContext = titleNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
     auto titleEventHub = titleNode->GetOrCreateGestureEventHub();
     titleEventHub->ActClick();
     titleEventHub->ActClick();
@@ -1225,7 +1232,21 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest006, TestSize.Level1)
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
     /**
-     * @tc.cases: case3. UP KeyAction.
+     * @tc.cases: case3. home KeyEvent.
+     */
+    KeyEvent keyEventHome(KeyCode::KEY_MOVE_HOME, KeyAction::DOWN);
+    datePickerPattern->OnKeyEvent(keyEventHome);
+    propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    /**
+     * @tc.cases: case4. end KeyEvent.
+     */
+    KeyEvent keyEventEnd(KeyCode::KEY_MOVE_END, KeyAction::DOWN);
+    datePickerPattern->OnKeyEvent(keyEventEnd);
+    propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    /**
+     * @tc.cases: case5. UP KeyAction.
      */
     KeyEvent keyActionUp(KeyCode::KEY_DPAD_DOWN, KeyAction::UP);
     EXPECT_FALSE(datePickerPattern->OnKeyEvent(keyActionUp));
@@ -1335,10 +1356,11 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level1)
     ASSERT_NE(datePickerPattern, nullptr);
     auto yearId = datePickerPattern->GetYearId();
     auto yearColumnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, yearId);
-    LayoutWrapper layoutWrapper = LayoutWrapper(yearColumnNode, yearColumnNode->GetGeometryNode(), pickerProperty);
-    RefPtr<LayoutWrapper> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(yearColumnNode, yearColumnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
     EXPECT_NE(subLayoutWrapper, nullptr);
-    RefPtr<LayoutWrapper> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    RefPtr<LayoutWrapperNode> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
     EXPECT_NE(subTwoLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
@@ -1383,10 +1405,10 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest002, TestSize.Level1)
     auto subNode = AceType::DynamicCast<FrameNode>(yearColumnNode->GetFirstChild());
     ASSERT_NE(subNode, nullptr);
 
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(yearColumnNode, yearColumnNode->GetGeometryNode(), dataPickerLayoutProperty);
-    RefPtr<LayoutWrapper> subLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(subNode, subNode->GetGeometryNode(), nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(yearColumnNode, yearColumnNode->GetGeometryNode(), dataPickerLayoutProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(subNode, subNode->GetGeometryNode(), nullptr);
     EXPECT_NE(subLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 1);
@@ -1604,7 +1626,8 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest001, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
     auto pickerProperty = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.frameSizeChange = true;
     auto pickerColumnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
@@ -1950,7 +1973,8 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest009, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
     auto pickerProperty = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.frameSizeChange = true;
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();

@@ -64,7 +64,7 @@ Size SvgSvg::GetSize() const
     return Size(declaration->GetWidth().Value(), declaration->GetHeight().Value());
 }
 
-const Rect& SvgSvg::GetViewBox() const
+Rect SvgSvg::GetViewBox() const
 {
     auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
     CHECK_NULL_RETURN_NOLOG(declaration, Rect());

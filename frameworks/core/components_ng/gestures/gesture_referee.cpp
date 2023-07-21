@@ -218,8 +218,8 @@ void GestureReferee::CleanAll()
 {
     for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
         iter->second->Close();
-        gestureScopes_.erase(iter);
     }
+    gestureScopes_.clear();
 }
 
 void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)

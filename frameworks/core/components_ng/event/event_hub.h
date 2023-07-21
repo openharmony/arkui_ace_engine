@@ -236,6 +236,11 @@ public:
         }
     }
 
+    bool HasOnDragMove() const
+    {
+        return static_cast<bool>(onDragMove_);
+    }
+
     void SetOnDrop(OnDragFunc&& onDrop)
     {
         onDrop_ = std::move(onDrop);

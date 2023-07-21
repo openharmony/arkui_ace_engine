@@ -528,6 +528,24 @@ public:
     virtual void Grant(std::vector<std::string>& resources) const = 0;
 };
 
+class ACE_EXPORT WebScreenCaptureRequest : public AceType {
+    DECLARE_ACE_TYPE(WebScreenCaptureRequest, AceType)
+
+public:
+    WebScreenCaptureRequest() = default;
+    ~WebScreenCaptureRequest() = default;
+
+    virtual void Deny() const = 0;
+
+    virtual std::string GetOrigin() const = 0;
+
+    virtual void SetCaptureMode(int32_t mode) = 0;
+
+    virtual void SetSourceId(int32_t sourceId) = 0;
+
+    virtual void Grant() const = 0;
+};
+
 class ACE_EXPORT WebWindowNewHandler : public AceType {
     DECLARE_ACE_TYPE(WebWindowNewHandler, AceType)
 
@@ -575,6 +593,23 @@ public:
 
 private:
     std::string loadedUrl_;
+};
+
+class ACE_EXPORT ContextMenuHideEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ContextMenuHideEvent, BaseEventInfo);
+
+public:
+    explicit ContextMenuHideEvent(const std::string& info) : BaseEventInfo("ContextMenuHideEvent"), info_(info)
+    {}
+    ~ContextMenuHideEvent() = default;
+
+    const std::string& GetInfo() const
+    {
+        return info_;
+    }
+
+private:
+    std::string info_;
 };
 
 class ACE_EXPORT LoadWebProgressChangeEvent : public BaseEventInfo {
@@ -748,6 +783,24 @@ public:
 
 private:
     RefPtr<WebPermissionRequest> webPermissionRequest_;
+};
+
+class ACE_EXPORT WebScreenCaptureRequestEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebScreenCaptureRequestEvent, BaseEventInfo);
+
+public:
+    WebScreenCaptureRequestEvent(const RefPtr<WebScreenCaptureRequest>& request)
+        : BaseEventInfo("WebScreenCaptureRequestEvent"), request_(request)
+    {}
+    ~WebScreenCaptureRequestEvent() = default;
+
+    const RefPtr<WebScreenCaptureRequest>& GetWebScreenCaptureRequest() const
+    {
+        return request_;
+    }
+
+private:
+    RefPtr<WebScreenCaptureRequest> request_;
 };
 
 class ACE_EXPORT DownloadStartEvent : public BaseEventInfo {
@@ -1328,6 +1381,30 @@ public:
 private:
     long navigationStartTick_;
     long firstContentfulPaintMs_;
+};
+
+class ACE_EXPORT WebOnOverScrollEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebOnOverScrollEvent, BaseEventInfo);
+
+public:
+    WebOnOverScrollEvent(double xOffset, double yOffset)
+        : BaseEventInfo("OnOverScrollEvent"), xOffset_(xOffset), yOffset_(yOffset)
+    {}
+    ~WebOnOverScrollEvent() = default;
+
+    float GetX() const
+    {
+        return xOffset_;
+    }
+
+    float GetY() const
+    {
+        return yOffset_;
+    }
+
+private:
+    float xOffset_ = 0.0f;
+    float yOffset_ = 0.0f;
 };
 } // namespace OHOS::Ace
 

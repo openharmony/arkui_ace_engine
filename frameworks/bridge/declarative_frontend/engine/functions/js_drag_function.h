@@ -47,5 +47,51 @@ private:
     JSRef<JSObject> CreateItemDragInfo(const ItemDragInfo& info);
 };
 
+class JsDragEvent : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj);
+    void SetJsPasteData(const JSRef<JSObject>& jsPasteData);
+    void GetJsPasteData(const JSCallbackInfo& args);
+    void GetScreenX(const JSCallbackInfo& args);
+    void GetScreenY(const JSCallbackInfo& args);
+    void GetX(const JSCallbackInfo& args);
+    void GetY(const JSCallbackInfo& args);
+    void GetDescription(const JSCallbackInfo& args);
+    void SetDescription(const JSCallbackInfo& args);
+    void GetVelocityX(const JSCallbackInfo& args);
+    void GetVelocityY(const JSCallbackInfo& args);
+    void GetVelocity(const JSCallbackInfo& args);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetData(const JSCallbackInfo& args);
+    void GetData(const JSCallbackInfo& args);
+    void GetSummary(const JSCallbackInfo& args);
+    void SetResult(const JSCallbackInfo& args);
+    void GetResult(const JSCallbackInfo& args);
+    void GetPreviewRect(const JSCallbackInfo& args);
+    void UseCustomDropAnimation(const JSCallbackInfo& args);
+    void SetDragInfo(const JSCallbackInfo& args);
+    void GetDragInfo(const JSCallbackInfo& args);
+    void DragBehavior(const JSCallbackInfo& args);
+#endif
+    void SetDragEvent(const RefPtr<DragEvent>& dragEvent)
+    {
+        dragEvent_ = dragEvent;
+    }
+
+    RefPtr<DragEvent> GetDragEvent() const
+    {
+        return dragEvent_;
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JsDragEvent* dragEvent);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    JSRef<JSObject> CreateRectangle(const Rect& info);
+#endif
+    RefPtr<DragEvent> dragEvent_;
+    JSRef<JSObject> jsPasteData_;
+};
+
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_DRAG_FUNCTION_H

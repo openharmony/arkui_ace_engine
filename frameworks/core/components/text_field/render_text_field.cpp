@@ -134,18 +134,6 @@ void GetKeyboardFilter(TextInputType keyboard, std::string& keyboardFilterValue,
 }
 } // namespace
 
-#if defined(ENABLE_STANDARD_INPUT)
-void RenderTextField::UpdateConfiguration()
-{
-    MiscServices::Configuration configuration;
-    LOGI("UpdateConfiguration: Enter key type %{public}d", static_cast<int32_t>(action_));
-    LOGI("UpdateConfiguration: Enter keyboard type %{public}d", static_cast<int32_t>(keyboard_));
-    configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>((int32_t)action_));
-    configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
-    MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
-}
-#endif
-
 RenderTextField::RenderTextField()
     : twinklingInterval(TWINKLING_INTERVAL_MS), controller_(AceType::MakeRefPtr<TextEditController>())
 {}
@@ -1177,7 +1165,6 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     if (softKeyboardEnabled_) {
         LOGI("Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
-        UpdateConfiguration();
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this), context_);
         }
@@ -1186,15 +1173,17 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
             LOGE("Request open soft keyboard failed because input method is null.");
             return false;
         }
+        MiscServices::TextConfig textConfig;
         auto context = context_.Upgrade();
         if (context) {
-            LOGI("RequestKeyboard set calling window id is : %{public}zu", context->GetFocusWindowId());
+            LOGI("RequestKeyboard set calling window id is : %{public}u", context->GetFocusWindowId());
             inputMethod->SetCallingWindow(context->GetFocusWindowId());
         }
         MiscServices::InputAttribute inputAttribute;
         inputAttribute.inputPattern = (int32_t)keyboard_;
         inputAttribute.enterKeyType = (int32_t)action_;
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
+        textConfig.inputAttribute = inputAttribute;
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
             AttachIme();
@@ -2811,6 +2800,37 @@ void RenderTextField::Delete(int32_t start, int32_t end)
     if (onChange_) {
         onChange_(GetEditingValue().text);
     }
+}
+
+std::u16string RenderTextField::GetLeftTextOfCursor(int32_t number)
+{
+    auto start = cursorPositionForShow_;
+    if (IsSelected()) {
+        start = std::min(GetEditingValue().selection.GetStart(), GetEditingValue().selection.GetEnd());
+    }
+    auto stringText = GetEditingValue().GetSelectedText(TextSelection(start - number, start));
+    return StringUtils::Str8ToStr16(stringText);
+}
+
+std::u16string RenderTextField::GetRightTextOfCursor(int32_t number)
+{
+    auto end = cursorPositionForShow_;
+    if (IsSelected()) {
+        end = std::max(GetEditingValue().selection.GetStart(), GetEditingValue().selection.GetEnd());
+    }
+    auto stringText = GetEditingValue().GetSelectedText(TextSelection(end, end + number));
+    return StringUtils::Str8ToStr16(stringText);
+}
+
+int32_t RenderTextField::GetTextIndexAtCursor()
+{
+    return cursorPositionForShow_;
+}
+
+bool RenderTextField::IsSelected() const
+{
+    return GetEditingValue().selection.IsValid() &&
+           !(GetEditingValue().selection.GetStart() == GetEditingValue().selection.GetEnd());
 }
 
 std::string RenderTextField::ProvideRestoreInfo()

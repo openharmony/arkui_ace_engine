@@ -61,6 +61,8 @@ public:
         return layoutAlgorithm;
     }
 
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -155,6 +157,9 @@ public:
         navigationStack_->Remove();
     }
 
+    void DoNavigationTransitionAnimation(const RefPtr<UINode>& preTopNavDestination,
+        const RefPtr<UINode>& newTopNavDestination, int preStackSize, int newStackSize);
+
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
 
     void CleanStack()
@@ -172,6 +177,54 @@ public:
         return navigationStackProvided_;
     }
 
+    Dimension GetMinNavBarWidthValue() const
+    {
+        return minNavBarWidthValue_;
+    }
+
+    Dimension GetMaxNavBarWidthValue() const
+    {
+        return maxNavBarWidthValue_;
+    }
+
+    Dimension GetMinContentWidthValue() const
+    {
+        return minContentWidthValue_;
+    }
+
+    bool GetUserSetNavBarRangeFlag() const
+    {
+        return userSetNavBarRangeFlag_;
+    }
+
+    bool GetUserSetMinContentFlag() const
+    {
+        return userSetMinContentFlag_;
+    }
+
+    void OnWindowHide() override;
+    void OnWindowShow() override;
+
+    void SetNavBarVisibilityChange(bool isChange)
+    {
+        navBarVisibilityChange_ = isChange;
+    }
+
+    bool GetNavBarVisibilityChange() const
+    {
+        return navBarVisibilityChange_;
+    }
+
+    void SetNavModeChange(bool isChange)
+    {
+        navModeChange_ = isChange;
+    }
+
+    bool GetNavModeChange() const
+    {
+        return navModeChange_;
+    }
+
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode currentMode);
@@ -183,9 +236,13 @@ private:
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void OnHover(bool isHover);
-    void UpdateResponseRegion(float realDividerWidth, float realNavBarWidth,
-    float dragRegionHeight, OffsetF dragRectOffset);
+    void UpdateResponseRegion(
+        float realDividerWidth, float realNavBarWidth, float dragRegionHeight, OffsetF dragRectOffset);
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
+    void RangeCalculation(
+        const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
+    void OnNavBarStateChange();
+    bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
@@ -199,6 +256,14 @@ private:
     float realNavBarWidth_ = 360.0f;
     float realDividerWidth_ = 2.0f;
     bool navigationStackProvided_ = false;
+    bool navBarVisibilityChange_ = false;
+    bool navModeChange_ = false;
+    bool userSetNavBarRangeFlag_ = false;
+    bool userSetMinContentFlag_ = false;
+    Dimension minNavBarWidthValue_ = 0.0_vp;
+    Dimension maxNavBarWidthValue_ = 0.0_vp;
+    Dimension minContentWidthValue_ = 0.0_vp;
+    NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 };
 
 } // namespace OHOS::Ace::NG

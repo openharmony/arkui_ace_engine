@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_TEXT_OVERLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_TEXT_OVERLAY_MANAGER_H
 
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing_forward.h"
+#endif
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "frameworks/base/geometry/offset.h"
@@ -28,7 +31,9 @@ namespace txt {
 class Paragraph;
 }
 
+#ifndef USE_ROSEN_DRAWING
 class SkCanvas;
+#endif
 
 namespace OHOS::Ace {
 

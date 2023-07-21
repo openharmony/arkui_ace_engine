@@ -41,6 +41,7 @@ public:
         value->propPanelType_ = ClonePanelType();
         value->propPanelMode_ = ClonePanelMode();
         value->propHasDragBar_ = CloneHasDragBar();
+        value->propCustomHeight_ = CloneCustomHeight();
         value->propMiniHeight_ = CloneMiniHeight();
         value->propHalfHeight_ = CloneHalfHeight();
         value->propFullHeight_ = CloneFullHeight();
@@ -56,6 +57,7 @@ public:
         ResetPanelType();
         ResetPanelMode();
         ResetHasDragBar();
+        ResetCustomHeight();
         ResetMiniHeight();
         ResetHalfHeight();
         ResetFullHeight();
@@ -67,6 +69,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PanelType, PanelType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PanelMode, PanelMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasDragBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CustomHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MiniHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HalfHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FullHeight, Dimension, PROPERTY_UPDATE_MEASURE);

@@ -58,10 +58,10 @@ ohos_shared_library("drawable_descriptor") {
   }
 
   external_deps = [
-    "graphic_standard:2d_graphics",
-    "graphic_standard:librender_service_client",
-    "multimedia_image_framework:image",
-    "multimedia_image_framework:image_native",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_client",
+    "image_framework:image",
+    "image_framework:image_native",
     "napi:ace_napi",
     "resource_management:global_resmgr",
   ]

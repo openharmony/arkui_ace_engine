@@ -52,6 +52,8 @@ void ModelViewNG::Create(const std::string& src)
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelAnimations, {});
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelGeometries, {});
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRenders, {});
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelImageTexturePaths, {});
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffers, {});
 
     lightsIdx_ = 0;
     if (lights_.empty()) {
@@ -187,6 +189,24 @@ void ModelViewNG::SetHeight(Dimension& height)
         height.SetValue(0.0);
     }
     ViewAbstract::SetHeight(CalcLength(height));
+}
+
+void ModelViewNG::SetShader(const std::string& path)
+{
+    LOGD("ModelViewNG::SetShader() path: %s", path.c_str());
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ShaderPath, path);
+}
+
+void ModelViewNG::AddShaderImageTexture(const std::string& path)
+{
+    LOGD("ModelViewNG::AddShaderImageTexture() path: %s", path.c_str());
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleImageTexturePath, path);
+}
+
+void ModelViewNG::AddShaderInputBuffer(const RefPtr<OHOS::Render3D::ShaderInputBuffer>& buffer)
+{
+    LOGD("ModelViewNG::AddShaderInputBuffer() size: %d", buffer->GetSize());
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleShaderInputBuffer, buffer);
 }
 
 void ModelViewNG::PerformCameraUpdate()

@@ -27,7 +27,7 @@ void UINode::UpdateLayoutPropertyFlag() {}
 void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag) {}
 void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag) {}
 void UINode::MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag) {}
-void UINode::MarkNeedSyncRenderTree() {}
+void UINode::MarkNeedSyncRenderTree(bool needRebuild) {}
 void UINode::RebuildRenderContextTree() {}
 void UINode::OnDetachFromMainTree(bool) {}
 void UINode::OnAttachToMainTree(bool) {}
@@ -41,7 +41,7 @@ bool UINode::RemoveImmediately() const
     return true;
 }
 void UINode::DumpTree(int32_t depth) {}
-void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
+void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) {}
 void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
 void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
 void UINode::Build() {}
@@ -135,7 +135,7 @@ int32_t UINode::GetChildIndexById(int32_t id)
     return -1;
 }
 
-RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
+RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     return nullptr;
 }
@@ -150,5 +150,21 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
     return false;
 }
 
+void UINode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+
 void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t) {}
+
+RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
+{
+    return nullptr;
+}
+
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index)
+{
+    return nullptr;
+}
+
+void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll) {}
+
+void UINode::OnSetCacheCount(int32_t) {}
 } // namespace OHOS::Ace::NG

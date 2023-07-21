@@ -75,8 +75,6 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
-    bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange) override;
-
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TimePickerLayoutProperty>();
@@ -99,6 +97,8 @@ public:
     void HandleHourColumnBuilding();
 
     void FlushColumn();
+
+    void FlushAmPmFormatString();
 
     void OnDataLinking(
         const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
@@ -316,7 +316,26 @@ public:
     }
 
     void CreateAmPmNode();
+    void OnColorConfigurationUpdate() override;
+	
+    void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
+    {
+        contentRowNode_ = contentRowNode;
+    }
 
+    void SetbuttonTitleNode(RefPtr<FrameNode>& buttonTitleNode)
+    {
+        buttonTitleNode_ = buttonTitleNode;
+    }
+
+    void SetPickerTag(bool isPicker)
+    {
+        isPicker_ = isPicker;
+    }
+
+    void SetFocusDisable();
+    void SetFocusEnable();
+    
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -357,6 +376,10 @@ private:
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
+
+    RefPtr<FrameNode> buttonTitleNode_;
+    RefPtr<FrameNode> contentRowNode_;
+    bool isPicker_ = false;
 };
 } // namespace OHOS::Ace::NG
 

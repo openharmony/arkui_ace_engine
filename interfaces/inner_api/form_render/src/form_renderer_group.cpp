@@ -49,7 +49,14 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
     formRequest.compId = compId;
     formRequest.want = want;
     formRequest.formJsInfo = formJsInfo;
-    formRequests_.push_back(formRequest);
+    auto info = std::find_if(
+        formRequests_.begin(), formRequests_.end(), formRequest);
+    if (info != formRequests_.end()) {
+        *info = formRequest;
+    } else {
+        formRequests_.emplace_back(formRequest);
+    }
+
     if (formRenderer_ == nullptr) {
         formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_);
         if (!formRenderer_) {
@@ -75,13 +82,14 @@ void FormRendererGroup::ReloadForm(const AppExecFwk::FormJsInfo& formJsInfo)
 
     formRenderer_->ReloadForm(formJsInfo.formSrc);
     for (auto &formRequest : formRequests_) {
-        formRequest.formJsInfo = formJsInfo;
-        formRequest.isDynamic = formJsInfo.isDynamic;
-        if (!formJsInfo.isDynamic && currentCompId_ == formRequest.compId) {
+        bool allDynamic = formJsInfo.isDynamic && formRequest.isDynamic;
+        if (!allDynamic && currentCompId_ == formRequest.compId) {
             HILOG_INFO("SurfaceReuse due to change to static card when curCompId is %{public}s.",
                 formRequest.compId.c_str());
             formRenderer_->OnSurfaceReuse(formJsInfo);
         }
+        formRequest.formJsInfo = formJsInfo;
+        formRequest.isDynamic = formJsInfo.isDynamic;
     }
 }
 

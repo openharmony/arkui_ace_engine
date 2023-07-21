@@ -166,7 +166,7 @@ void TabBarPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (paintProperty) {
         RectF rect;
         auto indicator = paintProperty->GetIndicator().value_or(rect);
-        indicator.SetLeft(currentIndicatorOffset_);
+        indicator.SetLeft(currentIndicatorOffset_ - indicatorStyle_.width.ConvertToPx() / 2);
         tabBarModifier_->SetIndicator(indicator);
     }
     tabBarModifier_->SetIndicatorColor(LinearColor(indicatorStyle_.color));

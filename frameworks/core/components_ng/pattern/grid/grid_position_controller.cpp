@@ -17,17 +17,22 @@
 
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
-void GridPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t /* source */)
+void GridPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign align, int32_t /* source */)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    gridPattern->UpdateStartIndex(index);
+    if (align == ScrollAlign::NONE) {
+        align = ScrollAlign::AUTO;
+    }
+    gridPattern->StopAnimate();
+    gridPattern->UpdateStartIndex(index, align);
 }
 
 void GridPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
@@ -45,7 +50,7 @@ void GridPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool /*
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-
+    gridPattern->StopAnimate();
     if ((gridPattern->GetGridLayoutInfo().axis_ == Axis::VERTICAL && scrollEdgeType == ScrollEdgeType::SCROLL_TOP) ||
         (gridPattern->GetGridLayoutInfo().axis_ == Axis::HORIZONTAL && scrollEdgeType == ScrollEdgeType::SCROLL_LEFT)) {
         gridPattern->UpdateStartIndex(0);

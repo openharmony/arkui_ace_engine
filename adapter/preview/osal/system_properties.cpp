@@ -24,6 +24,7 @@ constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr char PROPERTY_DEVICE_TYPE_PHONE[] = "phone";
 constexpr char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
+constexpr char PROPERTY_DEVICE_TYPE_TWO_IN_ONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 
@@ -69,7 +70,6 @@ int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
-PerformancePtr SystemProperties::performanceProps_ = nullptr;
 #ifndef ENABLE_ROSEN_BACKEND
 bool SystemProperties::rosenBackendEnabled_ = false;
 #else
@@ -91,15 +91,13 @@ void SystemProperties::InitDeviceType(DeviceType type)
     } else if (type == DeviceType::TABLET) {
         deviceType_ = DeviceType::TABLET;
         paramDeviceType_ = PROPERTY_DEVICE_TYPE_TABLET;
+    } else if (type == DeviceType::TWO_IN_ONE) {
+        deviceType_ = DeviceType::TWO_IN_ONE;
+        paramDeviceType_ = PROPERTY_DEVICE_TYPE_TWO_IN_ONE;
     } else {
         deviceType_ = DeviceType::PHONE;
         paramDeviceType_ = PROPERTY_DEVICE_TYPE_PHONE;
     }
-}
-
-int32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType /* type */)
-{
-    return -1;
 }
 
 DeviceType SystemProperties::GetDeviceType()
@@ -206,13 +204,6 @@ bool SystemProperties::GetIsUseMemoryMonitor()
     return false;
 }
 
-bool SystemProperties::IsPerformanceCheckEnabled()
-{
-    return false;
-}
-
-void SystemProperties::InitPerformanceParameters() {}
-
 bool SystemProperties::IsFormAnimationLimited()
 {
     return true;
@@ -227,4 +218,7 @@ bool SystemProperties::IsSceneBoardEnabled()
 {
     return false;
 }
+
+void SystemProperties::GetAppBarInfo(std::string& bundleName, std::string& abilityName) {}
+
 } // namespace OHOS::Ace

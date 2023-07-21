@@ -57,10 +57,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     OffsetF contentOffset = paintWrapper->GetContentOffset();
-    textFieldContentModifier_->SetContentOffset(contentOffset);
     SizeF contentSize = paintWrapper->GetContentSize();
-    textFieldContentModifier_->SetContentSize(contentSize);
-
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     if (textFieldPattern->GetContChange()) {
@@ -75,9 +72,11 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto currentTextRectOffsetX = textFieldPattern->GetTextRect().GetX();
-    auto currentTextRectOffsetY = textFieldPattern->GetTextRect().GetY();
+    auto currentTextRectOffsetY =
+        textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY();
     if (textFieldContentModifier_->GetTextRectX() != currentTextRectOffsetX ||
-        textFieldContentModifier_->GetTextRectY() != currentTextRectOffsetY) {
+        (textFieldPattern->IsTextArea() ? textFieldContentModifier_->GetTextRectY()
+                                        : textFieldContentModifier_->GetContentOffsetY()) != currentTextRectOffsetY) {
         // If the parent node is a Search, the Search callback is executed.
         if (textFieldPattern->IsSearchParentNode()) {
             auto parentFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
@@ -85,13 +84,14 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
             CHECK_NULL_VOID(searchPattern);
             auto textFieldOffset = searchPattern->GetTextFieldOffset();
             auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
-            eventHub->FireOnScrollChangeEvent(
-                currentTextRectOffsetX + textFieldOffset.GetX(), currentTextRectOffsetY + textFieldOffset.GetY());
-        } else {
-            auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-            eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
+            currentTextRectOffsetX += textFieldOffset.GetX();
+            currentTextRectOffsetY += textFieldOffset.GetY();
         }
+        auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+        eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
     }
+    textFieldContentModifier_->SetContentOffset(contentOffset);
+    textFieldContentModifier_->SetContentSize(contentSize);
     textFieldContentModifier_->SetTextRectY(textFieldPattern->GetTextRect().GetY());
     textFieldContentModifier_->SetTextRectX(textFieldPattern->GetTextRect().GetX());
     textFieldContentModifier_->SetTextAlign(textFieldPattern->GetTextAlign());

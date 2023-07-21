@@ -63,6 +63,21 @@ BadgePosition BadgeComponent::GetBadgePosition() const
     return declaration_->GetBadgePosition();
 }
 
+const Dimension& BadgeComponent::GetBadgePositionX() const
+{
+    return declaration_->GetBadgePositionX();
+}
+
+const Dimension& BadgeComponent::GetBadgePositionY() const
+{
+    return declaration_->GetBadgePositionY();
+}
+
+bool BadgeComponent::IsPositionXy() const
+{
+    return declaration_->IsPositionXy();
+}
+
 const Edge& BadgeComponent::GetPadding() const
 {
     return declaration_->GetPadding();
@@ -126,6 +141,21 @@ void BadgeComponent::SetMessageCount(int64_t messageCount)
 void BadgeComponent::SetBadgePosition(BadgePosition badgePostion)
 {
     declaration_->SetBadgePosition(badgePostion);
+}
+
+void BadgeComponent::SetBadgePositionX(const Dimension& badgePostionX)
+{
+    declaration_->SetBadgePositionX(badgePostionX);
+}
+
+void BadgeComponent::SetBadgePositionY(const Dimension& badgePostionY)
+{
+    declaration_->SetBadgePositionY(badgePostionY);
+}
+
+void BadgeComponent::SetIsPositionXy(bool isPositionXy)
+{
+    declaration_->SetIsPositionXy(isPositionXy);
 }
 
 void BadgeComponent::SetBadgeTextColor(const Color& badgeTextColor)

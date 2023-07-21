@@ -27,6 +27,7 @@
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/cone.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/cube.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/sphere.h"
+#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/shader_input_buffer.h"
 
 namespace OHOS::Ace {
 
@@ -525,6 +526,72 @@ void JSSceneView::JsHeight(const JSCallbackInfo& info)
     ModelView::GetInstance()->SetHeight(value);
 }
 
+void JSSceneView::JsShader(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        LOGE("The arg is wrong, it is supposed to have 1 argument");
+        return;
+    }
+
+    std::string shaderPath;
+    auto parseOk = ParseJsMedia(info[0], shaderPath);
+    if (!parseOk) {
+        LOGE("JSSceneView::JsShader() arg parsing failed.");
+        return;
+    }
+
+    LOGD("shaderPath after ParseJsMedia(): %s", shaderPath.c_str());
+    ModelView::GetInstance()->SetShader(shaderPath);
+}
+
+void JSSceneView::JsShaderImageTexture(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        LOGE("The arg is wrong, it is supposed to have 1 argument");
+        return;
+    }
+
+    std::string texturePath;
+    auto parseOk = ParseJsMedia(info[0], texturePath);
+    if (!parseOk) {
+        LOGE("JSSceneView::JsShaderImageTexture() arg parsing failed.");
+        return;
+    }
+
+    LOGD("texturePath after ParseJsMedia(): %s", texturePath.c_str());
+    ModelView::GetInstance()->AddShaderImageTexture(texturePath);
+}
+
+void JSSceneView::JsShaderInputBuffer(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsArray()) {
+        LOGE("JsShaderInputBuffer() Invalid args.");
+        return;
+    }
+
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
+    int32_t length = static_cast<int32_t>(array->Length());
+    if (length <= 0) {
+        LOGE("JsShaderInputBuffer() Buffer is empty.");
+        return;
+    }
+
+    std::vector<float> shaderBuffer;
+    for (int32_t i = 0; i < length; i++) {
+        JSRef<JSVal> jsValue = array->GetValueAt(i);
+        if (jsValue->IsNumber()) {
+            shaderBuffer.emplace_back(jsValue->ToNumber<float>());
+        } else {
+            LOGE("JsShaderInputBuffer() Invalid data.");
+            return;
+        }
+    }
+
+    RefPtr<OHOS::Render3D::ShaderInputBuffer> buffer =
+        AceType::MakeRefPtr<OHOS::Render3D::ShaderInputBuffer>(shaderBuffer);
+    ModelView::GetInstance()->AddShaderInputBuffer(buffer);
+}
+
 void JSSceneView::JSBind(BindingTarget globalObj)
 {
     LOGD("JSSceneView::JSBind()");
@@ -544,6 +611,9 @@ void JSSceneView::JSBind(BindingTarget globalObj)
     JSClass<JSSceneView>::StaticMethod("customRender", &JSSceneView::JsAddCustomRender);
     JSClass<JSSceneView>::StaticMethod("width", &JSSceneView::JsWidth);
     JSClass<JSSceneView>::StaticMethod("height", &JSSceneView::JsHeight);
+    JSClass<JSSceneView>::StaticMethod("shader", &JSSceneView::JsShader);
+    JSClass<JSSceneView>::StaticMethod("shaderImageTexture", &JSSceneView::JsShaderImageTexture);
+    JSClass<JSSceneView>::StaticMethod("shaderInputBuffer", &JSSceneView::JsShaderInputBuffer);
     JSClass<JSSceneView>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

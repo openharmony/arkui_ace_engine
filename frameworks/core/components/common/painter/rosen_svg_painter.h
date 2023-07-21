@@ -20,9 +20,12 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPoint.h"
-#include "include/core/SkTypeface.h"
 #endif
+#include "include/core/SkTypeface.h"
 
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "frameworks/base/geometry/matrix4.h"
 #include "frameworks/core/components/common/properties/motion_path_evaluator.h"
 #include "frameworks/core/components/common/properties/svg_paint_state.h"
@@ -116,14 +119,13 @@ public:
     static SkMatrix ToSkMatrix(const Matrix4& matrix4);
 
     static void SetGradientStyle(SkPaint& skPaint, const FillState& fillState, double opacity);
-
-    static sk_sp<SkTypeface> fontTypeChinese_;
-    static sk_sp<SkTypeface> fontTypeNormal_;
 #else
     static RSMatrix ToDrawingMatrix(const Matrix4& matrix4);
     static void SetGradientStyle(RSBrush& brush, const FillState& fillState, double opacity);
-    // TODO Drawing : about txt-SkTypeface
 #endif
+
+    static sk_sp<SkTypeface> fontTypeChinese_;
+    static sk_sp<SkTypeface> fontTypeNormal_;
 };
 
 } // namespace OHOS::Ace

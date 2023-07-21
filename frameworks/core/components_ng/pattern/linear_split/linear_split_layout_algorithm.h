@@ -30,8 +30,8 @@ class ACE_EXPORT LinearSplitLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(LinearSplitLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    explicit LinearSplitLayoutAlgorithm(SplitType splitType, std::vector<float> dragSplitOffset, bool isOverParent)
-        : splitType_(splitType), dragSplitOffset_(std::move(dragSplitOffset)), isOverParent_(isOverParent) {};
+    LinearSplitLayoutAlgorithm(SplitType splitType, std::vector<float> childrenDragPos, bool isOverParent)
+        : splitType_(splitType), childrenDragPos_(std::move(childrenDragPos)), isOverParent_(isOverParent) {};
     ~LinearSplitLayoutAlgorithm() override = default;
 
     void OnReset() override {}
@@ -53,23 +53,38 @@ public:
         return splitRects_;
     }
 
-    OffsetF GetParentOffset() const
-    {
-        return parentOffset_;
-    }
-
     bool GetIsOverParent() const
     {
         return isOverParent_;
     }
 
+    const std::vector<float>& GetChildrenDragPos() const
+    {
+        return childrenDragPos_;
+    }
+
+    const std::vector<float>& GetChildrenConstrains() const
+    {
+        return childrenConstrains_;
+    }
+
 private:
+    std::pair<SizeF, SizeF> MeasureChildren(LayoutWrapper* layoutWrapper);
+    LayoutConstraintF GetChildConstrain(LayoutWrapper* layoutWrapper, LayoutConstraintF childConstrain,
+        int32_t index);
+    void LayoutRowSplit(LayoutWrapper* layoutWrapper, float childOffsetMain, float childOffsetCross);
+    void LayoutColumnSplit(LayoutWrapper* layoutWrapper, float childOffsetMain, float childOffsetCross);
+    void ColumnSplitChildConstrain(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& item,
+        int32_t index);
+    static std::pair<float, float> GetDividerMargin(LayoutWrapper* layoutWrapper);
+    static float GetLinearSplitChildMinSize(LayoutWrapper* layoutWrapper);
+
     SplitType splitType_;
     std::set<RefPtr<LayoutWrapper>> displayNodes_;
     std::vector<OffsetF> childrenOffset_;
     std::vector<Rect> splitRects_;
-    std::vector<float> dragSplitOffset_;
-    OffsetF parentOffset_;
+    std::vector<float> childrenDragPos_;
+    std::vector<float> childrenConstrains_;
     float splitLength_ = 0.0f;
     bool isOverParent_ = false;
 

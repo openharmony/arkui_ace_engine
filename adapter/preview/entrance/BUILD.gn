@@ -55,6 +55,7 @@ ohos_source_set("preview_entrance_source") {
     ]
 
     deps = [
+      "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "$ace_napi:ace_napi",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$ace_root/interfaces/inner_api/ace:ace_uicontent",
@@ -69,15 +70,13 @@ ohos_source_set("preview_entrance_source") {
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       external_deps += [
-        "graphic_standard:librender_service_client",
+        "graphic_2d:librender_service_client",
         "previewer:ide_util",
         "window_manager:previewer_window",
       ]
-    } else {
-      deps += [
-        "$ace_flutter_engine_root/glfw:flutter_glfw_preview_$platform",
-        "$ace_flutter_engine_root/skia:ace_skia_$platform",
-      ]
+      if (ace_use_rosen_drawing) {
+        external_deps += [ "graphic_2d:2d_graphics" ]
+      }
     }
 
     if (!is_cross_platform_build) {

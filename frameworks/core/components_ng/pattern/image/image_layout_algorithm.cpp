@@ -124,12 +124,6 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (altLoadingCtx_) {
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize);
     }
-
-    // update RS frame to content rect, no need to offset in PaintMethod
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
-    host->GetRenderContext()->SetOverrideContentRect(contentRect);
 }
 
 } // namespace OHOS::Ace::NG

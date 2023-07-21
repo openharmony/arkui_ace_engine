@@ -77,7 +77,7 @@ template("ace_unittest") {
   }
 
   if (render) {
-    ace_unittest_deps += [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
+    ace_unittest_deps += [ "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client" ]
   }
 
   if (flutter_skia) {

@@ -17,31 +17,31 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
+#include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/event/mouse_event.h"
-#include "core/components_ng/base/frame_node.h"
-#include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -75,8 +75,10 @@ const Dimension MENU_FLOAT_X = 226.0_vp;
 const Dimension MENU_FLOAT_Y = 28.0_vp;
 const int32_t MENU_ITEM_MAXLINES = 1;
 const int32_t MENU_TASK_DELAY_TIME = 1000;
-const Color MENU_ITEM_CHOOSE_COLOR = Color(0x0c000000);
-}
+const Color MENU_ITEM_HOVER_COLOR = Color(0x0c000000);
+const Color MENU_ITEM_PRESS_COLOR = Color(0x1a000000);
+const Color MENU_ITEM_COLOR = Color(0xffffff);
+} // namespace
 bool ContainerModalViewEnhance::sIsHovering = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
 CancelableCallback<void()> ContainerModalViewEnhance::sContextTimer_;
@@ -153,17 +155,23 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
     CHECK_NULL_RETURN(windowManager, nullptr);
     RefPtr<FrameNode> maximizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MAX,
         {});
+    maximizeBtn->UpdateInspectorId("EnhanceMaximizeBtn");
     BondingMaxBtnGestureEvent(maximizeBtn, containerNode);
     BondingMaxBtnInputEvent(maximizeBtn, containerNode);
     containerTitleRow->AddChild(maximizeBtn);
     
     RefPtr<FrameNode> minimizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MIN,
-        [windowManager] (GestureEvent& info) {
-            CHECK_NULL_VOID(windowManager);
+        [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))] (GestureEvent& info) {
+            auto windowManager = weak.Upgrade();
+            if (!windowManager) {
+                LOGE("create minBtn callback func failed,windowManager is null!");
+                return;
+            }
             LOGI("minimize button clicked");
             windowManager->WindowMinimize();
         });
     // minimizeBtn add empty panEvent to over fater container event
+    minimizeBtn->UpdateInspectorId("EnhanceMinimizeBtn");
     auto minimizeBtnEventHub = minimizeBtn->GetOrCreateGestureEventHub();
     auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
     PanDirection panDirection;
@@ -173,12 +181,17 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
 
     RefPtr<FrameNode> closeBtn = BuildControlButton(
         InternalResource::ResourceId::IC_WINDOW_CLOSE,
-        [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID(windowManager);
+        [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+            auto windowManager = weak.Upgrade();
+            if (!windowManager) {
+                LOGE("create closeBtn callback func failed,windowManager is null!");
+                return;
+            }
             LOGI("close button clicked");
             windowManager->WindowClose();
         }, true);
     // closeBtn add empty panEvent to over fater container event
+    closeBtn->UpdateInspectorId("EnhanceCloseBtn");
     auto closeBtnEventHub = closeBtn->GetOrCreateGestureEventHub();
     closeBtnEventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
     containerTitleRow->AddChild(closeBtn);
@@ -192,7 +205,9 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& max
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     // add click event
-    auto event = [containerNode, windowManager](GestureEvent &info) {
+    auto event = [containerNode, wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+        auto windowManager = wk.Upgrade();
+        CHECK_NULL_VOID(windowManager);
         ResetHoverTimer();
         auto mode = windowManager->GetWindowMode();
         auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
@@ -213,7 +228,7 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& max
         LOGD("maximize btn long press,call showMaxMenu func");
         auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
         auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
-        OffsetF menuPosition {menuPosX, menuPosY};
+        OffsetF menuPosition { menuPosX, menuPosY };
         ShowMaxMenu(maximizeBtn, menuPosition);
     };
     // diable mouse left!
@@ -302,9 +317,13 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
     // click maxize Item Event
-    auto maximizeClickFunc = [windowManager](GestureEvent &info) {
-        CHECK_NULL_VOID_NOLOG(windowManager);
-        LOGD("MODE_MAXIMIZE selected");
+    auto maximizeClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent &info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            LOGE("create maxBtn callback func failed,windowManager is null");
+            return;
+        }
+        LOGD("Enhance Menu, MODE_MAXIMIZE selected");
         ResetHoverTimer();
         if (MaximizeMode::MODE_AVOID_SYSTEM_BAR == windowManager->GetCurrentWindowMaximizeMode()) {
             windowManager->WindowRecover();
@@ -320,6 +339,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
         : "window.maximize");
     auto maximizeRow = BuildMenuItem(maximizeTitle, InternalResource::ResourceId::IC_WINDOW_MENU_MAXIMIZE,
         maximizeEvent, windowManager->GetWindowMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    maximizeRow->UpdateInspectorId("EnhanceMenuMaximizeRow");
     PaddingProperty pad;
     pad.left = CalcLength(CONTENT_PADDING);
     return BuildMenuItemPadding(pad, maximizeRow);
@@ -331,10 +351,14 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    auto fullScreenClickFunc = [windowManager](GestureEvent &info) {
-        CHECK_NULL_VOID_NOLOG(windowManager);
+    auto fullScreenClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent &info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            LOGE("create fullScreen callback func failed,windowManager is null!");
+            return;
+        }
         ResetHoverTimer();
-        LOGD("MODE_FULLSCREEN selected");
+        LOGD("Enhance Menu, MODE_FULLSCREEN selected");
         if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode()) {
             windowManager->WindowRecover();
         } else {
@@ -348,6 +372,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
         "window.exitFullScreen" : "window.fullScreen");
     auto fullScreenRow = BuildMenuItem(fullScreenTitle, InternalResource::ResourceId::IC_WINDOW_MENU_FULLSCREEN,
         fullScreenEvent, windowManager->GetWindowMaximizeMode() == MaximizeMode::MODE_FULL_FILL);
+    fullScreenRow->UpdateInspectorId("EnhanceMenuFullScreenRow");
     PaddingProperty pad;
     pad.left = CalcLength(CONTENT_PADDING);
     return BuildMenuItemPadding(pad, fullScreenRow);
@@ -373,14 +398,19 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildLeftSplitMenuItem()
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    auto leftSplitClickFunc = [windowManager](GestureEvent &info) {
-        CHECK_NULL_VOID_NOLOG(windowManager);
-        LOGD("left split selected");
+    auto leftSplitClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent &info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            LOGE("create leftsplit callback func failed,windowMannager is null!");
+            return;
+        }
+        LOGD("Enhance Menu, left split selected");
         windowManager->FireWindowSplitCallBack();
     };
     auto leftSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(leftSplitClickFunc));
     auto screenLeftRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.leftSide"),
         InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L, leftSplitEvent, false);
+    screenLeftRow->UpdateInspectorId("EnhanceMenuScreenLeftRow");
     PaddingProperty pad;
     pad.left = CalcLength(CONTENT_PADDING);
     return BuildMenuItemPadding(pad, screenLeftRow);
@@ -392,14 +422,19 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildRightSplitMenuItem()
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    auto rightSplitClickFunc = [windowManager](GestureEvent &info) {
-        CHECK_NULL_VOID_NOLOG(windowManager);
-        LOGI("right split selected");
+    auto rightSplitClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent &info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            LOGE("create rightSpiltBtn callback func failed, windowManager is null!");
+            return;
+        }
+        LOGD("Enhance Menu, right split selected");
         windowManager->FireWindowSplitCallBack(false);
     };
     auto rightSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(rightSplitClickFunc));
     auto screenRightRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.rightSide"),
         InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, rightSplitEvent, false);
+    screenRightRow->UpdateInspectorId("EnhanceScreenRow");
     PaddingProperty pad;
     pad.left = CalcLength(CONTENT_PADDING);
     return BuildMenuItemPadding(pad, screenRightRow);
@@ -457,13 +492,36 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItem(std::string title, In
         PaddingProperty chooseIconLeftPadding;
         chooseIconLeftPadding.left = CalcLength(MENU_ITEM_TEXT_PADDING);
         containerTitleRow->AddChild(BuildMenuItemPadding(chooseIconLeftPadding, chooseIcon));
-        auto renderContext = containerTitleRow->GetRenderContext();
-        renderContext->UpdateBackgroundColor(MENU_ITEM_CHOOSE_COLOR);
     }
     auto hub = containerTitleRow->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
     hub->AddClickEvent(event);
+    BondingMenuItemEvent(containerTitleRow);
     return containerTitleRow;
+}
+
+void ContainerModalViewEnhance::BondingMenuItemEvent(RefPtr<FrameNode> item)
+{
+    auto inputHub = item->GetOrCreateInputEventHub();
+    auto hoverFunc = [item](bool isHover) {
+        auto renderContext = item->GetRenderContext();
+        if (isHover) {
+            renderContext->UpdateBackgroundColor(MENU_ITEM_HOVER_COLOR);
+        } else {
+            renderContext->UpdateBackgroundColor(MENU_ITEM_COLOR);
+        }
+    };
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverFunc));
+    inputHub->AddOnHoverEvent(hoverEvent);
+
+    auto clickFunc = [item](MouseInfo& info)-> void {
+        if (MouseAction::PRESS == info.GetAction()) {
+            auto renderContext = item->GetRenderContext();
+            renderContext->UpdateBackgroundColor(MENU_ITEM_PRESS_COLOR);
+        }
+    };
+    auto clickEvent = AceType::MakeRefPtr<InputEvent>(std::move(clickFunc));
+    inputHub->AddOnMouseEvent(clickEvent);
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemIcon(InternalResource::ResourceId resourceId)

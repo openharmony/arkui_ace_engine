@@ -52,6 +52,7 @@ template("ace_osal_ohos_source_set") {
     ]
 
     sources = [
+      "ace_checker.cpp",
       "ace_engine_ext.cpp",
       "ace_trace.cpp",
       "anr_thread.cpp",
@@ -64,6 +65,7 @@ template("ace_osal_ohos_source_set") {
       "socperf_client_impl.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",
+      "ui_extension_helper_impl.cpp",
       "want_wrap_ohos.cpp",
     ]
 
@@ -95,8 +97,8 @@ template("ace_osal_ohos_source_set") {
       external_deps += [
         "ability_base:want",
         "ability_runtime:abilitykit_native",
+        "image_framework:image",
         "input:libmmi-client",
-        "multimedia_image_framework:image",
         "napi:ace_napi",
         "resource_management:global_resmgr",
       ]
@@ -132,7 +134,8 @@ template("ace_osal_ohos_source_set") {
       "ability_runtime:abilitykit_native",
       "ability_runtime:runtime",
       "bundle_framework:appexecfwk_core",
-      "graphic_standard:librender_service_client",
+      "graphic_2d:librender_service_client",
+      "hichecker:libhichecker",
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
       "hitrace:libhitracechain",

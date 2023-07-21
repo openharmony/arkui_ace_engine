@@ -157,6 +157,14 @@ void JSTabs::Create(const JSCallbackInfo& info)
 #ifndef NG_BUILD
             tabController->SetInitialIndex(index);
 #endif
+        } else if (indexVal->IsUndefined()) {
+            index = 0;
+            if (!tabController) {
+                tabController = JSTabsController::CreateController();
+            }
+#ifndef NG_BUILD
+            tabController->SetInitialIndex(index);
+#endif
         } else if (indexVal->IsObject()) {
             JSRef<JSObject> indexObj = JSRef<JSObject>::Cast(indexVal);
             auto indexValueProperty = indexObj->GetProperty("value");

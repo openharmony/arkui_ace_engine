@@ -45,6 +45,32 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
     yAxis_.UpdatePoint(seconds, event.y);
 }
 
+void VelocityTracker::UpdateTrackerPoint(double x, double y, const TimeStamp& time, bool end)
+{
+    Offset trackerPoint(x, y);
+    isVelocityDone_ = false;
+    if (isFirstPoint_) {
+        firstPointTime_ = time;
+        isFirstPoint_ = false;
+    } else {
+        delta_ = trackerPoint - lastPosition_;
+        lastPosition_ = trackerPoint;
+    }
+    std::chrono::duration<double> diffTime = time - lastTimePoint_;
+    lastTimePoint_ = time;
+    lastPosition_ = trackerPoint;
+    // judge duration is 500ms.
+    static const double range = 0.5;
+    if (delta_.IsZero() && end && (diffTime.count() < range)) {
+        return;
+    }
+    // nanoseconds duration to seconds.
+    std::chrono::duration<double> duration = time - firstPointTime_;
+    auto seconds = duration.count();
+    xAxis_.UpdatePoint(seconds, x);
+    yAxis_.UpdatePoint(seconds, y);
+}
+
 void VelocityTracker::UpdateVelocity()
 {
     if (isVelocityDone_) {

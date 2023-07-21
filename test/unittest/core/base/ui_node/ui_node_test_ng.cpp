@@ -728,7 +728,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg020, TestSize.Level1)
      * @tc.expected: children_.size is 1 and the AdjustLayoutWrapperTree function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
-    RefPtr<LayoutWrapper> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
+    RefPtr<LayoutWrapperNode> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
     ZERO->UINode::AdjustLayoutWrapperTree(retLayoutWrapper, true, true);
     EXPECT_EQ(ZERO->children_.size(), 1);
     ZERO->Clean();
@@ -1153,7 +1153,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg039, TestSize.Level1)
      * @tc.steps: step1. call the CreateLayoutWrapper
      * @tc.expected: the return value is null
      */
-    RefPtr<LayoutWrapper> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
+    RefPtr<LayoutWrapperNode> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
     EXPECT_EQ(retLayoutWrapper, nullptr);
     /**
      * @tc.steps: step2. add one child for ZERO and call CreateLayoutWrapper
@@ -1186,47 +1186,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg040, TestSize.Level1)
     EXPECT_EQ(ZERO->children_.size(), 2);
 }
 
-/**
- * @tc.name: UINodeTestNg041
- * @tc.desc: Test ui node method
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg041, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create some node
-     */
-    SystemProperties::performanceProps_ = std::make_unique<PerformanceCheckParameter>();
-    auto parent = FrameNode::CreateFrameNode(V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
-    auto current = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
-    auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
-    auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
-    auto child3 = FrameNode::CreateFrameNode(V2::OPTION_COMPONENT_TAG, 5, AceType::MakeRefPtr<Pattern>());
-    child3->SetBuildByJs(true);
-    /**
-     * @tc.steps: step2. root parent node do GetPerformanceCheckData
-     * @tc.expected: nodeMap.size() is 0
-     */
-    PerformanceCheckNodeMap nodeMap;
-    parent->GetPerformanceCheckData(nodeMap);
-    EXPECT_EQ(nodeMap.size(), 0);
-    /**
-     * @tc.steps: step3. add a node to parent node and do GetPerformanceCheckData
-     * @tc.expected: nodeMap.size() is 0
-     */
-    parent->AddChild(current);
-    current->GetPerformanceCheckData(nodeMap);
-    EXPECT_EQ(nodeMap.size(), 0);
-    /**
-     * @tc.steps: step4. config a simple node tree and do GetPerformanceCheckData
-     * @tc.expected: nodeMap.size() is 1
-     */
-    current->AddChild(child);
-    current->AddChild(child2);
-    child->AddChild(child3);
-    current->GetPerformanceCheckData(nodeMap);
-    EXPECT_EQ(nodeMap.size(), 1);
-}
 
 /**
  * @tc.name: UINodeTestNg042

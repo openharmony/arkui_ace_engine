@@ -1850,6 +1850,10 @@ void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName
     }
     switch (state) {
         case Frontend::State::ON_SHOW:
+            if (isFirstCallShow_) {
+                isFirstCallShow_ = false;
+                break;
+            }
             CallAppFunc("onShow");
             break;
         case Frontend::State::ON_HIDE:

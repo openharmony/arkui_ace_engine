@@ -80,22 +80,22 @@ common_bin = [
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context"
     subsystem_name = "graphic"
-    part_name = "graphic_standard"
+    part_name = "graphic_2d"
   },
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base"
     subsystem_name = "graphic"
-    part_name = "graphic_standard"
+    part_name = "graphic_2d"
   },
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client"
     subsystem_name = "graphic"
-    part_name = "graphic_standard"
+    part_name = "graphic_2d"
   },
   {
     label = "//third_party/flutter/glfw:glfw"
     subsystem_name = "graphic"
-    part_name = "graphic_standard"
+    part_name = "graphic_2d"
   },
   {
     label = "//third_party/flutter/build/skia:skia_shared"
@@ -162,7 +162,7 @@ if (defined(use_new_skia) && use_new_skia) {
     {
       label = "//third_party/skia:skia_canvaskit"
       subsystem_name = "thirdparty"
-      part_name = "third_party_skia"
+      part_name = "skia"
     },
   ]
 }

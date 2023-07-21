@@ -32,6 +32,7 @@ using ItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
 using ItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
 using ItemDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
 using ItemDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
+using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 
 class GridEventHub : public EventHub {
     DECLARE_ACE_TYPE(GridEventHub, EventHub)
@@ -81,6 +82,76 @@ public:
             V2::GridEventInfo info(param);
             onScrollToIndex_(&info);
         }
+    }
+
+    void SetOnScroll(OnScrollEvent&& onScroll)
+    {
+        onScrollEvent_ = std::move(onScroll);
+    }
+
+    const OnScrollEvent& GetOnScroll() const
+    {
+        return onScrollEvent_;
+    }
+
+    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+    {
+        onScrollFrameBeginEvent_ = std::move(onScrollFrameBegin);
+    }
+
+    const OnScrollFrameBeginEvent& GetOnScrollFrameBegin() const
+    {
+        return onScrollFrameBeginEvent_;
+    }
+
+    void SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+    {
+        onScrollStartEvent_ = std::move(onScrollStart);
+    }
+
+    const OnScrollStartEvent& GetOnScrollStart() const
+    {
+        return onScrollStartEvent_;
+    }
+
+    void SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
+    {
+        onScrollStopEvent_ = std::move(onScrollStop);
+    }
+
+    const OnScrollStopEvent& GetOnScrollStop() const
+    {
+        return onScrollStopEvent_;
+    }
+
+    void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
+    {
+        onScrollIndexEvent_ = std::move(onScrollIndex);
+    }
+
+    const ScrollIndexFunc& GetOnScrollIndex() const
+    {
+        return onScrollIndexEvent_;
+    }
+
+    void SetOnReachStart(OnReachEvent&& onReachStart)
+    {
+        onReachStartEvent_ = std::move(onReachStart);
+    }
+
+    const OnReachEvent& GetOnReachStart() const
+    {
+        return onReachStartEvent_;
+    }
+
+    void SetOnReachEnd(OnReachEvent&& onReachEnd)
+    {
+        onReachEndEvent_ = std::move(onReachEnd);
+    }
+
+    const OnReachEvent& GetOnReachEnd() const
+    {
+        return onReachEndEvent_;
     }
 
     std::pair<std::optional<float>, std::optional<float>> FireOnScrollBarUpdate(int32_t index, const Dimension& offset)
@@ -136,6 +207,14 @@ private:
     RefPtr<DragDropProxy> dragDropProxy_;
     int32_t draggedIndex_ = 0;
     RefPtr<FrameNode> draggingItem_;
+
+    OnScrollEvent onScrollEvent_;
+    OnScrollStartEvent onScrollStartEvent_;
+    OnScrollStopEvent onScrollStopEvent_;
+    ScrollIndexFunc onScrollIndexEvent_;
+    OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
+    OnReachEvent onReachStartEvent_;
+    OnReachEvent onReachEndEvent_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -130,8 +130,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest001, TestSize.Level
     EXPECT_FALSE(relativeContainerFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper.GetLayoutProperty();
@@ -166,8 +166,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest001, TestSize.Level
     auto firstFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
-    RefPtr<LayoutWrapper> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     auto boxLayoutAlgorithm = firstFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
@@ -210,8 +210,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest002, TestSize.Level
     EXPECT_FALSE(relativeContainerFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper.GetLayoutProperty();
@@ -253,8 +253,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest002, TestSize.Level
     auto firstFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
-    RefPtr<LayoutWrapper> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     auto boxLayoutAlgorithm = firstFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
@@ -278,8 +278,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest002, TestSize.Level
     auto secondFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> secondGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     secondGeometryNode->Reset();
-    RefPtr<LayoutWrapper> secondLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(secondFrameNode, secondGeometryNode, secondFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> secondLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+                        secondFrameNode, secondGeometryNode, secondFrameNode->GetLayoutProperty());
     secondLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     secondLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
@@ -329,8 +329,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(CONTAINER_SIZE);
     EXPECT_FALSE(geometryNode == nullptr);
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
 
     layoutWrapper.GetGeometryNode()->SetFrameSize(CONTAINER_SIZE);
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
@@ -396,8 +396,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     auto firstItem = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, firstNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> firstItemLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(firstItem, firstItemGeometryNode, firstItem->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstItemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstItem, firstItemGeometryNode, firstItem->GetLayoutProperty());
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
     LayoutConstraintF firstItemLayoutConstraint = childLayoutConstraint;
@@ -421,8 +421,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     auto secondItem = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, secondNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> secondItemLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(secondItem, secondItemGeometryNode, secondItem->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> secondItemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(secondItem, secondItemGeometryNode, secondItem->GetLayoutProperty());
     secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     secondItemLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
@@ -447,8 +447,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     auto thirdItem = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, thirdNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> thirdItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> thirdItemLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(thirdItem, thirdItemGeometryNode, thirdItem->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> thirdItemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(thirdItem, thirdItemGeometryNode, thirdItem->GetLayoutProperty());
     thirdItemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(THIRD_ITEM_WIDTH), CalcLength(THIRD_ITEM_HEIGHT)));
     thirdItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
@@ -475,8 +475,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     auto fourthItem = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, fourthNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> fourthItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> fourthItemLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(fourthItem, fourthItemGeometryNode, fourthItem->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> fourthItemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(fourthItem, fourthItemGeometryNode, fourthItem->GetLayoutProperty());
     fourthItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     fourthItemLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
@@ -501,8 +501,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     auto fifthItem = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, fifthNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> fifthItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> fifthItemLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(fifthItem, fifthItemGeometryNode, fifthItem->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> fifthItemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(fifthItem, fifthItemGeometryNode, fifthItem->GetLayoutProperty());
     fifthItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     fifthItemLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
@@ -562,8 +562,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest004, TestSize.Level
     EXPECT_FALSE(frameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
@@ -602,8 +602,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest005, TestSize.Level
     EXPECT_FALSE(frameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
@@ -638,7 +638,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest005, TestSize.Level
     auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -654,7 +654,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest005, TestSize.Level
     auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     secondItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
     secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     std::map<AlignDirection, AlignRule> secondItemAlignRules;
@@ -691,8 +691,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest006, TestSize.Level
     EXPECT_FALSE(frameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
@@ -724,7 +724,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest006, TestSize.Level
     auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -740,7 +740,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest006, TestSize.Level
     auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     secondItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
     secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     secondItemFrameNode->UpdateInspectorId(SECOND_ITEM_ID);
@@ -769,8 +769,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest007, TestSize.Level
     EXPECT_FALSE(frameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
@@ -810,7 +810,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest007, TestSize.Level
     auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     std::map<AlignDirection, AlignRule> firstItemAlignRules;
@@ -830,7 +830,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest007, TestSize.Level
     auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     secondItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
     secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     std::map<AlignDirection, AlignRule> secondItemAlignRules;
@@ -864,8 +864,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest008, TestSize.Level
     EXPECT_FALSE(frameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
@@ -907,7 +907,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest008, TestSize.Level
     auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     std::map<AlignDirection, AlignRule> firstItemAlignRules;
@@ -931,7 +931,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest008, TestSize.Level
     auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     secondItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
     secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     std::map<AlignDirection, AlignRule> secondItemAlignRules;
@@ -971,8 +971,8 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest009, TestSize.Level
     EXPECT_FALSE(frameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
@@ -1010,7 +1010,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest009, TestSize.Level
     auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     std::map<AlignDirection, AlignRule> firstItemAlignRules;
@@ -1030,7 +1030,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest009, TestSize.Level
     auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     secondItemGeometryNode->Reset();
-    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
     secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     std::map<AlignDirection, AlignRule> secondItemAlignRules;

@@ -42,6 +42,7 @@ public:
         paintProperty->propGradientColor_ = CloneGradientColor();
         paintProperty->propPaintShadow_ = ClonePaintShadow();
         paintProperty->propProgressStatus_ = CloneProgressStatus();
+        paintProperty->propEnableSmoothEffect_ = CloneEnableSmoothEffect();
         return paintProperty;
     }
 
@@ -56,6 +57,7 @@ public:
         ResetGradientColor();
         ResetPaintShadow();
         ResetProgressStatus();
+        ResetEnableSmoothEffect();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -89,6 +91,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientColor, Gradient, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PaintShadow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressStatus, ProgressStatus, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableSmoothEffect, bool, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

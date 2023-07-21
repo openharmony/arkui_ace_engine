@@ -32,10 +32,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-} // namespace
-
 void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -44,7 +40,7 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
         V2::DATE_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
-
+    datePickerPattern->SetPickerTag(true);
     bool hasYearNode = datePickerPattern->HasYearNode();
     bool hasMonthNode = datePickerPattern->HasMonthNode();
     bool hasDayNode = datePickerPattern->HasDayNode();
@@ -55,10 +51,6 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 
     CHECK_NULL_VOID(pickerTheme);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
     datePickerPattern->SetShowCount(showCount);
 
     auto yearColumnNode = FrameNode::GetOrCreateFrameNode(
@@ -279,9 +271,9 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     }
     auto startDays = pickerDialog.parseStartDate.ToDays();
     auto endDays = pickerDialog.parseEndDate.ToDays();
-    auto selectedDays = pickerDialog.parseSelectedDate.ToDays();
-    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
-        LOGE("date error");
+    if (startDays > endDays) {
+        pickerDialog.parseStartDate.SetYear(0);
+        pickerDialog.parseEndDate.SetYear(0);
     }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

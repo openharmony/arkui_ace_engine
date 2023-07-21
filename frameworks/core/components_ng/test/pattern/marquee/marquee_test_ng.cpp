@@ -357,7 +357,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest005, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     ASSERT_NE(pattern, nullptr);
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -376,8 +376,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest005, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**
@@ -458,7 +458,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest006, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     ASSERT_NE(pattern, nullptr);
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -477,8 +477,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest006, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**
@@ -546,7 +546,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest007, TestSize.Level1)
      * @tc.expected: step2. related function is called.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(marqueeLayoutAlgorithm));
@@ -563,8 +563,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest007, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**
@@ -665,7 +665,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest008, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     ASSERT_NE(pattern, nullptr);
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -684,8 +684,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest008, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**
@@ -757,7 +757,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest009, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     ASSERT_NE(pattern, nullptr);
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -776,8 +776,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest009, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**

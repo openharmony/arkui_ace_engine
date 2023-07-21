@@ -27,6 +27,9 @@ void PopupBasePattern::BeforeCreateLayoutWrapper()
     inset.bottom_ = inset.bottom_.Combine(manager->GetKeyboardInset());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateSafeAreaInsets(inset);
+    auto props = host->GetLayoutProperty();
+    if (inset.IsValid() || props->GetSafeAreaInsets()) {
+        props->UpdateSafeAreaInsets(inset);
+    }
 }
 } // namespace OHOS::Ace::NG

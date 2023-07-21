@@ -14,17 +14,18 @@
  */
 
 #include "core/components_ng/pattern/search/search_pattern.h"
+
 #include <cstdint>
 
 #include "base/geometry/rect.h"
 #include "core/components/search/search_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_model.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,8 +67,7 @@ void SearchPattern::UpdateChangeEvent(const std::string& value)
     CHECK_NULL_VOID(imageEvent);
 
     auto style = layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
-    if ((style == CancelButtonStyle::CONSTANT)
-        || ((style == CancelButtonStyle::INPUT) && !value.empty())) {
+    if ((style == CancelButtonStyle::CONSTANT) || ((style == CancelButtonStyle::INPUT) && !value.empty())) {
         cancelButtonRenderContext->UpdateOpacity(1.0);
         cancelImageRenderContext->UpdateOpacity(1.0);
         cancelButtonEvent->SetEnabled(true);
@@ -292,17 +292,15 @@ Rect SearchPattern::HandleTextContentRect()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, Rect(0, 0, 0, 0));
     RectF rect = textFieldPattern->GetTextRect();
-    auto y = rect.GetY();
-    if (rect.GetY() == 0) {
-        y = textFieldPattern->GetPaddingTop();
-    }
+    RectF frameRect = textFieldPattern->GetFrameRect();
+    auto y = rect.GetY() + frameRect.GetY();
     if (!textFieldPattern->IsOperation()) {
-        return Rect(rect.GetX(), y, 0, 0);
+        return Rect(rect.GetX() + frameRect.GetX(), y, 0, 0);
     }
     if (NearEqual(rect.GetX(), -Infinity<float>())) {
-        return Rect(textFieldPattern->GetPaddingLeft(), y, 0, 0);
+        return Rect(frameRect.GetX(), y, 0, 0);
     }
-    return Rect(rect.GetX(), y, rect.Width(), rect.Height());
+    return Rect(rect.GetX() + frameRect.GetX(), y, rect.Width(), rect.Height());
 }
 
 int32_t SearchPattern::HandleTextContentLines()
@@ -745,10 +743,16 @@ void SearchPattern::HandleHoverEvent(bool isHover)
 
 void SearchPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto buttonSpace = searchTheme->GetSearchButtonSpace().ConvertToPx();
     const auto& mousePosition = info.GetLocalLocation();
     PointF mousePoint(mousePosition.GetX(), mousePosition.GetY());
-    RectF cancelRect(cancelButtonOffset_, cancelButtonSize_);
-    RectF searchRect(buttonOffset_, buttonSize_);
+    RectF cancelRect(cancelButtonOffset_.GetX() - buttonSpace, cancelButtonOffset_.GetY() - buttonSpace,
+        cancelButtonSize_.Width() + 2 * buttonSpace, cancelButtonSize_.Height() + 2 * buttonSpace);
+    RectF searchRect(buttonOffset_.GetX() - buttonSpace, buttonOffset_.GetY() - buttonSpace,
+        buttonSize_.Width() + 2 * buttonSpace, buttonSize_.Height() + 2 * buttonSpace);
     auto isMouseInCancelButton = cancelRect.IsInRegion(mousePoint);
     auto isMouseInSearchButton = searchRect.IsInRegion(mousePoint);
 

@@ -93,7 +93,7 @@ bool RosenRenderSvgPattern::OnAsPaint(const Offset& offset, const Rect& paintRec
     }
 
     RSRect rect = RSRect(tileRect.Left(), tileRect.Top(), tileRect.Right(), tileRect.Bottom());
-    auto shaderEffect = RSShaderEffect::CreatePictureShader(*rsPicture,
+    auto shaderEffect = RSRecordingShaderEffect::CreatePictureShader(*rsPicture,
         RSTileMode::REPEAT, RSTileMode::REPEAT, RSFilterMode::NEAREST, matrix4, rect);
 
     if (rsPen != nullptr) {

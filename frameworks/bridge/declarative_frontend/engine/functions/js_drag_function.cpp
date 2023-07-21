@@ -20,13 +20,14 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "js_native_api_types.h"
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
+
 #include "core/common/udmf/udmf_client.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
+#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -81,245 +82,238 @@ private:
 
     RefPtr<PasteData> pasteData_;
 };
+
+void JsDragEvent::JSBind(BindingTarget globalObj)
+{
+    JSClass<JsDragEvent>::Declare("DragEvent");
+    JSClass<JsDragEvent>::CustomMethod("getPasteData", &JsDragEvent::GetJsPasteData);
+    JSClass<JsDragEvent>::CustomMethod("getDisplayX", &JsDragEvent::GetScreenX);
+    JSClass<JsDragEvent>::CustomMethod("getDisplayY", &JsDragEvent::GetScreenY);
+    JSClass<JsDragEvent>::CustomMethod("getWindowX", &JsDragEvent::GetX);
+    JSClass<JsDragEvent>::CustomMethod("getWindowY", &JsDragEvent::GetY);
+    JSClass<JsDragEvent>::CustomMethod("getX", &JsDragEvent::GetX);
+    JSClass<JsDragEvent>::CustomMethod("getY", &JsDragEvent::GetY);
+    JSClass<JsDragEvent>::CustomMethod("getDescription", &JsDragEvent::GetDescription);
+    JSClass<JsDragEvent>::CustomMethod("setDescription", &JsDragEvent::SetDescription);
 #ifdef ENABLE_DRAG_FRAMEWORK
-class ScopeRAII {
-public:
-    explicit ScopeRAII(NativeScopeManager* manager) : manager_(manager)
-    {
-        scope_ = manager_->Open();
-    }
-    ~ScopeRAII()
-    {
-        manager_->Close(scope_);
-    }
-
-private:
-    NativeScopeManager* manager_;
-    NativeScope* scope_;
-};
+    JSClass<JsDragEvent>::CustomMethod("setData", &JsDragEvent::SetData);
+    JSClass<JsDragEvent>::CustomMethod("getData", &JsDragEvent::GetData);
+    JSClass<JsDragEvent>::CustomMethod("getSummary", &JsDragEvent::GetSummary);
+    JSClass<JsDragEvent>::CustomMethod("setResult", &JsDragEvent::SetResult);
+    JSClass<JsDragEvent>::CustomMethod("getResult", &JsDragEvent::GetResult);
+    JSClass<JsDragEvent>::CustomMethod("getPreviewRect", &JsDragEvent::GetPreviewRect);
+    JSClass<JsDragEvent>::CustomMethod("useCustomDropAnimation", &JsDragEvent::UseCustomDropAnimation);
+    JSClass<JsDragEvent>::CustomMethod("setDragInfo", &JsDragEvent::SetDragInfo);
+    JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
+    JSClass<JsDragEvent>::CustomMethod("dragBehavior", &JsDragEvent::DragBehavior);
 #endif
-class JsDragEvent : public Referenced {
-public:
-    static void JSBind(BindingTarget globalObj)
-    {
-        JSClass<JsDragEvent>::Declare("DragEvent");
-        JSClass<JsDragEvent>::CustomMethod("getPasteData", &JsDragEvent::GetJsPasteData);
-        JSClass<JsDragEvent>::CustomMethod("getDisplayX", &JsDragEvent::GetScreenX);
-        JSClass<JsDragEvent>::CustomMethod("getDisplayY", &JsDragEvent::GetScreenY);
-        JSClass<JsDragEvent>::CustomMethod("getWindowX", &JsDragEvent::GetX);
-        JSClass<JsDragEvent>::CustomMethod("getWindowY", &JsDragEvent::GetY);
-        JSClass<JsDragEvent>::CustomMethod("getX", &JsDragEvent::GetX);
-        JSClass<JsDragEvent>::CustomMethod("getY", &JsDragEvent::GetY);
-        JSClass<JsDragEvent>::CustomMethod("getDescription", &JsDragEvent::GetDescription);
-        JSClass<JsDragEvent>::CustomMethod("setDescription", &JsDragEvent::SetDescription);
+    JSClass<JsDragEvent>::CustomMethod("getVelocityX", &JsDragEvent::GetVelocityX);
+    JSClass<JsDragEvent>::CustomMethod("getVelocityY", &JsDragEvent::GetVelocityY);
+    JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
+    JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
+}
+
+void JsDragEvent::SetJsPasteData(const JSRef<JSObject>& jsPasteData)
+{
+    jsPasteData_ = jsPasteData;
+}
+
+void JsDragEvent::GetJsPasteData(const JSCallbackInfo& args)
+{
+    args.SetReturnValue(jsPasteData_);
+}
+
+void JsDragEvent::GetScreenX(const JSCallbackInfo& args)
+{
+    auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenX())));
+    auto xValueRef = JSRef<JSVal>::Make(xValue);
+    args.SetReturnValue(xValueRef);
+}
+
+void JsDragEvent::GetScreenY(const JSCallbackInfo& args)
+{
+    auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenY())));
+    auto yValueRef = JSRef<JSVal>::Make(yValue);
+    args.SetReturnValue(yValueRef);
+}
+
+void JsDragEvent::GetX(const JSCallbackInfo& args)
+{
+    auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetX())));
+    auto xValueRef = JSRef<JSVal>::Make(xValue);
+    args.SetReturnValue(xValueRef);
+}
+
+void JsDragEvent::GetY(const JSCallbackInfo& args)
+{
+    auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetY())));
+    auto yValueRef = JSRef<JSVal>::Make(yValue);
+    args.SetReturnValue(yValueRef);
+}
+
+void JsDragEvent::GetDescription(const JSCallbackInfo& args)
+{
+    auto description = JSVal(ToJSValue(dragEvent_->GetDescription()));
+    auto descriptionRef = JSRef<JSVal>::Make(description);
+    args.SetReturnValue(descriptionRef);
+}
+
+void JsDragEvent::SetDescription(const JSCallbackInfo& args)
+{
+    if (args[0]->IsString()) {
+        dragEvent_->SetDescription(args[0]->ToString());
+    }
+}
 #ifdef ENABLE_DRAG_FRAMEWORK
-        JSClass<JsDragEvent>::CustomMethod("setData", &JsDragEvent::SetData);
-        JSClass<JsDragEvent>::CustomMethod("getData", &JsDragEvent::GetData);
-        JSClass<JsDragEvent>::CustomMethod("getSummary", &JsDragEvent::GetSummary);
-        JSClass<JsDragEvent>::CustomMethod("setResult", &JsDragEvent::SetResult);
-        JSClass<JsDragEvent>::CustomMethod("getResult", &JsDragEvent::GetResult);
-        JSClass<JsDragEvent>::CustomMethod("getPreviewRect", &JsDragEvent::GetPreviewRect);
-        JSClass<JsDragEvent>::CustomMethod("useCustomDropAnimation", &JsDragEvent::UseCustomDropAnimation);
-        JSClass<JsDragEvent>::CustomMethod("setDragInfo", &JsDragEvent::SetDragInfo);
-        JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
-        JSClass<JsDragEvent>::CustomMethod("copy", &JsDragEvent::Copy);
+void JsDragEvent::SetData(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        LOGE("info[0] is not an object when try SetData");
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(nativeEngine->GetScopeManager());
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
+    CHECK_NULL_VOID(udData);
+    dragEvent_->SetData(udData);
+}
+
+void JsDragEvent::GetData(const JSCallbackInfo& args)
+{
+    auto dragData = dragEvent_->GetData();
+    CHECK_NULL_VOID(dragData);
+    NativeValue* nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
+    CHECK_NULL_VOID(nativeValue);
+    auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    args.SetReturnValue(jsValue);
+}
+
+void JsDragEvent::GetSummary(const JSCallbackInfo& args)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    auto summary = dragEvent_->GetSummary();
+    NativeValue* nativeValue = UdmfClient::GetInstance()->TransformSummary(summary);
+    CHECK_NULL_VOID(nativeValue);
+    auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    args.SetReturnValue(jsValue);
+}
+
+void JsDragEvent::SetResult(const JSCallbackInfo& args)
+{
+    if (args[0]->IsNumber()) {
+        auto dragRet = args[0]->ToNumber<int32_t>();
+        dragEvent_->SetResult((DragRet)dragRet);
+    }
+}
+
+void JsDragEvent::GetResult(const JSCallbackInfo& args)
+{
+    auto dragRet = JSVal(ToJSValue(static_cast<int32_t>(dragEvent_->GetResult())));
+    auto dragRetRef = JSRef<JSVal>::Make(dragRet);
+    args.SetReturnValue(dragRetRef);
+}
+
+void JsDragEvent::GetPreviewRect(const JSCallbackInfo& args)
+{
+    auto rectObj = CreateRectangle(dragEvent_->GetPreviewRect());
+    JSRef<JSVal> previewRect = JSRef<JSObject>::Cast(rectObj);
+    args.SetReturnValue(previewRect);
+}
+
+void JsDragEvent::UseCustomDropAnimation(const JSCallbackInfo& args)
+{
+    if (args[0]->IsBoolean()) {
+        dragEvent_->UseCustomAnimation(args[0]->ToBoolean());
+    }
+}
+
+void JsDragEvent::SetDragInfo(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        LOGE("info[0] is not an object when try SetDragInfo");
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(nativeEngine->GetScopeManager());
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
+    CHECK_NULL_VOID(udData);
+    dragEvent_->SetData(udData);
+}
+
+void JsDragEvent::GetDragInfo(const JSCallbackInfo& args)
+{
+    auto dragData = dragEvent_->GetDragInfo();
+    CHECK_NULL_VOID(dragData);
+    NativeValue* nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
+    CHECK_NULL_VOID(nativeValue);
+    auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    args.SetReturnValue(jsValue);
+}
+
+void JsDragEvent::DragBehavior(const JSCallbackInfo& args)
+{
+    if (args[0]->IsNumber()) {
+        dragEvent_->SetCopy(!static_cast<bool>(args[0]->ToNumber<int32_t>()));
+    }
+}
 #endif
-        JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
-    }
 
-    void SetJsPasteData(const JSRef<JSObject>& jsPasteData)
-    {
-        jsPasteData_ = jsPasteData;
-    }
+void JsDragEvent::GetVelocityX(const JSCallbackInfo& args)
+{
+    auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityX())));
+    auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+    args.SetReturnValue(jsValueRef);
+}
 
-    void GetJsPasteData(const JSCallbackInfo& args)
-    {
-        args.SetReturnValue(jsPasteData_);
-    }
+void JsDragEvent::GetVelocityY(const JSCallbackInfo& args)
+{
+    auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityY())));
+    auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+    args.SetReturnValue(jsValueRef);
+}
 
-    void GetScreenX(const JSCallbackInfo& args)
-    {
-        auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenX())));
-        auto xValueRef = JSRef<JSVal>::Make(xValue);
-        args.SetReturnValue(xValueRef);
-    }
+void JsDragEvent::GetVelocity(const JSCallbackInfo& args)
+{
+    auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityValue())));
+    auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+    args.SetReturnValue(jsValueRef);
+}
 
-    void GetScreenY(const JSCallbackInfo& args)
-    {
-        auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenY())));
-        auto yValueRef = JSRef<JSVal>::Make(yValue);
-        args.SetReturnValue(yValueRef);
-    }
+void JsDragEvent::Constructor(const JSCallbackInfo& args)
+{
+    auto dragEvent = Referenced::MakeRefPtr<JsDragEvent>();
+    dragEvent->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(dragEvent));
+}
 
-    void GetX(const JSCallbackInfo& args)
-    {
-        auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetX())));
-        auto xValueRef = JSRef<JSVal>::Make(xValue);
-        args.SetReturnValue(xValueRef);
+void JsDragEvent::Destructor(JsDragEvent* dragEvent)
+{
+    if (dragEvent != nullptr) {
+        dragEvent->DecRefCount();
     }
-
-    void GetY(const JSCallbackInfo& args)
-    {
-        auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetY())));
-        auto yValueRef = JSRef<JSVal>::Make(yValue);
-        args.SetReturnValue(yValueRef);
-    }
-
-    void GetDescription(const JSCallbackInfo& args)
-    {
-        auto description = JSVal(ToJSValue(dragEvent_->GetDescription()));
-        auto descriptionRef = JSRef<JSVal>::Make(description);
-        args.SetReturnValue(descriptionRef);
-    }
-
-    void SetDescription(const JSCallbackInfo& args)
-    {
-        if (args[0]->IsString()) {
-            dragEvent_->SetDescription(args[0]->ToString());
-        }
-    }
+}
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void SetData(const JSCallbackInfo& args)
-    {
-        if (!args[0]->IsObject()) {
-            LOGE("info[0] is not an object when try SetData");
-            return ;
-        }
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(nativeEngine->GetScopeManager());
-        NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-        RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
-        CHECK_NULL_VOID(udData);
-        dragEvent_->SetData(udData);
-    }
-
-    void GetData(const JSCallbackInfo& args)
-    {
-        auto dragData = dragEvent_->GetData();
-        CHECK_NULL_VOID(dragData);
-        NativeValue* nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
-        CHECK_NULL_VOID(nativeValue);
-        auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
-        args.SetReturnValue(jsValue);
-    }
-
-    void GetSummary(const JSCallbackInfo& args)
-    {
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        auto summary = dragEvent_->GetSummary();
-        NativeValue* nativeValue = UdmfClient::GetInstance()->TransformSummary(summary);
-        CHECK_NULL_VOID(nativeValue);
-        auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
-        args.SetReturnValue(jsValue);
-    }
-
-    void SetResult(const JSCallbackInfo& args)
-    {
-        if (args[0]->IsNumber()) {
-            auto dragRet = args[0]->ToNumber<int32_t>();
-            dragEvent_->SetResult((DragRet)dragRet);
-        }
-    }
-
-    void GetResult(const JSCallbackInfo& args)
-    {
-        auto dragRet = JSVal(ToJSValue(static_cast<int32_t>(dragEvent_->GetResult())));
-        auto dragRetRef = JSRef<JSVal>::Make(dragRet);
-        args.SetReturnValue(dragRetRef);
-    }
-
-    void GetPreviewRect(const JSCallbackInfo& args)
-    {
-        auto rectObj = CreateRectangle(dragEvent_->GetPreviewRect());
-        JSRef<JSVal> previewRect = JSRef<JSObject>::Cast(rectObj);
-        args.SetReturnValue(previewRect);
-    }
-
-    void UseCustomDropAnimation(const JSCallbackInfo& args)
-    {
-        if (args[0]->IsBoolean()) {
-            dragEvent_->UseCustomAnimation(args[0]->ToBoolean());
-        }
-    }
-
-    void SetDragInfo(const JSCallbackInfo& args)
-    {
-        if (!args[0]->IsObject()) {
-            LOGE("info[0] is not an object when try SetDragInfo");
-            return ;
-        }
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(nativeEngine->GetScopeManager());
-        NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-        RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
-        CHECK_NULL_VOID(udData);
-        dragEvent_->SetData(udData);
-    }
-
-    void GetDragInfo(const JSCallbackInfo& args)
-    {
-        auto dragData = dragEvent_->GetDragInfo();
-        CHECK_NULL_VOID(dragData);
-        NativeValue* nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
-        CHECK_NULL_VOID(nativeValue);
-        auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
-        args.SetReturnValue(jsValue);
-    }
-
-    void Copy(const JSCallbackInfo& args)
-    {
-        if (args[0]->IsBoolean()) {
-            dragEvent_->SetCopy(args[0]->ToBoolean());
-        }
-    }
+JSRef<JSObject> JsDragEvent::CreateRectangle(const Rect& info)
+{
+    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+    rectObj->SetProperty<double>("x", SystemProperties::Px2Vp(info.Left()));
+    rectObj->SetProperty<double>("y", SystemProperties::Px2Vp(info.Top()));
+    rectObj->SetProperty<double>("width", SystemProperties::Px2Vp(info.Width()));
+    rectObj->SetProperty<double>("height", SystemProperties::Px2Vp(info.Height()));
+    return rectObj;
+}
 #endif
-    void SetDragEvent(const RefPtr<DragEvent>& dragEvent)
-    {
-        dragEvent_ = dragEvent;
-    }
-
-    RefPtr<DragEvent> GetDragEvent() const
-    {
-        return dragEvent_;
-    }
-
-private:
-    static void Constructor(const JSCallbackInfo& args)
-    {
-        auto dragEvent = Referenced::MakeRefPtr<JsDragEvent>();
-        dragEvent->IncRefCount();
-        args.SetReturnValue(Referenced::RawPtr(dragEvent));
-    }
-
-    static void Destructor(JsDragEvent* dragEvent)
-    {
-        if (dragEvent != nullptr) {
-            dragEvent->DecRefCount();
-        }
-    }
-#ifdef ENABLE_DRAG_FRAMEWORK
-    JSRef<JSObject> CreateRectangle(const Rect& info)
-    {
-        JSRef<JSObject> rectObj = JSRef<JSObject>::New();
-        rectObj->SetProperty<double>("x", SystemProperties::Px2Vp(info.Left()));
-        rectObj->SetProperty<double>("y", SystemProperties::Px2Vp(info.Top()));
-        rectObj->SetProperty<double>("width", SystemProperties::Px2Vp(info.Width()));
-        rectObj->SetProperty<double>("height", SystemProperties::Px2Vp(info.Height()));
-        return rectObj;
-    }
-#endif
-    RefPtr<DragEvent> dragEvent_;
-    JSRef<JSObject> jsPasteData_;
-};
 
 void JsDragFunction::JSBind(BindingTarget globalObj)
 {
@@ -332,7 +326,7 @@ void JsDragFunction::Execute()
     JsFunction::Execute();
 }
 
-JSRef<JSVal> JsDragFunction::Execute(const RefPtr<DragEvent>& info, const std::string &extraParams)
+JSRef<JSVal> JsDragFunction::Execute(const RefPtr<DragEvent>& info, const std::string& extraParams)
 {
     JSRef<JSVal> dragInfo = JSRef<JSObject>::Cast(CreateDragEvent(info));
     JSRef<JSVal> jsonInfo = JSRef<JSVal>::Make(ToJSValue(extraParams));

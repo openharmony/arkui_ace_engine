@@ -949,31 +949,27 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
     if (info[1]->IsString()) {
         std::string imageDataXStr = "";
         JSViewAbstract::ParseJsString(info[1], imageDataXStr);
-        value = Dimension(StringToDimension(imageDataXStr).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataXStr).ConvertToPx());
         imageData.x = value.Value();
     } else {
         ParseJsInt(info[1], imageData.x);
+        imageData.x = SystemProperties::Vp2Px(imageData.x);
     }
     if (info[2]->IsString()) {
         std::string imageDataYStr = "";
         JSViewAbstract::ParseJsString(info[2], imageDataYStr);
-        value = Dimension(StringToDimension(imageDataYStr).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataYStr).ConvertToPx());
         imageData.y = value.Value();
     } else {
         ParseJsInt(info[2], imageData.y);
+        imageData.y = SystemProperties::Vp2Px(imageData.y);
     }
-    imageData.x = SystemProperties::Vp2Px(imageData.x);
-    imageData.y = SystemProperties::Vp2Px(imageData.y);
 
     imageData.dirtyWidth = width;
     imageData.dirtyHeight = height;
 
     if (info.Length() == 7) {
         ParseImageDataAsStr(info, imageData);
-        imageData.dirtyX = SystemProperties::Vp2Px(imageData.dirtyX);
-        imageData.dirtyY = SystemProperties::Vp2Px(imageData.dirtyY);
-        imageData.dirtyWidth = SystemProperties::Vp2Px(imageData.dirtyWidth);
-        imageData.dirtyHeight = SystemProperties::Vp2Px(imageData.dirtyHeight);
     }
 
     imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, width)
@@ -988,34 +984,38 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[3]->IsString()) {
         std::string imageDataDirtyXStr = "";
         JSViewAbstract::ParseJsString(info[3], imageDataDirtyXStr);
-        value = Dimension(StringToDimension(imageDataDirtyXStr).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataDirtyXStr).ConvertToPx());
         imageData.dirtyX = value.Value();
     } else {
         ParseJsInt(info[3], imageData.dirtyX);
+        imageData.dirtyX = SystemProperties::Vp2Px(imageData.dirtyX);
     }
     if (info[4]->IsString()) {
         std::string imageDataDirtyYStr = "";
         JSViewAbstract::ParseJsString(info[4], imageDataDirtyYStr);
-        value = Dimension(StringToDimension(imageDataDirtyYStr).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataDirtyYStr).ConvertToPx());
         imageData.dirtyY = value.Value();
     } else {
         ParseJsInt(info[4], imageData.dirtyY);
+        imageData.dirtyY = SystemProperties::Vp2Px(imageData.dirtyY);
     }
     if (info[5]->IsString()) {
         std::string imageDataDirtWidth = "";
         JSViewAbstract::ParseJsString(info[5], imageDataDirtWidth);
-        value = Dimension(StringToDimension(imageDataDirtWidth).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataDirtWidth).ConvertToPx());
         imageData.dirtyWidth = value.Value();
     } else {
         ParseJsInt(info[5], imageData.dirtyWidth);
+        imageData.dirtyWidth = SystemProperties::Vp2Px(imageData.dirtyWidth);
     }
     if (info[6]->IsString()) {
         std::string imageDataDirtyHeight = "";
         JSViewAbstract::ParseJsString(info[6], imageDataDirtyHeight);
-        value = Dimension(StringToDimension(imageDataDirtyHeight).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataDirtyHeight).ConvertToPx());
         imageData.dirtyHeight = value.Value();
     } else {
         ParseJsInt(info[6], imageData.dirtyHeight);
+        imageData.dirtyHeight = SystemProperties::Vp2Px(imageData.dirtyHeight);
     }
 }
 
@@ -1193,7 +1193,8 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     napi_create_int32(env, 0, &temp);
     napi_set_named_property(env, napiValue, "index", temp);
 #endif
-
+#else
+    LOGW("[Engine Log] The function 'getPixelMap' is not supported on the current platform.");
 #endif
 }
 

@@ -133,7 +133,7 @@ void RosenRenderContext::StartRecording()
             SkClipOp::kDifference, true);
     }
 #else
-    recordingCanvas_ = new RSRecordingCanvas(estimatedRect_.Width(), estimatedRect_.Height());
+    recordingCanvas_ = new Rosen::Drawing::RecordingCanvas(estimatedRect_.Width(), estimatedRect_.Height());
     if (clipHole_.IsValid()) {
         recordingCanvas_->Save();
         needRestoreHole_ = true;

@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
 #include "bridge/declarative_frontend/jsview/js_canvas.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_path.h"
@@ -398,6 +399,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "Counter", JSCounter::JSBind },
+    { "CalendarPicker", JSCalendarPicker::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -470,6 +472,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
     { "Counter", JSCounter::JSBind },
+    { "CalendarPicker", JSCalendarPicker::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -497,6 +500,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Toggle", JSToggle::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
+    { "CalendarPickerDialog", JSCalendarPickerDialog::JSBind },
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
     { "Path", JSPath::JSBind },
@@ -642,6 +646,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RootScene", JSRootScene::JSBind },
     { "Screen", JSScreen::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
+    { "UIExtensionProxy", JSUIExtensionProxy::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
 #endif
     { "RichEditor", JSRichEditor::JSBind },

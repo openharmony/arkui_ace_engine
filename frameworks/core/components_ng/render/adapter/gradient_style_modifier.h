@@ -68,7 +68,11 @@ public:
     ~GradientStyleModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override;
+#ifndef USE_ROSEN_DRAWING
+    void PaintGradient(SkCanvas& canvas, const SizeF& frameSize) const;
+#else
     void PaintGradient(RSCanvas& canvas, const SizeF& frameSize) const;
+#endif
 
     Gradient GetGradient() const;
     void SetGradient(const Gradient& gradient);

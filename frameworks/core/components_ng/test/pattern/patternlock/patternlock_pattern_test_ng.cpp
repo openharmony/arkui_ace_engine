@@ -890,7 +890,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockLayoutAlgorithmTest001, TestSize.L
     constexpr Dimension sideLength = Dimension(20.0);
     PatternLockLayoutAlgorithm layoutAlgorithm(sideLength);
     auto layoutProperty = AceType::MakeRefPtr<PatternLockLayoutProperty>();
-    LayoutWrapper layoutWrapper(nullptr, nullptr, layoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, layoutProperty);
     /**
      * @tc.case: case1.
      */

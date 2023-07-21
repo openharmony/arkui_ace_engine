@@ -24,6 +24,7 @@
 #include "base/window/drag_window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
+#include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace::NG {
 
@@ -81,7 +82,7 @@ public:
     void RestoreClipboardData();
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const RefPtr<OHOS::Ace::DragEvent>& event);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
@@ -112,13 +113,16 @@ public:
         isDragCancel_ = isDragCancel;
     }
 
+    void SetIsMouseDrag(bool isMouseDragged)
+    {
+        isMouseDragged_ = isMouseDragged;
+    }
+
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
-        std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes);
+        std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
 
 private:
-    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
-    std::map<int32_t, RefPtr<FrameNode>> FindDragFrameNodeMapByPosition(
-        float globalX, float globalY, DragType dragType);
+    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
@@ -128,6 +132,8 @@ private:
     int32_t GetItemIndex(const RefPtr<FrameNode>& frameNode, DragType dragType, float globalX, float globalY);
     void CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height);
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
+    void ClearVelocityInfo();
+    void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
 
     std::set<WeakPtr<FrameNode>> dragFrameNodes_;
     std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -152,6 +158,8 @@ private:
     int64_t currentId_ = -1;
 
     bool isDragged_ = false;
+    bool isMouseDragged_ = false;
+    VelocityTracker velocityTracker_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

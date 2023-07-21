@@ -39,10 +39,14 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     CHECK_NULL_VOID(fullScreenNode);
     fullScreenNode->InitVideoFullScreenNode(videoNode);
     // add node to root
-    int32_t rootId = videoNode->GetRootId();
-    auto rootNode = FrameNode::GetFrameNode(V2::ROOT_ETS_TAG, rootId);
-    CHECK_NULL_VOID(rootNode);
-    
+    auto rootNode = PipelineContext::GetCurrentContext()->GetRootElement();
+    if (!rootNode) {
+        LOGI("rootNode is nullptr");
+        auto videoPattern = AceType::DynamicCast<VideoPattern>(videoNode->GetPattern());
+        videoPattern->UpdateMediaParam(mediaPlayer_, renderSurface_, renderContextForMediaPlayer_);
+        ResetMediaParam();
+        return;
+    }
     fullScreenNode->MountToParent(rootNode);
     // set video size all window
     LayoutConstraintF parentConstraint;
@@ -58,6 +62,7 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     rootNode->RebuildRenderContextTree();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    OnFullScreenChange(true);
 }
 
 void VideoFullScreenPattern::ExitFullScreen()
@@ -102,6 +107,7 @@ void VideoFullScreenPattern::UpdateState()
     bool isChanged = false;
     if (videoLayout->HasObjectFit() &&
         (fullScreenLayout->GetObjectFit() != videoLayout->GetObjectFit())) {
+        isChanged = true;
         fullScreenLayout->UpdateObjectFit(videoLayout->GetObjectFit().value());
     }
     if (videoLayout->HasVideoSource() &&
@@ -120,8 +126,8 @@ void VideoFullScreenPattern::UpdateState()
         fullScreenLayout->UpdateControls(videoLayout->GetControls().value());
     }
     if (isChanged) {
+        fullScreenNode->MarkModifyDone();
         fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
-    fullScreenNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

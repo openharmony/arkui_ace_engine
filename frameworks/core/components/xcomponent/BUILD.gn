@@ -39,8 +39,8 @@ build_component("xcomponent") {
       "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
     ]
     external_deps = [
-      "graphic_standard:librender_service_client",
-      "graphic_standard:surface",
+      "graphic_2d:librender_service_client",
+      "graphic_2d:surface",
       "ipc:ipc_core",
       "window_manager:libwm",
     ]

@@ -33,7 +33,6 @@ struct ListItemGroupPaintInfo {
     int32_t lanes = 1;
     float spaceWidth = 0.0f;
     float laneGutter = 0.0f;
-    float childCrossSize = 0.0f;
 };
 
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
@@ -162,7 +161,6 @@ private:
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;
-    float childCrossSize_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };
 } // namespace OHOS::Ace::NG

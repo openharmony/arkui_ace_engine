@@ -57,7 +57,7 @@ void JSBlank::Create(const JSCallbackInfo& info)
         return;
     }
     if (ParseJsDimensionVp(info[0], blankMin)) {
-        if (blankMin.IsNegative()) {
+        if (blankMin.IsNegative() || blankMin.Unit() == DimensionUnit::PERCENT) {
             blankMin.SetValue(0.0);
         }
         BlankModel::GetInstance()->SetBlankMin(blankMin);

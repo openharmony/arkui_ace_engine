@@ -15,11 +15,12 @@
 
 #include "form_renderer.h"
 
-#include "base/utils/utils.h"
 #include "configuration.h"
 #include "form_constants.h"
 #include "form_renderer_hilog.h"
 #include "refbase.h"
+
+#include "base/utils/utils.h"
 
 namespace OHOS {
 namespace Ace {
@@ -27,9 +28,8 @@ namespace {
 constexpr char FORM_RENDERER_ALLOW_UPDATE[] = "allowUpdate";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
-}
-FormRenderer::FormRenderer(
-    const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
+} // namespace
+FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
     : context_(context), runtime_(runtime)
 {
@@ -66,6 +66,16 @@ void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
         }
     };
     uiContent_->SetErrorEventHandler(errorEventHandler);
+
+    if (!formJsInfo.isDynamic) {
+        auto formLinkInfoUpdateHandler = [weak = weak_from_this()](const std::vector<std::string>& formLinkInfos) {
+            auto formRenderer = weak.lock();
+            if (formRenderer) {
+                formRenderer->OnFormLinkInfoUpdate(formLinkInfos);
+            }
+        };
+        uiContent_->SetFormLinkInfoUpdateHandler(formLinkInfoUpdateHandler);
+    }
 
     auto rsSurfaceNode = uiContent_->GetFormRootNode();
     if (rsSurfaceNode == nullptr) {
@@ -210,6 +220,7 @@ void FormRenderer::OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
     HILOG_INFO("Form OnSurfaceReuse.");
     formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), formJsInfo, newWant);
+    formRendererDelegate_->OnFormLinkInfoUpdate(cachedInfos_);
 }
 
 void FormRenderer::OnActionEvent(const std::string& action)
@@ -232,7 +243,17 @@ void FormRenderer::OnError(const std::string& code, const std::string& msg)
     formRendererDelegate_->OnError(code, msg);
 }
 
-void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject> &remoteObj)
+void FormRenderer::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos)
+{
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("formRendererDelegate is null!");
+        return;
+    }
+    cachedInfos_ = formLinkInfos;
+    formRendererDelegate_->OnFormLinkInfoUpdate(formLinkInfos);
+}
+
+void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
 {
     HILOG_INFO("Get renderRemoteObj, add death recipient.");
     auto renderRemoteObj = iface_cast<IFormRendererDelegate>(remoteObj);
@@ -267,8 +288,7 @@ void FormRenderer::ResetRenderDelegate()
     formRendererDelegate_ = nullptr;
 }
 
-void FormRenderer::UpdateConfiguration(
-    const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+void FormRenderer::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
     if (!uiContent_) {
         HILOG_ERROR("uiContent_ is null");
@@ -311,8 +331,7 @@ void FormRenderer::AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInf
         HILOG_ERROR("rsSurfaceNode is nullptr.");
         return;
     }
-    if (!NearEqual(width_, uiContent_->GetFormWidth()) ||
-        !NearEqual(height_, uiContent_->GetFormHeight())) {
+    if (!NearEqual(width_, uiContent_->GetFormWidth()) || !NearEqual(height_, uiContent_->GetFormHeight())) {
         uiContent_->SetFormWidth(width_);
         uiContent_->SetFormHeight(height_);
         uiContent_->OnFormSurfaceChange(width_, height_);
@@ -320,5 +339,5 @@ void FormRenderer::AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInf
     }
     uiContent_->Foreground();
 }
-}  // namespace Ace
-}  // namespace OHOS
+} // namespace Ace
+} // namespace OHOS

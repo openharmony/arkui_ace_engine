@@ -148,7 +148,6 @@ private:
     void UpdateUIStatus(bool check);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
@@ -156,8 +155,6 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
-    RefPtr<Animator> onController_;
-    RefPtr<Animator> offController_;
 
     bool isFirstCreated_ = true;
     bool preCheck_ = false;

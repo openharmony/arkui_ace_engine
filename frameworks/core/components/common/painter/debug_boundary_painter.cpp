@@ -22,6 +22,8 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 #include "core/components/common/properties/color.h"
 #include "core/pipeline/base/render_node.h"
@@ -101,7 +103,7 @@ void DebugBoundaryPainter::PaintDebugMargin(RSCanvas* canvas, const Offset& offs
     auto startPointY = offset.GetY();
     auto verticalRectHeight = layoutSize.Height() - margin.TopPx() - margin.BottomPx();
     brush.SetColor(BOUNDARY_MARGIN_COLOR);
-    
+
     auto layoutRect = RSRect(startPointX, startPointY,
         layoutSize.Width() + startPointX, margin.TopPx() + startPointY);
     canvas->AttachBrush(brush);
@@ -112,10 +114,10 @@ void DebugBoundaryPainter::PaintDebugMargin(RSCanvas* canvas, const Offset& offs
     canvas->DrawRect(layoutRect);
 
     layoutRect = RSRect(startPointX, startPointY + margin.TopPx(),
-        margin.LeftPx() + startPointX, verticalRectHeight + startPointY + margin.TopPx();
+        margin.LeftPx() + startPointX, verticalRectHeight + startPointY + margin.TopPx());
     canvas->DrawRect(layoutRect);
 
-    layoutRect = RSRect::MakeXYWH(startPointX + layoutSize.Width() - margin.RightPx(),
+    layoutRect = RSRect(startPointX + layoutSize.Width() - margin.RightPx(),
         startPointY + margin.TopPx(), startPointX + layoutSize.Width(),
         verticalRectHeight + startPointY + margin.TopPx());
     canvas->DrawRect(layoutRect);

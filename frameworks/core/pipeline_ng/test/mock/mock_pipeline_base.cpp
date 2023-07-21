@@ -18,12 +18,14 @@
 #include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NODE_ID = 143;
 } // namespace
 RefPtr<MockPipelineBase> MockPipelineBase::pipeline_;
+uint64_t UITaskScheduler::frameId_ = 0;
 
 void MockPipelineBase::SetUp()
 {
@@ -255,6 +257,8 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
 
+void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange) {}
+
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -311,8 +315,6 @@ SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
 {
     return {};
 }
-
-void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback) {}
 
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {

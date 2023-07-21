@@ -321,6 +321,67 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     return jsonNode->ToString();
 }
 
+void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
+{
+    auto frameNode = Inspector::GetFrameNodeByKey(key);
+    CHECK_NULL_VOID(frameNode);
+    rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
+    rectangle.localOffset = frameNode->GetGeometryNode()->GetFrameOffset();
+    rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    rectangle.screenRect = pipeline->GetCurrentWindowRect();
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    Matrix4 defMatrix4 = Matrix4::CreateIdentity();
+    Matrix4 matrix4 = renderContext->GetTransformMatrixValue(defMatrix4);
+    rectangle.matrix4 = matrix4;
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    const double halfDimension = 50.0;
+    auto center = renderContext->GetTransformCenter().value_or(DimensionOffset(
+        Dimension(halfDimension, DimensionUnit::PERCENT), Dimension(halfDimension, DimensionUnit::PERCENT)));
+    double centerX = 0.0;
+    double centerY = 0.0;
+    if (center.GetX().Unit() == DimensionUnit::PERCENT || center.GetY().Unit() == DimensionUnit::PERCENT) {
+        if (rect.IsValid()) {
+            centerX = Dimension(center.GetX().ConvertToPxWithSize(rect.Width()), DimensionUnit::PX).ConvertToVp();
+            centerY = Dimension(center.GetY().ConvertToPxWithSize(rect.Height()), DimensionUnit::PX).ConvertToVp();
+        }
+    } else {
+        centerX = center.GetX().ConvertToVp();
+        centerY = center.GetY().ConvertToVp();
+    }
+    VectorF defScale = VectorF(1.0, 1.0);
+    VectorF scale = renderContext->GetTransformScaleValue(defScale);
+    rectangle.scale.x = scale.x;
+    rectangle.scale.y = scale.y;
+    rectangle.scale.z = 1.0;
+    rectangle.scale.centerX = centerX;
+    rectangle.scale.centerY = centerY;
+    Vector5F defRotate = Vector5F(0.0, 0.0, 0.0, 0.0, 0.0);
+    Vector5F rotate = renderContext->GetTransformRotateValue(defRotate);
+    rectangle.rotate.x = rotate.x;
+    rectangle.rotate.y = rotate.y;
+    rectangle.rotate.z = rotate.z;
+    rectangle.rotate.angle = rotate.w;
+    rectangle.rotate.centerX = centerX;
+    rectangle.rotate.centerY = centerY;
+    TranslateOptions defTranslate = TranslateOptions(0.0, 0.0, 0.0);
+    TranslateOptions translate = renderContext->GetTransformTranslateValue(defTranslate);
+    if ((translate.x.Unit() == DimensionUnit::PERCENT) && rect.IsValid()) {
+        rectangle.translate.x =
+            Dimension(translate.x.ConvertToPxWithSize(rect.Width()), DimensionUnit::PX).ConvertToVp();
+    } else {
+        rectangle.translate.x = translate.x.ConvertToVp();
+    }
+    if ((translate.y.Unit() == DimensionUnit::PERCENT) && rect.IsValid()) {
+        rectangle.translate.y =
+            Dimension(translate.y.ConvertToPxWithSize(rect.Height()), DimensionUnit::PX).ConvertToVp();
+    } else {
+        rectangle.translate.y = translate.y.ConvertToVp();
+    }
+    rectangle.translate.z = translate.z.ConvertToVp();
+}
 std::string Inspector::GetInspector(bool isLayoutInspector)
 {
     LOGI("GetInspector start");

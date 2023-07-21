@@ -427,7 +427,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest003, TestSize.Level1)
      */
     auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(customNode, nullptr);
-    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         customNode, customNode->GetGeometryNode(), customNode->GetLayoutProperty());
     ASSERT_NE(childLayoutWrapper, nullptr);
     /**
@@ -442,7 +442,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest003, TestSize.Level1)
     propsCustom.buttons = btnItems;
     auto dialogWithCustom = DialogView::CreateDialogNode(propsCustom, customNode);
     ASSERT_NE(dialogWithCustom, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
     layoutWrapper->AppendChild(childLayoutWrapper);
     DialogLayoutAlgorithm dialogLayoutAlgorithm;
@@ -456,7 +456,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest003, TestSize.Level1)
     propsCustom.content = "";
     dialogWithCustom = DialogView::CreateDialogNode(propsCustom, customNode);
     ASSERT_NE(dialogWithCustom, nullptr);
-    auto layoutWrapper2 = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper2 = AceType::MakeRefPtr<LayoutWrapperNode>(
         dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
     ASSERT_NE(layoutWrapper2, nullptr);
     layoutWrapper2->AppendChild(childLayoutWrapper);
@@ -485,16 +485,16 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest004, TestSize.Level1)
         ASSERT_NE(dialog, nullptr);
         auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
         ASSERT_NE(contentNode, nullptr);
-        auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
             contentNode, contentNode->GetGeometryNode(), contentNode->GetLayoutProperty());
         for (auto& node : contentNode->GetChildren()) {
             auto frameNode = AceType::DynamicCast<FrameNode>(node);
-            auto grandsonLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+            auto grandsonLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
                 frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
             childLayoutWrapper->AppendChild(grandsonLayoutWrapper);
         }
 
-        auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
             dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
         layoutWrapper->AppendChild(childLayoutWrapper);
         /**

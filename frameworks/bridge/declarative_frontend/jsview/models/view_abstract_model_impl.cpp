@@ -35,6 +35,7 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/gestures/long_press_gesture.h"
+#include "core/image/image_source_info.h"
 
 // avoid windows build error about macro defined in winuser.h
 #ifdef GetMessage
@@ -278,7 +279,7 @@ void ViewAbstractModelImpl::SetBackgroundColor(const Color& color)
     }
 }
 
-void ViewAbstractModelImpl::SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant)
+void ViewAbstractModelImpl::SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant)
 {
     auto decoration = GetBackDecoration();
     auto image = decoration->GetImage();
@@ -287,9 +288,9 @@ void ViewAbstractModelImpl::SetBackgroundImage(const std::string& src, RefPtr<Th
     }
 
     if (themeConstant) {
-        image->SetSrc(src, themeConstant);
+        image->SetSrc(src.GetSrc(), themeConstant);
     } else {
-        image->SetParsedSrc(src);
+        image->SetParsedSrc(src.GetSrc());
     }
 
     decoration->SetImage(image);
@@ -670,7 +671,7 @@ void ViewAbstractModelImpl::SetTranslate(const Dimension& x, const Dimension& y,
     transform->Translate(x, y, z, option);
 }
 
-void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle)
+void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle, float perspective)
 {
     RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
@@ -1434,6 +1435,8 @@ RefPtr<SelectTheme> GetSelectTheme()
     CHECK_NULL_RETURN(context, nullptr);
     return context->GetTheme<SelectTheme>();
 }
+
+void ViewAbstractModelImpl::BindBackground(std::function<void()>&& buildFunc, const Alignment& align) {}
 
 GestureEventFunc CreateMenuEventWithParams(
     const WeakPtr<OHOS::Ace::MenuComponent>& weak, std::vector<NG::OptionParam>&& params)

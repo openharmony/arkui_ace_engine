@@ -19,11 +19,13 @@ ohos_unittest("navigation_test_ng") {
 
   sources = [
     # custom
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
 
     # inner
     "$ace_root/frameworks/base/geometry/dimension.cpp",
@@ -31,7 +33,6 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/base/geometry/matrix3.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
-    "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
@@ -49,6 +50,8 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
@@ -86,6 +89,10 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/toggle_button_accessibility_property.cpp",
@@ -143,10 +150,12 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
     "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_subwindow_manager.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
@@ -170,6 +179,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # self
@@ -187,6 +197,8 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/tool_bar_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/tool_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_model_ng.cpp",

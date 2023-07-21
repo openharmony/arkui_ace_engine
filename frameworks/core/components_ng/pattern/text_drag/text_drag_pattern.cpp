@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -46,17 +47,53 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
         dragContext->UpdateForegroundColorStrategy(hostContext->GetForegroundColorStrategy().value());
     }
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
-    auto data = CalculateTextDragData(hostPattern, dragContext);
+    auto data = CalculateTextDragData(hostPattern, dragNode);
     dragPattern->Initialize(hostPattern->GetDragParagraph(), data);
+    dragPattern->SetLastLineHeight(data.lineHeight_);
 
     CalcSize size(NG::CalcLength(dragPattern->GetFrameWidth()), NG::CalcLength(dragPattern->GetFrameHeight()));
     dragNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(size);
     return dragNode;
 }
 
-TextDragData TextDragPattern::CalculateTextDragData(
-    RefPtr<TextDragBase>& hostPattern, RefPtr<RenderContext>& dragContext)
+RefPtr<FrameNode> TextDragPattern::CreateDragNode(
+    const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren)
 {
+    auto hostPattern = hostNode->GetPattern<TextDragBase>();
+    auto dragNode = TextDragPattern::CreateDragNode(hostNode);
+    auto dragPattern = dragNode->GetPattern<TextDragPattern>();
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    auto placeHolderIndex = textPattern->GetPlaceHolderIndex();
+    auto rectsForPlaceholders = textPattern->GetRectsForPlaceholders();
+
+    size_t index = 0;
+    std::vector<Rect> realRectsForPlaceholders;
+    std::list<RefPtr<FrameNode>> realImageChildren;
+    auto boxes = hostPattern->GetTextBoxes();
+    for (const auto& child : imageChildren) {
+        auto imageIndex = placeHolderIndex[index];
+        auto rect = rectsForPlaceholders.at(imageIndex);
+
+        for (const auto& box : boxes) {
+            if (NearEqual<float>(box.rect_.GetLeft(), rect.Left()) &&
+                NearEqual<float>(box.rect_.GetRight(), rect.Right()) &&
+                NearEqual<float>(box.rect_.GetTop(), rect.Top()) &&
+                NearEqual<float>(box.rect_.GetBottom(), rect.Bottom())) {
+                realImageChildren.emplace_back(child);
+                realRectsForPlaceholders.emplace_back(rect);
+            }
+        }
+        ++index;
+    }
+    dragPattern->SetLastLineHeight(boxes.back().rect_.GetHeight());
+    dragPattern->InitSpanImageLayout(realImageChildren, realRectsForPlaceholders);
+    return dragNode;
+}
+
+TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPattern, RefPtr<FrameNode>& dragNode)
+{
+    auto dragContext = dragNode->GetRenderContext();
+    auto dragPattern = dragNode->GetPattern<TextDragPattern>();
     float textStartX = hostPattern->GetTextRect().GetX();
     float textStartY =
         hostPattern->IsTextArea() ? hostPattern->GetTextRect().GetY() : hostPattern->GetTextContentRect().GetY();
@@ -101,9 +138,13 @@ TextDragData TextDragPattern::CalculateTextDragData(
             width += delta;
             globalX -= delta / 2; // 2 : half
         }
+        dragPattern->SetContentOffset(OffsetF(boxes.front().rect_.GetLeft() - TEXT_DRAG_OFFSET.ConvertToPx(),
+            boxes.front().rect_.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
     } else {
         globalX = contentRect.Left() + hostGlobalOffset.GetX() - TEXT_DRAG_OFFSET.ConvertToPx();
         width = contentRect.Width();
+        dragPattern->SetContentOffset(
+            OffsetF(0 - TEXT_DRAG_OFFSET.ConvertToPx(), boxes.front().rect_.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
     }
     dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalX), Dimension(globalY)));
     RectF dragTextRect(
@@ -137,8 +178,8 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
         path->LineTo(textEnd, startY);
         path->LineTo(textEnd, endY);
         path->LineTo(endX, endY);
-        path->LineTo(endX, endY + lineHeight);
-        path->LineTo(textStart, endY + lineHeight);
+        path->LineTo(endX, endY + lastLineHeight_);
+        path->LineTo(textStart, endY + lastLineHeight_);
         path->LineTo(textStart, startY + lineHeight);
         path->LineTo(startX, startY + lineHeight);
         path->LineTo(startX, startY);

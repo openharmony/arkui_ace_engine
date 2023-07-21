@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 
 #include <climits>
@@ -75,6 +74,7 @@ constexpr Dimension DIALOG_BUTTON_TEXT_SIZE = 16.0_fp;
 constexpr Color DEFAULT_BUTTON_COLOR = Color(0xff007dff);
 const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
 constexpr int32_t TWO_BUTTON_MODE = 2;
+constexpr int32_t START_CHILD_INDEX = 0;
 constexpr char DIALOG_BUTTONS_CONTAINER_ID[] = "__container__";
 constexpr char DIALOG_DIVIDER_ID[] = "Dialog_Divider";
 constexpr char DIALOG_BUTTON0_ID[] = "Button0";
@@ -124,7 +124,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         // close dialog if clicked outside content rect
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
-            PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
+                PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
             PopDialog(-1);
         }
     }
@@ -541,6 +541,9 @@ void DialogPattern::AddButtonAndDivider(
         if (buttons.size() == TWO_BUTTON_MODE) {
             auto buttonNode = CreateButton(buttons[i], i, false, true);
             CHECK_NULL_VOID(buttonNode);
+            auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
+            CHECK_NULL_VOID(buttonPattern);
+            buttonPattern->SetSkipColorConfigurationUpdate();
             buttonNode->MountToParent(container);
             buttonNode->MarkModifyDone();
             container->AddChild(buttonNode);
@@ -551,6 +554,9 @@ void DialogPattern::AddButtonAndDivider(
         } else {
             auto buttonNode = CreateButton(buttons[i], i);
             CHECK_NULL_VOID(buttonNode);
+            auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
+            CHECK_NULL_VOID(buttonPattern);
+            buttonPattern->SetSkipColorConfigurationUpdate();
             buttonNode->MountToParent(container);
             buttonNode->MarkModifyDone();
         }
@@ -616,7 +622,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     if (item.action) {
         hub->AddClickEvent(item.action);
     }
-    
+
     // close dialog when clicked
     BindCloseCallBack(hub, SHEET_INFO_IDX);
     itemRow->MountToParent(itemNode);
@@ -655,7 +661,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoIcon(const std::string& icon)
     };
     auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     iconProps->UpdateMargin(margin);
-    LOGD("item icon src = %s", item.icon.c_str());
+    LOGD("item icon src = %s", icon.c_str());
     auto imageSrc = ImageSourceInfo(icon);
     iconProps->UpdateImageSourceInfo(imageSrc);
     iconProps->UpdateUserDefinedIdealSize(CalcSize(SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE));
@@ -753,4 +759,22 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     }
 }
 
+void DialogPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
+    CHECK_NULL_VOID(col);
+    auto colContext = col->GetContext();
+    CHECK_NULL_VOID(colContext);
+    auto colRenderContext = col->GetRenderContext();
+    CHECK_NULL_VOID(colRenderContext);
+    colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    OnModifyDone();
+    host->MarkDirtyNode();
+}
 } // namespace OHOS::Ace::NG

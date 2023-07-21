@@ -18,6 +18,8 @@
 #include "render_service_client/core/ui/rs_node.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/components/box/render_box.h"

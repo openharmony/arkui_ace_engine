@@ -96,6 +96,11 @@ public:
         richEditorController_ = controller;
     }
 
+    long long GetTimestamp() const
+    {
+        return timestamp_;
+    }
+
     void OnVisibleChange(bool isVisible) override;
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
@@ -105,8 +110,8 @@ public:
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     int32_t GetInstanceId() const;
     void InsertValue(const std::string& insertValue);
-    void CreateTextSpanNode(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue,
-        RichEditorAbstractSpanResult& retInfo);
+    void CreateTextSpanNode(
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
     void DeleteBackward(int32_t length);
     void DeleteForward(int32_t length);
     void SetInputMethodStatus(bool keyboardShown);
@@ -132,8 +137,18 @@ public:
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options);
     int32_t AddTextSpan(const TextSpanOptions& options);
-    RichEditorSelection GetSpansInfo(int32_t start, int32_t end);
+    RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
+    std::u16string GetLeftTextOfCursor(int32_t number);
+    std::u16string GetRightTextOfCursor(int32_t number);
+    int32_t GetTextIndexAtCursor();
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
+    void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
+    void OnAreaChangedInner() override;
+    void CreateHandles() override;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::function<void(Offset)> GetThumbnailCallback() override;
+#endif
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -154,6 +169,23 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void InitDragDropEvent();
+    void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
+    NG::DragDropInfo OnDragStart(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void OnDragEnd();
+    void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
+
+    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(RefPtr<SpanNode> node);
@@ -177,8 +209,8 @@ private:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
-    void AfterIMEInsertValue(
-        const RefPtr<SpanNode>& spanNode, int32_t moveLength, RichEditorAbstractSpanResult& retInfo);
+    void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength);
+    void InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -198,6 +230,8 @@ private:
     bool isRichEditorInit_ = false;
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
+    long long timestamp_ = 0;
+    OffsetF parentGlobalOffset_;
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;
@@ -205,6 +239,9 @@ private:
     RefPtr<RichEditorContentModifier> richEditorContentModifier_;
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::list<ResultObject> dragResultObjects_;
+#endif // ENABLE_DRAG_FRAMEWORK
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

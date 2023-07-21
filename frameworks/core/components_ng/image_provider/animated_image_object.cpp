@@ -14,7 +14,11 @@
  */
 #include "core/components_ng/image_provider/animated_image_object.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
 
@@ -22,7 +26,11 @@ namespace OHOS::Ace::NG {
 void AnimatedImageObject::MakeCanvasImage(
     const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool /*forceResize*/, bool /*syncLoad*/)
 {
+#ifndef USE_ROSEN_DRAWING
     auto image = AnimatedImage::Create(DynamicCast<SkiaImageData>(data_), resizeTarget, src_.GetSrc());
+#else
+    auto image = AnimatedImage::Create(DynamicCast<DrawingImageData>(data_), resizeTarget, src_.GetSrc());
+#endif
     CHECK_NULL_VOID(ctx);
     if (!image) {
         ctx->FailCallback("failed to create animated image");

@@ -26,15 +26,15 @@
 #include "frameworks/core/common/frontend.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
-#include "core/common/form_manager.h"
-#include "core/components/form/resource/form_utils.h"
-
 #include "form_callback_client.h"
 #include "form_host_client.h"
-#include "form_js_info.h"
 #include "form_info.h"
+#include "form_js_info.h"
 #include "form_mgr.h"
 #include "pointer_event.h"
+
+#include "core/common/form_manager.h"
+#include "core/components/form/resource/form_utils.h"
 #endif
 
 namespace OHOS::Ace {
@@ -52,14 +52,10 @@ constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 
 bool GetFormInfo(
-    std::string& bundleName,
-    std::string& moduleName,
-    const std::string& cardName,
-    OHOS::AppExecFwk::FormInfo& formInfo)
+    std::string& bundleName, std::string& moduleName, const std::string& cardName, OHOS::AppExecFwk::FormInfo& formInfo)
 {
     std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
-    auto result = OHOS::AppExecFwk::FormMgr::GetInstance()
-        .GetFormsInfoByModule(bundleName, moduleName, formInfos);
+    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFormsInfoByModule(bundleName, moduleName, formInfos);
     if (result != 0) {
         LOGW("Query FormInfo failed.");
         return false;
@@ -147,8 +143,8 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_MODULE_NAME_KEY, info.moduleName);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_NAME_KEY, info.cardName);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TEMPORARY_KEY, info.temporary);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::ACQUIRE_TYPE,
-        OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
+    wantCache_.SetParam(
+        OHOS::AppExecFwk::Constants::ACQUIRE_TYPE, OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, info.width.Value());
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
@@ -194,6 +190,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     LOGI("Add form success isDynamic: %{public}d", isDynamic_);
     if (formCallbackClient_ == nullptr) {
         formCallbackClient_ = std::make_shared<FormCallbackClient>();
+        formCallbackClient_->SetInstanceId(Container::CurrentId());
     }
     formCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
     clientInstance->AddForm(formCallbackClient_, formJsInfo);
@@ -220,8 +217,8 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
     const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want)
 {
-    LOGI("Form OnSurfaceCreate formId: %{public}s, isDynamic: %{public}d",
-        std::to_string(formInfo.formId).c_str(), formInfo.isDynamic);
+    LOGI("Form OnSurfaceCreate formId: %{public}s, isDynamic: %{public}d", std::to_string(formInfo.formId).c_str(),
+        formInfo.isDynamic);
     if (!rsSurfaceNode) {
         LOGE("Form OnSurfaceCreate rsSurfaceNode is null");
         return;
@@ -232,7 +229,7 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         return;
     }
 
-    onFormSurfaceNodeCallback_(rsSurfaceNode);
+    onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic);
     if (!formRendererDispatcher_) {
         sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
@@ -399,6 +396,15 @@ void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallba
     onFormSurfaceChangeCallback_ = std::move(callback);
 }
 
+void FormManagerDelegate::AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        LOGE("callback is null or has released");
+        return;
+    }
+    onFormLinkInfoUpdateCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
 {
     if (!callback || state_ == State::RELEASED) {
@@ -434,7 +440,7 @@ void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback)
     snapshotCallback_ = std::move(callback);
 }
 
-bool FormManagerDelegate::ParseAction(const std::string &action, const std::string& type, AAFwk::Want &want)
+bool FormManagerDelegate::ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     auto bundleName = eventAction->GetValue("bundleName");
@@ -509,12 +515,11 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
 
-    auto&& onErrorEventHandler =
-        [weak = WeakClaim(this)](const std::string& code, const std::string& msg) {
-            auto formManagerDelegate = weak.Upgrade();
-            CHECK_NULL_VOID(formManagerDelegate);
-            formManagerDelegate->OnFormError(code, msg);
-        };
+    auto&& onErrorEventHandler = [weak = WeakClaim(this)](const std::string& code, const std::string& msg) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnFormError(code, msg);
+    };
     renderDelegate_->SetErrorEventHandler(std::move(onErrorEventHandler));
 
     auto&& onSurfaceChangeHandler = [weak = WeakClaim(this)](float width, float height) {
@@ -523,6 +528,13 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnFormSurfaceChange(width, height);
     };
     renderDelegate_->SetSurfaceChangeEventHandler(std::move(onSurfaceChangeHandler));
+
+    auto&& onFormLinkInfoUpdateHandler = [weak = WeakClaim(this)](const std::vector<std::string>& formLinkInfos) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnFormLinkInfoUpdate(formLinkInfos);
+    };
+    renderDelegate_->SetFormLinkInfoUpdateHandler(std::move(onFormLinkInfoUpdateHandler));
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -554,8 +566,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
             auto context = context_.Upgrade();
             CHECK_NULL_VOID(context);
             auto instantId = context->GetInstanceId();
-            formUtils_->RouterEvent(
-                runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+            formUtils_->RouterEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
         }
         return;
     } else if (type == "call") {
@@ -567,9 +578,8 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
             auto context = context_.Upgrade();
             CHECK_NULL_VOID(context);
             auto instantId = context->GetInstanceId();
-            formUtils_->BackgroundEvent(
-                runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
-            }
+            formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+        }
         return;
     }
 
@@ -585,8 +595,8 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     }
 
     // requestForm request to fms
-    int resultCode = AppExecFwk::FormMgr::GetInstance().MessageEvent(runningCardId_, want,
-        AppExecFwk::FormHostClient::GetInstance());
+    int resultCode = AppExecFwk::FormMgr::GetInstance().MessageEvent(
+        runningCardId_, want, AppExecFwk::FormHostClient::GetInstance());
     if (resultCode != ERR_OK) {
         LOGE("failed to notify the form service, error code is %{public}d.", resultCode);
     }
@@ -597,14 +607,13 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     paramStream << "type" << FORM_MANAGER_PARAM_EQUALS << type << FORM_MANAGER_PARAM_AND
                 << "action" << FORM_MANAGER_PARAM_EQUALS << action;
     std::string param = paramStream.str();
-    LOGI("send method:%{private}s, type:%{public}s params:%{private}s",
-        actionMethod.c_str(), type.c_str(), param.c_str());
+    LOGI("send method:%{private}s, type:%{public}s params:%{private}s", actionMethod.c_str(), type.c_str(),
+        param.c_str());
     CallResRegisterMethod(actionMethod, param, nullptr);
 #endif
 }
 
-void FormManagerDelegate::DispatchPointerEvent(
-    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (!isDynamic_ || formRendererDispatcher_ == nullptr) {
         LOGI("Is not dynamic or dispatchPointerEvent is null");
@@ -640,12 +649,19 @@ void FormManagerDelegate::OnFormSurfaceChange(float width, float height)
     }
 }
 
+void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos)
+{
+    if (onFormLinkInfoUpdateCallback_) {
+        onFormLinkInfoUpdateCallback_(formLinkInfos);
+    }
+}
+
 void FormManagerDelegate::OnFormAcquired(const std::string& param)
 {
     auto result = ParseMapFromString(param);
     if (onFormAcquiredCallbackForJava_) {
-        onFormAcquiredCallbackForJava_(StringUtils::StringToLongInt(result["formId"]), result["codePath"],
-            result["moduleName"], result["data"]);
+        onFormAcquiredCallbackForJava_(
+            StringUtils::StringToLongInt(result["formId"]), result["codePath"], result["moduleName"], result["data"]);
     }
 }
 
@@ -706,10 +722,10 @@ void FormManagerDelegate::HandleSnapshotCallback()
 void FormManagerDelegate::ReAddForm()
 {
     LOGI("ReAddForm.");
-    formRendererDispatcher_ = nullptr;  // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
+    formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
-    auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(
-        formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
+    auto ret =
+        OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
         LOGE("Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
@@ -728,8 +744,8 @@ void FormManagerDelegate::ResetForm()
 
 void FormManagerDelegate::ReleaseForm()
 {
-    LOGI("FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s",
-        runningCardId_, runningCompId_.c_str());
+    LOGI("FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s", runningCardId_,
+        runningCompId_.c_str());
     if (runningCardId_ <= 0) {
         return;
     }
@@ -742,7 +758,7 @@ void FormManagerDelegate::ReleaseForm()
     clientInstance->RemoveForm(formCallbackClient_, runningCardId_);
 }
 
-void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJsInfo)
+void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo)
 {
     if (formJsInfo.formId != runningCardId_) {
         LOGI("form update, but card is not current card");
@@ -767,8 +783,8 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
             uiSyntax = OHOS::Ace::FrontendType::ETS_CARD;
         }
         formJsInfo_ = formJsInfo;
-        onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath, formJsInfo.formName,
-            formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo, type, uiSyntax);
+        onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath, formJsInfo.formName, formJsInfo.formData,
+            formJsInfo.imageDataMap, formJsInfo, type, uiSyntax);
     } else {
         if (formJsInfo.formData.empty()) {
             LOGE("update form data success, but data is empty!!!");
@@ -785,8 +801,8 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
 
 void FormManagerDelegate::ReleaseRenderer()
 {
-    LOGI("FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s",
-        runningCardId_, runningCompId_.c_str());
+    LOGI("FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s", runningCardId_,
+        runningCompId_.c_str());
     if (runningCardId_ <= 0) {
         return;
     }

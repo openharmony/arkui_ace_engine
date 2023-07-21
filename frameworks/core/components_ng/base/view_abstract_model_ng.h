@@ -37,6 +37,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -108,7 +109,7 @@ public:
         ViewAbstract::SetBackgroundColor(color);
     }
 
-    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override
+    void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override
     {
         ViewAbstract::SetBackgroundImage(src);
     }
@@ -409,9 +410,9 @@ public:
         ViewAbstract::SetTranslate(TranslateOptions(x, y, z));
     }
 
-    void SetRotate(float x, float y, float z, float angle) override
+    void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override
     {
-        ViewAbstract::SetRotate(NG::Vector4F(x, y, z, angle));
+        ViewAbstract::SetRotate(NG::Vector5F(x, y, z, angle, perspective));
     }
 
     void SetTransformMatrix(const std::vector<float>& matrix) override
@@ -453,8 +454,9 @@ public:
                 };
                 overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
                 CHECK_NULL_VOID(overlayNode);
-                frameNode->AddChild(overlayNode);
-                frameNode->SetOverlayNode(AceType::WeakClaim(AceType::RawPtr(overlayNode)));
+                frameNode->SetOverlayNode(overlayNode);
+                overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+                overlayNode->SetActive(true);
             } else {
                 overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
@@ -861,6 +863,8 @@ public:
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
+
+    void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;

@@ -38,6 +38,7 @@ static constexpr size_t ARGC_WITH_MODE = 2;
 static constexpr size_t ARGC_WITH_MODE_AND_CALLBACK = 3;
 static constexpr uint32_t STANDARD = 0;
 static constexpr uint32_t SINGLE = 1;
+static constexpr uint32_t INVALID = 2;
 
 static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
 {
@@ -141,7 +142,7 @@ static void CommonRouterProcess(napi_env env, napi_callback_info info, const Rou
         LOGW("The parameter type is incorrect.");
     }
 
-    uint32_t mode = STANDARD;
+    uint32_t mode = INVALID;
     napi_typeof(env, argv[1], &valueType);
     if (argc == ARGC_WITH_MODE && valueType == napi_number) {
         LOGI("router mode with single");
@@ -159,7 +160,11 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
             LOGE("can not get delegate.");
             return;
         }
-        delegate->PushWithMode(uri, params, mode);
+        if (mode == INVALID) {
+            delegate->Push(uri, params);
+        } else {
+            delegate->PushWithMode(uri, params, mode);
+        }
     };
     CommonRouterProcess(env, info, callback);
     return nullptr;
@@ -174,7 +179,11 @@ static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
             LOGE("can not get delegate.");
             return;
         }
-        delegate->ReplaceWithMode(uri, params, mode);
+        if (mode == INVALID) {
+            delegate->Replace(uri, params);
+        } else {
+            delegate->ReplaceWithMode(uri, params, mode);
+        }
     };
     CommonRouterProcess(env, info, callback);
     return nullptr;
@@ -291,12 +300,6 @@ static napi_value CommonRouterWithCallbackProcess(
     } else if (argc > ARGC_WITH_MODE_AND_CALLBACK) {
         LOGW("params number err");
         NapiThrow(env, "The largest number of parameters is 3.", Framework::ERROR_CODE_PARAM_INVALID);
-        return result;
-    }
-
-    auto delegate = EngineHelper::GetCurrentDelegate();
-    if (!delegate) {
-        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return result;
     }
 

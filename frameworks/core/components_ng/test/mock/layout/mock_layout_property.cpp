@@ -62,7 +62,7 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return nullptr;
 }
 
-LayoutConstraintF CreateChildConstraint()
+LayoutConstraintF LayoutProperty::CreateChildConstraint() const
 {
     return {};
 }
@@ -161,4 +161,24 @@ void LayoutProperty::SetOverlayOffset(
 {}
 
 void LayoutProperty::GetOverlayOffset(Dimension& overlayOffsetX, Dimension& overlayOffsetY) {}
+
+void LayoutProperty::UpdateAllGeometryTransition(const RefPtr<UINode>& parent) {}
+
+bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
+{
+    return false;
+}
+void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host) {}
+
+void LayoutProperty::UpdateContentConstraint() {}
+
+MarginPropertyF LayoutProperty::CreateMargin()
+{
+    return MarginPropertyF();
+}
+
+PaddingPropertyF LayoutProperty::CreatePaddingAndBorder()
+{
+    return PaddingPropertyF();
+}
 } // namespace OHOS::Ace::NG

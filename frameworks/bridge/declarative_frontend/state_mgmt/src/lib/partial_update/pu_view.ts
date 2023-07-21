@@ -62,6 +62,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // inActive means updates are delayed
   private isActive_ : boolean = true;
 
+  // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
+  private isDeleting_: boolean = false;
+
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
 
@@ -88,6 +91,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected localStoragebackStore_: LocalStorage = undefined;
 
   protected get localStorage_() {
+    if (!this.localStoragebackStore_ && this.parent_) {
+      stateMgmtConsole.debug(`${this.constructor.name} get localStorage_ : Using LocalStorage instance of the parent View.`);
+      this.localStoragebackStore_ = this.parent_.localStorage_;
+    }
+
     if (!this.localStoragebackStore_) {
       stateMgmtConsole.info(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
       this.localStoragebackStore_ = new LocalStorage({ /* empty */ });
@@ -133,9 +141,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.localStoragebackStore_ = undefined;
     if (parent) {
       // this View is not a top-level View
-      stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
       this.setCardId(parent.getCardId());
-      this.localStorage_ = parent.localStorage_;
+      // Call below will set this.parent_ to parent as well
       parent.addChild(this);
     } else if (localStorage) {
       this.localStorage_ = localStorage;
@@ -172,6 +179,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
       removedElmtIds.push(key);
     });
     this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
+    if (this.hasRecycleManager()) {
+      this.getRecycleManager().purgeAllCachedRecycleNode();
+    }
 
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
@@ -180,6 +190,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if (this.parent_) {
       this.parent_.removeChild(this);
     }
+    this.localStoragebackStore_ = undefined;
+    this.isDeleting_ = true;
   }
 
   
@@ -195,13 +207,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
     this.isActive_ = active;
     if (this.isActive_) {
-      this.onActive()
+      this.onActiveInternal()
     } else {
-      this.onInactive();
+      this.onInactiveInternal();
     }
   }
 
-  private onActive(): void {   
+  private onActiveInternal(): void {
     if (!this.isActive_) {
       return;
     }
@@ -217,7 +229,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
 
-  private onInactive(): void {
+  private onInactiveInternal(): void {
     if (this.isActive_) {
       return;
     }
@@ -650,7 +662,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // add current JS object to it's parent recycle manager
   public recycleSelf(name: string): void {
-    if (this.parent_) {
+    if (this.parent_ && !this.parent_.isDeleting_) {
       this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
     } else {
       this.resetRecycleCustomNode();

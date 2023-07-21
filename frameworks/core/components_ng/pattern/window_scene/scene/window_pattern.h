@@ -37,6 +37,8 @@ public:
     void DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DisPatchFocusActiveEvent(bool isFocusActive);
     void TransferFocusWindowId(uint32_t focusWindowId);
+    void TransferFocusState(bool focusState);
+
 protected:
     void OnAttachToFrameNode() override;
 
@@ -67,7 +69,6 @@ private:
     bool CreatePersistentNode();
 
     void BufferAvailableCallback();
-    void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);

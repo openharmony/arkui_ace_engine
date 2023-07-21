@@ -28,8 +28,6 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 
 void ListPattern::OnModifyDone() {}
 
-void ListPattern::OnAttachToFrameNode() {}
-
 bool ListPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
 {
@@ -49,6 +47,11 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
 }
 
 void ListPattern::OnScrollEndCallback() {}
+
+bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    return false;
+}
 
 bool ListPattern::IsAtBottom() const
 {
@@ -88,11 +91,18 @@ bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
     return false;
 }
 
-void ListPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
-
 void ListPattern::FireOnScrollStart() {}
 
 void ListPattern::OnAnimateStop() {}
 
 void ListPattern::ScrollTo(float position) {}
+
+void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
+
+void ListPattern::ClearMultiSelect() {};
+
+bool ListPattern::IsItemSelected(const MouseInfo& info)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

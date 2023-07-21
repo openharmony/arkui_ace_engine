@@ -57,6 +57,7 @@ public:
     void SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetJsEnabled(bool isJsEnabled) override;
     void SetFileAccessEnabled(bool isFileAccessEnabled) override;
     void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled) override;
@@ -79,6 +80,7 @@ public:
     void SetScaleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetPermissionRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetBackgroundColor(Color backgroundColor) override;
     void InitialScale(float scale) override;
     void SetSearchResultReceiveEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
@@ -137,6 +139,7 @@ public:
     void NotifyPopupWindowResult(int32_t webId, bool result) override;
     void SetAudioResumeInterval(int32_t resumeInterval) override;
     void SetAudioExclusive(bool audioExclusive) override;
+    void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

@@ -49,6 +49,7 @@
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -636,13 +637,9 @@ void UIContentImpl::CommonInitializeForm(
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
-                [context = context_] {
-                    auto sharedContext = context.lock();
-                    CHECK_NULL_VOID_NOLOG(sharedContext);
-                    auto abilityContext =
-                        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                    CHECK_NULL_VOID_NOLOG(abilityContext);
-                    abilityContext->CloseAbility();
+                [window = window_] {
+                    CHECK_NULL_VOID_NOLOG(window);
+                    window->PerformBack();
                 },
                 [context = context_](const std::string& address) {
                     auto sharedContext = context.lock();
@@ -883,6 +880,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         LOGI("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+        if (abilityContext) {
+            int32_t missionId = -1;
+            abilityContext->GetMissionId(missionId);
+            AceApplicationInfo::GetInstance().SetMissionId(missionId);
+        }
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
@@ -937,7 +940,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     // Initialize performance check parameters
-    SystemProperties::InitPerformanceParameters();
+    AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
     SystemProperties::SetColorMode(ColorMode::LIGHT);
 
@@ -1096,13 +1099,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
-                [context = context_] {
-                    auto sharedContext = context.lock();
-                    CHECK_NULL_VOID_NOLOG(sharedContext);
-                    auto abilityContext =
-                        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                    CHECK_NULL_VOID_NOLOG(abilityContext);
-                    abilityContext->CloseAbility();
+                [window = window_] {
+                    CHECK_NULL_VOID_NOLOG(window);
+                    window->PerformBack();
                 },
                 [context = context_](const std::string& address) {
                     auto sharedContext = context.lock();
@@ -1289,8 +1288,10 @@ void UIContentImpl::ReloadForm(const std::string& url)
     startUrl_ = url;
     LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
+    container->ReloadForm();
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
 }
@@ -1390,8 +1391,9 @@ bool UIContentImpl::ProcessBackPressed()
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     LOGD("UIContentImpl::ProcessPointerEvent begin");
-    auto container = AceEngine::Get().GetContainer(instanceId_);
+    auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
     CHECK_NULL_RETURN(container, false);
+    container->SetCurPointerEvent(pointerEvent);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     LOGD("UIContentImpl::ProcessPointerEvent end");
@@ -1662,6 +1664,16 @@ void UIContentImpl::SetActionEventHandler(std::function<void(const std::string& 
     pipelineContext->SetActionEventHandler(std::move(actionCallback));
 }
 
+void UIContentImpl::SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFormLinkInfoUpdateHandler(std::move(callback));
+}
+
 void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback)
 {
     CHECK_NULL_VOID(errorCallback);
@@ -1753,7 +1765,7 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, isFocusActive]() {
-            auto pipelineContext =  AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetIsFocusActive(isFocusActive);
         },
@@ -1769,7 +1781,7 @@ void UIContentImpl::SetFocusWindowId(uint32_t focusWindowId)
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, focusWindowId]() {
-            auto pipelineContext =  AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetFocusWindowId(focusWindowId);
         },

@@ -18,9 +18,11 @@
 #include <unordered_map>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
@@ -52,33 +54,43 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             transitionType, [weak = WeakPtr<FrameNode>(page), transitionType, instanceId = Container::CurrentId()]() {
                 ContainerScope scope(instanceId);
                 LOGI("pageTransition exit finish");
-                auto page = weak.Upgrade();
-                CHECK_NULL_VOID(page);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
-                auto pageFocusHub = page->GetFocusHub();
-                CHECK_NULL_VOID(pageFocusHub);
-                pageFocusHub->SetParentFocusable(false);
-                pageFocusHub->LostFocus();
-                if (transitionType == PageTransitionType::EXIT_POP && page->GetParent()) {
-                    auto stageNode = page->GetParent();
-                    stageNode->RemoveChild(page);
-                    stageNode->RebuildRenderContextTree();
-                    context->RequestFrame();
-                    return;
-                }
-                page->GetEventHub<EventHub>()->SetEnabled(true);
-                auto pattern = page->GetPattern<PagePattern>();
-                CHECK_NULL_VOID(pattern);
-                pattern->SetPageInTransition(false);
-                pattern->ProcessHideState();
-                context->MarkNeedFlushMouseEvent();
+                auto taskExecutor = context->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [weak, weakContext = WeakPtr<PipelineContext>(context), transitionType]() {
+                        auto page = weak.Upgrade();
+                        CHECK_NULL_VOID(page);
+                        auto context = weakContext.Upgrade();
+                        CHECK_NULL_VOID(context);
+                        auto pageFocusHub = page->GetFocusHub();
+                        CHECK_NULL_VOID(pageFocusHub);
+                        pageFocusHub->SetParentFocusable(false);
+                        pageFocusHub->LostFocus();
+                        if (transitionType == PageTransitionType::EXIT_POP && page->GetParent()) {
+                            auto stageNode = page->GetParent();
+                            stageNode->RemoveChild(page);
+                            stageNode->RebuildRenderContextTree();
+                            context->RequestFrame();
+                            return;
+                        }
+                        page->GetEventHub<EventHub>()->SetEnabled(true);
+                        auto pattern = page->GetPattern<PagePattern>();
+                        CHECK_NULL_VOID(pattern);
+                        pattern->SetPageInTransition(false);
+                        pattern->ProcessHideState();
+                        context->MarkNeedFlushMouseEvent();
+                    },
+                    TaskExecutor::TaskType::UI);
             });
         return;
     }
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "NA");
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
             ContainerScope scope(instanceId);
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
             LOGI("pageTransition in finish");
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
@@ -170,7 +182,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
-    if (SystemProperties::IsPerformanceCheckEnabled()) {
+    if (AceChecker::IsPerformanceCheckEnabled()) {
         // After completing layout tasks at all nodes on the page, perform performance testing and management
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakNode = WeakPtr<FrameNode>(node), startTime]() {
             auto stage = weakStage.Upgrade();

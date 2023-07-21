@@ -33,7 +33,10 @@ public:
         return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
     void OnSetDepth(const int32_t depth) override;
+
 protected:
     void OnAttachToFrameNode() override;
 

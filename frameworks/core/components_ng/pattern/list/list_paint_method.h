@@ -81,7 +81,6 @@ private:
     int32_t totalItemCount_;
     float space_;
     float laneGutter_ = 0.0f;
-
     RefPtr<ListContentModifier> listContentModifier_;
 
     WeakPtr<ScrollBar> scrollBar_;

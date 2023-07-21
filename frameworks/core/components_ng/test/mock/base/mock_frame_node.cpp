@@ -19,6 +19,13 @@
 
 namespace OHOS::Ace::NG {
 thread_local int32_t UINode::currentAccessibilityId_ = 0;
+
+class FramePorxy {
+public:
+    explicit FramePorxy(FrameNode* frameNode) {}
+    ~FramePorxy() {}
+};
+
 FrameNode::~FrameNode() {}
 void FrameNode::OnWindowShow() {}
 void FrameNode::OnWindowHide() {}
@@ -70,15 +77,60 @@ void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& vis
 void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
 void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
 {}
-void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout) {}
-void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
+void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout)
+{}
+void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) {}
 void FrameNode::UpdateLayoutPropertyFlag() {}
 void FrameNode::ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) {}
 void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag) {}
 void FrameNode::MarkResponseRegion(bool isResponseRegion) {}
+void FrameNode::MarkNeedSyncRenderTree(bool) {}
+RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index)
+{
+    return nullptr;
+}
+const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needReset)
+{
+    return layoutAlgorithm_;
+}
+
+void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint) {}
+
+void FrameNode::Layout() {}
+
+RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
+{
+    return nullptr;
+}
+
+const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
+{
+    static std::list<RefPtr<LayoutWrapper>> list;
+    return list;
+}
+
+void FrameNode::RemoveChildInRenderTree(uint32_t index) {}
+
+bool FrameNode::SkipMeasureContent() const
+{
+    return false;
+}
+float FrameNode::GetBaselineDistance() const
+{
+    return 0.0f;
+}
+
+bool FrameNode::CheckNeedForceMeasureAndLayout()
+{
+    return false;
+}
+
+void FrameNode::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) {}
+
+void FrameNode::RemoveAllChildInRenderTree() {}
 
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
-    : UINode(tag, nodeId, isRoot), pattern_(pattern)
+    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
 {
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
@@ -154,7 +206,7 @@ OffsetF FrameNode::GetPaintRectOffsetToPage() const
     return { 1.0f, 1.0f };
 }
 
-RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
+RefPtr<LayoutWrapperNode> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     return nullptr;
 }
@@ -169,8 +221,7 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame() const
     return nullptr;
 }
 
-bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint,
-    int32_t sourceType)
+bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType)
 {
     return true;
 }
@@ -263,11 +314,12 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return nullptr;
 }
 
-void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
-{
-}
+void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
 
-void FrameNode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
+void FrameNode::OnSetDepth(const int32_t depth) {}
+
+void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 {
+    isActive_ = false;
 }
 } // namespace OHOS::Ace::NG

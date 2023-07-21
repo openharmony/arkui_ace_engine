@@ -284,6 +284,11 @@ void ViewFunctions::InitViewFunctions(
             LOGD("View is not a recycle node");
         }
 
+        JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycle");
+        if (jsAboutToRecycleFunc->IsFunction()) {
+            jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
+        }
+
         JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActive");
         if (jsSetActive->IsFunction()) {
             jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
@@ -438,6 +443,11 @@ void ViewFunctions::ExecuteDisappear()
     } else {
         LOGE("jsView Object is undefined and will not execute aboutToDisappear function");
     }
+}
+
+void ViewFunctions::ExecuteAboutToRecycle()
+{
+    ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycle");
 }
 
 bool ViewFunctions::HasLayout() const

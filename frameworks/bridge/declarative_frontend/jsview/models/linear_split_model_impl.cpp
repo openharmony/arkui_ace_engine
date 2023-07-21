@@ -56,4 +56,9 @@ void LinearSplitModelImpl::SetResizeable(NG::SplitType splitType, bool resizeabl
     }
 }
 
+void LinearSplitModelImpl::SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider)
+{
+}
+
+
 } // namespace OHOS::Ace::Framework

@@ -23,7 +23,10 @@ namespace OHOS::Ace {
 
 struct BadgeAttribute : Attribute {
     bool showMessage = true;
+    bool isPositionXy = false;
     BadgePosition badgePosition { BadgePosition::RIGHT_TOP };
+    Dimension badgePositionX;
+    Dimension badgePositionY;
     int64_t messageCount = 0;
     int64_t maxCount = 99;
     std::optional<std::string> badgeLabel;
@@ -55,6 +58,24 @@ public:
     {
         auto& attribute = static_cast<BadgeAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.badgePosition;
+    }
+
+    const Dimension& GetBadgePositionX() const
+    {
+        auto& attribute = static_cast<BadgeAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+        return attribute.badgePositionX;
+    }
+
+    const Dimension& GetBadgePositionY() const
+    {
+        auto& attribute = static_cast<BadgeAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+        return attribute.badgePositionY;
+    }
+
+    bool IsPositionXy() const
+    {
+        auto& attribute = static_cast<BadgeAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+        return attribute.isPositionXy;
     }
 
     const std::optional<std::string>& GetBadgeLabel() const
@@ -145,6 +166,24 @@ public:
     {
         auto& attribute = MaybeResetAttribute<BadgeAttribute>(AttributeTag::SPECIALIZED_ATTR);
         attribute.badgePosition = badgePostion;
+    }
+
+    void SetBadgePositionX(const Dimension& badgePostionX)
+    {
+        auto& attribute = MaybeResetAttribute<BadgeAttribute>(AttributeTag::SPECIALIZED_ATTR);
+        attribute.badgePositionX = badgePostionX;
+    }
+
+    void SetBadgePositionY(const Dimension& badgePostionY)
+    {
+        auto& attribute = MaybeResetAttribute<BadgeAttribute>(AttributeTag::SPECIALIZED_ATTR);
+        attribute.badgePositionY = badgePostionY;
+    }
+
+    void SetIsPositionXy(bool isPositionXy)
+    {
+        auto& attribute = MaybeResetAttribute<BadgeAttribute>(AttributeTag::SPECIALIZED_ATTR);
+        attribute.isPositionXy = isPositionXy;
     }
 
     void SetBadgeCircleSizeDefined(bool badgeCircleSizeDefined)

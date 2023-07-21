@@ -36,12 +36,27 @@ class WantWrap;
 
 namespace OHOS::Ace::Framework {
 #if !defined(PREVIEW)
-    RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
-    const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj);
-    RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
-    RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj);
+class ScopeRAII {
+public:
+    explicit ScopeRAII(NativeScopeManager* manager) : manager_(manager)
+    {
+        scope_ = manager_->Open();
+    }
+    ~ScopeRAII()
+    {
+        manager_->Close(scope_);
+    }
+
+private:
+    NativeScopeManager* manager_;
+    NativeScope* scope_;
+};
+RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
+const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj);
+RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
+RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj);
 #endif
 
-    bool IsDisableEventVersion();
+bool IsDisableEventVersion();
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

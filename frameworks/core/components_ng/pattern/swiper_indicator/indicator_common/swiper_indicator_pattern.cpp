@@ -251,6 +251,7 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
     }
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
+    gestureHub->SetHitTestMode(HitTestMode::HTMBLOCK);
 }
 
 void SwiperIndicatorPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -402,7 +403,15 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
 
 void SwiperIndicatorPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!panEvent_);
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto axis = swiperPattern->GetDirection();
+    if (axis_ == axis) {
+        return;
+    }
+    axis_ = axis;
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -439,18 +448,14 @@ void SwiperIndicatorPattern::InitPanEvent(const RefPtr<GestureEventHub>& gesture
         pattern->HandleDragEnd(0.0);
     };
 
-    if (panEvent_) {
+    if (panEvent_ != nullptr) {
         gestureHub->RemovePanEvent(panEvent_);
     }
 
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    if (swiperPattern->GetDirection() == Axis::VERTICAL) {
+    if (axis_ == Axis::VERTICAL) {
         panDirection = { .type = PanDirection::VERTICAL };
     }
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
@@ -464,13 +469,19 @@ void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
 
 void SwiperIndicatorPattern::HandleDragUpdate(const GestureEvent& info)
 {
-    if (CheckIsTouchBottom(info)) {
-        return;
-    }
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
+    if (swiperPattern->TotalCount() <= displayCount) {
+        return;
+    }
+    if (CheckIsTouchBottom(info)) {
+        return;
+    }
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
     auto offset = dragPoint - dragStartPoint_;

@@ -41,19 +41,18 @@ public:
      * @param option message option.
      * @return Returns ERR_OK on success, others on failure.
      */
-     int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
-    int32_t HandleOnSurfaceCreate(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleOnSurfaceReuse(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleOnSurfaceRelease(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleOnActionEvent(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleOnError(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleOnSurfaceChange(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnSurfaceCreate(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnSurfaceReuse(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnSurfaceRelease(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnActionEvent(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnError(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnSurfaceChange(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnFormLinkInfoUpdate(MessageParcel& data, MessageParcel& reply);
 
-    using FormRendererDelegateFunc =
-        int32_t (FormRendererDelegateStub::*)(MessageParcel &data, MessageParcel &reply);
+    using FormRendererDelegateFunc = int32_t (FormRendererDelegateStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, FormRendererDelegateFunc> memberFuncMap_;
 
     DISALLOW_COPY_AND_MOVE(FormRendererDelegateStub);

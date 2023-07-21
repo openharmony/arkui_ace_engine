@@ -41,6 +41,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 
@@ -69,7 +70,7 @@ public:
 
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
-    virtual void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) = 0;
+    virtual void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
@@ -124,7 +125,7 @@ public:
     virtual void SetScale(float x, float y, float z) = 0;
     virtual void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
-    virtual void SetRotate(float x, float y, float z, float angle) = 0;
+    virtual void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
 
     // display props
@@ -239,6 +240,9 @@ public:
 
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
+
+    // background
+    virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;

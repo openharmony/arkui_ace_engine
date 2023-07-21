@@ -124,7 +124,9 @@ void EventManager::TouchTest(
         frameNode->CheckSecurityComponentStatus(rect);
     }
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, event.id);
+    TouchTestResult hitTestResult;
+    frameNode->TouchTest(point, point, touchRestrict, hitTestResult, event.id);
+    axisTouchTestResults_[event.id] = std::move(hitTestResult);
 }
 
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
@@ -163,6 +165,18 @@ void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
     CHECK_NULL_VOID_NOLOG(selectOverlayManager);
+    if (touchPoint.type == TouchType::DOWN &&
+        touchTestResults_.find(touchPoint.id) != touchTestResults_.end()) {
+        std::vector<std::string> touchTestIds;
+        const auto& resultList = touchTestResults_[touchPoint.id];
+        for (const auto& result : resultList) {
+            auto eventTarget = result->GetEventTarget();
+            if (eventTarget.has_value()) {
+                touchTestIds.emplace_back(eventTarget.value().id);
+            }
+        }
+        selectOverlayManager->SetOnTouchTestResults(touchTestIds);
+    }
     selectOverlayManager->HandleGlobalEvent(touchPoint, rootOffset);
 }
 
@@ -213,7 +227,9 @@ void EventManager::TouchTest(
     // collect
     const Point point { event.x, event.y, event.sourceType };
     // For root node, the parent local point is the same as global point.
-    renderNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_);
+    TouchTestResult hitTestResult;
+    renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
+    axisTouchTestResults_[event.id] = std::move(hitTestResult);
 }
 
 void EventManager::FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents)
@@ -310,17 +326,22 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
 {
     ContainerScope scope(instanceId_);
 
+    const auto curResultIter = axisTouchTestResults_.find(event.id);
+    if (curResultIter == axisTouchTestResults_.end()) {
+        LOGI("the %{public}d axis test result does not exist!", event.id);
+        return false;
+    }
     if (event.action == AxisAction::BEGIN) {
         // first collect gesture into gesture referee.
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
-                refereeNG_->AddGestureToScope(event.id, axisTouchTestResult_);
+                refereeNG_->AddGestureToScope(event.id, curResultIter->second);
             }
         }
     }
 
     ACE_FUNCTION_TRACE();
-    for (const auto& entry : axisTouchTestResult_) {
+    for (const auto& entry : curResultIter->second) {
         if (!entry->HandleEvent(event)) {
             break;
         }
@@ -331,7 +352,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
                 refereeNG_->CleanGestureScope(event.id);
             }
         }
-        axisTouchTestResult_.clear();
+        axisTouchTestResults_.erase(event.id);
     }
     return true;
 }
@@ -592,11 +613,14 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     LOGD("DispatchMouseEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
         event.action == MouseAction::MOVE || event.action == MouseAction::WINDOW_ENTER ||
-        event.action == MouseAction::WINDOW_LEAVE || event.action == MouseAction::PULL_MOVE ||
-        event.action == MouseAction::PULL_UP) {
+        event.action == MouseAction::WINDOW_LEAVE) {
         MouseTestResult handledResults;
         handledResults.clear();
-        if (event.button == MouseButton::LEFT_BUTTON) {
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, false);
+        if ((event.button == MouseButton::LEFT_BUTTON && !container->IsScenceBoardWindow()) ||
+            (event.button == MouseButton::LEFT_BUTTON && container->IsScenceBoardWindow() &&
+            event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);
@@ -1166,6 +1190,7 @@ void EventManager::ClearResults()
 {
     touchTestResults_.clear();
     mouseTestResults_.clear();
+    axisTouchTestResults_.clear();
     keyboardShortcutNode_.clear();
 }
 

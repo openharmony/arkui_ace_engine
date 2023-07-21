@@ -55,6 +55,7 @@ public:
     void SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetJsEnabled(bool isJsEnabled) override;
     void SetFileAccessEnabled(bool isFileAccessEnabled) override;
     void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled) override;
@@ -97,6 +98,7 @@ public:
     void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnable) override;
     void SetAllowWindowOpenMethod(bool isAllowWindowOpenMethod) override;
     void SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo) override;
+    void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WEB_MODEL_IMPL_H

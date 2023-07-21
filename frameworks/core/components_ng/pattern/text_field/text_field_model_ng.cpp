@@ -81,7 +81,15 @@ void TextFieldModelNG::CreateNode(
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
+    SetDraggable(textFieldTheme->GetDraggable());
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
+}
+
+void TextFieldModelNG::SetDraggable(bool draggable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDraggable(draggable);
 }
 
 void TextFieldModelNG::SetShowUnderline(bool showUnderLine)
@@ -461,7 +469,7 @@ void TextFieldModelNG::SetShowCounter(bool value)
 
 void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, static_cast<DisplayMode>(value));
 }
 
 void TextFieldModelNG::SetMaxViewLines(uint32_t value)

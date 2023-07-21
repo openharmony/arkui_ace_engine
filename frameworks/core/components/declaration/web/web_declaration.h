@@ -47,6 +47,7 @@ struct WebEvent : Event {
     EventMarker scrollId;
     EventMarker fullScreenExitEventId;
     EventMarker windowExitId;
+    EventMarker overScrollId;
 };
 
 struct WebMethod : Method {
@@ -314,6 +315,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.windowExitId;
+    }
+
+    void SetOverScrollId(const EventMarker& overScrollId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.overScrollId = overScrollId;
+    }
+
+    const EventMarker& GetOverScrollId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.overScrollId;
     }
 
 protected:

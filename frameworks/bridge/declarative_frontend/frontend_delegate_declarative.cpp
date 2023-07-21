@@ -1793,10 +1793,10 @@ void FrontendDelegateDeclarative::OnSurfaceChanged()
         mediaQueryInfo_->SetIsInit(false);
     }
     mediaQueryInfo_->EnsureListenerIdValid();
-    OnMediaQueryUpdate();
+    OnMediaQueryUpdate(true);
 }
 
-void FrontendDelegateDeclarative::OnMediaQueryUpdate()
+void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
 {
     auto containerId = Container::CurrentId();
     if (containerId < 0) {
@@ -1830,10 +1830,7 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
         delegate->mediaQueryInfo_->ResetListenerId();
     };
     auto container = Container::Current();
-    if (!container) {
-        return;
-    }
-    if (container->IsUseStageModel()) {
+    if (container && container->IsUseStageModel() && isSynchronous) {
         callback();
         return;
     }
@@ -1842,7 +1839,6 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
 {
-    LOGI("FrontendDelegateDeclarative::OnLayoutCompleted");
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), componentId] {
             auto delegate = weak.Upgrade();
@@ -1856,7 +1852,6 @@ void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& component
 
 void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
 {
-    LOGI("FrontendDelegateDeclarative::OnDrawCompleted");
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), componentId] {
             auto delegate = weak.Upgrade();

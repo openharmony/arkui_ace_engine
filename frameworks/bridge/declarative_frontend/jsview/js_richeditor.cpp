@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -276,7 +277,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     spanRange->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textSpanResult.GetSpanRangeEnd())));
     offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan())));
     offsetInSpan->SetValueAt(
-        0, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength())));
+        1, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength())));
     spanPositionObj->SetPropertyObject("spanRange", spanRange);
     spanPositionObj->SetProperty<int32_t>("spanIndex", textSpanResult.GetSpanIndex());
     decorationObj->SetProperty<TextDecoration>("type", textSpanResult.GetTextDecoration());
@@ -312,7 +313,7 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
         spanRange->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeStart())));
         spanRange->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeEnd())));
         offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan())));
-        offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan() + it.GetEraseLength())));
+        offsetInSpan->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan() + it.GetEraseLength())));
         spanPositionObj->SetPropertyObject("spanRange", spanRange);
         spanPositionObj->SetProperty<int32_t>("spanIndex", it.GetSpanIndex());
         spanResultObj->SetPropertyObject("spanPosition", spanPositionObj);
@@ -390,6 +391,12 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onIMEInputComplete", &JSRichEditor::SetOnIMEInputComplete);
     JSClass<JSRichEditor>::StaticMethod("aboutToDelete", &JSRichEditor::SetAboutToDelete);
     JSClass<JSRichEditor>::StaticMethod("onDeleteComplete", &JSRichEditor::SetOnDeleteComplete);
+    JSClass<JSRichEditor>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSRichEditor>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSRichEditor>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSRichEditor>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRichEditor>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRichEditor>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -502,6 +509,20 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
+    }
+    if (options.image.has_value()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(options.image.value());
+        if (srcType == SrcType::ASSET) {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto assetManager = pipelineContext->GetAssetManager();
+            CHECK_NULL_VOID(assetManager);
+            auto assetData = assetManager->GetAsset(options.image.value());
+            if (!assetData) {
+                args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+                return;
+            }
+        }
     }
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> imageObject = JSRef<JSObject>::Cast(args[1]);
@@ -726,8 +747,8 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
 
-    int32_t start = 0;
-    int32_t end = 0;
+    int32_t start = -1;
+    int32_t end = -1;
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     JSContainerBase::ParseJsInt32(jsObject->GetProperty("start"), start);

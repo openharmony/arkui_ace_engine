@@ -19,7 +19,6 @@
 #include "gmock/gmock.h"
 
 #include "core/common/window_ng/window_extension_connection_adapter_ng.h"
-#include "session/host/include/extension_session.h"
 
 namespace OHOS::Ace {
 class MockWindowExtensionConnectionAdapterNG : public WindowExtensionConnectionAdapterNG {
@@ -28,8 +27,7 @@ public:
     MOCK_METHOD0(Show, void());
     MOCK_METHOD0(Hide, void());
     MOCK_METHOD0(RequestFocus, void());
-    MOCK_METHOD3(ConnectExtension, void(const RefPtr<NG::FrameNode>& node, int32_t windowId,
-        sptr<Rosen::ExtensionSession>& extensionSession));
+    MOCK_METHOD2(ConnectExtension, void(const RefPtr<NG::FrameNode>& node, int32_t windowId));
     MOCK_METHOD1(UpdateRect, void(const Rect& rect));
     MOCK_METHOD0(RemoveExtension, void());
 };

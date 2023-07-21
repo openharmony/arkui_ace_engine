@@ -140,12 +140,14 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnLoadIntercept, bool);
     ACE_WEB_EVENT_PROPERTY(OnFileSelectorShow, bool);
     ACE_WEB_EVENT_PROPERTY(OnContextMenuShow, bool);
+    ACE_WEB_EVENT_PROPERTY(OnContextMenuHide, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderExited, void);
     ACE_WEB_EVENT_PROPERTY(OnRefreshAccessedHistory, void);
     ACE_WEB_EVENT_PROPERTY(OnResourceLoad, void);
     ACE_WEB_EVENT_PROPERTY(OnScaleChange, void);
     ACE_WEB_EVENT_PROPERTY(OnScroll, void);
     ACE_WEB_EVENT_PROPERTY(OnPermissionRequest, void);
+    ACE_WEB_EVENT_PROPERTY(OnScreenCaptureRequest, void);
     ACE_WEB_EVENT_PROPERTY(OnSearchResultReceive, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowNew, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowExit, void);
@@ -154,6 +156,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnFaviconReceived, void);
     ACE_WEB_EVENT_PROPERTY(OnFirstContentfulPaint, void);
     ACE_WEB_EVENT_PROPERTY(OnTouchIconUrl, void);
+    ACE_WEB_EVENT_PROPERTY(OnOverScroll, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

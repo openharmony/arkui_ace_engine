@@ -34,7 +34,9 @@ void CustomPaintPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    auto renderCtx = host->GetRenderContext();
+    renderCtx->SetClipToBounds(false);
+    renderCtx->SetUsingContentRectForRenderFrame(true);
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -59,16 +61,20 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
     if (config.contentSizeChange || config.frameSizeChange) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, false);
         if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
             isCanvasInit_ = !config.frameSizeChange;
         } else {
             isCanvasInit_ = false;
         }
     } else if (config.frameOffsetChange || config.contentOffsetChange) {
-        isCanvasInit_ = true;
+        if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            isCanvasInit_ = true;
+        } else {
+            isCanvasInit_ = false;
+        }
     }
 
     if (!isCanvasInit_) {
@@ -703,7 +709,7 @@ void CustomPaintPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-const LineDashParam& CustomPaintPattern::GetLineDash() const
+LineDashParam CustomPaintPattern::GetLineDash() const
 {
     return paintMethod_->GetLineDash();
 }

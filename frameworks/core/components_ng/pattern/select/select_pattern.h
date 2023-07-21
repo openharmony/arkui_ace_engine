@@ -178,6 +178,7 @@ public:
     std::string GetValue();
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnAttachToFrameNode() override;

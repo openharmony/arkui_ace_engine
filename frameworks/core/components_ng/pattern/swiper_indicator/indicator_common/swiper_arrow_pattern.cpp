@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -87,6 +88,7 @@ void SwiperArrowPattern::InitButtonEvent()
     };
     buttonTouchListenr_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     arrowGestureHub->AddTouchEvent(buttonTouchListenr_);
+    arrowGestureHub->SetHitTestMode(HitTestMode::HTMBLOCK);
 
     auto hoverCallback = [weak = WeakClaim(this), buttonNode](bool isHovered) {
         auto pattern = weak.Upgrade();

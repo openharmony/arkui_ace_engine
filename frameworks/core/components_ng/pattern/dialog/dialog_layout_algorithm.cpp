@@ -79,7 +79,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
 
-    if (layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
+    if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
         AnalysisHeightOfChild(layoutWrapper);
     }
 }

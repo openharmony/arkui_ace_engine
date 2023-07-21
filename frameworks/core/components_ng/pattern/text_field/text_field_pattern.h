@@ -263,8 +263,6 @@ public:
         return { FocusType::NODE, true };
     }
 
-    void UpdateConfiguration();
-
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
 
@@ -449,7 +447,9 @@ public:
     {
         return isUsingMouse_;
     }
-
+    int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove);
+    int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
+    int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
         if (textEditingValue_.ToString().length() > 1) {
@@ -459,7 +459,15 @@ public:
     }
 
     bool CursorMoveLeft();
+    bool CursorMoveLeftWord();
+    bool CursorMoveLineBegin();
+    bool CursorMoveToParagraphBegin();
+    bool CursorMoveHome();
     bool CursorMoveRight();
+    bool CursorMoveRightWord();
+    bool CursorMoveLineEnd();
+    bool CursorMoveToParagraphEnd();
+    bool CursorMoveEnd();
     bool CursorMoveUp();
     bool CursorMoveDown();
     void SetCaretPosition(int32_t position);
@@ -490,6 +498,9 @@ public:
         imeShown_ = keyboardShown;
 #endif
     }
+    std::u16string GetLeftTextOfCursor(int32_t number);
+    std::u16string GetRightTextOfCursor(int32_t number);
+    int32_t GetTextIndexAtCursor();
 
     bool HasConnection() const
     {
@@ -715,6 +726,11 @@ public:
         return dragStatus_ == DragStatus::DRAGGING;
     }
 
+    bool IsTouchTestPointInArea(const Offset& touchOffset, bool isTouchPointHits) override
+    {
+        return isTouchPointHits && BetweenSelectedPosition(touchOffset);
+    }
+
     bool BetweenSelectedPosition(const Offset& globalOffset) override
     {
         if (!InSelectMode()) {
@@ -761,8 +777,13 @@ public:
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelectionLeft();
+    void HandleSelectionLeftWord();
+    void HandleSelectionLineBegin();
+    void HandleSelectionHome();
     void HandleSelectionRight();
-
+    void HandleSelectionRightWord();
+    void HandleSelectionLineEnd();
+    void HandleSelectionEnd();
     void HandleOnUndoAction();
     void HandleOnRedoAction();
     void HandleOnSelectAll(bool inlineStyle = false);
@@ -870,11 +891,6 @@ public:
         caretUpdateType_ = CaretUpdateType::EVENT;
     }
 
-    void SetTextInputFlag(bool enable)
-    {
-        isTextInput_ = enable;
-    }
-
     bool GetTextInputFlag() const
     {
         return isTextInput_;
@@ -888,6 +904,11 @@ public:
     float GetSingleLineHeight() const
     {
         return inlineSingleLineHeight_;
+    }
+
+    float GetInlinePadding() const
+    {
+        return inlinePadding_;
     }
 
 private:
@@ -946,10 +967,12 @@ private:
 
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
+    void FireOnSelectionChange(int32_t start, int32_t end);
     void UpdateDestinationToCaretByEvent();
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
+    bool CharLineChanged(int32_t caretPosition);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
@@ -971,6 +994,7 @@ private:
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
+    float FitCursorInSafeArea();
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
     void ResetBackgroundColor();
@@ -997,7 +1021,7 @@ private:
 
     void UpdateCopyAllStatus();
     void SaveInlineStates();
-    void ApplyInlineStates();
+    void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
 
     RectF frameRect_;
@@ -1049,6 +1073,7 @@ private:
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
+    // relative to frameRect
     RectF caretRect_;
     bool cursorVisible_ = false;
     bool focusEventInitialized_ = false;
@@ -1081,7 +1106,10 @@ private:
     int32_t drawOverlayFlag_ = 0;
     bool isTextInput_ = false;
     bool inlineSelectAllFlag_ = false;
+    bool inlineFocusState_ = false;
     float inlineSingleLineHeight_ = 0.0f;
+    float inlinePadding_ = 0.0f;
+    float previewWidth_ = 0.0f;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;

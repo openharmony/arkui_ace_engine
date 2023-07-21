@@ -18,6 +18,7 @@
 
 #include "form_callback_interface.h"
 
+#include "core/common/ace_engine.h"
 namespace OHOS::Ace {
 
 class FormCallbackClient : public OHOS::AppExecFwk::FormCallbackInterface,
@@ -26,36 +27,72 @@ public:
     FormCallbackClient() = default;
     virtual ~FormCallbackClient() = default;
 
-    void ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJsInfo) override
+    void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo) override
     {
-        auto delegate = delegate_.Upgrade();
-        if (delegate) {
-            delegate->ProcessFormUpdate(formJsInfo);
-        }
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId_);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [delegate = delegate_, formJsInfo]() {
+                auto formManagerDelegate = delegate.Upgrade();
+                if (formManagerDelegate) {
+                    formManagerDelegate->ProcessFormUpdate(formJsInfo);
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
 
     void ProcessFormUninstall(const int64_t formId) override
     {
-        auto delegate = delegate_.Upgrade();
-        if (delegate) {
-            delegate->ProcessFormUninstall(formId);
-        }
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId_);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [delegate = delegate_, formId]() {
+                auto formManagerDelegate = delegate.Upgrade();
+                if (formManagerDelegate) {
+                    formManagerDelegate->ProcessFormUninstall(formId);
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
 
     void OnDeathReceived() override
     {
-        auto delegate = delegate_.Upgrade();
-        if (delegate) {
-            delegate->OnDeathReceived();
-        }
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId_);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [delegate = delegate_]() {
+                auto formManagerDelegate = delegate.Upgrade();
+                if (formManagerDelegate) {
+                    formManagerDelegate->OnDeathReceived();
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
 
-    void OnError(const int32_t errorCode, const std::string &errorMsg) override
+    void OnError(const int32_t errorCode, const std::string& errorMsg) override
     {
-        auto delegate = delegate_.Upgrade();
-        if (delegate) {
-            delegate->OnFormError(std::to_string(errorCode), errorMsg);
-        }
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId_);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [delegate = delegate_, errorCode, errorMsg]() {
+                auto formManagerDelegate = delegate.Upgrade();
+                if (formManagerDelegate) {
+                    formManagerDelegate->OnFormError(std::to_string(errorCode), errorMsg);
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
 
     void SetFormManagerDelegate(WeakPtr<FormManagerDelegate> delegate)
@@ -63,7 +100,13 @@ public:
         delegate_ = delegate;
     }
 
+    void SetInstanceId(const int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
 private:
+    int32_t instanceId_ = -1;
     WeakPtr<FormManagerDelegate> delegate_;
 };
 

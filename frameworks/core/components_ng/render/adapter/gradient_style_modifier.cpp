@@ -19,7 +19,11 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -29,13 +33,19 @@ void GradientStyleModifier::Draw(RSDrawingContext& context) const
 {
     CHECK_NULL_VOID(colors_);
     CHECK_NULL_VOID(colorStops_);
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
-    RSCanvas rsCanvas(&skCanvas);
     SizeF contentSize(context.width, context.height);
-    PaintGradient(rsCanvas, contentSize);
+    PaintGradient(*skCanvas, contentSize);
+#else
+    CHECK_NULL_VOID(context.canvas);
+    SizeF contentSize(context.width, context.height);
+    PaintGradient(*context.canvas, contentSize);
+#endif
 }
 
-void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSize) const
+#ifndef USE_ROSEN_DRAWING
+void GradientStyleModifier::PaintGradient(SkCanvas& canvas, const SizeF& frameSize) const
 {
     if (Negative(frameSize.Height()) || Negative(frameSize.Width())) {
         return;
@@ -45,26 +55,46 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
     paint.setAntiAlias(true);
     paint.setShader(shader);
 
-    auto imageInfo = SkImageInfo::Make(
-        frameSize.Width(), frameSize.Height(), SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-    SkBitmap skBitmap;
-    skBitmap.allocPixels(imageInfo);
+    SkRRect rRect;
+    if (borderRadius_.has_value()) {
+        SkVector fRadii[4] = { { borderRadius_.value().x_, borderRadius_.value().x_ },
+            { borderRadius_.value().y_, borderRadius_.value().y_ },
+            { borderRadius_.value().z_, borderRadius_.value().z_ },
+            { borderRadius_.value().w_, borderRadius_.value().w_ } };
+        rRect.setRectRadii(SkRect::MakeWH(frameSize.Width(), frameSize.Height()), fRadii);
+        canvas.save();
+        canvas.clipRRect(rRect, SkClipOp::kIntersect, true);
+    }
+    canvas.drawRect(SkRect::MakeXYWH(0, 0, frameSize.Width(), frameSize.Height()), paint);
+    canvas.restore();
+}
+#else
+void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSize) const
+{
+    if (Negative(frameSize.Height()) || Negative(frameSize.Width())) {
+        return;
+    }
+    auto shader = DrawingDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetShaderEffect(shader);
 
-    std::unique_ptr<SkCanvas> skCanvas = std::make_unique<SkCanvas>(skBitmap);
-    skCanvas->drawPaint(paint);
-    auto skImage = SkImage::MakeFromBitmap(skBitmap);
-    RSImage rsImage(&skImage);
-
+    RSRoundRect rRect;
     canvas.Save();
     if (borderRadius_.has_value()) {
-        RSRoundRect rRect(
-            RSRect(0, 0, frameSize.Width(), frameSize.Height()), borderRadius_.value().x_, borderRadius_.value().y_);
+        std::vector<RSPoint> fRadii = { { borderRadius_.value().x_, borderRadius_.value().x_ },
+            { borderRadius_.value().y_, borderRadius_.value().y_ },
+            { borderRadius_.value().z_, borderRadius_.value().z_ },
+            { borderRadius_.value().w_, borderRadius_.value().w_ } };
+        rRect = RSRoundRect(RSRect(0, 0, frameSize.Width(), frameSize.Height()), fRadii);
         canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
     }
-    canvas.DrawImageRect(
-        rsImage, OHOS::Rosen::Drawing::Rect(0.0, 0.0, frameSize.Width(), frameSize.Height()), rosen::SamplingOptions());
+    canvas.AttachBrush(brush);
+    canvas.DrawRect(RSRect(0, 0, frameSize.Width(), frameSize.Height()));
+    canvas.DetachBrush();
     canvas.Restore();
 }
+#endif
 
 Gradient GradientStyleModifier::GetGradient() const
 {

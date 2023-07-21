@@ -39,7 +39,7 @@ public:
     void SetMaxHeight(const CalcDimension& maxHeight) override;
 
     void SetBackgroundColor(const Color& color) override;
-    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override;
+    void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
     void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
@@ -84,7 +84,7 @@ public:
     void SetScale(float x, float y, float z) override;
     void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
-    void SetRotate(float x, float y, float z, float angle) override;
+    void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
 
     void SetOpacity(double opacity, bool passThrough = false) override;
@@ -188,6 +188,7 @@ public:
     void DisableOnFocus() override {};
     void DisableOnBlur() override {};
 
+    void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;

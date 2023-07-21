@@ -154,9 +154,9 @@ std::shared_ptr<RSImageFilter> RosenRenderSvgFilter::MakeImageFilter(
 #else
             RSColorMatrix m;
             m.SetScale(0, 0, 0, 1.0f);
-            auto colorFilter = RSColorFilter::CreateMatrixColorFilter(m);
+            auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(m);
             if (colorFilter != nullptr) {
-                return RSImageFilter::CreateColorFilterImageFilter(*colorFilter, nullptr);
+                return RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, nullptr);
             }
             break;
 #endif
@@ -207,14 +207,14 @@ void RosenRenderSvgFilter::ConverImageFilterColor(
 void RosenRenderSvgFilter::ConverImageFilterColor(
     std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& src, const ColorInterpolationType& dst)
 {
-    std::shared_ptr<RSColorFilter> colorFilter = nullptr;
+    std::shared_ptr<RSRecordingColorFilter> colorFilter = nullptr;
     if (dst == ColorInterpolationType::LINEAR_RGB && src == ColorInterpolationType::SRGB) {
-        colorFilter = RSColorFilter::CreateSrgbGammaToLinear();
+        colorFilter = RSRecordingColorFilter::CreateSrgbGammaToLinear();
     } else if (dst == ColorInterpolationType::SRGB && src == ColorInterpolationType::LINEAR_RGB) {
-        colorFilter = RSColorFilter::CreateLinearToSrgbGamma();
+        colorFilter = RSRecordingColorFilter::CreateLinearToSrgbGamma();
     }
     if (colorFilter != nullptr) {
-        imageFilter = RSImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
+        imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
     }
 }
 #endif

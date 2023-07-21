@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,13 +24,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
-constexpr int32_t DEFAULT_WEEKS = 5;
-
+constexpr int32_t CALENDAR_WEEK_DAYS = 7;
+constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
 } // namespace
-
 void CalendarMonthPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -40,15 +37,83 @@ void CalendarMonthPattern::OnAttachToFrameNode()
 
 bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (IsCalendarDialog()) {
+        SetColRowSpace();
+    }
+
     return !(config.skipMeasure || dirty->SkipMeasureContent());
+}
+
+void CalendarMonthPattern::SetColRowSpace()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto contentConstraint = host->GetLayoutProperty()->GetLayoutConstraint();
+    if (!contentConstraint.has_value()) {
+        return;
+    }
+    auto constraint = contentConstraint.value();
+
+    auto dataSize = GetMonthData().days.size();
+    if (dataSize <= 0) {
+        return;
+    }
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto width = constraint.selfIdealSize.Width().value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() * 2;
+    auto height = constraint.selfIdealSize.Height().value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx();
+    auto paintProperty = GetPaintProperty<CalendarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    auto calendarDaySize = theme->GetCalendarPickerDayWidthOrHeight();
+    auto space = (width - calendarDaySize.ConvertToPx() * CALENDAR_WEEK_DAYS) / (CALENDAR_WEEK_DAYS - 1);
+    if (Positive(space)) {
+        Dimension colSpace = 0.0_px;
+        colSpace.SetValue(space);
+        paintProperty->UpdateColSpace(colSpace);
+    }
+
+    auto rowCount = dataSize / CALENDAR_WEEK_DAYS;
+    space = (height - calendarDaySize.ConvertToPx() * (rowCount + 1)) / rowCount;
+    if (!Positive(space)) {
+        return;
+    }
+    Dimension rowSpace = 0.0_px;
+    rowSpace.SetValue(space);
+    paintProperty->UpdateWeekAndDayRowSpace(rowSpace);
+    switch (rowCount) {
+        case 4:
+            paintProperty->UpdateDailyFourRowSpace(rowSpace);
+            break;
+        case 6:
+            paintProperty->UpdateDailySixRowSpace(rowSpace);
+            break;
+        case 5:
+        default:
+            paintProperty->UpdateDailyFiveRowSpace(rowSpace);
+            break;
+    }
 }
 
 void CalendarMonthPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    InitClickEvent();
+    InitTouchEvent();
+    InitHoverEvent();
+}
+
+void CalendarMonthPattern::InitClickEvent()
+{
+    if (clickListener_) {
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID_NOLOG(!clickListener_);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto obtainedMonth = obtainedMonth_;
@@ -60,6 +125,62 @@ void CalendarMonthPattern::OnModifyDone()
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
+}
+
+void CalendarMonthPattern::InitTouchEvent()
+{
+    if (touchListener_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto calendarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(calendarPattern);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            calendarPattern->OnTouchEvent(info.GetTouches().front().GetLocalLocation(), true);
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            calendarPattern->OnTouchEvent(info.GetTouches().front().GetLocalLocation(), false);
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void CalendarMonthPattern::InitHoverEvent()
+{
+    if (hoverListener_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = GetEventHub<CalendarEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverCallback = [weak = WeakClaim(this)](bool state) {
+        auto calendarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(calendarPattern);
+        calendarPattern->SetHoverState(state);
+        if (!state) {
+            Offset localLocation;
+            calendarPattern->OnHoverEvent(localLocation, false);
+        }
+    };
+    hoverListener_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
+    inputHub->AddOnHoverEvent(hoverListener_);
+    auto mouseCallback = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto calendarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(calendarPattern);
+        calendarPattern->OnHoverEvent(info.GetLocalLocation(), calendarPattern->GetHoverState());
+    };
+    inputHub->SetMouseEvent(std::move(mouseCallback));
 }
 
 void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& obtainedMonth)
@@ -88,6 +209,42 @@ void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& o
     }
 }
 
+void CalendarMonthPattern::OnTouchEvent(const Offset& localLocation, bool isPressed)
+{
+    if (!isCalendarDialog_ || obtainedMonth_.days.empty()) {
+        return;
+    }
+    if (isPressed) {
+        obtainedMonth_.days[JudgeArea(localLocation)].isPressing = true;
+    } else {
+        for (auto& day : obtainedMonth_.days) {
+            day.isPressing = false;
+        }
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CalendarMonthPattern::OnHoverEvent(const Offset& localLocation, bool state)
+{
+    if (!isCalendarDialog_ || obtainedMonth_.days.empty()) {
+        return;
+    }
+    for (auto& day : obtainedMonth_.days) {
+        day.isHovering = false;
+    }
+    int32_t index = JudgeArea(localLocation);
+    if (state && index >= 0) {
+        obtainedMonth_.days[index].isHovering = true;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
 {
     auto host = GetHost();
@@ -98,7 +255,7 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     CHECK_NULL_RETURN(pipelineContext, false);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, false);
-    auto topPadding = theme->GetCalendarTheme().topPadding.ConvertToPx();
+    auto topPadding = isCalendarDialog_ ? 0.0 : theme->GetCalendarTheme().topPadding.ConvertToPx();
     auto weekHeight = paintProperty->GetWeekHeight().value_or(theme->GetCalendarTheme().weekHeight).ConvertToPx();
     auto weekAndDayRowSpace =
         paintProperty->GetWeekAndDayRowSpace().value_or(theme->GetCalendarTheme().weekAndDayRowSpace).ConvertToPx();
@@ -108,7 +265,9 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
                         ? theme->GetCalendarTheme().colSpace.ConvertToPx()
                         : paintProperty->GetColSpaceValue({}).ConvertToPx();
-
+    auto dailyFourRowSpace = NonPositive(paintProperty->GetDailyFourRowSpaceValue({}).ConvertToPx())
+                                 ? theme->GetCalendarTheme().dailySixRowSpace.ConvertToPx()
+                                 : paintProperty->GetDailyFourRowSpaceValue({}).ConvertToPx();
     auto dailyFiveRowSpace = paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx() <= 0
                                  ? theme->GetCalendarTheme().dailyFiveRowSpace.ConvertToPx()
                                  : paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx();
@@ -116,7 +275,19 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
                                 ? theme->GetCalendarTheme().dailySixRowSpace.ConvertToPx()
                                 : paintProperty->GetDailySixRowSpaceValue({}).ConvertToPx();
     auto rows = (static_cast<int32_t>(obtainedMonth_.days.size()) / columnsOfData);
-    auto rowSpace = rows == DEFAULT_WEEKS ? dailyFiveRowSpace : dailySixRowSpace;
+    auto rowSpace = dailySixRowSpace;
+    switch (rows) {
+        case 4: {
+            rowSpace = dailyFourRowSpace;
+            break;
+        }
+        case 5: {
+            rowSpace = dailyFiveRowSpace;
+            break;
+        }
+        default:
+            break;
+    }
     auto browHeight = weekHeight + topPadding + weekAndDayRowSpace;
     auto maxHeight = host->GetGeometryNode()->GetFrameSize().Height();
     auto maxWidth = host->GetGeometryNode()->GetFrameSize().Width();
@@ -135,5 +306,4 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     }
     return (y * columnsOfData + x);
 }
-
 } // namespace OHOS::Ace::NG

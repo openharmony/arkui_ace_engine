@@ -14,21 +14,23 @@
  */
 
 #include <optional>
+
 #include "gtest/gtest.h"
+
 #include "base/utils/utils.h"
 #define protected public
 #define private public
 
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
@@ -57,37 +59,37 @@ const SizeF FRAME_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 const SizeF BIG_ITEM_SIZE(BIG_ITEM_WIDTH, BIG_ITEM_HEIGHT);
 
-RefPtr<LayoutWrapper> CreatlayoutWrapper()
+RefPtr<LayoutWrapperNode> CreatlayoutWrapper()
 {
     auto rowFrameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
 
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
     return layoutWrapper;
 }
 
-RefPtr<LayoutWrapper> CreatChildlayoutWrapper()
+RefPtr<LayoutWrapperNode> CreatChildlayoutWrapper()
 {
     auto firstFrameNode = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
-    RefPtr<LayoutWrapper> firstLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
     return firstLayoutWrapper;
 }
 } // namespace
 
 class BoxLayoutAlgorithmTestNg : public testing::Test {
 public:
-static void SetUpTestCase()
-{
-    MockPipelineBase::SetUp();
-}
-static void TearDownTestCase()
-{
-    MockPipelineBase::TearDown();
-}
+    static void SetUpTestCase()
+    {
+        MockPipelineBase::SetUp();
+    }
+    static void TearDownTestCase()
+    {
+        MockPipelineBase::TearDown();
+    }
 };
 
 /**
@@ -359,8 +361,8 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_MeasureContent005, Tes
     noPadding.bottom = CalcLength(NOPADDING);
 
     /**
-    * @tc.steps: step3. Perform element updates.
-    */
+     * @tc.steps: step3. Perform element updates.
+     */
     layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
@@ -442,7 +444,7 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_PerformLayout006, Test
      * @tc.steps: step6. call PerformLayout.
      * @tc.expected: expect the content_ is not null.
      */
-    SizeF size {0.1, 0.1};
+    SizeF size { 0.1, 0.1 };
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     layoutWrapper->GetGeometryNode()->SetContentSize(size);
     boxLayoutAlgorithm.PerformLayout(AccessibilityManager::RawPtr(layoutWrapper));
@@ -477,7 +479,7 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_PerformMeasureSelfWith
     noPadding.right = CalcLength(NOPADDING);
     noPadding.top = CalcLength(NOPADDING);
     noPadding.bottom = CalcLength(NOPADDING);
-    
+
     /**
      * @tc.steps: step3. Perform element updates.
      */
@@ -530,7 +532,7 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_PerformMeasureSelfWith
     noPadding.right = CalcLength(NOPADDING);
     noPadding.top = CalcLength(NOPADDING);
     noPadding.bottom = CalcLength(NOPADDING);
-    
+
     /**
      * @tc.steps: step3. Perform element updates.
      */
@@ -555,10 +557,10 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_PerformMeasureSelfWith
      * @tc.steps: step5. call SetContentSize.
      * @tc.expected: expect the layoutWrapper->GetGeometryNode()->content_ is not null .
      */
-    SizeF size {0.1, 0.1};
+    SizeF size { 0.1, 0.1 };
     layoutWrapper->GetGeometryNode()->SetContentSize(size);
-    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(AccessibilityManager::RawPtr(layoutWrapper),
-        layoutWrapper->GetAllChildrenWithBuild());
+    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(
+        AccessibilityManager::RawPtr(layoutWrapper), layoutWrapper->GetAllChildrenWithBuild());
     EXPECT_NE(layoutWrapper->GetGeometryNode()->content_, nullptr);
 }
 
@@ -590,7 +592,7 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_PerformMeasureSelfWith
     noPadding.right = CalcLength(NOPADDING);
     noPadding.top = CalcLength(NOPADDING);
     noPadding.bottom = CalcLength(NOPADDING);
-    
+
     /**
      * @tc.steps: step3. Perform element updates.
      */
