@@ -202,6 +202,7 @@ public:
     {
         SetAllChildrenInActive();
         ResetChildren();
+        Build();
         for (const auto& child : children_) {
             child.node->DoRemoveChildInRenderTree(0, true);
         }
