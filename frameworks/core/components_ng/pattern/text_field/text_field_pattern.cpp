@@ -1778,6 +1778,7 @@ void TextFieldPattern::InitDragDropEvent()
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
     gestureHub->SetTextDraggable(true);
+    gestureHub->SetTextField(true);
     auto callback = GetThumbnailCallback();
     gestureHub->SetThumbnailCallback(std::move(callback));
     auto eventHub = host->GetEventHub<EventHub>();
@@ -1895,6 +1896,9 @@ void TextFieldPattern::InitDragDropEvent()
         std::string str = UdmfClient::GetInstance()->GetSingleTextRecord(data);
         pattern->needToRequestKeyboardInner_ = true;
         pattern->dragRecipientStatus_ = DragStatus::NONE;
+        if (str.empty()) {
+            return;
+        }
         if (pattern->dragStatus_ == DragStatus::NONE) {
             pattern->InsertValue(str);
         } else {
@@ -2880,6 +2884,11 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     if (info.GetAction() == MouseAction::PRESS) {
         LOGI("Handle mouse left button press");
+        if (InSelectMode() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+            blockPress_ = true;
+            return;
+        }
+        blockPress_ = false;
         CloseSelectOverlay();
         if (!focusHub->IsFocusable()) {
             return;
@@ -2901,6 +2910,11 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     if (info.GetAction() == MouseAction::RELEASE) {
         LOGI("Handle mouse left button release");
+        if (blockPress_) {
+            caretUpdateType_ = CaretUpdateType::PRESSED;
+            UpdateCaretPositionByPressOffset();
+            blockPress_ = false;
+        }
         CloseSelectOverlay();
         caretUpdateType_ = CaretUpdateType::NONE;
         isMousePressed_ = false;
@@ -2917,7 +2931,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
 
     if (info.GetAction() == MouseAction::MOVE) {
-        if (!isMousePressed_) {
+        if (!isMousePressed_ || blockPress_) {
             return;
         }
         caretUpdateType_ = CaretUpdateType::EVENT;
@@ -3479,8 +3493,7 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     }
     // directionMove == 0 left, directionMove == 1 right
     // cannot get word length by current caret position and direction
-    if ((directionMove == 0 && originCaretPosition == 0) ||
-        (directionMove == 1 && originCaretPosition == textLength)) {
+    if ((directionMove == 0 && originCaretPosition == 0) || (directionMove == 1 && originCaretPosition == textLength)) {
         return 0;
     }
     int32_t offset = 0;
@@ -3553,8 +3566,8 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
     int32_t moveLineEndOffset = 0;
     int32_t strIndex = 0;
     for (strIndex = originCaretPosition + 1; (textEditingValue_.text[strIndex] != '\n' && strIndex <= textLength) ||
-                                         (needToCheckLineChanged && !CharLineChanged(strIndex));
-        strIndex++) {
+                                             (needToCheckLineChanged && !CharLineChanged(strIndex));
+         strIndex++) {
         moveLineEndOffset++;
     }
     if (moveLineEndOffset > textLength - originCaretPosition) {
