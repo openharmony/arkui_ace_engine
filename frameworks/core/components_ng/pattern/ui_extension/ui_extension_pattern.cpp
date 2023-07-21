@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
@@ -106,9 +107,7 @@ void UIExtensionPattern::OnConnectInner()
         onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(session_));
     }
     RegisterVisibleAreaChange();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    TransferFocusState(focusHub->IsFocusable());
+    TransferFocusState(IsCurrentFocus());
 }
 
 void UIExtensionPattern::OnDisconnect()
@@ -128,6 +127,28 @@ void UIExtensionPattern::OnDisconnect()
             }
         },
         TaskExecutor::TaskType::UI);
+}
+
+bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    CHECK_NULL_RETURN(dirty, false);
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameRect = geometryNode->GetFrameRect();
+
+    Rosen::WSRect windowRect {
+        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
+        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
+        .width_ = std::round(frameRect.Width()),
+        .height_ = std::round(frameRect.Height())
+    };
+
+    CHECK_NULL_RETURN(session_, false);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    return false;
 }
 
 void UIExtensionPattern::OnWindowShow()
@@ -199,6 +220,10 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID_NOLOG(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    if (textFieldManager) {
+        textFieldManager->ClearOnFocusTextField();
+    }
 }
 
 FocusPattern UIExtensionPattern::GetFocusPattern() const
@@ -259,6 +284,12 @@ void UIExtensionPattern::HandleBlurEvent()
 {
     WindowPattern::DisPatchFocusActiveEvent(false);
     TransferFocusState(false);
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    if (textFieldManager) {
+        textFieldManager->ClearOnFocusTextField();
+    }
 }
 
 bool UIExtensionPattern::KeyEventConsumed(const KeyEvent& event)
@@ -331,6 +362,17 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto hub = host->GetFocusHub();
     CHECK_NULL_VOID(hub);
     hub->RequestFocusImmediately();
+
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        auto touchOffsetToWindow = info.GetTouches().front().GetGlobalLocation();
+        auto touchOffsetToFrameNode = info.GetTouches().front().GetLocalLocation();
+        auto rectToWindow = host->GetTransformRectRelativeToWindow();
+        UpdateTextFieldManager(
+            { rectToWindow.GetOffset().GetX(), touchOffsetToWindow.GetY() },
+            rectToWindow.Height() - touchOffsetToFrameNode.GetY());
+    }
+
     WindowPattern::DispatchPointerEvent(pointerEvent);
 }
 
@@ -483,5 +525,28 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
     auto host = GetHost();
     CHECK_NULL_VOID_NOLOG(host);
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
+}
+
+void UIExtensionPattern::UpdateTextFieldManager(const Offset& offset, float height)
+{
+    if (!IsCurrentFocus()) {
+        return;
+    }
+    auto context = GetHost()->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->SetClickPosition(offset);
+    textFieldManager->SetHeight(height);
+    textFieldManager->SetOnFocusTextField(WeakClaim(this));
+}
+
+bool UIExtensionPattern::IsCurrentFocus() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN_NOLOG(host, false);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN_NOLOG(focusHub, false);
+    return focusHub->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG
