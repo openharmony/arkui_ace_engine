@@ -572,7 +572,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     auto rootNode = rootNodeWeak_.Upgrade();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
-        rootNode = FindWindowScene(popupInfo.target.Upgrade());
+        rootNode = FindWindowScene(popupMap_[targetId].popupNode);
     }
     CHECK_NULL_VOID(rootNode);
     auto rootChildren = rootNode->GetChildren();

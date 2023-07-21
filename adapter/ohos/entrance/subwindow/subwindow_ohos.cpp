@@ -238,6 +238,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     CHECK_NULL_VOID(overlayManager);
     ShowWindow();
     ResizeWindow();
+    ContainerScope scope(childContainerId_);
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
@@ -252,6 +253,7 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     popupInfo.popupId = -1;
     popupInfo.markNeedUpdate = true;
+    ContainerScope scope(childContainerId_);
     overlayManager->HidePopup(targetId, popupInfo);
     context->FlushPipelineImmediately();
     HideWindow();
@@ -383,6 +385,11 @@ void SubwindowOhos::HideWindow()
     }
 
     OHOS::Rosen::WMError ret = window_->Hide();
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+    if (parentContainer->IsScenceBoardWindow()) {
+        window_->SetTouchable(true);
+    }
 
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         LOGE("Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
@@ -439,6 +446,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     CHECK_NULL_VOID(overlay);
     ShowWindow();
     ResizeWindow();
+    ContainerScope scope(childContainerId_);
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
@@ -700,7 +708,7 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
         LOGE("can not get delegate.");
         return;
     }
-    ContainerScope scope(aceContainer->GetInstanceId());
+    ContainerScope scope(childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
     if (parentContainer->IsScenceBoardWindow()) {
