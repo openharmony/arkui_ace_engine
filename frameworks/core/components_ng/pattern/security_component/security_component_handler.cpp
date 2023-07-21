@@ -272,6 +272,11 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
         if (CheckRenderEffect(parentNode)) {
             return true;
         }
+        RefPtr<RenderContext> parentRenderContext = parentNode->GetRenderContext();
+        if (!parentRenderContext->GetClipEdge().value_or(false)) {
+            parent = parent->GetParent();
+            continue;
+        }
         GetVisibleRect(parentNode, visibleRect);
         double currentVisibleRatio = CalculateCurrentVisibleRatio(visibleRect, frameRect);
         if (!NearEqual(currentVisibleRatio, 1)) {
@@ -382,7 +387,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
     std::string type = node->GetTag();
-    if (type == V2::SEC_LOCATION_BUTTON_ETS_TAG) {
+    if (type == V2::LOCATION_BUTTON_ETS_TAG) {
         LocationButton buttonInfo;
         buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
         buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
@@ -394,7 +399,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();
-    } else if (type == V2::SEC_PASTE_BUTTON_ETS_TAG) {
+    } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
         PasteButton buttonInfo;
         buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
         buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
@@ -406,7 +411,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();
-    } else if (type == V2::SEC_SAVE_BUTTON_ETS_TAG) {
+    } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
         SaveButton buttonInfo;
         buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
         buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();

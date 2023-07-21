@@ -2150,8 +2150,8 @@ bool FrameNode::HaveSecurityComponent()
 
 bool FrameNode::IsSecurityComponent()
 {
-    return GetTag() == V2::SEC_LOCATION_BUTTON_ETS_TAG || GetTag() == V2::SEC_PASTE_BUTTON_ETS_TAG ||
-           GetTag() == V2::SEC_SAVE_BUTTON_ETS_TAG;
+    return GetTag() == V2::LOCATION_BUTTON_ETS_TAG || GetTag() == V2::PASTE_BUTTON_ETS_TAG ||
+           GetTag() == V2::SAVE_BUTTON_ETS_TAG;
 }
 
 void FrameNode::OnSetDepth(const int32_t depth)
