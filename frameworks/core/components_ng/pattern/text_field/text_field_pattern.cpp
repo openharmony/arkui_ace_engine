@@ -2199,6 +2199,9 @@ void TextFieldPattern::OnModifyDone()
         }
         HandleCounterBorder();
     }
+    if (!IsTextArea()) {
+        isTextInput_ = true;
+    }
     auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
     if ((!IsSelected() && inputStyle == InputStyle::INLINE) ||
         ((inputStyle == InputStyle::DEFAULT) && preInputStyle_ != InputStyle::INLINE)) {

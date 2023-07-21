@@ -67,8 +67,7 @@ void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
         return;
     }
 
-    LOGI("session %{public}" PRIu64 " changes to %{public}" PRIu64,
-        session_->GetPersistentId(), session->GetPersistentId());
+    LOGI("session %{public}d changes to %{public}d", session_->GetPersistentId(), session->GetPersistentId());
     session_ = session;
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);

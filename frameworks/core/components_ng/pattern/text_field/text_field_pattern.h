@@ -891,11 +891,6 @@ public:
         caretUpdateType_ = CaretUpdateType::EVENT;
     }
 
-    void SetTextInputFlag(bool enable)
-    {
-        isTextInput_ = enable;
-    }
-
     bool GetTextInputFlag() const
     {
         return isTextInput_;
