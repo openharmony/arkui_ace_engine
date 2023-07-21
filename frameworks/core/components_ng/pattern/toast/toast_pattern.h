@@ -54,6 +54,12 @@ public:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig) override;
 
 private:
+    void BeforeCreateLayoutWrapper() override;
+    void UpdateToastSize(const RefPtr<FrameNode>& toast);
+    void UpdateTextSizeConstraint(const RefPtr<FrameNode>& text);
+
+    double GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper);
+
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
 };
 } // namespace OHOS::Ace::NG
