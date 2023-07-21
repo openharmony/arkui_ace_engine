@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {
 void RichEditorInsertValue::SetInsertOffset(int32_t insertOffset)
@@ -124,16 +126,6 @@ void RichEditorAbstractSpanResult::SetFontSize(double fontSize)
 double RichEditorAbstractSpanResult::GetFontSize() const
 {
     return fontSize_;
-}
-
-void RichEditorAbstractSpanResult::SetFontStyle(FontStyle fontStyle)
-{
-    fontStyle_ = fontStyle;
-}
-
-FontStyle RichEditorAbstractSpanResult::GetFontStyle() const
-{
-    return fontStyle_;
 }
 
 void RichEditorAbstractSpanResult::SetFontWeight(int32_t fontWeigth)
@@ -330,5 +322,22 @@ void RichEditorEventHub::FireOndeleteComplete()
 {
     if (onDeleteComplete_)
         onDeleteComplete_();
+}
+
+std::string RichEditorEventHub::GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, extraInfo);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(host, extraInfo);
+
+    auto json = JsonUtil::Create(true);
+    if (type == DragEventType::DROP && pattern->GetTimestamp() == timestamp_) {
+        json->Put("isInComponent", true);
+    }
+    if (!extraInfo.empty()) {
+        json->Put("extraInfo", extraInfo.c_str());
+    }
+    return json->ToString();
 }
 } // namespace OHOS::Ace::NG
