@@ -738,10 +738,14 @@ public:
         }
         Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
                         Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
-        auto position = ConvertTouchOffsetToCaretPosition(offset);
-        auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
-        auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
-        return offset.GetX() >= 0 && (position >= selectStart) && (position < selectEnd);
+        bool isInRange = offset.GetX() >= textBoxes_[0].rect_.GetLeft() && offset.GetX() <=
+                        textBoxes_[0].rect_.GetRight() && offset.GetY() >= textBoxes_[0].rect_.GetTop() &&
+                        offset.GetY() <= textBoxes_[0].rect_.GetBottom();
+        if (isInRange) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // xts
