@@ -972,8 +972,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
                 moveStep = -curListItemGroupPara.lanes;
                 nextIndexInGroup = curIndexInGroup + moveStep;
             }
-        } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN) ||
-                   (step == FocusStep::TAB)) {
+        } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN)) {
             moveStep = 1;
             if (((curIndexInGroup == -1) && ((curIndex - (lanes_ - 1)) % lanes_ != 0)) || ((curIndexInGroup != -1) &&
                 ((curIndexInGroup - (curListItemGroupPara.lanes - 1)) % curListItemGroupPara.lanes == 0))) {
@@ -983,14 +982,29 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
                 ((curIndexInGroup - (curListItemGroupPara.lanes - 1)) % curListItemGroupPara.lanes != 0)) {
                 nextIndexInGroup = curIndexInGroup + moveStep;
             }
-        } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP) ||
-                   (step == FocusStep::SHIFT_TAB)) {
+        } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP)) {
             moveStep = -1;
             if (((curIndexInGroup == -1) && (curIndex % lanes_ != 0)) || ((curIndexInGroup != -1) &&
                 (curIndexInGroup % curListItemGroupPara.lanes == 0))) {
                 nextIndex = curIndex + moveStep;
                 nextIndexInGroup = -1;
             } else if ((curIndexInGroup != -1) && (curIndexInGroup % curListItemGroupPara.lanes != 0)) {
+                nextIndexInGroup = curIndexInGroup + moveStep;
+            }
+        }  else if (step == FocusStep::TAB) {
+            moveStep = 1;
+            if ((curIndexInGroup == -1) || (curIndexInGroup >= curListItemGroupPara.itemEndIndex)) {
+                nextIndex = curIndex + moveStep;
+                nextIndexInGroup = -1;
+            } else {
+                nextIndexInGroup = curIndexInGroup + moveStep;
+            }
+        } else if (step == FocusStep::SHIFT_TAB) {
+            moveStep = -1;
+            if ((curIndexInGroup == -1) || (curIndexInGroup <= 0)) {
+                nextIndex = curIndex + moveStep;
+                nextIndexInGroup = -1;
+            } else {
                 nextIndexInGroup = curIndexInGroup + moveStep;
             }
         }
