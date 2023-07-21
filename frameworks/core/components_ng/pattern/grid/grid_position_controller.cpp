@@ -31,6 +31,7 @@ void GridPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlig
     if (align == ScrollAlign::NONE) {
         align = ScrollAlign::AUTO;
     }
+    gridPattern->StopAnimate();
     gridPattern->UpdateStartIndex(index, align);
 }
 
@@ -49,7 +50,7 @@ void GridPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool /*
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-
+    gridPattern->StopAnimate();
     if ((gridPattern->GetGridLayoutInfo().axis_ == Axis::VERTICAL && scrollEdgeType == ScrollEdgeType::SCROLL_TOP) ||
         (gridPattern->GetGridLayoutInfo().axis_ == Axis::HORIZONTAL && scrollEdgeType == ScrollEdgeType::SCROLL_LEFT)) {
         gridPattern->UpdateStartIndex(0);
