@@ -741,11 +741,7 @@ public:
         bool isInRange = offset.GetX() >= textBoxes_[0].rect_.GetLeft() && offset.GetX() <=
                         textBoxes_[0].rect_.GetRight() && offset.GetY() >= textBoxes_[0].rect_.GetTop() &&
                         offset.GetY() <= textBoxes_[0].rect_.GetBottom();
-        if (isInRange) {
-            return true;
-        } else {
-            return false;
-        }
+        return isInRange;
     }
 
     // xts
