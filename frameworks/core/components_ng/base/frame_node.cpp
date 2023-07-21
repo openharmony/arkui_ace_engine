@@ -520,6 +520,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         SetBackgroundLayoutConstraint(columnNode);
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
+        backgroundNode_ = columnNode;
     }
 
     // update focus state
