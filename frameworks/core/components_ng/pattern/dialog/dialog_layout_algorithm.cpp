@@ -362,12 +362,34 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(
         }
         return true;
     }
+
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+            topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+            return true;
+        }
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+            topLeftPoint = OffsetF((maxSize.Width() - childSize.Width()) / 2.0,
+                maxSize.Height() - childSize.Height() - GetPaddingBottom());
+            return true;
+        }
+    }
     return false;
 }
 
 void DialogLayoutAlgorithm::UpdateTouchRegion()
 {
     // TODO: update touch region is not completed.
+}
+
+double DialogLayoutAlgorithm::GetPaddingBottom() const
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, 0);
+    auto bottom = dialogTheme->GetDefaultPaddingBottomFixed();
+    return pipelineContext->NormalizeToPx(bottom);
 }
 
 } // namespace OHOS::Ace::NG
