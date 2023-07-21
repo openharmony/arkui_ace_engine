@@ -1488,6 +1488,20 @@ void PipelineContext::HandleOnAreaChangeEvent()
     for (auto&& frameNode : nodes) {
         frameNode->TriggerOnAreaChangeCallback();
     }
+    UpdateFormLinkInfos();
+}
+
+void PipelineContext::UpdateFormLinkInfos()
+{
+    if (formLinkInfoUpdateHandler_ && !formLinkInfoMap_.empty()) {
+        LOGI("formLinkInfoUpdateHandler called");
+        std::vector<std::string> formLinkInfos;
+        for (auto iter = formLinkInfoMap_.rbegin(); iter != formLinkInfoMap_.rend(); ++iter) {
+            auto info = iter->second;
+            formLinkInfos.push_back(info);
+        }
+        formLinkInfoUpdateHandler_(formLinkInfos);
+    }
 }
 
 void PipelineContext::OnShow()
