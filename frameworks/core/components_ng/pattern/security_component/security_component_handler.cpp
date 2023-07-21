@@ -17,6 +17,9 @@
 
 #include <securec.h>
 
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "adapter/ohos/entrance/ace_container.h"
+#endif
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
@@ -471,7 +474,9 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
-    return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, secEvent);
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_RETURN(container, -1);
+    return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, secEvent, container->GetToken());
 }
 #else
 int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
