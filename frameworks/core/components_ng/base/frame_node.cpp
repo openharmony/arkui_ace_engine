@@ -965,11 +965,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         ACE_SCOPED_TRACE("Layout");
         Layout();
     }
-    {
-        LayoutWrapper::SaveGeoState();
-        LayoutWrapper::AvoidKeyboard();
-        LayoutWrapper::ExpandSafeArea();
-    }
     SetRootMeasureNode(false);
     return std::nullopt;
 }
@@ -1837,12 +1832,7 @@ OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
     OffsetF offset {};
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
-        auto wrapper = parent->layoutWrapper_.Upgrade();
-        if (wrapper) {
-            offset += wrapper->GetGeometryNode()->GetFrameOffset();
-        } else {
-            offset += parent->geometryNode_->GetFrameOffset();
-        }
+        offset += parent->geometryNode_->GetFrameOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;
@@ -2166,7 +2156,12 @@ void FrameNode::OnSetDepth(const int32_t depth)
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    if (!oldGeometryNode_) {
+        oldGeometryNode_ = geometryNode_->Clone();
+    }
+#ifndef ACE_UNITTEST
     RestoreGeoState();
+#endif
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
     if (!oldGeometryNode_) {
@@ -2259,14 +2254,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 void FrameNode::Layout()
 {
     int64_t time = GetSysTimestamp();
-    auto&& expandOpts = layoutProperty_->GetSafeAreaExpandOpts();
-    if ((expandOpts && expandOpts->Expansive()) || GetTag() == V2::PAGE_ETS_TAG) {
-        // record expansive wrappers during Layout traversal to speed up SafeArea expansion
-        // Page node needs to avoid keyboard, record it too.
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->GetSafeAreaManager()->AddWrapper(WeakClaim(this));
-    }
     OffsetNodeToSafeArea();
     if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
         if (!layoutProperty_->GetLayoutConstraint()) {
@@ -2291,6 +2278,12 @@ void FrameNode::Layout()
     } else {
         GetLayoutAlgorithm()->SetSkipLayout();
     }
+
+#ifndef ACE_UNITTEST
+    SaveGeoState();
+    AvoidKeyboard();
+    ExpandSafeArea();
+#endif
 
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
         geometryNode_->GetFrameOffset().ToString().c_str());

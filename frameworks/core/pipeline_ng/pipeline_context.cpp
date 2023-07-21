@@ -773,6 +773,10 @@ void PipelineContext::SyncSafeArea()
     CHECK_NULL_VOID_NOLOG(!ignoreViewSafeArea_);
     CHECK_NULL_VOID_NOLOG(isLayoutFullScreen_);
     rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto page = stageManager_->GetLastPage();
+    if (page) {
+        page->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
@@ -824,6 +828,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
         }
         rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto page = stageManager_->GetLastPage();
+        if (page) {
+            page->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
         // layout immediately
         FlushUITasks();
 
