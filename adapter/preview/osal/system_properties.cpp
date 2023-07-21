@@ -219,6 +219,4 @@ bool SystemProperties::IsSceneBoardEnabled()
     return false;
 }
 
-void SystemProperties::GetAppBarInfo(std::string& bundleName, std::string& abilityName) {}
-
 } // namespace OHOS::Ace
