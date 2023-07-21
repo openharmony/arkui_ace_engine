@@ -545,7 +545,7 @@ void GridPattern::FlushCurrentFocus()
         }
     }
     if (gridLayoutInfo_.gridMatrix_.find(lastFocusItemMainIndex_) == gridLayoutInfo_.gridMatrix_.end()) {
-        LOGE("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
+        LOGD("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
         return;
     }
     auto curCrossNum = GetCrossCount();
@@ -860,7 +860,7 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
             }
         }
     }
-    LOGW("Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex, tarCrossIndex, tarIndex);
+    LOGD("Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex, tarCrossIndex, tarIndex);
     return nullptr;
 }
 
