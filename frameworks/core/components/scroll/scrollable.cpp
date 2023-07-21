@@ -262,7 +262,7 @@ void Scrollable::HandleTouchDown()
     springController_->Stop();
     if (!controller_->IsStopped()) {
         controller_->Stop();
-    } else if (!snapController_->IsStopped()) {
+    } else if (snapController_->IsRunning()) {
         snapController_->Stop();
     } else {
         // Resets values.
