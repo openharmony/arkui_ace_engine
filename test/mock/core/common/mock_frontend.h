@@ -40,7 +40,6 @@ public:
     MOCK_METHOD(void, UpdateState, (Frontend::State state), (override));
     MOCK_METHOD(RefPtr<AccessibilityManager>, GetAccessibilityManager, (), (const override));
     MOCK_METHOD(bool, IsForeground, (), (override));
-    MOCK_METHOD(FrontendType, GetType, (), (override));
     MOCK_METHOD(RefPtr<AceEventHandler>, GetEventHandler, (), (override));
     MOCK_METHOD(void, RebuildAllPages, (), (override));
     MOCK_METHOD(void, SetColorMode, (ColorMode colorMode), (override));
