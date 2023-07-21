@@ -163,8 +163,6 @@ void LayoutWrapperNode::Measure(const std::optional<LayoutConstraintF>& parentCo
     CHECK_NULL_VOID(layoutProperty_);
     CHECK_NULL_VOID(geometryNode_);
     CHECK_NULL_VOID(host);
-    // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
-    RestoreGeoState();
 
     CHECK_NULL_VOID(layoutAlgorithm_);
     if (layoutAlgorithm_->SkipMeasure()) {
