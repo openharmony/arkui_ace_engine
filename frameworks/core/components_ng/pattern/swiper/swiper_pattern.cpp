@@ -1328,7 +1328,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
                     auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
                     if (curChildFrame) {
                         FlushFocus(curChildFrame);
-                    } 
+                    }
                 }
             }
             OnIndexChange();
@@ -1731,7 +1731,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
                 auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
                 if (curChildFrame) {
                     FlushFocus(curChildFrame);
-                } 
+                }
             }
         }
         OnIndexChange();
@@ -2456,7 +2456,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
                 auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
                 if (curChildFrame) {
                     FlushFocus(curChildFrame);
-                } 
+                }
             }
         }
         OnIndexChange();
@@ -2488,7 +2488,7 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
                 auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
                 if (curChildFrame) {
                     FlushFocus(curChildFrame);
-                } 
+                }
             }
             oldIndex_ = nextIndex;
             currentFirstIndex_ = GetLoopIndex(nextIndex);
