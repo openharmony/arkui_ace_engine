@@ -335,7 +335,7 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overl
 }
 
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
-    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindow(containerId);
@@ -345,7 +345,7 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }
-    return subwindow->ShowDialogNG(dialogProps, customNode);
+    return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
 
 void SubwindowManager::AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow)
