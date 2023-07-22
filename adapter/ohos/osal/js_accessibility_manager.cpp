@@ -647,6 +647,7 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int32_t>
 {
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+        CHECK_NULL_VOID_NOLOG(frameNode->IsActive());
         if (uiNode->GetTag() == "stage") {
         } else if (uiNode->GetTag() == "page") {
             if (uiNode->GetPageId() != pageId) {
@@ -830,10 +831,6 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
 {
     CHECK_NULL_VOID_NOLOG(node);
-    NG::RectF rect;
-    if (node->IsActive()) {
-        rect = node->GetTransformRectRelativeToWindow();
-    }
     nodeInfo.SetParent(GetParentId(node));
     std::vector<int32_t> children;
     for (const auto& item : node->GetChildren()) {
@@ -852,6 +849,7 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
+        auto rect = node->GetTransformRectRelativeToWindow();
         auto left = rect.Left() + commonProperty.windowLeft;
         auto top = rect.Top() + commonProperty.windowTop;
         auto right = rect.Right() + commonProperty.windowLeft;
