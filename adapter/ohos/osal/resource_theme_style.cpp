@@ -59,6 +59,7 @@ static const std::set<std::string> stringAttrs = {
     "description_download_and_share",
     "description_receive",
     "description_continue_to_receive",
+    "draggable",
 };
 
 double ParseDoubleUnit(const std::string& value, std::string& unit)
