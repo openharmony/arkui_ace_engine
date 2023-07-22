@@ -38,7 +38,9 @@ public:
     static void SetDateTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
     static void SetTimeTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
+    static void SetDialogDateChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
+    static void SetDialogDateAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static void SetDialogSwitchEvent(std::function<bool()> switchEvent);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
         const RefPtr<FrameNode>& datePickerNode,

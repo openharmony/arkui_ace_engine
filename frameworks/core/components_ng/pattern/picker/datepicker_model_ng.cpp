@@ -188,6 +188,15 @@ void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void DatePickerModelNG::SetOnDateChange(DateChangeEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDateChange(std::move(onChange));
+}
+
 void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
@@ -254,6 +263,7 @@ void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
 void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::DatePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
+    std::function<void(const std::string&)>&& onDateAccept, std::function<void(const std::string&)>&& onDateChange,
     DatePickerType pickerType)
 {
     auto container = Container::Current();
@@ -286,6 +296,8 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogEvent["changeId"] = onChange;
     dialogEvent["acceptId"] = onAccept;
+    dialogEvent["dateChangeId"] = onDateChange;
+    dialogEvent["dateAcceptId"] = onDateAccept;
     auto func = [onCancel](const GestureEvent& /* info */) {
         if (onCancel) {
             onCancel();
