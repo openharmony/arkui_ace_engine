@@ -511,13 +511,19 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         return;
     }
     if (options.image.has_value()) {
-        SrcType srcType = ImageSourceInfo::ResolveURIType(options.image.value());
+        std::string assetSrc = options.image.value();
+        SrcType srcType = ImageSourceInfo::ResolveURIType(assetSrc);
+        if (assetSrc[0] == '/') {
+            assetSrc = assetSrc.substr(1); // get the asset src without '/'.
+        } else if (assetSrc[0] == '.' && assetSrc.size() > 2 && assetSrc[1] == '/') {
+            assetSrc = assetSrc.substr(2); // get the asset src without './'.
+        }
         if (srcType == SrcType::ASSET) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             auto assetManager = pipelineContext->GetAssetManager();
             CHECK_NULL_VOID(assetManager);
-            auto assetData = assetManager->GetAsset(options.image.value());
+            auto assetData = assetManager->GetAsset(assetSrc);
             if (!assetData) {
                 args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
                 return;
