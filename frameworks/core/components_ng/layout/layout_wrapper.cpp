@@ -529,6 +529,16 @@ void LayoutWrapper::ExpandSafeAreaInner()
 
 void LayoutWrapper::ExpandIntoKeyboard()
 {
+    // if parent already expanded into keyboard, offset shouldn't be applied again
+    auto parent = GetHostNode()->GetAncestorNodeOfFrame();
+    while (parent) {
+        auto&& opts = parent->GetLayoutProperty()->GetSafeAreaExpandOpts();
+        if (opts && (opts->edges & SAFE_AREA_EDGE_BOTTOM) && opts->type & SAFE_AREA_TYPE_KEYBOARD) {
+            return;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     geometryNode_->SetFrameOffset(
