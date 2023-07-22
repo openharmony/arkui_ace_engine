@@ -614,8 +614,10 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     double keyboardHeight = keyboardArea.Height();
     if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         if (windowManager_->GetWindowType() == WindowType::WINDOW_TYPE_UNDEFINED ||
-            windowManager_->GetWindowType() > WindowType::WINDOW_TYPE_APP_END) {
-            // only app window need avoid virtual keyboard
+            (windowManager_->GetWindowType() > WindowType::WINDOW_TYPE_APP_END &&
+             windowManager_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT)) {
+            LOGW("this window type: %{public}d do not need avoid virtual keyboard.",
+                static_cast<int32_t>(windowManager_->GetWindowMode()));
             return;
         }
         keyboardHeight = ModifyKeyboardHeight(keyboardHeight);
