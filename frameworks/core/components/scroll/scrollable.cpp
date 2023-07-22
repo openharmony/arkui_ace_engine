@@ -988,7 +988,7 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::ProcessScrollMotionStop()
 {
-    if (needScrollSnapChange_ && calePredictSnapOffsetCallback_) {
+    if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && motion_) {
         needScrollSnapChange_ = false;
         auto predictSnapOffset = calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - currentPos_);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
