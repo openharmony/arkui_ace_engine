@@ -434,21 +434,19 @@ void GestureEventHub::CancelDragForWeb()
 
 void GestureEventHub::ResetDragActionForWeb()
 {
+    isReceivedDragGestureInfo_ = false;
     CHECK_NULL_VOID_NOLOG(dragEventActuator_);
     dragEventActuator_->ResetDragActionForWeb();
 }
 
 void GestureEventHub::StartDragTaskForWeb()
 {
-    auto startTime = std::chrono::high_resolution_clock::now();
-    auto timeElapsed = startTime - gestureInfoForWeb_.GetTimeStamp();
-    auto timeElapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed);
-    // 100 : 100ms
-    if (timeElapsedMs.count() > 100) {
-        LOGW("start drag task for web failed, not received this drag action gesture info");
+    if (!isReceivedDragGestureInfo_) {
+        LOGI("not received drag info, wait ark drag start");
         return;
     }
 
+    isReceivedDragGestureInfo_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
@@ -513,12 +511,23 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
 }
 #endif
 
+void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        LOGI("web component receive drag start, need to let web kernel start drag action");
+        gestureInfoForWeb_ = info;
+        isReceivedDragGestureInfo_ = true;
+    }
+}
+
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
-        gestureInfoForWeb_ = info;
+        HandleNotallowDrag(info);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();

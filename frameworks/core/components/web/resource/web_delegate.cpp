@@ -4482,6 +4482,10 @@ bool WebDelegate::IsImageDrag()
 
 std::shared_ptr<OHOS::NWeb::NWebDragData> WebDelegate::GetOrCreateDragData()
 {
+    if (dragData_) {
+        return dragData_;
+    }
+
     if (nweb_) {
         dragData_ = nweb_->GetOrCreateDragData();
         return dragData_;
