@@ -243,8 +243,9 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     if (mouseAction == MouseAction::WINDOW_LEAVE) {
-        HandleMoveAway(hoverIndex_.value());
-        return;
+        if (hoverIndex_.has_value()) {
+            HandleMoveAway(hoverIndex_.value());
+        }
     }
 }
 
