@@ -18,8 +18,8 @@
 #include <map>
 
 #include "base/want/want_wrap.h"
+#include "core/common/app_bar_helper.h"
 #include "core/common/container.h"
-#include "core/common/ui_extension_helper.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -217,16 +217,15 @@ void AppBarView::BindContentCover(int32_t targetId)
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+
+    std::string stageAbilityName = "";
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    if (appBarTheme) {
+        stageAbilityName = appBarTheme->GetStageAbilityName();
+    }
     NG::ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
-    auto buildNodeFunc = [targetId, overlayManager, &modalStyle]() -> RefPtr<UINode> {
-        std::string bundleName = "";
-        std::string abilityName = "";
-        SystemProperties::GetAppBarInfo(bundleName, abilityName);
-        if (bundleName.empty() || abilityName.empty()) {
-            return nullptr;
-        }
-
+    auto buildNodeFunc = [targetId, overlayManager, &modalStyle, &stageAbilityName]() -> RefPtr<UINode> {
         auto onRelease = [overlayManager, &modalStyle, targetId](int32_t releaseCode) {
             overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
         };
@@ -234,6 +233,8 @@ void AppBarView::BindContentCover(int32_t targetId)
             [overlayManager, &modalStyle, targetId](int32_t code, const std::string& name, const std::string& message) {
                 overlayManager->BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
             };
+
+        // Create parameters of UIExtension.
         auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
         std::map<std::string, std::string> params;
         params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
@@ -242,8 +243,14 @@ void AppBarView::BindContentCover(int32_t targetId)
         if (missionId != -1) {
             params.try_emplace("missionId", std::to_string(missionId));
         }
-        auto uiExtNode = OHOS::Ace::UIExtensionHelper::CreateUIExtensionNode(
-            bundleName, abilityName, params, std::move(onRelease), std::move(onError));
+        
+        // Create UIExtension node.
+        auto appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
+        auto uiExtNode = OHOS::Ace::AppBarHelper::CreateUIExtensionNode(appGalleryBundleName, stageAbilityName,
+            params, std::move(onRelease), std::move(onError));
+        LOGI("BundleName: %{public}s, abilityName: %{public}s", appGalleryBundleName.c_str(), stageAbilityName.c_str());
+
+        // Update ideal size of UIExtension.
         auto layoutProperty = uiExtNode->GetLayoutProperty();
         CHECK_NULL_RETURN(layoutProperty, uiExtNode);
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)),
