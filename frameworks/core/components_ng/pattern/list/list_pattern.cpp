@@ -1263,6 +1263,16 @@ void ListPattern::UpdateScrollBarOffset()
     UpdateScrollBarRegion(currentOffset, estimatedHeight, size, viewOffset);
 }
 
+float ListPattern::GetTotalHeight() const
+{
+    if (itemPosition_.empty()) {
+        return 0.0f;
+    }
+
+    float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
+    return itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+}
+
 void ListPattern::SetChainAnimation()
 {
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
