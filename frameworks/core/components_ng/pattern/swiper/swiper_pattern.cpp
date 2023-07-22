@@ -467,9 +467,7 @@ int32_t SwiperPattern::GetLoopIndex(int32_t originalIndex) const
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    auto isNotInit = true;
     if (isInit_) {
-        isNotInit = false;
         isInit_ = false;
         // first load Swiper to preload page.
         SetLazyLoadFeature(true);
@@ -511,9 +509,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         isJump = true;
         UpdateCurrentIndex(swiperLayoutAlgorithm->GetCurrentIndex());
         currentIndexOffset_ = 0.0f;
-        if (isNotInit) {
-            OnIndexChange();
-        }
         jumpIndex_.reset();
     } else if (targetIndex_) {
         auto iter = itemPosition_.find(targetIndex_.value());
