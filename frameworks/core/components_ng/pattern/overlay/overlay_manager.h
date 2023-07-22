@@ -98,7 +98,7 @@ public:
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
-        const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft = false);
+        const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
