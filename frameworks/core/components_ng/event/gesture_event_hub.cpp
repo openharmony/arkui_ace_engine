@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
@@ -857,8 +858,9 @@ OnDragCallback GestureEventHub::GetDragCallback()
     CHECK_NULL_RETURN(dragDropManager, ret);
     auto eventManager = pipeline->GetEventManager();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
+    auto callback = [id = Container::CurrentId(), eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
                         const DragNotifyMsg& notifyMessage) {
+        ContainerScope scope(id);
         DragRet result = DragRet::DRAG_FAIL;
         switch (notifyMessage.result) {
             case DragResult::DRAG_SUCCESS:
