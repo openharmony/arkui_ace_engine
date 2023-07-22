@@ -1107,7 +1107,7 @@ bool Scrollable::HandleOverScroll(double velocity)
 {
     auto parent = parent_.Upgrade();
     if (!parent || !nestedOpt_.NeedParent()) {
-        if (edgeEffect_ != EdgeEffect::NONE) {
+        if (edgeEffect_ == EdgeEffect::SPRING) {
             ProcessScrollOverCallback(velocity);
             return true;
         }
@@ -1125,14 +1125,14 @@ bool Scrollable::HandleOverScroll(double velocity)
             }
             return true;
         }
-        if (edgeEffect_ != EdgeEffect::NONE) {
+        if (edgeEffect_ == EdgeEffect::SPRING) {
             ProcessScrollOverCallback(velocity);
             return true;
         }
     }
 
     // self handle over scroll first
-    if (edgeEffect_ != EdgeEffect::NONE) {
+    if (edgeEffect_ == EdgeEffect::SPRING) {
         ProcessScrollOverCallback(velocity);
         return true;
     }
