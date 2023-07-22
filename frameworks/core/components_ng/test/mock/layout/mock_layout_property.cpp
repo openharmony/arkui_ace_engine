@@ -103,7 +103,7 @@ float LayoutProperty::GetAspectRatio() const
 
 void LayoutProperty::UpdateAspectRatio(float ratio) {}
 
-void LayoutProperty::UpdateGeometryTransition(const std::string& id) {}
+void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition) {}
 
 void LayoutProperty::UpdateLayoutDirection(TextDirection value) {}
 

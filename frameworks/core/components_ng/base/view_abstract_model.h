@@ -139,7 +139,7 @@ public:
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
-    virtual void SetGeometryTransition(const std::string& id) = 0;
+    virtual void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
     virtual void SetRenderFit(RenderFit renderFit) = 0;
@@ -165,7 +165,7 @@ public:
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
     virtual void SetBackdropBlur(const Dimension& radius) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
-    
+
     virtual void SetFrontBlur(const Dimension& radius) = 0;
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
