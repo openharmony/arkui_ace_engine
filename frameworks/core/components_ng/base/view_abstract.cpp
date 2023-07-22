@@ -1101,6 +1101,7 @@ void ViewAbstract::BindPopup(
             LOGI("Popup now show in subwindow.");
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
             if (popupPattern) {
+                popupPattern->SetContainerId(Container::CurrentId());
                 popupPattern->StartEnteringAnimation(nullptr);
             }
         } else {
