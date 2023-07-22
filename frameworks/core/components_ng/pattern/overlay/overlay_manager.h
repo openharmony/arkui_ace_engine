@@ -275,9 +275,10 @@ private:
     void FireModalPageShow();
     void FireModalPageHide();
 
-    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
+    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
+        bool isModeChangeToAuto = false);
 
-    void ComputeSheetOffset(NG::SheetStyle& sheetStyle);
+    void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);

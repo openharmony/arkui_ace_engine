@@ -119,6 +119,9 @@ constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::string SHEET_HEIGHT_MEDIUM = "medium";
+const std::string SHEET_HEIGHT_LARGE = "large";
+const std::string SHEET_HEIGHT_AUTO = "auto";
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -5146,13 +5149,18 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         // Remove all " ".
         heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
         std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
-        if (heightStr == "medium") {
+        if (heightStr == SHEET_HEIGHT_MEDIUM) {
             sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
             sheetStyle.height.reset();
             return;
         }
-        if (heightStr == "large") {
+        if (heightStr == SHEET_HEIGHT_LARGE) {
             sheetStyle.sheetMode = NG::SheetMode::LARGE;
+            sheetStyle.height.reset();
+            return;
+        }
+        if (heightStr == SHEET_HEIGHT_AUTO) {
+            sheetStyle.sheetMode = NG::SheetMode::AUTO;
             sheetStyle.height.reset();
             return;
         }

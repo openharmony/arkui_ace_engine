@@ -45,6 +45,9 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, RefPtr<FrameNode>
     sheetLayoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     sheetLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    if (sheetStyle.sheetMode.has_value() && sheetStyle.sheetMode == SheetMode::AUTO) {
+        sheetLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+    }
 
     // create drag bar
     bool isShow = sheetStyle.showDragBar.value_or(true);
