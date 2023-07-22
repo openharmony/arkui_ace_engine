@@ -8209,7 +8209,6 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward001, TestSize.Level1)
             }
             swiperLayoutAlgorithm->targetIndex_ = 0;
         }
-        swiperLayoutAlgorithm->forwardFeature_ = true;
     }
 }
 
@@ -8260,7 +8259,6 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutBackward001, TestSize.Level1)
             }
             swiperLayoutAlgorithm->targetIndex_ = 0;
         }
-        swiperLayoutAlgorithm->backwardFeature_ = true;
     }
 }
 
