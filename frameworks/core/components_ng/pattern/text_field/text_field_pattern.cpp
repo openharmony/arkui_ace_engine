@@ -354,6 +354,7 @@ bool TextFieldPattern::UpdateCaretPosition()
         LOGW("Not on focus, cannot update caret");
         return true;
     }
+    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
     // text input has higher priority than events such as mouse press
     if (caretUpdateType_ == CaretUpdateType::INPUT) {
         UpdateCaretPositionByTextEdit();
@@ -1319,13 +1320,9 @@ void TextFieldPattern::HandleBlurEvent()
     caretRect_.Reset();
     StopTwinkling();
     CloseKeyboard(true);
-    auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     MarkRedrawOverlay();
-    UpdateCaretPositionWithClamp(pos);
-    textEditingValue_.CursorMoveToPosition(pos);
     textSelector_.Update(-1);
     selectionMode_ = SelectionMode::NONE;
-    caretUpdateType_ = CaretUpdateType::EVENT;
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     ResetBackgroundColor();
