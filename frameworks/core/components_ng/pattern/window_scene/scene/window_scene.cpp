@@ -113,11 +113,9 @@ void WindowScene::OnBackground()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         CHECK_NULL_VOID(self->session_);
-        auto snapshot = self->session_->GetSnapshot();
-        auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
-
-        CHECK_NULL_VOID(pixelMap);
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+        CHECK_NULL_VOID(self->session_->GetScenePersistence());
+        imageLayoutProperty->UpdateImageSourceInfo(
+            ImageSourceInfo("file:/" + self->session_->GetScenePersistence()->GetSnapshotFilePath()));
         imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
         self->snapshotNode_->MarkModifyDone();
     };
