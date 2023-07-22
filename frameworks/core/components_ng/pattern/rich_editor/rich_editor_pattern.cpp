@@ -780,6 +780,10 @@ void RichEditorPattern::HandleBlurEvent()
 {
     StopTwinkling();
     CloseKeyboard(true);
+    if (textSelector_.IsValid()) {
+        CloseSelectOverlay();
+        ResetSelection();
+    }
 }
 
 void RichEditorPattern::HandleFocusEvent() {}
@@ -838,11 +842,15 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         eventHub->FireOnSelect(&textSelectInfo);
     }
     SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
     if (richEditorOverlayModifier_) {
         RequestKeyboard(false, true, true);
     }
-
-    StopTwinkling();
+    if (caretVisible_) {
+        StopTwinkling();
+    }
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1211,9 +1219,12 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
     if (isSelector) {
-        auto length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        textSelector_.Update(-1, -1);
-        DeleteForward(length);
+        DeleteForward(textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
+    if (!caretVisible_) {
+        StartTwinkling();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1248,7 +1259,6 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     text = converter.to_bytes(textTemp);
     spanNode->UpdateContent(text);
     AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
-    return;
 }
 
 void RichEditorPattern::InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue)
