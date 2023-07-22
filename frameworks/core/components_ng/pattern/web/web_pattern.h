@@ -336,6 +336,7 @@ public:
     bool NotifyStartDragTask();
     bool IsImageDrag();
     DragRet GetDragAcceptableStatus();
+    Offset GetDragOffset() const;
 
 private:
     void RegistVirtualKeyBoardListener();
