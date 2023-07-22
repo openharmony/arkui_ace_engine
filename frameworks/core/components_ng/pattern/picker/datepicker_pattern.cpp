@@ -55,6 +55,7 @@ void DatePickerPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
 }
 
 bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
