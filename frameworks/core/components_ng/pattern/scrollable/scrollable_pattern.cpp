@@ -256,22 +256,27 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
 
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
+    bool isAtTop = IsAtTop();
+    bool isAtBottom = IsAtBottom();
     // check edgeEffect is not springEffect
     if (scrollEffect_ && scrollEffect_->IsFadeEffect() && (source == SCROLL_FROM_UPDATE ||
         source == SCROLL_FROM_ANIMATION)) {    // handle edge effect
-        if ((IsAtTop() && Positive(offset)) || (IsAtBottom() && Negative(offset))) {
+        if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
             scrollEffect_->HandleOverScroll(GetAxis(), -offset, size);
         }
     }
     if (!(scrollEffect_ && scrollEffect_->IsSpringEffect() && (source == SCROLL_FROM_UPDATE ||
         source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING))) {
-        if (IsAtTop() && Positive(offset)) {
+        if (isAtTop && Positive(offset)) {
+            animateOverScroll_ = false;
             return false;
         }
-        if (IsAtBottom() && Negative(offset)) {
+        if (isAtBottom && Negative(offset)) {
+            animateOverScroll_ = false;
             return false;
         }
     }
+    animateOverScroll_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && (isAtTop || isAtBottom);
     return true;
 }
 
