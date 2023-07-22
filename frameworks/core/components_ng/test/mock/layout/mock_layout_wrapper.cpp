@@ -17,8 +17,16 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
+void LayoutWrapper::Update(
+    WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
+{}
 
-const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false)
+LayoutWrapper::LayoutWrapper(
+    WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
+    : hostNode_(std::move(hostNode)), geometryNode_(std::move(geometryNode)), layoutProperty_(std::move(layoutProperty))
+{}
+
+RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool addToRenderTree)
 {
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -28,76 +36,93 @@ const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false)
     return layoutWrapper;
 }
 
-void Measure(const std::optional<LayoutConstraintF>& parentConstraint) {}
+void LayoutWrapper::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) {}
 
-void Layout() {}
-
-int32_t GetTotalChildCount()
-{
-    return 0;
-}
-
-const RefPtr<GeometryNode>& GetGeometryNode()
-{
-    return nullptr;
-}
-
-const RefPtr<LayoutProperty>& GetLayoutProperty()
-{
-    return nullptr;
-}
-
-RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true)
-{
-    return V2::SWIPER_ETS_TAG;
-}
-
-const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true)
+const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
 {
     return {};
 }
 
-void RemoveChildInRenderTree(uint32_t index) {}
+void LayoutWrapper::RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper) {}
 
-void RemoveAllChildInRenderTree() {}
+void LayoutWrapper::RemoveChildInRenderTree(int32_t index) {}
 
-RefPtr<FrameNode> GetHostNode()
+void LayoutWrapper::RemoveAllChildInRenderTree() {}
+
+void LayoutWrapper::ResetHostNode() {}
+
+RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
 {
-    return nullptr;
+    return {};
 }
 
-const std::string& GetHostTag()
+WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
 {
-    return "";
+    return {};
 }
 
-bool IsActive()
+std::string LayoutWrapper::GetHostTag() const
+{
+    return V2::SWIPER_ETS_TAG;
+}
+
+int32_t LayoutWrapper::GetHostDepth() const
+{
+    return {};
+}
+
+void LayoutWrapper::CreateRootConstraint() {}
+
+void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint) {}
+
+void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint) {}
+
+// This will call child and self measure process.
+void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint) {}
+
+// Called to perform layout children.
+void LayoutWrapper::Layout() {}
+
+void LayoutWrapper::RestoreGeoState() {}
+
+void LayoutWrapper::AvoidKeyboard() {}
+
+void LayoutWrapper::ExpandSafeArea() {}
+
+void LayoutWrapper::SaveGeoState() {}
+void LayoutWrapper::ExpandSafeAreaInner() {}
+
+void LayoutWrapper::ExpandIntoKeyboard() {}
+
+bool LayoutWrapper::SkipMeasureContent() const
 {
     return false;
 }
 
-void SetActive(bool active = true) {}
-
-bool SkipMeasureContent()
+bool LayoutWrapper::CheckNeedForceMeasureAndLayout()
 {
     return false;
 }
 
-void SetCacheCount(int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) {}
-
-float GetBaselineDistance()
-{
-    return 0.0f;
-}
-
-bool CheckNeedForceMeasureAndLayout()
+bool LayoutWrapper::CheckChildNeedForceMeasureAndLayout()
 {
     return false;
 }
 
-void AddNodeFlexLayouts() {}
+void LayoutWrapper::MountToHostOnMainThread() {}
 
-void AddNodeLayoutTime(int64_t time) {}
+void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread() {}
 
-void RestoreGeoState() {}
+void LayoutWrapper::BuildLazyItem() {}
+
+std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
+{
+    return {};
+}
+
+void LayoutWrapper::AddNodeFlexLayouts() {}
+
+void LayoutWrapper::AddNodeLayoutTime(int64_t time) {}
+
+void LayoutWrapper::AppendChild(const RefPtr<LayoutWrapper>& child, bool isOverlayNode) {}
 } // namespace OHOS::Ace::NG
