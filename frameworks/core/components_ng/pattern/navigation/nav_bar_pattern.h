@@ -75,30 +75,24 @@ public:
         return toolBarMenuItems_;
     }
 
-    int32_t GetMenuNodeId()
+    int32_t GetMenuNodeId() const
     {
-        if (!menuNodeId_.has_value()) {
-            menuNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
         return menuNodeId_.value();
     }
 
-    int32_t GetLandscapeMenuNodeId()
+    int32_t GetLandscapeMenuNodeId() const
     {
-        if (!landscapeMenuNodeId_.has_value()) {
-            landscapeMenuNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
         return landscapeMenuNodeId_.value();
     }
 
-    bool HasMenuNode() const
+    void SetMenuNodeId(const int32_t menuNodeId)
     {
-        return menuNodeId_.has_value();
+        menuNodeId_ = menuNodeId;
     }
 
-    bool HasLandscapeMenuNode() const
+    void SetLandscapeMenuNodeId(const int32_t landscapeMenuNodeId)
     {
-        return landscapeMenuNodeId_.has_value();
+        landscapeMenuNodeId_ = landscapeMenuNodeId;
     }
 
 protected:
