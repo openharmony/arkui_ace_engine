@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
+#include <cstdint>
 #include <functional>
 #include <unordered_map>
 #include <utility>
@@ -34,6 +35,14 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+
+namespace OHOS::Ace {
+struct ModalUIExtensionCallbacks;
+} // namespace OHOS::Ace
+
+namespace OHOS::AAFwk {
+class Want;
+} // namespace OHOS::AAFwk
 
 namespace OHOS::Ace::NG {
 
@@ -246,6 +255,10 @@ public:
     static void DestroySheetMask(const RefPtr<FrameNode>& sheetNode);
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
+
+    // ui extension
+    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
+    void CloseModalUIExtension(int32_t sessionId);
 
 private:
     void PopToast(int32_t targetId);

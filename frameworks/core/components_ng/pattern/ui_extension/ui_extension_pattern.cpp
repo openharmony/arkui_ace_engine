@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
+#include <cstdint>
+
 #include "session/host/include/extension_session.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "ui/rs_surface_node.h"
@@ -55,6 +57,28 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
     CHECK_NULL_VOID(session_);
     RegisterLifecycleListener();
     LOGI("UIExtension request UIExtensionAbility start");
+    RequestExtensionSessionActivation();
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
+        new (std::nothrow) Rosen::ExtensionSession::ExtensionSessionEventCallback();
+    extensionSession->RegisterExtensionSessionEventCallback(extSessionEventCallback);
+}
+
+UIExtensionPattern::UIExtensionPattern(const AAFwk::Want& want)
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_VOID_NOLOG(container);
+    auto callerToken = container->GetToken();
+    Rosen::SessionInfo extensionSessionInfo = {
+        .bundleName_ = want.GetElement().GetBundleName(),
+        .abilityName_ = want.GetElement().GetAbilityName(),
+        .callerToken_ = callerToken,
+        .want = new (std::nothrow) Want(want),
+    };
+    session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
+    CHECK_NULL_VOID(session_);
+    RegisterLifecycleListener();
+    LOGI("Native Modal UIExtension request UIExtensionAbility start");
     RequestExtensionSessionActivation();
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     sptr<Rosen::ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback =
@@ -418,7 +442,7 @@ void UIExtensionPattern::UnregisterAbilityResultListener()
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
 }
 
-void UIExtensionPattern::SetOnRemoteReadyCallback(std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
+void UIExtensionPattern::SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback)
 {
     onRemoteReadyCallback_ = std::move(callback);
 
@@ -441,13 +465,13 @@ void UIExtensionPattern::SetOnRemoteReadyCallback(std::function<void(const RefPt
         };
 }
 
-void UIExtensionPattern::SetOnReleaseCallback(std::function<void(int32_t)>&& callback)
+void UIExtensionPattern::SetOnReleaseCallback(const std::function<void(int32_t)>&& callback)
 {
     onReleaseCallback_ = std::move(callback);
 }
 
 void UIExtensionPattern::SetOnErrorCallback(
-    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback)
+    const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback)
 {
     onErrorCallback_ = std::move(callback);
     if (lastError_.code != 0) {
@@ -457,7 +481,7 @@ void UIExtensionPattern::SetOnErrorCallback(
     }
 }
 
-void UIExtensionPattern::SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback)
+void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback)
 {
     onResultCallback_ = std::move(callback);
 
@@ -480,7 +504,7 @@ void UIExtensionPattern::SetOnResultCallback(std::function<void(int32_t, const A
         };
 }
 
-void UIExtensionPattern::SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback)
+void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback)
 {
     onReceiveCallback_ = std::move(callback);
 
@@ -547,5 +571,11 @@ bool UIExtensionPattern::IsCurrentFocus() const
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_RETURN_NOLOG(focusHub, false);
     return focusHub->IsCurrentFocus();
+}
+
+int32_t UIExtensionPattern::GetSessionId()
+{
+    CHECK_NULL_RETURN(session_, 0);
+    return session_->GetPersistentId();
 }
 } // namespace OHOS::Ace::NG
