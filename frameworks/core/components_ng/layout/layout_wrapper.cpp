@@ -42,16 +42,9 @@ void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraint
 {
     SizeF safeSize { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
     safeSize.MinusPadding(insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
-    if (safeSize.Width() < constraint.maxSize.Width() || safeSize.Height() < constraint.maxSize.Height()) {
-        safeSize.SetWidth(std::min(safeSize.Width(), constraint.maxSize.Width()));
-        safeSize.SetHeight(std::min(safeSize.Height(), constraint.maxSize.Height()));
-        constraint.maxSize = safeSize;
-        constraint.parentIdealSize = OptionalSizeF(safeSize);
-        constraint.percentReference = safeSize;
-    }
-    if (safeSize < constraint.minSize) {
-        constraint.minSize = safeSize;
-    }
+    constraint.maxSize = safeSize;
+    constraint.parentIdealSize = OptionalSizeF(safeSize);
+    constraint.percentReference = safeSize;
 }
 
 void LayoutWrapper::OffsetNodeToSafeArea()
