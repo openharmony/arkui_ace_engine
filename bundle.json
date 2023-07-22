@@ -59,7 +59,7 @@
                 "i18n",
                 "hicollie",
                 "init",
-                "multimedia_image_framework",
+                "image_framework",
                 "player_framework",
                 "access_token",
                 "input",
@@ -149,7 +149,8 @@
                 }
             ],
             "test": [
-                "//foundation/arkui/ace_engine/frameworks/bridge/test:unittest",
+                "//foundation/arkui/ace_engine/test/unittest:unittest",
+                "//foundation/arkui/ace_engine/frameworks/core/components_ng/test:unittest",
                 "//foundation/arkui/ace_engine/test/fuzztest:fuzztest"
             ]
         }

@@ -74,8 +74,8 @@ public:
         scrollableEvent_->SetEnabled(enable);
     }
     void SetScrollableAxis(Axis axis);
-    const RefPtr<GestureEventHub>& GetGestureHub();
-    const RefPtr<InputEventHub>& GetInputHub();
+    RefPtr<GestureEventHub> GetGestureHub();
+    RefPtr<InputEventHub> GetInputHub();
 
     // edgeEffect
     const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
@@ -149,14 +149,6 @@ public:
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID_NOLOG(scrollable);
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
-    }
-
-    bool IsScrollBarPressed() const
-    {
-        if (scrollBar_) {
-            return scrollBar_->IsPressed();
-        }
-        return false;
     }
 
     bool IsScrollableSpringEffect() const
@@ -273,12 +265,6 @@ protected:
     RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
     {
         return scrollBarProxy_;
-    }
-    void SetScrollBarDriving(bool Driving)
-    {
-        if (scrollBar_) {
-            scrollBar_->SetDriving(Driving);
-        }
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 

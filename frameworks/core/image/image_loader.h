@@ -114,7 +114,7 @@ public:
     RefPtr<NG::ImageData> LoadDecodedImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 private:
-    static const std::string& GetThumbnailOrientation(const ImageSourceInfo& src);
+    static std::string GetThumbnailOrientation(const ImageSourceInfo& src);
 };
 
 class AssetImageLoader final : public ImageLoader {

@@ -180,10 +180,11 @@ private:
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
     bool showTips_ = false;
-    bool hotFlag_ = false;
+    bool hotFlag_ = false; // whether the mouse is hovering over the slider
     bool valueChangeFlag_ = false;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
+    bool AxisFlag_ = false; // Wheel operation flag
     bool focusFlag_ = false;
     bool panMoveFlag_ = false;
     bool hasVisibleChangeRegistered_ = false;

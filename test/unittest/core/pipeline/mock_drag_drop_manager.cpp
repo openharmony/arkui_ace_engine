@@ -47,7 +47,8 @@ RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& cust
 
 void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY) {}
 
-RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType)
+RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
+    float globalX, float globalY, DragType dragType, bool findDrop)
 {
     return nullptr;
 }

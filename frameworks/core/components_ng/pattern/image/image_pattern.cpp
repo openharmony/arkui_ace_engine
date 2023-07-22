@@ -159,8 +159,7 @@ void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& layoutWrapper = host->GetLayoutWrapper().Upgrade();
-    const auto& geometryNode = layoutWrapper == nullptr ? host->GetGeometryNode() : layoutWrapper->GetGeometryNode();
+    const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     // update src data
     image_ = loadingCtx_->MoveCanvasImage();
@@ -249,7 +248,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     if (altImage_ && altDstRect_ && altSrcRect_) {
         return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
     }
-    CreateObscuredImageIfNeed();
+    CreateObscuredImage();
     if (obscuredImage_) {
         return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_);
     }
@@ -264,15 +263,15 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     return image_;
 }
 
-void ImagePattern::CreateObscuredImageIfNeed()
+void ImagePattern::CreateObscuredImage()
 {
-    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto layoutConstraint = imageLayoutProperty->GetLayoutConstraint();
-    CHECK_NULL_VOID(layoutConstraint);
+    auto props = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto layoutConstraint = props->GetLayoutConstraint();
+    CHECK_NULL_VOID_NOLOG(layoutConstraint);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    auto sourceInfo = props->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     auto reasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
         if (!obscuredImage_) {

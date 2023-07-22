@@ -17,16 +17,8 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
-void LayoutWrapper::Update(
-    WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
-{}
 
-LayoutWrapper::LayoutWrapper(
-    WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
-    : hostNode_(std::move(hostNode)), geometryNode_(std::move(geometryNode)), layoutProperty_(std::move(layoutProperty))
-{}
-
-RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool addToRenderTree)
+const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false)
 {
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
@@ -36,93 +28,76 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
     return layoutWrapper;
 }
 
-void LayoutWrapper::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) {}
+void Measure(const std::optional<LayoutConstraintF>& parentConstraint) {}
 
-const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
+void Layout() {}
+
+int32_t GetTotalChildCount()
 {
-    return {};
+    return 0;
 }
 
-void LayoutWrapper::RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper) {}
-
-void LayoutWrapper::RemoveChildInRenderTree(int32_t index) {}
-
-void LayoutWrapper::RemoveAllChildInRenderTree() {}
-
-void LayoutWrapper::ResetHostNode() {}
-
-RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
+const RefPtr<GeometryNode>& GetGeometryNode()
 {
-    return {};
+    return nullptr;
 }
 
-WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
+const RefPtr<LayoutProperty>& GetLayoutProperty()
 {
-    return {};
+    return nullptr;
 }
 
-std::string LayoutWrapper::GetHostTag() const
+RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true)
 {
     return V2::SWIPER_ETS_TAG;
 }
 
-int32_t LayoutWrapper::GetHostDepth() const
+const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true)
 {
     return {};
 }
 
-void LayoutWrapper::CreateRootConstraint() {}
+void RemoveChildInRenderTree(uint32_t index) {}
 
-void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint) {}
+void RemoveAllChildInRenderTree() {}
 
-void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint) {}
+RefPtr<FrameNode> GetHostNode()
+{
+    return nullptr;
+}
 
-// This will call child and self measure process.
-void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint) {}
+const std::string& GetHostTag()
+{
+    return "";
+}
 
-// Called to perform layout children.
-void LayoutWrapper::Layout() {}
-
-void LayoutWrapper::RestoreGeoState() {}
-
-void LayoutWrapper::AvoidKeyboard() {}
-
-void LayoutWrapper::ExpandSafeArea() {}
-
-void LayoutWrapper::SaveGeoState() {}
-void LayoutWrapper::ExpandSafeAreaInner() {}
-
-void LayoutWrapper::ExpandIntoKeyboard() {}
-
-bool LayoutWrapper::SkipMeasureContent() const
+bool IsActive()
 {
     return false;
 }
 
-bool LayoutWrapper::CheckNeedForceMeasureAndLayout()
+void SetActive(bool active = true) {}
+
+bool SkipMeasureContent()
 {
     return false;
 }
 
-bool LayoutWrapper::CheckChildNeedForceMeasureAndLayout()
+void SetCacheCount(int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) {}
+
+float GetBaselineDistance()
+{
+    return 0.0f;
+}
+
+bool CheckNeedForceMeasureAndLayout()
 {
     return false;
 }
 
-void LayoutWrapper::MountToHostOnMainThread() {}
+void AddNodeFlexLayouts() {}
 
-void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread() {}
+void AddNodeLayoutTime(int64_t time) {}
 
-void LayoutWrapper::BuildLazyItem() {}
-
-std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
-{
-    return {};
-}
-
-void LayoutWrapper::AddNodeFlexLayouts() {}
-
-void LayoutWrapper::AddNodeLayoutTime(int64_t time) {}
-
-void LayoutWrapper::AppendChild(const RefPtr<LayoutWrapper>& child, bool isOverlayNode) {}
+void RestoreGeoState() {}
 } // namespace OHOS::Ace::NG

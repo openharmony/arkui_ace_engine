@@ -588,6 +588,30 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     SetBackBlurFilter();
 }
 
+void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+{
+    const auto& groupProperty = GetOrCreateBackground();
+    if (groupProperty->CheckEffectOption(effectOption)) {
+        return;
+    }
+    groupProperty->propEffectOption = effectOption;
+    if (!effectOption.has_value()) {
+        return;
+    }
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    float radiusPx = context->NormalizeToPx(effectOption->radius);
+#ifndef USE_ROSEN_DRAWING
+    float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+    float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
+    std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
+        backblurRadius, static_cast<float>(effectOption->saturation),
+        static_cast<float>(effectOption->brightness), effectOption->color.GetValue());
+    rsNode_->SetBackgroundFilter(backFilter);
+}
+
 void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle)
 {
     const auto& groupProperty = GetOrCreateForeground();
@@ -1291,6 +1315,11 @@ void RosenRenderContext::OnModifyDone()
     if (HasClickEffectLevel()) {
         InitEventClickEffect();
     }
+}
+
+RectF RosenRenderContext::GetPropertyOfPosition()
+{
+    return AdjustPaintRect();
 }
 
 RectF RosenRenderContext::AdjustPaintRect()

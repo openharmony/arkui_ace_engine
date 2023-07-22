@@ -57,8 +57,19 @@ struct BackgroundProperty {
         }
         return NearEqual(propBlurRadius.value(), radius);
     }
+    bool CheckEffectOption(const std::optional<EffectOption>& effectOption) const
+    {
+        if (!effectOption.has_value()) {
+            return false;
+        }
+        if (!propEffectOption.has_value()) {
+            return false;
+        }
+        return NearEqual(propEffectOption.value(), effectOption.value());
+    }
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
+    std::optional<EffectOption> propEffectOption;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 

@@ -17,6 +17,8 @@
 
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
@@ -220,6 +222,7 @@ float GridPattern::GetMainContentSize() const
 
 void GridPattern::FireOnScrollStart()
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -452,24 +455,41 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
     }
 
     auto onReachStart = gridEventHub->GetOnReachStart();
-	// want to call onReachStart(), must be:
-	//    onReachStart function pointer existing,
-	//    first time to reach top: currentOffset equal to 0,
-	//    Or Spring end to reach top again: reachStart_ is true and last time reachStart_ is false.
-    if (onReachStart && gridLayoutInfo_.startIndex_ == 0 &&
-        (NearZero(gridLayoutInfo_.currentOffset_) || (gridLayoutInfo_.reachStart_ && !reachStart))) {
+    if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
+        if ((scrollState_ == SCROLL_FROM_UPDATE || scrollState_ == SCROLL_FROM_ANIMATION_SPRING ||
+                scrollState_ == SCROLL_FROM_ANIMATION) &&
+            gridLayoutInfo_.reachStart_ && !reachStart && !NearZero(gridLayoutInfo_.currentOffset_)) {
+            onReachStart();
+            initialIndex_ = true;
+        }
+        if (scrollState_ == SCROLL_FROM_ANIMATION_SPRING && NearZero(gridLayoutInfo_.currentOffset_)) {
+            onReachStart();
+            initialIndex_ = true;
+        }
+        if (!NearZero(gridLayoutInfo_.currentOffset_)) {
+            offsetCount_++;
+        }
+        if (scrollState_ == SCROLL_FROM_NONE && reachStart && NearZero(gridLayoutInfo_.currentOffset_) &&
+            offsetCount_ > 1) {
+            onReachStart();
+            initialIndex_ = true;
+            offsetCount_ = 0;
+        }
+    }
+    if (onReachStart && !initialIndex_ && gridLayoutInfo_.startIndex_ == 0) {
         onReachStart();
+        initialIndex_ = true;
     }
 
     auto onReachEnd = gridEventHub->GetOnReachEnd();
-	// want to call onReachEnd(), must be:
-	//    onReachEnd function pointer existing and endIndex_ equal to sub windows count,
-	//    first time to reach bottom: reachEnd_ is true and offsetEnd_ is different from last time,
-	//    Or spring end to reach bottom again: reachEnd_ is false and offsetEnd_ is false.
-    if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1) &&
-        ((gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) ||
-        (!gridLayoutInfo_.reachEnd_ && !gridLayoutInfo_.offsetEnd_))) {
-        onReachEnd();
+    if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
+        if (gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) {
+            onReachEnd();
+        }
+        if (scrollState_ == SCROLL_FROM_ANIMATION_SPRING && !gridLayoutInfo_.reachEnd_ &&
+            !gridLayoutInfo_.offsetEnd_) {
+            onReachEnd();
+        }
     }
 
     if (scrollStop_) {
@@ -477,6 +497,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
         if (!GetScrollAbort() && onScrollStop) {
             scrollState_ = SCROLL_FROM_NONE;
             onScrollStop();
+        }
+        if (!GetScrollAbort()) {
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         }
         scrollStop_ = false;
         SetScrollAbort(false);
@@ -521,7 +544,7 @@ void GridPattern::FlushCurrentFocus()
         }
     }
     if (gridLayoutInfo_.gridMatrix_.find(lastFocusItemMainIndex_) == gridLayoutInfo_.gridMatrix_.end()) {
-        LOGE("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
+        LOGD("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
         return;
     }
     auto curCrossNum = GetCrossCount();
@@ -836,7 +859,7 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
             }
         }
     }
-    LOGW("Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex, tarCrossIndex, tarIndex);
+    LOGD("Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex, tarCrossIndex, tarIndex);
     return nullptr;
 }
 
@@ -1007,6 +1030,7 @@ void GridPattern::SetPositionController(const RefPtr<ScrollableController>& cont
 
 void GridPattern::ScrollPage(bool reverse)
 {
+    StopAnimate();
     if (!isConfigScrollable_) {
         return;
     }

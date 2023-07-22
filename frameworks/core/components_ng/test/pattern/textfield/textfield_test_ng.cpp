@@ -2332,7 +2332,6 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback002, TestSize.Level1)
     const int32_t source = 0;
     bool ret = false;
     textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
-    textFieldPattern->scrollBar_->SetDriving(true);
 
     /**
      * @tc.steps: step2. call OnScrollCallback function.
@@ -2358,7 +2357,6 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback003, TestSize.Level1)
     const int32_t source = 0;
     bool ret = false;
     textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
-    textFieldPattern->scrollBar_->SetDriving(false);
 
     /**
      * @tc.steps: step2. call OnScrollCallback function.
@@ -4077,7 +4075,7 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     ASSERT_NE(geometryNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(frameNode)), geometryNode->Clone(), layoutProperty->Clone());
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
@@ -4133,7 +4131,7 @@ HWTEST_F(TextFieldPatternTestNg, MeasureContent, TestSize.Level2)
     contentConstraint.selfIdealSize.SetWidth(20);
     contentConstraint.selfIdealSize.SetHeight(20);
     cloneLayoutProperty->contentConstraint_ = contentConstraint;
-    LayoutWrapper layoutWrapper(
+    LayoutWrapperNode layoutWrapper(
         AceType::WeakClaim(AceType::RawPtr(frameNode)), geometryNode->Clone(), cloneLayoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
@@ -4247,7 +4245,8 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldLayoutAlgorithmMeasure, TestSize.Level
     layoutConstraint.selfIdealSize.SetWidth(20);
     layoutConstraint.selfIdealSize.SetHeight(20);
     cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
-    LayoutWrapper layoutWrapper(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    LayoutWrapperNode layoutWrapper(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     layoutAlgorithm->Measure(&layoutWrapper);
@@ -4372,7 +4371,8 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldLayoutAlgorithmLayout, TestSize.Level2
     layoutConstraint.selfIdealSize.SetWidth(20);
     layoutConstraint.selfIdealSize.SetHeight(20);
     cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
-    LayoutWrapper layoutWrapper(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    LayoutWrapperNode layoutWrapper(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     layoutAlgorithm->Layout(&layoutWrapper);

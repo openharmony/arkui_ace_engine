@@ -19,11 +19,13 @@ ohos_unittest("navigation_test_ng") {
 
   sources = [
     # custom
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
 
     # inner
     "$ace_root/frameworks/base/geometry/dimension.cpp",
@@ -153,6 +155,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
@@ -174,8 +177,10 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_txt_paragraph.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # self

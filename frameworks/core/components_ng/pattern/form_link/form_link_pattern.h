@@ -45,7 +45,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnAreaChangedInner() override;
 
     FormLinkInfo formLinkInfo_;
 };

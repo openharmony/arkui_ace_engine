@@ -709,7 +709,7 @@ void CustomPaintPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-const LineDashParam& CustomPaintPattern::GetLineDash() const
+LineDashParam CustomPaintPattern::GetLineDash() const
 {
     return paintMethod_->GetLineDash();
 }

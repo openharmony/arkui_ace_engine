@@ -71,6 +71,7 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto optionHeight = optionSize.Height();
 
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+    child->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     child->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(horInterval_, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
     child->Layout();

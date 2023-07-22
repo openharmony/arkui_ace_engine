@@ -219,7 +219,7 @@ void StepperPattern::UpdateLeftButtonNode(int32_t index)
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(leftLabel);
 
     textNode->MarkModifyDone();
-    buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void StepperPattern::UpdateOrCreateRightButtonNode(int32_t index)
@@ -404,12 +404,6 @@ void StepperPattern::CreateWaitingRightButtonNode()
     CHECK_NULL_VOID(hostNode);
     // Create loadingProgressNode
     auto buttonId = hostNode->GetRightButtonId();
-    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
-    buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
-    buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
-    CHECK_NULL_VOID(buttonNode);
     auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(
         V2::LOADING_PROGRESS_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     loadingProgressNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -556,21 +550,19 @@ void StepperPattern::InitButtonClickEvent()
     CHECK_NULL_VOID(hostNode);
 
     if (hostNode->HasLeftButtonNode()) {
-        auto leftClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
-            auto stepperPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(stepperPattern);
-            stepperPattern->HandlingLeftButtonClickEvent();
-        };
         auto leftButtonNode =
             DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetLeftButtonId())));
         CHECK_NULL_VOID(leftButtonNode);
         auto leftGestureHub = leftButtonNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(leftGestureHub);
-        if (leftClickEvent_) {
-            leftGestureHub->RemoveClickEvent(leftClickEvent_);
+        if (leftGestureHub->IsClickEventsEmpty()) {
+            auto leftClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
+                auto stepperPattern = weak.Upgrade();
+                CHECK_NULL_VOID_NOLOG(stepperPattern);
+                stepperPattern->HandlingLeftButtonClickEvent();
+            };
+            leftGestureHub->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(leftClickEvent)));
         }
-        leftClickEvent_ = MakeRefPtr<ClickEvent>(std::move(leftClickEvent));
-        leftGestureHub->AddClickEvent(leftClickEvent_);
     }
 
     auto rightButtonNode =
@@ -578,16 +570,14 @@ void StepperPattern::InitButtonClickEvent()
     CHECK_NULL_VOID(rightButtonNode);
     auto rightGestureHub = rightButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(rightGestureHub);
-    auto rightClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto stepperPattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(stepperPattern);
-        stepperPattern->HandlingRightButtonClickEvent();
-    };
-    if (rightClickEvent_) {
-        rightGestureHub->RemoveClickEvent(rightClickEvent_);
+    if (rightGestureHub->IsClickEventsEmpty()) {
+        auto rightClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
+            auto stepperPattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(stepperPattern);
+            stepperPattern->HandlingRightButtonClickEvent();
+        };
+        rightGestureHub->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(rightClickEvent)));
     }
-    rightClickEvent_ = MakeRefPtr<ClickEvent>(std::move(rightClickEvent));
-    rightGestureHub->AddClickEvent(rightClickEvent_);
 }
 
 void StepperPattern::HandlingLeftButtonClickEvent()
@@ -665,5 +655,58 @@ void StepperPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         pattern->HandlingLeftButtonClickEvent();
     });
+}
+
+WeakPtr<FocusHub> StepperPattern::GetFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    auto curFocusNode = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocusNode, nullptr);
+    auto hostNode = DynamicCast<StepperNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, nullptr);
+
+    auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index_)));
+    CHECK_NULL_RETURN(stepperItemNode, nullptr);
+    auto buttonFocusHub = stepperItemNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(buttonFocusHub, nullptr);
+
+    auto stepperItemLayoutProperty = stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>();
+    CHECK_NULL_RETURN(stepperItemLayoutProperty, nullptr);
+    auto labelStatus = stepperItemLayoutProperty->GetLabelStatus().value_or("normal");
+
+    if (hostNode->HasLeftButtonNode()) {
+        auto leftButtonNode =
+            DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetLeftButtonId())));
+        CHECK_NULL_RETURN(leftButtonNode, nullptr);
+        leftFocusHub_ = leftButtonNode->GetOrCreateFocusHub();
+    }
+
+    auto rightButtonNode =
+        DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetRightButtonId())));
+    CHECK_NULL_RETURN(rightButtonNode, nullptr);
+    auto rightFocusHub = rightButtonNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(rightFocusHub, nullptr);
+
+    if (labelStatus == "normal" || labelStatus == "skip") {
+        if (step == FocusStep::UP || step == FocusStep::LEFT || step == FocusStep::SHIFT_TAB) {
+            return curFocusNode == leftFocusHub_ ? buttonFocusHub : leftFocusHub_;
+        }
+
+        if (curFocusNode != leftFocusHub_ && curFocusNode != rightFocusHub) {
+            return hostNode->HasLeftButtonNode() ? leftFocusHub_ : rightFocusHub;
+        }
+
+        if (curFocusNode == rightFocusHub && !hostNode->HasLeftButtonNode()) {
+            return buttonFocusHub;
+        }
+
+        if (step == FocusStep::DOWN || step == FocusStep::RIGHT || step == FocusStep::TAB) {
+            return curFocusNode == buttonFocusHub ? leftFocusHub_ : rightFocusHub;
+        }
+    } else if (labelStatus == "disabled" || labelStatus == "waiting") {
+        return curFocusNode == leftFocusHub_ ? buttonFocusHub : leftFocusHub_;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

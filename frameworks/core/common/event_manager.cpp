@@ -124,7 +124,9 @@ void EventManager::TouchTest(
         frameNode->CheckSecurityComponentStatus(rect);
     }
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, event.id);
+    TouchTestResult hitTestResult;
+    frameNode->TouchTest(point, point, touchRestrict, hitTestResult, event.id);
+    axisTouchTestResults_[event.id] = std::move(hitTestResult);
 }
 
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
@@ -225,7 +227,9 @@ void EventManager::TouchTest(
     // collect
     const Point point { event.x, event.y, event.sourceType };
     // For root node, the parent local point is the same as global point.
-    renderNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_);
+    TouchTestResult hitTestResult;
+    renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
+    axisTouchTestResults_[event.id] = std::move(hitTestResult);
 }
 
 void EventManager::FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents)
@@ -322,17 +326,22 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
 {
     ContainerScope scope(instanceId_);
 
+    const auto curResultIter = axisTouchTestResults_.find(event.id);
+    if (curResultIter == axisTouchTestResults_.end()) {
+        LOGI("the %{public}d axis test result does not exist!", event.id);
+        return false;
+    }
     if (event.action == AxisAction::BEGIN) {
         // first collect gesture into gesture referee.
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
-                refereeNG_->AddGestureToScope(event.id, axisTouchTestResult_);
+                refereeNG_->AddGestureToScope(event.id, curResultIter->second);
             }
         }
     }
 
     ACE_FUNCTION_TRACE();
-    for (const auto& entry : axisTouchTestResult_) {
+    for (const auto& entry : curResultIter->second) {
         if (!entry->HandleEvent(event)) {
             break;
         }
@@ -343,7 +352,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
                 refereeNG_->CleanGestureScope(event.id);
             }
         }
-        axisTouchTestResult_.clear();
+        axisTouchTestResults_.erase(event.id);
     }
     return true;
 }
@@ -607,8 +616,10 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         event.action == MouseAction::WINDOW_LEAVE) {
         MouseTestResult handledResults;
         handledResults.clear();
-        if ((event.button == MouseButton::LEFT_BUTTON && !SystemProperties::IsSceneBoardEnabled()) ||
-            (event.button == MouseButton::LEFT_BUTTON && SystemProperties::IsSceneBoardEnabled() &&
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, false);
+        if ((event.button == MouseButton::LEFT_BUTTON && !container->IsScenceBoardWindow()) ||
+            (event.button == MouseButton::LEFT_BUTTON && container->IsScenceBoardWindow() &&
             event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
@@ -1179,6 +1190,7 @@ void EventManager::ClearResults()
 {
     touchTestResults_.clear();
     mouseTestResults_.clear();
+    axisTouchTestResults_.clear();
     keyboardShortcutNode_.clear();
 }
 

@@ -27,17 +27,22 @@ ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEv
     : gestureEventHub_(gestureEventHub)
 {}
 
-void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& /*touchRestrict*/,
+void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const PointF& localPoint,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
     for (const auto& [axis, event] : scrollableEvents_) {
         if (!event || !event->GetEnable()) {
             continue;
         }
-        const auto& scrollable = event->GetScrollable();
-        scrollable->SetGetEventTargetImpl(getEventTargetImpl);
-        scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        scrollable->OnCollectTouchTarget(result);
+        auto scrollBar = event->GetScrollBar();
+        if (scrollBar && scrollBar->InBarTouchRegion(Point(localPoint.GetX(), localPoint.GetY()))) {
+            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+        } else {
+            const auto& scrollable = event->GetScrollable();
+            scrollable->SetGetEventTargetImpl(getEventTargetImpl);
+            scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            scrollable->OnCollectTouchTarget(result);
+        }
     }
 }
 
@@ -52,7 +57,6 @@ void ScrollableActuator::InitializeScrollable(RefPtr<ScrollableEvent> event)
     scrollable->SetOnScrollFrameBegin(event->GetScrollFrameBeginCallback());
     scrollable->SetScrollEndCallback(event->GetScrollEndCallback());
     scrollable->Initialize(host->GetContext());
-    scrollable->SetMouseLeftButtonScroll(event->GetMouseLeftButtonScroll());
     scrollable->SetUnstaticFriction(event->GetFriction());
     event->SetScrollable(scrollable);
 }

@@ -91,11 +91,12 @@ public:
     static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color& color);
-    static void SetBackgroundImage(const std::string& src);
+    static void SetBackgroundImage(const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat);
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
+    static void SetBackgroundEffect(const EffectOption& effectOption);
     static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
@@ -125,7 +126,7 @@ public:
 
     // customBackground
     static void SetBackgroundAlign(const Alignment& align);
-    
+
     // decoration
     static void SetBackdropBlur(const Dimension& radius);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);

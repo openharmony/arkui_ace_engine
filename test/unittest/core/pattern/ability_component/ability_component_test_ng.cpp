@@ -201,7 +201,8 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest004, TestSize.Level1
     pattern->OnInActive();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     EXPECT_NE(layoutWrapper, nullptr);
     DirtySwapConfig config;
     config.frameOffsetChange = true;
@@ -239,7 +240,7 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest005, TestSize.Level1
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto layoutProperty = layoutWrapper.GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
     auto abilityComponentPattern = frameNode->GetPattern<AbilityComponentPattern>();

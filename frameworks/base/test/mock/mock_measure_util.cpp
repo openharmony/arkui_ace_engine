@@ -13,15 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/common/ui_extension_helper.h"
+#include "base/geometry/size.h"
+#include "base/utils/measure_util.h"
 
 namespace OHOS::Ace {
-
-RefPtr<NG::FrameNode> UIExtensionHelper::CreateUIExtensionNode(const std::string& bundleName,
-    const std::string& abilityName, const std::map<std::string, std::string>& params,
-    std::function<void(int32_t)>&& onRelease)
+Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
 {
-    return nullptr;
+    return Size(0.0, 0.0);
 }
-
-}
+} // namespace OHOS::Ace

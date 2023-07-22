@@ -728,7 +728,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg020, TestSize.Level1)
      * @tc.expected: children_.size is 1 and the AdjustLayoutWrapperTree function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
-    RefPtr<LayoutWrapper> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
+    RefPtr<LayoutWrapperNode> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
     ZERO->UINode::AdjustLayoutWrapperTree(retLayoutWrapper, true, true);
     EXPECT_EQ(ZERO->children_.size(), 1);
     ZERO->Clean();
@@ -1153,7 +1153,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg039, TestSize.Level1)
      * @tc.steps: step1. call the CreateLayoutWrapper
      * @tc.expected: the return value is null
      */
-    RefPtr<LayoutWrapper> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
+    RefPtr<LayoutWrapperNode> retLayoutWrapper = ZERO->UINode::CreateLayoutWrapper(true, true);
     EXPECT_EQ(retLayoutWrapper, nullptr);
     /**
      * @tc.steps: step2. add one child for ZERO and call CreateLayoutWrapper

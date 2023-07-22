@@ -34,6 +34,7 @@ struct TextInputConfiguration {
     std::string actionLabel;
     TextInputAction action = TextInputAction::UNSPECIFIED;
     std::string inputFilter;
+    uint32_t maxLength;
     // Below maybe supported in the future. Just keep for placeholder.
     bool autoCorrect = false;
     std::string capitalization;

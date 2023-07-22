@@ -128,23 +128,6 @@ void JSSecButtonBase::SetLayoutDirection(const JSCallbackInfo& info)
         static_cast<SecurityComponentLayoutDirection>(value));
 }
 
-void JSSecButtonBase::SetlayoutOrder(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsNumber()) {
-        SecurityComponentModelNG::SetlayoutOrder(
-            SecSecurityComponentLayoutOrder::ICON_FIRST);
-        return;
-    }
-    int32_t value = info[0]->ToNumber<int32_t>();
-    if ((value < static_cast<int32_t>(SecSecurityComponentLayoutOrder::ICON_FIRST)) ||
-        (value > static_cast<int32_t>(SecSecurityComponentLayoutOrder::TEXT_FIRST))) {
-        SecurityComponentModelNG::SetlayoutOrder(
-            SecSecurityComponentLayoutOrder::ICON_FIRST);
-        return;
-    }
-    SecurityComponentModelNG::SetlayoutOrder(static_cast<SecSecurityComponentLayoutOrder>(value));
-}
-
 void JSSecButtonBase::SetBackgroundColor(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();

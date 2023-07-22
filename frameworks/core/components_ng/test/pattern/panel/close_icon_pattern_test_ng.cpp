@@ -227,8 +227,8 @@ HWTEST_F(CloseIconPatternTestNg, CloseIconPatternTest004, TestSize.Level1)
     EXPECT_FALSE(layoutProPerty == nullptr);
     auto layoutAlgorithm = AceType::DynamicCast<CloseIconLayoutAlgorithm>(closeIconPattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(layoutAlgorithm == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(closeIconNode, geometryNode, closeIconNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(closeIconNode, geometryNode, closeIconNode->GetLayoutProperty());
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     /**
      * @tc.steps: step5. update layoutWrapper.

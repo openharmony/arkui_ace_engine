@@ -28,8 +28,6 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 
 void ListPattern::OnModifyDone() {}
 
-void ListPattern::OnAttachToFrameNode() {}
-
 bool ListPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
 {
@@ -92,8 +90,6 @@ bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
 {
     return false;
 }
-
-void ListPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 
 void ListPattern::FireOnScrollStart() {}
 

@@ -255,12 +255,13 @@ void BuildMoreItemNodeAction(
     gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(callback));
 }
 
-RefPtr<FrameNode> CreateMenuItems(
-    const std::vector<NG::BarItem>& menuItems, RefPtr<NavBarNode> navBarNode, bool isCreateLandscapeMenu)
+RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG::BarItem>& menuItems,
+    RefPtr<NavBarNode> navBarNode, bool isCreateLandscapeMenu)
 {
-    int32_t menuNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::GetOrCreateFrameNode(
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    menuNode->Clean();
     auto rowProperty = menuNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rowProperty, nullptr);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
@@ -425,12 +426,13 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         auto titleBarMenuItems = navBarPattern->GetTitleBarMenuItems();
         auto toolBarMenuItems = navBarPattern->GetToolBarMenuItems();
 
-        auto menuNode = CreateMenuItems(titleBarMenuItems, navBarNode, false);
+        auto menuNode = CreateMenuItems(navBarPattern->GetMenuNodeId(), titleBarMenuItems, navBarNode, false);
         CHECK_NULL_VOID(menuNode);
         navBarNode->SetMenu(menuNode);
 
         titleBarMenuItems.insert(titleBarMenuItems.end(), toolBarMenuItems.begin(), toolBarMenuItems.end());
-        auto landscapeMenuNode = CreateMenuItems(titleBarMenuItems, navBarNode, true);
+        auto landscapeMenuNode =
+            CreateMenuItems(navBarPattern->GetLandscapeMenuNodeId(), titleBarMenuItems, navBarNode, true);
         CHECK_NULL_VOID(landscapeMenuNode);
         navBarNode->SetLandscapeMenu(landscapeMenuNode);
 

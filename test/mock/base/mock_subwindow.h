@@ -42,7 +42,7 @@ public:
     MOCK_METHOD0(ClearMenu, void());
     MOCK_METHOD0(ClearMenuNG, void());
     MOCK_METHOD2(
-        ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode));
+        ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, std::function<void()>&& buildFunc));
     MOCK_METHOD0(HideSubWindowNG, void());
     MOCK_CONST_METHOD0(GetChildContainerId, int32_t());
     MOCK_METHOD0(GetShown, bool());

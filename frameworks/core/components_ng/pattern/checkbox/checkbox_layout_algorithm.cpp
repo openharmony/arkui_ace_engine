@@ -61,6 +61,8 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto width = defaultWidth_ - 2 * horizontalPadding_;
     auto height = defaultHeight_ - 2 * verticalPadding_;
     auto size = SizeF(width, height);
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
     size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     if (!NearEqual(size.Width(), size.Height())) {
         auto length = std::min(size.Width(), size.Height());

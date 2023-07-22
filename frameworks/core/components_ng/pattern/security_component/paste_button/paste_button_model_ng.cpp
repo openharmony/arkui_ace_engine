@@ -43,7 +43,7 @@ PasteButtonModelNG* PasteButtonModelNG::GetInstance()
 void PasteButtonModelNG::Create(int32_t text, int32_t icon,
     int32_t backgroundType)
 {
-    SecurityComponentModelNG::CreateCommon(V2::SEC_PASTE_BUTTON_ETS_TAG,
+    SecurityComponentModelNG::CreateCommon(V2::PASTE_BUTTON_ETS_TAG,
         text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
 }
 

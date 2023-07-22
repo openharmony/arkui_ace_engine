@@ -63,23 +63,6 @@ public:
 
     SafeAreaInsets GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const;
 
-    // Add during Layout traversal
-    void AddWrapper(const WeakPtr<LayoutWrapper>& wrapper)
-    {
-        wrappersToAdjust_.emplace_back(wrapper);
-    }
-
-    // Reset after ExpandSafeArea and AvoidKeyboard
-    void ResetWrappers()
-    {
-        wrappersToAdjust_.clear();
-    }
-
-    const std::vector<WeakPtr<LayoutWrapper>>& GetWrappers() const
-    {
-        return wrappersToAdjust_;
-    }
-
     const std::set<WeakPtr<FrameNode>>& GetGeoRestoreNodes() const
     {
         return geoRestoreNodes_;
@@ -106,7 +89,6 @@ private:
     // bottom direction only
     SafeAreaInsets::Inset keyboardInset_;
     std::set<WeakPtr<FrameNode>> geoRestoreNodes_;
-    std::vector<WeakPtr<LayoutWrapper>> wrappersToAdjust_;
     // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;

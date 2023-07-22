@@ -37,7 +37,9 @@ build_component_ng("security_component_pattern_ng") {
     if (security_component_enable) {
       sources += [ "security_component_probe.cpp" ]
       external_deps += [
+        "ability_runtime:abilitykit_native",
         "access_token:libaccesstoken_sdk",
+        "napi:ace_napi",
         "security_component:libsecurity_component_framework",
         "security_component:libsecurity_component_sdk",
       ]

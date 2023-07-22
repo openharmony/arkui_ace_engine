@@ -117,7 +117,10 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
 #ifdef ENABLE_DRAG_FRAMEWORK
         view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
-        if (SystemProperties::IsSceneBoardEnabled() &&
+        int32_t instanceId = view->GetInstanceId();
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
+        if (container->IsScenceBoardWindow() &&
             (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
             pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
             view->ProcessMouseEvent(pointerEvent);
@@ -281,7 +284,9 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
 {
     MouseEvent event;
     if (pointerEvent) {
-        ConvertMouseEvent(pointerEvent, event);
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ConvertMouseEvent(pointerEvent, event, container->IsScenceBoardWindow());
     }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID_NOLOG(pointerEvent);

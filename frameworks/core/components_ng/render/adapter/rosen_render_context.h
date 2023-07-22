@@ -135,6 +135,7 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
+    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
     void ResetBackBlurStyle() override;
@@ -189,6 +190,9 @@ public:
     RectF GetPaintRectWithTranslate() override;
 
     RectF GetPaintRectWithoutTransform() override;
+
+    // get position property
+    RectF GetPropertyOfPosition() override;
 
     // append translate value and return origin value.
     void UpdateTranslateInXY(const OffsetF& offset) override;

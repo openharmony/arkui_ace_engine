@@ -357,6 +357,7 @@ public:
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
     {
         builderFunc_ = buildFunc;
+        backgroundNode_ = nullptr;
     }
 
     bool IsDraggable() const
@@ -379,14 +380,14 @@ public:
         return allowDrop_;
     }
 
-    void SetOverlayNode(const WeakPtr<FrameNode>& overlayNode)
+    void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
     {
         overlayNode_ = overlayNode;
     }
 
     RefPtr<FrameNode> GetOverlayNode() const
     {
-        return overlayNode_.Upgrade();
+        return overlayNode_;
     }
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
@@ -404,16 +405,6 @@ public:
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
-
-    // called during LayoutWrapper creation, used for finding corresponding LayoutWrapper during RestoreGeoState
-    void RecordLayoutWrapper(WeakPtr<LayoutWrapper> layoutWrapper)
-    {
-        layoutWrapper_ = std::move(layoutWrapper);
-    }
-    const WeakPtr<LayoutWrapper>& GetLayoutWrapper() const
-    {
-        return layoutWrapper_;
-    }
 
     void SetViewPort(RectF viewPort)
     {
@@ -468,7 +459,7 @@ public:
     const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
-    void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override {};
+    void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
     const std::string& GetHostTag() const override
     {
         return GetTag();
@@ -509,6 +500,7 @@ private:
     OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
+    void LayoutOverlay();
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
     void OnGenerateOneDepthVisibleFrameWithTransition(
@@ -567,9 +559,8 @@ private:
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
-    // only valid during layout task
-    WeakPtr<LayoutWrapper> layoutWrapper_;
 
+    RefPtr<FrameNode> backgroundNode_;
     std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
@@ -609,7 +600,7 @@ private:
 
     bool isRestoreInfoUsed_ = false;
 
-    WeakPtr<FrameNode> overlayNode_;
+    RefPtr<FrameNode> overlayNode_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

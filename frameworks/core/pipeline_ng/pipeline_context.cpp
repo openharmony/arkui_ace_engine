@@ -773,6 +773,10 @@ void PipelineContext::SyncSafeArea()
     CHECK_NULL_VOID_NOLOG(!ignoreViewSafeArea_);
     CHECK_NULL_VOID_NOLOG(isLayoutFullScreen_);
     rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto page = stageManager_->GetLastPage();
+    if (page) {
+        page->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
@@ -824,6 +828,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
         }
         rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto page = stageManager_->GetLastPage();
+        if (page) {
+            page->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
         // layout immediately
         FlushUITasks();
 
@@ -1223,11 +1231,12 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false);
     }
+    auto container = Container::Current();
     if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-             event.action == MouseAction::MOVE) &&
-            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
-        (SystemProperties::IsSceneBoardEnabled() &&
-            (event.pullAction == MouseAction::PULL_MOVE || event.pullAction == MouseAction::PULL_UP))) {
+        event.action == MouseAction::MOVE) &&
+        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+        (container && container->IsScenceBoardWindow() && (event.pullAction == MouseAction::PULL_MOVE ||
+        event.pullAction == MouseAction::PULL_UP))) {
         auto touchPoint = event.CreateTouchPoint();
         OnTouchEvent(touchPoint);
     }
@@ -1487,6 +1496,20 @@ void PipelineContext::HandleOnAreaChangeEvent()
     for (auto&& frameNode : nodes) {
         frameNode->TriggerOnAreaChangeCallback();
     }
+    UpdateFormLinkInfos();
+}
+
+void PipelineContext::UpdateFormLinkInfos()
+{
+    if (formLinkInfoUpdateHandler_ && !formLinkInfoMap_.empty()) {
+        LOGI("formLinkInfoUpdateHandler called");
+        std::vector<std::string> formLinkInfos;
+        for (auto iter = formLinkInfoMap_.rbegin(); iter != formLinkInfoMap_.rend(); ++iter) {
+            auto info = iter->second;
+            formLinkInfos.push_back(info);
+        }
+        formLinkInfoUpdateHandler_(formLinkInfos);
+    }
 }
 
 void PipelineContext::OnShow()
@@ -1647,6 +1670,7 @@ void PipelineContext::Destroy()
     nodesToNotifyMemoryLevel_.clear();
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
+    needRenderNode_.clear();
     PipelineBase::Destroy();
     LOGI("PipelineContext::Destroy end.");
 }

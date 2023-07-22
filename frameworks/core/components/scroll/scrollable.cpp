@@ -124,7 +124,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
                 return;
             }
             // Send event to accessibility when scroll start.
@@ -142,7 +142,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionUpdate = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
                 return;
             }
             scroll->HandleDragUpdate(info);
@@ -152,7 +152,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionEnd = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
                 return;
             }
             scroll->HandleDragEnd(info);
@@ -262,7 +262,7 @@ void Scrollable::HandleTouchDown()
     springController_->Stop();
     if (!controller_->IsStopped()) {
         controller_->Stop();
-    } else if (!snapController_->IsStopped()) {
+    } else if (snapController_->IsRunning()) {
         snapController_->Stop();
     } else {
         // Resets values.

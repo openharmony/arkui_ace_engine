@@ -29,6 +29,9 @@ public:
 
     // app exit to home by geturing slide out
     static constexpr char LAUNCHER_APP_SWIPE_TO_HOME[] = "LAUNCHER_APP_SWIPE_TO_HOME";
+
+    // app list fling
+    static constexpr char APP_LIST_FLING[] = "APP_LIST_FLING";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

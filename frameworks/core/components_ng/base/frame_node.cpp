@@ -202,6 +202,7 @@ public:
     {
         SetAllChildrenInActive();
         ResetChildren();
+        Build();
         for (const auto& child : children_) {
             child.node->DoRemoveChildInRenderTree(0, true);
         }
@@ -727,6 +728,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         SetBackgroundLayoutConstraint(columnNode);
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
+        backgroundNode_ = columnNode;
     }
 
     // update focus state
@@ -963,11 +965,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         ACE_SCOPED_TRACE("Layout");
         Layout();
     }
-    {
-        LayoutWrapper::SaveGeoState();
-        LayoutWrapper::AvoidKeyboard();
-        LayoutWrapper::ExpandSafeArea();
-    }
     SetRootMeasureNode(false);
     return std::nullopt;
 }
@@ -1181,6 +1178,9 @@ void FrameNode::RebuildRenderContextTree()
     std::list<RefPtr<FrameNode>> children;
     // generate full children list, including disappear children.
     GenerateOneDepthVisibleFrameWithTransition(children);
+    if (overlayNode_) {
+        children.push_back(overlayNode_);
+    }
     frameChildren_ = { children.begin(), children.end() };
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
@@ -1534,7 +1534,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 TouchTestResult finalResult;
                 const auto coordinateOffset = globalPoint - localPoint;
                 preventBubbling = gestureHub->ProcessTouchTestHit(
-                    coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId);
+                    coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId, localPoint);
                 newComingTargets.swap(finalResult);
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
@@ -1832,12 +1832,7 @@ OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
     OffsetF offset {};
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
-        auto wrapper = parent->layoutWrapper_.Upgrade();
-        if (wrapper) {
-            offset += wrapper->GetGeometryNode()->GetFrameOffset();
-        } else {
-            offset += parent->geometryNode_->GetFrameOffset();
-        }
+        offset += parent->geometryNode_->GetFrameOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;
@@ -2146,8 +2141,8 @@ bool FrameNode::HaveSecurityComponent()
 
 bool FrameNode::IsSecurityComponent()
 {
-    return GetTag() == V2::SEC_LOCATION_BUTTON_ETS_TAG || GetTag() == V2::SEC_PASTE_BUTTON_ETS_TAG ||
-           GetTag() == V2::SEC_SAVE_BUTTON_ETS_TAG;
+    return GetTag() == V2::LOCATION_BUTTON_ETS_TAG || GetTag() == V2::PASTE_BUTTON_ETS_TAG ||
+           GetTag() == V2::SAVE_BUTTON_ETS_TAG;
 }
 
 void FrameNode::OnSetDepth(const int32_t depth)
@@ -2161,9 +2156,17 @@ void FrameNode::OnSetDepth(const int32_t depth)
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    if (!oldGeometryNode_) {
+        oldGeometryNode_ = geometryNode_->Clone();
+    }
+#ifndef ACE_UNITTEST
     RestoreGeoState();
+#endif
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
+    if (!oldGeometryNode_) {
+        oldGeometryNode_ = geometryNode_->Clone();
+    }
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         layoutAlgorithm_->SetSkipMeasure();
         layoutAlgorithm_->SetSkipLayout();
@@ -2224,6 +2227,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         geometryNode_->SetContentSize(size.value());
     }
     layoutAlgorithm_->Measure(this);
+    if (overlayNode_) {
+        overlayNode_->Measure(layoutProperty_->CreateChildConstraint());
+    }
     // check aspect radio.
     if (pattern_ && pattern_->IsNeedAdjustByAspectRatio()) {
         const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
@@ -2248,14 +2254,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 void FrameNode::Layout()
 {
     int64_t time = GetSysTimestamp();
-    auto&& expandOpts = layoutProperty_->GetSafeAreaExpandOpts();
-    if ((expandOpts && expandOpts->Expansive()) || GetTag() == V2::PAGE_ETS_TAG) {
-        // record expansive wrappers during Layout traversal to speed up SafeArea expansion
-        // Page node needs to avoid keyboard, record it too.
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->GetSafeAreaManager()->AddWrapper(WeakClaim(this));
-    }
     OffsetNodeToSafeArea();
     if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
         if (!layoutProperty_->GetLayoutConstraint()) {
@@ -2271,12 +2269,21 @@ void FrameNode::Layout()
             layoutProperty_->UpdateContentConstraint();
         }
         GetLayoutAlgorithm()->Layout(this);
+        if (overlayNode_) {
+            LayoutOverlay();
+        }
         time = GetSysTimestamp() - time;
         AddNodeFlexLayouts();
         AddNodeLayoutTime(time);
     } else {
         GetLayoutAlgorithm()->SetSkipLayout();
     }
+
+#ifndef ACE_UNITTEST
+    SaveGeoState();
+    AvoidKeyboard();
+    ExpandSafeArea();
+#endif
 
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
         geometryNode_->GetFrameOffset().ToString().c_str());
@@ -2295,10 +2302,10 @@ void FrameNode::SyncGeometryNode()
     }
 
     // update layout size.
-    bool frameSizeChange = false;
-    bool frameOffsetChange = false;
-    bool contentSizeChange = false;
-    bool contentOffsetChange = false;
+    bool frameSizeChange = true;
+    bool frameOffsetChange = true;
+    bool contentSizeChange = true;
+    bool contentOffsetChange = true;
     if (oldGeometryNode_) {
         frameSizeChange = geometryNode_->GetFrameSize() != oldGeometryNode_->GetFrameSize();
         frameOffsetChange = geometryNode_->GetFrameOffset() != oldGeometryNode_->GetFrameOffset();
@@ -2460,9 +2467,6 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 {
     if ((!layoutAlgorithm_ || (needReset && layoutAlgorithm_->IsExpire())) && pattern_) {
         layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
-        if (!oldGeometryNode_) {
-            oldGeometryNode_ = geometryNode_->Clone();
-        }
     }
     return layoutAlgorithm_;
 }
@@ -2470,6 +2474,29 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 void FrameNode::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
 {
     frameProxy_->SetCacheCount(cacheCount);
+}
+
+void FrameNode::LayoutOverlay()
+{
+    auto size = geometryNode_->GetMarginFrameSize();
+    auto align = Alignment::TOP_LEFT;
+    Dimension offsetX, offsetY;
+    auto childLayoutProperty = overlayNode_->GetLayoutProperty();
+    childLayoutProperty->GetOverlayOffset(offsetX, offsetY);
+    auto offset = OffsetF(offsetX.ConvertToPx(), offsetY.ConvertToPx());
+    if (childLayoutProperty->GetPositionProperty()) {
+        align = childLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+    }
+
+    auto childSize = overlayNode_->GetGeometryNode()->GetMarginFrameSize();
+    auto translate = Alignment::GetAlignPosition(size, childSize, align) + offset;
+    overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
+    overlayNode_->Layout();
+}
+
+void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
+{
+    isActive_ = false;
 }
 
 } // namespace OHOS::Ace::NG

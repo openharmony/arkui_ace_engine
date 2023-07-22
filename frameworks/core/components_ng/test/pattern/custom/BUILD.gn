@@ -17,10 +17,10 @@ ace_unittest("custom_test_ng") {
   ace_animation = true
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "custom_test_ng.cpp",
   ]
