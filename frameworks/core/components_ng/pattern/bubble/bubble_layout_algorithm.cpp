@@ -26,6 +26,8 @@
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -33,17 +35,29 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
 constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 6.0_vp;
 constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 
+// get main window's pipeline
+RefPtr<PipelineContext> GetMainPipelineContext()
+{
+    auto containerId = Container::CurrentId();
+    RefPtr<PipelineContext> context;
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        context = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+    } else {
+        context = PipelineContext::GetCurrentContext();
+    }
+    return context;
+}
 } // namespace
 
 void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -499,13 +513,11 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     targetSize_ = geometryNode->GetFrameSize();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     targetOffset_ = targetNode->GetPaintRectOffset();
     // Show in SubWindow
     if (showInSubWindow) {
-        auto overlayManager = pipelineContext->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
         auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
             pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
         targetOffset_ += displayWindowOffset;
@@ -516,5 +528,4 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
         }
     }
 }
-
 } // namespace OHOS::Ace::NG
