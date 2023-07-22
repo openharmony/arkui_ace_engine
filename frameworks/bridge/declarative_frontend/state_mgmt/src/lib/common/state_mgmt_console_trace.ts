@@ -49,3 +49,31 @@ class stateMgmtTrace {
         return result;
     }
 }
+
+class errorReport {
+    public static varValueCheckFailed<T>(params : { customComponent : string, variableDeco: string, variableName: string, expectedType: string, value : T }) : void {
+        let msg = `@Component '${params.customComponent}': Illegal variable value error with decorated variable ${params.variableDeco} '${params.variableName}': `;
+        msg += `failed validation: '${params.expectedType}`;
+        try {
+            msg += `, attempt to assign value type: '${typeof params.value}'`;
+            msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
+        } catch(e) {}
+        
+        msg += "!";
+        throw new TypeError(msg);
+    }
+
+    public static varObservationFailed<T>(params : { customComponent : string, variableDeco: string, variableName: string, value: T  }) : void {
+        let msg = `@Component '${params.customComponent}': decorated variable ${params.variableDeco} '${params.variableName}': `;
+        msg += `its class is neither decorated with '@Observed' nor it is an instance of 'SubscribableAbstract'`;
+
+        try {
+            msg += `, attempt to assign value type: '${typeof params.value}'`;
+            msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
+        } catch(e) {}
+        
+        msg += "!";
+
+        throw new TypeError(msg);
+    }
+}
