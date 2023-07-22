@@ -7362,54 +7362,6 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutBackwardItem001, TestSize.Leve
     }
 }
 
-// /**
-//  * @tc.name: SwiperLayoutAlgorithmOffScreenLayoutDirection001
-//  * @tc.desc: OffScreenLayoutDirection
-//  * @tc.type: FUNC
-//  */
-// HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmOffScreenLayoutDirection001, TestSize.Level1)
-// {
-//     /**
-//      * @tc.steps: step1. Create swipernode.
-//      */
-//     auto* stack = ViewStackProcessor::GetInstance();
-//     auto swiperNode =
-//         FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-//     stack->Push(swiperNode);
-//     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-//     ASSERT_NE(swiperPattern, nullptr);
-//     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(swiperPattern->CreateLayoutAlgorithm());
-//     swiperLayoutAlgorithm->targetIndex_ = 1;
-//     struct SwiperItemInfo swiperItemInfo1;
-//     swiperItemInfo1.startPos = -1.0f;
-//     swiperItemInfo1.endPos = -1.0f;
-//     swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-
-//     /**
-//      * @tc.steps: step2. call OffScreenLayoutDirection.
-//      * @tc.expected: Related function runs ok.
-//      */
-//     for (int i = 0; i <= 1; i++) {
-//         for (int j = 0; j <= 1; j++) {
-//             swiperLayoutAlgorithm->OffScreenLayoutDirection();
-//             if (i == 1) {
-//                 swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-//                 continue;
-//             }
-//             swiperLayoutAlgorithm->itemPosition_.clear();
-//         }
-//         swiperLayoutAlgorithm->targetIndex_.reset();
-//     }
-
-//     swiperLayoutAlgorithm->targetIndex_ = 1;
-//     swiperLayoutAlgorithm->itemPosition_.clear();
-//     swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
-//     for (int i = 0; i <= 1; i++) {
-//         swiperLayoutAlgorithm->OffScreenLayoutDirection();
-//         swiperLayoutAlgorithm->targetIndex_ = -1;
-//     }
-// }
-
 /**
  * @tc.name: SwiperPatternUpdateAnimationProperty001
  * @tc.desc: UpdateAnimationProperty
