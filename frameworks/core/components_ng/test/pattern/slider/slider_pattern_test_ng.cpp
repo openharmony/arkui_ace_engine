@@ -434,7 +434,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
     TouchEventInfo info("");
     info.changedTouches_.emplace_back(LInfo);
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_EQ(sliderPattern->hotFlag_, true);
     sliderPattern->showTips_ = true;
     sliderPattern->HandleTouchEvent(info);
     EXPECT_EQ(sliderPattern->bubbleFlag_, true);
@@ -449,8 +448,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
      * @tc.cases: case3. when TouchType is UP.
      */
     info.changedTouches_.front().touchType_ = TouchType::UP;
-    sliderPattern->HandleTouchEvent(info);
-    EXPECT_EQ(sliderPattern->hotFlag_, false);
     sliderPattern->HandleTouchEvent(info);
     EXPECT_EQ(sliderPattern->bubbleFlag_, false);
 }
@@ -535,8 +532,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg007, TestSize.Level1)
     info.SetOffsetX(.0);
     info.SetOffsetY(1.0);
     sliderPattern->HandlingGestureEvent(info);
-    EXPECT_EQ(sliderPattern->valueRatio_, .0f);
-    EXPECT_EQ(sliderPattern->value_, .0f);
+    EXPECT_EQ(sliderPattern->valueRatio_, .02f);
+    EXPECT_EQ(sliderPattern->value_, 2.0f);
     /**
      * @tc.cases: case2. InputEventType is AXIS and MoveStep(1).
      */
@@ -690,7 +687,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg010, TestSize.Level1)
      * @tc.cases: case1. mouse down position is outside the block side, UpdateValueByLocalLocation
      */
     sliderPattern->HandleTouchEvent(info);
-    EXPECT_EQ(sliderPattern->hotFlag_, true);
     EXPECT_NE(sliderPattern->value_, .0f);
     /**
      * @tc.cases: case2. mouse down position is inside the block side, not UpdateValueByLocalLocation
@@ -764,6 +760,68 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg011, TestSize.Level1)
     EXPECT_EQ(sliderPattern->value_, .0f);
     EXPECT_FALSE(sliderPattern->valueChangeFlag_);
 }
+
+/**
+ * @tc.name: SliderPatternTestNg012
+ * @tc.desc: Test Slider mouse Event and wheel operation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and set theme.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(MIN, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    sliderPattern->mouseHoverFlag_ = true;
+    sliderPattern->showTips_ = true;
+    /**
+     * @tc.steps: step2. When the mouse moves into the slider area.
+     */
+    sliderPattern->HandleHoverEvent(true);
+    EXPECT_TRUE(sliderPattern->hotFlag_);
+    EXPECT_TRUE(sliderPattern->mouseHoverFlag_);
+    /**
+     * @tc.steps: step3. When the mouse wheel starts scrolling.
+     */
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::AXIS;
+    sliderPattern->HandlingGestureEvent(info);
+    EXPECT_TRUE(sliderPattern->bubbleFlag_);
+    EXPECT_TRUE(sliderPattern->AxisFlag_);
+    /**
+     * @tc.steps: step4. After the mouse wheel starts scrolling, move the mouse out of the slider area
+     */
+    sliderLayoutProperty->UpdateDirection(Axis::VERTICAL);
+    sliderPattern->HandleHoverEvent(false);
+    EXPECT_FALSE(sliderPattern->hotFlag_);
+    EXPECT_FALSE(sliderPattern->mouseHoverFlag_);
+    EXPECT_FALSE(sliderPattern->bubbleFlag_);
+    EXPECT_FALSE(sliderPattern->AxisFlag_);
+    /**
+     * @tc.steps: step5. When moving the mouse out of the slider area, mouse wheel starts scrolling quickly.
+     * @tc.desc: SliderTips will not show.
+     */
+    sliderPattern->HandleHoverEvent(true);
+    sliderPattern->HandleHoverEvent(false);
+    sliderPattern->HandlingGestureEvent(info);
+    EXPECT_FALSE(sliderPattern->hotFlag_);
+    EXPECT_FALSE(sliderPattern->mouseHoverFlag_);
+    EXPECT_FALSE(sliderPattern->bubbleFlag_);
+    EXPECT_FALSE(sliderPattern->AxisFlag_);
+}
+
 
 /**
  * @tc.name: SliderLayoutAlgorithm001
