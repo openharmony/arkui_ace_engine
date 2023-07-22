@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 void LayoutWrapper::Update(
@@ -27,7 +28,12 @@ LayoutWrapper::LayoutWrapper(
 
 RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool addToRenderTree)
 {
-    return nullptr;
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    return layoutWrapper;
 }
 
 void LayoutWrapper::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) {}
@@ -57,7 +63,7 @@ WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
 
 std::string LayoutWrapper::GetHostTag() const
 {
-    return {};
+    return V2::SWIPER_ETS_TAG;
 }
 
 int32_t LayoutWrapper::GetHostDepth() const
