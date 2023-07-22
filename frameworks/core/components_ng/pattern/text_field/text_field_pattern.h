@@ -1111,6 +1111,7 @@ private:
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
     float previewWidth_ = 0.0f;
+    InputStyle preInputStyle_ = InputStyle::DEFAULT;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;

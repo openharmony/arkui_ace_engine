@@ -134,7 +134,6 @@ HWTEST_F(AppBarTestNg, Test003, TestSize.Level1)
     ClickBtn(backBtn);
     auto shareBtn = AceType::DynamicCast<FrameNode>(titleBar->GetChildAtIndex(2));
     EXPECT_TRUE(shareBtn);
-    ClickBtn(shareBtn);
     SUCCEED();
 }
 } // namespace OHOS::Ace::NG

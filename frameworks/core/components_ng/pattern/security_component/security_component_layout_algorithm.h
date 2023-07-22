@@ -28,7 +28,6 @@ struct SecurityComponentLayoutPaddingParams {
     double bottom = 0.0;
     double left = 0.0;
     double textIconSpace = 0.0;
-    bool iconStart = false;
 };
 
 class ACE_EXPORT SecurityComponentLayoutAlgorithm : public BoxLayoutAlgorithm {

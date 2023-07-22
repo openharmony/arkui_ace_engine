@@ -35,7 +35,6 @@ public:
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetFontColor(const JSCallbackInfo& info);
     static void SetLayoutDirection(const JSCallbackInfo& info);
-    static void SetlayoutOrder(const JSCallbackInfo& info);
     static void SetBackgroundColor(const JSCallbackInfo& info);
     static void SetBackgroundPadding(const JSCallbackInfo& info);
     static void SetTextIconSpace(const JSCallbackInfo& info);

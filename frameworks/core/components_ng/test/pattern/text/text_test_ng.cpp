@@ -2170,7 +2170,7 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     MockPipelineBase::SetUp();
     // set textDecorationAnimatable_ true
     textContentModifier.textDecorationAnimatable_ = true;
-    textContentModifier.oldTextDecoration_ = TextDecoration::UNDERLINE;
+    textContentModifier.textDecoration_ = TextDecoration::UNDERLINE;
     textContentModifier.SetTextDecoration(TextDecoration::NONE);
     textContentModifier.ModifyTextStyle(textStyle);
     // set textDecorationColorAlpha_ value

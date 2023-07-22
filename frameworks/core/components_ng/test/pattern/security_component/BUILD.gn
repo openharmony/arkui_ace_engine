@@ -147,10 +147,15 @@ ohos_unittest("security_component_pattern_test_ng") {
   ]
 
   if (security_component_enable) {
-    sources += [ "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_probe.cpp" ]
+    sources += [
+      "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_probe.cpp",
+      "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+    ]
     cflags_cc = [ "-DSECURITY_COMPONENT_ENABLE" ]
     external_deps = [
+      "ability_runtime:abilitykit_native",
       "access_token:libaccesstoken_sdk",
+      "napi:ace_napi",
       "security_component:libsecurity_component_framework",
       "security_component:libsecurity_component_sdk",
     ]

@@ -742,6 +742,7 @@ void PipelineBase::Destroy()
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
+    formLinkInfoMap_.clear();
     LOGI("PipelineBase::Destroy end.");
 }
 } // namespace OHOS::Ace

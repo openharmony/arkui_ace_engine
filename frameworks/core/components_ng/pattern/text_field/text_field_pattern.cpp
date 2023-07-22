@@ -1813,7 +1813,7 @@ void TextFieldPattern::InitDragDropEvent()
         pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
         itemInfo.extraInfo = selectedStr;
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-        UdmfClient::GetInstance()->AddTextRecord(unifiedData, selectedStr);
+        UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
         event->SetData(unifiedData);
         host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                      : PROPERTY_UPDATE_MEASURE);
@@ -1902,7 +1902,7 @@ void TextFieldPattern::InitDragDropEvent()
         }
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
-        std::string str = UdmfClient::GetInstance()->GetSingleTextRecord(data);
+        std::string str = UdmfClient::GetInstance()->GetSinglePlainTextRecord(data);
         pattern->needToRequestKeyboardInner_ = true;
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (pattern->dragStatus_ == DragStatus::NONE) {
@@ -2213,17 +2213,23 @@ void TextFieldPattern::OnModifyDone()
     if (!IsTextArea()) {
         isTextInput_ = true;
     }
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !inlineFocusState_) {
+    auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
+    if ((!IsSelected() && inputStyle == InputStyle::INLINE) ||
+        ((inputStyle == InputStyle::DEFAULT) && preInputStyle_ != InputStyle::INLINE)) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
     }
-    if (IsSelected() && paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
-        ApplyInlineStates(false);
+    if (IsSelected() && inputStyle == InputStyle::INLINE) {
+        preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
     if (layoutProperty->GetShowUnderlineValue(false) &&
         layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         ApplyUnderlineStates();
     }
+    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
+        RestorePreInlineStates();
+    }
+    preInputStyle_ = inputStyle;
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }

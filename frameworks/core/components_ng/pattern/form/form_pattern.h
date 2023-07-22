@@ -87,6 +87,7 @@ public:
 
     void SetFormLinkInfos(const std::vector<std::string>& infos)
     {
+        formLinkInfos_.clear();
         formLinkInfos_ = infos;
     }
 

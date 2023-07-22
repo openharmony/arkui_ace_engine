@@ -99,6 +99,17 @@ void FormPattern::OnAttachToFrameNode()
             },
             DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
     });
+
+    // Init click event for static form.
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto formPattern = weak.Upgrade();
+        CHECK_NULL_VOID(formPattern);
+        formPattern->HandleStaticFormEvent(
+            { static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()) });
+    };
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureEventHub->AddClickEvent(clickEvent);
     scopeId_ = Container::CurrentId();
 }
 
@@ -161,24 +172,11 @@ void FormPattern::HandleSnapshot()
             form->TakeSurfaceCaptureForUI();
         },
         TaskExecutor::TaskType::UI, DELAY_TIME_FOR_FORM_SNAPSHOT);
-
-    // Init click event for static form.
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gestureEventHub = host->GetOrCreateGestureEventHub();
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto formPattern = weak.Upgrade();
-        CHECK_NULL_VOID(formPattern);
-        formPattern->HandleStaticFormEvent(
-            { static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()) });
-    };
-    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gestureEventHub->AddClickEvent(clickEvent);
 }
 
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 {
-    if (formLinkInfos_.empty()) {
+    if (formLinkInfos_.empty() || isDynamic_) {
         LOGE("formLinkInfos is empty, do not handle event.");
         return;
     }

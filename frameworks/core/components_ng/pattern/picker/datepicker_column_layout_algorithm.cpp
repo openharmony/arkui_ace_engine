@@ -45,7 +45,7 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
     }
     auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - 1) +
-        pickerTheme->GetDividerSpacing().ConvertToPx());
+                                     pickerTheme->GetDividerSpacing().ConvertToPx());
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
     auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
@@ -140,13 +140,18 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     uint32_t halfCount = layoutWrapper->GetTotalChildCount() / 2;
     float childStartCoordinate = static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
-                                            pickerTheme->GetGradientHeight().ConvertToPx() * halfCount -
-                                            pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
+                                                    pickerTheme->GetGradientHeight().ConvertToPx() * halfCount -
+                                                    pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
+    uint32_t i = 0;
+    uint32_t showCount = pickerTheme->GetShowOptionCount();
     for (const auto& child : children) {
+        if (i >= showCount) {
+            break;
+        }
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();
         auto childOffset =
-            OffsetF(0.0f, childStartCoordinate + static_cast<float>(currentOffset_) + padding.Offset().GetY());
+            OffsetF(0.0f, childStartCoordinate + static_cast<float>(currentOffset_[i++]) + padding.Offset().GetY());
         childGeometryNode->SetMarginFrameOffset(childOffset);
         child->Layout();
         childStartCoordinate += childSize.Height();
