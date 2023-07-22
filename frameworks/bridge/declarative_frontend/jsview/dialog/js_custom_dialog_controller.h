@@ -34,6 +34,8 @@ public:
     static void ConstructorCallback(const JSCallbackInfo& args);
     static void DestructorCallback(JSCustomDialogController* instance);
 
+    static void ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+
     void JsOpenDialog(const JSCallbackInfo& info);
     void JsCloseDialog(const JSCallbackInfo& info);
 

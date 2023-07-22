@@ -106,6 +106,34 @@ private:
             .bgColor = Color::BLUE,
         },
     };
+    vector<ButtonInfo> btnItems1 = {
+        ButtonInfo {
+            .text = "main button",
+            .isBgColorSetted = true,
+            .enabled = false,
+            .defaultFocus = true,
+        },
+        ButtonInfo {
+            .text = "second button",
+            .bgColor = Color::BLUE,
+            .enabled = false,
+            .defaultFocus = false,
+        },
+    };
+    vector<ButtonInfo> btnItems2 = {
+        ButtonInfo {
+            .text = "main button",
+            .bgColor = Color::BLUE,
+            .defaultFocus = true,
+            .dlgButtonStyle = DialogButtonStyle::DEFAULT,
+        },
+        ButtonInfo {
+            .text = "second button",
+            .bgColor = Color::BLUE,
+            .defaultFocus = false,
+            .dlgButtonStyle = DialogButtonStyle::HIGHTLIGHT,
+        },
+    };
     vector<DialogProperties> propsVectors = {
         DialogProperties {
             .type = DialogType::ACTION_SHEET,
@@ -116,10 +144,18 @@ private:
         DialogProperties {
             .type = DialogType::ACTION_SHEET,
             .title = "dialog test",
+            .subtitle = "subtitle dialog test",
             .sheetsInfo = sheetItems,
         },
         DialogProperties {
             .content = "dialog content test",
+        },
+        DialogProperties {
+            .type = DialogType::ACTION_SHEET,
+            .title = "",
+            .subtitle = "subtitle dialog test",
+            .content = "dialog content test",
+            .sheetsInfo = sheetItems,
         },
     };
 };
@@ -640,5 +676,49 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg006, TestSize.Level1)
     ASSERT_NE(dialogPattern, nullptr);
     info.SetGlobalLocation(globalLocation);
     dialogPattern->HandleClick(info);
+}
+
+/**
+ * @tc.name: DialogPatternTest005
+ * @tc.desc: CreateDialogNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set properties
+     */
+    const DialogType types[] = { DialogType::ALERT_DIALOG, DialogType::ACTION_SHEET, DialogType::COMMON };
+    SetDialogTheme();
+    /**
+     * @tc.steps: step2. call CreateDialogNode function with different props.
+     * @tc.expected: the dialog node created successfully.
+     */
+    for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); i++) {
+        DialogProperties props;
+        props.type = types[i];
+        if (i == 1) {
+            props.title = "dialog test";
+            props.content = "dialog content test";
+            props.customStyle = true;
+            props.sheetsInfo = sheetItems;
+            props.isMenu = true;
+            props.buttons = btnItems2;
+            props.backgroundColor = Color::BLACK;
+            props.borderRadius->radiusTopLeft = Dimension('20PX');
+            props.borderRadius->radiusTopRight = Dimension('20PX');
+            props.borderRadius->radiusBottomRight = Dimension('20PX');
+            props.borderRadius->radiusBottomLeft = Dimension('20PX');
+            props.borderRadius->multiValued = false;
+        } else if (i == 0) {
+            props.buttons = btnItems1;
+        }
+        auto dialog = DialogView::CreateDialogNode(props, nullptr);
+        ASSERT_NE(dialog, nullptr);
+        auto dialogPattern = dialog->GetPattern<DialogPattern>();
+        EXPECT_TRUE(dialogPattern);
+        ASSERT_NE(dialogPattern, nullptr);
+        dialogPattern->GetSubtitle();
+    }
 }
 } // namespace OHOS::Ace::NG

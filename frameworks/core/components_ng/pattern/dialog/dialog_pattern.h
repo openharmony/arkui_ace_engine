@@ -79,6 +79,11 @@ public:
         return title_;
     }
 
+    const std::string& GetSubtitle()
+    {
+        return subtitle_;
+    }
+
     const std::string& GetMessage()
     {
         return message_;
@@ -116,7 +121,7 @@ public:
     {
         return dialogProperties_;
     }
-	
+
     void OnColorConfigurationUpdate() override;
 
 private:
@@ -130,8 +135,13 @@ private:
     void PopDialog(int32_t buttonIdx);
 
     // set render context properties of content frame
-    void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode);
-
+    void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
+    RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
+    RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
+    void ParseButtonFontColorAndBgColor(
+        const ButtonInfo& params, std::string& textColor, std::optional<Color>& bgColor);
+    void SetButtonTextOpacity(const RefPtr<FrameNode>& textNode, bool enabled);
+    void SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled);
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> CreateDialogScroll(const DialogProperties& dialogProps);
@@ -165,9 +175,12 @@ private:
     // XTS inspector values
     std::string message_;
     std::string title_;
+    std::string subtitle_;
 
     DialogProperties dialogProperties_;
     RefPtr<FrameNode> menuNode_;
+    bool isFirstDefaultFocus_ = true;
+
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };
 } // namespace OHOS::Ace::NG
