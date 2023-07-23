@@ -1609,4 +1609,28 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest042, TestSize.Level1)
     layoutWrapper->OffsetNodeToSafeArea();
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
 }
+
+/**
+ * @tc.name: LayoutWrapperTest043
+ * @tc.desc: Test ExpandIntoKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest043, TestSize.Level1)
+{
+    auto [parent, layoutWrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
+
+    auto [child, childWrapper] = CreateNodeAndWrapper(FIRST_CHILD_FRAME_NODE, NODE_ID_1);
+    child->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
+    child->MountToParent(parent);
+
+    auto safeAreaManager = PipelineContext::GetCurrentContext()->safeAreaManager_;
+    safeAreaManager->UpdateKeyboardOffset(50.0f);
+    parent->ExpandIntoKeyboard();
+    EXPECT_EQ(parent->GetGeometryNode()->GetFrameOffset(), OffsetF(0, -50.0f));
+
+    // parent already expanded
+    child->ExpandIntoKeyboard();
+    EXPECT_EQ(child->GetGeometryNode()->GetFrameOffset(), OffsetF(0, 0));
+}
 } // namespace OHOS::Ace::NG
