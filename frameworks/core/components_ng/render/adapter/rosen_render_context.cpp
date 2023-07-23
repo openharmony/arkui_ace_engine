@@ -1329,10 +1329,11 @@ RectF RosenRenderContext::AdjustPaintRect()
         return rect;
     }
     if (HasOffset()) {
-        CombinePaddingAndOffset(
-            resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
-        rect.SetLeft(rect.GetX() + resultX.ConvertToPx() - anchorX.value_or(0));
-        rect.SetTop(rect.GetY() + resultY.ConvertToPx() - anchorY.value_or(0));
+        auto offset = GetOffsetValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
+        auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
+        auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
+        rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
+        rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
         return rect;
     }
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
@@ -1380,31 +1381,6 @@ void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension&
             DimensionUnit::PX);
     } else {
         resultY = selfMarginTop + GetPositionValue({}).GetY() + parentPaddingTop;
-    }
-}
-
-void RosenRenderContext::CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY,
-    const Dimension& parentPaddingLeft, const Dimension& parentPaddingTop, float widthPercentReference,
-    float heightPercentReference)
-{
-    // to distinguish cases ex. offset has percentage unit and padding has vp unit
-    if (parentPaddingLeft.Unit() != GetOffsetValue({}).GetX().Unit()) {
-        resultX = Dimension(
-            ConvertToPx(parentPaddingLeft, ScaleProperty::CreateScaleProperty(), widthPercentReference).value_or(0) +
-                ConvertToPx(GetOffsetValue({}).GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
-                    .value_or(0),
-            DimensionUnit::PX);
-    } else {
-        resultX = parentPaddingLeft + GetOffsetValue({}).GetX();
-    }
-    if (parentPaddingTop.Unit() != GetOffsetValue({}).GetY().Unit()) {
-        resultY = Dimension(
-            ConvertToPx(parentPaddingTop, ScaleProperty::CreateScaleProperty(), heightPercentReference).value_or(0) +
-                ConvertToPx(GetOffsetValue({}).GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
-                    .value_or(0),
-            DimensionUnit::PX);
-    } else {
-        resultY = parentPaddingTop + GetOffsetValue({}).GetY();
     }
 }
 
