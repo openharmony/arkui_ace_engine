@@ -143,7 +143,7 @@ protected:
     void AnimateOnAttribute(const RefPtr<SvgAnimation>& animate, const T& originalValue);
     // animate a transformation attribute
     void AnimateTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
-    void AnimateValueTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
+    void AnimateFromToTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
     void AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
 
     // update svg attribute in animation

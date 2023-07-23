@@ -286,7 +286,7 @@ bool SvgAnimate::CreateLinearAnimate(
         animation->AddListener(std::move(callback));
         animator->AddInterpolator(animation);
     } else {
-        if (!LinearAnimate(std::move(callback), originalValue, animator)) {
+        if (!LinearAnimateFromTo(std::move(callback), originalValue, animator)) {
             LOGW("create linear animate failed");
             return false;
         }
@@ -300,7 +300,7 @@ bool SvgAnimate::CreateLinearAnimate(
 }
 
 template<typename T>
-bool SvgAnimate::LinearAnimate(
+bool SvgAnimate::LinearAnimateFromTo(
     std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator)
 {
     if (!animator) {
@@ -384,6 +384,9 @@ bool SvgAnimate::LinearWithKeyTimes(const RefPtr<KeyframeAnimation<T>>& animatio
     auto valueIter = values.begin() + 1;
     auto keyTimeIter = keyTimes_.begin() + 1;
     while (valueIter != (values.end() - 1)) {
+        if constexpr (std::is_same_v<T, double>) {
+            LOGI("ZTE frame value = %f", GetValue<T>(*valueIter));
+        }
         CreateKeyframe(animation, GetValue<T>(*valueIter), *keyTimeIter, GetCurve());
         ++valueIter;
         ++keyTimeIter;
@@ -416,7 +419,7 @@ bool SvgAnimate::CreatePacedAnimate(
         animation->AddListener(std::move(callback));
         animator->AddInterpolator(animation);
     } else {
-        if (!LinearAnimate(std::move(callback), originalValue, animator)) {
+        if (!LinearAnimateFromTo(std::move(callback), originalValue, animator)) {
             LOGW("create linear animate failed");
             return false;
         }
