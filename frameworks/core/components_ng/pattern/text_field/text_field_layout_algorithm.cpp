@@ -110,13 +110,21 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
         return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto defaultHeight = textFieldTheme->GetHeight().ConvertToPx();
     if (!frameSize.Height().has_value()) {
         if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
             calcLayoutConstraint->maxSize.value().Height().has_value()) {
             frameSize.SetHeight(std::max(layoutConstraint->maxSize.Height(), layoutConstraint->minSize.Height()));
         } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
+            auto height = contentHeight + pattern->GetVerticalPaddingSum() < defaultHeight
+                              ? defaultHeight
+                              : contentHeight + pattern->GetVerticalPaddingSum();
             frameSize.SetHeight(
-                std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
+                std::min(layoutConstraint->maxSize.Height(), static_cast<float>(height)));
         } else {
             frameSize.SetHeight(layoutConstraint->minSize.Height());
         }
