@@ -384,9 +384,6 @@ bool SvgAnimate::LinearWithKeyTimes(const RefPtr<KeyframeAnimation<T>>& animatio
     auto valueIter = values.begin() + 1;
     auto keyTimeIter = keyTimes_.begin() + 1;
     while (valueIter != (values.end() - 1)) {
-        if constexpr (std::is_same_v<T, double>) {
-            LOGI("ZTE frame value = %f", GetValue<T>(*valueIter));
-        }
         CreateKeyframe(animation, GetValue<T>(*valueIter), *keyTimeIter, GetCurve());
         ++valueIter;
         ++keyTimeIter;

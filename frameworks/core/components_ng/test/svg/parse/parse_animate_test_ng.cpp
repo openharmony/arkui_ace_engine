@@ -36,7 +36,6 @@ const std::string SVG_ANIMATE_TRANSFORM(
     "<path d =\"M50 50L20 50A30 30 0 0 0 80 50Z\">"
     "<animateTransform attributeName =\"transform\" type=\"rotate\" repeatCount=\"3\" dur=\"1s\""
     " values=\"0 50 50;45 50 50;0 50 50\" keyTimes=\"0;0.5;1\"></animateTransform></path></svg>");
-
 } // namespace
 class ParseAnimateTestNg : public testing::Test {};
 

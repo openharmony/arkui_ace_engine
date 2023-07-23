@@ -395,6 +395,7 @@ ohos_unittest("parse_animate_test_ng") {
 group("svg_parse_unit_test") {
   testonly = true
   deps = [
+    ":parse_animate_test_ng",
     ":parse_circle_test_ng",
     ":parse_clippath_test_ng",
     ":parse_ellipse_test_ng",
@@ -413,6 +414,5 @@ group("svg_parse_unit_test") {
     ":parse_style_test_ng",
     ":parse_svg_test_ng",
     ":parse_use_test_ng",
-    ":parse_animate_test_ng",
   ]
 }
