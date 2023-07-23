@@ -920,9 +920,7 @@ void TextFieldPattern::GetTextRectsInRange(
             if (tmp.size() != 1) {
                 return;
             }
-            bool isInRange = offset.GetX() >= tmp[0].rect_.GetLeft() && offset.GetX() <= tmp[0].rect_.GetRight() &&
-                             offset.GetY() >= tmp[0].rect_.GetTop() && offset.GetY() <= tmp[0].rect_.GetBottom();
-            if (isInRange) {
+            if (LastTouchIsInSelectRegion(tmp)) {
                 textBoxes = tmp;
                 UpdateSelectorByPosition(base - 1);
             }
@@ -2382,6 +2380,18 @@ void TextFieldPattern::ProcessOverlay()
     }
     selectionMode_ = SelectionMode::SELECT;
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+        // When the content length is 1, you need to use the TextBox and pressing coordinates to determine whether it is
+        // selected
+        if (textEditingValue_.text.length() == 1) {
+            std::vector<RSTypographyProperties::TextBox> box;
+            GetTextRectsInRange(0, 1, box);
+            if (LastTouchIsInSelectRegion(box)) {
+                UpdateSelection(0, 1);
+                textEditingValue_.CursorMoveToPosition(1);
+                CreateHandles();
+                return;
+            }
+        }
         if (textEditingValue_.caretPosition == 0 && GetLastTouchOffset().GetX() < textRect_.GetX()) {
             UpdateSelection(0, 0);
             CreateSingleHandle();
@@ -3479,8 +3489,7 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     }
     // directionMove == 0 left, directionMove == 1 right
     // cannot get word length by current caret position and direction
-    if ((directionMove == 0 && originCaretPosition == 0) ||
-        (directionMove == 1 && originCaretPosition == textLength)) {
+    if ((directionMove == 0 && originCaretPosition == 0) || (directionMove == 1 && originCaretPosition == textLength)) {
         return 0;
     }
     int32_t offset = 0;
@@ -3553,8 +3562,8 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
     int32_t moveLineEndOffset = 0;
     int32_t strIndex = 0;
     for (strIndex = originCaretPosition + 1; (textEditingValue_.text[strIndex] != '\n' && strIndex <= textLength) ||
-                                         (needToCheckLineChanged && !CharLineChanged(strIndex));
-        strIndex++) {
+                                             (needToCheckLineChanged && !CharLineChanged(strIndex));
+         strIndex++) {
         moveLineEndOffset++;
     }
     if (moveLineEndOffset > textLength - originCaretPosition) {
@@ -5405,5 +5414,21 @@ void TextFieldPattern::StopEditing()
     MarkRedrawOverlay();
     CloseSelectOverlay();
     CloseKeyboard(true);
+}
+
+bool TextFieldPattern::LastTouchIsInSelectRegion(const std::vector<RSTypographyProperties::TextBox>& boxes)
+{
+    if (boxes.empty()) {
+        return false;
+    }
+
+    Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX(), textRect_.GetY());
+    for (const auto& box : boxes) {
+        RectF rect(box.rect_.GetLeft(), box.rect_.GetTop(), box.rect_.GetWidth(), box.rect_.GetHeight());
+        if (rect.IsInRegion({ offset.GetX(), offset.GetY() })) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
