@@ -247,9 +247,12 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             }
         }
         if (!isLoop_) {
-            startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
-            endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
-            startIndexInVisibleWindow = std::min(startIndexInVisibleWindow, totalItemCount_ - 1);
+            startIndex = std::min(GetLoopIndex(GetStartIndex()), totalItemCount_ - 1);
+            endIndex = std::min(GetLoopIndex(GetEndIndex()), totalItemCount_ - 1);
+            startIndexInVisibleWindow = std::min(GetLoopIndex(startIndexInVisibleWindow), totalItemCount_ - 1);
+            if (targetIndex_.has_value()) {
+                targetIndex_ = GetLoopIndex(targetIndex_.value());
+            }
         } else {
             startIndex = GetStartIndex();
             endIndex = GetEndIndex();
