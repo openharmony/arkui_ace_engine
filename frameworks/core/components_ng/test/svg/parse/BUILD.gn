@@ -375,6 +375,23 @@ ohos_unittest("parse_use_test_ng") {
   ]
 }
 
+ohos_unittest("parse_animate_test_ng") {
+  module_out_path = svg_test_output_path
+
+  sources = [ "parse_animate_test_ng.cpp" ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  configs = [
+    ":config_svg_parse_test",
+    "$ace_root:ace_config",
+  ]
+}
+
 group("svg_parse_unit_test") {
   testonly = true
   deps = [
@@ -396,5 +413,6 @@ group("svg_parse_unit_test") {
     ":parse_style_test_ng",
     ":parse_svg_test_ng",
     ":parse_use_test_ng",
+    ":parse_animate_test_ng",
   ]
 }
