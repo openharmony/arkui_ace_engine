@@ -82,7 +82,6 @@ void RefreshPattern::OnModifyDone()
         CustomBuilderReset();
     } else if (!progressChild_) {
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
-        LoadingProgressReset();
     }
     if (layoutProperty->GetIsCustomBuilderExistValue() || isRefreshing_ != refreshingProp) {
         if (refreshingProp) {
@@ -240,8 +239,8 @@ void RefreshPattern::ReplaceLoadingProgressNode()
     CHECK_NULL_VOID(loadingProgressChild);
     host->AddChild(loadingProgressChild);
     progressChild_ = loadingProgressChild;
-    host->RebuildRenderContextTree();
     LoadingProgressReset();
+    host->RebuildRenderContextTree();
 }
 
 void RefreshPattern::LoadingProgressReset()
@@ -604,7 +603,6 @@ void RefreshPattern::ResetLoadingProgressColor()
     auto paintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateColor(theme->GetProgressColor());
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder) const
