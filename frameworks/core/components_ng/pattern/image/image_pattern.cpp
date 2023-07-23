@@ -161,19 +161,20 @@ void ImagePattern::OnImageLoadSuccess()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    // update src data
+
     image_ = loadingCtx_->MoveCanvasImage();
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
 
     RectF paintRect = CalcImageContentPaintSize(geometryNode);
-    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
+    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(),
         loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
         geometryNode->GetFrameSize().Height(), 1, paintRect.Width(), paintRect.Height(),
         paintRect.GetX(), paintRect.GetY());
-    auto imageEventHub = GetEventHub<ImageEventHub>();
-    CHECK_NULL_VOID(imageEventHub);
-    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
+    auto eventHub = GetEventHub<ImageEventHub>();
+    if (eventHub) {
+        eventHub->FireCompleteEvent(event);
+    }
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     PrepareAnimation(image_);
@@ -197,12 +198,12 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(geometryNode);
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
+    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(),
         loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
         geometryNode->GetFrameSize().Height(), 0, geometryNode->GetContentSize().Width(),
         geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
         geometryNode->GetContentOffset().GetY());
-    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
+    imageEventHub->FireCompleteEvent(event);
 
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
