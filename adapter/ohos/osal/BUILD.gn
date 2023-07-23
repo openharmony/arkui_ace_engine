@@ -69,10 +69,7 @@ template("ace_osal_ohos_source_set") {
       "want_wrap_ohos.cpp",
     ]
 
-    external_deps += [
-      "init:libbegetutil",
-      "window_manager:libwsutils",
-    ]
+    external_deps += [ "init:libbegetutil" ]
 
     if (is_ohos_standard_system) {
       sources += [
