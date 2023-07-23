@@ -51,13 +51,9 @@ void GridPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool /*
     CHECK_NULL_VOID(pattern);
     auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
     gridPattern->StopAnimate();
-    if ((gridPattern->GetGridLayoutInfo().axis_ == Axis::VERTICAL && scrollEdgeType == ScrollEdgeType::SCROLL_TOP) ||
-        (gridPattern->GetGridLayoutInfo().axis_ == Axis::HORIZONTAL && scrollEdgeType == ScrollEdgeType::SCROLL_LEFT)) {
+    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         gridPattern->UpdateStartIndex(0);
-    } else if ((gridPattern->GetGridLayoutInfo().axis_ == Axis::VERTICAL &&
-                   scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) ||
-               (gridPattern->GetGridLayoutInfo().axis_ == Axis::HORIZONTAL &&
-                   scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT)) {
+    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
         gridPattern->UpdateStartIndex(gridPattern->GetGridLayoutInfo().childrenCount_ - 1);
     }
 }
