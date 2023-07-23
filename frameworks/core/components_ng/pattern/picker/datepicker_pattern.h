@@ -192,6 +192,11 @@ public:
         return showMonthDays_;
     }
 
+    void SetShowTimeFlag(bool value)
+    {
+        showTime_ = value;
+    }
+
     const EventMarker& GetDialogAcceptEvent() const
     {
         return OnDialogAccept_;
@@ -320,16 +325,7 @@ public:
     void HandleMonthDaysChange(
         const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
 
-    std::string GetSelectedObject(bool isColumnChange, int status = -1) const
-    {
-        auto date = selectedDate_;
-        if (isColumnChange) {
-            date = GetCurrentDate();
-        }
-        // W3C's month is between 0 to 11, need to reduce one.
-        date.SetMonth(date.GetMonth() - 1);
-        return date.ToString(true, status);
-    }
+    std::string GetSelectedObject(bool isColumnChange, int status = -1) const;
 
     const LunarDate& GetSelectDate()
     {
@@ -598,6 +594,7 @@ private:
     std::vector<RefPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
     bool showMonthDays_ = false;
+    bool showTime_ = false;
     Color backgroundColor_ = Color::WHITE;
     std::optional<int32_t> yearId_;
     std::optional<int32_t> monthId_;

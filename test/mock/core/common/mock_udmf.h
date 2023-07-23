@@ -48,8 +48,8 @@ public:
         void, AddPixelMapRecord, (const RefPtr<UnifiedData>& unifiedData, (std::vector<uint8_t>& data)), (override));
     MOCK_METHOD(void, AddImageRecord, (const RefPtr<UnifiedData>& unifiedData, const std::string& uri), (override));
     MOCK_METHOD(
-        void, AddTextRecord, (const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr), (override));
-    MOCK_METHOD(std::string, GetSingleTextRecord, (const RefPtr<UnifiedData>& unifiedData), (override));
+        void, AddPlainTextRecord, (const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr), (override));
+    MOCK_METHOD(std::string, GetSinglePlainTextRecord, (const RefPtr<UnifiedData>& unifiedData), (override));
     MOCK_METHOD(int32_t, GetVideoRecordUri, (const RefPtr<UnifiedData>& unifiedData, std::string& uri), (override));
 };
 class MockUnifiedData : public UnifiedData {

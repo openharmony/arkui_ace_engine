@@ -215,7 +215,7 @@ void LazyForEachNode::OnDataReloaded()
 
 void LazyForEachNode::OnDataAdded(size_t index)
 {
-    ACE_SCOPED_TRACE("OnDataReloaded");
+    ACE_SCOPED_TRACE("OnDataAdded");
     auto insertIndex = static_cast<int32_t>(index);
     if (builder_ && builder_->OnDataAdded(index)) {
         children_.clear();

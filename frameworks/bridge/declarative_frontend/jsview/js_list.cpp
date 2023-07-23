@@ -194,8 +194,10 @@ void JSList::SetLanes(const JSCallbackInfo& info)
 
     if (info.Length() >= 2 && !(info[1]->IsNull())) { /* 2: parameter count */
         CalcDimension laneGutter;
-        if (!JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
-            ListModel::GetInstance()->SetLaneGutter(0.0_vp);
+        if (JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
+            if (laneGutter.IsNegative()) {
+                laneGutter.Reset();
+            }
         }
         ListModel::GetInstance()->SetLaneGutter(laneGutter);
     }

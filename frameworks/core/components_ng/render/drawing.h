@@ -42,6 +42,7 @@
 #include "utils/scalar.h"
 
 namespace OHOS::Ace {
+namespace RSDrawing = Rosen::Drawing;
 using RSCanvas = Rosen::Drawing::Canvas;
 using RSImage = Rosen::Drawing::Image;
 using RSBrush = Rosen::Drawing::Brush;

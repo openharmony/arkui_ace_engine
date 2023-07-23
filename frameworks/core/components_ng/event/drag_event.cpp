@@ -137,21 +137,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
+                SubwindowManager::GetInstance()->HideMenuNG();
                 AnimationOption option;
                 option.SetDuration(PIXELMAP_ANIMATION_DURATION);
                 option.SetCurve(Curves::SHARP);
                 AnimationUtils::Animate(
-                    option, [renderContext]() { renderContext->UpdateOpacity(SCALE_NUMBER); },
-                    option.GetOnFinishEvent());
-                auto container = Container::Current();
-                if (container && container->IsScenceBoardWindow()) {
-                    auto pipelineContext = PipelineContext::GetCurrentContext();
-                    CHECK_NULL_VOID(pipelineContext);
-                    auto manager = pipelineContext->GetOverlayManager();
-                    manager->HideAllMenus();
-                } else {
-                    SubwindowManager::GetInstance()->HideMenuNG();
-                }
+                    option,
+                    [renderContext]() {
+                        renderContext->UpdateOpacity(SCALE_NUMBER);
+                    }, option.GetOnFinishEvent());
             }
         }
 

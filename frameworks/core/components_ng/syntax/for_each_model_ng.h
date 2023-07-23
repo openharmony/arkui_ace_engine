@@ -33,7 +33,7 @@ public:
     void Pop() override;
     
     void Create(const std::string& compilerGenId, const OHOS::Ace::ForEachFunc& ForEachFunc) override;
-    const std::list<std::string>& GetCurrentIdList(int32_t nodeId) override;
+    std::list<std::string> GetCurrentIdList(int32_t nodeId) override;
 
     void SetNewIds(std::list<std::string>&& newIds) override;
 

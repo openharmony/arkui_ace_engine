@@ -247,7 +247,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
     PanDirection panDirection;
-    panDirection.type = PanDirection::ALL;
+    panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
@@ -455,7 +455,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         std::string linkTitle = delegate_->dragData_->GetLinkTitle();
         // plain text
         if (!plainContent.empty()) {
-            UdmfClient::GetInstance()->AddTextRecord(aceUnifiedData, plainContent);
+            UdmfClient::GetInstance()->AddPlainTextRecord(aceUnifiedData, plainContent);
         }
         // html
         if (!htmlContent.empty()) {
@@ -780,7 +780,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     if (aceData && aceData->GetSize() >= 1) {
         LOGI("DragDrop event WebEventHub onDragDropId, size:%{public}d", (int)aceData->GetSize());
         // plain text
-        std::string plain = UdmfClient::GetInstance()->GetSingleTextRecord(aceData);
+        std::string plain = UdmfClient::GetInstance()->GetSinglePlainTextRecord(aceData);
         if (!plain.empty()) {
             delegate_->dragData_->SetFragmentText(plain);
             LOGI("DragDrop event WebEventHub onDragDropId, plain size:%{public}d", (int)plain.size());

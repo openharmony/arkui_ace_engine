@@ -80,6 +80,17 @@ private:
     std::string GetCurrentFormatDateTime();
     static void UpdateTextLayoutProperty(
         RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    std::vector<std::string> ParseInputFormat(
+        bool& is24H, int32_t& weekType, int32_t& month, int32_t& day, bool& isMilliSecond);
+    static std::vector<std::string> ParseDateTimeValue(const std::string& strDateTimeValue);
+    static std::string GetAmPm(const std::string& dateTimeValue);
+    static std::string Abstract(const std::string& strSource, const bool& abstractItem);
+    static int32_t GetDigitNumber(const std::string& strSource);
+    static std::string GetWeek(const bool& isShortType, const int32_t& week);
+    static std::string SpliceDateTime(
+        const std::vector<std::string>& curDateTime, const std::vector<std::string>& inputFormatSplitter);
+    static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const std::string& str,
+        const char& element, const int32_t& elementIndex);
 
     std::string GetFormat() const;
     int32_t GetHoursWest() const;

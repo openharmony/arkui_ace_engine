@@ -164,6 +164,7 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
         float crossSize = crossSizeOptional.value();
         if (lanes_ > 1) {
             crossSize = (crossSize + laneGutter_) / lanes_ - laneGutter_;
+            crossSize = crossSize <= 0 ? 1 : crossSize;
         }
         if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
             crossSize = maxLaneLength_.value();
@@ -293,7 +294,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         layoutWrapper->RemoveAllChildInRenderTree();
         jumpIndex_.reset();
     } else if (!itemPosition_.empty()) {
-        if (itemPosition_.begin()->first > 0) {
+        if (itemPosition_.begin()->first > 0 || (forwardLayout_ && Negative(referencePos_))) {
             startPos = itemPosition_.begin()->second.first;
         }
         endPos = itemPosition_.rbegin()->second.second;

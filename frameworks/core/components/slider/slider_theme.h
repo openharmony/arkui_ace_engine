@@ -39,6 +39,7 @@ public:
 
         static constexpr Color BLOCK_COLOR_PRESSED = Color(0x19182431);
         static constexpr Color BLOCK_OUTER_EDGE_COLOR = Color(0x0A000000);
+        static constexpr Color BLOCK_SHADOW_COLOR = Color(0x26000000);
         static constexpr Dimension BUBBLE_TO_CIRCLE_CENTER_DISTANCE = 20.0_vp;
         static constexpr Dimension MEASURE_CONTENT_DEFAULT_WIDTH = 40.0_vp;
         static constexpr Dimension OUTSET_HOT_BLOCK_SHADOW_WIDTH = 4.0_vp;
@@ -68,6 +69,7 @@ public:
             theme->tipFontSize_ = themeConstants->GetDimension(THEME_SLIDER_TIP_FONT_SIZE);
             theme->tipTextPadding_ = themeConstants->GetDimension(THEME_SLIDER_TIP_TEXT_PADDING_SIZE);
             theme->blockHoverColor_ = themeConstants->GetColor(THEME_SLIDER_BLOCK_HOVER_COLOR);
+            theme->blockShadowColor_ = BLOCK_SHADOW_COLOR;
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -223,6 +225,11 @@ public:
         return trackSelectedColor_;
     }
 
+    Color GetBlockShadowColor() const
+    {
+        return blockShadowColor_;
+    }
+
     Dimension GetFocusSideDistance() const
     {
         return focusSideDistance_;
@@ -279,6 +286,7 @@ private:
     Color markerColor_;
     Color trackBgColor_;
     Color trackSelectedColor_;
+    Color blockShadowColor_;
 
     // others
     Dimension focusSideDistance_;

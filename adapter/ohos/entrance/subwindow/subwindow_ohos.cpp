@@ -24,6 +24,7 @@
 #include "base/geometry/rect.h"
 #include "core/components/root/root_element.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
@@ -238,6 +239,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     CHECK_NULL_VOID(overlayManager);
     ShowWindow();
     ResizeWindow();
+    ContainerScope scope(childContainerId_);
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
@@ -252,6 +254,7 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     popupInfo.popupId = -1;
     popupInfo.markNeedUpdate = true;
+    ContainerScope scope(childContainerId_);
     overlayManager->HidePopup(targetId, popupInfo);
     context->FlushPipelineImmediately();
     HideWindow();
@@ -383,6 +386,11 @@ void SubwindowOhos::HideWindow()
     }
 
     OHOS::Rosen::WMError ret = window_->Hide();
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+    if (parentContainer->IsScenceBoardWindow()) {
+        window_->SetTouchable(true);
+    }
 
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         LOGE("Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
@@ -439,6 +447,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     CHECK_NULL_VOID(overlay);
     ShowWindow();
     ResizeWindow();
+    ContainerScope scope(childContainerId_);
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
@@ -562,7 +571,7 @@ void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
 }
 
 RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
-    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
     LOGI("SubwindowOhos::ShowDialogNG");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -572,9 +581,10 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
     ShowWindow();
+    window_->SetFullScreen(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
-    return overlay->ShowDialog(dialogProps, customNode);
+    return overlay->ShowDialog(dialogProps, std::move(buildFunc));
 }
 
 void SubwindowOhos::HideSubWindowNG()
@@ -700,7 +710,7 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
         LOGE("can not get delegate.");
         return;
     }
-    ContainerScope scope(aceContainer->GetInstanceId());
+    ContainerScope scope(childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
     if (parentContainer->IsScenceBoardWindow()) {

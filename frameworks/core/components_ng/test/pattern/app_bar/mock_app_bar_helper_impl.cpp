@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-/**
- * ObservedPropertySimpleAbstractPU
- * 
- * all definitions in this file are framework internal
- */
-abstract class ObservedPropertySimpleAbstractPU<T> extends ObservedPropertyAbstractPU<T>  {
+#include "core/common/app_bar_helper.h"
 
-  constructor(owningView: IPropertySubscriber, propertyName: PropertyInfo) {
-    super(owningView, propertyName);
-  }
+namespace OHOS::Ace {
+
+RefPtr<NG::FrameNode> AppBarHelper::CreateUIExtensionNode(const std::string& bundleName,
+    const std::string& abilityName, const std::map<std::string, std::string>& params,
+    std::function<void(int32_t)>&& onRelease)
+{
+    return nullptr;
+}
+
 }

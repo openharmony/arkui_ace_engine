@@ -213,6 +213,14 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
+    bool IsClickEventsEmpty() const
+    {
+        if (!clickEventActuator_) {
+            return true;
+        }
+        return clickEventActuator_->IsClickEventsEmpty();
+    }
+
     void BindMenu(GestureEventFunc&& showMenu);
 
     bool IsLongClickable() const

@@ -92,7 +92,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
         if (NearZero(titleBarHeight)) {
             titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         }
-        auto doubleTitleBarHeight = overDragOffset / 6.0f + titleBarHeight;
+        auto doubleTitleBarHeight =  overDragOffset / 6.0f + titleBarHeight;
         constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), doubleTitleBarHeight);
         titleBarWrapper->Measure(constraint);
         return titleBarHeight;
@@ -241,7 +241,7 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), overDragOffset + titlebarHeight);
+        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(),  overDragOffset + titlebarHeight);
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;

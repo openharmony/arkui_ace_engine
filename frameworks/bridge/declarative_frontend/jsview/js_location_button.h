@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEC_PASTE_BUTTON_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEC_PASTE_BUTTON_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LOCATION_BUTTON_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LOCATION_BUTTON_H
 
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_sec_button_base.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/location_button/location_button_common.h"
 #include "core/event/mouse_event.h"
 #include "core/gestures/click_recognizer.h"
 
 namespace OHOS::Ace::Framework {
-class JsSecPasteButtonClickFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsSecPasteButtonClickFunction, JsFunction)
+class JsLocationButtonClickFunction : public JsFunction {
+    DECLARE_ACE_TYPE(JsLocationButtonClickFunction, JsFunction)
 public:
-    explicit JsSecPasteButtonClickFunction(const JSRef<JSFunc>& jsFunction) :
+    explicit JsLocationButtonClickFunction(const JSRef<JSFunc>& jsFunction) :
         JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsSecPasteButtonClickFunction() override {};
+    ~JsLocationButtonClickFunction() override {};
     void Execute() override
     {
         JsFunction::ExecuteJS();
@@ -41,13 +41,13 @@ public:
     void Execute(GestureEvent& info);
 };
 
-class JSSecPasteButton : public JSViewAbstract, public JSInteractableView {
+class JSLocationButton : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
-    static bool ParseComponentStyle(const JSCallbackInfo& info, PasteButtonPasteDescription& text,
-        PasteButtonIconStyle& icon, int32_t& bg);
+    static bool ParseComponentStyle(const JSCallbackInfo& info, LocationButtonLocationDescription& text,
+        LocationButtonIconStyle& icon, int32_t& bg);
     static void Create(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEC_PASTE_BUTTON_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LOCATION_BUTTON_H

@@ -177,6 +177,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_txt_paragraph.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",

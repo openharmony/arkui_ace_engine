@@ -51,7 +51,7 @@ public:
     virtual void ClearMenu() {};
     virtual void ClearMenuNG() = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
-        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) = 0;
+        const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual void HideSubWindowNG() = 0;
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;

@@ -290,6 +290,8 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     if (IsTextArea()) {
         CheckScrollable();
+    } else {
+        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
     }
     UpdateScrollBarOffset();
     caretUpdateType_ = CaretUpdateType::NONE;
@@ -352,6 +354,7 @@ bool TextFieldPattern::UpdateCaretPosition()
         LOGW("Not on focus, cannot update caret");
         return true;
     }
+    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
     // text input has higher priority than events such as mouse press
     if (caretUpdateType_ == CaretUpdateType::INPUT) {
         UpdateCaretPositionByTextEdit();
@@ -1317,13 +1320,9 @@ void TextFieldPattern::HandleBlurEvent()
     caretRect_.Reset();
     StopTwinkling();
     CloseKeyboard(true);
-    auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     MarkRedrawOverlay();
-    UpdateCaretPositionWithClamp(pos);
-    textEditingValue_.CursorMoveToPosition(pos);
     textSelector_.Update(-1);
     selectionMode_ = SelectionMode::NONE;
-    caretUpdateType_ = CaretUpdateType::EVENT;
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     ResetBackgroundColor();
@@ -1804,7 +1803,7 @@ void TextFieldPattern::InitDragDropEvent()
         pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
         itemInfo.extraInfo = selectedStr;
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-        UdmfClient::GetInstance()->AddTextRecord(unifiedData, selectedStr);
+        UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
         event->SetData(unifiedData);
         host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                      : PROPERTY_UPDATE_MEASURE);
@@ -1893,7 +1892,7 @@ void TextFieldPattern::InitDragDropEvent()
         }
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
-        std::string str = UdmfClient::GetInstance()->GetSingleTextRecord(data);
+        std::string str = UdmfClient::GetInstance()->GetSinglePlainTextRecord(data);
         pattern->needToRequestKeyboardInner_ = true;
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
@@ -2203,13 +2202,22 @@ void TextFieldPattern::OnModifyDone()
         }
         HandleCounterBorder();
     }
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !inlineFocusState_) {
+    if (!IsTextArea()) {
+        isTextInput_ = true;
+    }
+    auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
+    if ((!IsSelected() && inputStyle == InputStyle::INLINE) ||
+        ((inputStyle == InputStyle::DEFAULT) && preInputStyle_ != InputStyle::INLINE)) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
     }
-    if (IsSelected() && paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
-        ApplyInlineStates(false);
+    if (IsSelected() && inputStyle == InputStyle::INLINE) {
+        preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
+    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
+        RestorePreInlineStates();
+    }
+    preInputStyle_ = inputStyle;
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }

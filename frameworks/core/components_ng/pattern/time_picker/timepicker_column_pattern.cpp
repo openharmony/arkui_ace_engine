@@ -49,7 +49,7 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 
-const std::string MEASURE_SIZE_STRING = "TEST";
+const char* MEASURE_SIZE_STRING = "TEST";
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
@@ -85,7 +85,7 @@ void TimePickerColumnPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitMouseAndPressEvent();
     SetAccessibilityAction();
-    if (optionProperties_.size() <= 0) {
+    if (optionProperties_.empty()) {
         auto midIndex = showCount / 2;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -99,15 +99,12 @@ void TimePickerColumnPattern::OnModifyDone()
             if (childIndex == midIndex) { // selected
                 auto selectedOptionSize = theme->GetOptionStyle(true, false).GetFontSize();
                 measureContext.fontSize = selectedOptionSize;
-                measureContext.fontFamily = "";
             } else if (childIndex % midIndex == 1 && (childIndex != 0 || childIndex != (showCount - 1))) {
                 auto focusOptionSize = theme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
                 measureContext.fontSize = focusOptionSize;
-                measureContext.fontFamily = "";
             } else {
                 auto normalOptionSize = theme->GetOptionStyle(false, false).GetFontSize();
                 measureContext.fontSize = normalOptionSize;
-                measureContext.fontFamily = "";
             }
             if (childIndex == showCount / MIDDLE_CHILD_INDEX) {
                 prop.height = dividerSpacing_;

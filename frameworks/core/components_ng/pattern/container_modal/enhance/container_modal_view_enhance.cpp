@@ -155,6 +155,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
     CHECK_NULL_RETURN(windowManager, nullptr);
     RefPtr<FrameNode> maximizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MAX,
         {});
+    maximizeBtn->UpdateInspectorId("EnhanceMaximizeBtn");
     BondingMaxBtnGestureEvent(maximizeBtn, containerNode);
     BondingMaxBtnInputEvent(maximizeBtn, containerNode);
     containerTitleRow->AddChild(maximizeBtn);
@@ -170,6 +171,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
             windowManager->WindowMinimize();
         });
     // minimizeBtn add empty panEvent to over fater container event
+    minimizeBtn->UpdateInspectorId("EnhanceMinimizeBtn");
     auto minimizeBtnEventHub = minimizeBtn->GetOrCreateGestureEventHub();
     auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
     PanDirection panDirection;
@@ -189,6 +191,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(RefPtr<FrameNode>
             windowManager->WindowClose();
         }, true);
     // closeBtn add empty panEvent to over fater container event
+    closeBtn->UpdateInspectorId("EnhanceCloseBtn");
     auto closeBtnEventHub = closeBtn->GetOrCreateGestureEventHub();
     closeBtnEventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
     containerTitleRow->AddChild(closeBtn);
@@ -320,7 +323,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
             LOGE("create maxBtn callback func failed,windowManager is null");
             return;
         }
-        LOGD("MODE_MAXIMIZE selected");
+        LOGD("Enhance Menu, MODE_MAXIMIZE selected");
         ResetHoverTimer();
         if (MaximizeMode::MODE_AVOID_SYSTEM_BAR == windowManager->GetCurrentWindowMaximizeMode()) {
             windowManager->WindowRecover();
@@ -336,6 +339,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
         : "window.maximize");
     auto maximizeRow = BuildMenuItem(maximizeTitle, InternalResource::ResourceId::IC_WINDOW_MENU_MAXIMIZE,
         maximizeEvent, windowManager->GetWindowMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    maximizeRow->UpdateInspectorId("EnhanceMenuMaximizeRow");
     PaddingProperty pad;
     pad.left = CalcLength(CONTENT_PADDING);
     return BuildMenuItemPadding(pad, maximizeRow);
@@ -354,7 +358,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
             return;
         }
         ResetHoverTimer();
-        LOGD("MODE_FULLSCREEN selected");
+        LOGD("Enhance Menu, MODE_FULLSCREEN selected");
         if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode()) {
             windowManager->WindowRecover();
         } else {
@@ -368,6 +372,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
         "window.exitFullScreen" : "window.fullScreen");
     auto fullScreenRow = BuildMenuItem(fullScreenTitle, InternalResource::ResourceId::IC_WINDOW_MENU_FULLSCREEN,
         fullScreenEvent, windowManager->GetWindowMaximizeMode() == MaximizeMode::MODE_FULL_FILL);
+    fullScreenRow->UpdateInspectorId("EnhanceMenuFullScreenRow");
     PaddingProperty pad;
     pad.left = CalcLength(CONTENT_PADDING);
     return BuildMenuItemPadding(pad, fullScreenRow);
@@ -399,12 +404,13 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildLeftSplitMenuItem()
             LOGE("create leftsplit callback func failed,windowMannager is null!");
             return;
         }
-        LOGD("left split selected");
+        LOGD("Enhance Menu, left split selected");
         windowManager->FireWindowSplitCallBack();
     };
     auto leftSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(leftSplitClickFunc));
     auto screenLeftRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.leftSide"),
         InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L, leftSplitEvent, false);
+    screenLeftRow->UpdateInspectorId("EnhanceMenuScreenLeftRow");
     PaddingProperty pad;
     pad.left = CalcLength(CONTENT_PADDING);
     return BuildMenuItemPadding(pad, screenLeftRow);
@@ -422,12 +428,13 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildRightSplitMenuItem()
             LOGE("create rightSpiltBtn callback func failed, windowManager is null!");
             return;
         }
-        LOGI("right split selected");
+        LOGD("Enhance Menu, right split selected");
         windowManager->FireWindowSplitCallBack(false);
     };
     auto rightSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(rightSplitClickFunc));
     auto screenRightRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.rightSide"),
         InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, rightSplitEvent, false);
+    screenRightRow->UpdateInspectorId("EnhanceScreenRow");
     PaddingProperty pad;
     pad.left = CalcLength(CONTENT_PADDING);
     return BuildMenuItemPadding(pad, screenRightRow);

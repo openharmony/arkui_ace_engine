@@ -74,8 +74,8 @@ public:
         scrollableEvent_->SetEnabled(enable);
     }
     void SetScrollableAxis(Axis axis);
-    const RefPtr<GestureEventHub>& GetGestureHub();
-    const RefPtr<InputEventHub>& GetInputHub();
+    RefPtr<GestureEventHub> GetGestureHub();
+    RefPtr<InputEventHub> GetInputHub();
 
     // edgeEffect
     const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
@@ -240,7 +240,7 @@ public:
     bool CanOverScroll(int32_t source)
     {
         return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || AnimateRunning()));
+            IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -317,6 +317,7 @@ private:
     RefPtr<Animator> animator_;
     RefPtr<SpringMotion> springMotion_;
     bool scrollAbort_ = false;
+    bool animateOverScroll_ = false;
 
     NestedScrollOptions nestedScroll_;
 
