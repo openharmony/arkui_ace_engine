@@ -2159,9 +2159,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
     }
-#ifndef ACE_UNITTEST
     RestoreGeoState();
-#endif
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
     if (!oldGeometryNode_) {
@@ -2279,11 +2277,9 @@ void FrameNode::Layout()
         GetLayoutAlgorithm()->SetSkipLayout();
     }
 
-#ifndef ACE_UNITTEST
     SaveGeoState();
     AvoidKeyboard();
     ExpandSafeArea();
-#endif
 
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
         geometryNode_->GetFrameOffset().ToString().c_str());
