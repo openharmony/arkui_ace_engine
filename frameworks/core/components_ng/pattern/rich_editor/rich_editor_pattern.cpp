@@ -258,7 +258,8 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     }
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
-        textSelector_.Update(-1, -1);
+        CloseSelectOverlay();
+        ResetSelection();
     }
     SetCaretOffset(start);
     ResetSelection();
@@ -614,7 +615,6 @@ void RichEditorPattern::UpdateSpanStyle(int32_t start, int32_t end, TextStyle te
     CHECK_NULL_VOID(host);
     int32_t spanStart = 0;
     int32_t spanEnd = 0;
-
     for (auto it = host->GetChildren().begin(); it != host->GetChildren().end(); ++it) {
         auto spanNode = DynamicCast<SpanNode>(*it);
         auto imageNode = DynamicCast<FrameNode>(*it);
@@ -657,6 +657,10 @@ void RichEditorPattern::UpdateSpanStyle(int32_t start, int32_t end, TextStyle te
         if (spanStart >= end) {
             break;
         }
+    }
+    if (textSelector_.IsValid()) {
+        CloseSelectOverlay();
+        ResetSelection();
     }
 }
 
@@ -2018,5 +2022,16 @@ void RichEditorPattern::OnAreaChangedInner()
             CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
         CreateHandles();
     }
+}
+
+void RichEditorPattern::CloseSelectOverlay()
+{
+    TextPattern::CloseSelectOverlay();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto textSelectInfo = GetSpansInfo(-1, -1, GetSpansMethod::ONSELECT);
+    eventHub->FireOnSelect(&textSelectInfo);
 }
 } // namespace OHOS::Ace::NG
