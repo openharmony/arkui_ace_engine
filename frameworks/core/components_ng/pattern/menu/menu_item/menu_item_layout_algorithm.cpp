@@ -85,6 +85,7 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (padding.top.has_value() && padding.top.value() > topSpace) {
         topSpace = padding.top.value();
     }
+    leftRow->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     leftRow->GetGeometryNode()->SetMarginFrameOffset(OffsetF(padding.left.value_or(horInterval_), topSpace));
     leftRow->Layout();
 
