@@ -17,11 +17,6 @@
 
 #include <unordered_map>
 
-#include "include/core/SkPaint.h"
-#include "include/core/SkRect.h"
-
-#include "bridge/common/dom/dom_type.h"
-#include "core/pipeline/base/constants.h"
 #include "frameworks/core/components/declaration/svg/svg_animate_declaration.h"
 
 namespace OHOS::Ace::NG {
