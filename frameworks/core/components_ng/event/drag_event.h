@@ -142,6 +142,7 @@ private:
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
+    RefPtr<SequencedRecognizer> previewSequencedRecognizer_;
     std::function<void(GestureEvent&)> actionStart_;
 
     std::function<void(GestureEvent&)> longPressUpdate_;
