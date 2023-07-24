@@ -51,6 +51,7 @@ private:
     static void JsSetFontStyle(const JSCallbackInfo& info);
     static void JsSetFontDefault();
     static void JsSetFont(const JSRef<JSObject>& info);
+    static void JsSetCommonOptions(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
