@@ -1108,6 +1108,7 @@ private:
     bool isTextInput_ = false;
     bool inlineSelectAllFlag_ = false;
     bool inlineFocusState_ = false;
+    bool blockPress_ = false;
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
     float previewWidth_ = 0.0f;

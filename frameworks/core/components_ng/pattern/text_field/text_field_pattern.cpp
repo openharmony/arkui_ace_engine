@@ -1776,6 +1776,7 @@ void TextFieldPattern::InitDragDropEvent()
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
     gestureHub->SetTextDraggable(true);
+    gestureHub->SetTextField(true);
     auto callback = GetThumbnailCallback();
     gestureHub->SetThumbnailCallback(std::move(callback));
     auto eventHub = host->GetEventHub<EventHub>();
@@ -1893,6 +1894,9 @@ void TextFieldPattern::InitDragDropEvent()
         std::string str = UdmfClient::GetInstance()->GetSinglePlainTextRecord(data);
         pattern->needToRequestKeyboardInner_ = true;
         pattern->dragRecipientStatus_ = DragStatus::NONE;
+        if (str.empty()) {
+            return;
+        }
         if (pattern->dragStatus_ == DragStatus::NONE) {
             pattern->InsertValue(str);
         } else {
@@ -2899,6 +2903,11 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     if (info.GetAction() == MouseAction::PRESS) {
         LOGI("Handle mouse left button press");
+        if (InSelectMode() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+            blockPress_ = true;
+            return;
+        }
+        blockPress_ = false;
         CloseSelectOverlay();
         if (!focusHub->IsFocusable()) {
             return;
@@ -2920,6 +2929,11 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     if (info.GetAction() == MouseAction::RELEASE) {
         LOGI("Handle mouse left button release");
+        if (blockPress_) {
+            caretUpdateType_ = CaretUpdateType::PRESSED;
+            UpdateCaretPositionByPressOffset();
+            blockPress_ = false;
+        }
         CloseSelectOverlay();
         caretUpdateType_ = CaretUpdateType::NONE;
         isMousePressed_ = false;
@@ -2936,7 +2950,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
 
     if (info.GetAction() == MouseAction::MOVE) {
-        if (!isMousePressed_) {
+        if (!isMousePressed_ || blockPress_) {
             return;
         }
         caretUpdateType_ = CaretUpdateType::EVENT;

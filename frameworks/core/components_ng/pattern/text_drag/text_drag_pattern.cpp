@@ -123,7 +123,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
             leftHandleX = contentRect.Left();
             leftHandleY = contentRect.Top();
         }
-        if (boxLast.rect_.GetBottom() > contentRect.Bottom()) {
+        if ((boxLast.rect_.GetBottom() + textStartY) > contentRect.Bottom()) {
             rightHandleX = contentRect.Right();
             rightHandleY = contentRect.Bottom() - lineHeight;
         }

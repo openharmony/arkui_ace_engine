@@ -146,6 +146,7 @@ private:
 
     std::function<void(GestureEvent&)> longPressUpdate_;
     std::function<void()> actionCancel_;
+    std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
