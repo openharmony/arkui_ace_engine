@@ -77,6 +77,8 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void ToastPattern::BeforeCreateLayoutWrapper()
 {
+    PopupBasePattern::BeforeCreateLayoutWrapper();
+
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
     UpdateToastSize(toastNode);
