@@ -210,6 +210,10 @@ void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
         DataPickerRowLayoutProperty, DisappearColor, value.textColor.value_or(disappearStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, DisappearWeight, value.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, DisappearFontFamily, value.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, DisappearFontStyle, value.fontStyle.value_or(disappearStyle.GetFontStyle()));
 }
 
 void DatePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -225,6 +229,10 @@ void DatePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
         DataPickerRowLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()));
 }
 
 void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -240,6 +248,10 @@ void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
         DataPickerRowLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, SelectedWeight, value.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, SelectedFontFamily, value.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
 void DatePickerModelNG::SetBackgroundColor(const Color& color)

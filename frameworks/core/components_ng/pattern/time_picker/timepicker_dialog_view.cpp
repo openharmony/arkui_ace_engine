@@ -420,6 +420,10 @@ void TimePickerDialogView::SetTextProperties(
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearWeight,
         properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontFamily,
+        properties.disappearTextStyle_.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontStyle,
+        properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, properties.normalTextStyle_.fontSize.value());
@@ -430,6 +434,10 @@ void TimePickerDialogView::SetTextProperties(
         TimePickerLayoutProperty, Color, properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, Weight, properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontFamily,
+        properties.normalTextStyle_.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontStyle,
+        properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(
@@ -441,5 +449,9 @@ void TimePickerDialogView::SetTextProperties(
         properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedWeight,
         properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontFamily,
+        properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontStyle,
+        properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 } // namespace OHOS::Ace::NG
