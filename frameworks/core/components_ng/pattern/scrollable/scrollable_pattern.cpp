@@ -322,6 +322,8 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         }
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
     if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
         // set the scroll bar style
@@ -329,11 +331,10 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else if (scrollBar_->GetDisplayMode() != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(renderContext);
     if (renderContext->HasBorderRadius()) {
