@@ -125,14 +125,20 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     if (callback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
             [callback, overlayId, isSelectAll](GestureEvent& /*info*/) {
-                if (callback) {
-                    callback();
-                }
-                // close text overlay.
                 auto pipeline = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetSelectOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
+                auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
+                CHECK_NULL_VOID(selectOverlay);
+                auto isDoingAnimation = selectOverlay->GetAnimationStatus();
+                CHECK_NULL_VOID(!isDoingAnimation);
+                auto isExtensionMenu = selectOverlay->GetIsExtensionMenu();
+                CHECK_NULL_VOID(!isExtensionMenu);
+                if (callback) {
+                    callback();
+                }
+                // close text overlay.
                 if (!isSelectAll) {
                     overlayManager->DestroySelectOverlay(overlayId);
                 }
