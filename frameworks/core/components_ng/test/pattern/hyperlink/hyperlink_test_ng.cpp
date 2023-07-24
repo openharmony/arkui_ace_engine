@@ -40,7 +40,7 @@ namespace {
 constexpr double RADIUS_DEFAULT = 300.0;
 const std::string HYPERLINK_ADDRESS = "https://www.baidu.com";
 const std::string HYPERLINK_CONTENT = "baidu";
-const std::string HYPERLINK_EXTRAINFO = "{\"url\":\"https://www.baidu.com\",\"title\":\"\"}";
+const std::string HYPERLINK_EXTRAINFO = "{\"url\":\"https://www.baidu.com\",\"title\":\"baidu\"}";
 } // namespace
 
 class HyperlinkTestNg : public testing::Test {
@@ -149,7 +149,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
 
     hyperlinkModelNG.SetDraggable(true);
     EXPECT_TRUE(hyperlinkNode->IsDraggable());
-    EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
+    EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
 
     hyperlinkModelNG.SetDraggable(true);
     EXPECT_TRUE(hyperlinkNode->IsDraggable());
