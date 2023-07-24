@@ -726,13 +726,19 @@ void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
 bool PipelineBase::MaybeRelease()
 {
     CHECK_RUN_ON(UI);
-    CHECK_NULL_RETURN(taskExecutor_, true);
+    CHECK_NULL_RETURN(taskExecutor_, (Destroy(), true));
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         LOGI("Destroy Pipeline on UI thread.");
+        Destroy();
         return true;
     } else {
         LOGI("Post Destroy Pipeline Task to UI thread.");
-        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI);
+        return !taskExecutor_->PostTask(
+            [this]() {
+                Destroy();
+                delete this;
+            },
+            TaskExecutor::TaskType::UI);
     }
 }
 
