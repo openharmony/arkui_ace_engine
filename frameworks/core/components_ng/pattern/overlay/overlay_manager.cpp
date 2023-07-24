@@ -508,7 +508,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         if (!popupInfo.isBlockEvent && hub) {
             auto ges = hub->GetOrCreateGestureEventHub();
             if (ges) {
-                ges->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+                ges->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
             }
         }
         popupMap_[targetId].popupNode->MountToParent(rootNode);
