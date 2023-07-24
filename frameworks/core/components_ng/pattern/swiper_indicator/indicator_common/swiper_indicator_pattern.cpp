@@ -86,13 +86,16 @@ void SwiperIndicatorPattern::OnModifyDone()
             }
             indicator->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         });
-
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    InitClickEvent(gestureHub);
-    InitHoverMouseEvent();
-    InitTouchEvent(gestureHub);
-    InitPanEvent(gestureHub);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
+        auto gestureHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitClickEvent(gestureHub);
+        InitHoverMouseEvent();
+        InitTouchEvent(gestureHub);
+        InitPanEvent(gestureHub);
+    }
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
