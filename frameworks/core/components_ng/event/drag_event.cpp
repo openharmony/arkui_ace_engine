@@ -460,6 +460,23 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     }
 }
 
+OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
+{
+    auto offsetToWindow = frameNode->GetPaintRectOffset();
+    auto offsetX = offsetToWindow.GetX();
+    auto offsetY = offsetToWindow.GetY();
+#ifdef WEB_SUPPORTED
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        auto webPattern = frameNode->GetPattern<WebPattern>();
+        if (webPattern) {
+            offsetX += webPattern->GetDragOffset().GetX();
+            offsetY += webPattern->GetDragOffset().GetY();
+        }
+    }
+#endif
+    return OffsetF(offsetX, offsetY);
+}
+
 void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -477,13 +494,8 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(pixelMap);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
-    auto offsetToWindow = frameNode->GetPaintRectOffset();
-    auto offsetX = offsetToWindow.GetX();
-    auto offsetY = offsetToWindow.GetY();
-    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        offsetX = longPressInfo_.GetGlobalPoint().GetX() - (width / 2);
-        offsetY = longPressInfo_.GetGlobalPoint().GetY() - (height / 2);
-    }
+    auto offsetX = GetFloatImageOffset(frameNode).GetX();
+    auto offsetY = GetFloatImageOffset(frameNode).GetY();
     // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
