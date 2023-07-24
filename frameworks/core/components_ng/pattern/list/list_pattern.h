@@ -166,6 +166,8 @@ public:
         return currentOffset_;
     }
 
+    float GetTotalHeight() const override;
+
     // scroller
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override
     {

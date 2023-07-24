@@ -97,6 +97,11 @@ void ListPattern::OnAnimateStop() {}
 
 void ListPattern::ScrollTo(float position) {}
 
+float ListPattern::GetTotalHeight() const
+{
+    return 0.0f;
+}
+
 void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
 
 void ListPattern::ClearMultiSelect() {};

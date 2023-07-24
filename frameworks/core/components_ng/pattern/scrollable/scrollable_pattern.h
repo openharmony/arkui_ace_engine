@@ -234,6 +234,11 @@ public:
     {
         return 0.0f;
     }
+    // main size of all children
+    virtual float GetTotalHeight() const
+    {
+        return 0.0f;
+    }
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
     virtual void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth);
@@ -326,6 +331,7 @@ private:
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
+    float totalOffsetOfMousePressed_ = 0.0f;
     MouseInfo lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<InputEvent> mouseEvent_;
