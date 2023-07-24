@@ -1354,6 +1354,7 @@ void TextFieldPattern::HandleOnUndoAction()
     redoOperationRecords_.push_back(value);
     if (operationRecords_.empty()) {
         LOGW("No record left, clear");
+        FireEventHubOnChange("");
         ClearEditingValue();
         return;
     }
