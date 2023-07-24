@@ -447,10 +447,15 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionVp(itemHeightValue, dimPosition);
     swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionVp(selectedItemWidthValue, dimPosition);
-    swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionVp(selectedItemHeightValue, dimPosition);
-    swiperParameters.selectedItemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    bool parseSeleItemWOk = ParseJsDimensionVp(selectedItemWidthValue, dimPosition);
+    swiperParameters.selectedItemWidth = parseSeleItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    bool parseSeleItemHOk = ParseJsDimensionVp(selectedItemHeightValue, dimPosition);
+    swiperParameters.selectedItemHeight = parseSeleItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseSeleItemWOk == false && parseSeleItemHOk == false) {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
+    } else {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
+    }
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
@@ -460,7 +465,6 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = ParseJsColor(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
-    SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
     return swiperParameters;
 }
 
