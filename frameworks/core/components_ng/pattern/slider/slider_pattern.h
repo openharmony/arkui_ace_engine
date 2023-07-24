@@ -200,7 +200,7 @@ private:
     OffsetF circleCenter_ = { 0.0f, 0.0f }; // Relative to the content area
 
     float trackThickness_ = 0.0f;
-    float blockHotSize_ = 0.0f;
+    SizeF blockHotSize_;
     SizeF blockSize_;
 
     RefPtr<TouchEventImpl> touchEvent_;
