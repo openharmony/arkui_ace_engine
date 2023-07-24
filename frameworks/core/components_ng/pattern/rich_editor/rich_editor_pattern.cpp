@@ -1048,21 +1048,7 @@ bool RichEditorPattern::SelectOverlayIsOn()
 
 void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
-    auto textEditingValueLen = static_cast<int32_t>(StringUtils::ToWstring(value->text).length());
-    auto textForDispayValueLen = GetTextContentLength();
-    if (textForDispayValueLen == textEditingValueLen) {
-        caretPosition_ = std::clamp(value->selection.baseOffset, 0, GetTextContentLength());
-    } else if (textForDispayValueLen < textEditingValueLen) {
-        auto insertValue = StringUtils::ToWstring(value->text);
-        insertValue.substr(caretPosition_, std::max(0, value->selection.baseOffset - caretPosition_));
-        InsertValue(StringUtils::ToString(insertValue));
-    } else if (textForDispayValueLen > textEditingValueLen) {
-        if (value->selection.baseOffset < caretPosition_) {
-            DeleteBackward(textForDispayValueLen - textEditingValueLen);
-        } else {
-            DeleteForward(textForDispayValueLen - textEditingValueLen);
-        }
-    }
+    InsertValue(value->text);
 }
 
 void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
@@ -1252,11 +1238,10 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
         }
     }
     auto text = spanNode->GetSpanItem()->content;
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring textTemp = converter.from_bytes(text);
-    std::wstring insertValueTemp = converter.from_bytes(insertValue);
+    std::wstring textTemp = StringUtils::ToWstring(text);
+    std::wstring insertValueTemp = StringUtils::ToWstring(insertValue);
     textTemp.insert(info.GetOffsetInSpan(), insertValueTemp);
-    text = converter.to_bytes(textTemp);
+    text = StringUtils::ToString(textTemp);
     spanNode->UpdateContent(text);
     AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
 }
@@ -1264,11 +1249,10 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
 void RichEditorPattern::InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue)
 {
     auto text = spanNodeBefore->GetSpanItem()->content;
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring textTemp = converter.from_bytes(text);
-    std::wstring insertValueTemp = converter.from_bytes(insertValue);
+    std::wstring textTemp = StringUtils::ToWstring(text);
+    std::wstring insertValueTemp = StringUtils::ToWstring(insertValue);
     textTemp.append(insertValueTemp);
-    text = converter.to_bytes(textTemp);
+    text = StringUtils::ToString(textTemp);
     spanNodeBefore->UpdateContent(text);
 }
 
@@ -1568,13 +1552,12 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
             case SpanResultType::TEXT: {
                 auto spanItem = spanNode->GetSpanItem();
                 auto text = spanItem->content;
-                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-                std::wstring textTemp = converter.from_bytes(text);
+                std::wstring textTemp = StringUtils::ToWstring(text);
                 textTemp.erase(it.OffsetInSpan(), it.GetEraseLength());
                 if (textTemp.size() == 0) {
                     deleteNodes.emplace(it.GetSpanIndex());
                 }
-                text = converter.to_bytes(textTemp);
+                text = StringUtils::ToString(textTemp);
                 spanNode->UpdateContent(text);
                 break;
             }
@@ -1598,26 +1581,40 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
 bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if (keyEvent.action == KeyAction::DOWN) {
-        if (keyEvent.code == KeyCode::KEY_DPAD_LEFT) {
-            return CursorMoveLeft();
-        }
-        if (keyEvent.code == KeyCode::KEY_DPAD_RIGHT) {
-            return CursorMoveRight();
-        }
-        if (keyEvent.code == KeyCode::KEY_DPAD_UP) {
-            return CursorMoveUp();
-        }
-        if (keyEvent.code == KeyCode::KEY_DPAD_DOWN) {
-            return CursorMoveDown();
-        }
         if (keyEvent.code == KeyCode::KEY_DEL) {
+#if defined(PREVIEW)
+            DeleteForward(1);
+#else
             DeleteBackward(1);
+#endif
+            return true;
+        }
+        if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
+#if defined(PREVIEW)
+            DeleteBackward(1);
+#else
+            DeleteForward(1);
+#endif
             return true;
         }
         if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
             keyEvent.code == KeyCode::KEY_DPAD_CENTER) {
             InsertValue("\n");
             return true;
+        }
+        if (keyEvent.IsDirectionalKey()) {
+            switch (keyEvent.code) {
+                case KeyCode::KEY_DPAD_UP:
+                    return CursorMoveUp();
+                case KeyCode::KEY_DPAD_DOWN:
+                    return CursorMoveDown();
+                case KeyCode::KEY_DPAD_LEFT:
+                    return CursorMoveLeft();
+                case KeyCode::KEY_DPAD_RIGHT:
+                    return CursorMoveRight();
+                default:
+                    return false;
+            }
         }
         auto visibilityCode = keyEvent.ConvertInputCodeToString();
         if (visibilityCode != std::string("")) {
