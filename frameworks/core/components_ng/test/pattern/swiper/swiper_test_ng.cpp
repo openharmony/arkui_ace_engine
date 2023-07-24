@@ -7395,7 +7395,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateAnimationProperty001, TestSize.Level1)
                 swiperPattern->UpdateAnimationProperty(velocity);
                 swiperPattern->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
                 if (i == 1) {
-                    velocity = -200.1f;
+                    velocity = -1300;
                     continue;
                 }
                 if (i == 1 && j == 1) {
@@ -7409,7 +7409,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateAnimationProperty001, TestSize.Level1)
             }
             velocity = 0.1f;
         }
-        velocity = 200.1f;
+        velocity = 1300;
     }
 }
 
