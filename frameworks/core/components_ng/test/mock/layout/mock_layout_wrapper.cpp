@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -44,22 +43,6 @@ const RefPtr<LayoutProperty>& GetLayoutProperty()
 
 RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true)
 {
-    if (index >= 2) {
-        auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-        auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-        auto layoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-        return layoutWrapper;
-    } else if (index == 1) {
-        auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-        auto layoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, nullptr, indicatorNode->GetLayoutProperty());
-        return layoutWrapper;
-    }
     return nullptr;
 }
 
@@ -79,7 +62,7 @@ RefPtr<FrameNode> GetHostNode()
 
 const std::string& GetHostTag()
 {
-    return V2::SWIPER_ETS_TAG;
+    return "";
 }
 
 bool IsActive()
