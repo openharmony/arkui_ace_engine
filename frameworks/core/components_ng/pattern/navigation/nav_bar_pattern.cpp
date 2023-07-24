@@ -143,7 +143,9 @@ void InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode, bool isMoreBut
 void UpdateBarItemNodeWithItem(
     const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, const bool isButtonEnabled)
 {
-    if (barItem.text.has_value() && !barItem.text.value().empty()) {
+    if (PipelineContext::GetCurrentContext()->GetMinPlatformVersion() <
+        static_cast<int32_t>(PlatformVersion::VERSION_TEN)
+        && barItem.text.has_value() && !barItem.text.value().empty()) {
         auto textNode = CreateBarItemTextNode(barItem.text.value());
         barItemNode->SetTextNode(textNode);
         barItemNode->AddChild(textNode);
