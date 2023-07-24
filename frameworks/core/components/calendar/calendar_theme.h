@@ -408,6 +408,7 @@ public:
             theme->calendarDayKeyFocusedPenWidth_ = pattern->GetAttr<Dimension>(
                 "calendar_day_key_focused_pen_width", 0.0_vp);
             theme->entryFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_entry_font_size", 0.0_fp);
+            theme->dialogBorderRadius_ = pattern->GetAttr<Dimension>("calendar_picker_dialog_border_radius", 0.0_vp);
         }
     };
 
@@ -576,6 +577,11 @@ public:
         return entryFontSize_;
     }
 
+    const Dimension& GetDialogBorderRadius() const
+    {
+        return dialogBorderRadius_;
+    }
+
     const Color& GetDialogBackgroundColor() const
     {
         return dialogBackgroundColor_;
@@ -690,6 +696,7 @@ private:
     Dimension calendarDayKeyFocusedWidth_;
     Dimension calendarDayKeyFocusedPenWidth_;
     Dimension entryFontSize_;
+    Dimension dialogBorderRadius_;
 };
 
 } // namespace OHOS::Ace

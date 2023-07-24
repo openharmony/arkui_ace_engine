@@ -265,14 +265,14 @@ void CalendarPaintMethod::DrawCalendarPickerBackgroundArea(
         pen.SetWidth(calendarDayKeyFocusedPenWidth_);
         canvas.AttachPen(pen);
 
-        auto focusedX = x - (calendarDayKeyFocusedWidth_ - dayWidth_) / 2;
-        auto focusedY = y - (calendarDayKeyFocusedWidth_ - dayWidth_) / 2;
+        auto focusedX = x - (calendarDayKeyFocusedWidth_ - dayWidth_) / 2 - calendarDayKeyFocusedPenWidth_ / 2;
+        auto focusedY = y - (calendarDayKeyFocusedWidth_ - dayWidth_) / 2 - calendarDayKeyFocusedPenWidth_ / 2;
         RSRect keyFocusedrect(static_cast<float>(focusedX), static_cast<float>(focusedY),
-            static_cast<float>(focusedX + calendarDayKeyFocusedWidth_),
-            static_cast<float>(focusedY + calendarDayKeyFocusedWidth_));
+            static_cast<float>(focusedX + calendarDayKeyFocusedWidth_ + calendarDayKeyFocusedPenWidth_),
+            static_cast<float>(focusedY + calendarDayKeyFocusedWidth_ + calendarDayKeyFocusedPenWidth_));
         auto keyFocusedrrect = RSRoundRect(keyFocusedrect,
-            dayRadius_ / dayWidth_ * calendarDayKeyFocusedWidth_,
-            dayRadius_ / dayWidth_ * calendarDayKeyFocusedWidth_);
+            dayRadius_ / dayWidth_ * (calendarDayKeyFocusedWidth_ + calendarDayKeyFocusedPenWidth_),
+            dayRadius_ / dayWidth_ * (calendarDayKeyFocusedWidth_ + calendarDayKeyFocusedPenWidth_));
         canvas.DrawRoundRect(keyFocusedrrect);
         canvas.DetachPen();
     }
