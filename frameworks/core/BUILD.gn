@@ -804,6 +804,19 @@ template("ace_core_ng_source_set") {
     external_deps = []
     if (ace_use_new_skia) {
       configs += [ "$ace_flutter_engine_root:flutter_config" ]
+
+      if (is_cross_platform_build) {
+        sources += [ "components/common/painter/rosen_svg_painter.cpp" ]
+
+        sources -= [
+          "components/common/painter/flutter_decoration_painter.cpp",
+          "components/common/painter/flutter_svg_painter.cpp",
+          "components/font/flutter_font_collection.cpp",
+        ]
+
+        deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
+      }
+
       deps += [
         "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
         "$skia_root_new:skia_$platform",
