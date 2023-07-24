@@ -769,7 +769,7 @@ void OverlayManager::HideMenuInSubWindow()
     }
 }
 
-void OverlayManager::HideMenu(int32_t targetId)
+void OverlayManager::HideMenu(int32_t targetId, bool isMenuOnTouch)
 {
     LOGI("OverlayManager::HideMenuNode menu targetId is %{public}d", targetId);
     if (menuMap_.find(targetId) == menuMap_.end()) {
@@ -782,7 +782,11 @@ void OverlayManager::HideMenu(int32_t targetId)
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 #ifdef ENABLE_DRAG_FRAMEWORK
         RemoveEventColumn();
-        RemovePixelMapAnimation(false, 0, 0);
+        if (isMenuOnTouch) {
+            RemovePixelMap();
+        } else {
+            RemovePixelMapAnimation(false, 0, 0);
+        }
         RemoveFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
