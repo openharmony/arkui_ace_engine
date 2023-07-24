@@ -451,17 +451,11 @@ void RosenRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& co
         return;
     }
     auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
-    if (sharedImageManager->RegisterLoader(nameOfSharedImage, AceType::WeakClaim(this))) {
-        // This case means that the image to load is a memory image and its data is not ready.
-        // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
-        // When the data is ready, [SharedImageManager] will call [UpdateData] in [AddImageData].
-        return;
-    }
-    // this is when current picName is not found in [ProviderMapToReload], indicating that image data of this
-    // image may have been written to [SharedImageMap], so start loading
-    if (sharedImageManager->FindImageInSharedImageMap(nameOfSharedImage, AceType::WeakClaim(this))) {
-        return;
-    }
+    sharedImageManager->RegisterLoader(nameOfSharedImage, AceType::WeakClaim(this));
+    // This case means that the image to load is a memory image.
+    // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
+    // When the data is ready, [SharedImageManager] will call [UpdateData] in [AddImageData].
+    sharedImageManager->FindImageInSharedImageMap(nameOfSharedImage, AceType::WeakClaim(this));
 }
 
 void RosenRenderImage::PerformLayoutPixmap()
