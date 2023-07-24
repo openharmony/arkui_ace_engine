@@ -909,6 +909,9 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
+    if (quickMenuCallback_) {
+        quickMenuCallback_->Cancel();
+    }
 }
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
@@ -1490,6 +1493,9 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
+    if (!touchInfos.empty()) {
+        WebRequestFocus();
+    }
 }
 
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
@@ -1507,9 +1513,6 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.y -= webOffset_.GetY();
         }
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
-    }
-    if (!touchInfos.empty()) {
-        WebRequestFocus();
     }
 }
 
@@ -1662,6 +1665,7 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
+    quickMenuCallback_ = callback;
     int32_t flags = params->GetEditStateFlags();
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) {
         selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
