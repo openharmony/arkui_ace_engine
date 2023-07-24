@@ -8201,14 +8201,8 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward001, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
-            if (i == 1) {
-                swiperLayoutAlgorithm->targetIndex_ = 1;
-                continue;
-            }
-            swiperLayoutAlgorithm->targetIndex_ = 0;
-        }
+        swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+        swiperLayoutAlgorithm->targetIndex_ = 0;
     }
 }
 
@@ -8251,14 +8245,8 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutBackward001, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, axis, endIndex, endPos);
-            if (i == 1) {
-                swiperLayoutAlgorithm->targetIndex_ = 1;
-                continue;
-            }
-            swiperLayoutAlgorithm->targetIndex_ = 0;
-        }
+        swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+        swiperLayoutAlgorithm->targetIndex_ = 0;
     }
 }
 
@@ -8339,6 +8327,12 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward002, TestSize.Level1)
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto indicatorNode_test = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode_test, nullptr);
+    layoutWrapper.currentChildCount_ = 2;
+    layoutWrapper.childrenMap_.emplace(std::make_pair(1,
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode->GetLayoutProperty())));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.percentReference = CONTAINER_SIZE;
@@ -8421,8 +8415,9 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Level1)
     float endPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
     swiperLayoutAlgorithm->SetIsLoop(false);
-    swiperLayoutAlgorithm->totalItemCount_ = 1;
+    swiperLayoutAlgorithm->totalItemCount_ = 2;
     swiperLayoutAlgorithm->itemPosition_.clear();
+    layoutWrapper.currentChildCount_ = 2;
 
     /**
      * @tc.steps: step2. call LayoutBackward.
@@ -8432,7 +8427,14 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Level1)
         for (int j = 0; j <= 1; j++) {
             swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, axis, endIndex, endPos);
             if (i == 1) {
-                endIndex = 0;
+                endIndex = 1;
+                auto indicatorNode_test =
+                    FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                        []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+                ASSERT_NE(indicatorNode_test, nullptr);
+                layoutWrapper.childrenMap_.emplace(
+                    std::make_pair(1, AceType::MakeRefPtr<LayoutWrapperNode>(
+                                          indicatorNode_test, geometryNode, indicatorNode->GetLayoutProperty())));
                 continue;
             }
             swiperLayoutAlgorithm->SetIsLoop(true);
@@ -8491,6 +8493,11 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmPlaceDigitChild001, TestSize.Level1)
     indicatorWrapper->AppendChild(lastLayoutWrapper);
     layoutProperty->UpdateLeft(Dimension(1));
     layoutProperty->UpdateTop(Dimension(1));
+    indicatorWrapper->layoutProperty_  = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.parentIdealSize = OptionalSizeF(0.1f, 0.2f);
+    indicatorWrapper->GetLayoutProperty()->layoutConstraint_ = layoutConstraintF;
+
 
     /**
      * @tc.steps: step2. call PlaceDigitChild.
@@ -8573,21 +8580,19 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmGetNodeLayoutWrapperByTag001, TestSi
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            if(i==1 && j==1){
+            if (i == 1 && j == 1) {
                 AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->indicatorId_.reset();
                 AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->leftButtonId_ = 1;
             }
             for (int k = 0; k <= 1; k++) {
                 swiperLayoutAlgorithm->GetNodeLayoutWrapperByTag(&layoutWrapper, tagName);
-                if (i==0 && j == 1) {
+                if (i == 0 && j == 1) {
                     AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->leftButtonId_.reset();
                     continue;
-                }
-                else if(i==1 && j==0){
+                } else if (i == 1 && j == 0) {
                     AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->indicatorId_ = 1;
                     continue;
-                }
-                else if(i==1 && j==1){
+                } else if (i == 1 && j == 1) {
                     break;
                 }
                 layoutWrapper.currentChildCount_ = 1;
@@ -8598,5 +8603,56 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmGetNodeLayoutWrapperByTag001, TestSi
     }
     AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->leftButtonId_.reset();
     swiperLayoutAlgorithm->GetNodeLayoutWrapperByTag(&layoutWrapper, tagName);
+}
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmGetChildMaxSize001
+ * @tc.desc: GetChildMaxSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmGetChildMaxSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(swiperPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(swiperLayoutAlgorithm, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    layoutWrapper.currentChildCount_ = 2;
+    layoutWrapper.childrenMap_.emplace(std::make_pair(
+        0, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty())));
+    layoutWrapper.childrenMap_.emplace(std::make_pair(
+        1, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, nullptr, indicatorNode->GetLayoutProperty())));
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    Axis axis = Axis::HORIZONTAL;
+    bool isMainAxis = true;
+    swiperLayoutAlgorithm->totalItemCount_ = 3;
+
+    /**
+     * @tc.steps: step2. call GetChildMaxSize.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        swiperLayoutAlgorithm->GetChildMaxSize(&layoutWrapper, axis, isMainAxis);
+        swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 2 }));
+        swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
+        swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
+        isMainAxis = false;
+    }
 }
 } // namespace OHOS::Ace::NG
