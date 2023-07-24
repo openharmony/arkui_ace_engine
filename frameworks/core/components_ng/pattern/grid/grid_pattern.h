@@ -220,7 +220,7 @@ private:
 
     GridLayoutInfo gridLayoutInfo_;
     void ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
-                      bool prevReachEnd, bool reachStart);
+                      bool prevReachEnd, bool reachStart, bool isChangedUpToEnd);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
     void FireOnScrollStart();
