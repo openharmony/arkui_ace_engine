@@ -724,6 +724,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                                                                                : Axis::VERTICAL;
     auto realSize = CreateIdealSize(layoutConstraint.value(), axis, measureType).ConvertToSizeT();
     if (children.empty()) {
+        LOGD("layoutWrapper children is empty");
         layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
         return;
     }
