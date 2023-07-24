@@ -172,8 +172,11 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
-    // add version protection, enable keyboard as default start from API 10 or higher
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+    if (PipelineBase::GetCurrentContext() &&
+        // for normal app add version protection, enable keyboard as default start from API 10 or higher
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9 &&
+        // UIExtension Ability focus windowId setted by component user window, can not enable keyboard as default
+        !PipelineBase::GetCurrentContext()->IsFocusWindowIdSetted()) {
         needToRequestKeyboardOnFocus_ = true;
     }
 }
