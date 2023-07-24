@@ -251,7 +251,7 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, Pa
     bool ret = true;
     auto getRange = paramObjec->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
-        return false;
+        return ret;
     }
     if (!JSTextPickerParser::ParseTextArray(paramObjec, param)) {
         if (!JSTextPickerParser::ParseIconTextArray(paramObjec, param.result, param.kind, param.selected)) {
@@ -489,7 +489,9 @@ bool JSTextPickerParser::ParseMultiTextArrayValue(const JsiRef<JsiValue>& jsValu
             ParseMultiTextArrayValueSingleInternal(param.options, value, param.values);
         } else {
             for (uint32_t i = 0; i < param.options.size(); i++) {
-                param.values.emplace_back(param.options[i].rangeResult.front());
+                if (param.options[i].rangeResult.size() > 0) {
+                    param.values.emplace_back(param.options[i].rangeResult.front());
+                }
             }
         }
     }
