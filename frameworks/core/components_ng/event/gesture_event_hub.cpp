@@ -481,7 +481,7 @@ std::shared_ptr<Media::PixelMap> CreatePixelMapFromString(const std::string& fil
 
 OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale) const
 {
-    OffsetF result = OffsetF(-1.0f, -1.0f);
+    OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         return result;
     }
@@ -614,9 +614,10 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     if (dragEventActuator_->GetIsNotInPreviewState()) {
+        LOGD("Drag window start for not in previewState");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
-    }
-    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && dragDropInfo.pixelMap) {
+    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && dragDropInfo.pixelMap) {
+        LOGD("Drag window start for Mouse with custom pixelMap");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     }
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();

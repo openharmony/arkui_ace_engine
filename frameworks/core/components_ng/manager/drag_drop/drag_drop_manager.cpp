@@ -173,7 +173,7 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
         }
         RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
         CHECK_NULL_VOID(pixelMap);
-        float scale = pixelMap->GetWidth() / (NearZero(width) ? 1.0f : width);
+        float scale = NearZero(width) ? 1.0f : pixelMap->GetWidth() / width;
         imageContext->UpdatePosition(NG::OffsetT<Dimension>(
             Dimension(globalX - width * PIXELMAP_POSITION_WIDTH * scale - width / 2.0f + width * scale / 2.0f),
             Dimension(globalY - height * PIXELMAP_POSITION_HEIGHT * scale - height / 2.0f + height * scale / 2.0f)));

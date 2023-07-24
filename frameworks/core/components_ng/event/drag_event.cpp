@@ -208,6 +208,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 LOGE("InteractionManager: UpdateShadowPic error");
                 return;
             }
+            LOGD("Drag window start for Mouse with default pixelMap");
             Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
         };
         auto gestureHub = gestureEventHub_.Upgrade();
@@ -671,6 +672,7 @@ void DragEventActuator::GetTextPixelMap(bool startDrag)
         LOGE("InteractionManager: UpdateShadowPic error");
         return;
     }
+    LOGD("Drag window start for Mouse with Text");
     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     gestureHub->SetPixelMap(nullptr);
 }
@@ -733,6 +735,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
             CHECK_NULL_VOID(pattern);
             pattern->CreateHandles();
         }
+        LOGD("Drag window start for Text");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);

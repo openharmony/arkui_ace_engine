@@ -1771,6 +1771,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     option.SetCurve(motion);
     option.SetOnFinishEvent([this, id = Container::CurrentId()] {
         ContainerScope scope(id);
+        LOGD("Drag window start with default pixelMap");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
         RemovePixelMap();
     });
