@@ -717,28 +717,12 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(LayoutWrapper* layo
         if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER) {
             gridLayoutInfo_.currentOffset_ /= 2;
         }
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         return;
     }
     /* targetIndex is out of the matrix */
-    if (gridLayoutInfo_.gridMatrix_.empty()) {
-        LOGW("no grid for jump to index:%{public}d", gridLayoutInfo_.jumpIndex_);
-        return;
-    }
-    auto grid = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(grid);
-    auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(gridLayoutInfo_.jumpIndex_);
-    if (!itemWrapper) {
-        return;
-    }
-    bool hasNormalItem = false;
-    LargeItemLineHeight(itemWrapper, hasNormalItem);
-    // scroll to end of the screen
-    gridLayoutInfo_.currentOffset_ = mainSize - cellAveLength_;
-    // scroll to center of the screen
-    if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER) {
-        gridLayoutInfo_.currentOffset_ /= 2;
-    }
-}
+    LOGW("can not find jumpIndex in Grid Matrix :%{public}d", gridLayoutInfo_.jumpIndex_);
+}   
 
 float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
