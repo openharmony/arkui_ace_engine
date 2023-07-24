@@ -626,6 +626,16 @@ void SideBarContainerPattern::UpdateResponseRegion(const RefPtr<SideBarContainer
     DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
         Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
     responseRegion.emplace_back(responseRect);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameRect = geometryNode->GetFrameRect();
+    DimensionRect responseRectAll(Dimension(frameRect.Width(), DimensionUnit::PX),
+        Dimension(frameRect.Height(), DimensionUnit::PX), DimensionOffset());
+    responseRegion.emplace_back(responseRectAll);
+
     gestureEventHub->SetResponseRegion(responseRegion);
 }
 
