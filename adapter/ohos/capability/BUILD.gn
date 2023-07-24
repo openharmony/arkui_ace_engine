@@ -27,7 +27,6 @@ template("ace_capability_ohos_source_set") {
 
     sources = [
       "clipboard/clipboard_impl.cpp",
-      "distributed/storage/distributed_storage.cpp",
       "environment/environment_impl.cpp",
       "environment/environment_proxy_impl.cpp",
       "preference/storage_impl.cpp",
@@ -35,7 +34,6 @@ template("ace_capability_ohos_source_set") {
     include_dirs = []
     external_deps = [
       "ability_base:want",
-      "data_object:distributeddataobject_impl",
       "ipc:ipc_core",
       "preferences:native_preferences",
     ]

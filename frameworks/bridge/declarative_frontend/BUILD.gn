@@ -180,7 +180,6 @@ template("declarative_js_engine") {
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
-      "jsview/js_distributed.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_environment.cpp",
