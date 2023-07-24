@@ -138,6 +138,23 @@ void SwiperPattern::StopAndResetSpringAnimation()
     }
 }
 
+void SwiperPattern::OnLoopChange()
+{
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    if (!preLoop_.has_value()) {
+        preLoop_ = layoutProperty->GetLoop().value_or(true);
+        return;
+    }
+
+    if (preLoop_.value() != layoutProperty->GetLoop().value_or(true) &&
+        (layoutProperty->GetPrevMargin().has_value() || layoutProperty->GetNextMargin().has_value())) {
+        jumpIndex_ = GetLoopIndex(currentIndex_);
+        preLoop_ = layoutProperty->GetLoop().value_or(true);
+    }
+}
+
 void SwiperPattern::OnModifyDone()
 {
     currentOffset_ = 0.0f;
@@ -158,6 +175,7 @@ void SwiperPattern::OnModifyDone()
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
     StopAndResetSpringAnimation();
+    OnLoopChange();
     if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
         StopPropertyTranslateAnimation();
         StopTranslateAnimation();
@@ -498,7 +516,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         OnIndexChange();
     }
 
-    if (config.skipMeasure && config.skipLayout) {
+    if (!IsAutoPlay() && config.skipMeasure && config.skipLayout) {
         return false;
     }
 
@@ -2042,9 +2060,9 @@ bool SwiperPattern::IsLoop() const
     if (TotalDisPlayCount() >= TotalCount()) {
         return false;
     }
-    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, true);
-    return swiperPaintProperty->GetLoop().value_or(true);
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, true);
+    return swiperLayoutProperty->GetLoop().value_or(true);
 }
 
 bool SwiperPattern::IsEnabled() const
@@ -2643,7 +2661,7 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     CHECK_NULL_VOID(arrowLayoutProperty);
     arrowLayoutProperty->UpdateDirection(layoutProperty->GetDirection().value_or(Axis::HORIZONTAL));
     arrowLayoutProperty->UpdateIndex(layoutProperty->GetIndex().value_or(0));
-    arrowLayoutProperty->UpdateLoop(swiperPaintProperty->GetLoop().value_or(true));
+    arrowLayoutProperty->UpdateLoop(layoutProperty->GetLoop().value_or(true));
     arrowLayoutProperty->UpdateEnabled(swiperPaintProperty->GetEnabled().value_or(true));
     arrowLayoutProperty->UpdateDisplayArrow(layoutProperty->GetDisplayArrowValue());
     arrowLayoutProperty->UpdateHoverShow(layoutProperty->GetHoverShowValue());

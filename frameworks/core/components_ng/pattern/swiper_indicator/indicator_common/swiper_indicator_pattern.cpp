@@ -527,10 +527,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
-
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, false);
-    auto isLoop = swiperPaintProperty->GetLoop().value_or(true);
+    auto isLoop = swiperLayoutProperty->GetLoop().value_or(true);
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
     auto offset = dragPoint - dragStartPoint_;
