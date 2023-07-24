@@ -426,7 +426,6 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     CHECK_NULL_VOID(overlay);
     ShowWindow();
     ResizeWindow();
-    ContainerScope scope(childContainerId_);
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
@@ -443,6 +442,7 @@ void SubwindowOhos::HideMenuNG()
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
+    ContainerScope scope(childContainerId_);
     overlay->HideMenuInSubWindow();
 }
 
