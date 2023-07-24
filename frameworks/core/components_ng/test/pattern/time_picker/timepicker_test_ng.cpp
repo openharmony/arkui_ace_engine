@@ -1071,6 +1071,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     auto totalOptionCount = options[minuteColumn];
 
     gestureEvent.SetInputEventType(InputEventType::AXIS);
+    gestureEvent.SetSourceTool(SourceTool::MOUSE);
     Offset deltaOffset(0.0, -1.0);
     gestureEvent.SetDelta(deltaOffset);
     auto preIndex = minuteColumnPattern->GetCurrentIndex();
