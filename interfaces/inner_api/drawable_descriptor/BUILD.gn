@@ -25,6 +25,12 @@ config("drawable_config") {
     "${ace_root}/interfaces/inner_api/drawable_descriptor",
     "${ace_root}/interfaces/napi/kits/drawabledescriptor",
   ]
+  if (current_os != "ohos") {
+    include_dirs += [
+      "//base/global/resource_management/frameworks/resmgr/include",
+      "//base/global/resource_management/interfaces/inner_api/include",
+    ]
+  }
 }
 
 ohos_shared_library("drawable_descriptor") {
@@ -58,13 +64,35 @@ ohos_shared_library("drawable_descriptor") {
   }
 
   external_deps = [
-    "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
-    "image_framework:image",
-    "image_framework:image_native",
     "napi:ace_napi",
-    "resource_management:global_resmgr",
   ]
+
+  if (current_os == "ohos") {
+    external_deps += [
+      "graphic_2d:2d_graphics",
+      "image_framework:image",
+      "image_framework:image_native",
+      "resource_management:global_resmgr",
+    ]
+  } else {
+    defines += [ "PREVIEW" ]
+    external_deps += [ "hilog:libhilog" ]
+    if (use_mingw_win) {
+      defines += [ "WINDOWS_PLATFORM" ]
+      external_deps += [ "resource_management:win_resmgr" ]
+    }
+
+    if (use_mac) {
+      defines += [ "MAC_PLATFORM" ]
+      external_deps += [ "resource_management:mac_resmgr" ]
+    }
+
+    if (use_linux) {
+      defines += [ "LINUX_PLATFORM" ]
+      external_deps += [ "resource_management:linux_resmgr" ]
+    }
+  }
 
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk" ]
