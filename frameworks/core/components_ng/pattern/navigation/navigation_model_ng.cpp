@@ -1191,6 +1191,8 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
     navBarPattern->SetTitleBarMenuItems(menuItems);
+    navBarPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navBarPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
     navBarNode->UpdatePrevMenuIsCustom(false);
 }
 

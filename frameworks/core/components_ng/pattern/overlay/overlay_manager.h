@@ -86,7 +86,7 @@ public:
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenu(int32_t targetId);
+    void HideMenu(int32_t targetId, bool isMenuOnTouch = false);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenuInSubWindow(int32_t targetId);
@@ -98,7 +98,7 @@ public:
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
-        const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft = false);
+        const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEC_SAVE_BUTTON_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEC_SAVE_BUTTON_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SAVE_BUTTON_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SAVE_BUTTON_H
 
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -26,13 +26,13 @@
 #include "core/gestures/click_recognizer.h"
 
 namespace OHOS::Ace::Framework {
-class JsSecSaveButtonClickFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsSecSaveButtonClickFunction, JsFunction)
+class JsSaveButtonClickFunction : public JsFunction {
+    DECLARE_ACE_TYPE(JsSaveButtonClickFunction, JsFunction)
 public:
-    explicit JsSecSaveButtonClickFunction(const JSRef<JSFunc>& jsFunction) :
+    explicit JsSaveButtonClickFunction(const JSRef<JSFunc>& jsFunction) :
         JsFunction(JSRef<JSObject>(), jsFunction) {}
 
-    ~JsSecSaveButtonClickFunction() override {};
+    ~JsSaveButtonClickFunction() override {};
     void Execute() override
     {
         JsFunction::ExecuteJS();
@@ -41,7 +41,7 @@ public:
     void Execute(GestureEvent& info);
 };
 
-class JSSecSaveButton : public JSViewAbstract, public JSInteractableView {
+class JSSaveButton : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static bool ParseComponentStyle(const JSCallbackInfo& info, SaveButtonSaveDescription& text,
@@ -50,4 +50,4 @@ public:
     static void JsOnClick(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEC_LOCATION_BUTTON_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SAVE_BUTTON_H

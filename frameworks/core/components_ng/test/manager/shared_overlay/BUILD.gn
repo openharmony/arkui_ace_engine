@@ -45,6 +45,7 @@ ohos_unittest("shared_overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
@@ -53,6 +54,7 @@ ohos_unittest("shared_overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 

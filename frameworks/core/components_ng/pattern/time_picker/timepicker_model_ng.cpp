@@ -152,6 +152,10 @@ void TimePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
         TimePickerLayoutProperty, DisappearColor, value.textColor.value_or(disappearStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearWeight, value.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, DisappearFontFamily, value.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, DisappearFontStyle, value.fontStyle.value_or(disappearStyle.GetFontStyle()));
 }
 
 void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -166,6 +170,10 @@ void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()));
 }
 
 void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -181,6 +189,10 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
         TimePickerLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedWeight, value.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, SelectedFontFamily, value.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
 void TimePickerModelNG::SetBackgroundColor(const Color& color)

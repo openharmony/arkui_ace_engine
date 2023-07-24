@@ -528,7 +528,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
-    EXPECT_EQ(sheetNode->GetTag(), "SheetPage");
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
 
     /**
      * @tc.steps: step4. destroy modal page.

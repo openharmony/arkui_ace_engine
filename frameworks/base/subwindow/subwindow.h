@@ -44,14 +44,13 @@ public:
     virtual void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) = 0;
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) = 0;
     virtual void HidePopupNG(int32_t targetId) = 0;
-    virtual void HidePopupNG() = 0;
     virtual void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) = 0;
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
     virtual void ClearMenuNG() = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
-        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) = 0;
+        const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual void HideSubWindowNG() = 0;
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;

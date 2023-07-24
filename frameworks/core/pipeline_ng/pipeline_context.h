@@ -379,6 +379,7 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
+    void FlushFrameTrace();
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
@@ -407,6 +408,9 @@ private:
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     void SyncSafeArea();
+
+    // only used for static form.
+    void UpdateFormLinkInfos();
 
     template<typename T>
     struct NodeCompare {

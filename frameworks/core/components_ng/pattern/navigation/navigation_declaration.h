@@ -89,14 +89,13 @@ constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 constexpr Dimension FULL_SINGLE_LINE_TITLEBAR_HEIGHT = 112.0_vp;
 constexpr Dimension FULL_DOUBLE_LINE_TITLEBAR_HEIGHT = 138.0_vp;
 constexpr Dimension NAV_HORIZONTAL_MARGIN_L = 16.0_vp; // ohos_id_elements_margin_horizontal_l
-constexpr Dimension NAV_HORIZONTAL_MARGIN_M = 8.0_vp; // ohos_id_elements_margin_horizontal_m
+constexpr Dimension NAV_HORIZONTAL_MARGIN_M = 8.0_vp;  // ohos_id_elements_margin_horizontal_m
 constexpr Dimension MENU_ITEM_PADDING = 24.0_vp;
 constexpr Dimension BUTTON_PADDING = 12.0_vp;
 constexpr Dimension BUTTON_RADIUS = 5.0_vp;
 constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
-constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 432.0_vp;
-constexpr float MAX_NAV_BAR_WIDTH_SCALE = 0.4f;
+constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 280.0_vp;
 
 // more button
 constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
@@ -165,15 +164,9 @@ enum class ChildNodeOperation {
     NONE
 };
 
-enum class TitleHeight {
-    MAIN_ONLY,
-    MAIN_WITH_SUB
-};
+enum class TitleHeight { MAIN_ONLY, MAIN_WITH_SUB };
 
-enum class TitleBarParentType {
-    NAVBAR,
-    NAV_DESTINATION
-};
+enum class TitleBarParentType { NAVBAR, NAV_DESTINATION };
 
 enum class NavRouteMode {
     PUSH_WITH_RECREATE = 0,

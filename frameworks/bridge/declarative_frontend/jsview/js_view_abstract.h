@@ -87,6 +87,7 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
+    static void JsBackgroundEffect(const JSCallbackInfo& info);
     static void JsForegroundBlurStyle(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);

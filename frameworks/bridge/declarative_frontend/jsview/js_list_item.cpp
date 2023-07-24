@@ -184,40 +184,52 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     if (defaultDeleteAnimation->IsBoolean()) {
         useDefaultDeleteAnimation = defaultDeleteAnimation->ToBoolean();
     }
-    auto onDelete = deleteAreaObj->GetProperty("onDelete");
-    std::function<void()> onDeleteCallback;
-    if (onDelete->IsFunction()) {
-        onDeleteCallback = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onDelete)]() {
+    auto onAction = deleteAreaObj->GetProperty("onAction");
+    if (!onAction->IsFunction()) {
+        onAction = deleteAreaObj->GetProperty("onDelete");
+    }
+    std::function<void()> onActionCallback;
+    if (onAction->IsFunction()) {
+        onActionCallback = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onAction)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
     }
-    auto onEnterDeleteArea = deleteAreaObj->GetProperty("onEnterDeleteArea");
-    std::function<void()> onEnterDeleteAreaCallback;
-    if (onEnterDeleteArea->IsFunction()) {
-        onEnterDeleteAreaCallback = [execCtx = args.GetExecutionContext(),
-                                        func = JSRef<JSFunc>::Cast(onEnterDeleteArea)]() {
+    auto onEnterActionArea = deleteAreaObj->GetProperty("onEnterActionArea");
+    if (!onEnterActionArea->IsFunction()) {
+        onEnterActionArea = deleteAreaObj->GetProperty("onEnterDeleteArea");
+    }
+    std::function<void()> onEnterActionAreaCallback;
+    if (onEnterActionArea->IsFunction()) {
+        onEnterActionAreaCallback = [execCtx = args.GetExecutionContext(),
+                                        func = JSRef<JSFunc>::Cast(onEnterActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
     }
-    auto onExitDeleteArea = deleteAreaObj->GetProperty("onExitDeleteArea");
-    std::function<void()> onExitDeleteAreaCallback;
-    if (onExitDeleteArea->IsFunction()) {
-        onExitDeleteAreaCallback = [execCtx = args.GetExecutionContext(),
-                                       func = JSRef<JSFunc>::Cast(onExitDeleteArea)]() {
+    auto onExitActionArea = deleteAreaObj->GetProperty("onExitActionArea");
+    if (!onExitActionArea->IsFunction()) {
+        onExitActionArea = deleteAreaObj->GetProperty("onExitDeleteArea");
+    }
+    std::function<void()> onExitActionAreaCallback;
+    if (onExitActionArea->IsFunction()) {
+        onExitActionAreaCallback = [execCtx = args.GetExecutionContext(),
+                                       func = JSRef<JSFunc>::Cast(onExitActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
     }
-    auto deleteAreaDistance = deleteAreaObj->GetProperty("deleteAreaDistance");
+    auto actionAreaDistance = deleteAreaObj->GetProperty("actionAreaDistance");
     CalcDimension length;
-    if (!ParseJsDimensionVp(deleteAreaDistance, length)) {
-        length = listItemTheme->GetDeleteDistance();
+    if (!ParseJsDimensionVp(actionAreaDistance, length)) {
+        actionAreaDistance = deleteAreaObj->GetProperty("deleteAreaDistance");
+        if (!ParseJsDimensionVp(actionAreaDistance, length)) {
+            length = listItemTheme->GetDeleteDistance();
+        }
     }
 
     ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), useDefaultDeleteAnimation,
-        std::move(onDeleteCallback), std::move(onEnterDeleteAreaCallback), std::move(onExitDeleteAreaCallback), length,
+        std::move(onActionCallback), std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback), length,
         isStartArea);
 }
 

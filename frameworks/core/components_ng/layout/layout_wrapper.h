@@ -117,12 +117,12 @@ public:
     static void ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint);
 
     // apply keyboard avoidance on content rootNodes
-    static void AvoidKeyboard();
+    void AvoidKeyboard();
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
-    static void ExpandSafeArea();
+    void ExpandSafeArea();
 
     // save geometry states before SafeArea expansion / keyboard avoidance
-    static void SaveGeoState();
+    void SaveGeoState();
     // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
     void RestoreGeoState();
 
@@ -131,7 +131,6 @@ protected:
     void ApplyConstraint(LayoutConstraintF constraint);
 
     void OffsetNodeToSafeArea();
-    void ExpandSafeAreaInner();
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
     void ExpandIntoKeyboard();
 

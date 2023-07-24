@@ -163,6 +163,9 @@ void SwiperPattern::OnModifyDone()
         StopTranslateAnimation();
         StopSpringAnimation();
         StopFadeAnimation();
+        if (indicatorController_) {
+            indicatorController_->Stop();
+        }
         currentOffset_ = 0.0f;
         mainSizeIsMeasured_ = false;
         itemPosition_.clear();
@@ -275,6 +278,9 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->StopTranslateAnimation();
                 swiper->StopSpringAnimation();
                 swiper->StopFadeAnimation();
+                if (swiper->indicatorController_) {
+                    swiper->indicatorController_->Stop();
+                }
                 swiper->currentOffset_ = 0.0f;
                 swiper->itemPosition_.clear();
                 swiper->jumpIndex_ = swiper->currentIndex_;
@@ -2104,7 +2110,7 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
         swiperParameters_->itemHeight = swiperIndicatorTheme->GetSize();
         swiperParameters_->selectedItemWidth = swiperIndicatorTheme->GetSize();
         swiperParameters_->selectedItemHeight = swiperIndicatorTheme->GetSize();
-        swiperParameters_->maskValue = true;
+        swiperParameters_->maskValue = false;
         swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
         swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
     }

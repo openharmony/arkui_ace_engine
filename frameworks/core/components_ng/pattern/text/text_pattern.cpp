@@ -65,7 +65,7 @@ void TextPattern::OnAttachToFrameNode()
         PipelineContext::GetCurrentContext()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->GetRenderContext()->SetClipToFrame(true);
+        host->GetRenderContext()->UpdateClipEdge(true);
     }
 }
 
@@ -621,7 +621,7 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     itemInfo.extraInfo = selectedStr;
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-    UdmfClient::GetInstance()->AddTextRecord(unifiedData, selectedStr);
+    UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
 
     AceEngineExt::GetInstance().DragStartExt();

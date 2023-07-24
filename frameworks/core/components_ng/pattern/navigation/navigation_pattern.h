@@ -177,31 +177,6 @@ public:
         return navigationStackProvided_;
     }
 
-    Dimension GetMinNavBarWidthValue() const
-    {
-        return minNavBarWidthValue_;
-    }
-
-    Dimension GetMaxNavBarWidthValue() const
-    {
-        return maxNavBarWidthValue_;
-    }
-
-    Dimension GetMinContentWidthValue() const
-    {
-        return minContentWidthValue_;
-    }
-
-    bool GetUserSetNavBarRangeFlag() const
-    {
-        return userSetNavBarRangeFlag_;
-    }
-
-    bool GetUserSetMinContentFlag() const
-    {
-        return userSetMinContentFlag_;
-    }
-
     void OnWindowHide() override;
     void OnWindowShow() override;
 
@@ -236,8 +211,8 @@ private:
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void OnHover(bool isHover);
-    void UpdateResponseRegion(
-        float realDividerWidth, float realNavBarWidth, float dragRegionHeight, OffsetF dragRectOffset);
+    void UpdateResponseRegion(float realDividerWidth, float realNavBarWidth,
+    float dragRegionHeight, OffsetF dragRectOffset);
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);

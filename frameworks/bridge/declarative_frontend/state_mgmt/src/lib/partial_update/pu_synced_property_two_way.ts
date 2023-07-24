@@ -18,11 +18,10 @@
  * implementation of @Link and @Consume decorated variables of type class object
  * 
  * all definitions in this file are framework internal
- */
-class SynchedPropertyObjectTwoWayPU<C extends Object>
-  extends ObservedPropertyObjectAbstractPU<C>
-  implements PeerChangeEventReceiverPU<C>,
-  ObservedObjectEventsPUReceiver<C> {
+*/
+
+class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
+  implements PeerChangeEventReceiverPU<C>, ObservedObjectEventsPUReceiver<C> {
 
   private source_: ObservedPropertyObjectAbstract<C>;
   private changeNotificationIsOngoing_: boolean = false;
@@ -38,7 +37,7 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
       // register to the ObservedObject
       ObservedObject.addOwningProperty(this.source_.get(), this);
     } else {
-      stateMgmtConsole.error(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
+      throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source variable in parent/ancestor @ Component must be defined. Application error!`);
     }
   }
 
@@ -63,25 +62,31 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
 
   private setObject(newValue: C): void {
     if (!this.source_) {
-        stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), @Link/@Consume: no linked parent property. Likely a consequence of earlier application error.`);
-        return;
+      throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), \
+            @Link/@Consume: no source variable in parent/ancestor @Component. Application error.`);
     }
 
-    let oldValueObject = this.getUnmonitored();
-    if (oldValueObject != undefined && oldValueObject != null) {
-      ObservedObject.removeOwningProperty(oldValueObject, this);
+    if (this.getUnmonitored() == newValue) {
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+      return;
     }
+
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set.`);
+
+    if (this.checkIsSupportedValue(newValue)) {
+    // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
     this.source_.set(newValue)
-    ObservedObject.addOwningProperty(this.getUnmonitored(), this);
+    }
   }
 
+
   /**
-   * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has chnaged value
+   * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has changed value
    * that peer can be in either parent or child component if 'this' is used for a @Link
-   * that peer can be in either acestor or descendant component if 'this' is used for a @Consume
+   * that peer can be in either ancestor or descendant component if 'this' is used for a @Consume
    * @param eventSource 
    */
-  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<C>) {
+  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasChangedPU: contained ObservedObject '${eventSource.info()}' hasChanged'.`)
       this.notifyPropertyHasChangedPU();
@@ -93,13 +98,13 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
    * @param souceObject 
    * @param changedPropertyName 
    */
-  public objectPropertyHasChangedPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
+  public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
         objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
     this.notifyPropertyHasChangedPU();
   }
 
-  public objectPropertyHasBeenReadPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
+  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
     objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
     this.notifyPropertyHasBeenReadPU();
@@ -134,3 +139,13 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
     this.changeNotificationIsOngoing_ = false;
   }
 }
+
+// class definitions for backward compatibility
+class SynchedPropertyObjectTwoWayPU<C> extends SynchedPropertyTwoWayPU<C> {
+
+}
+
+class SynchedPropertySimpleTwoWayPU<T> extends SynchedPropertyTwoWayPU<T> {
+  
+}
+

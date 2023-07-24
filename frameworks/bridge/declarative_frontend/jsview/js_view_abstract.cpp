@@ -1993,6 +1993,39 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
 
+void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have 1 argument");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGW("failed to set background effect.");
+        return;
+    }
+    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+    CalcDimension radius;
+    if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    double saturation = 1.0f;
+    if (jsOption->GetProperty("saturation")->IsNumber()) {
+        saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
+        saturation = saturation > 0.0f ? saturation : 1.0f;
+    }
+    double brightness = 1.0f;
+    if (jsOption->GetProperty("brightness")->IsNumber()) {
+        brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
+        brightness = brightness > 0.0f ? brightness : 1.0f;
+    }
+    Color color = Color::TRANSPARENT;
+    if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
+        color.SetValue(Color::TRANSPARENT.GetValue());
+    }
+    EffectOption option = {radius, saturation, brightness, color};
+    ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
+}
+
 void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
@@ -5355,6 +5388,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundEffect", &JSViewAbstract::JsBackgroundEffect);
     JSClass<JSViewAbstract>::StaticMethod("foregroundBlurStyle", &JSViewAbstract::JsForegroundBlurStyle);
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);

@@ -127,11 +127,6 @@ public:
         return eventHandler_;
     }
 
-    FrontendType GetType() override
-    {
-        return type_;
-    }
-
     // judge frontend is foreground frontend.
     bool IsForeground() override
     {
@@ -205,7 +200,6 @@ protected:
     void ParseManifest() const;
 
     ColorMode colorMode_ = ColorMode::LIGHT;
-    FrontendType type_ = FrontendType::JS_CARD;
     bool foregroundFrontend_ = false;
     bool pageLoaded_ = false;
     double density_ = 1.0;
@@ -217,7 +211,6 @@ protected:
     OnFormVisibleCallback onFormVisibleCallback_;
 
     mutable std::once_flag onceFlag_;
-    RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AceEventHandler> eventHandler_;
     Framework::PageIdPool pageIdPool_;
     std::string formSrc_;

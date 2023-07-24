@@ -73,7 +73,7 @@ void SlidingPanelPattern::OnModifyDone()
         }
     }
 
-    if (layoutProperty->GetShowCloseIconValue(true)) {
+    if (layoutProperty->GetShowCloseIconValue(false)) {
         auto closeIconNode = GetCloseIconNode();
         CHECK_NULL_VOID(closeIconNode);
         auto closeIconPattern = closeIconNode->GetPattern<CloseIconPattern>();

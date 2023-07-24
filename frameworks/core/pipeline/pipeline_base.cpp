@@ -614,8 +614,10 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     double keyboardHeight = keyboardArea.Height();
     if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         if (windowManager_->GetWindowType() == WindowType::WINDOW_TYPE_UNDEFINED ||
-            windowManager_->GetWindowType() > WindowType::WINDOW_TYPE_APP_END) {
-            // only app window need avoid virtual keyboard
+            (windowManager_->GetWindowType() > WindowType::WINDOW_TYPE_APP_END &&
+             windowManager_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT)) {
+            LOGW("this window type: %{public}d do not need avoid virtual keyboard.",
+                static_cast<int32_t>(windowManager_->GetWindowMode()));
             return;
         }
         keyboardHeight = ModifyKeyboardHeight(keyboardHeight);
@@ -721,6 +723,19 @@ void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
     subWindowVsyncCallbacks_.erase(subWindowId);
 }
 
+bool PipelineBase::MaybeRelease()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        LOGI("Destroy Pipeline on UI thread.");
+        return true;
+    } else {
+        LOGI("Post Destroy Pipeline Task to UI thread.");
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI);
+    }
+}
+
 void PipelineBase::Destroy()
 {
     CHECK_RUN_ON(UI);
@@ -742,6 +757,7 @@ void PipelineBase::Destroy()
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
+    formLinkInfoMap_.clear();
     LOGI("PipelineBase::Destroy end.");
 }
 } // namespace OHOS::Ace

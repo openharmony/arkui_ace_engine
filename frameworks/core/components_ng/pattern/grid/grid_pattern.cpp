@@ -456,8 +456,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
 
     auto onReachStart = gridEventHub->GetOnReachStart();
     if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
-        if (scrollState_ == SCROLL_FROM_UPDATE && gridLayoutInfo_.reachStart_ && !reachStart &&
-            !NearZero(gridLayoutInfo_.currentOffset_)) {
+        if ((scrollState_ == SCROLL_FROM_UPDATE || scrollState_ == SCROLL_FROM_ANIMATION_SPRING ||
+                scrollState_ == SCROLL_FROM_ANIMATION) &&
+            gridLayoutInfo_.reachStart_ && !reachStart && !NearZero(gridLayoutInfo_.currentOffset_)) {
             onReachStart();
             initialIndex_ = true;
         }
@@ -467,8 +468,6 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
         }
         if (!NearZero(gridLayoutInfo_.currentOffset_)) {
             offsetCount_++;
-        } else {
-            offsetCount_ = 0;
         }
         if (scrollState_ == SCROLL_FROM_NONE && reachStart && NearZero(gridLayoutInfo_.currentOffset_) &&
             offsetCount_ > 1) {
@@ -545,7 +544,7 @@ void GridPattern::FlushCurrentFocus()
         }
     }
     if (gridLayoutInfo_.gridMatrix_.find(lastFocusItemMainIndex_) == gridLayoutInfo_.gridMatrix_.end()) {
-        LOGE("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
+        LOGD("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
         return;
     }
     auto curCrossNum = GetCrossCount();
@@ -860,7 +859,7 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
             }
         }
     }
-    LOGW("Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex, tarCrossIndex, tarIndex);
+    LOGD("Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex, tarCrossIndex, tarIndex);
     return nullptr;
 }
 
@@ -1169,6 +1168,44 @@ float GridPattern::GetAverageHeight() const
         return 0;
     }
     return heightSum / itemCount;
+}
+
+float GridPattern::GetTotalHeight() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN_NOLOG(host, 0.0f);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0f);
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    float heightSum = 0;
+    int32_t itemCount = 0;
+    float estimatedHeight = 0.f;
+    if (scrollbarInfo_.first.has_value() && scrollbarInfo_.second.has_value()) {
+        estimatedHeight = scrollbarInfo_.second.value();
+    } else {
+        auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, gridLayoutInfo_.axis_);
+        for (const auto& item : gridLayoutInfo_.lineHeightMap_) {
+            auto line = gridLayoutInfo_.gridMatrix_.find(item.first);
+            if (line == gridLayoutInfo_.gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
+                continue;
+            }
+            auto lineStart = line->second.begin()->second;
+            auto lineEnd = line->second.rbegin()->second;
+            itemCount += (lineEnd - lineStart + 1);
+            heightSum += item.second + mainGap;
+        }
+        auto averageHeight = heightSum / itemCount;
+        if (itemCount >= (gridLayoutInfo_.childrenCount_ - 1)) {
+            estimatedHeight = heightSum - mainGap;
+        } else {
+            estimatedHeight = heightSum + (gridLayoutInfo_.childrenCount_ - itemCount) * averageHeight;
+        }
+    }
+    return estimatedHeight;
 }
 
 void GridPattern::UpdateScrollBarOffset()
