@@ -363,6 +363,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
+    bool isChangedUpToEnd = gridLayoutInfo.startIndex_ > gridLayoutInfo_.startIndex_;
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     float currentOffset = gridLayoutInfo_.currentOffset_;
     bool reachEnd = gridLayoutInfo_.reachEnd_;
@@ -370,7 +371,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     ProcessEvent(indexChanged, gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, currentOffset,
-                 offsetEnd, reachEnd, reachStart);
+                 offsetEnd, reachEnd, reachStart, isChangedUpToEnd);
 
     SetScrollState(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
@@ -406,7 +407,7 @@ void GridPattern::CheckScrollable()
 }
 
 void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
-                               bool reachEnd, bool reachStart)
+                               bool reachEnd, bool reachStart, bool isChangedUpToEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -463,6 +464,10 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
             onReachStart();
             initialIndex_ = true;
         }
+        if (scrollState_ == SCROLL_FROM_JUMP && NearZero(finalOffset) && gridLayoutInfo_.reachStart_) {
+            onReachStart();
+            initialIndex_ = true;
+        }
         if (!NearZero(gridLayoutInfo_.currentOffset_)) {
             offsetCount_++;
         }
@@ -480,12 +485,25 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
 
     auto onReachEnd = gridEventHub->GetOnReachEnd();
     if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
-        if (gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) {
+        if (scrollState_ == SCROLL_FROM_UPDATE && gridLayoutInfo_.reachEnd_ && !reachEnd &&
+            gridLayoutInfo_.offsetEnd_ != offsetEnd) {
             onReachEnd();
         }
         if (scrollState_ == SCROLL_FROM_ANIMATION_SPRING && !gridLayoutInfo_.reachEnd_ &&
             !gridLayoutInfo_.offsetEnd_) {
             onReachEnd();
+        }
+        if (scrollState_ == SCROLL_FROM_ANIMATION && gridLayoutInfo_.reachEnd_ && !reachEnd &&
+            !gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
+            onReachEnd();
+        }
+        if (NearZero(finalOffset) && isChangedUpToEnd && gridLayoutInfo_.reachEnd_ && reachEnd &&
+            !gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
+            if (scrollState_ == SCROLL_FROM_ANIMATION) {
+                onReachEnd();
+            } else if (scrollState_ == SCROLL_FROM_UPDATE) {
+                onReachEnd();
+            }
         }
     }
 
