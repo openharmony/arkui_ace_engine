@@ -775,7 +775,12 @@ void RichEditorPattern::HandleBlurEvent()
     CloseKeyboard(true);
 }
 
-void RichEditorPattern::HandleFocusEvent() {}
+void RichEditorPattern::HandleFocusEvent()
+{
+    SetCaretOffset(GetTextContentLength());
+    StartTwinkling();
+    RequestKeyboard(false, true, true);
+}
 
 void RichEditorPattern::OnVisibleChange(bool isVisible)
 {
