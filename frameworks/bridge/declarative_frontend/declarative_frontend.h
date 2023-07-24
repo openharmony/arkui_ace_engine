@@ -62,12 +62,12 @@ public:
     void PushPage(const std::string& url, const std::string& params) override;
 
     // Js frontend manages all pages self.
-    void AddPage(const RefPtr<AcePage>& page) override {};
+    void AddPage(const RefPtr<AcePage>& page) override {}
 
     RefPtr<AcePage> GetPage(int32_t /*pageId*/) const override
     {
         return nullptr;
-    };
+    }
 
     std::string GetCurrentPageUrl() const override;
 
@@ -153,11 +153,6 @@ public:
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return handler_;
-    };
-
-    FrontendType GetType() override
-    {
-        return type_;
     }
 
     // judge frontend is foreground frontend.
@@ -237,7 +232,6 @@ protected:
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
-    FrontendType type_ = FrontendType::DECLARATIVE_JS;
     RefPtr<AceEventHandler> handler_;
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<AccessibilityManager> accessibilityManager_;

@@ -116,11 +116,6 @@ public:
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return nullptr;
-    };
-
-    FrontendType GetType() override
-    {
-        return type_;
     }
 
     // judge frontend is foreground frontend.
@@ -192,11 +187,9 @@ public:
 private:
     void InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
-    FrontendType type_ = FrontendType::DECLARATIVE_JS;
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<Framework::FrontendDelegateDeclarativeNG> delegate_;
     RefPtr<AccessibilityManager> accessibilityManager_;
-    RefPtr<TaskExecutor> taskExecutor_;
 
     std::string pageProfile_;
     bool foregroundFrontend_ = false;
