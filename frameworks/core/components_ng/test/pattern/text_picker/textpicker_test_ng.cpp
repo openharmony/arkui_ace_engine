@@ -25,6 +25,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/measure_util.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -55,6 +56,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t COLUMN_INDEX_0 = 0;
+constexpr int32_t COLUMN_INDEX_2 = 2;
 constexpr int32_t HALF_INDEX_NUM = 5;
 constexpr int32_t INDEX_NUM = 10;
 constexpr int32_t CURRENT_INDEX = 8;
@@ -81,6 +84,7 @@ const double YOFFSET_START2 = 2000.0;
 const double YOFFSET_END2 = 3000.0;
 const double TIME_PLUS = 1 * 100.0;
 const double TIME_PLUS_LARGE = 10 * 1000.0;
+constexpr double DISTANCE = 20.0;
 } // namespace
 
 class TextPickerTestNg : public testing::Test {
@@ -4791,5 +4795,150 @@ HWTEST_F(TextPickerTestNg, GetOptionsCascadeStr001, TestSize.Level1)
     std::string result = pickerPattern->GetOptionsCascadeStr(options);
     std::string expectResult = "[{\"text\":\"11\"},{\"text\":\"21\"},{\"text\":\"31\"}]";
     EXPECT_EQ(result, expectResult);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest007
+ * @tc.desc: Test TextPickerColumnPattern GetShiftDistance when dir == UP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest007, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    ScrollDirection dir = ScrollDirection::UP;
+    TextPickerOptionProperty prop;
+    prop.height = 2.0f;
+    prop.fontheight = 1.0f;
+    prop.prevDistance = 4.0f;
+    prop.nextDistance = 5.0f;
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->GetShiftDistance(COLUMN_INDEX_0, dir);
+    double distance = 0.0f - textPickerColumnPattern_->optionProperties_[COLUMN_INDEX_0].height;
+    EXPECT_EQ(textPickerColumnPattern_->GetShiftDistance(COLUMN_INDEX_0, dir), distance);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest008
+ * @tc.desc: Test TextPickerColumnPattern CalcAlgorithmOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest008, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    ScrollDirection dir = ScrollDirection::UP;
+    textPickerColumnPattern->algorithmOffset_.clear();
+    TextPickerOptionProperty prop;
+    prop.height = 2.0f;
+    prop.fontheight = 1.0f;
+    prop.prevDistance = 10.0f;
+    prop.nextDistance = 10.0f;
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->CalcAlgorithmOffset(dir, DISTANCE);
+    EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size(), 5);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest009
+ * @tc.desc: Test TextPickerColumnPattern GetShiftDistanceForLandscape when dir == DOWN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest009, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    ScrollDirection dir = ScrollDirection::DOWN;
+    TextPickerOptionProperty prop;
+    prop.height = 2.0f;
+    prop.fontheight = 1.0f;
+    prop.prevDistance = 4.0f;
+    prop.nextDistance = 5.0f;
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->GetShiftDistanceForLandscape(COLUMN_INDEX_2, dir);
+    double distance = textPickerColumnPattern->optionProperties_[COLUMN_INDEX_2].height;
+    EXPECT_EQ(textPickerColumnPattern_->GetShiftDistanceForLandscape(COLUMN_INDEX_2, dir), distance);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest010
+ * @tc.desc: Test TextPickerColumnPattern GetShiftDistanceForLandscape when dir == UP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest010, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    ScrollDirection dir = ScrollDirection::UP;
+    TextPickerOptionProperty prop;
+    prop.height = 2.0f;
+    prop.fontheight = 1.0f;
+    prop.prevDistance = 4.0f;
+    prop.nextDistance = 5.0f;
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->GetShiftDistanceForLandscape(COLUMN_INDEX_0, dir);
+    double distance = 0.0f - textPickerColumnPattern->optionProperties_[COLUMN_INDEX_0].height;
+    EXPECT_EQ(textPickerColumnPattern_->GetShiftDistanceForLandscape(COLUMN_INDEX_0, dir), distance);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest011
+ * @tc.desc: Test TextPickerColumnPattern ScrollOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest011, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showOptionCount_ = 4;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->ScrollOption(20.0f);
+    EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size(), 5);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest012
+ * @tc.desc: Test TextPickerColumnPattern ResetAlgorithmOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest012, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    textPickerColumnPattern->algorithmOffset_.clear();
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    uint32_t counts = theme->GetShowOptionCount();
+    textPickerColumnPattern->ResetAlgorithmOffset();
+    for (uint32_t i = 0; i < counts; i++) {
+        EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.emplace_back(i), i);
+    }
 }
 } // namespace OHOS::Ace::NG
