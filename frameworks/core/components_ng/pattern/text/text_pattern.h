@@ -245,6 +245,8 @@ public:
         return imageOffset_;
     }
 
+    void CheckHandles(SelectHandleInfo& handleInfo);
+
 protected:
     void HandleOnCopy();
     void InitMouseEvent();
@@ -302,10 +304,12 @@ private:
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
     void FontRegisterCallback(RefPtr<SpanNode> spanNode);
+    bool IsSelectAll();
     // to check if drag is in progress
 
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
+    SelectMenuInfo selectMenuInfo_;
     bool panEventInitialized_ = false;
     RefPtr<Clipboard> clipboard_;
     RefPtr<DragWindow> dragWindow_;

@@ -309,6 +309,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gmock_main",
   ]
 

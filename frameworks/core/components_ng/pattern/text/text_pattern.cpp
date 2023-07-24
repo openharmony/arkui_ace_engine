@@ -247,6 +247,13 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
             handleInfo.paintRect = textSelector_.secondHandle;
             selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
         }
+        if (IsSelectAll() && selectMenuInfo_.showCopyAll == true) {
+            selectMenuInfo_.showCopyAll = false;
+            selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+        } else if (!IsSelectAll() && selectMenuInfo_.showCopyAll == false) {
+            selectMenuInfo_.showCopyAll = true;
+            selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+        }
         return;
     }
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -255,6 +262,10 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+bool TextPattern::IsSelectAll()
+{
+    return textSelector_.GetTextStart() == 0 && textSelector_.GetTextEnd() == GetWideText().length();
+}
 std::wstring TextPattern::GetWideText() const
 {
     return StringUtils::ToWstring(textForDisplay_);
@@ -335,7 +346,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     if (!menuOptionItems_.empty()) {
         selectInfo.menuOptionItems = GetMenuOptionItems();
     }
-
+    selectMenuInfo_ = selectInfo.menuInfo;
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         SelectHandleInfo firstHandleInfo;
         SelectHandleInfo secondHandleInfo;
@@ -370,13 +381,30 @@ void TextPattern::HandleOnSelectAll()
         auto start = textSelector_.GetTextStart();
         auto end = textSelector_.GetTextEnd();
         selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+        CheckHandles(secondHandleInfo);
+        selectMenuInfo_.showCopyAll = false;
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+        selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
     } else {
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::CheckHandles(SelectHandleInfo& handleInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
+    RectF contentGlobalRect(offset, contentRect_.GetSize());
+    auto handleOffset = handleInfo.paintRect.GetOffset();
+    if (!contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY()))) {
+        handleInfo.isShow = false;
+    }
 }
 
 void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
