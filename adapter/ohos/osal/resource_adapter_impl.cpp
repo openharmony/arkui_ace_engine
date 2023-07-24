@@ -551,7 +551,8 @@ bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len
 bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
     const std::string& bundleName, const std::string& moduleName)
 {
-    auto manager = GetResourceManager(bundleName, moduleName);
+    UpdateResourceManager(bundleName, moduleName);
+    auto manager = GetResourceManager();
     CHECK_NULL_RETURN_NOLOG(manager, false);
     auto state = manager->GetRawFileFromHap(rawFile, len, dest);
     if (state != Global::Resource::SUCCESS || !dest) {
@@ -578,7 +579,8 @@ bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_
 bool ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest,
     const std::string& bundleName, const std::string& moduleName)
 {
-    auto manager = GetResourceManager(bundleName, moduleName);
+    UpdateResourceManager(bundleName, moduleName);
+    auto manager = GetResourceManager();
     CHECK_NULL_RETURN_NOLOG(manager, false);
     auto state = manager->GetMediaDataById(resId, len, dest);
     if (state != Global::Resource::SUCCESS) {
@@ -604,7 +606,8 @@ bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, 
 bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest,
     const std::string& bundleName, const std::string& moduleName)
 {
-    auto manager = GetResourceManager(bundleName, moduleName);
+    UpdateResourceManager(bundleName, moduleName);
+    auto manager = GetResourceManager();
     CHECK_NULL_RETURN_NOLOG(manager, false);
     auto state = manager->GetMediaDataByName(resName.c_str(), len, dest);
     if (state != Global::Resource::SUCCESS) {
@@ -613,31 +616,6 @@ bool ResourceAdapterImpl::GetMediaData(const std::string& resName, size_t& len, 
         return false;
     }
     return true;
-}
-
-std::shared_ptr<Global::Resource::ResourceManager> ResourceAdapterImpl::GetResourceManager(
-    const std::string& bundleName, const std::string& moduleName)
-{
-    if (bundleName.empty() && moduleName.empty()) {
-        return sysResourceManager_;
-    }
-
-    std::unique_lock<std::shared_mutex> lock(resourceMutex_);
-    auto iter = resourceManagers_.find({ bundleName, moduleName });
-    if (iter != resourceManagers_.end()) {
-        return iter->second;
-    } else {
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, nullptr);
-        auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
-        CHECK_NULL_RETURN(aceContainer, nullptr);
-        auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
-        CHECK_NULL_RETURN(context, nullptr);
-        auto resourceManager = context->GetResourceManager();
-        CHECK_NULL_RETURN(resourceManager, nullptr);
-        resourceManagers_[{ bundleName, moduleName }] = resourceManager;
-        return resourceManager;
-    }
 }
 
 void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, const std::string& moduleName)
