@@ -209,6 +209,7 @@ ohos_unittest("select_overlay_test_ng") {
 
   deps += [
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/icu/icu4c:shared_icui18n",
     "//third_party/icu/icu4c:shared_icuuc",
   ]
