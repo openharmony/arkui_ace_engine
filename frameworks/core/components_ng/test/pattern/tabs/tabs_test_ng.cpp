@@ -5937,7 +5937,7 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent007, TestSize.Level1)
     pipeline->isFocusActive_ = false;
     event.code = KeyCode::KEY_DPAD_RIGHT;
     tabBarPattern->focusIndicator_ = 0;
-    EXPECT_TRUE(tabBarPattern->OnKeyEvent(event));
+    EXPECT_FALSE(tabBarPattern->OnKeyEvent(event));
 
     pipeline->isFocusActive_ = true;
     event.code = KeyCode::KEY_A;
