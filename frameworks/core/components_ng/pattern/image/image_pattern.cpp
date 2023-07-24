@@ -719,4 +719,13 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
     event->SetData(unifiedData);
 #endif
 }
+
+void ImagePattern::OnLanguageConfigurationUpdate()
+{
+    auto&& src = loadingCtx_->GetSourceInfo();
+    // Resource image needs to reload when Language changes
+    if (src.GetSrcType() == SrcType::RESOURCE) {
+        loadingCtx_.Reset();
+    }
+}
 } // namespace OHOS::Ace::NG
