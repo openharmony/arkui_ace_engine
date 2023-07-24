@@ -243,19 +243,18 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void SubwindowManager::HidePopupNG(int32_t targetId)
+void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
 {
-    auto subwindow = GetCurrentWindow();
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
     if (subwindow) {
         subwindow->HidePopupNG(targetId);
-    }
-}
-
-void SubwindowManager::HidePopupNG()
-{
-    auto subwindow = GetCurrentWindow();
-    if (subwindow) {
-        subwindow->HidePopupNG();
     }
 }
 
@@ -326,9 +325,16 @@ void SubwindowManager::ClearMenu()
     }
 }
 
-void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
+void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
 {
-    auto subwindow = GetCurrentWindow();
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
     if (subwindow) {
         subwindow->SetHotAreas(rects, overlayId);
     }

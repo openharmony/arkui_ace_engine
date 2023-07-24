@@ -28,6 +28,20 @@ public:
 
     void BeforeCreateLayoutWrapper() override;
 
+    void SetContainerId(int32_t containerId)
+    {
+        containerId_ = containerId;
+    }
+
+    int32_t GetContainerId() const
+    {
+        return containerId_;
+    }
+
+private:
+    // record node in which container.
+    int32_t containerId_ = -1;
+
     ACE_DISALLOW_COPY_AND_MOVE(PopupBasePattern);
 };
 } // namespace OHOS::Ace::NG

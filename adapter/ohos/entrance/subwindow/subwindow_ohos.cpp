@@ -251,32 +251,11 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    auto popupInfo = overlayManager->GetPopupInfo(targetId == -1 ? popupTargetId_ : targetId);
     popupInfo.popupId = -1;
     popupInfo.markNeedUpdate = true;
     ContainerScope scope(childContainerId_);
-    overlayManager->HidePopup(targetId, popupInfo);
-    context->FlushPipelineImmediately();
-    HideWindow();
-#ifdef ENABLE_DRAG_FRAMEWORK
-    HideEventColumn();
-    HidePixelMap();
-    HideFilter();
-#endif // ENABLE_DRAG_FRAMEWORK
-}
-
-void SubwindowOhos::HidePopupNG()
-{
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto popupInfo = overlayManager->GetPopupInfo(popupTargetId_);
-    popupInfo.popupId = -1;
-    popupInfo.markNeedUpdate = true;
-    overlayManager->HidePopup(popupTargetId_, popupInfo);
+    overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);
     context->FlushPipelineImmediately();
     HideWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK

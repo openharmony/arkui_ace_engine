@@ -35,7 +35,6 @@ public:
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
     MOCK_METHOD2(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo));
     MOCK_METHOD1(HidePopupNG, void(int32_t targetId));
-    MOCK_METHOD0(HidePopupNG, void());
     MOCK_METHOD2(GetPopupInfoNG, void(int32_t targetId, NG::PopupInfo& popupInfo));
     MOCK_METHOD1(CancelPopup, bool(const std::string& id));
     MOCK_METHOD0(CloseMenu, void());

@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
@@ -738,6 +739,11 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     SetShowMenuAnimation(menu, true);
     menu->MarkModifyDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+
+    // set subwindow container id in menu.
+    auto menuPattern = menu->GetPattern<PopupBasePattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetContainerId(Container::CurrentId());
     LOGI("menuNode mounted in subwindow");
 }
 
