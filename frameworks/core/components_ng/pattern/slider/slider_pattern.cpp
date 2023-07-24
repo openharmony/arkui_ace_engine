@@ -177,10 +177,22 @@ bool SliderPattern::AtMousePanArea(const Offset& offsetInFrame)
     CHECK_NULL_RETURN(content, false);
     auto contentOffset = content->GetRect().GetOffset();
     auto offset = Offset(offsetInFrame.GetX() - contentOffset.GetX(), offsetInFrame.GetY() - contentOffset.GetY());
-    double distanceCircle = std::min(blockSize_.Width(), blockSize_.Height()) * HALF + hotBlockShadowWidth_;
-    auto diffX = circleCenter_.GetX() - offset.GetX();
-    auto diffY = circleCenter_.GetY() - offset.GetY();
-    return diffX * diffX + diffY * diffY <= distanceCircle * distanceCircle;
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto blockType = paintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT);
+    if (blockType == SliderModelNG::BlockStyleType::DEFAULT) {
+        double distanceCircle = std::min(blockSize_.Width(), blockSize_.Height()) * HALF + hotBlockShadowWidth_;
+        auto diffX = circleCenter_.GetX() - offset.GetX();
+        auto diffY = circleCenter_.GetY() - offset.GetY();
+        return diffX * diffX + diffY * diffY <= distanceCircle * distanceCircle;
+    } else {
+        float sideHotSizeX = blockSize_.Width() * HALF;
+        float sideHotSizeY = blockSize_.Height() * HALF;
+        return !(circleCenter_.GetX() - sideHotSizeX > offset.GetX() ||
+                 circleCenter_.GetY() - sideHotSizeY > offset.GetY() ||
+                 circleCenter_.GetX() + sideHotSizeX < offset.GetX() ||
+                 circleCenter_.GetY() + sideHotSizeY < offset.GetY());
+    }
 }
 
 bool SliderPattern::AtTouchPanArea(const Offset& offsetInFrame)
@@ -189,11 +201,12 @@ bool SliderPattern::AtTouchPanArea(const Offset& offsetInFrame)
     CHECK_NULL_RETURN(content, false);
     auto contentOffset = content->GetRect().GetOffset();
     auto offset = Offset(offsetInFrame.GetX() - contentOffset.GetX(), offsetInFrame.GetY() - contentOffset.GetY());
-    float sideHotSize = blockHotSize_ * HALF;
-    return !(circleCenter_.GetX() - sideHotSize > offset.GetX() ||
-        circleCenter_.GetY() - sideHotSize > offset.GetY() ||
-        circleCenter_.GetX() + sideHotSize < offset.GetX() ||
-        circleCenter_.GetY() + sideHotSize < offset.GetY());
+    float sideHotSizeX = blockHotSize_.Width() * HALF;
+    float sideHotSizeY = blockHotSize_.Height() * HALF;
+    return !(circleCenter_.GetX() - sideHotSizeX > offset.GetX() ||
+        circleCenter_.GetY() - sideHotSizeY > offset.GetY() ||
+        circleCenter_.GetX() + sideHotSizeX < offset.GetX() ||
+        circleCenter_.GetY() + sideHotSizeY < offset.GetY());
 }
 
 bool SliderPattern::AtPanArea(const Offset& offset, const SourceType& sourceType)
