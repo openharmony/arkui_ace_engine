@@ -105,11 +105,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis);
         mainSizeIsDefined_ = true;
     }
-    auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
-    spaceWidth_ = itemSpace > (contentMainSize_ + paddingBeforeContent_ + paddingAfterContent_) ? 0.0f : itemSpace;
 
     // calculate child layout constraint.
     auto childLayoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, contentIdealSize);
+    auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
+    spaceWidth_ = itemSpace > (contentMainSize_ + paddingBeforeContent_ + paddingAfterContent_) ? 0.0f : itemSpace;
     if (totalItemCount_ > 0) {
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
