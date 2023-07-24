@@ -432,8 +432,6 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
-    CHECK_NULL_VOID(indexerEventHub);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
@@ -516,7 +514,7 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
     if (selectChanged || NeedShowPopupView()) {
         ShowBubble();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode();
 }
 
 void IndexerPattern::ShowBubble()
