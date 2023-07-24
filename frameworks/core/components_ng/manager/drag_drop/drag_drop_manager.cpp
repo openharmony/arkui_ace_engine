@@ -203,7 +203,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
         }
     }
 
-    CHECK_NULL_RETURN(parentFrameNode, nullptr);
+    CHECK_NULL_RETURN_NOLOG(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
         if (parentFrameNode == iter.second) {
             auto eventHub = parentFrameNode->GetEventHub<EventHub>();

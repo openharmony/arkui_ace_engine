@@ -324,8 +324,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
         if (!SequencedRecognizer_) {
             SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
-            SequencedRecognizer_->RemainChildOnResetStatus();
         }
+        SequencedRecognizer_->RemainChildOnResetStatus();
         SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         result.emplace_back(SequencedRecognizer_);
@@ -402,12 +402,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     if (!SequencedRecognizer_) {
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
-        SequencedRecognizer_->RemainChildOnResetStatus();
     }
+    SequencedRecognizer_->RemainChildOnResetStatus();
     SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(SequencedRecognizer_);
-    result.emplace_back(previewLongPressRecognizer_);
+    std::vector<RefPtr<NGGestureRecognizer>> previewRecognizers { previewLongPressRecognizer_ };
+    if (!previewSequencedRecognizer_) {
+        previewSequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(previewRecognizers);
+    }
+    previewSequencedRecognizer_->RemainChildOnResetStatus();
+    previewSequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    previewSequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(previewSequencedRecognizer_);
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
