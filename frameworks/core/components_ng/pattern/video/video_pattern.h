@@ -101,6 +101,7 @@ public:
 
     bool IsFullScreen() const;
 
+    void OnColorConfigurationUpdate() override;
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
@@ -288,6 +289,7 @@ private:
     }
 
     RefPtr<VideoControllerV2> videoControllerV2_;
+    RefPtr<FrameNode> controlBar_;
 
     GestureEventFunc playBtnCallBack_;
     GestureEventFunc pauseBtnCallBack_;
