@@ -217,7 +217,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
-
+    FlushFrameTrace();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -227,7 +227,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         distributedUI->ApplyOneUpdate();
     } while (false);
 #endif
-
     FlushAnimation(GetTimeFromExternalTimer());
     FlushTouchEvents();
     FlushBuild();
@@ -261,9 +260,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAnimation) {
         RequestFrame();
     }
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().FlushEnd();
-    }
     FlushMessages();
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
@@ -278,6 +274,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     needRenderNode_.clear();
     taskScheduler_.FlushAfterRenderTask();
     // Keep the call sent at the end of the function
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().FlushEnd();
+    }
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
 }
 
@@ -289,6 +288,13 @@ void PipelineContext::InspectDrew()
     }
 }
 
+void PipelineContext::FlushFrameTrace()
+{
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().FlushBegin();
+    }
+}
+
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
     CHECK_RUN_ON(UI);
@@ -296,11 +302,7 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     if (scheduleTasks_.empty()) {
         return;
     }
-    FrameReport& fr = FrameReport::GetInstance();
-    if (fr.GetEnable()) {
-        fr.FlushBegin();
-        fr.BeginFlushAnimation();
-    }
+
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
     }
@@ -773,6 +775,10 @@ void PipelineContext::SyncSafeArea()
     CHECK_NULL_VOID_NOLOG(!ignoreViewSafeArea_);
     CHECK_NULL_VOID_NOLOG(isLayoutFullScreen_);
     rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto page = stageManager_->GetLastPage();
+    if (page) {
+        page->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
@@ -824,6 +830,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
         }
         rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto page = stageManager_->GetLastPage();
+        if (page) {
+            page->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
         // layout immediately
         FlushUITasks();
 
@@ -1487,6 +1497,20 @@ void PipelineContext::HandleOnAreaChangeEvent()
     auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
         frameNode->TriggerOnAreaChangeCallback();
+    }
+    UpdateFormLinkInfos();
+}
+
+void PipelineContext::UpdateFormLinkInfos()
+{
+    if (formLinkInfoUpdateHandler_ && !formLinkInfoMap_.empty()) {
+        LOGI("formLinkInfoUpdateHandler called");
+        std::vector<std::string> formLinkInfos;
+        for (auto iter = formLinkInfoMap_.rbegin(); iter != formLinkInfoMap_.rend(); ++iter) {
+            auto info = iter->second;
+            formLinkInfos.push_back(info);
+        }
+        formLinkInfoUpdateHandler_(formLinkInfos);
     }
 }
 

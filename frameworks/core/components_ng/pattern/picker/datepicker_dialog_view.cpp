@@ -109,6 +109,8 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_RETURN(monthDaysPickerPattern, nullptr);
         monthDaysPickerPattern->SetTitleId(pickerPattern->GetTitleId());
+        monthDaysPickerPattern->SetShowTimeFlag(true);
+        pickerPattern->SetShowTimeFlag(true);
         auto monthDaysLayoutProperty = monthDaysNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthDaysLayoutProperty, nullptr);
         monthDaysLayoutProperty->UpdateUserDefinedIdealSize(
@@ -119,6 +121,17 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         monthDaysNode->MarkModifyDone();
         monthDaysNode->MountToParent(pickerRow);
         auto timeNode = CreateTimeNode(settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
+        auto timePickerEventHub = timeNode->GetEventHub<TimePickerEventHub>();
+        CHECK_NULL_RETURN(timePickerEventHub, nullptr);
+        auto onChangeCallback = [monthDaysNode]() {
+            auto pickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
+            CHECK_NULL_VOID(pickerPattern);
+            auto str = pickerPattern->GetSelectedObject(true);
+            auto datePickerEventHub = pickerPattern->GetEventHub<DatePickerEventHub>();
+            CHECK_NULL_VOID(datePickerEventHub);
+            datePickerEventHub->FireDialogChangeEvent(str);
+        };
+        timePickerEventHub->SetOnChangeForDatePicker(std::move(onChangeCallback));
         auto timeLayoutProperty = timeNode->GetLayoutProperty();
         CHECK_NULL_RETURN(timeLayoutProperty, nullptr);
         timeLayoutProperty->UpdateUserDefinedIdealSize(
@@ -210,7 +223,15 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
 
     // build dialog accept and cancel button
     auto changeEvent = dialogEvent["changeId"];
+    auto dateChangeEvent = dialogEvent["dateChangeId"];
+    if (settingData.showTime) {
+        auto changeEventSame = changeEvent;
+        auto dateChangeEventSame = dateChangeEvent;
+        SetDialogChange(acceptNode, std::move(changeEventSame));
+        SetDialogDateChange(acceptNode, std::move(dateChangeEventSame));
+    }
     SetDialogChange(dateNode, std::move(changeEvent));
+    SetDialogDateChange(dateNode, std::move(dateChangeEvent));
     auto contentRow = CreateButtonNode(acceptNode, dateNode, dialogEvent, std::move(dialogCancelEvent));
     CHECK_NULL_RETURN(contentRow, nullptr);
     auto event = [dialogNode](const GestureEvent& /* info */) {
@@ -346,6 +367,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto acceptEvent = dialogEvent["acceptId"];
+    auto dateAcceptEvent = dialogEvent["dateAcceptId"];
     auto cancelEvent = dialogCancelEvent["cancelId"];
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -356,6 +378,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
 
     contentRow->SetNeedCallChildrenUpdate(false);
+    SetDialogDateAcceptEvent(dateNode, std::move(dateAcceptEvent));
 
     auto buttonCancelNode = CreateCancelNode(cancelEvent, datePickerNode);
     auto buttonConfirmNode = CreateConfirmNode(dateNode, datePickerNode, acceptEvent);
@@ -782,12 +805,28 @@ void DatePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, D
     eventHub->SetDialogChange(std::move(onChange));
 }
 
+void DatePickerDialogView::SetDialogDateChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDialogDateChange(std::move(onChange));
+}
+
 void DatePickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogAcceptEvent(std::move(onChange));
+}
+
+void DatePickerDialogView::SetDialogDateAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDialogDateAcceptEvent(std::move(onChange));
 }
 
 void DatePickerDialogView::SetDialogSwitchEvent(std::function<bool()> switchEvent)
@@ -821,6 +860,10 @@ void DatePickerDialogView::SetDateTextProperties(
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     pickerProperty->UpdateDisappearWeight(
         properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    pickerProperty->UpdateDisappearFontFamily(
+        properties.disappearTextStyle_.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    pickerProperty->UpdateDisappearFontStyle(
+        properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
         pickerProperty->UpdateFontSize(properties.normalTextStyle_.fontSize.value());
@@ -829,6 +872,8 @@ void DatePickerDialogView::SetDateTextProperties(
     }
     pickerProperty->UpdateColor(properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     pickerProperty->UpdateWeight(properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+    pickerProperty->UpdateFontFamily(properties.normalTextStyle_.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    pickerProperty->UpdateFontStyle(properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
         pickerProperty->UpdateSelectedFontSize(properties.selectedTextStyle_.fontSize.value());
@@ -838,6 +883,10 @@ void DatePickerDialogView::SetDateTextProperties(
     pickerProperty->UpdateSelectedColor(properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     pickerProperty->UpdateSelectedWeight(
         properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    pickerProperty->UpdateSelectedFontFamily(
+        properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    pickerProperty->UpdateSelectedFontStyle(
+        properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
 void DatePickerDialogView::SetTimeTextProperties(

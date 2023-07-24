@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-/**
- * ObservedPropertyObjectAbstractPU
- * 
- * common bbase class of ObservedPropertyObjectPU and
- * SyncedObjectPropertyTwoWayPU
- * adds the createObjectLink to the ObservedPropertyAbstract base
- * 
- * all definitions in this file are framework internal
- */
+#include "core/common/app_bar_helper.h"
 
-abstract class ObservedPropertyObjectAbstractPU<C extends Object>
-  extends ObservedPropertyAbstractPU<C> {
+namespace OHOS::Ace {
 
-  constructor(owningView: IPropertySubscriber, thisPropertyName: PropertyInfo) {
-    super(owningView, thisPropertyName)
-  }
+RefPtr<NG::FrameNode> AppBarHelper::CreateUIExtensionNode(const std::string& bundleName,
+    const std::string& abilityName, const std::map<std::string, std::string>& params,
+    std::function<void(int32_t)>&& onRelease,
+    std::function<void(int32_t, const std::string&, const std::string&)>&& onError)
+{
+    return nullptr;
 }
+
+std::string AppBarHelper::QueryAppGalleryBundleName()
+{
+    return "";
+}
+
+} // namespace OHOS::Ace

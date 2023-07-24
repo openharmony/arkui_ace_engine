@@ -166,6 +166,8 @@ public:
         return currentOffset_;
     }
 
+    float GetTotalHeight() const override;
+
     // scroller
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override
     {
@@ -241,8 +243,7 @@ private:
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
     bool NeedScrollSnapAlignEffect() const;
-    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void RegistOritationListener();
+    ScrollAlign GetScrollAlignByScrollSnapAlign() const;
 
     // multiSelectable
     void ClearMultiSelect() override;

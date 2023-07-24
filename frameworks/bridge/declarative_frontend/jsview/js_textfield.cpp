@@ -194,13 +194,10 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
         return;
     }
 
-    Color color;
-    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor")) {
-        auto theme = GetTheme<TextFieldTheme>();
-        if (info[0]->IsUndefined() && theme) {
-            color = theme->GetPlaceholderColor();
-        }
-    }
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    Color color = theme->GetPlaceholderColor();
+    CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor");
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
 
@@ -1005,6 +1002,10 @@ void JSTextField::SetMaxLines(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsNumber()) {
         LOGI("SetMaxLines create error, info is not number or non-valid");
+        TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
+        return;
+    }
+    if (info[0]->ToNumber<int32_t>() <= 0) {
         TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
         return;
     }

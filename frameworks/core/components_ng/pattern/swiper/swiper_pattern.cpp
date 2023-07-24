@@ -163,6 +163,9 @@ void SwiperPattern::OnModifyDone()
         StopTranslateAnimation();
         StopSpringAnimation();
         StopFadeAnimation();
+        if (indicatorController_) {
+            indicatorController_->Stop();
+        }
         currentOffset_ = 0.0f;
         mainSizeIsMeasured_ = false;
         itemPosition_.clear();
@@ -275,6 +278,9 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->StopTranslateAnimation();
                 swiper->StopSpringAnimation();
                 swiper->StopFadeAnimation();
+                if (swiper->indicatorController_) {
+                    swiper->indicatorController_->Stop();
+                }
                 swiper->currentOffset_ = 0.0f;
                 swiper->itemPosition_.clear();
                 swiper->jumpIndex_ = swiper->currentIndex_;
@@ -536,7 +542,8 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
         jumpIndex_.reset();
     } else if (targetIndex_) {
-        auto iter = itemPosition_.find(targetIndex_.value());
+        auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
+        auto iter = itemPosition_.find(targetIndexValue);
         if (iter != itemPosition_.end()) {
             float targetPos = 0.0f;
             targetPos = iter->second.startPos;
@@ -2104,7 +2111,7 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
         swiperParameters_->itemHeight = swiperIndicatorTheme->GetSize();
         swiperParameters_->selectedItemWidth = swiperIndicatorTheme->GetSize();
         swiperParameters_->selectedItemHeight = swiperIndicatorTheme->GetSize();
-        swiperParameters_->maskValue = true;
+        swiperParameters_->maskValue = false;
         swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
         swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
     }
@@ -2337,7 +2344,8 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             if (childrenSize <= 0 || displayCount <= 0 || swiper->itemPosition_.empty()) {
                 return;
             }
-            if (!swiper->IsLoop() && (swiper->autoPlayCurrentIndex_ + 1) > (childrenSize - displayCount)) {
+            if (!swiper->IsLoop() &&
+                (swiper->GetLoopIndex(swiper->autoPlayCurrentIndex_) + 1) > (childrenSize - displayCount)) {
                 return;
             }
             swiper->targetIndex_ = swiper->autoPlayCurrentIndex_ + 1;

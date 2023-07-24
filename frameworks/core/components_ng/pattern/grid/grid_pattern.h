@@ -166,6 +166,8 @@ public:
         return EstimateHeight();
     }
 
+    float GetTotalHeight() const override;
+
     void OnAnimateStop() override;
 
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
@@ -227,6 +229,8 @@ private:
     RefPtr<GridPositionController> positionController_;
     float animatorOffset_ = 0.0f;
     bool scrollStop_ = false;
+    bool initialIndex_ = false;
+    int32_t offsetCount_ = 0;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;

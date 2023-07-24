@@ -124,7 +124,6 @@ private:
     RefPtr<AnimatablePropertyFloat> shadowOffsetYFloat_;
     RefPtr<AnimatablePropertyColor> shadowColor_;
 
-    TextDecoration oldTextDecoration_ = TextDecoration::NONE;
     float oldColorAlpha_ { 0.0f };
     std::optional<TextDecoration> textDecoration_;
     std::optional<Color> textDecorationColor_;

@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_clock/text_clock_accessibility_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
+#include "core/components_ng/pattern/text_clock/text_clock_layout_algorithm.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
 
@@ -52,6 +53,11 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<TextClockEventHub>();
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<TextClockLayoutAlgorithm>();
     }
 
     RefPtr<TextClockController> GetTextClockController() const

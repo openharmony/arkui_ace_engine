@@ -42,6 +42,7 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
     void OnVisibleChange(bool visible) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     bool HasStartingPage() override
     {
@@ -91,6 +92,8 @@ private:
     void OnConnectInner();
 
     void RegisterVisibleAreaChange();
+    void UpdateTextFieldManager(const Offset& offset, float height);
+    bool IsCurrentFocus() const;
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

@@ -26,7 +26,6 @@
 #include "core/components/common/painter/rosen_svg_painter.h"
 #endif
 #include "core/components/common/properties/decoration.h"
-#include "core/components/transform/render_transform.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
@@ -412,7 +411,7 @@ void SvgNode::AnimateTransform(const RefPtr<SvgAnimation>& animate, double origi
     if (!animate->GetValues().empty()) {
         AnimateFrameTransform(animate, originalValue);
     } else {
-        AnimateValueTransform(animate, originalValue);
+        AnimateFromToTransform(animate, originalValue);
     }
 }
 
@@ -429,20 +428,19 @@ void SvgNode::AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double 
         return;
     }
 
-    // set indices instead of frames
+    // change Values to frame indices to create an index-based animation
+    // property values of each frame are stored in [frames]
     std::vector<std::string> indices;
     uint32_t size = animate->GetValues().size();
     for (uint32_t i = 0; i < size; i++) {
         indices.emplace_back(std::to_string(i));
     }
-    auto instance = AceType::MakeRefPtr<SvgAnimate>();
-    animate->Copy(instance);
-    instance->SetValues(indices);
+    animate->SetValues(indices);
 
     std::function<void(double)> callback = [weak = WeakClaim(this), type, frames](double value) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        // use index and rate to locate frame and position
+        // use index and rate to locate frame and progress
         auto index = static_cast<uint32_t>(value);
         double rate = value - index;
         if (index >= frames.size() - 1) {
@@ -460,7 +458,7 @@ void SvgNode::AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double 
     animate->CreatePropertyAnimation(originalValue, std::move(callback));
 }
 
-void SvgNode::AnimateValueTransform(const RefPtr<SvgAnimation>& animate, double originalValue)
+void SvgNode::AnimateFromToTransform(const RefPtr<SvgAnimation>& animate, double originalValue)
 {
     std::vector<float> fromVec;
     std::vector<float> toVec;

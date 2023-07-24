@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,13 +25,16 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     float height_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
-                                                               : contentConstraint.maxSize.Height();
+                                                               : contentConstraint.percentReference.Height();
     float width_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
-                                                             : contentConstraint.maxSize.Width();
-    height_ = std::min(height_, contentConstraint.maxSize.Height());
-    width_ = std::min(width_, contentConstraint.maxSize.Width());
-    LOGD("LoadingProgressLayoutAlgorithm::MeasureContent: width_: %{public}fl ,height_: %{public}fl", width_, height_);
-    return SizeF(width_, height_);
+                                                             : contentConstraint.percentReference.Width();
+    height_ = std::min(height_, contentConstraint.percentReference.Height());
+    width_ = std::min(width_, contentConstraint.percentReference.Width());
+    auto diameter = std::min(width_, height_);
+    LOGD("LoadingProgressLayoutAlgorithm::MeasureContent: width_: %{public}fl, height_: %{public}fl, diameter: "
+         "%{public}fl",
+        width_, height_, diameter);
+    return SizeF(diameter, diameter);
 }
 
 } // namespace OHOS::Ace::NG

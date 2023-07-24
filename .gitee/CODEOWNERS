@@ -93,7 +93,7 @@ frameworks/core/components_ng/pattern/refresh/  @aryawang
 frameworks/core/components_ng/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @zhangbingce
-frameworks/core/components_ng/pattern/rich_editor/  @cc520bf
+frameworks/core/components_ng/pattern/rich_editor/  @jyj-0306
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
@@ -159,7 +159,7 @@ frameworks/core/components/flex/  @yangfan229
 frameworks/core/components/focus_animation/  @catpoison
 frameworks/core/components/focus_collaboration/  @catpoison
 frameworks/core/components/focusable/  @catpoison
-frameworks/core/components/font/  @cc520bf
+frameworks/core/components/font/  @jyj-0306
 frameworks/core/components/foreach/  @yan-shuifeng
 frameworks/core/components/form/  @wangchensu1
 frameworks/core/components/gesture_listener/  @zheng-qiyi
@@ -367,7 +367,7 @@ frameworks/core/components_ng/test/pattern/refresh/  @suiwuyue
 frameworks/core/components_ng/test/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/test/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/test/pattern/rendering_context/  @zhangbingce
-frameworks/core/components_ng/test/pattern/rich_editor/  @cc520bf
+frameworks/core/components_ng/test/pattern/rich_editor/  @jyj-0306
 frameworks/core/components_ng/test/pattern/root/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/scroll/  @suiwuyue
 frameworks/core/components_ng/test/pattern/scroll_bar/  @suiwuyue

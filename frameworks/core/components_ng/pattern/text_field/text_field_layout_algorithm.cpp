@@ -110,13 +110,21 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
         return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto defaultHeight = textFieldTheme->GetHeight().ConvertToPx();
     if (!frameSize.Height().has_value()) {
         if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
             calcLayoutConstraint->maxSize.value().Height().has_value()) {
             frameSize.SetHeight(std::max(layoutConstraint->maxSize.Height(), layoutConstraint->minSize.Height()));
         } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
+            auto height = contentHeight + pattern->GetVerticalPaddingSum() < defaultHeight
+                              ? defaultHeight
+                              : contentHeight + pattern->GetVerticalPaddingSum();
             frameSize.SetHeight(
-                std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
+                std::min(layoutConstraint->maxSize.Height(), static_cast<float>(height)));
         } else {
             frameSize.SetHeight(layoutConstraint->minSize.Height());
         }
@@ -185,7 +193,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         textContent = textFieldLayoutProperty->GetValueValue("");
         if (!pattern->IsTextArea()) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-            pattern->SetTextInputFlag(true);
         }
     } else {
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
@@ -210,6 +217,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         CreateParagraph(textStyle, textContent,
             isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
     }
+    float imageSize = 0.0f;
+    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
+    imageSize = showPasswordIcon ? pattern->GetIconSize() : 0.0f;
+    auto imageHotZoneWidth = showPasswordIcon ? imageSize + pattern->GetIconRightOffset() : 0.0;
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder && !isInlineStyle) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
@@ -218,6 +229,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         if (isInlineStyle) {
             paragraph_->Layout(idealWidth + textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
                 textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
+        } else if (showPlaceHolder && isPasswordType) {
+            paragraph_->Layout(idealWidth - imageHotZoneWidth);
         } else {
             paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
         }
@@ -248,7 +261,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
-    if (isInlineStyle && pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
+    if (pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
         pattern->SetSingleLineHeight(preferredHeight);
     }
     if (pattern->IsTextArea()) {
@@ -266,7 +279,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     // check password image size.
-    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.Reset();
@@ -282,8 +294,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         }
         return SizeF(idealWidth, std::min(preferredHeight, idealHeight));
     }
-    float imageSize = 0.0f;
-    imageSize = showPasswordIcon ? pattern->GetIconSize() : 0.0f;
 
     if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
         // for textArea, need to delete imageWidth and remeasure.
@@ -300,9 +310,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), idealHeight);
     textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), static_cast<float>(preferredHeight)));
-    auto imageHotZoneWidth = imageSize + pattern->GetIconRightOffset();
-    paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx()
-        - imageHotZoneWidth);
     return SizeF(idealWidth - imageHotZoneWidth, std::min(idealHeight, preferredHeight));
 }
 
@@ -504,7 +511,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
     paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
-    paraStyle.fontFamily_ = textStyle.GetFontFamilies().at(0);
+    auto fontFamilies = textStyle.GetFontFamilies();
+    if (!fontFamilies.empty()) {
+        paraStyle.fontFamily_ = fontFamilies.at(0);
+    }
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
@@ -536,7 +546,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle->GetWordBreak());
     paraStyle.fontSize_ = textStyle->GetFontSize().ConvertToPx();
-    paraStyle.fontFamily_ = textStyle->GetFontFamilies().at(0);
+    auto fontFamilies = textStyle->GetFontFamilies();
+    if (!fontFamilies.empty()) {
+        paraStyle.fontFamily_ = fontFamilies.at(0);
+    }
     if (textStyle->GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }

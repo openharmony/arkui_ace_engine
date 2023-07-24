@@ -496,7 +496,7 @@ void ScrollBar::PlayBarEndAnimation()
         return;
     }
 
-    scrollEndAnimator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+    scrollEndAnimator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext(), "ScrollBarEndAnimator");
     scrollEndAnimator_->PreventFrameJank();
     auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(UINT8_MAX, 0, Curves::SHARP);
     animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {

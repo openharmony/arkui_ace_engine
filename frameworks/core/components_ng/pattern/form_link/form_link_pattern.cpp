@@ -24,18 +24,24 @@ void FormLinkPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddOnAreaChangeNode(GetHost()->GetId());
 }
 
-bool FormLinkPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void FormLinkPattern::OnAreaChangedInner()
 {
-    CHECK_NULL_RETURN(dirty, false);
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    formLinkInfo_.SetFomLinkRect(geometryNode->GetFrameRect());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto linkRect = geometryNode->GetFrameRect();
+    linkRect.SetOffset(GetHost()->GetTransformRelativeOffset());
+    formLinkInfo_.SetFomLinkRect(linkRect);
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    pipeline->AddFormLinkInfo(formLinkInfo_.ToString());
-    return false;
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddFormLinkInfo(host->GetId(), formLinkInfo_.ToString());
+
 }
 
 } // namespace OHOS::Ace::NG

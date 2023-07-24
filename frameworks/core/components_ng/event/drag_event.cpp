@@ -136,6 +136,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
+                SubwindowManager::GetInstance()->HideMenuNG();
                 AnimationOption option;
                 option.SetDuration(PIXELMAP_ANIMATION_DURATION);
                 option.SetCurve(Curves::SHARP);
@@ -144,15 +145,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     [renderContext]() {
                         renderContext->UpdateOpacity(SCALE_NUMBER);
                     }, option.GetOnFinishEvent());
-                auto container = Container::Current();
-                if (container && container->IsScenceBoardWindow()) {
-                    auto pipelineContext = PipelineContext::GetCurrentContext();
-                    CHECK_NULL_VOID(pipelineContext);
-                    auto manager = pipelineContext->GetOverlayManager();
-                    manager->HideAllMenus();
-                } else {
-                    SubwindowManager::GetInstance()->HideMenuNG();
-                }
             }
         }
 
@@ -216,6 +208,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 LOGE("InteractionManager: UpdateShadowPic error");
                 return;
             }
+            LOGD("Drag window start for Mouse with default pixelMap");
             Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
         };
         auto gestureHub = gestureEventHub_.Upgrade();
@@ -467,6 +460,23 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     }
 }
 
+OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
+{
+    auto offsetToWindow = frameNode->GetPaintRectOffset();
+    auto offsetX = offsetToWindow.GetX();
+    auto offsetY = offsetToWindow.GetY();
+#ifdef WEB_SUPPORTED
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        auto webPattern = frameNode->GetPattern<WebPattern>();
+        if (webPattern) {
+            offsetX += webPattern->GetDragOffset().GetX();
+            offsetY += webPattern->GetDragOffset().GetY();
+        }
+    }
+#endif
+    return OffsetF(offsetX, offsetY);
+}
+
 void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -484,13 +494,8 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(pixelMap);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
-    auto offsetToWindow = frameNode->GetPaintRectOffset();
-    auto offsetX = offsetToWindow.GetX();
-    auto offsetY = offsetToWindow.GetY();
-    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        offsetX = longPressInfo_.GetGlobalPoint().GetX() - (width / 2);
-        offsetY = longPressInfo_.GetGlobalPoint().GetY() - (height / 2);
-    }
+    auto offsetX = GetFloatImageOffset(frameNode).GetX();
+    auto offsetY = GetFloatImageOffset(frameNode).GetY();
     // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -679,6 +684,7 @@ void DragEventActuator::GetTextPixelMap(bool startDrag)
         LOGE("InteractionManager: UpdateShadowPic error");
         return;
     }
+    LOGD("Drag window start for Mouse with Text");
     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     gestureHub->SetPixelMap(nullptr);
 }
@@ -741,6 +747,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
             CHECK_NULL_VOID(pattern);
             pattern->CreateHandles();
         }
+        LOGD("Drag window start for Text");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);

@@ -134,6 +134,11 @@ public:
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
 
+    void SetBackgroundEffect(const EffectOption& effectOption) override
+    {
+        ViewAbstract::SetBackgroundEffect(effectOption);
+    }
+
     void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
     {
         ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);

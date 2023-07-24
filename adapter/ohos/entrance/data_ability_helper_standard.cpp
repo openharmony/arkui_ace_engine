@@ -28,41 +28,59 @@ namespace OHOS::Ace {
 namespace {
 const std::string MEDIA_PLUGIN = "multimedia/libmedialibrary.z.so";
 const std::string FILE_PLUGIN = "filemanagement/libuserfilemanager.z.so";
-const std::string PHOTO_HEAD = "file://media/Photo";
-const std::string AUDIO_HEAD = "file://media/Audio";
+const std::string PAH_PLUGIN = "file/libphotoaccesshelper.z.so";
 const std::string MEDIA_SERVER_HEAD = "datashare:///media";
 
 #if !defined(PREVIEW)
-bool UseFilePlugin(const std::string& uri)
-{
-    return StringUtils::StartWith(uri, PHOTO_HEAD) || StringUtils::StartWith(uri, AUDIO_HEAD);
-}
-
 using ThumbnailNapiEntry = void* (*)(const char*, void*);
-ThumbnailNapiEntry GetThumbnailNapiEntry(const std::string& uri)
+static void* GetThumbnailFromNapi(const std::string& uri, const std::weak_ptr<OHOS::AbilityRuntime::Context> &context)
 {
+    ACE_SCOPED_TRACE("GetThumbnailFromNapi");
+#if defined(_ARM64_) || defined(SIMULATOR_64)
+        static const std::string PREFIX = "/system/lib64/module/";
+#else
+        static const std::string PREFIX = "/system/lib/module/";
+#endif
+    static const std::vector<std::string> THUMB_PLUGINS = {
+        PAH_PLUGIN,
+        FILE_PLUGIN,
+        MEDIA_PLUGIN,
+    };
+    void* outThumbnail = nullptr;
+    auto runtimeContext = context.lock();
+    CHECK_NULL_RETURN(runtimeContext, nullptr);
     static ThumbnailNapiEntry thumbnailNapiEntry = nullptr;
     if (!thumbnailNapiEntry) {
-#if defined(_ARM64_) || defined(SIMULATOR_64)
-        std::string prefix = "/system/lib64/module/";
-#else
-        std::string prefix = "/system/lib/module/";
-#endif
-
-        auto napiPluginPath = prefix.append(UseFilePlugin(uri) ? FILE_PLUGIN : MEDIA_PLUGIN);
-        void* handle = dlopen(napiPluginPath.c_str(), RTLD_LAZY);
-        CHECK_NULL_RETURN(handle, nullptr);
-        thumbnailNapiEntry = reinterpret_cast<ThumbnailNapiEntry>(dlsym(handle, "OHOS_MEDIA_NativeGetThumbnail"));
-        if (thumbnailNapiEntry == nullptr) {
-            dlclose(handle);
-            LOGE("Failed to get symbol OHOS_MEDIA_NativeGetThumbnail in %{public}s", napiPluginPath.c_str());
-            return nullptr;
+        for (const auto& plug : THUMB_PLUGINS) {
+            auto napiPlug = PREFIX + plug;
+            void* handle = dlopen(napiPlug.c_str(), RTLD_LAZY);
+            CHECK_NULL_RETURN(handle, nullptr);
+            thumbnailNapiEntry = reinterpret_cast<ThumbnailNapiEntry>(dlsym(handle, "OHOS_MEDIA_NativeGetThumbnail"));
+            if (thumbnailNapiEntry == nullptr) {
+                dlclose(handle);
+                LOGE("Failed to get symbol OHOS_MEDIA_NativeGetThumbnail in %{public}s, try next plugin",
+                    napiPlug.c_str());
+                continue;
+            }
+            outThumbnail = thumbnailNapiEntry(uri.c_str(), &runtimeContext);
+            if (outThumbnail == nullptr) {
+                dlclose(handle);
+                thumbnailNapiEntry = nullptr;
+                LOGE("Failed to get thumbnail from %{private}s, try next plugin", napiPlug.c_str());
+                continue;
+            }
+            return outThumbnail;
+        }
+    } else {
+        outThumbnail = thumbnailNapiEntry(uri.c_str(), &runtimeContext);
+        if (outThumbnail == nullptr) {
+            thumbnailNapiEntry = nullptr;
+            LOGE("Failed to get thumbnail!");
         }
     }
-    return thumbnailNapiEntry;
+    return outThumbnail;
 }
 #endif
-
 } // namespace
 
 DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS::AppExecFwk::Context>& context,
@@ -81,11 +99,7 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
 #ifdef PREVIEW
     return nullptr;
 #else
-    ThumbnailNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry(uri);
-    CHECK_NULL_RETURN(thumbnailNapiEntry, nullptr);
-    auto runtimeContextSptr = runtimeContext_.lock();
-    CHECK_NULL_RETURN(runtimeContextSptr, nullptr);
-    return thumbnailNapiEntry(uri.c_str(), &runtimeContextSptr);
+    return GetThumbnailFromNapi(uri, runtimeContext_);
 #endif
 }
 

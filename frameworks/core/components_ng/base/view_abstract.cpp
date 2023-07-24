@@ -257,6 +257,20 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
 }
 
+void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateBackgroundEffect(effectOption);
+    }
+}
+
 void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1091,6 +1105,7 @@ void ViewAbstract::BindPopup(
             LOGI("Popup now show in subwindow.");
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
             if (popupPattern) {
+                popupPattern->SetContainerId(Container::CurrentId());
                 popupPattern->StartEnteringAnimation(nullptr);
             }
         } else {
@@ -1156,11 +1171,6 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     // unable to use the subWindow in the Previewer.
     isContextMenu = false;
 #endif
-    // windowScene will not use subwindow
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        isContextMenu = false;
-    }
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {

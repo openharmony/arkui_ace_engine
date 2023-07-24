@@ -44,7 +44,7 @@ SaveButtonModelNG* SaveButtonModelNG::GetInstance()
 void SaveButtonModelNG::Create(int32_t text, int32_t icon,
     int32_t backgroundType)
 {
-    SecurityComponentModelNG::CreateCommon(V2::SEC_SAVE_BUTTON_ETS_TAG,
+    SecurityComponentModelNG::CreateCommon(V2::SAVE_BUTTON_ETS_TAG,
         text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
 }
 

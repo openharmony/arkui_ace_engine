@@ -738,10 +738,10 @@ public:
         }
         Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
                         Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
-        auto position = ConvertTouchOffsetToCaretPosition(offset);
-        auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
-        auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
-        return offset.GetX() >= 0 && (position >= selectStart) && (position < selectEnd);
+        bool isInRange = offset.GetX() >= textBoxes_[0].rect_.GetLeft() && offset.GetX() <=
+                        textBoxes_[0].rect_.GetRight() && offset.GetY() >= textBoxes_[0].rect_.GetTop() &&
+                        offset.GetY() <= textBoxes_[0].rect_.GetBottom();
+        return isInRange;
     }
 
     // xts
@@ -891,11 +891,6 @@ public:
         caretUpdateType_ = CaretUpdateType::EVENT;
     }
 
-    void SetTextInputFlag(bool enable)
-    {
-        isTextInput_ = enable;
-    }
-
     bool GetTextInputFlag() const
     {
         return isTextInput_;
@@ -993,6 +988,7 @@ private:
 
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool LastTouchIsInSelectRegion(const std::vector<RSTypographyProperties::TextBox>& boxes);
 
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
@@ -1115,6 +1111,7 @@ private:
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
     float previewWidth_ = 0.0f;
+    InputStyle preInputStyle_ = InputStyle::DEFAULT;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;

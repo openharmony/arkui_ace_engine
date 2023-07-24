@@ -135,6 +135,7 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
+    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
     void ResetBackBlurStyle() override;
@@ -350,8 +351,6 @@ private:
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
-    void CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
-        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
 

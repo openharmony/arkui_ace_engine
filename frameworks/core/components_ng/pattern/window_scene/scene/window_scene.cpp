@@ -67,8 +67,7 @@ void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
         return;
     }
 
-    LOGI("session %{public}" PRIu64 " changes to %{public}" PRIu64,
-        session_->GetPersistentId(), session->GetPersistentId());
+    LOGI("session %{public}d changes to %{public}d", session_->GetPersistentId(), session->GetPersistentId());
     session_ = session;
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
@@ -96,29 +95,35 @@ void WindowScene::OnForeground()
 
 void WindowScene::OnBackground()
 {
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        self->snapshotNode_ = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        auto imageLayoutProperty = self->snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
+        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+        self->snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChild(self->contentNode_);
+        host->AddChild(self->snapshotNode_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+        CHECK_NULL_VOID(self->session_);
+        CHECK_NULL_VOID(self->session_->GetScenePersistence());
+        imageLayoutProperty->UpdateImageSourceInfo(
+            ImageSourceInfo("file:/" + self->session_->GetScenePersistence()->GetSnapshotFilePath()));
+        imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+        self->snapshotNode_->MarkModifyDone();
+    };
+
     ContainerScope scope(instanceId_);
-
-    snapshotNode_ = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->RemoveChild(contentNode_);
-    host->AddChild(snapshotNode_);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-    CHECK_NULL_VOID(session_);
-    auto snapshot = session_->GetSnapshot();
-    auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
-
-    CHECK_NULL_VOID(pixelMap);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    snapshotNode_->MarkModifyDone();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnSetDepth(const int32_t depth)

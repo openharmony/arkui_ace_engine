@@ -255,10 +255,10 @@ public:
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [] {
+            [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->ClearMenuNG();
-                SubwindowManager::GetInstance()->HidePopupNG();
+                SubwindowManager::GetInstance()->ClearMenuNG(instanceId);
+                SubwindowManager::GetInstance()->HidePopupNG(-1, instanceId);
             },
             TaskExecutor::TaskType::UI);
     }

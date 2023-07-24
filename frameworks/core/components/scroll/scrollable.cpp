@@ -988,7 +988,7 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::ProcessScrollMotionStop()
 {
-    if (needScrollSnapChange_ && calePredictSnapOffsetCallback_) {
+    if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && motion_) {
         needScrollSnapChange_ = false;
         auto predictSnapOffset = calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - currentPos_);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
@@ -1107,7 +1107,7 @@ bool Scrollable::HandleOverScroll(double velocity)
 {
     auto parent = parent_.Upgrade();
     if (!parent || !nestedOpt_.NeedParent()) {
-        if (edgeEffect_ != EdgeEffect::NONE) {
+        if (edgeEffect_ == EdgeEffect::SPRING) {
             ProcessScrollOverCallback(velocity);
             return true;
         }
@@ -1125,14 +1125,14 @@ bool Scrollable::HandleOverScroll(double velocity)
             }
             return true;
         }
-        if (edgeEffect_ != EdgeEffect::NONE) {
+        if (edgeEffect_ == EdgeEffect::SPRING) {
             ProcessScrollOverCallback(velocity);
             return true;
         }
     }
 
     // self handle over scroll first
-    if (edgeEffect_ != EdgeEffect::NONE) {
+    if (edgeEffect_ == EdgeEffect::SPRING) {
         ProcessScrollOverCallback(velocity);
         return true;
     }

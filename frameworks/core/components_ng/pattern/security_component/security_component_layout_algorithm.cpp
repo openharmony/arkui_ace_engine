@@ -111,8 +111,6 @@ void SecurityComponentLayoutAlgorithm::FillPaddingParams(
     res.bottom = securityComponentProperty->GetBackgroundBottomPadding().value().ConvertToPx();
     res.left = securityComponentProperty->GetBackgroundLeftPadding().value().ConvertToPx();
     res.textIconSpace = securityComponentProperty->GetTextIconSpace().value().ConvertToPx();
-    res.iconStart =
-        (securityComponentProperty->GetLayoutOrder().value() == SecSecurityComponentLayoutOrder::ICON_FIRST);
 }
 
 void SecurityComponentLayoutAlgorithm::UpdateVertical(OffsetT<Dimension>& offsetIcon,
@@ -122,13 +120,8 @@ void SecurityComponentLayoutAlgorithm::UpdateVertical(OffsetT<Dimension>& offset
         textSizeF_.Height() + params.bottom;
     componentWidth_ = params.left +
         ((iconSizeF_.Width() > textSizeF_.Width()) ? iconSizeF_.Width() : textSizeF_.Width()) + params.right;
-    if (params.iconStart) {
-        offsetText = offsetIcon + OffsetT<Dimension>(Dimension(0.0F),
-            Dimension(iconSizeF_.Height() + params.textIconSpace));
-    } else {
-        offsetIcon = offsetText + OffsetT<Dimension>(Dimension(0.0F),
-            Dimension(textSizeF_.Height() + params.textIconSpace));
-    }
+    offsetText = offsetIcon + OffsetT<Dimension>(Dimension(0.0F),
+        Dimension(iconSizeF_.Height() + params.textIconSpace));
     if (iconSizeF_.Width() > textSizeF_.Width()) {
         offsetText += OffsetT<Dimension>(Dimension((iconSizeF_.Width() - textSizeF_.Width()) / HALF), Dimension(0.0F));
     } else {
@@ -143,13 +136,8 @@ void SecurityComponentLayoutAlgorithm::UpdateHorizontal(OffsetT<Dimension>& offs
         params.top + ((iconSizeF_.Height() > textSizeF_.Height()) ? iconSizeF_.Height() : textSizeF_.Height()) +
         params.bottom;
     componentWidth_ = params.left + iconSizeF_.Width() + params.textIconSpace + textSizeF_.Width() + params.right;
-    if (params.iconStart) {
-        offsetText = offsetIcon +
-            OffsetT<Dimension>(Dimension(iconSizeF_.Width() + params.textIconSpace), Dimension(0.0F));
-    } else {
-        offsetIcon = offsetText +
-            OffsetT<Dimension>(Dimension(textSizeF_.Width() + params.textIconSpace), Dimension(0.0F));
-    }
+    offsetText = offsetIcon +
+        OffsetT<Dimension>(Dimension(iconSizeF_.Width() + params.textIconSpace), Dimension(0.0F));
     if (iconSizeF_.Height() > textSizeF_.Height()) {
         offsetText +=
             OffsetT<Dimension>(Dimension(0.0F), Dimension((iconSizeF_.Height() - textSizeF_.Height()) / HALF));

@@ -19,6 +19,7 @@ ace_unittest("refresh_test_ng") {
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/test_ng.cpp",
 
     # animation
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",

@@ -219,7 +219,7 @@ void StepperPattern::UpdateLeftButtonNode(int32_t index)
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(leftLabel);
 
     textNode->MarkModifyDone();
-    buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void StepperPattern::UpdateOrCreateRightButtonNode(int32_t index)

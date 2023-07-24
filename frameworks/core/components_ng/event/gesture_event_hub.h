@@ -434,6 +434,7 @@ public:
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
     bool IsAllowedDrag(RefPtr<EventHub> eventHub);
+    void HandleNotallowDrag(const GestureEvent& info);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -475,6 +476,7 @@ private:
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
     GestureEvent gestureInfoForWeb_;
+    bool isReceivedDragGestureInfo_ = false;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;

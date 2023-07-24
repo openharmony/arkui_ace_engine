@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
@@ -433,21 +434,19 @@ void GestureEventHub::CancelDragForWeb()
 
 void GestureEventHub::ResetDragActionForWeb()
 {
+    isReceivedDragGestureInfo_ = false;
     CHECK_NULL_VOID_NOLOG(dragEventActuator_);
     dragEventActuator_->ResetDragActionForWeb();
 }
 
 void GestureEventHub::StartDragTaskForWeb()
 {
-    auto startTime = std::chrono::high_resolution_clock::now();
-    auto timeElapsed = startTime - gestureInfoForWeb_.GetTimeStamp();
-    auto timeElapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed);
-    // 100 : 100ms
-    if (timeElapsedMs.count() > 100) {
-        LOGW("start drag task for web failed, not received this drag action gesture info");
+    if (!isReceivedDragGestureInfo_) {
+        LOGI("not received drag info, wait ark drag start");
         return;
     }
 
+    isReceivedDragGestureInfo_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
@@ -480,7 +479,7 @@ std::shared_ptr<Media::PixelMap> CreatePixelMapFromString(const std::string& fil
 
 OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale) const
 {
-    OffsetF result = OffsetF(-1.0f, -1.0f);
+    OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         return result;
     }
@@ -512,12 +511,23 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
 }
 #endif
 
+void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        LOGI("web component receive drag start, need to let web kernel start drag action");
+        gestureInfoForWeb_ = info;
+        isReceivedDragGestureInfo_ = true;
+    }
+}
+
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
-        gestureInfoForWeb_ = info;
+        HandleNotallowDrag(info);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -613,9 +623,10 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     if (dragEventActuator_->GetIsNotInPreviewState()) {
+        LOGD("Drag window start for not in previewState");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
-    }
-    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && dragDropInfo.pixelMap) {
+    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && dragDropInfo.pixelMap) {
+        LOGD("Drag window start for Mouse with custom pixelMap");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     }
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
@@ -892,8 +903,9 @@ OnDragCallback GestureEventHub::GetDragCallback()
     CHECK_NULL_RETURN(dragDropManager, ret);
     auto eventManager = pipeline->GetEventManager();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
+    auto callback = [id = Container::CurrentId(), eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
                         const DragNotifyMsg& notifyMessage) {
+        ContainerScope scope(id);
         DragRet result = DragRet::DRAG_FAIL;
         switch (notifyMessage.result) {
             case DragResult::DRAG_SUCCESS:

@@ -38,6 +38,12 @@
 
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr char SPLIT_LEFT_KEY[] = "container_modal_split_left_button";
+constexpr char MAXIMIZE_KEY[] = "container_modal_maximize_button";
+constexpr char MINIMIZE_KEY[] = "container_modal_minimize_button";
+constexpr char CLOSE_KEY[] = "container_modal_close_button";
+} // namespace
 
 /**
  * The structure of container_modal is designed as follows :
@@ -236,6 +242,18 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& conta
 RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton, bool canDrag)
 {
+    static std::unordered_map<InternalResource::ResourceId, std::string> controlButtonKeyMap = {
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, SPLIT_LEFT_KEY },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT, SPLIT_LEFT_KEY },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER, MAXIMIZE_KEY },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, MAXIMIZE_KEY },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER, MAXIMIZE_KEY },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE, MAXIMIZE_KEY },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, MINIMIZE_KEY },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE, MINIMIZE_KEY },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, CLOSE_KEY },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, CLOSE_KEY },
+    };
     // button image icon
     ImageSourceInfo imageSourceInfo;
     auto imageIcon = FrameNode::CreateFrameNode(
@@ -260,6 +278,12 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     if (buttonFocus) {
         buttonFocus->SetFocusable(false);
     }
+    std::string buttonKey = "";
+    auto iter = controlButtonKeyMap.find(icon);
+    if (iter != controlButtonKeyMap.end()) {
+        buttonKey = iter->second;
+    }
+    buttonNode->UpdateInspectorId(buttonKey);
 
     AddButtonHover(buttonNode, imageIcon);
     AddButtonMouse(buttonNode, imageIcon);

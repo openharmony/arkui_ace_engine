@@ -336,6 +336,7 @@ public:
     bool NotifyStartDragTask();
     bool IsImageDrag();
     DragRet GetDragAcceptableStatus();
+    Offset GetDragOffset() const;
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -524,6 +525,7 @@ private:
     bool isEnhanceSurface_ = false;
     bool isAllowWindowOpenMethod_ = false;
     OffsetF webOffset_;
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;

@@ -202,6 +202,7 @@ public:
     {
         SetAllChildrenInActive();
         ResetChildren();
+        Build();
         for (const auto& child : children_) {
             child.node->DoRemoveChildInRenderTree(0, true);
         }
@@ -727,6 +728,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         SetBackgroundLayoutConstraint(columnNode);
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
+        backgroundNode_ = columnNode;
     }
 
     // update focus state
@@ -962,11 +964,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     {
         ACE_SCOPED_TRACE("Layout");
         Layout();
-    }
-    {
-        LayoutWrapper::SaveGeoState();
-        LayoutWrapper::AvoidKeyboard();
-        LayoutWrapper::ExpandSafeArea();
     }
     SetRootMeasureNode(false);
     return std::nullopt;
@@ -1835,12 +1832,7 @@ OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
     OffsetF offset {};
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
-        auto wrapper = parent->layoutWrapper_.Upgrade();
-        if (wrapper) {
-            offset += wrapper->GetGeometryNode()->GetFrameOffset();
-        } else {
-            offset += parent->geometryNode_->GetFrameOffset();
-        }
+        offset += parent->geometryNode_->GetFrameOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;
@@ -2149,8 +2141,8 @@ bool FrameNode::HaveSecurityComponent()
 
 bool FrameNode::IsSecurityComponent()
 {
-    return GetTag() == V2::SEC_LOCATION_BUTTON_ETS_TAG || GetTag() == V2::SEC_PASTE_BUTTON_ETS_TAG ||
-           GetTag() == V2::SEC_SAVE_BUTTON_ETS_TAG;
+    return GetTag() == V2::LOCATION_BUTTON_ETS_TAG || GetTag() == V2::PASTE_BUTTON_ETS_TAG ||
+           GetTag() == V2::SAVE_BUTTON_ETS_TAG;
 }
 
 void FrameNode::OnSetDepth(const int32_t depth)
@@ -2164,6 +2156,9 @@ void FrameNode::OnSetDepth(const int32_t depth)
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    if (!oldGeometryNode_) {
+        oldGeometryNode_ = geometryNode_->Clone();
+    }
     RestoreGeoState();
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
@@ -2257,14 +2252,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 void FrameNode::Layout()
 {
     int64_t time = GetSysTimestamp();
-    auto&& expandOpts = layoutProperty_->GetSafeAreaExpandOpts();
-    if ((expandOpts && expandOpts->Expansive()) || GetTag() == V2::PAGE_ETS_TAG) {
-        // record expansive wrappers during Layout traversal to speed up SafeArea expansion
-        // Page node needs to avoid keyboard, record it too.
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->GetSafeAreaManager()->AddWrapper(WeakClaim(this));
-    }
     OffsetNodeToSafeArea();
     if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
         if (!layoutProperty_->GetLayoutConstraint()) {
@@ -2289,6 +2276,10 @@ void FrameNode::Layout()
     } else {
         GetLayoutAlgorithm()->SetSkipLayout();
     }
+
+    SaveGeoState();
+    AvoidKeyboard();
+    ExpandSafeArea();
 
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
         geometryNode_->GetFrameOffset().ToString().c_str());

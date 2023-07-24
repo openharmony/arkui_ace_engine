@@ -80,6 +80,7 @@
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
+#include "bridge/declarative_frontend/jsview/js_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_marquee.h"
 #include "bridge/declarative_frontend/jsview/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/js_menu.h"
@@ -93,6 +94,7 @@
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "bridge/declarative_frontend/jsview/js_pan_handler.h"
+#include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
 #include "bridge/declarative_frontend/jsview/js_path2d.h"
 #include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
@@ -112,13 +114,11 @@
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
+#include "bridge/declarative_frontend/jsview/js_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
-#include "bridge/declarative_frontend/jsview/js_sec_location_button.h"
-#include "bridge/declarative_frontend/jsview/js_sec_paste_button.h"
-#include "bridge/declarative_frontend/jsview/js_sec_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -528,9 +528,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
     { "FormLink", JSFormLink::JSBind },
-    { "SecLocationButton", JSSecLocationButton::JSBind },
-    { "SecPasteButton", JSSecPasteButton::JSBind },
-    { "SecSaveButton", JSSecSaveButton::JSBind },
+    { "LocationButton", JSLocationButton::JSBind },
+    { "PasteButton", JSPasteButton::JSBind },
+    { "SaveButton", JSSaveButton::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
