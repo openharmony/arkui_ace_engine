@@ -409,17 +409,13 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
         JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
         JSRef<JSVal> width = size->GetValueAt(0);
         CalcDimension imageSpanWidth;
-        if (!width->IsNull() && (JSContainerBase::ParseJsDimensionVp(width, imageSpanWidth) ||
-                                    JSContainerBase::ParseJsDimensionFp(width, imageSpanWidth) ||
-                                    JSContainerBase::ParseJsDimensionPx(width, imageSpanWidth))) {
+        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVp(width, imageSpanWidth)) {
             imageSize.width = imageSpanWidth;
             updateSpanStyle_.updateImageWidth = imageSpanWidth;
         }
         JSRef<JSVal> height = size->GetValueAt(1);
         CalcDimension imageSpanHeight;
-        if (!height->IsNull() && (JSContainerBase::ParseJsDimensionVp(height, imageSpanHeight) ||
-                                     JSContainerBase::ParseJsDimensionFp(height, imageSpanHeight) ||
-                                     JSContainerBase::ParseJsDimensionPx(height, imageSpanHeight))) {
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVp(height, imageSpanHeight)) {
             imageSize.height = imageSpanHeight;
             updateSpanStyle_.updateImageHeight = imageSpanHeight;
         }
