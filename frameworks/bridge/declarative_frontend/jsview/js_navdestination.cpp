@@ -124,11 +124,17 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
                 return;
             }
             CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
                 return;
             }
             NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
             return;
+        } else {
+            CalcDimension titleHeight;
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
+                return;
+            }
+            NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
         }
     } else {
         LOGE("arg is not [String|Function].");
