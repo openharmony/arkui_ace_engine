@@ -157,7 +157,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     frameNode->SetDraggable(false);
                     return;
                 }
-                if (patten->BetweenSelectedPosition(info.GetGlobalLocation())){
+                if (patten->BetweenSelectedPosition(info.GetGlobalLocation())) {
                     frameNode->SetDraggable(true);
                     textDragCallback_(info.GetGlobalLocation());
                 }
