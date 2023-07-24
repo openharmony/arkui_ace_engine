@@ -1081,7 +1081,7 @@ private:
     bool isMousePressed_ = false;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
-#if defined(ENABLE_STANDARD_INPUT)
+#if defined(ENABLE_STANDARD_INPUT) || defined(PREVIEW)
     bool textObscured_ = true;
 #else
     bool textObscured_ = false;
