@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <vector>
 
@@ -400,7 +401,13 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
+    if (info[0]->IsString()) {
+        auto value = info[0]->ToString();
+        if (value.back() == '%') {
+            return;
+        }
+    }
+    if (!ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP)) {
         LOGI("Parse to dimension FP failed!");
         return;
     }
@@ -673,16 +680,16 @@ NG::PaddingProperty JSTextField::SetPaddings(const std::optional<CalcDimension>&
     }
     if (left.has_value()) {
         if (left.value().Unit() == DimensionUnit::CALC) {
-            paddings.left = NG::CalcLength(
-                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+            paddings.left =
+                NG::CalcLength(left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
         }
     }
     if (right.has_value()) {
         if (right.value().Unit() == DimensionUnit::CALC) {
-            paddings.right = NG::CalcLength(
-                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+            paddings.right =
+                NG::CalcLength(right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
         }
