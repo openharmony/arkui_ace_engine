@@ -273,6 +273,10 @@ void PagePattern::BeforeCreateLayoutWrapper()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateSafeAreaInsets(pipeline->GetSafeArea());
+    auto safeArea = pipeline->GetSafeArea();
+    auto props = host->GetLayoutProperty();
+    if (safeArea.IsValid() || props->GetSafeAreaInsets()) {
+        props->UpdateSafeAreaInsets(safeArea);
+    }
 }
 } // namespace OHOS::Ace::NG
