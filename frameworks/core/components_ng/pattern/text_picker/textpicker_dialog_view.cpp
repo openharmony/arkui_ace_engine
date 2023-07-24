@@ -337,15 +337,21 @@ RefPtr<FrameNode> TextPickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto dividerNode = FrameNode::GetOrCreateFrameNode(V2::DIVIDER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
-    auto dividerRenderContext = dividerNode->GetRenderContext();
-    CHECK_NULL_RETURN(dividerRenderContext, nullptr);
-    dividerRenderContext->UpdateBackgroundColor(dialogTheme->GetDividerColor());
+    CHECK_NULL_RETURN(dividerNode, nullptr);
+
+    auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_RETURN(dividerPaintProps, nullptr);
+    dividerPaintProps->UpdateDividerColor(dialogTheme->GetDividerColor());
+
+    auto dividerLayoutProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
+    dividerLayoutProps->UpdateVertical(true);
 
     MarginProperty margin;
     margin.top = CalcLength(dialogTheme->GetDividerHeight());
     margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    dividerNode->GetLayoutProperty()->UpdateMargin(margin);
-    dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+    dividerLayoutProps->UpdateMargin(margin);
+    dividerLayoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
 
     return dividerNode;
