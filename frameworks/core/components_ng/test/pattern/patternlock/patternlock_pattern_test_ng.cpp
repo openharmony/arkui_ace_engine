@@ -489,7 +489,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest006, TestSize.Level1)
 
 /**
  * @tc.name: PatternLockPatternTest007
- * @tc.desc: Test PatternLock pattern method OnTouchMove.
+ * @tc.desc: Test PatternLock pattern method HandleGestureUpdate.
  * @tc.type: FUNC
  */
 HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
@@ -516,14 +516,18 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
     float offsetY = 1.0f;
     Offset offset(offsetX, offsetY);
     pattern->isMoveEventValid_ = false;
-    TouchLocationInfo locationInfo(0);
-    locationInfo.SetTouchType(TouchType::MOVE);
-    locationInfo.SetLocalLocation(offset);
-    TouchEventInfo touchEventInfo("onTouchMove");
-    touchEventInfo.AddTouchLocationInfo(std::move(locationInfo));
-    pattern->OnTouchMove(touchEventInfo);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    pattern->HandleGestureUpdate(info);
+    EXPECT_EQ(pattern->cellCenter_.GetX(), .0f);
+    EXPECT_EQ(pattern->cellCenter_.GetY(), .0f);
+    info.SetLocalLocation(offset);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    pattern->HandleGestureUpdate(info);
+    EXPECT_EQ(pattern->cellCenter_.GetX(), .0f);
+    EXPECT_EQ(pattern->cellCenter_.GetY(), .0f);
     pattern->isMoveEventValid_ = true;
-    pattern->OnTouchMove(touchEventInfo);
+    pattern->HandleGestureUpdate(info);
     EXPECT_EQ(pattern->cellCenter_.GetX(), offset.GetX());
     EXPECT_EQ(pattern->cellCenter_.GetY(), offset.GetY());
 }
@@ -618,16 +622,6 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest009, TestSize.Level1)
     EXPECT_EQ(pattern->isMoveEventValid_, false);
 
     pattern->isMoveEventValid_ = true;
-    TouchLocationInfo locationInfoTouchMove(0);
-    locationInfoTouchMove.SetLocalLocation(offset);
-    locationInfoTouchMove.SetTouchType(TouchType::MOVE);
-    TouchEventInfo touchEventInfoTouchMove("onTouchMove");
-    touchEventInfoTouchMove.AddTouchLocationInfo(std::move(locationInfoTouchMove));
-    pattern->HandleTouchEvent(touchEventInfoTouchMove);
-    EXPECT_EQ(pattern->cellCenter_.GetX(), offset.GetX());
-    EXPECT_EQ(pattern->cellCenter_.GetY(), offset.GetY());
-    pattern->cellCenter_.Reset();
-
     TouchLocationInfo locationInfoTouchUnkown(0);
     locationInfoTouchUnkown.SetLocalLocation(offset);
     locationInfoTouchUnkown.SetTouchType(TouchType::UNKNOWN);
