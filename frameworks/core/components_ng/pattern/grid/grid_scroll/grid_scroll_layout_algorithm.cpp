@@ -83,21 +83,21 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(Layout
     }
 
     auto grid = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(grid);
+    CHECK_NULL_VOID_NOLOG(grid);
     auto focusHub = grid->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID_NOLOG(focusHub);
     // textField not in Grid
     if (!focusHub->IsCurrentFocus()) {
         return;
     }
 
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID_NOLOG(context);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    CHECK_NULL_VOID(textFieldManager);
+    CHECK_NULL_VOID_NOLOG(textFieldManager);
     // only when textField is onFocus
     auto focused = textFieldManager->GetOnFocusTextField().Upgrade();
-    CHECK_NULL_VOID(focused);
+    CHECK_NULL_VOID_NOLOG(focused);
     auto position = textFieldManager->GetClickPosition().GetY();
     auto gridOffset = grid->GetTransformRelativeOffset();
     auto offset = mainSize + gridOffset.GetY() - position;
@@ -394,6 +394,8 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
             gridLayoutInfo_.currentOffset_ = 0;
             gridLayoutInfo_.prevOffset_ = 0;
         }
+        gridLayoutInfo_.reachStart_ = true;
+        gridLayoutInfo_.offsetEnd_ = true;
         return;
     }
 

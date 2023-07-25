@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -49,10 +50,23 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure && skipLayout) {
         return false;
     }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto paintProperty = host->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto bubbleLayoutAlgorithm = DynamicCast<BubbleLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(bubbleLayoutAlgorithm, false);
+
+    // Calculating bubble offset and set.
+    auto childRenderOffset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(dirty);
+    auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_RETURN(childNode, false);
+    auto childContext = childNode->GetRenderContext();
+    CHECK_NULL_RETURN(childContext, false);
+    childContext->UpdateOffset(childRenderOffset);
+
     showArrow_ = bubbleLayoutAlgorithm->ShowArrow();
     arrowPosition_ = bubbleLayoutAlgorithm->GetArrowPosition();
     childOffset_ = bubbleLayoutAlgorithm->GetChildOffset();
@@ -60,10 +74,6 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     touchRegion_ = bubbleLayoutAlgorithm->GetTouchRegion();
     targetOffset_ = bubbleLayoutAlgorithm->GetTargetOffset();
     targetSize_ = bubbleLayoutAlgorithm->GetTargetSize();
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto paintProperty = host->GetPaintProperty<BubbleRenderProperty>();
-    CHECK_NULL_RETURN(paintProperty, false);
     arrowPlacement_ = bubbleLayoutAlgorithm->GetArrowPlacement();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {

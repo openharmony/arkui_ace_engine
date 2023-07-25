@@ -1164,6 +1164,44 @@ float GridPattern::GetAverageHeight() const
     return heightSum / itemCount;
 }
 
+float GridPattern::GetTotalHeight() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN_NOLOG(host, 0.0f);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0f);
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    float heightSum = 0;
+    int32_t itemCount = 0;
+    float estimatedHeight = 0.f;
+    if (scrollbarInfo_.first.has_value() && scrollbarInfo_.second.has_value()) {
+        estimatedHeight = scrollbarInfo_.second.value();
+    } else {
+        auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, gridLayoutInfo_.axis_);
+        for (const auto& item : gridLayoutInfo_.lineHeightMap_) {
+            auto line = gridLayoutInfo_.gridMatrix_.find(item.first);
+            if (line == gridLayoutInfo_.gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
+                continue;
+            }
+            auto lineStart = line->second.begin()->second;
+            auto lineEnd = line->second.rbegin()->second;
+            itemCount += (lineEnd - lineStart + 1);
+            heightSum += item.second + mainGap;
+        }
+        auto averageHeight = heightSum / itemCount;
+        if (itemCount >= (gridLayoutInfo_.childrenCount_ - 1)) {
+            estimatedHeight = heightSum - mainGap;
+        } else {
+            estimatedHeight = heightSum + (gridLayoutInfo_.childrenCount_ - itemCount) * averageHeight;
+        }
+    }
+    return estimatedHeight;
+}
+
 void GridPattern::UpdateScrollBarOffset()
 {
     if (!GetScrollBar() && !GetScrollBarProxy()) {

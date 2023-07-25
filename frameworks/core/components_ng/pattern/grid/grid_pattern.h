@@ -166,6 +166,8 @@ public:
         return EstimateHeight();
     }
 
+    float GetTotalHeight() const override;
+
     void OnAnimateStop() override;
 
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;

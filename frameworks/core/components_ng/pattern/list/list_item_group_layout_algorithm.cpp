@@ -293,7 +293,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         layoutWrapper->RemoveAllChildInRenderTree();
         jumpIndex_.reset();
     } else if (!itemPosition_.empty()) {
-        if (itemPosition_.begin()->first > 0) {
+        if (itemPosition_.begin()->first > 0 || (forwardLayout_ && Negative(referencePos_))) {
             startPos = itemPosition_.begin()->second.first;
         }
         endPos = itemPosition_.rbegin()->second.second;

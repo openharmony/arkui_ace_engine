@@ -322,6 +322,8 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         }
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
     if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
         // set the scroll bar style
@@ -329,11 +331,10 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else if (scrollBar_->GetDisplayMode() != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(renderContext);
     if (renderContext->HasBorderRadius()) {
@@ -617,6 +618,7 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
         mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        totalOffsetOfMousePressed_ = mousePressOffset_.GetMainOffset(axis_) + GetTotalOffset();
         mousePressed_ = true;
         // do not select when click
     } else if (info.GetAction() == MouseAction::MOVE) {
@@ -748,6 +750,22 @@ bool ScrollablePattern::ShouldSelectScrollBeStopped()
     if (NearZero(offset)) {
         return true;
     }
+
+    // avoid start position move when offset is bigger then item height
+    auto currentMainStartOffset = mouseStartOffset_.GetMainOffset(axis_);
+    if (Positive(offset)) {
+        if (LessNotEqual(totalOffsetOfMousePressed_, currentMainStartOffset + offset)) {
+            offset = totalOffsetOfMousePressed_ - currentMainStartOffset;
+        }
+    } else {
+        auto hostSize = GetHostFrameSize();
+        CHECK_NULL_RETURN_NOLOG(hostSize.has_value(), true);
+        auto minStartOffset = -(GetTotalHeight() - totalOffsetOfMousePressed_ - hostSize->MainSize(axis_));
+        if (GreatNotEqual(minStartOffset, currentMainStartOffset + offset)) {
+            offset = minStartOffset - currentMainStartOffset;
+        }
+    }
+
     if (axis_ == Axis::VERTICAL) {
         mouseStartOffset_.AddY(offset);
     } else {

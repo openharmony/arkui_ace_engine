@@ -629,6 +629,7 @@ private:
     bool isUserFinish_ = true;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
+    SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
 };
 } // namespace OHOS::Ace::NG
 
