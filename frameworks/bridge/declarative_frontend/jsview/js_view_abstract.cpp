@@ -2512,23 +2512,38 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
         if (borderWidth.IsNegative()) {
             borderWidth.Reset();
         }
+        if (borderWidth.Unit() == DimensionUnit::PERCENT) {
+            borderWidth.Reset();
+        }
         ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension left;
         if (ParseJsDimensionVp(object->GetProperty("left"), left) && left.IsNonNegative()) {
+            if (left.Unit() == DimensionUnit::PERCENT) {
+                left.Reset();
+            }
             leftDimen = left;
         }
         CalcDimension right;
         if (ParseJsDimensionVp(object->GetProperty("right"), right) && right.IsNonNegative()) {
+            if (right.Unit() == DimensionUnit::PERCENT) {
+                right.Reset();
+            }
             rightDimen = right;
         }
         CalcDimension top;
         if (ParseJsDimensionVp(object->GetProperty("top"), top) && top.IsNonNegative()) {
+            if (top.Unit() == DimensionUnit::PERCENT) {
+                top.Reset();
+            }
             topDimen = top;
         }
         CalcDimension bottom;
         if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom) && bottom.IsNonNegative()) {
+            if (bottom.Unit() == DimensionUnit::PERCENT) {
+                bottom.Reset();
+            }
             bottomDimen = bottom;
         }
         ViewAbstractModel::GetInstance()->SetBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
