@@ -33,6 +33,7 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
@@ -781,9 +782,9 @@ void OverlayManager::HideMenu(int32_t targetId)
     menuMap_[targetId]->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        RemoveEventColumn();
-        RemovePixelMapAnimation(false, 0, 0);
-        RemoveFilter();
+    RemoveEventColumn();
+    RemovePixelMapAnimation(false, 0, 0);
+    RemoveFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
@@ -855,9 +856,18 @@ void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
 }
 
 RefPtr<FrameNode> OverlayManager::ShowDialog(
-    const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
     LOGI("OverlayManager::ShowDialog");
+    RefPtr<UINode> customNode;
+    // create custom builder content
+    if (buildFunc) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_RETURN(customNode, nullptr);
+    }
+
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     BeforeShowDialog(dialog);
     OpenDialogAnimation(dialog);
@@ -904,8 +914,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 }
 
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto dialogNode =
         CalendarDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
@@ -1198,7 +1207,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             auto topModalNode = modalStack_.top().Upgrade();
             CHECK_NULL_VOID(topModalNode);
             if (topModalNode->GetTag() == "ModalPage") {
-                if (topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() == targetId) { 
+                if (topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() == targetId) {
                     if (modalStyle.backgroundColor.has_value()) {
                         topModalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
                     }

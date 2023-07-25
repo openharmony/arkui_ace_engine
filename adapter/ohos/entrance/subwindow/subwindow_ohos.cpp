@@ -24,6 +24,7 @@
 #include "base/geometry/rect.h"
 #include "core/components/root/root_element.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
@@ -562,7 +563,7 @@ void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
 }
 
 RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
-    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
     LOGI("SubwindowOhos::ShowDialogNG");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -572,9 +573,10 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
     ShowWindow();
+    window_->SetFullScreen(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
-    return overlay->ShowDialog(dialogProps, customNode);
+    return overlay->ShowDialog(dialogProps, std::move(buildFunc));
 }
 
 void SubwindowOhos::HideSubWindowNG()
