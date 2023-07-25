@@ -63,6 +63,7 @@ template("ace_osal_ohos_source_set") {
       "frame_report.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
+      "modal_ui_extension_impl.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
       "system_properties.cpp",
