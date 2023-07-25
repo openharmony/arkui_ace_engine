@@ -165,5 +165,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(layoutProperty);
     textFieldOverlayModifier_->SetShowCounter(
         layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
+    if (textFieldPattern->GetSelectMode() != SelectionMode::NONE) {
+        textFieldPattern->MarkRedrawOverlay();
+    }
 }
 } // namespace OHOS::Ace::NG
