@@ -7611,10 +7611,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternPostTranslateTask001, TestSize.Level1)
         for (int j = 0; j <= 1; j++) {
             swiperPattern->PostTranslateTask(delayTime);
             if (i == 1) {
-                swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateLoop(true);
+                swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
                 continue;
             }
-            swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateLoop(false);
+            swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
         }
         swiperPattern->itemPosition_.erase(1);
         swiperPattern->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
@@ -7824,6 +7824,8 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish001, TestSize.Level1)
     ASSERT_NE(indicatorNode2, nullptr);
     swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
     ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    ASSERT_NE(swiperNode->layoutProperty_, nullptr);
     swiperPattern->currentIndex_ = 1;
 
     /**
@@ -7847,7 +7849,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish001, TestSize.Level1)
         forceStop = false;
         swiperPattern->isVisible_ = true;
         swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
-        swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateLoop(true);
+        swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
     }
 }
 
@@ -7928,7 +7930,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternCheckAndSetArrowHoverState001, TestSize.Leve
             }
             swiperPattern->currentIndex_ = 0;
         }
-        swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateLoop(false);
+        swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
     }
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDirection(Axis::HORIZONTAL);
     for (int i = 0; i <= 1; i++) {
