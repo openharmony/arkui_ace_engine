@@ -2510,12 +2510,12 @@ void RosenRenderContext::PaintOverlayText()
             rsNode_->SetDrawRegion(overlayRect);
         } else {
             modifier_ = std::make_shared<OverlayTextModifier>();
+            rsNode_->AddModifier(modifier_);
             modifier_->SetCustomData(NG::OverlayTextData(overlayText));
             auto overlayOffset = modifier_->GetOverlayOffset();
             overlayRect = std::make_shared<Rosen::RectF>(paintRect.GetX(), paintRect.GetY(),
                 paintRect.Width() + overlayOffset.GetX(), paintRect.Height() + overlayOffset.GetY());
             rsNode_->SetDrawRegion(overlayRect);
-            rsNode_->AddModifier(modifier_);
         }
     }
 }
