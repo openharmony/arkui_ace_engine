@@ -502,7 +502,7 @@ void SwiperLayoutAlgorithm::SetInactive(
                 pos->second.endPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
             GreatOrEqual(
                 pos->second.startPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos)) {
-            layoutWrapper->RemoveChildInRenderTree(pos->first);
+            layoutWrapper->RemoveChildInRenderTree(GetLoopIndex(pos->first));
             removeIndexes.emplace_back(pos->first);
         }
     }
