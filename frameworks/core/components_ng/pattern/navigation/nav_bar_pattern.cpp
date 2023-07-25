@@ -428,9 +428,11 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         auto titleBarMenuItems = navBarPattern->GetTitleBarMenuItems();
         auto toolBarMenuItems = navBarPattern->GetToolBarMenuItems();
 
-        auto menuNode = CreateMenuItems(navBarPattern->GetMenuNodeId(), titleBarMenuItems, navBarNode, false);
-        CHECK_NULL_VOID(menuNode);
-        navBarNode->SetMenu(menuNode);
+        if (navBarPattern->HasMenuNodeId()) {
+            auto menuNode = CreateMenuItems(navBarPattern->GetMenuNodeId(), titleBarMenuItems, navBarNode, false);
+            CHECK_NULL_VOID(menuNode);
+            navBarNode->SetMenu(menuNode);
+        }
 
         titleBarMenuItems.insert(titleBarMenuItems.end(), toolBarMenuItems.begin(), toolBarMenuItems.end());
         auto landscapeMenuNode =
@@ -444,9 +446,7 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
         CHECK_NULL_VOID(navBarLayoutProperty);
         bool isToolbarHide = navBarLayoutProperty->GetHideToolBar().value_or(false);
-
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT || isToolbarHide ||
-            navigationLayoutProperty->GetNavigationModeValue() == NavigationMode::AUTO ||
             navigationLayoutProperty->GetNavigationModeValue() == NavigationMode::SPLIT) {
             titleBarNode->SetMenu(navBarNode->GetMenu());
         } else {
