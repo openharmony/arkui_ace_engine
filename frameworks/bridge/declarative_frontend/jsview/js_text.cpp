@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -147,17 +148,14 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
-        return;
-    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    ParseJsDimensionFp(info[0], fontSize);
     if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
-        TextModel::GetInstance()->SetFontSize(theme->GetTextStyle().GetFontSize());
-        return;
+        fontSize = theme->GetTextStyle().GetFontSize();
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
 }
@@ -248,14 +246,8 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
 
 void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
-    int32_t value;
-    if (info[0]->ToString() == "Infinity") {
-        value = Infinity<uint32_t>();
-    } else if (!info[0]->IsNumber()) {
-        return;
-    } else {
-        ParseJsInt32(info[0], value);
-    }
+    int32_t value = Infinity<uint32_t>();
+    ParseJsInt32(info[0], value);
     TextModel::GetInstance()->SetMaxLines(value);
 }
 
@@ -335,9 +327,7 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
-        return;
-    }
+    ParseJsDimensionFp(info[0], fontSize);
     TextModel::GetInstance()->SetAdaptMinFontSize(fontSize);
 }
 
@@ -348,9 +338,7 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
-        return;
-    }
+    ParseJsDimensionFp(info[0], fontSize);
     TextModel::GetInstance()->SetAdaptMaxFontSize(fontSize);
 }
 
@@ -399,23 +387,18 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> typeValue = obj->GetProperty("type");
         JSRef<JSVal> colorValue = obj->GetProperty("color");
-
-        std::optional<TextDecoration> textDecoration;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
         }
-        std::optional<Color> colorVal;
-        Color result;
-        if (ParseJsColor(colorValue, result)) {
-            colorVal = result;
-        }
-
-        if (textDecoration) {
-            TextModel::GetInstance()->SetTextDecoration(textDecoration.value());
-        }
-        if (colorVal) {
-            TextModel::GetInstance()->SetTextDecorationColor(colorVal.value());
-        }
+        Color result = theme->GetTextStyle().GetTextDecorationColor();
+        ParseJsColor(colorValue, result);
+        TextModel::GetInstance()->SetTextDecoration(textDecoration);
+        TextModel::GetInstance()->SetTextDecorationColor(result);
     } while (false);
     info.SetReturnValue(info.This());
 }
