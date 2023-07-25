@@ -843,7 +843,7 @@ void SliderPattern::UpdateBlock()
         if (imageFrameNode_ != nullptr) {
             auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(imageFrameNode_->GetLayoutProperty());
             imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(sliderPaintProperty->GetBlockImage().value()));
-            imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+            imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
             imageLayoutProperty->UpdateAutoResize(true);
             imageFrameNode_->MarkModifyDone();
         }
