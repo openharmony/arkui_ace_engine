@@ -269,8 +269,11 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
 {
     itemsCrossPosition_.clear();
     UpdateGridLayoutInfo(layoutWrapper, mainSize);
-    SkipForwardLines(mainSize, layoutWrapper);
-    SkipBackwardLines(mainSize, layoutWrapper);
+    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(gridLayoutProperty);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    SkipForwardLines(cacheCount * mainSize, layoutWrapper);
+    SkipBackwardLines(cacheCount * mainSize, layoutWrapper);
 
     if (!gridLayoutInfo_.lastCrossCount_) {
         gridLayoutInfo_.lastCrossCount_ = crossCount_;
@@ -1314,7 +1317,21 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
     auto gridLayoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto mainSize = GetMainAxisSize(frameSize, gridLayoutInfo_.axis_);
     auto crossSize = GetCrossAxisSize(frameSize, gridLayoutInfo_.axis_);
-    childLayoutWrapper->Measure(CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossStart, crossSpan));
+    auto childConstraint = CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossStart, crossSpan);
+    auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
+    auto oldConstraint = childLayoutProperty->GetLayoutConstraint();
+    if (oldConstraint.has_value() && !NearEqual(GetCrossAxisSize(oldConstraint.value().maxSize, axis_),
+                                                GetCrossAxisSize(childConstraint.maxSize, axis_))) {
+        auto layoutAlgorithmWrapper = childLayoutWrapper->GetLayoutAlgorithm();
+        if (layoutAlgorithmWrapper->SkipMeasure()) {
+            layoutAlgorithmWrapper->SetNeedMeasure();
+            if (layoutAlgorithmWrapper->GetLayoutAlgorithm() == nullptr) {
+                layoutAlgorithmWrapper->SetLayoutAlgorithm(
+                    childLayoutWrapper->GetHostNode()->GetPattern()->CreateLayoutAlgorithm());
+            }
+        }
+    }
+    childLayoutWrapper->Measure(childConstraint);
 }
 
 bool GridScrollLayoutAlgorithm::CheckGridPlaced(
