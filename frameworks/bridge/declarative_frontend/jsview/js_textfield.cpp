@@ -1005,6 +1005,10 @@ void JSTextField::SetMaxLines(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
         return;
     }
+    if (info[0]->ToNumber<int32_t>() <= 0) {
+        TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
+        return;
+    }
     TextFieldModel::GetInstance()->SetMaxViewLines(info[0]->ToNumber<uint32_t>());
 }
 
