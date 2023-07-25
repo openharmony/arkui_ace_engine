@@ -188,7 +188,7 @@ public:
             theme->defaultDividerWidth_ =
                 pattern->GetAttr<Dimension>("default_divider_width", theme->defaultDividerWidth_);
             theme->selectMinWidth_ = pattern->GetAttr<Dimension>("select_min_width", theme->selectMinWidth_);
-            theme->selectMinHeight_ = pattern->GetAttr<Dimension>("select_min_height", theme->selectMinHeight_);
+            theme->selectDefaultHeight_ = pattern->GetAttr<Dimension>("select_min_height", theme->selectDefaultHeight_);
             theme->iconSideLength_ = pattern->GetAttr<Dimension>("icon_side_length", theme->iconSideLength_);
             theme->endIconWidth_ = MENU_END_ICON_WIDTH;
             theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
@@ -278,7 +278,7 @@ public:
         theme->spinnerHeight_ = spinnerHeight_;
         theme->defaultDividerWidth_ = defaultDividerWidth_;
         theme->selectMinWidth_ = selectMinWidth_;
-        theme->selectMinHeight_ = selectMinHeight_;
+        theme->selectDefaultHeight_ = selectDefaultHeight_;
         theme->iconSideLength_ = iconSideLength_;
         theme->endIconWidth_ = endIconWidth_;
         theme->endIconHeight_ = endIconHeight_;
@@ -785,9 +785,9 @@ public:
         return selectMinWidth_;
     }
 
-    const Dimension& GetSelectMinHeight() const
+    const Dimension& GetSelectDefaultHeight() const
     {
-        return selectMinHeight_;
+        return selectDefaultHeight_;
     }
 
     const Dimension& GetIconSideLength() const
@@ -879,7 +879,7 @@ private:
     Dimension defaultDividerWidth_;
 
     Dimension selectMinWidth_;
-    Dimension selectMinHeight_;
+    Dimension selectDefaultHeight_;
     Dimension iconSideLength_;
     Dimension endIconWidth_;
     Dimension endIconHeight_;
