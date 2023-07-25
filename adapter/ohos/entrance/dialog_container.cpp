@@ -240,29 +240,8 @@ void DialogContainer::Destroy()
 {
     LOGI("DialogContainer::Destroy begin");
     ContainerScope scope(instanceId_);
-    if (pipelineContext_ && taskExecutor_) {
-        // 1. Destroy Pipeline on UI thread.
-        RefPtr<PipelineBase> context;
-        context.Swap(pipelineContext_);
-        if (GetSettings().usePlatformAsUIThread) {
-            context->Destroy();
-        } else {
-            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
-        }
-        // 2. Destroy Frontend on JS thread.
-        RefPtr<Frontend> frontend;
-        frontend_.Swap(frontend);
-        if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
-            frontend->UpdateState(Frontend::State::ON_DESTROY);
-            frontend->Destroy();
-        } else {
-            taskExecutor_->PostTask(
-                [frontend]() {
-                    frontend->UpdateState(Frontend::State::ON_DESTROY);
-                    frontend->Destroy();
-                },
-                TaskExecutor::TaskType::JS);
-        }
+    if (frontend_) {
+        frontend_->UpdateState(Frontend::State::ON_DESTROY);
     }
     resRegister_.Reset();
     assetManager_.Reset();
