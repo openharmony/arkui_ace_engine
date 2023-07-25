@@ -194,13 +194,10 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
         return;
     }
 
-    Color color;
-    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor")) {
-        auto theme = GetTheme<TextFieldTheme>();
-        if (info[0]->IsUndefined() && theme) {
-            color = theme->GetPlaceholderColor();
-        }
-    }
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    Color color = theme->GetPlaceholderColor();
+    CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor");
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
 
