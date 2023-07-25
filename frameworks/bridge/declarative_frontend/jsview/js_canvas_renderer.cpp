@@ -14,9 +14,11 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
+#include <cstdint>
 
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -899,25 +901,15 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     ParseJsInt(heightValue, height);
 
     ImageData imageData;
-    std::vector<uint32_t> array;
+    std::vector<uint8_t> array;
     ParseImageData(info, imageData, array);
 
-    int64_t num = 0;
-    for (int32_t i = 0; i < height; ++i) {
-        for (int32_t j = 0; j < width; ++j) {
-            if ((i >= imageData.dirtyY) && (i - imageData.dirtyY < imageData.dirtyHeight) && (j >= imageData.dirtyX) &&
-                (j - imageData.dirtyX < imageData.dirtyWidth)) {
-                int32_t flag = j + width * i;
-                if (array.size() > static_cast<uint32_t>(4 * flag + 3)) {
-                    auto red = array[4 * flag];
-                    auto green = array[4 * flag + 1];
-                    auto blue = array[4 * flag + 2];
-                    auto alpha = array[4 * flag + 3];
-                    if (num < imageData.dirtyWidth * imageData.dirtyHeight) {
-                        imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue));
-                    }
-                    num++;
-                }
+    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+            uint32_t idx = 4 * (j + width * i);
+            if (array.size() > idx + 3) {
+                imageData.data.emplace_back(
+                    Color::FromARGB(array[idx + 3], array[idx], array[idx + 1], array[idx + 2]));
             }
         }
     }
@@ -930,7 +922,7 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     CanvasRendererModel::GetInstance()->PutImageData(baseInfo, imageData);
 }
 
-void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array)
+void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint8_t>& array)
 {
     int32_t width = 0;
     int32_t height = 0;
@@ -942,7 +934,14 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
         JSRef<JSVal> dataValue = obj->GetProperty("data");
         ParseJsInt(widthValue, width);
         ParseJsInt(heightValue, height);
-        JSViewAbstract::ParseJsIntegerArray(dataValue, array);
+        if (dataValue->IsUint8ClampedArray()) {
+            JSRef<JSUint8ClampedArray> colorArray = JSRef<JSUint8ClampedArray>::Cast(dataValue);
+            auto arrayBuffer = colorArray->GetArrayBuffer();
+            auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+            for (auto idx = 0; idx < arrayBuffer->ByteLength(); ++idx) {
+                array.emplace_back(buffer[idx]);
+            }
+        }
     }
 
     Dimension value;
@@ -1059,26 +1058,22 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
     std::unique_ptr<ImageData> data;
     data = GetImageDataFromCanvas(left, top, width, height);
-    JSRef<JSArray> colorArray = JSRef<JSArray>::New();
 
+    final_height = static_cast<uint32_t>(data->dirtyHeight);
+    final_width = static_cast<uint32_t>(data->dirtyWidth);
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(final_height * final_width * 4);
+    auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
     if (data != nullptr) {
-        final_height = static_cast<uint32_t>(data->dirtyHeight);
-        final_width = static_cast<uint32_t>(data->dirtyWidth);
-
-        uint32_t count = 0;
-        for (uint32_t i = 0; i < final_height; i++) {
-            for (uint32_t j = 0; j < final_width; j++) {
-                int32_t idx = i * data->dirtyWidth + j;
-                auto pixel = data->data[idx];
-
-                colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(pixel.GetRed())));
-                colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(pixel.GetGreen())));
-                colorArray->SetValueAt(count + 2, JSRef<JSVal>::Make(ToJSValue(pixel.GetBlue())));
-                colorArray->SetValueAt(count + 3, JSRef<JSVal>::Make(ToJSValue(pixel.GetAlpha())));
-                count += 4;
-            }
+        for (uint32_t idx = 0; idx < final_height * final_width; ++idx) {
+            buffer[4 * idx] = data->data[idx].GetRed();
+            buffer[4 * idx + 1] = data->data[idx].GetGreen();
+            buffer[4 * idx + 2] = data->data[idx].GetBlue();
+            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
         }
     }
+
+    JSRef<JSUint8ClampedArray> colorArray =
+        JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
 
     auto retObj = JSRef<JSObject>::New();
     retObj->SetProperty("width", final_width);

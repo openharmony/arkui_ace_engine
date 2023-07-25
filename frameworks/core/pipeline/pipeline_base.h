@@ -593,9 +593,14 @@ public:
         focusWindowId_ = windowId;
     }
 
-    uint32_t GetFocusWindowId()
+    uint32_t GetFocusWindowId() const
     {
         return focusWindowId_.value_or(windowId_);
+    }
+
+    bool IsFocusWindowIdSetted() const
+    {
+        return focusWindowId_.has_value();
     }
 
     float GetViewScale() const

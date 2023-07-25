@@ -44,7 +44,6 @@ private:
     void UpdateSession(const sptr<Rosen::Session>& session);
 
     void OnForeground() override;
-    void OnBackground() override;
 
     friend class WindowSceneModel;
 

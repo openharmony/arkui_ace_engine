@@ -55,8 +55,23 @@ public:
         if (!textOverlayModifier_) {
             textOverlayModifier_ = MakeRefPtr<TextOverlayModifier>();
         }
-        return MakeRefPtr<TextPaintMethod>(
+        auto paintMethod = MakeRefPtr<TextPaintMethod>(
             WeakClaim(this), paragraph_, baselineOffset_, textContentModifier_, textOverlayModifier_);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, paintMethod);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_RETURN(context, paintMethod);
+        if (context->GetClipEdge().has_value()) {
+            auto geometryNode = host->GetGeometryNode();
+            auto frameOffset = geometryNode->GetFrameOffset();
+            auto frameSize = geometryNode->GetFrameSize();
+            auto height = static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
+            if (context->GetClipEdge().value() == false && LessNotEqual(frameSize.Height(), height)) {
+                RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
+                textOverlayModifier_->SetBoundsRect(boundsRect);
+            }
+        }
+        return paintMethod;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

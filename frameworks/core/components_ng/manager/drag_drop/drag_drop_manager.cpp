@@ -271,7 +271,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     if (result) {
         return result;
     }
-    return nullptr;
+    return hitFrameNodes.rbegin()->second;
 }
 
 bool DragDropManager::CheckDragDropProxy(int64_t id) const

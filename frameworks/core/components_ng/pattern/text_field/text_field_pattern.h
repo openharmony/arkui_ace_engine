@@ -738,10 +738,16 @@ public:
         }
         Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
                         Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
-        bool isInRange = offset.GetX() >= textBoxes_[0].rect_.GetLeft() && offset.GetX() <=
-                        textBoxes_[0].rect_.GetRight() && offset.GetY() >= textBoxes_[0].rect_.GetTop() &&
-                        offset.GetY() <= textBoxes_[0].rect_.GetBottom();
-        return isInRange;
+        for (const auto& textBoxes : textBoxes_) {
+            bool isInRange = LessOrEqual(textBoxes.rect_.GetLeft(), offset.GetX()) &&
+                LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
+                LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
+                LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
+            if (isInRange) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // xts

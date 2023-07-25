@@ -172,8 +172,11 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
-    // add version protection, enable keyboard as default start from API 10 or higher
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+    if (PipelineBase::GetCurrentContext() &&
+        // for normal app add version protection, enable keyboard as default start from API 10 or higher
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9 &&
+        // UIExtension Ability focus windowId setted by component user window, can not enable keyboard as default
+        !PipelineBase::GetCurrentContext()->IsFocusWindowIdSetted()) {
         needToRequestKeyboardOnFocus_ = true;
     }
 }
@@ -1351,6 +1354,9 @@ void TextFieldPattern::HandleOnUndoAction()
     }
     auto value = operationRecords_.back();
     operationRecords_.pop_back();
+    if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH && !(redoOperationRecords_.empty())) {
+        redoOperationRecords_.erase(redoOperationRecords_.begin());
+    }
     redoOperationRecords_.push_back(value);
     if (operationRecords_.empty()) {
         LOGW("No record left, clear");
@@ -2186,6 +2192,7 @@ void TextFieldPattern::OnModifyDone()
         SetAxis(Axis::HORIZONTAL);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
+            SetScrollEnable(false);
         }
     }
 
@@ -3178,7 +3185,7 @@ void TextFieldPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     if (IsDisabled()) {
-        sourceInfo.SetSrc(iconPath, theme->GetDisabledIconFillColor());
+        sourceInfo.SetSrc(iconPath, theme->GetDisableTextColor());
     } else {
         sourceInfo.SetSrc(iconPath);
     }
@@ -3519,11 +3526,12 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     }
     int32_t offset = 0;
     int32_t strIndex = 0;
+    auto wideTextValue = textEditingValue_.GetWideText();
     for (directionMove == 0 ? strIndex = (originCaretPosition - 1) : strIndex = originCaretPosition;
          directionMove == 0 ? strIndex >= 0 : strIndex <= textLength;) {
-        if ((textEditingValue_.text[strIndex] >= '0' && textEditingValue_.text[strIndex] <= '9') ||
-            (textEditingValue_.text[strIndex] >= 'a' && textEditingValue_.text[strIndex] <= 'z') ||
-            (textEditingValue_.text[strIndex] >= 'A' && textEditingValue_.text[strIndex] <= 'Z')) {
+        if ((wideTextValue[strIndex] >= L'0' && wideTextValue[strIndex] <= L'9') ||
+            (wideTextValue[strIndex] >= L'a' && wideTextValue[strIndex] <= L'z') ||
+            (wideTextValue[strIndex] >= L'A' && wideTextValue[strIndex] <= L'Z')) {
             offset++;
         } else {
             if (offset > 0) {
@@ -3556,13 +3564,14 @@ int32_t TextFieldPattern::GetLineBeginPosition(int32_t originCaretPosition, bool
     }
     int32_t moveLineBeginOffset = 0;
     int32_t strIndex = originCaretPosition;
+    auto wideTextValue = textEditingValue_.GetWideText();
     do {
         moveLineBeginOffset++;
         strIndex--;
         // stop moving caret if reaches \n, text head or caret line changed
-    } while (((strIndex > 0) && (textEditingValue_.text[strIndex] != '\n')) ||
+    } while (((strIndex > 0) && (wideTextValue[strIndex] != L'\n')) ||
              (needToCheckLineChanged && !CharLineChanged(strIndex)));
-    if (textEditingValue_.text[strIndex] == '\n') {
+    if (wideTextValue[strIndex] == L'\n') {
         moveLineBeginOffset--;
     }
     if (moveLineBeginOffset > originCaretPosition) {
@@ -3586,7 +3595,8 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
     }
     int32_t moveLineEndOffset = 0;
     int32_t strIndex = 0;
-    for (strIndex = originCaretPosition + 1; (textEditingValue_.text[strIndex] != '\n' && strIndex <= textLength) ||
+    auto wideTextValue = textEditingValue_.GetWideText();
+    for (strIndex = originCaretPosition + 1; (strIndex <= textLength && wideTextValue[strIndex] != L'\n') ||
                                              (needToCheckLineChanged && !CharLineChanged(strIndex));
          strIndex++) {
         moveLineEndOffset++;
@@ -3647,7 +3657,7 @@ bool TextFieldPattern::CursorMoveLeftWord()
         UpdateCaretPositionWithClamp(originCaretPosition - leftWordLength);
     }
     OnCursorMoveDone();
-    return originCaretPosition == textEditingValue_.caretPosition;
+    return originCaretPosition != textEditingValue_.caretPosition;
 }
 
 bool TextFieldPattern::CursorMoveLineBegin()
