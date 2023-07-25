@@ -22,18 +22,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 
-namespace OHOS::Ace {
-struct ModalUIExtensionCallbacks;
-} // namespace OHOS::Ace
-
 namespace OHOS::Ace::NG {
 class ACE_EXPORT UIExtensionModelNG : public UIExtensionModel {
 public:
     static RefPtr<FrameNode> Create(const std::string& bundleName, const std::string& abilityName,
         const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease,
         std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
-    static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
-
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap) override;
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
