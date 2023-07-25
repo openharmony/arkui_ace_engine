@@ -171,6 +171,12 @@ public:
 
     void ResetCalcMinSize();
 
+    void ResetCalcMaxSize();
+
+    void ResetCalcMinSize(bool resetWidth);
+
+    void ResetCalcMaxSize(bool resetWidth);
+
     void UpdateFlexGrow(float flexGrow);
 
     void ResetFlexGrow();

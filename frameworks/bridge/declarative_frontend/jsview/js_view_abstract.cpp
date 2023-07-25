@@ -1483,21 +1483,29 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
     CalcDimension minHeight;
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
     CalcDimension maxHeight;
-
+    bool version10OrLarger = PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         ViewAbstractModel::GetInstance()->SetMinWidth(minWidth);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMinSize(true);
     }
 
     if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
         ViewAbstractModel::GetInstance()->SetMaxWidth(maxWidth);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMaxSize(true);
     }
 
     if (ParseJsDimensionVp(minHeightValue, minHeight)) {
         ViewAbstractModel::GetInstance()->SetMinHeight(minHeight);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMinSize(false);
     }
 
     if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
         ViewAbstractModel::GetInstance()->SetMaxHeight(maxHeight);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMaxSize(false);
     }
 }
 
