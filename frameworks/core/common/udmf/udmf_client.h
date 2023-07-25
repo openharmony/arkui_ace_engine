@@ -51,6 +51,7 @@ public:
     virtual void AddImageRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& uri) = 0;
     virtual void AddPlainTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) = 0;
     virtual std::string GetSinglePlainTextRecord(const RefPtr<UnifiedData>& unifiedData) = 0;
+    virtual std::vector<std::string> GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData) = 0;
     virtual int32_t GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData, std::string& uri) = 0;
 };
 } // namespace OHOS::Ace
