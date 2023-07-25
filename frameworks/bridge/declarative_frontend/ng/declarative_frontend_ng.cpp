@@ -41,6 +41,7 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
 {
     LOGI("DeclarativeFrontendNG initialize begin.");
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeDelegate(taskExecutor);
     bool needPostJsTask = true;
@@ -61,7 +62,6 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
     } else {
         initJSEngineTask();
     }
-    taskExecutor_ = taskExecutor;
     LOGI("DeclarativeFrontendNG initialize end.");
     return true;
 }

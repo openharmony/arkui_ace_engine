@@ -407,6 +407,10 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 }
 
 void PipelineBase::Destroy() {}
+bool PipelineBase::MaybeRelease()
+{
+    return AceType::MaybeRelease();
+}
 
 void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 
