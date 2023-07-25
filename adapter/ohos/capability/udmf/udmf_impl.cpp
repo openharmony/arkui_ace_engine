@@ -25,6 +25,7 @@
 #include "system_defined_form.h"
 #include "system_defined_pixelmap.h"
 #include "text.h"
+#include "plain_text.h"
 #include "udmf_client.h"
 #include "unified_data.h"
 #include "unified_data_napi.h"
@@ -240,30 +241,24 @@ void UdmfClientImpl::AddImageRecord(const RefPtr<UnifiedData>& unifiedData, cons
     udData->GetUnifiedData()->AddRecord(record);
 }
 
-void UdmfClientImpl::AddTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr)
+void UdmfClientImpl::AddPlainTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr)
 {
-    UDMF::UDVariant udmfValue(selectedStr);
-    UDMF::UDDetails udmfDetails = { { "value", udmfValue } };
-    auto record = std::make_shared<UDMF::Text>(udmfDetails);
+    auto record = std::make_shared<UDMF::PlainText>(selectedStr, "");
 
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_VOID(udData);
     udData->GetUnifiedData()->AddRecord(record);
 }
 
-std::string UdmfClientImpl::GetSingleTextRecord(const RefPtr<UnifiedData>& unifiedData)
+std::string UdmfClientImpl::GetSinglePlainTextRecord(const RefPtr<UnifiedData>& unifiedData)
 {
     std::string str = "";
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_RETURN(udData, str);
     auto records = udData->GetUnifiedData()->GetRecords();
-    if (records.size() >= 1 && records[0]->GetType() == UDMF::UDType::TEXT) {
-        UDMF::Text* text = reinterpret_cast<UDMF::Text*>(records[0].get());
-        UDMF::UDDetails udmfDetails = text->GetDetails();
-        auto value = udmfDetails.find("value");
-        if (value != udmfDetails.end()) {
-            str = std::get<std::string>(value->second);
-        }
+    if (records.size() >= 1 && records[0]->GetType() == UDMF::UDType::PLAIN_TEXT) {
+        UDMF::PlainText* plainText = reinterpret_cast<UDMF::PlainText*>(records[0].get());
+        str = plainText->GetContent();
     }
     return str;
 }
