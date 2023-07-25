@@ -268,9 +268,8 @@ void TimePickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
-    if (timePickerLayoutProperty->HasDisappearColor()) {
-        textLayoutProperty->UpdateTextColor(timePickerLayoutProperty->GetDisappearColor().value());
-    }
+    textLayoutProperty->UpdateTextColor(timePickerLayoutProperty->GetDisappearColor().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (timePickerLayoutProperty->HasDisappearFontSize()) {
         textLayoutProperty->UpdateFontSize(timePickerLayoutProperty->GetDisappearFontSize().value());
     } else {
@@ -278,9 +277,12 @@ void TimePickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
         textLayoutProperty->UpdateAdaptMinFontSize(
             pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
     }
-    if (timePickerLayoutProperty->HasDisappearWeight()) {
-        textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetDisappearWeight().value());
-    }
+    textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetDisappearWeight().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(timePickerLayoutProperty->GetDisappearFontFamily().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(timePickerLayoutProperty->GetDisappearFontStyle().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void TimePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -288,9 +290,8 @@ void TimePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    if (timePickerLayoutProperty->HasColor()) {
-        textLayoutProperty->UpdateTextColor(timePickerLayoutProperty->GetColor().value());
-    }
+    textLayoutProperty->UpdateTextColor(timePickerLayoutProperty->GetColor().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (timePickerLayoutProperty->HasFontSize()) {
         textLayoutProperty->UpdateFontSize(timePickerLayoutProperty->GetFontSize().value());
     } else {
@@ -298,9 +299,12 @@ void TimePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         textLayoutProperty->UpdateAdaptMinFontSize(
             pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
     }
-    if (timePickerLayoutProperty->HasWeight()) {
-        textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetWeight().value());
-    }
+    textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetWeight().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(timePickerLayoutProperty->GetFontFamily().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(timePickerLayoutProperty->GetFontStyle().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -308,18 +312,20 @@ void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    Color themeSelectedColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
-    Color selectedColor = timePickerLayoutProperty->GetSelectedColor().value_or(themeSelectedColor);
-    textLayoutProperty->UpdateTextColor(selectedColor);
-    FontWeight themeFontWeight = pickerTheme->GetOptionStyle(true, false).GetFontWeight();
-    FontWeight selectedFontWeight = timePickerLayoutProperty->GetSelectedWeight().value_or(themeFontWeight);
-    textLayoutProperty->UpdateFontWeight(selectedFontWeight);
+    textLayoutProperty->UpdateTextColor(timePickerLayoutProperty->GetSelectedColor().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     if (timePickerLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(timePickerLayoutProperty->GetSelectedFontSize().value());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
         textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
     }
+    textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetSelectedWeight().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(timePickerLayoutProperty->GetSelectedFontFamily().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(timePickerLayoutProperty->GetSelectedFontStyle().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
 }
 
 void TimePickerColumnPattern::ChangeAmPmTextStyle(
