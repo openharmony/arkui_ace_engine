@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("custom_paint_test_ng") {
@@ -42,6 +43,7 @@ ohos_unittest("custom_paint_test_ng") {
     "c_utils:utils",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:scene_session",
@@ -53,6 +55,10 @@ ohos_unittest("custom_paint_test_ng") {
     "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps += [ "image_framework:image_native" ]
+  }
   defines = [ "ENABLE_DRAG_FRAMEWORK" ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

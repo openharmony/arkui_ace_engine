@@ -86,7 +86,7 @@ public:
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenu(int32_t targetId);
+    void HideMenu(int32_t targetId, bool isMenuOnTouch = false);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenuInSubWindow(int32_t targetId);
@@ -98,7 +98,7 @@ public:
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
-        const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft = false);
+        const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -222,6 +222,7 @@ public:
     {
         filterColumnNodeWeak_ = columnNode;
     }
+    void MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
     void MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
     void MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
     void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
@@ -262,7 +263,7 @@ private:
     void BlurOverlayNode(bool isInSubWindow = false);
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
-    void PopMenuAnimation(const RefPtr<FrameNode>& menu, const WeakPtr<UINode>& windowScene = nullptr);
+    void PopMenuAnimation(const RefPtr<FrameNode>& menu);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);

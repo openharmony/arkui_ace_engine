@@ -25,6 +25,7 @@ using TimeChangeEvent = std::function<void(const BaseEventInfo* info)>;
 using DialogEvent = std::function<void(const std::string&)>;
 using DialogCancelEvent = std::function<void()>;
 using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
+using TimeChangeEventForDatePicker = std::function<void()>;
 
 class TimePickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TimePickerEventHub, EventHub)
@@ -38,6 +39,11 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
+    void SetOnChangeForDatePicker(TimeChangeEventForDatePicker&& changeEvent)
+    {
+        changeEventForDatePicker_ = std::move(changeEvent);
+    }
+
     void FireChangeEvent(const BaseEventInfo* info) const
     {
         if (selectedTimeChangeEvent_) {
@@ -45,6 +51,9 @@ public:
         }
         if (changeEvent_) {
             changeEvent_(info);
+        }
+        if (changeEventForDatePicker_) {
+            changeEventForDatePicker_();
         }
     }
 
@@ -82,6 +91,7 @@ private:
     DialogEvent DialogChangeEvent_;
     DialogEvent DialogAcceptEvent_;
     TimeChangeEvent selectedTimeChangeEvent_;
+    TimeChangeEventForDatePicker changeEventForDatePicker_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerEventHub);
 };

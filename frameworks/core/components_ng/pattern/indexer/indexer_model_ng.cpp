@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
@@ -34,6 +35,10 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
 
     frameNode->Clean();
     int32_t indexerSize = arrayValue.size();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
     for (int32_t index = 0; index < indexerSize; index++) {
         auto indexerChildNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -41,6 +46,20 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
         auto textLayoutProperty = indexerChildNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(arrayValue[index]);
+        Dimension borderWidth;
+        textLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
+        auto defaultFont = indexerTheme->GetDefaultTextStyle();
+        textLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
+        textLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
+        textLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
+        textLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
+        textLayoutProperty->UpdateTextColor(indexerTheme->GetDefaultTextColor());
+        auto childRenderContext = indexerChildNode->GetRenderContext();
+        CHECK_NULL_VOID(childRenderContext);
+        childRenderContext->ResetBlendBorderColor();
+        childRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        Dimension radiusZeroSize;
+        childRenderContext->UpdateBorderRadius({ radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
         frameNode->AddChild(indexerChildNode);
     }
     stack->Push(frameNode);

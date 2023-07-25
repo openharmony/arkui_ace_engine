@@ -19,7 +19,11 @@
 
 #include "test/mock/base/mock_pixel_map.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_provider.h"

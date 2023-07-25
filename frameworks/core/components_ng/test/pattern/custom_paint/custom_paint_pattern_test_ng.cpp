@@ -142,7 +142,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto layoutProperty = layoutWrapper.GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
@@ -186,7 +186,8 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgorithm, nullptr);
@@ -808,7 +809,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgorithm, nullptr);
-    auto dirty = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto dirty = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     dirty->skipMeasureContent_ = false;
     dirty->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm);
 

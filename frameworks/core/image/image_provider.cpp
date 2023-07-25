@@ -33,6 +33,9 @@
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/event/ace_event_helper.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"

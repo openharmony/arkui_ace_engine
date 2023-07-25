@@ -93,6 +93,11 @@ public:
         clickEvents_.remove(clickEvent);
     }
 
+    bool IsClickEventsEmpty() const
+    {
+        return clickEvents_.empty();
+    }
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 

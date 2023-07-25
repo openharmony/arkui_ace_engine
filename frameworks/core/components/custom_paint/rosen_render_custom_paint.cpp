@@ -17,9 +17,9 @@
 
 #include <cmath>
 
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography.h"
-#include "rosen_text/typography_style.h"
+#include "txt/paragraph_builder.h"
+#include "txt/paragraph_style.h"
+#include "txt/paragraph_txt.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "securec.h"
@@ -59,7 +59,11 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components/text/text_theme.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_provider.h"
@@ -196,7 +200,9 @@ void RosenRenderCustomPaint::CreateBitmap(double viewScale)
     cacheBitmap_.Build(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale, format);
     canvasCache_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    drawingCanvas_ = std::make_unique<RSCanvas>();
     drawingCanvas_->Bind(canvasCache_);
+    cacheCanvas_ = std::make_unique<RSCanvas>();
     cacheCanvas_->Bind(cacheBitmap_);
 #endif
 }
@@ -600,39 +606,39 @@ void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string&
 double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
+    txt::ParagraphStyle style;
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("fontCollection is null");
         return 0.0;
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     std::vector<std::string> fontFamilies;
     if (context.fontSize) {
-        txtStyle.fontSize = context.fontSize.value().ConvertToPx();
+        txtStyle.font_size = context.fontSize.value().ConvertToPx();
     } else {
         auto context = PipelineBase::GetCurrentContext();
         auto textTheme = context->GetTheme<TextTheme>();
-        txtStyle.fontSize = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
+        txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
     }
-    txtStyle.fontStyle = ConvertTxtFontStyle(context.fontStyle);
+    txtStyle.font_style = ConvertTxtFontStyle(context.fontStyle);
     FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
-    txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
+    txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
-    txtStyle.fontFamilies = fontFamilies;
+    txtStyle.font_families = fontFamilies;
     if (context.letterSpacing.has_value()) {
-        txtStyle.letterSpacing = context.letterSpacing.value().ConvertToPx();
+        txtStyle.letter_spacing = context.letterSpacing.value().ConvertToPx();
     }
 
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(context.textContent));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(context.textContent));
+    auto paragraph = builder->Build();
     if (!paragraph) {
         return 0.0;
     }
     paragraph->Layout(Size::INFINITE_SIZE);
-    return std::ceil(paragraph->GetActualWidth());
+    return std::ceil(paragraph->GetLongestLine());
 }
 
 Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
@@ -643,50 +649,50 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         LOGW("fontCollection is null");
         return Size(0.0, 0.0);
     }
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(context.textAlign);
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(context.textAlign);
     if (context.textOverlayFlow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
     if (GreatNotEqual(context.maxlines, 0.0)) {
-        style.maxLines = context.maxlines;
+        style.max_lines = context.maxlines;
     }
 
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     std::vector<std::string> fontFamilies;
     if (context.fontSize.has_value()) {
-        txtStyle.fontSize = context.fontSize.value().ConvertToPx();
+        txtStyle.font_size = context.fontSize.value().ConvertToPx();
     } else {
         auto context = PipelineBase::GetCurrentContext();
         auto textTheme = context->GetTheme<TextTheme>();
-        txtStyle.fontSize = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
+        txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
     }
-    txtStyle.fontStyle = ConvertTxtFontStyle(context.fontStyle);
+    txtStyle.font_style = ConvertTxtFontStyle(context.fontStyle);
     FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
-    txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
+    txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
-    txtStyle.fontFamilies = fontFamilies;
+    txtStyle.font_families = fontFamilies;
     if (context.letterSpacing.has_value()) {
-        txtStyle.letterSpacing = context.letterSpacing.value().ConvertToPx();
+        txtStyle.letter_spacing = context.letterSpacing.value().ConvertToPx();
     }
     if (context.lineHeight.has_value()) {
         if (context.lineHeight->Unit() == DimensionUnit::PERCENT) {
-            txtStyle.heightOnly = true;
-            txtStyle.heightScale = context.lineHeight->Value();
+            txtStyle.has_height_override = true;
+            txtStyle.height = context.lineHeight->Value();
         } else {
             auto lineHeight = context.lineHeight.value().ConvertToPx();
-            if (!NearEqual(lineHeight, txtStyle.fontSize) && (lineHeight > 0.0) && (!NearZero(txtStyle.fontSize))) {
-                txtStyle.heightScale = lineHeight / txtStyle.fontSize;
-                txtStyle.heightOnly = true;
+            if (!NearEqual(lineHeight, txtStyle.font_size) && (lineHeight > 0.0) && (!NearZero(txtStyle.font_size))) {
+                txtStyle.height = lineHeight / txtStyle.font_size;
+                txtStyle.has_height_override = true;
             }
         }
     }
     builder->PushStyle(txtStyle);
     std::string content = context.textContent;
     StringUtils::TransformStrCase(content, static_cast<int32_t>(context.textCase));
-    builder->AppendText(StringUtils::Str8ToStr16(content));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(content));
+    auto paragraph = builder->Build();
     if (!paragraph) {
         return Size(0.0, 0.0);
     }
@@ -696,11 +702,11 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         paragraph->Layout(Size::INFINITE_SIZE);
     }
     double textWidth = 0.0;
-    auto* paragraphTxt = static_cast<Rosen::Typography*>(paragraph.get());
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph.get());
     if (paragraphTxt->GetLineCount() == 1) {
-        textWidth = std::max(paragraph->GetActualWidth(), paragraph->GetMaxIntrinsicWidth());
+        textWidth = std::max(paragraph->GetLongestLine(), paragraph->GetMaxIntrinsicWidth());
     } else {
-        textWidth = paragraph->GetActualWidth();
+        textWidth = paragraph->GetLongestLine();
     }
     auto sizeWidth = std::min(paragraph->GetMaxWidth(), textWidth);
     sizeWidth =
@@ -718,20 +724,20 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
 double RosenRenderCustomPaint::MeasureText(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return 0.0;
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetMaxIntrinsicWidth();
 }
@@ -739,20 +745,20 @@ double RosenRenderCustomPaint::MeasureText(const std::string& text, const PaintS
 double RosenRenderCustomPaint::MeasureTextHeight(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return 0.0;
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetHeight();
 }
@@ -760,20 +766,20 @@ double RosenRenderCustomPaint::MeasureTextHeight(const std::string& text, const 
 TextMetrics RosenRenderCustomPaint::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
     paragraph->Layout(Size::INFINITE_SIZE);
 
     auto textAlign = state.GetTextAlign();
@@ -797,13 +803,13 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
     if (GetLayoutSize().Width() > paragraph_->GetMaxIntrinsicWidth()) {
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
+#ifndef USE_ROSEN_DRAWING
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
-#ifndef USE_ROSEN_DRAWING
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
@@ -817,8 +823,6 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
 #else
     if (hasShadow) {
         drawingCanvas_->Save();
-        auto shadowOffsetX = shadow_.GetOffset().GetX();
-        auto shadowOffsetY = shadow_.GetOffset().GetY();
         LOGE("Drawing is not supported");
         drawingCanvas_->Restore();
         return;
@@ -828,7 +832,7 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
 #endif
 }
 
-double RosenRenderCustomPaint::GetAlignOffset(TextAlign align, std::unique_ptr<Rosen::Typography>& paragraph)
+double RosenRenderCustomPaint::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double x = 0.0;
     switch (align) {
@@ -854,7 +858,7 @@ double RosenRenderCustomPaint::GetAlignOffset(TextAlign align, std::unique_ptr<R
     return x;
 }
 
-double RosenRenderCustomPaint::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<Rosen::Typography>& paragraph)
+double RosenRenderCustomPaint::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double y = 0.0;
     switch (baseline) {
@@ -985,12 +989,12 @@ void RosenRenderCustomPaint::Arc(const Offset& offset, const ArcParam& param)
 
 void RosenRenderCustomPaint::ArcTo(const Offset& offset, const ArcToParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     double x1 = param.x1 + offset.GetX();
     double y1 = param.y1 + offset.GetY();
     double x2 = param.x2 + offset.GetX();
     double y2 = param.y2 + offset.GetY();
     double radius = param.radius;
-#ifndef USE_ROSEN_DRAWING
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
 #else
@@ -1100,7 +1104,7 @@ void RosenRenderCustomPaint::SetFillRuleForPath(const CanvasFillRule& rule)
     if (rule == CanvasFillRule::NONZERO) {
         drawingPath_.SetFillStyle(RSPathFillType::WINDING);
     } else if (rule == CanvasFillRule::EVENODD) {
-        drawingPath_.SetFillStyle(RSPathFillType::EVEN_ODD);
+        drawingPath_.SetFillStyle(RSPathFillType::EVENTODD);
     }
 #endif
 }
@@ -1125,7 +1129,7 @@ void RosenRenderCustomPaint::SetFillRuleForPath2D(const CanvasFillRule& rule)
     if (rule == CanvasFillRule::NONZERO) {
         drawingPath2d_.SetFillStyle(RSPathFillType::WINDING);
     } else if (rule == CanvasFillRule::EVENODD) {
-        drawingPath2d_.SetFillStyle(RSPathFillType::EVEN_ODD);
+        drawingPath2d_.SetFillStyle(RSPathFillType::EVENTODD);
     }
 #endif
 }
@@ -1443,12 +1447,12 @@ void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& arg
 
 void RosenRenderCustomPaint::Path2DArcTo(const Offset& offset, const PathArgs& args)
 {
+#ifndef USE_ROSEN_DRAWING
     double x1 = args.para1 + offset.GetX();
     double y1 = args.para2 + offset.GetY();
     double x2 = args.para3 + offset.GetX();
     double y2 = args.para4 + offset.GetY();
     double r = args.para5;
-#ifndef USE_ROSEN_DRAWING
     skPath2d_.arcTo(x1, y1, x2, y2, r);
 #else
     LOGE("Drawing is not supported");
@@ -1856,60 +1860,66 @@ bool RosenRenderCustomPaint::UpdateParagraph(
     const Offset& offset, const std::string& text, bool isStroke, bool hasShadow)
 {
     using namespace Constants;
-    Rosen::TypographyStyle style;
+    txt::ParagraphStyle style;
     if (isStroke) {
-        style.textAlign = ConvertTxtTextAlign(strokeState_.GetTextAlign());
+        style.text_align = ConvertTxtTextAlign(strokeState_.GetTextAlign());
     } else {
-        style.textAlign = ConvertTxtTextAlign(fillState_.GetTextAlign());
+        style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return false;
     }
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
     if (!isStroke && hasShadow) {
-        Rosen::TextShadow txtShadow;
+        txt::TextShadow txtShadow;
         txtShadow.color = shadow_.GetColor().GetValue();
-        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
-        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
-        txtShadow.blurRadius = shadow_.GetBlurRadius();
-        txtStyle.shadows.emplace_back(txtShadow);
+        txtShadow.offset.fX = shadow_.GetOffset().GetX();
+        txtShadow.offset.fY = shadow_.GetOffset().GetY();
+#ifndef NEW_SKIA
+        txtShadow.blur_radius = shadow_.GetBlurRadius();
+#else
+        txtShadow.blur_sigma = shadow_.GetBlurRadius();
+#endif
+        txtStyle.text_shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateTextStyleForeground(offset, isStroke, txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    paragraph_ = builder->CreateTypography();
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    paragraph_ = builder->Build();
     return true;
 }
 
 void RosenRenderCustomPaint::UpdateTextStyleForeground(
-    const Offset& offset, bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow)
+    const Offset& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
 {
     using namespace Constants;
 #ifndef USE_ROSEN_DRAWING
     if (!isStroke) {
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
-        txtStyle.fontSize = fillState_.GetTextStyle().GetFontSize().Value();
+        txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid()) {
             SkPaint paint;
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(offset, paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
+            txtStyle.has_foreground = true;
         }
         if (globalState_.HasGlobalAlpha()) {
-            if (txtStyle.foreground.has_value()) {
-                txtStyle.foreground->setColor(fillState_.GetColor().GetValue());
-                txtStyle.foreground->setAlphaf(globalState_.GetAlpha()); // set alpha after color
+            if (txtStyle.has_foreground) {
+                txtStyle.foreground.setColor(fillState_.GetColor().GetValue());
+                txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
             } else {
                 SkPaint paint;
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 InitPaintBlend(paint);
                 txtStyle.foreground = paint;
+                txtStyle.has_foreground = true;
             }
         }
     } else {
@@ -1917,7 +1927,7 @@ void RosenRenderCustomPaint::UpdateTextStyleForeground(
         SkPaint paint = GetStrokePaint();
         InitPaintBlend(paint);
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
-        txtStyle.fontSize = strokeState_.GetTextStyle().GetFontSize().Value();
+        txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
         if (strokeState_.GetGradient().IsValid()) {
             UpdatePaintShader(offset, paint, strokeState_.GetGradient());
         }
@@ -1927,6 +1937,7 @@ void RosenRenderCustomPaint::UpdateTextStyleForeground(
                 RosenDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
         }
         txtStyle.foreground = paint;
+        txtStyle.has_foreground = true;
     }
 #else
     LOGE("Drawing is not supported");

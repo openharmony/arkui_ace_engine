@@ -173,7 +173,6 @@ foreach(item, ace_platforms) {
         "hichecker:libhichecker",
         "init:libbeget_proxy",
         "init:libbegetutil",
-        "window_manager:libwsutils",
       ]
     }
   }

@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-using OnTitleModeChangeEvent = std::function<void(const NavigationTitleMode)>;
+using OnTitleModeChangeEvent = std::function<void(const BaseEventInfo* eventInfo)>;
 using OnNavBarStateChangeEvent = std::function<void(bool)>;
 
 class NavigationEventHub : public EventHub {
@@ -34,10 +34,10 @@ public:
         onTitleModeChangeEvent_ = changeEvent;
     }
 
-    void FireChangeEvent(NavigationTitleMode mode) const
+    void FireChangeEvent(const BaseEventInfo* eventInfo) const
     {
         if (onTitleModeChangeEvent_) {
-            onTitleModeChangeEvent_(mode);
+            onTitleModeChangeEvent_(eventInfo);
         }
     }
 

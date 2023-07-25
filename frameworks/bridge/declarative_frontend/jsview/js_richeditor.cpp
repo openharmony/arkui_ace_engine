@@ -409,17 +409,13 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
         JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
         JSRef<JSVal> width = size->GetValueAt(0);
         CalcDimension imageSpanWidth;
-        if (!width->IsNull() && (JSContainerBase::ParseJsDimensionVp(width, imageSpanWidth) ||
-                                    JSContainerBase::ParseJsDimensionFp(width, imageSpanWidth) ||
-                                    JSContainerBase::ParseJsDimensionPx(width, imageSpanWidth))) {
+        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVp(width, imageSpanWidth)) {
             imageSize.width = imageSpanWidth;
             updateSpanStyle_.updateImageWidth = imageSpanWidth;
         }
         JSRef<JSVal> height = size->GetValueAt(1);
         CalcDimension imageSpanHeight;
-        if (!height->IsNull() && (JSContainerBase::ParseJsDimensionVp(height, imageSpanHeight) ||
-                                     JSContainerBase::ParseJsDimensionFp(height, imageSpanHeight) ||
-                                     JSContainerBase::ParseJsDimensionPx(height, imageSpanHeight))) {
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVp(height, imageSpanHeight)) {
             imageSize.height = imageSpanHeight;
             updateSpanStyle_.updateImageHeight = imageSpanHeight;
         }
@@ -509,6 +505,26 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
+    }
+    if (options.image.has_value()) {
+        std::string assetSrc = options.image.value();
+        SrcType srcType = ImageSourceInfo::ResolveURIType(assetSrc);
+        if (assetSrc[0] == '/') {
+            assetSrc = assetSrc.substr(1); // get the asset src without '/'.
+        } else if (assetSrc[0] == '.' && assetSrc.size() > 2 && assetSrc[1] == '/') {
+            assetSrc = assetSrc.substr(2); // get the asset src without './'.
+        }
+        if (srcType == SrcType::ASSET) {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto assetManager = pipelineContext->GetAssetManager();
+            CHECK_NULL_VOID(assetManager);
+            auto assetData = assetManager->GetAsset(assetSrc);
+            if (!assetData) {
+                args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+                return;
+            }
+        }
     }
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> imageObject = JSRef<JSObject>::Cast(args[1]);

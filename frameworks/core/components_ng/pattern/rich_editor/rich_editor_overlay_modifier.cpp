@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 RichEditorOverlayModifier::RichEditorOverlayModifier() : TextOverlayModifier()
@@ -80,6 +81,9 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
 
 void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
+    if (contentRect_.has_value()) {
+        drawingContext.canvas.ClipRect(ToRSRect(contentRect_.value()), RSClipOp::INTERSECT);
+    }
     PaintCaret(drawingContext);
     TextOverlayModifier::onDraw(drawingContext);
 }

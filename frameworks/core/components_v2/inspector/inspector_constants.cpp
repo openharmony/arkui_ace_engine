@@ -55,6 +55,10 @@ const char STAGE_ETS_TAG[] = "stage";
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)
 const char CONTAINER_MODAL_ETS_TAG[] = "ContainerModal";
+
+const char ATOMIC_SERVICE_ETS_TAG[] = "AtomicService";
+const char APP_BAR_ETS_TAG[] = "AppBar";
+
 // js custom view
 const char JS_VIEW_ETS_TAG[] = "JsView";
 const char JS_VIEW_COMPONENT_TAG[] = "ProxyComponent";
@@ -340,6 +344,7 @@ const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 const char SHEET_COMPONENT_TAG[] = "SheetComponent";
 const char SHEET_ETS_TAG[] = "Sheet";
 const char SHEET_MASK_TAG[] = "SheetMask";
+const char SHEET_PAGE_TAG[] = "SheetPage";
 
 // hyperlink
 const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";
@@ -514,15 +519,15 @@ ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
 const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
 const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 
-// SecLocationButton
-const char SEC_LOCATION_BUTTON_COMPONENT_TAG[] = "SecLocationButtonComponent";
-const char SEC_LOCATION_BUTTON_ETS_TAG[] = "SecLocationButton";
+// LocationButton
+const char LOCATION_BUTTON_COMPONENT_TAG[] = "LocationButtonComponent";
+const char LOCATION_BUTTON_ETS_TAG[] = "LocationButton";
 
-// SecPasteButton
-const char SEC_PASTE_BUTTON_COMPONENT_TAG[] = "SecPasteButtonComponent";
-const char SEC_PASTE_BUTTON_ETS_TAG[] = "SecPasteButton";
+// PasteButton
+const char PASTE_BUTTON_COMPONENT_TAG[] = "PasteButtonComponent";
+const char PASTE_BUTTON_ETS_TAG[] = "PasteButton";
 
-// SecSaveButton
-const char SEC_SAVE_BUTTON_COMPONENT_TAG[] = "SecSaveButtonComponent";
-const char SEC_SAVE_BUTTON_ETS_TAG[] = "SecSaveButton";
+// SaveButton
+const char SAVE_BUTTON_COMPONENT_TAG[] = "SaveButtonComponent";
+const char SAVE_BUTTON_ETS_TAG[] = "SaveButton";
 } // namespace OHOS::Ace::V2

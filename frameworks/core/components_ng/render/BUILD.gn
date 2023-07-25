@@ -67,6 +67,18 @@ build_component_ng("render_ng") {
     "adapter/rosen_window.cpp",
   ]
 
+  if (ace_use_rosen_drawing) {
+    sources -= [
+      "adapter/skia_decoration_painter.cpp",
+      "adapter/skia_image.cpp",
+    ]
+
+    rosen_sources += [
+      "adapter/rosen/drawing_decoration_painter.cpp",
+      "adapter/rosen/drawing_image.cpp",
+    ]
+  }
+
   if (current_os != "ohos") {
     rosen_sources -= [
       "adapter/rosen_media_player.cpp",

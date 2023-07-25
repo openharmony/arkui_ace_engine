@@ -432,8 +432,6 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
-    CHECK_NULL_VOID(indexerEventHub);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
@@ -516,7 +514,7 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
     if (selectChanged || NeedShowPopupView()) {
         ShowBubble();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode();
 }
 
 void IndexerPattern::ShowBubble()
@@ -738,6 +736,7 @@ void IndexerPattern::CreateBubbleListView(std::vector<std::string>& currentListD
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         listItemNode->AddChild(textNode);
+        AddListItemClickListener(listItemNode, i);
         listNode->AddChild(listItemNode);
     }
 }
@@ -770,7 +769,6 @@ void IndexerPattern::UpdateBubbleListItem(
         listItemProperty->UpdateAlignment(Alignment::CENTER);
         auto listItemContext = listItemNode->GetRenderContext();
         CHECK_NULL_VOID(listItemContext);
-        AddListItemClickListener(listItemNode, i);
         auto textNode = DynamicCast<FrameNode>(listItemNode->GetFirstChild());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();

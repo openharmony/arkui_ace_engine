@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
@@ -25,7 +26,7 @@ config("config_svg_parse_test") {
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
@@ -67,6 +68,13 @@ ohos_unittest("parse_g_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
+  }
 }
 
 ohos_unittest("parse_circle_test_ng") {
@@ -84,6 +92,13 @@ ohos_unittest("parse_circle_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
+  }
 }
 
 ohos_unittest("parse_clippath_test_ng") {
@@ -101,6 +116,13 @@ ohos_unittest("parse_clippath_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
+  }
 }
 
 ohos_unittest("parse_ellipse_test_ng") {
@@ -118,6 +140,13 @@ ohos_unittest("parse_ellipse_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
+  }
 }
 
 ohos_unittest("parse_fe_offset_test_ng") {
@@ -152,6 +181,13 @@ ohos_unittest("parse_fecolormatrix_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
+  }
 }
 
 ohos_unittest("parse_fecomposite_test_ng") {
@@ -169,6 +205,13 @@ ohos_unittest("parse_fecomposite_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
+  }
 }
 
 ohos_unittest("parse_fegaussianblur_test_ng") {
@@ -186,6 +229,13 @@ ohos_unittest("parse_fegaussianblur_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
+  }
 }
 
 ohos_unittest("parse_filter_test_ng") {
@@ -203,6 +253,13 @@ ohos_unittest("parse_filter_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [
+      "image_framework:image_native",
+      "window_manager:libdm",
+    ]
+  }
 }
 
 ohos_unittest("parse_gradient_test_ng") {
@@ -237,6 +294,10 @@ ohos_unittest("parse_line_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [ "image_framework:image_native" ]
+  }
 }
 
 ohos_unittest("parse_mask_test_ng") {
@@ -254,6 +315,10 @@ ohos_unittest("parse_mask_test_ng") {
     ":config_svg_parse_test",
     "$ace_root:ace_config",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps = [ "image_framework:image_native" ]
+  }
 }
 
 ohos_unittest("parse_path_test_ng") {
@@ -375,9 +440,27 @@ ohos_unittest("parse_use_test_ng") {
   ]
 }
 
+ohos_unittest("parse_animate_test_ng") {
+  module_out_path = svg_test_output_path
+
+  sources = [ "parse_animate_test_ng.cpp" ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  configs = [
+    ":config_svg_parse_test",
+    "$ace_root:ace_config",
+  ]
+}
+
 group("svg_parse_unit_test") {
   testonly = true
   deps = [
+    ":parse_animate_test_ng",
     ":parse_circle_test_ng",
     ":parse_clippath_test_ng",
     ":parse_ellipse_test_ng",

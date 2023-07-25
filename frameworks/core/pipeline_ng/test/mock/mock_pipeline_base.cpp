@@ -18,12 +18,14 @@
 #include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NODE_ID = 143;
 } // namespace
 RefPtr<MockPipelineBase> MockPipelineBase::pipeline_;
+uint64_t UITaskScheduler::frameId_ = 0;
 
 void MockPipelineBase::SetUp()
 {
@@ -212,6 +214,8 @@ bool PipelineContext::OnBackPressed()
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
+void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
@@ -314,8 +318,6 @@ SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
     return {};
 }
 
-void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback) {}
-
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
     // top inset = 1
@@ -409,6 +411,10 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 }
 
 void PipelineBase::Destroy() {}
+bool PipelineBase::MaybeRelease()
+{
+    return AceType::MaybeRelease();
+}
 
 void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 

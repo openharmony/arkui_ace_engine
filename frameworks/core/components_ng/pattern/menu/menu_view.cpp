@@ -83,7 +83,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     textProperty->UpdateFontSize(theme->GetMenuTitleFontSize());
     textProperty->UpdateFontWeight(FontWeight::MEDIUM);
     textProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
-    textProperty->UpdateTextColor(theme->GetMenuFontColor());
+    textProperty->UpdateTextColor(theme->GetMenuTitleFontColor());
     textProperty->UpdateContent(title);
 
     CalcSize idealSize;

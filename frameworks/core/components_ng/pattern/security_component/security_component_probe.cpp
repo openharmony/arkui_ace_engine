@@ -63,8 +63,8 @@ int32_t SecurityComponentProbe::GetComponentInfo(int32_t nodeId, std::string& co
             return;
         }
 
-        if ((node->GetTag() != V2::SEC_LOCATION_BUTTON_ETS_TAG) && (node->GetTag() != V2::SEC_PASTE_BUTTON_ETS_TAG) &&
-            (node->GetTag() != V2::SEC_SAVE_BUTTON_ETS_TAG)) {
+        if ((node->GetTag() != V2::LOCATION_BUTTON_ETS_TAG) && (node->GetTag() != V2::PASTE_BUTTON_ETS_TAG) &&
+            (node->GetTag() != V2::SAVE_BUTTON_ETS_TAG)) {
             LOGW("node is not security component.");
             taskRes = -1;
             return;

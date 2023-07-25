@@ -124,7 +124,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
                 return;
             }
             // Send event to accessibility when scroll start.
@@ -142,7 +142,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionUpdate = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
                 return;
             }
             scroll->HandleDragUpdate(info);
@@ -152,7 +152,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionEnd = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
                 return;
             }
             scroll->HandleDragEnd(info);
@@ -262,7 +262,7 @@ void Scrollable::HandleTouchDown()
     springController_->Stop();
     if (!controller_->IsStopped()) {
         controller_->Stop();
-    } else if (!snapController_->IsStopped()) {
+    } else if (snapController_->IsRunning()) {
         snapController_->Stop();
     } else {
         // Resets values.
@@ -419,7 +419,7 @@ ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source,
     }
     double allOffset = offset;
     ExecuteScrollFrameBegin(offset, scrollState);
-    auto remainOffset = allOffset - offset;
+    auto remainOffset = std::abs(offset) < std::abs(allOffset) ? allOffset - offset : 0;
     auto overOffsets = overScrollOffsetCallback_(offset);
     auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
     remainOffset += overOffset;
@@ -433,9 +433,9 @@ ScrollResult Scrollable::HandleScrollParentFirst(double& offset, int32_t source,
         return { remainOffset, !NearZero(overOffset) };
     }
     if (edgeEffect_ == EdgeEffect::NONE) {
-        parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
+        result = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
     }
-    canOverScroll_ = !NearZero(overOffset);
+    canOverScroll_ = !NearZero(overOffset) || (NearZero(offset) && result.reachEdge);
     return { 0, canOverScroll_ };
 }
 
@@ -457,27 +457,26 @@ ScrollResult Scrollable::HandleScrollSelfFirst(double& offset, int32_t source, N
     }
     double allOffset = offset;
     ExecuteScrollFrameBegin(offset, scrollState);
-    auto remainOffset = allOffset - offset;
+    auto remainOffset = std::abs(offset) < std::abs(allOffset) ? allOffset - offset : 0;
     auto overOffsets = overScrollOffsetCallback_(offset);
     auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
-    if (NearZero(overOffset)) {
+    if (NearZero(overOffset) && NearZero(remainOffset)) {
         canOverScroll_ = false;
         return { 0, false };
     }
     offset -= overOffset;
-    auto result = parent->HandleScroll(overOffset, source, NestedState::CHILD_SCROLL);
-    remainOffset += result.remain;
-    if (NearZero(remainOffset)) {
+    auto result = parent->HandleScroll(overOffset + remainOffset, source, NestedState::CHILD_SCROLL);
+    if (NearZero(result.remain)) {
         canOverScroll_ = false;
         return { 0, false };
     }
     if (state == NestedState::CHILD_SCROLL) {
         canOverScroll_ = false;
-        return { remainOffset, result.reachEdge };
+        return result;
     }
-    auto overRes = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL);
-    offset += overRes.remain;
-    canOverScroll_ = !NearZero(overOffset) && result.reachEdge;
+    auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL);
+    offset += std::abs(overOffset) < std::abs(result.remain) ? overOffset : overRes.remain;
+    canOverScroll_ = (!NearZero(overOffset) || NearZero(offset)) && overRes.reachEdge;
     return { 0, canOverScroll_ };
 }
 
@@ -989,7 +988,7 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::ProcessScrollMotionStop()
 {
-    if (needScrollSnapChange_ && calePredictSnapOffsetCallback_) {
+    if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && motion_) {
         needScrollSnapChange_ = false;
         auto predictSnapOffset = calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - currentPos_);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
@@ -1108,7 +1107,7 @@ bool Scrollable::HandleOverScroll(double velocity)
 {
     auto parent = parent_.Upgrade();
     if (!parent || !nestedOpt_.NeedParent()) {
-        if (edgeEffect_ != EdgeEffect::NONE) {
+        if (edgeEffect_ == EdgeEffect::SPRING) {
             ProcessScrollOverCallback(velocity);
             return true;
         }
@@ -1126,14 +1125,14 @@ bool Scrollable::HandleOverScroll(double velocity)
             }
             return true;
         }
-        if (edgeEffect_ != EdgeEffect::NONE) {
+        if (edgeEffect_ == EdgeEffect::SPRING) {
             ProcessScrollOverCallback(velocity);
             return true;
         }
     }
 
     // self handle over scroll first
-    if (edgeEffect_ != EdgeEffect::NONE) {
+    if (edgeEffect_ == EdgeEffect::SPRING) {
         ProcessScrollOverCallback(velocity);
         return true;
     }

@@ -161,36 +161,14 @@ void AceContainer::Initialize()
 
 void AceContainer::Destroy()
 {
+    LOGI("AceContainer::Destroy begin");
     ContainerScope scope(instanceId_);
-    if (pipelineContext_ && taskExecutor_) {
-        // 1. Destroy Pipeline on UI thread.
-        RefPtr<PipelineBase> context;
-        context.Swap(pipelineContext_);
-        if (GetSettings().usePlatformAsUIThread) {
-            context->Destroy();
-        } else {
-            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
-        }
-
-        if (isSubContainer_) {
-            // SubAceContainer just return.
-            return;
-        }
-
-        // 2. Destroy Frontend on JS thread.
-        RefPtr<Frontend> frontend;
-        LOGI("Frontend Swap");
-        frontend_.Swap(frontend);
-        if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
-            frontend->UpdateState(Frontend::State::ON_DESTROY);
-            frontend->Destroy();
-        } else {
-            frontend->UpdateState(Frontend::State::ON_DESTROY);
-            taskExecutor_->PostTask([frontend]() { frontend->Destroy(); }, TaskExecutor::TaskType::JS);
-        }
+    if (frontend_) {
+        frontend_->UpdateState(Frontend::State::ON_DESTROY);
     }
     resRegister_.Reset();
     assetManager_.Reset();
+    LOGI("AceContainer::Destroy end");
 }
 
 void AceContainer::DestroyView()
@@ -1558,6 +1536,18 @@ void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExe
     }
 }
 
+void AceContainer::ReloadForm()
+{
+    // Reload theme and resource
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    pipelineContext_->SetThemeManager(themeManager);
+    themeManager->InitResource(resourceInfo_);
+    themeManager->SetColorScheme(colorScheme_);
+    themeManager->LoadCustomTheme(assetManager_);
+    themeManager->LoadResourceThemes();
+}
+
 void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
 {
     if (picNameArray.empty()) {
@@ -1644,6 +1634,12 @@ void AceContainer::GetImageDataFromAshmem(
         // read image data from shared memory and save a copy to sharedImageManager
         sharedImageManager->AddSharedImage(picName, std::vector<uint8_t>(imageData, imageData + len));
     }
+}
+
+bool AceContainer::IsScenceBoardWindow()
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
 }
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)

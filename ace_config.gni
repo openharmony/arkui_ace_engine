@@ -175,6 +175,12 @@ if (defined(use_new_skia) && use_new_skia) {
   ace_common_defines += [ "NEW_SKIA" ]
 }
 
+ace_use_rosen_drawing = false
+if (defined(use_rosen_drawing) && use_rosen_drawing) {
+  ace_use_rosen_drawing = true
+  ace_common_defines += [ "USE_ROSEN_DRAWING" ]
+}
+
 if (enable_ng_build) {
   ace_common_defines += [ "NG_BUILD" ]
 }

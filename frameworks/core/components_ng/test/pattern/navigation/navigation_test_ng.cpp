@@ -78,7 +78,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void MockPipelineContextGetTheme();
-    static void RunMeasureAndLayout(RefPtr<LayoutWrapper>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
+    static void RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
 };
 
 void NavigationTestNg::SetUpTestSuite()
@@ -91,7 +91,7 @@ void NavigationTestNg::TearDownTestSuite()
     MockPipelineBase::TearDown();
 }
 
-void NavigationTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapper>& layoutWrapper, float width)
+void NavigationTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width)
 {
     layoutWrapper->SetActive();
     layoutWrapper->SetRootMeasureNode();
@@ -187,7 +187,8 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest003, TestSize.Level1)
     pattern->OnModifyDone();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
 
     DirtySwapConfig config;
@@ -232,7 +233,8 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest004, TestSize.Level1)
     pattern->OnModifyDone();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
 
     DirtySwapConfig config;
@@ -739,8 +741,8 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_012, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step2. create navbar frameNode.
      */
@@ -847,7 +849,8 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_014, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     navigationLayoutProperty->UpdateMinNavBarWidth(DEFAULT_MIN_NAV_BAR_WIDTH_PER);
     navigationLayoutProperty->UpdateMaxNavBarWidth(DEFAULT_MAX_NAV_BAR_WIDTH_PER);
@@ -1190,7 +1193,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     auto geometryNode = navigation->geometryNode_;
     auto layout = navigation->GetLayoutProperty<NavigationLayoutProperty>();
     auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(AceType::WeakClaim(AceType::RawPtr(navigation)), geometryNode, layout);
+        AceType::MakeRefPtr<LayoutWrapperNode>(AceType::WeakClaim(AceType::RawPtr(navigation)), geometryNode, layout);
     auto algorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
     layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
@@ -1238,7 +1241,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     navigation->navBarNode_ = navBarNode;
     auto geometryNode = navigation->geometryNode_;
     auto navigationLayoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(navigation)), geometryNode, navigationLayoutProperty);
 
     auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
@@ -1253,7 +1256,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     ASSERT_EQ(navigation->children_.size(), 1);
     auto navBarGeometryNode = navBarNode->geometryNode_;
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    auto navBarWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto navBarWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(navBarNode)), navBarGeometryNode, navBarLayoutProperty);
     layoutWrapper->childrenMap_[0] = navBarWrapper;
     layoutWrapper->currentChildCount_ = 1;
@@ -1278,7 +1281,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     ASSERT_EQ(navigation->children_.size(), 2);
     auto dividerGeometryNode = dividerNode->geometryNode_;
     auto dividerLayoutProperty = dividerNode->GetLayoutProperty<NavBarLayoutProperty>();
-    auto dividerWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto dividerWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(dividerNode)), dividerGeometryNode, dividerLayoutProperty);
     layoutWrapper->childrenMap_[1] = dividerWrapper;
     layoutWrapper->currentChildCount_ = 2;
@@ -1295,7 +1298,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     ASSERT_EQ(navigation->children_.size(), 3);
     auto contentGeometryNode = contentNode->geometryNode_;
     auto contentLayoutProperty = contentNode->GetLayoutProperty<NavBarLayoutProperty>();
-    auto contentWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto contentWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(contentNode)), contentGeometryNode, contentLayoutProperty);
     layoutWrapper->childrenMap_[2] = contentWrapper;
     layoutWrapper->currentChildCount_ = 3;

@@ -27,9 +27,9 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/navigation_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<NavigationModel> NavigationModel::instance_ = nullptr;
@@ -60,7 +60,9 @@ namespace {
 constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
-constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
+constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 200;
+constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
+constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 280.0_vp;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
@@ -189,7 +191,7 @@ void JSNavigation::ParseToolbarItemsConfiguration(
 
         auto itemStatusValue = itemObject->GetProperty("status");
         if (itemStatusValue->IsNumber()) {
-            toolBarItem.status = static_cast<NG::ToolbarItemStatus>(itemStatusValue->ToNumber<int32_t>());
+            toolBarItem.status = static_cast<NG::NavToolbarItemStatus>(itemStatusValue->ToNumber<int32_t>());
         }
 
         auto itemActiveIconObject = itemObject->GetProperty("activeIcon");
@@ -210,7 +212,8 @@ bool JSNavigation::ParseCommonTitle(const JSRef<JSVal>& jsValue)
     bool sub = subtitle->IsString();
     bool main = title->IsString();
     if (subtitle->IsString() || title->IsString()) {
-        NavigationModel::GetInstance()->ParseCommonTitle(sub, main, subtitle->ToString(), title->ToString());
+        NavigationModel::GetInstance()->ParseCommonTitle(
+            sub, main, subtitle->ToString(), title->ToString());
     }
     return isCommonTitle;
 }
@@ -306,15 +309,21 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         JSRef<JSVal> height = jsObj->GetProperty("height");
         if (height->IsNumber()) {
             if (height->ToNumber<int32_t>() == 0) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
+                NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
                 return;
             }
             if (height->ToNumber<int32_t>() == 1) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
+                NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
                 return;
             }
             CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
+                return;
+            }
+            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
+        } else {
+            CalcDimension titleHeight;
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
                 return;
             }
             NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
@@ -494,7 +503,7 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
         auto onTitleModeChangeCallback =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onTitleModeChange = [execCtx = info.GetExecutionContext(), func = std::move(onTitleModeChangeCallback)](
-                                     NG::NavigationTitleMode mode) {
+            NG::NavigationTitleMode mode) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("OnTitleModeChange");
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(mode));
@@ -503,7 +512,7 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
         auto changeHandler = AceType::MakeRefPtr<JsEventFunction<NavigationTitleModeChangeEvent, 1>>(
             JSRef<JSFunc>::Cast(info[0]), TitleModeChangeEventToJSValue);
         auto eventInfo = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
-                             const BaseEventInfo* baseInfo) {
+            const BaseEventInfo* baseInfo) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
             auto eventInfo = TypeInfoHelper::DynamicCast<NavigationTitleModeChangeEvent>(baseInfo);
             if (!eventInfo) {
@@ -577,6 +586,7 @@ void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
 
 void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
 {
+
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -587,19 +597,26 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
     JSRef<JSVal> max = rangeArray->GetValueAt(1);
 
     CalcDimension minNavBarWidth;
+    if (!ParseJsDimensionVp(min, minNavBarWidth)) {
+        minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
+    }
+
     CalcDimension maxNavBarWidth;
-    ParseJsDimensionVp(min, minNavBarWidth);
-    ParseJsDimensionVp(max, maxNavBarWidth);
+    if (!ParseJsDimensionVp(max, maxNavBarWidth)) {
+        maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
+    }
 
     if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
-        minNavBarWidth.SetValue(0);
+        minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
     }
-    NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
 
     if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
-        maxNavBarWidth.SetValue(0);
+        maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
     }
+
+    NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
     NavigationModel::GetInstance()->SetMaxNavBarWidth(maxNavBarWidth);
+
 }
 
 void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
@@ -613,7 +630,7 @@ void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
         auto onNavBarStateChangeCallback =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onNavBarStateChange = [execCtx = info.GetExecutionContext(),
-                                       func = std::move(onNavBarStateChangeCallback)](bool isVisible) {
+            func = std::move(onNavBarStateChangeCallback)](bool isVisible) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("OnNavBarStateChange");
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(isVisible));

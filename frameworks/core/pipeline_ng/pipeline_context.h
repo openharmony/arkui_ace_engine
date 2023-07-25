@@ -284,6 +284,7 @@ public:
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
+    void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
@@ -370,13 +371,6 @@ public:
     {
         storeNode_.erase(restoreId);
     }
-
-    // ---------------- WindowScene TouchEvent Callback Handler ---------------------
-    void AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback);
-    void RemoveWindowSceneTouchEventCallback(int32_t pointId);
-    void HandleWindowSceneTouchEvent(const TouchEvent& point);
-    // ------------------------------------------------------------------------------
-
     void SetNeedRenderNode(const RefPtr<FrameNode>& node);
 
 protected:
@@ -386,6 +380,7 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
+    void FlushFrameTrace();
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
@@ -414,6 +409,9 @@ private:
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     void SyncSafeArea();
+
+    // only used for static form.
+    void UpdateFormLinkInfos();
 
     template<typename T>
     struct NodeCompare {
@@ -450,7 +448,6 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
-    RefPtr<FrameNode> appBarNode_;
 
     std::set<RefPtr<FrameNode>> needRenderNode_;
 
@@ -471,6 +468,7 @@ private:
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
+    WeakPtr<FrameNode> dirtyDefaultFocusNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     bool hasIdleTasks_ = false;

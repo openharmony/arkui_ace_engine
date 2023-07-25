@@ -263,4 +263,20 @@ void PagePattern::StopPageTransition()
     FirePageTransitionFinish();
 }
 
+void PagePattern::BeforeCreateLayoutWrapper()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    // SafeArea already applied to AppBar
+    if (pipeline->GetInstallationFree()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto safeArea = pipeline->GetSafeArea();
+    auto props = host->GetLayoutProperty();
+    if (safeArea.IsValid() || props->GetSafeAreaInsets()) {
+        props->UpdateSafeAreaInsets(safeArea);
+    }
+}
 } // namespace OHOS::Ace::NG

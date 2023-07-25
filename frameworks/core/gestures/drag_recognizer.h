@@ -219,7 +219,7 @@ private:
         }
 
         auto marker = EventMarker(
-            [f = std::forward<TFunc>(func), args = std::make_tuple(std::forward<Ts>(args)...)]() mutable {
+            [this, f = std::forward<TFunc>(func), args = std::make_tuple(std::forward<Ts>(args)...)]() mutable {
                 std::apply(f, std::move(args));
             });
 

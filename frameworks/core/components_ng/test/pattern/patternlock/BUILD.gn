@@ -25,6 +25,9 @@ ohos_unittest("patternlock_pattern_test_ng") {
   sources = [
     # inner
     "$ace_root/frameworks/base/geometry/dimension.cpp",
+    "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
+    "$ace_root/frameworks/base/geometry/matrix3.cpp",
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
@@ -35,6 +38,10 @@ ohos_unittest("patternlock_pattern_test_ng") {
     "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
 
@@ -87,6 +94,7 @@ ohos_unittest("patternlock_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/event/gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/event/input_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/input_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/pan_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/state_style_manager.cpp",
     "$ace_root/frameworks/core/components_ng/event/touch_event.cpp",
 
@@ -96,8 +104,10 @@ ohos_unittest("patternlock_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/exclusive_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/multi_fingers_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/pan_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/parallel_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/recognizer_group.cpp",
+    "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
@@ -105,6 +115,7 @@ ohos_unittest("patternlock_pattern_test_ng") {
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",

@@ -1533,10 +1533,10 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-    std::vector<RSTypographyProperties::TextRect> textBoxs;
-    RSTypographyProperties::TextRect textBox;
-    textBoxs.emplace_back(textBox);
-    pattern->textBoxes_ = textBoxs;
+    std::vector<RSTypographyProperties::TextBox> textBoxes;
+    RSTypographyProperties::TextBox textBox;
+    textBoxes.emplace_back(textBox);
+    pattern->textBoxes_ = textBoxes;
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
@@ -2332,7 +2332,6 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback002, TestSize.Level1)
     const int32_t source = 0;
     bool ret = false;
     textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
-    textFieldPattern->scrollBar_->SetDriving(true);
 
     /**
      * @tc.steps: step2. call OnScrollCallback function.
@@ -2358,7 +2357,6 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback003, TestSize.Level1)
     const int32_t source = 0;
     bool ret = false;
     textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
-    textFieldPattern->scrollBar_->SetDriving(false);
 
     /**
      * @tc.steps: step2. call OnScrollCallback function.
@@ -2767,28 +2765,28 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextSelectionRectOffsetX, TestSize.Level1
     textFieldPattern->contentRect_.SetLeft(0.0f);
     textFieldPattern->contentRect_.SetWidth(100.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
-    RSTypographyProperties::TextRect textBox;
+    RSTypographyProperties::TextBox textBox;
     textFieldPattern->textBoxes_.emplace_back(textBox);
 
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(50.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetRight(50.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(-20.0f);
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(-10.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(-20.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetRight(-10.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(0.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(0.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(100.0f);
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(200.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(100.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetRight(200.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(300.0f);
+    textFieldPattern->textBoxes_.begin()->rect_.SetLeft(300.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
@@ -3494,8 +3492,8 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-    std::vector<RSTypographyProperties::TextRect> textBoxes;
-    RSTypographyProperties::TextRect textBox;
+    std::vector<RSTypographyProperties::TextBox> textBoxes;
+    RSTypographyProperties::TextBox textBox;
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
@@ -4077,7 +4075,7 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     ASSERT_NE(geometryNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(frameNode)), geometryNode->Clone(), layoutProperty->Clone());
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
@@ -4133,7 +4131,7 @@ HWTEST_F(TextFieldPatternTestNg, MeasureContent, TestSize.Level2)
     contentConstraint.selfIdealSize.SetWidth(20);
     contentConstraint.selfIdealSize.SetHeight(20);
     cloneLayoutProperty->contentConstraint_ = contentConstraint;
-    LayoutWrapper layoutWrapper(
+    LayoutWrapperNode layoutWrapper(
         AceType::WeakClaim(AceType::RawPtr(frameNode)), geometryNode->Clone(), cloneLayoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
@@ -4247,7 +4245,8 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldLayoutAlgorithmMeasure, TestSize.Level
     layoutConstraint.selfIdealSize.SetWidth(20);
     layoutConstraint.selfIdealSize.SetHeight(20);
     cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
-    LayoutWrapper layoutWrapper(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    LayoutWrapperNode layoutWrapper(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     layoutAlgorithm->Measure(&layoutWrapper);
@@ -4372,7 +4371,8 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldLayoutAlgorithmLayout, TestSize.Level2
     layoutConstraint.selfIdealSize.SetWidth(20);
     layoutConstraint.selfIdealSize.SetHeight(20);
     cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
-    LayoutWrapper layoutWrapper(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    LayoutWrapperNode layoutWrapper(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     layoutAlgorithm->Layout(&layoutWrapper);
@@ -4531,9 +4531,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
     EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 4);
     EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 8);
 
-    std::vector<RSTypographyProperties::TextRect> textBoxes;
-    RSTypographyProperties::TextRect firstTextBox;
-    RSTypographyProperties::TextRect secondTextBox;
+    std::vector<RSTypographyProperties::TextBox> textBoxes;
+    RSTypographyProperties::TextBox firstTextBox;
+    RSTypographyProperties::TextBox secondTextBox;
     textBoxes.emplace_back(firstTextBox);
     textBoxes.emplace_back(secondTextBox);
     pattern->textBoxes_ = textBoxes;

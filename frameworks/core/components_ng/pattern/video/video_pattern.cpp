@@ -1460,11 +1460,10 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
 {
     CHECK_NULL_VOID(videoPattern);
     currentPos_ = videoPattern->GetCurrentPos();
-    if (mediaPlayer_->IsPlaying() != isPlaying_) {
+    if (mediaPlayer_->IsMediaPlayerValid() && mediaPlayer_->IsPlaying() != isPlaying_) {
         isPlaying_ = mediaPlayer_->IsPlaying();
         ChangePlayButtonTag();
     }
-    isPlaying_ = mediaPlayer_->IsPlaying();
     isInitialState_ = videoPattern->GetInitialState();
     auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
     src_ = layoutProperty->GetVideoSourceValue("");

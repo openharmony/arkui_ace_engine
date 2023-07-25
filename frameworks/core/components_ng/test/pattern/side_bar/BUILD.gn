@@ -35,7 +35,10 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
     "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
@@ -54,6 +57,7 @@ ohos_unittest("side_bar_pattern_test_ng") {
     # mock
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_icon_theme.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
 
@@ -137,6 +141,8 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/button/mock_button_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/button/mock_button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid_container/mock_grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
@@ -154,7 +160,6 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
-    "//third_party/skia:skia_ohos",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

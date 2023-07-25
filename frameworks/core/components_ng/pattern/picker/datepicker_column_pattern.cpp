@@ -20,6 +20,7 @@
 #include <list>
 #include <stdint.h>
 
+#include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -42,16 +43,18 @@ namespace {
 // TODO datepicker style modification
 constexpr float PADDING_WEIGHT = 10.0f;
 const Dimension FONT_SIZE = Dimension(2.0);
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
 const int32_t ANIMATION_ZERO_TO_OUTER = 200;
 const int32_t ANIMATION_OUTER_TO_ZERO = 150;
+const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t PRESS_ANIMATION_DURATION = 100;
+constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr int32_t MINDDLE_CHILD_INDEX = 2;
+const char* MEASURE_SIZE_STRING = "TEST";
 } // namespace
 
 void DatePickerColumnPattern::OnAttachToFrameNode()
@@ -81,8 +84,42 @@ void DatePickerColumnPattern::OnModifyDone()
     CHECK_NULL_VOID(theme);
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
+    auto showCount = theme->GetShowOptionCount();
     InitMouseAndPressEvent();
     SetAccessibilityAction();
+    if (optionProperties_.empty()) {
+        auto midIndex = showCount / 2;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        dividerSpacing_ = pipeline->NormalizeToPx(theme->GetDividerSpacing());
+        gradientHeight_ = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
+        MeasureContext measureContext;
+        measureContext.textContent = MEASURE_SIZE_STRING;
+        uint32_t childIndex = 0;
+        DatePickerOptionProperty prop;
+        while (childIndex < showCount) {
+            if (childIndex == midIndex) { // selected
+                auto selectedOptionSize = theme->GetOptionStyle(true, false).GetFontSize();
+                measureContext.fontSize = selectedOptionSize;
+            } else if (childIndex % midIndex == 1 && (childIndex != 0 || childIndex != (showCount - 1))) {
+                auto focusOptionSize = theme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+                measureContext.fontSize = focusOptionSize;
+            } else {
+                auto normalOptionSize = theme->GetOptionStyle(false, false).GetFontSize();
+                measureContext.fontSize = normalOptionSize;
+            }
+            if (childIndex == showCount / MINDDLE_CHILD_INDEX) {
+                prop.height = dividerSpacing_;
+            } else {
+                prop.height = gradientHeight_;
+            }
+            Size size = MeasureUtil::MeasureTextSize(measureContext);
+            prop.fontheight = size.Height();
+            optionProperties_.emplace_back(prop);
+            childIndex++;
+        }
+        SetOptionShiftDistance();
+    }
 }
 
 void DatePickerColumnPattern::InitMouseAndPressEvent()
@@ -92,12 +129,9 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
     RefPtr<FrameNode> middleChild = nullptr;
-    if (GetShowCount() != OPTION_COUNT_PHONE_LANDSCAPE) {
-        middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(MINDDLE_CHILD_INDEX));
-    } else {
-        middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
-    }
+    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(MINDDLE_CHILD_INDEX));
     CHECK_NULL_VOID(middleChild);
     auto eventHub = middleChild->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -131,6 +165,24 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
+    for (int32_t i = 0; i < childSize; i++) {
+        RefPtr<FrameNode> childNode = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
+        CHECK_NULL_VOID(childNode);
+        RefPtr<DatePickerEventParam> param = MakeRefPtr<DatePickerEventParam>();
+        param->instance_ = childNode;
+        param->itemIndex_ = i;
+        param->itemTotalCounts_ = childSize;
+
+        auto eventHub = childNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        if (i != childSize / MINDDLE_CHILD_INDEX) {
+            RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
+            CHECK_NULL_VOID(clickListener);
+            auto gesture = eventHub->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gesture);
+            gesture->AddClickEvent(clickListener);
+        }
+    }
 }
 
 void DatePickerColumnPattern::HandleMouseEvent(bool isHover)
@@ -205,8 +257,8 @@ bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     return true;
 }
 
-void DatePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextContentOnly,
-    bool isUpdateAnimationProperties)
+void DatePickerColumnPattern::FlushCurrentOptions(
+    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -273,8 +325,8 @@ void DatePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     }
 }
 
-void DatePickerColumnPattern::UpdatePickerTextProperties(
-    uint32_t index, uint32_t showOptionCount, const RefPtr<TextLayoutProperty>& textLayoutProperty,
+void DatePickerColumnPattern::UpdatePickerTextProperties(uint32_t index, uint32_t showOptionCount,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -304,19 +356,20 @@ void DatePickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
-    if (dataPickerRowLayoutProperty->HasDisappearColor()) {
-        textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetDisappearColor().value());
-    }
+    textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetDisappearColor().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (dataPickerRowLayoutProperty->HasDisappearFontSize()) {
         textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetDisappearFontSize().value());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
-        textLayoutProperty->UpdateAdaptMinFontSize(
-            pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
+        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
     }
-    if (dataPickerRowLayoutProperty->HasDisappearWeight()) {
-        textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetDisappearWeight().value());
-    }
+    textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetDisappearWeight().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(dataPickerRowLayoutProperty->GetDisappearFontFamily().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(dataPickerRowLayoutProperty->GetDisappearFontStyle().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void DatePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -324,9 +377,8 @@ void DatePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    if (dataPickerRowLayoutProperty->HasColor()) {
-        textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetColor().value());
-    }
+    textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetColor().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (dataPickerRowLayoutProperty->HasFontSize()) {
         textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetFontSize().value());
     } else {
@@ -334,9 +386,12 @@ void DatePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         textLayoutProperty->UpdateAdaptMinFontSize(
             pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
     }
-    if (dataPickerRowLayoutProperty->HasWeight()) {
-        textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetWeight().value());
-    }
+    textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetWeight().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(dataPickerRowLayoutProperty->GetFontFamily().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(dataPickerRowLayoutProperty->GetFontStyle().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -344,18 +399,20 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    Color themeSelectedColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
-    Color selectedColor = dataPickerRowLayoutProperty->GetSelectedColor().value_or(themeSelectedColor);
-    textLayoutProperty->UpdateTextColor(selectedColor);
-    FontWeight themeFontWeight = pickerTheme->GetOptionStyle(true, false).GetFontWeight();
-    FontWeight selectedFontWeight = dataPickerRowLayoutProperty->GetSelectedWeight().value_or(themeFontWeight);
-    textLayoutProperty->UpdateFontWeight(selectedFontWeight);
+    textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetSelectedColor().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     if (dataPickerRowLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetSelectedFontSize().value());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
         textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
     }
+    textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetSelectedWeight().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(dataPickerRowLayoutProperty->GetSelectedFontFamily().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(dataPickerRowLayoutProperty->GetSelectedFontStyle().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
 }
 
 void DatePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
@@ -364,11 +421,7 @@ void DatePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE) {
-        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
-    } else {
-        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value());
-    }
+    gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
     dividerHeight_ = static_cast<float>(
         gradientHeight_ + pickerTheme->GetDividerSpacing().Value() + pickerTheme->GetGradientHeight().Value());
     dividerSpacingWidth_ = static_cast<float>(pickerTheme->GetDividerSpacing().Value() * TEXT_WEIGHT_NUMBER);
@@ -384,8 +437,8 @@ bool DatePickerColumnPattern::NotLoopOptions() const
     return totalOptionCount <= showOptionCount / 2 + 1; // the critical value of loop condition.
 }
 
-void DatePickerColumnPattern::AddAnimationTextProperties(uint32_t currentIndex,
-    const RefPtr<TextLayoutProperty>& textLayoutProperty)
+void DatePickerColumnPattern::AddAnimationTextProperties(
+    uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
     DateTextProperties properties;
     if (textLayoutProperty->HasFontSize()) {
@@ -458,18 +511,20 @@ void DatePickerColumnPattern::FlushAnimationTextProperties(bool isDown)
     }
 }
 
-void DatePickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-    uint32_t index, uint32_t showCount, bool isDown, double scale)
+void DatePickerColumnPattern::TextPropertiesLinearAnimation(
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index, uint32_t showCount, bool isDown, double scale)
 {
     if (index >= animationProperties_.size()) {
         LOGE("Animation Properties vactor is break.");
         return;
     }
-    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
-        return;
-    }
     Dimension startFontSize = animationProperties_[index].fontSize;
     Color startColor = animationProperties_[index].currentColor;
+    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
+        textLayoutProperty->UpdateFontSize(startFontSize);
+        textLayoutProperty->UpdateTextColor(startColor);
+        return;
+    }
     Dimension endFontSize;
     Color endColor;
     if (!isDown) {
@@ -488,6 +543,9 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
 
 void DatePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
 {
+    if (scale > 1) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     uint32_t showCount = GetShowCount();
@@ -504,20 +562,19 @@ void DatePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
         RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
-        textNode->MarkModifyDone();
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
         iter++;
     }
 }
 
-Dimension DatePickerColumnPattern::LinearFontSize(const Dimension& startFontSize,
-    const Dimension& endFontSize, double percent)
+Dimension DatePickerColumnPattern::LinearFontSize(
+    const Dimension& startFontSize, const Dimension& endFontSize, double percent)
 {
     return startFontSize + (endFontSize - startFontSize) * percent;
 }
 
-bool DatePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly,
-    bool isUpdateAnimationProperties)
+bool DatePickerColumnPattern::InnerHandleScroll(
+    bool isDown, bool isUpatePropertiesOnly, bool isUpdateAnimationProperties)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -537,6 +594,25 @@ bool DatePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
+
+    auto textNodes = host->GetChildren();
+    DatePickerScrollDirection dir = isDown ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
+    if (dir == DatePickerScrollDirection::UP) {
+        for (auto iter = textNodes.begin(); iter != (--textNodes.end()); iter++) {
+            auto curNode = DynamicCast<FrameNode>(*iter);
+            auto shiftIter = std::next(iter, 1);
+            auto shiftNode = DynamicCast<FrameNode>(*shiftIter);
+            ShiftOptionProp(curNode, shiftNode);
+        }
+    } else {
+        for (auto iter = textNodes.rbegin(); iter != (--textNodes.rend()); iter++) {
+            auto curNode = DynamicCast<FrameNode>(*iter);
+            auto shiftIter = std::next(iter, 1);
+            auto shiftNode = DynamicCast<FrameNode>(*shiftIter);
+            ShiftOptionProp(curNode, shiftNode);
+        }
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     return true;
 }
 
@@ -558,7 +634,7 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
+        if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             return;
         }
         pattern->HandleDragEnd();
@@ -592,7 +668,7 @@ void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 
 void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
-    if (event.GetInputEventType() == InputEventType::AXIS) {
+    if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
     }
@@ -600,7 +676,8 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
     CHECK_NULL_VOID_NOLOG(GetHost());
     CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
-    double offsetY = event.GetGlobalPoint().GetY();
+    auto offsetY =
+        event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
         return;
     }
@@ -626,12 +703,23 @@ void DatePickerColumnPattern::HandleDragEnd()
         ScrollOption(0.0);
         return;
     }
+    DatePickerScrollDirection dir =
+        scrollDelta_ > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
+    int32_t middleIndex = GetShowCount() / 2;
+    auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
+                                                                : optionProperties_[middleIndex].nextDistance;
+    auto shiftThreshold = shiftDistance / 2;
+    if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
+        InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
+        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
+    }
     auto curve = CreateAnimation(scrollDelta_, 0.0);
     fromController_->ClearInterpolators();
     fromController_->AddInterpolator(curve);
     fromController_->Play();
     frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
+
 void DatePickerColumnPattern::CreateAnimation()
 {
     CHECK_NULL_VOID_NOLOG(!animationCreated_);
@@ -681,37 +769,44 @@ void DatePickerColumnPattern::HandleCurveStopped()
 
 void DatePickerColumnPattern::ScrollOption(double delta, bool isJump)
 {
-    UpdateScrollDelta(delta);
-    double oldDelta = scrollDelta_;
     scrollDelta_ = delta;
+    auto midIndex = GetShowCount() / 2;
+    DatePickerScrollDirection dir = delta > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
+    auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
+                                                                : optionProperties_[midIndex].nextDistance;
+    auto distancePercent = delta / shiftDistance;
+    auto textThresHold = optionProperties_[midIndex].height / 4; // ux required
+    auto textLinearPercent = 0.0;
+    if (std::abs(delta) > textThresHold) {
+        textLinearPercent = (std::abs(delta) - textThresHold) / (std::abs(shiftDistance) - textThresHold);
+    }
+    UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), textLinearPercent);
+    CalcAlgorithmOffset(dir, distancePercent);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
 
-    if ((isJump_ && LessOrEqual(delta * oldDelta, 0.0)) || NearZero(delta) || (isJump_ && isJump)) {
-        isJump_ = false;
-        FlushCurrentOptions();
-        return;
-    }
-    if (isJump) {
-        isJump_ = true;
-    }
-    if (NearZero(jumpInterval_)) {
-        return;
-    }
-    double scale = 0.0;
-    if (!isJump_) {
-        scale = fabs(delta) / (jumpInterval_ * 2);
-        UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), scale);
-    } else {
-        scale = ((2 * jumpInterval_) - fabs(delta))  / (jumpInterval_ * 2);
-        UpdateTextPropertiesLinear(!LessNotEqual(delta, 0.0), scale);
+void DatePickerColumnPattern::ResetAlgorithmOffset()
+{
+    algorithmOffset_.clear();
+
+    uint32_t counts = GetShowCount();
+    for (uint32_t i = 0; i < counts; i++) {
+        algorithmOffset_.emplace_back(0.0f);
     }
 }
 
-void DatePickerColumnPattern::UpdateScrollDelta(double delta)
+void DatePickerColumnPattern::CalcAlgorithmOffset(DatePickerScrollDirection dir, double distancePercent)
 {
-    SetCurrentOffset(delta);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    algorithmOffset_.clear();
+    uint32_t counts = GetShowCount();
+
+    for (uint32_t i = 0; i < counts; i++) {
+        auto distance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[i].prevDistance
+                                                               : optionProperties_[i].nextDistance;
+        algorithmOffset_.emplace_back(distance * distancePercent);
+    }
 }
 
 void DatePickerColumnPattern::UpdateToss(double offsetY)
@@ -726,23 +821,190 @@ void DatePickerColumnPattern::TossStoped()
     ScrollOption(0.0);
 }
 
+int32_t DatePickerColumnPattern::CalcScrollIndex(
+    int32_t totalOptionCount, int32_t currentIndex, bool canLoop, int32_t step)
+{
+    int32_t nextIndex = currentIndex;
+    if (!canLoop) {
+        // scroll down
+        if (step > 0) {
+            nextIndex = (currentIndex + step) > (totalOptionCount - 1) ? totalOptionCount - 1 : currentIndex + step;
+            // scroll up
+        } else if (step < 0) {
+            nextIndex = currentIndex + step < 0 ? 0 : currentIndex + step;
+        }
+    } else {
+        if (totalOptionCount != 0) {
+            nextIndex = (totalOptionCount + currentIndex + step) % totalOptionCount;
+        }
+    }
+    return nextIndex;
+}
+
+float DatePickerColumnPattern::GetShiftDistance(uint32_t index, DatePickerScrollDirection dir)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    uint32_t optionCounts = theme->GetShowOptionCount();
+    LOGD("DatePickerColumnPattern::GetShiftDistance start showCount %{public}d", optionCounts);
+    uint32_t nextIndex = 0;
+    float distance = 0.0f;
+    float val = 0.0f;
+    auto isDown = dir == DatePickerScrollDirection::DOWN;
+    if (optionCounts == 0) {
+        return distance;
+    }
+    if (isDown) {
+        nextIndex = (optionCounts + index + 1) % optionCounts; // index add one
+    } else {
+        nextIndex = (optionCounts + index - 1) % optionCounts; // index reduce one
+    }
+    switch (static_cast<DatePickerOptionIndex>(index)) {
+        case DatePickerOptionIndex::COLUMN_INDEX_0: // first
+            distance = (dir == DatePickerScrollDirection::DOWN) ? optionProperties_[index].height
+                                                                : (0.0f - optionProperties_[index].height);
+            break;
+        case DatePickerOptionIndex::COLUMN_INDEX_1:
+            if (dir == DatePickerScrollDirection::UP) {
+                distance = -optionProperties_[nextIndex].height;
+            } else {
+                distance = optionProperties_[index].height +
+                           (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
+                               MINDDLE_CHILD_INDEX;
+            }
+            break;
+        case DatePickerOptionIndex::COLUMN_INDEX_2:
+            val = optionProperties_[index].height / MINDDLE_CHILD_INDEX + optionProperties_[nextIndex].height -
+                  optionProperties_[nextIndex].fontheight / MINDDLE_CHILD_INDEX;
+            distance = (dir == DatePickerScrollDirection::DOWN) ? val : (0.0f - val);
+            break;
+        case DatePickerOptionIndex::COLUMN_INDEX_3:
+            if (dir == DatePickerScrollDirection::DOWN) {
+                distance = optionProperties_[nextIndex].height;
+            } else {
+                val = optionProperties_[index].height +
+                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
+                          MINDDLE_CHILD_INDEX;
+                distance = 0.0f - val;
+            }
+            break;
+        case DatePickerOptionIndex::COLUMN_INDEX_4: // last
+            distance = (dir == DatePickerScrollDirection::DOWN) ? optionProperties_[index].height
+                                                                : (0.0f - optionProperties_[index].height);
+            break;
+        default:
+            break;
+    }
+    return distance;
+}
+
+float DatePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, DatePickerScrollDirection dir)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    uint32_t optionCounts = theme->GetShowOptionCount();
+    uint32_t nextIndex = 0;
+    float distance = 0.0f;
+    float val = 0.0f;
+    auto isDown = dir == DatePickerScrollDirection::DOWN;
+    if (optionCounts == 0) {
+        return distance;
+    }
+    if (isDown) {
+        nextIndex = (optionCounts + index + 1) % optionCounts; // index add one
+    } else {
+        nextIndex = (optionCounts + index - 1) % optionCounts; // index reduce one
+    }
+
+    switch (static_cast<DatePickerOptionIndex>(index)) {
+        case DatePickerOptionIndex::COLUMN_INDEX_0: // first
+
+            if (dir == DatePickerScrollDirection::UP) {
+                distance = 0.0f - optionProperties_[index].height;
+            } else {
+                distance = optionProperties_[index].height +
+                           (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
+                               MINDDLE_CHILD_INDEX;
+            }
+            break;
+        case DatePickerOptionIndex::COLUMN_INDEX_1:
+            val = optionProperties_[index].height / MINDDLE_CHILD_INDEX + optionProperties_[nextIndex].height -
+                  optionProperties_[nextIndex].fontheight / MINDDLE_CHILD_INDEX;
+            distance = (dir == DatePickerScrollDirection::DOWN) ? val : (0.0f - val);
+            break;
+        case DatePickerOptionIndex::COLUMN_INDEX_2: // last
+            if (dir == DatePickerScrollDirection::DOWN) {
+                distance = optionProperties_[index].height;
+            } else {
+                val = optionProperties_[index].height +
+                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
+                          MINDDLE_CHILD_INDEX;
+                distance = 0.0f - val;
+            }
+            break;
+        default:
+            break;
+    }
+    return distance;
+}
+
+void DatePickerColumnPattern::SetOptionShiftDistance()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    uint32_t itemCounts = theme->GetShowOptionCount();
+    bool isLanscape = itemCounts == OPTION_COUNT_PHONE_LANDSCAPE;
+    for (uint32_t i = 0; i < itemCounts; i++) {
+        DatePickerOptionProperty& prop = optionProperties_[i];
+        if (isLanscape) {
+            prop.prevDistance = GetShiftDistanceForLandscape(i, DatePickerScrollDirection::UP);
+            prop.nextDistance = GetShiftDistanceForLandscape(i, DatePickerScrollDirection::DOWN);
+        } else {
+            prop.prevDistance = GetShiftDistance(i, DatePickerScrollDirection::UP);
+            prop.nextDistance = GetShiftDistance(i, DatePickerScrollDirection::DOWN);
+        }
+    }
+}
+
 void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     yLast_ = offsetY;
-    double dragDelta = yLast_ - yOffset_;
+    auto dragDelta = yLast_ - yOffset_;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
     }
+    auto midIndex = GetShowCount() / 2;
+    DatePickerScrollDirection dir = dragDelta > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
+    auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
+                                                                : optionProperties_[midIndex].nextDistance;
     // the abs of drag delta is less than jump interval.
-    if (LessNotEqual(0.0 - jumpInterval_, dragDelta) && LessNotEqual(dragDelta, jumpInterval_)) {
-        ScrollOption(dragDelta);
-        return;
+    if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
+        InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
+        dragDelta = dragDelta - (abs(shiftDistance) * (LessNotEqual(dragDelta, 0.0) ? -1 : 1));
+        yOffset_ = offsetY;
     }
     // update selected option
-    InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, true);
-    double jumpDelta = (LessNotEqual(dragDelta, 0.0) ? jumpInterval_ : 0.0 - jumpInterval_);
-    ScrollOption(jumpDelta, true);
-    yOffset_ = offsetY - jumpDelta;
+    ScrollOption(dragDelta);
+}
+
+void DatePickerColumnPattern::ShiftOptionProp(RefPtr<FrameNode> curNode, RefPtr<FrameNode> shiftNode)
+{
+    RefPtr<TextPattern> curPattern = curNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(curPattern);
+    RefPtr<TextLayoutProperty> curLayoutProperty = curPattern->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(curLayoutProperty);
+
+    RefPtr<TextPattern> shiftPattern = shiftNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(shiftPattern);
+    RefPtr<TextLayoutProperty> shiftLayoutProperty = shiftPattern->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(shiftLayoutProperty);
+    curLayoutProperty->UpdateFontWeight(shiftLayoutProperty->GetFontWeight().value_or(FontWeight::W100));
 }
 
 bool DatePickerColumnPattern::CanMove(bool isDown) const
@@ -797,5 +1059,39 @@ void DatePickerColumnPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     });
+}
+
+RefPtr<ClickEvent> DatePickerColumnPattern::CreateItemClickEventListener(RefPtr<DatePickerEventParam> param)
+{
+    auto clickEventHandler = [param, weak = WeakClaim(this)](const GestureEvent& /* info */) {
+        auto pattern = weak.Upgrade();
+        pattern->OnAroundButtonClick(param);
+    };
+    auto listener = AceType::MakeRefPtr<NG::ClickEvent>(clickEventHandler);
+    return listener;
+}
+
+void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> param)
+{
+    int32_t middleIndex = GetShowCount() / 2;
+    int32_t step = param->itemIndex_ - middleIndex;
+    if (step != 0) {
+        if (fromController_->IsRunning()) {
+            fromController_->Finish();
+        }
+        for (int32_t i = 0; i < abs(step); i++) {
+            InnerHandleScroll(step > 0 ? true : false);
+        }
+        auto distance =
+            (step > 0 ? optionProperties_[middleIndex].prevDistance : optionProperties_[middleIndex].nextDistance) *
+            std::abs(step);
+        auto curveTop = CreateAnimation(abs(distance), 0.0);
+        auto curveBottom = CreateAnimation(0 - abs(distance), 0.0);
+        fromController_->ClearInterpolators();
+
+        fromController_->AddInterpolator(step > 0 ? curveTop : curveBottom);
+        fromController_->SetDuration(CLICK_ANIMATION_DURATION);
+        fromController_->Play();
+    }
 }
 } // namespace OHOS::Ace::NG

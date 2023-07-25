@@ -65,7 +65,7 @@ void TextPattern::OnAttachToFrameNode()
         PipelineContext::GetCurrentContext()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->GetRenderContext()->SetClipToFrame(true);
+        host->GetRenderContext()->UpdateClipEdge(true);
     }
 }
 
@@ -621,7 +621,7 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     itemInfo.extraInfo = selectedStr;
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-    UdmfClient::GetInstance()->AddTextRecord(unifiedData, selectedStr);
+    UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
 
     AceEngineExt::GetInstance().DragStartExt();
@@ -681,16 +681,16 @@ float TextPattern::GetLineHeight() const
     return selectedRects.front().Height();
 }
 
-RSTextRect TextPattern::ConvertRect(const Rect& rect)
+RSTypographyProperties::TextBox TextPattern::ConvertRect(const Rect& rect)
 {
     return { RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()), RSTextDirection::LTR };
 }
 
-std::vector<RSTextRect> TextPattern::GetTextBoxes()
+std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
 {
     std::vector<Rect> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
-    std::vector<RSTextRect> res;
+    std::vector<RSTypographyProperties::TextBox> res;
     res.reserve(selectedRects.size());
     for (auto&& rect : selectedRects) {
         res.emplace_back(ConvertRect(rect));
@@ -919,8 +919,9 @@ void TextPattern::FontRegisterCallback(RefPtr<SpanNode> spanNode)
         }
     };
     auto fontManager = pipelineContext->GetFontManager();
-    if (fontManager && spanNode->GetFontFamily()) {
-        for (const auto& familyName : spanNode->GetFontFamily().value()) {
+    auto fontFamilies = spanNode->GetFontFamily();
+    if (fontManager && fontFamilies.has_value()) {
+        for (const auto& familyName : fontFamilies.value()) {
             fontManager->RegisterCallbackNG(spanNode, familyName, callback);
         }
     }
@@ -979,6 +980,11 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
 void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(child);
+    auto chidNode = DynamicCast<FrameNode>(child);
+    if (chidNode && chidNode->GetLayoutProperty() && chidNode->GetLayoutProperty()->IsOverlayNode()) {
+        return;
+    }
+
     if (child->GetTag() == V2::SPAN_ETS_TAG) {
         auto spanNode = DynamicCast<SpanNode>(child);
         if (spanNode) {

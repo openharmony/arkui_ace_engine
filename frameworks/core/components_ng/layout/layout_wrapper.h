@@ -41,164 +41,59 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 
-using LazyBuildFunction = std::function<void(RefPtr<LayoutWrapper>)>;
-
-class ACE_FORCE_EXPORT LayoutWrapper : public AceType {
+class ACE_FORCE_EXPORT LayoutWrapper : public virtual AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
-    LayoutWrapper(
-        WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty);
-    LayoutWrapper(LazyBuildFunction&& fun)
-        : geometryNode_(MakeRefPtr<GeometryNode>()), layoutProperty_(MakeRefPtr<LayoutProperty>()),
-          lazyBuildFunction_(fun)
-    {}
+    LayoutWrapper(WeakPtr<FrameNode> hostNode) : hostNode_(std::move(hostNode)) {}
     ~LayoutWrapper() override = default;
 
-    void Update(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty);
-
-    void AppendChild(const RefPtr<LayoutWrapper>& child, bool isOverlayNode = false);
-
-    void SetLayoutWrapperBuilder(const RefPtr<LayoutWrapperBuilder>& builder)
-    {
-        CHECK_NULL_VOID(builder);
-        builder->SetStartIndex(currentChildCount_);
-        currentChildCount_ += builder->GetTotalCount();
-        layoutWrapperBuilder_ = builder;
-    }
-
-    void SetLayoutAlgorithm(const RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithm)
-    {
-        layoutAlgorithm_ = layoutAlgorithm;
-    }
-
-    const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm() const
-    {
-        return layoutAlgorithm_;
-    }
-
+    virtual const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) = 0;
     // This will call child and self measure process.
-    void Measure(const std::optional<LayoutConstraintF>& parentConstraint);
+    virtual void Measure(const std::optional<LayoutConstraintF>& parentConstraint) = 0;
 
     // Called to perform layout children.
-    void Layout();
+    virtual void Layout() = 0;
 
-    const RefPtr<GeometryNode>& GetGeometryNode() const
-    {
-        return geometryNode_;
-    }
+    virtual int32_t GetTotalChildCount() const = 0;
+    virtual const RefPtr<GeometryNode>& GetGeometryNode() const = 0;
+    virtual const RefPtr<LayoutProperty>& GetLayoutProperty() const = 0;
 
-    const RefPtr<LayoutProperty>& GetLayoutProperty() const
-    {
-        return layoutProperty_;
-    }
-
-    // Calling these two method will mark the node as in use by default, nodes marked as use state will be added to the
-    // render area, and nodes in the render area will be mounted on the render tree after the layout is complete. You
-    // can call the RemoveChildInRenderTree method to explicitly remove the node from the area to be rendered.
-    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(int32_t index, bool addToRenderTree = true);
-    const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true);
-
-    int32_t GetTotalChildCount() const
-    {
-        return currentChildCount_;
-    }
-
-    std::list<RefPtr<FrameNode>> GetChildrenInRenderArea() const;
-
-    static void RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper);
-    void RemoveChildInRenderTree(int32_t index);
-    void RemoveAllChildInRenderTree();
-
-    void ResetHostNode();
+    virtual RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) = 0;
+    virtual const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
+    virtual void RemoveChildInRenderTree(uint32_t index) = 0;
+    virtual void RemoveAllChildInRenderTree() = 0;
 
     RefPtr<FrameNode> GetHostNode() const;
-    WeakPtr<FrameNode> GetWeakHostNode() const;
-    std::string GetHostTag() const;
-    int32_t GetHostDepth() const;
-
-    bool IsActive() const
-    {
-        return isActive_;
-    }
-
-    void SetActive(bool active = true)
-    {
-        isActive_ = active;
-    }
+    virtual const std::string& GetHostTag() const = 0;
+    virtual bool IsActive() const = 0;
+    virtual void SetActive(bool active = true) = 0;
 
     bool IsRootMeasureNode() const
     {
         return isRootNode_;
     }
 
-    void SetRootMeasureNode()
+    void SetRootMeasureNode(bool isRoot = true)
     {
-        isRootNode_ = true;
+        isRootNode_ = isRoot;
     }
 
-    bool CheckShouldRunOnMain()
+    virtual bool IsOutOfLayout() const
     {
-        return (CanRunOnWhichThread() & MAIN_TASK) == MAIN_TASK;
+        return false;
     }
 
-    TaskThread CanRunOnWhichThread()
+    virtual bool SkipMeasureContent() const;
+
+    virtual void SetCacheCount(
+        int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) = 0;
+    virtual float GetBaselineDistance() const = 0;
+    virtual bool CheckShouldRunOnMain()
     {
-        if (layoutWrapperBuilder_) {
-            return MAIN_TASK;
-        }
-        TaskThread taskThread = UNDEFINED_TASK;
-        if (layoutAlgorithm_) {
-            taskThread = taskThread | layoutAlgorithm_->CanRunOnWhichThread();
-        }
-        if ((taskThread & MAIN_TASK) == MAIN_TASK) {
-            return MAIN_TASK;
-        }
-        for (const auto& child : children_) {
-            taskThread = taskThread | child->CanRunOnWhichThread();
-        }
-        return taskThread;
+        return true;
     }
 
-    bool SkipMeasureContent() const;
-
-    bool IsContraintNoChanged() const
-    {
-        return isConstraintNotChanged_;
-    }
-
-    // dirty layoutBox mount to host and switch layoutBox.
-    // Notice: only the cached layoutWrapper (after call GetChildLayoutWrapper) will update the host.
-    void MountToHostOnMainThread();
-    void SwapDirtyLayoutWrapperOnMainThread();
-    void SwapDirtyLayoutWrapperOnMainThreadForChild(RefPtr<LayoutWrapper> child);
-
-    bool IsForceSyncRenderTree() const
-    {
-        return needForceSyncRenderTree_;
-    }
-
-    float GetBaselineDistance() const
-    {
-        if (children_.empty()) {
-            return geometryNode_->GetBaselineDistance();
-        }
-        float distance = 0.0;
-        for (const auto& child : children_) {
-            float childBaseline = child->GetBaselineDistance();
-            distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
-        }
-        return distance;
-    }
-
-    bool IsOutOfLayout() const
-    {
-        return outOfLayout_;
-    }
-
-    void SetOutOfLayout(bool outOfLayout)
-    {
-        outOfLayout_ = outOfLayout;
-    }
+    virtual bool CheckNeedForceMeasureAndLayout() = 0;
 
     void SetIsOverlayNode(bool isOverlayNode)
     {
@@ -211,72 +106,41 @@ public:
     void AddNodeLayoutTime(int64_t time);
     // ------------------------------------------------------------------------
 
-    // Check the flag attribute with descendant node
-    bool CheckNeedForceMeasureAndLayout();
+    virtual void BuildLazyItem() {}
 
-    bool CheckChildNeedForceMeasureAndLayout();
-
-    void SetCacheCount(int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt);
-
-    void SetLongPredictTask();
-
-    void BuildLazyItem();
-
-    std::pair<int32_t, int32_t> GetLazyBuildRange();
+    bool IsContraintNoChanged() const
+    {
+        return isConstraintNotChanged_;
+    }
+    virtual void SetLongPredictTask() {}
 
     static void ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint);
 
     // apply keyboard avoidance on content rootNodes
-    static void AvoidKeyboard();
+    void AvoidKeyboard();
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
-    static void ExpandSafeArea();
+    void ExpandSafeArea();
 
     // save geometry states before SafeArea expansion / keyboard avoidance
-    static void SaveGeoState();
+    void SaveGeoState();
     // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
     void RestoreGeoState();
 
-private:
+protected:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
 
     void OffsetNodeToSafeArea();
-    void ExpandSafeAreaInner();
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
     void ExpandIntoKeyboard();
-    void LayoutOverlay();
-
-    // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
-    std::list<RefPtr<LayoutWrapper>> children_;
-    // Speed up the speed of getting child by index.
-    std::unordered_map<int32_t, RefPtr<LayoutWrapper>> childrenMap_;
-    
-    RefPtr<LayoutWrapper> overlayChild_;
-
-    // cached for GetAllChildrenWithBuild function.
-    std::list<RefPtr<LayoutWrapper>> cachedList_;
-
-    // The Wrapper Created by LazyForEach stores in the LayoutWrapperBuilder object.
-    RefPtr<LayoutWrapperBuilder> layoutWrapperBuilder_;
 
     WeakPtr<FrameNode> hostNode_;
-    RefPtr<GeometryNode> geometryNode_;
-    RefPtr<LayoutProperty> layoutProperty_;
-    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
 
-    int32_t currentChildCount_ = 0;
     bool isConstraintNotChanged_ = false;
-    bool isActive_ = false;
-    bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;
     bool isOverlayNode_ = false;
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
-
-    LazyBuildFunction lazyBuildFunction_;
-
-    // When the location property is set, it departs from the layout flow.
-    bool outOfLayout_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

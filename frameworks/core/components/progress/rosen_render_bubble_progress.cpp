@@ -15,7 +15,11 @@
 
 #include "core/components/progress/rosen_render_bubble_progress.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "base/geometry/offset.h"
 #include "core/pipeline/base/rosen_render_context.h"

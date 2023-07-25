@@ -78,7 +78,7 @@ public:
 
     void PaintCircle(DrawingContext& context, OffsetF offset, float date) const;
     void PaintLinearProgress(DrawingContext& context, OffsetF offset) const;
-    void PaintBackground(RSCanvas& canvas, OffsetF offset, float totalWidth, float height) const;
+    void PaintBackground(RSCanvas& canvas, OffsetF offset, float totalWidth, float height, float segmentWidth) const;
     void PaintColorSegment(RSCanvas& canvas, const LinearData& segmentLinearData) const;
     void PaintSpace(RSCanvas& canvas, OffsetF offset, float spaceWidth, float xSpace, float height) const;
     void PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const;

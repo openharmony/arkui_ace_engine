@@ -257,6 +257,7 @@ RefPtr<FrameNode> CreateToolbarItemTextNode(const std::string& text)
     textLayoutProperty->UpdateFontSize(theme->GetToolBarItemFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetToolBarItemFontColor());
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     return textNode;
 }
 
@@ -333,7 +334,7 @@ void UpdateToolbarItemNodeWithConfiguration(
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     bool navigationEnableStatus = CheckNavigationGroupEnableStatus();
-    if (barItem.status == NG::ToolbarItemStatus::DISABLED || !navigationEnableStatus) {
+    if (barItem.status == NG::NavToolbarItemStatus::DISABLED || !navigationEnableStatus) {
         auto renderContext = barItemNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateOpacity(theme->GetToolbarItemDisabledAlpha());
@@ -348,7 +349,7 @@ void UpdateToolbarItemNodeWithConfiguration(
     }
 
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
-    if (barItem.status == NG::ToolbarItemStatus::ACTIVE && barItem.activeIcon.has_value() &&
+    if (barItem.status == NG::NavToolbarItemStatus::ACTIVE && barItem.activeIcon.has_value() &&
         !barItem.activeIcon.value().empty() && barItem.icon.has_value() && !barItem.icon.value().empty()) {
         ImageSourceInfo initialIconInfo(barItem.icon.value());
         initialIconInfo.SetFillColor(theme->GetToolbarIconColor());
@@ -597,8 +598,8 @@ void NavigationModelNG::Create()
         // toolBar node
         if (!navBarNode->GetToolBarNode()) {
             int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            auto toolBarNode = ToolbarNode::GetOrCreateToolbarNode(
-                V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<ToolbarPattern>(); });
+            auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
+                V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
             navBarNode->AddChild(toolBarNode);
             navBarNode->SetToolBarNode(toolBarNode);
             navBarNode->SetPreToolBarNode(toolBarNode);
@@ -939,6 +940,21 @@ void NavigationModelNG::SetHideTitleBar(bool hideTitleBar)
 
 void NavigationModelNG::SetHideNavBar(bool hideNavBar)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
+
+    auto lastHideNavBarValue = navigationLayoutProperty->GetHideNavBar();
+    if (lastHideNavBarValue.has_value()) {
+        pattern->SetNavBarVisibilityChange(hideNavBar != lastHideNavBarValue.value());
+    } else {
+        pattern->SetNavBarVisibilityChange(true);
+    }
+
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
 }
 
@@ -954,6 +970,14 @@ void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap,
 
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
+    titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
+    titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    titleBarNode->MarkModifyDone();
     auto navBarContentNode = navBarNode->GetNavBarContentNode();
     CHECK_NULL_VOID(navBarContentNode);
     if (navBarContentNode->GetChildren().empty()) {
@@ -1078,9 +1102,9 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
         navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     } else {
-        auto toolbarNode = AceType::DynamicCast<ToolbarNode>(navBarNode->GetPreToolBarNode());
+        auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
         auto containerNode = toolbarNode->GetToolbarContainerNode();
-        if (toolbarNode && containerNode && static_cast<int32_t>(containerNode->GetChildren().size()) != 0) {
+        if (toolbarNode && containerNode) {
             navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
             auto preToolbarNode = navBarNode->GetPreToolBarNode();
             preToolbarNode->RemoveChild(containerNode);
@@ -1089,8 +1113,9 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
             navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::ADD);
         }
     }
-    auto toolBarNode = AceType::DynamicCast<ToolbarNode>(navBarNode->GetPreToolBarNode());
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
+    toolBarNode->SetIsUseNewToolbar(true);
     auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
@@ -1166,6 +1191,8 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
     navBarPattern->SetTitleBarMenuItems(menuItems);
+    navBarPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navBarPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
     navBarNode->UpdatePrevMenuIsCustom(false);
 }
 
@@ -1203,7 +1230,7 @@ void NavigationModelNG::SetOnTitleModeChange(std::function<void(NG::NavigationTi
     CHECK_NULL_VOID(navigationGroupNode);
     auto eventHub = navigationGroupNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnTitleModeChange(std::move(onTitleModeChange));
+    eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
 
 void NavigationModelNG::SetUsrNavigationMode(NavigationMode mode)

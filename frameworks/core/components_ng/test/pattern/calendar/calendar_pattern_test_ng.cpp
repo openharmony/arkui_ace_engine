@@ -708,16 +708,16 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest007, TestSize.Level1)
 
     paintMethod->SetDayTextStyle(dateTextStyle, lunarTextStyle, obtainedMonth.days[0]);
 
-    EXPECT_EQ(dateTextStyle.color, RSColor(0xffffffff));
-    EXPECT_EQ(lunarTextStyle.color, RSColor(0xffffffff));
+    EXPECT_EQ(dateTextStyle.color_, RSColor(0xffffffff));
+    EXPECT_EQ(lunarTextStyle.color_, RSColor(0xffffffff));
 
     /**
      * @tc.steps: step3. Set the first day focused, check the second day text style.
      * @tc.expected: step3. The text color is 0xff000000.
      */
     paintMethod->SetDayTextStyle(dateTextStyle, lunarTextStyle, obtainedMonth.days[1]);
-    EXPECT_EQ(dateTextStyle.color, RSColor(0xff000000));
-    EXPECT_EQ(lunarTextStyle.color, RSColor(0xff000000));
+    EXPECT_EQ(dateTextStyle.color_, RSColor(0xff000000));
+    EXPECT_EQ(lunarTextStyle.color_, RSColor(0xff000000));
 }
 
 /**
@@ -798,7 +798,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarPatternTest001, TestSize.Level1)
     auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
     ASSERT_NE(calendarPattern, nullptr);
 
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     EXPECT_FALSE(calendarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true));
 }
@@ -1081,7 +1081,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest001, TestSize.Level1)
     auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
     ASSERT_NE(calendarMonthPattern, nullptr);
 
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     DirtySwapConfig config;
     config.skipMeasure = true;
@@ -1247,7 +1247,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarLayoutAlgorithmTest001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     auto pipeline = frameNode->GetContext();
     ASSERT_NE(pipeline, nullptr);
@@ -1526,41 +1526,41 @@ HWTEST_F(CalendarPatternTestNg, CalendarPaintMethodTest005, TestSize.Level1)
      * @tc.expected: step3. The focused text color is same as text color, expected 0xff00ff00.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[0]);
-    EXPECT_EQ(workOffTextStyle.color, RSColor(0xff00ff00));
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff00ff00));
 
     /**
      * @tc.steps: step4. Check the offWork color.
      * @tc.expected: step4. The text color expected 0xffff0000, it is work.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[2]);
-    EXPECT_EQ(workOffTextStyle.color, RSColor(0xffff0000));
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
 
     /**
      * @tc.steps: step5. Check the offWork color.
      * @tc.expected: step5. The text color expected 0xffff0000, it is off.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[5]);
-    EXPECT_EQ(workOffTextStyle.color, RSColor(0xff0000ff));
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff0000ff));
 
     /**
      * @tc.steps: step6. Check the offWork color.
      * @tc.expected: step6. The text color expected 0xffff0000, it is off.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[6]);
-    EXPECT_EQ(workOffTextStyle.color, RSColor(0xff0000ff));
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff0000ff));
 
     /**
      * @tc.steps: step7. Check the offWork color.
      * @tc.expected: step7. The text color expected 0xffff0000, it is work.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[7]);
-    EXPECT_EQ(workOffTextStyle.color, RSColor(0xffff0000));
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
 
     /**
      * @tc.steps: step8. Check the offWork color.
      * @tc.expected: step8. The text color expected 0xffff0000, it is work.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[9]);
-    EXPECT_EQ(workOffTextStyle.color, RSColor(0xffff0000));
+    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
 }
 } // namespace OHOS::Ace::NG

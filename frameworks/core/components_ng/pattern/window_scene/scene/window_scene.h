@@ -26,8 +26,16 @@ public:
     explicit WindowScene(const sptr<Rosen::Session>& session);
     ~WindowScene() override;
 
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
+    {
+        return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
+    }
+
     void OnSetDepth(const int32_t depth) override;
+
 private:
+    void OnAttachToFrameNode() override;
+
     bool HasStartingPage() override
     {
         return true;
@@ -36,7 +44,6 @@ private:
     void UpdateSession(const sptr<Rosen::Session>& session);
 
     void OnForeground() override;
-    void OnBackground() override;
 
     friend class WindowSceneModel;
 

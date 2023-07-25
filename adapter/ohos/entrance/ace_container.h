@@ -288,6 +288,13 @@ public:
         return parentId_;
     }
 
+    void SetFocusWindowId(uint32_t focusWindowId)
+    {
+        if (pipelineContext_) {
+            pipelineContext_->SetFocusWindowId(focusWindowId);
+        }
+    }
+
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
@@ -405,6 +412,7 @@ public:
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
+    void ReloadForm();
 
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
@@ -413,6 +421,7 @@ public:
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
     bool IsLauncherContainer() override;
+    bool IsScenceBoardWindow() override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     void GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType) override;

@@ -23,6 +23,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
@@ -60,6 +61,12 @@ constexpr float FLOAT_240 = 240.0f;
 const std::string SHOW_ICON_STR = "123";
 const std::string HIDDEN_ICON_STR = "123";
 const std::string SWITCHING_ICON_STR = "123";
+constexpr Dimension IMAGE_WIDTH = 10.0_vp;
+constexpr Dimension IMAGE_HEIGHT = 10.0_vp;
+constexpr Dimension DEFAULT_IMAGE_WIDTH_V10 = 24.0_vp;
+constexpr Dimension DEFAULT_IMAGE_HEIGHT_V10 = 24.0_vp;
+constexpr int32_t PLATFORM_VERSION_9 = 9;
+constexpr int32_t PLATFORM_VERSION_10 = 10;
 } // namespace
 
 class SideBarPatternTestNg : public testing::Test {
@@ -360,8 +367,12 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg011, TestSize.Level1)
     auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
     ASSERT_NE(sideBarTheme, nullptr);
     Color controlButtonColor = sideBarTheme->GetControlImageColor();
-
-    auto imgFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonChildren = buttonFrameNode->GetChildren();
+    ASSERT_FALSE(buttonChildren.empty());
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(buttonChildren.front());
+    ASSERT_NE(imgFrameNode, nullptr);
     auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
 
@@ -649,7 +660,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg022, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(hostNode, geometryNode, layoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(
         AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>());
@@ -950,7 +961,12 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg031, TestSize.Level1)
     ASSERT_NE(sideBarTheme, nullptr);
     Color controlButtonColor = sideBarTheme->GetControlImageColor();
 
-    auto imgFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonChildren = buttonFrameNode->GetChildren();
+    ASSERT_FALSE(buttonChildren.empty());
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(buttonChildren.front());
+    ASSERT_NE(imgFrameNode, nullptr);
     auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
     auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
@@ -959,46 +975,67 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg031, TestSize.Level1)
 
 /**
  * @tc.name: SideBarPatternTestNg032
- * @tc.desc: Test SideBar InitControlButtonMouseEvent
+ * @tc.desc: Test SideBar OnUpdateShowControlButton
  * @tc.type: FUNC
  */
 HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg032, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create sideBar and controlbutton node,then register inputEvent to inputeEventHub.
-     * @tc.expected: check whether the controlButtonHoverEvent_ is not nullptr.
+     * @tc.steps: step1. create control button.
      */
+    SideBarContainerModelNG SideBarContainerModelInstance;
     auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
     ASSERT_NE(pattern, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
     ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
     pattern->AttachToFrameNode(frameNode);
-    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imgNode = FrameNode::GetOrCreateFrameNode(
-        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    ASSERT_NE(imgNode, nullptr);
-    auto imgHub = imgNode->GetEventHub<EventHub>();
-    ASSERT_NE(imgHub, nullptr);
-    auto inputHub = imgHub->GetOrCreateInputEventHub();
-    ASSERT_NE(inputHub, nullptr);
-    pattern->SetHasControlButton(true);
-    EXPECT_EQ(pattern->controlButtonHoverEvent_, nullptr);
-    pattern->InitControlButtonMouseEvent(inputHub);
-    EXPECT_NE(pattern->controlButtonHoverEvent_, nullptr);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+    SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+
+    /**
+     * @tc.steps: step2. Set showControlButton's value to false, then execute OnUpdateShowControlButton.
+     * @tc.expected: button is not visible.
+     */
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateShowControlButton(false);
+    pattern->OnUpdateShowControlButton(layoutProperty, frameNode);
+
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto visibility = buttonLayoutProperty->GetVisibility();
+    EXPECT_EQ(visibility, VisibleType::GONE);
+
+    /**
+     * @tc.steps: step3. Set showControlButton's value to true, then execute OnUpdateShowControlButton.
+     * @tc.expected: button is visible.
+     */
+    layoutProperty->UpdateShowControlButton(true);
+    pattern->OnUpdateShowControlButton(layoutProperty, frameNode);
+    buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    visibility = buttonLayoutProperty->GetVisibility();
+    EXPECT_EQ(visibility, VisibleType::VISIBLE);
 }
 
 /**
  * @tc.name: SideBarPatternTestNg033
- * @tc.desc: Test SideBar OnControlButtonHover
+ * @tc.desc: Test SideBar GetControlImageSize
  * @tc.type: FUNC
  */
 HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg033, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create sideBarContainer frameNode, then execute OnControlButtonHover method(hover is true).
-     * @tc.expected: check whether the isControlButtonHover_ is false.
+     * @tc.steps: step1. create sidebarContainer frame node.
      */
     auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1006,83 +1043,33 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg033, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
     ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
     pattern->AttachToFrameNode(frameNode);
 
-    pattern->OnControlButtonHover(true);
-    EXPECT_FALSE(pattern->isControlButtonHover_);
+    /**
+     * @tc.steps: step2. Set platform version to 10, then execute GetControlImageSize.
+     * @tc.expected: image's width is 24vp, and height is 24vp.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    Dimension width;
+    Dimension height;
+    pattern->GetControlImageSize(width, height);
+    EXPECT_EQ(width, DEFAULT_IMAGE_WIDTH_V10);
+    EXPECT_EQ(height, DEFAULT_IMAGE_HEIGHT_V10);
 
     /**
-     * @tc.steps: step2. create controlButton node,and mount controlButton node to its parent frameNode.
-     * Then execute OnControlButtonHover method(hover is true).
-     * @tc.expected: check whether the isControlButtonHover_ is true.
+     * @tc.steps: step3. Set image's width and height to 10vp, then execute GetControlImageSize.
+     * @tc.expected: image's width is 10vp, and height is 10vp.
      */
-    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imgNode = FrameNode::GetOrCreateFrameNode(
-        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    ASSERT_NE(imgNode, nullptr);
-    imgNode->MountToParent(frameNode);
-    pattern->OnControlButtonHover(true);
-    EXPECT_TRUE(pattern->isControlButtonHover_);
-
-    /**
-     * @tc.steps: step3. remove hover from the controlButton.
-     * @tc.expected: check whether the isControlButtonHover_ is false.
-     */
-    pattern->OnControlButtonHover(false);
-    EXPECT_FALSE(pattern->isControlButtonHover_);
-}
-
-/**
- * @tc.name: SideBarPatternTestNg034
- * @tc.desc: Test SideBar HandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg034, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sideBarContainer frameNode,then execute HandleMouseEvent method.
-     * @tc.expected: check whether the isControlButtonHover_ is false.
-     */
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-
-    MouseInfo info;
-    info.SetAction(MouseAction::PRESS);
-    info.SetButton(MouseButton::LEFT_BUTTON);
-    pattern->HandleMouseEvent(info);
-    EXPECT_FALSE(pattern->isControlButtonHover_);
-
-    /**
-     * @tc.steps: step2. create controlButton frameNode, and mount it to its parent frameNode.
-     * Then execute HandleMouseEvent method.
-     * @tc.expected: check whether the isControlButtonHover_ is false.
-     */
-    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imgNode = FrameNode::GetOrCreateFrameNode(
-        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    ASSERT_NE(imgNode, nullptr);
-    imgNode->MountToParent(frameNode);
-
-    pattern->HandleMouseEvent(info);
-    EXPECT_FALSE(pattern->isControlButtonHover_);
-
-    /**
-     * @tc.steps: step3. execute OnControlButtonHover method(hover is true).
-     * @tc.expected: check whether the isControlButtonHover_ is true.
-     */
-    pattern->OnControlButtonHover(true);
-    pattern->HandleMouseEvent(info);
-    info.SetAction(MouseAction::RELEASE);
-    pattern->HandleMouseEvent(info);
-    info.SetAction(MouseAction::HOVER_ENTER);
-    pattern->HandleMouseEvent(info);
-    info.SetButton(MouseButton::RIGHT_BUTTON);
-    pattern->HandleMouseEvent(info);
-    EXPECT_TRUE(pattern->isControlButtonHover_);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_9);
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateControlButtonWidth(IMAGE_WIDTH);
+    layoutProperty->UpdateControlButtonHeight(IMAGE_HEIGHT);
+    pattern->GetControlImageSize(width, height);
+    EXPECT_EQ(width, IMAGE_WIDTH);
+    EXPECT_EQ(height, IMAGE_HEIGHT);
 }
 } // namespace OHOS::Ace::NG

@@ -59,6 +59,7 @@
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
+#include "core/image/image_source_info.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -1482,21 +1483,29 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
     CalcDimension minHeight;
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
     CalcDimension maxHeight;
-
+    bool version10OrLarger = PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         ViewAbstractModel::GetInstance()->SetMinWidth(minWidth);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMinSize(true);
     }
 
     if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
         ViewAbstractModel::GetInstance()->SetMaxWidth(maxWidth);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMaxSize(true);
     }
 
     if (ParseJsDimensionVp(minHeightValue, minHeight)) {
         ViewAbstractModel::GetInstance()->SetMinHeight(minHeight);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMinSize(false);
     }
 
     if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
         ViewAbstractModel::GetInstance()->SetMaxHeight(maxHeight);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMaxSize(false);
     }
 }
 
@@ -1538,7 +1547,9 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsAlign", info, checkList)) {
+    if (!CheckJSCallbackInfo("JsAlign", info, checkList) && PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        ViewAbstractModel::GetInstance()->SetAlign(Alignment::CENTER);
         return;
     }
     auto value = info[0]->ToNumber<int32_t>();
@@ -1936,6 +1947,9 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
         LOGE("can not parse image src.");
         return;
     }
+    std::string bundle;
+    std::string module;
+    GetJsMediaBundleInfo(info[0], bundle, module);
 
     int32_t repeatIndex = 0;
     if (info.Length() == 2 && info[1]->IsNumber()) {
@@ -1943,9 +1957,10 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
     if (info[0]->IsString()) {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(src, GetThemeConstants());
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(
+            ImageSourceInfo { src, bundle, module }, GetThemeConstants());
     } else {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(src, nullptr);
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
     }
     ViewAbstractModel::GetInstance()->SetBackgroundImageRepeat(repeat);
 }
@@ -1984,6 +1999,39 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
         }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
+}
+
+void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have 1 argument");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGW("failed to set background effect.");
+        return;
+    }
+    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+    CalcDimension radius;
+    if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    double saturation = 1.0f;
+    if (jsOption->GetProperty("saturation")->IsNumber()) {
+        saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
+        saturation = saturation > 0.0f ? saturation : 1.0f;
+    }
+    double brightness = 1.0f;
+    if (jsOption->GetProperty("brightness")->IsNumber()) {
+        brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
+        brightness = brightness > 0.0f ? brightness : 1.0f;
+    }
+    Color color = Color::TRANSPARENT;
+    if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
+        color.SetValue(Color::TRANSPARENT.GetValue());
+    }
+    EffectOption option = {radius, saturation, brightness, color};
+    ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
 }
 
 void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
@@ -2028,12 +2076,10 @@ void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-
-    if (!info[0]->IsNumber()) {
-        LOGE("The arg is not a number");
-        return;
+    auto radio = 0.0;
+    if (info[0]->IsNumber()) {
+        radio = info[0]->ToNumber<double>();
     }
-    auto radio = info[0]->ToNumber<double>();
     ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0, 1.0));
 }
 
@@ -2045,7 +2091,9 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to be a object");
+        PixStretchEffectOption option;
+        option.ResetValue();
+        ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
         return;
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
@@ -2095,11 +2143,10 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    if (!info[0]->IsNumber()) {
-        LOGE("The arg is wrong,it is supposed to be a number!");
-        return;
+    auto radio = 1.0;
+    if (info[0]->IsNumber()) {
+        radio = info[0]->ToNumber<double>();
     }
-    auto radio = info[0]->ToNumber<double>();
     ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
@@ -2198,8 +2245,9 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         }
         CalcDimension x;
         CalcDimension y;
-        ParseJsonDimensionVp(imageArgs->GetValue("x"), x);
-        ParseJsonDimensionVp(imageArgs->GetValue("y"), y);
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        ParseJsDimensionVp(object->GetProperty("x"), x);
+        ParseJsDimensionVp(object->GetProperty("y"), y);
         double valueX = x.Value();
         double valueY = y.Value();
         DimensionUnit typeX = DimensionUnit::PX;
@@ -2840,36 +2888,35 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
     CalcDimension borderRadius;
     if (ParseJsDimensionVp(args, borderRadius)) {
+        if (borderRadius.Unit() == DimensionUnit::PERCENT) {
+            borderRadius.Reset();
+        }
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension topLeft;
-        if (ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
-            radiusTopLeft = topLeft;
-        }
+        GetBorderRadius("topLeft", object, topLeft);
         CalcDimension topRight;
-        if (ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
-            radiusTopRight = topRight;
-        }
+        GetBorderRadius("topRight", object, topRight);
         CalcDimension bottomLeft;
-        if (ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
-            radiusBottomLeft = bottomLeft;
-        }
+        GetBorderRadius("bottomLeft", object, bottomLeft);
         CalcDimension bottomRight;
-        if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
-            radiusBottomRight = bottomRight;
-        }
-        ViewAbstractModel::GetInstance()->SetBorderRadius(
-            radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        GetBorderRadius("bottomRight", object, bottomRight);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
     } else {
         LOGE("args format error. %{public}s", args->ToString().c_str());
         return;
+    }
+}
+
+void JSViewAbstract::GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius)
+{
+    if (ParseJsDimensionVp(object->GetProperty(key), radius)) {
+        if ((radius.Unit() == DimensionUnit::PERCENT)) {
+            radius.Reset();
+        }
     }
 }
 
@@ -5124,7 +5171,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto height = paramObj->GetProperty("height");
     auto showDragBar = paramObj->GetProperty("dragBar");
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
-    auto backgroundMask = paramObj->GetProperty("backgroundMask");
+    auto maskColor = paramObj->GetProperty("maskColor");
     if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
         sheetStyle.showDragBar = true;
     } else {
@@ -5174,13 +5221,13 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
-    // parse backgroundMask color
-    Color maskColor;
-    if (backgroundMask->IsNull() || backgroundMask->IsUndefined() ||
-        !JSViewAbstract::ParseJsColor(backgroundMask, maskColor)) {
-        maskColor.SetValue(0x00000000);
+    // parse maskColor
+    Color parseMaskColor;
+    if (maskColor->IsNull() || maskColor->IsUndefined() ||
+        !JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
+        parseMaskColor.SetValue(0x00000000);
     }
-    sheetStyle.backgroundMask = std::move(maskColor);
+    sheetStyle.maskColor = std::move(parseMaskColor);
 }
 
 void JSViewAbstract::ParseOverlayCallback(
@@ -5349,6 +5396,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundEffect", &JSViewAbstract::JsBackgroundEffect);
     JSClass<JSViewAbstract>::StaticMethod("foregroundBlurStyle", &JSViewAbstract::JsForegroundBlurStyle);
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
@@ -6275,4 +6323,19 @@ void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetRenderFit(renderFit);
 }
 
+void JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
+{
+    if (!jsValue->IsObject() || jsValue->IsString()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (!jsObj->IsUndefined()) {
+        JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
+        JSRef<JSVal> module = jsObj->GetProperty("moduleName");
+        if (bundle->IsString() && module->IsString()) {
+            bundleName = bundle->ToString();
+            moduleName = module->ToString();
+        }
+    }
+}
 } // namespace OHOS::Ace::Framework

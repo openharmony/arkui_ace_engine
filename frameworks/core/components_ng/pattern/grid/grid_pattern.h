@@ -104,6 +104,8 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<GridEventHub>();
@@ -164,6 +166,8 @@ public:
         return EstimateHeight();
     }
 
+    float GetTotalHeight() const override;
+
     void OnAnimateStop() override;
 
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
@@ -179,6 +183,7 @@ public:
     void MoveItems(int32_t itemIndex, int32_t insertIndex);
     void ClearDragState();
     float EstimateHeight() const;
+    float GetAverageHeight() const;
 
 private:
     float GetMainGap();
@@ -188,7 +193,6 @@ private:
     bool IsOutOfBoundary();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
-    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     float GetMainContentSize() const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -216,7 +220,8 @@ private:
     void SetAccessibilityAction();
 
     GridLayoutInfo gridLayoutInfo_;
-    void ProcessEvent(bool indexChanged, float finalOffset, bool offsetEnd);
+    void ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
+                      bool prevReachEnd, bool reachStart, bool isChangedUpToEnd);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
     void FireOnScrollStart();
@@ -225,6 +230,8 @@ private:
     RefPtr<GridPositionController> positionController_;
     float animatorOffset_ = 0.0f;
     bool scrollStop_ = false;
+    bool initialIndex_ = false;
+    int32_t offsetCount_ = 0;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;

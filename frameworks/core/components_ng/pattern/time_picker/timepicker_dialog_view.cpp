@@ -29,7 +29,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const int32_t MARGIN_HALF = 2;
 } // namespace
 
@@ -53,10 +52,6 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(pickerTheme, nullptr);
 
     uint32_t showCount = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetShowCount(showCount);
@@ -188,15 +183,21 @@ RefPtr<FrameNode> TimePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(pickerPattern, nullptr);
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, pickerPattern->GetDividerId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
-    auto dividerRenderContext = dividerNode->GetRenderContext();
-    CHECK_NULL_RETURN(dividerRenderContext, nullptr);
-    dividerRenderContext->UpdateBackgroundColor(dialogTheme->GetDividerColor());
+    CHECK_NULL_RETURN(dividerNode, nullptr);
+
+    auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_RETURN(dividerPaintProps, nullptr);
+    dividerPaintProps->UpdateDividerColor(dialogTheme->GetDividerColor());
+    
+    auto dividerLayoutProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
+    dividerLayoutProps->UpdateVertical(true);
 
     MarginProperty margin;
     margin.top = CalcLength(dialogTheme->GetDividerHeight());
     margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    dividerNode->GetLayoutProperty()->UpdateMargin(margin);
-    dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+    dividerLayoutProps->UpdateMargin(margin);
+    dividerLayoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
 
     return dividerNode;
@@ -425,6 +426,10 @@ void TimePickerDialogView::SetTextProperties(
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearWeight,
         properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontFamily,
+        properties.disappearTextStyle_.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontStyle,
+        properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, properties.normalTextStyle_.fontSize.value());
@@ -435,6 +440,10 @@ void TimePickerDialogView::SetTextProperties(
         TimePickerLayoutProperty, Color, properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, Weight, properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontFamily,
+        properties.normalTextStyle_.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontStyle,
+        properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(
@@ -446,5 +455,9 @@ void TimePickerDialogView::SetTextProperties(
         properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedWeight,
         properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontFamily,
+        properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontStyle,
+        properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 } // namespace OHOS::Ace::NG

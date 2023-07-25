@@ -120,11 +120,6 @@ public:
         return windowConfig_;
     }
 
-    FrontendType GetType() override
-    {
-        return type_;
-    }
-
     void SendCallbackMessage(const std::string& callbackId, const std::string& data) const override
     {
         // maybe will implement later
@@ -172,7 +167,6 @@ public:
     }
 
 private:
-    FrontendType type_ { FrontendType::JSON };
     static constexpr int32_t JSON_DESIGN_WIDTH = 1080;
     std::unordered_map<int, RefPtr<AcePage>> pageMap_;
     RefPtr<PipelineBase> pipelineContext_;

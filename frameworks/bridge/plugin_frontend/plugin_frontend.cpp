@@ -176,6 +176,7 @@ void PluginFrontend::Destroy()
 bool PluginFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::JS_PLUGIN);
     InitializeFrontendDelegate(taskExecutor);
     taskExecutor->PostSyncTask(

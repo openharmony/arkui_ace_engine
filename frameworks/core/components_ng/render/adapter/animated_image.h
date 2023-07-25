@@ -23,9 +23,15 @@
 #include "include/core/SkImage.h"
 
 #include "base/image/image_source.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 
 namespace OHOS::Ace::NG {
 class AnimatedImage : public virtual CanvasImage {
@@ -37,7 +43,7 @@ public:
 #ifndef USE_ROSEN_DRAWING
     static RefPtr<CanvasImage> Create(const RefPtr<SkiaImageData>& data, const SizeF& size, const std::string& url);
 #else
-    static RefPtr<CanvasImage> Create(const RefPtr<RosenImageData>& data, const SizeF& size, const std::string& url);
+    static RefPtr<CanvasImage> Create(const RefPtr<DrawingImageData>& data, const SizeF& size, const std::string& url);
 #endif
     void ControlAnimation(bool play) override;
     void SetRedrawCallback(std::function<void()>&& callback) override
@@ -86,8 +92,8 @@ public:
 
     sk_sp<SkImage> GetImage() const override;
 #else
-class AnimatedRSImage : public AnimatedImage, public RosenImage {
-    DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, RosenImage)
+class AnimatedRSImage : public AnimatedImage, public DrawingImage {
+    DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, DrawingImage)
 public:
     AnimatedRSImage(std::unique_ptr<SkCodec> codec, std::string url)
         : AnimatedImage(codec, std::move(url)), codec_(std::move(codec))

@@ -19,8 +19,8 @@
 #include <cstdint>
 #include <functional>
 #include <list>
+#include <map>
 #include <set>
-#include <unordered_map>
 
 #include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
@@ -105,6 +105,11 @@ public:
         frameInfo_ = nullptr;
     }
 
+    static uint64_t GetFrameId()
+    {
+        return frameId_;
+    }
+
 private:
     bool NeedAdditionalLayout();
 
@@ -126,7 +131,7 @@ private:
     };
 
     using PageDirtySet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
-    using RootDirtyMap = std::unordered_map<uint32_t, PageDirtySet>;
+    using RootDirtyMap = std::map<uint32_t, PageDirtySet>;
 
     RootDirtyMap dirtyLayoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
@@ -137,6 +142,8 @@ private:
     uint32_t currentPageId_ = 0;
 
     FrameInfo* frameInfo_ = nullptr;
+
+    static uint64_t frameId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UITaskScheduler);
 };

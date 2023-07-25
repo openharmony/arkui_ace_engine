@@ -33,6 +33,7 @@
 #include "core/components_ng/test/mock/rosen/testing_point.h"
 #include "core/components_ng/test/mock/rosen/testing_point3.h"
 #include "core/components_ng/test/mock/rosen/testing_sampling_options.h"
+#include "core/components_ng/test/mock/rosen/testing_scalar.h"
 #include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
 #include "core/components_ng/test/mock/rosen/testing_shadowflags.h"
 #include "core/components_ng/test/mock/rosen/testing_text_style.h"
@@ -41,6 +42,7 @@
 #include "core/components_ng/test/mock/rosen/testing_typography_style.h"
 
 namespace OHOS::Ace {
+namespace RSDrawing = Testing;
 using RSCanvas = Testing::TestingCanvas;
 using RSPen = Testing::TestingPen;
 using RSBrush = Testing::TestingBrush;
@@ -80,9 +82,6 @@ using RSScalar = float;
 using RSPathFillType = Testing::TestingPathFillType;
 using RSParagraph = Testing::TestingTypography;
 using RSTypographyProperties = Testing::TestingTypographyProperties;
-using RSTextRectHeightStyle = Testing::TestingTypographyProperties::TextRectHeightStyle;
-using RSTextRectWidthStyle = Testing::TestingTypographyProperties::TextRectWidthStyle;
-using RSTextRect = Testing::TestingTypographyProperties::TextRect;
 using RSParagraphStyle = Testing::TestingTypographyStyle;
 using RSParagraphBuilder = Testing::TestingTypographyCreate;
 using RSFontCollection = Testing::TestingFontCollection;

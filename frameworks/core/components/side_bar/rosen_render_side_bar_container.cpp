@@ -17,6 +17,8 @@
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 #include "render_service_client/core/ui/rs_node.h"
 

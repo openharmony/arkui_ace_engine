@@ -65,9 +65,6 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.indicatorMargin = indicatorMargin_->Get();
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
     PaintBackground(context, contentProperty);
-    if (indicatorMask_) {
-        PaintMask(context);
-    }
     PaintContent(context, contentProperty);
 }
 
@@ -198,12 +195,6 @@ void DotIndicatorModifier::PaintUnselectedIndicator(
         if (currentIndexFlag) {
             rectItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
             rectItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
-            if (itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] > itemHalfSizes[ITEM_HALF_WIDTH]) {
-                rectItemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
-            }
-            if (itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] > itemHalfSizes[ITEM_HALF_HEIGHT]) {
-                rectItemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
-            }
         }
         float rectLeft = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) - rectItemWidth * 0.5;
         float rectTop = (axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX()) - rectItemHeight * 0.5;
@@ -321,7 +312,9 @@ void DotIndicatorModifier::UpdateNormalPaintProperty(
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
-    auto backgroundColor = swiperTheme->GetHoverColor().ChangeOpacity(0);
+    auto backgroundColor = indicatorMask_ ?
+        swiperTheme->GetPressedColor() :
+        swiperTheme->GetHoverColor().ChangeOpacity(0);
     UpdateShrinkPaintProperty(margin, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     UpdateBackgroundColor(backgroundColor);
 }

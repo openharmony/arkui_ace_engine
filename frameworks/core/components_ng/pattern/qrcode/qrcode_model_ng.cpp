@@ -22,6 +22,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
+} // namespace
+
 void QRCodeModelNG::Create(const std::string& value)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -35,9 +39,15 @@ void QRCodeModelNG::Create(const std::string& value)
     RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
     CHECK_NULL_VOID(qrCodeTheme);
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
-    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, qrCodeTheme->GetQrcodeColor());
-    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, qrCodeTheme->GetBackgroundColor());
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrCodeTheme->GetBackgroundColor());
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, qrCodeTheme->GetQrcodeColor());
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, qrCodeTheme->GetBackgroundColor());
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrCodeTheme->GetBackgroundColor());
+    } else {
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, Color::BLACK);
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, Color::WHITE);
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::WHITE);
+    }
 }
 
 void QRCodeModelNG::SetQRCodeColor(Color color)

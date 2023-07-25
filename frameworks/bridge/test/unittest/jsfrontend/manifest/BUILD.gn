@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 module_output_path = "ace_engine_full/jsframework/manifest"
@@ -71,6 +72,7 @@ ohos_unittest("ManifestParserTest") {
     "c_utils:utils",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:scene_session",
@@ -82,6 +84,10 @@ ohos_unittest("ManifestParserTest") {
     "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
   ]
+
+  if (ability_runtime_graphics) {
+    external_deps += [ "image_framework:image_native" ]
+  }
   part_name = ace_engine_part
 }
 

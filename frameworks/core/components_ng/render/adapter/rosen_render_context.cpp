@@ -66,8 +66,13 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
@@ -161,10 +166,10 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
         return;
     }
 
-    auto rect = GetPaintRectWithoutTransform();
     isBreakingPoint_ = !recursive;
-    if (rect.IsValid()) {
+    if (isSynced_) {
         // has set size before, trigger transition directly.
+        auto rect = GetPaintRectWithoutTransform();
         NotifyTransitionInner(rect.GetSize(), true);
         return;
     }
@@ -458,7 +463,7 @@ void RosenRenderContext::PaintBackground()
     } else if (InstanceOf<SkiaImage>(bgImage_)) {
         PaintSkBgImage();
 #else
-    } else if (InstanceOf<RosenImage>(bgImage_)) {
+    } else if (InstanceOf<DrawingImage>(bgImage_)) {
         PaintRSBgImage();
 #endif
     } else {
@@ -583,6 +588,30 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     SetBackBlurFilter();
 }
 
+void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+{
+    const auto& groupProperty = GetOrCreateBackground();
+    if (groupProperty->CheckEffectOption(effectOption)) {
+        return;
+    }
+    groupProperty->propEffectOption = effectOption;
+    if (!effectOption.has_value()) {
+        return;
+    }
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    float radiusPx = context->NormalizeToPx(effectOption->radius);
+#ifndef USE_ROSEN_DRAWING
+    float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+    float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
+    std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
+        backblurRadius, static_cast<float>(effectOption->saturation),
+        static_cast<float>(effectOption->brightness), effectOption->color.GetValue());
+    rsNode_->SetBackgroundFilter(backFilter);
+}
+
 void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle)
 {
     const auto& groupProperty = GetOrCreateForeground();
@@ -674,7 +703,11 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
     return g_pixelMap;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderContext::GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList)
+#else
+bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList)
+#endif
 {
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
@@ -697,7 +730,7 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
     float yValue = 0.0f;
     if (translate.x.Unit() == DimensionUnit::PERCENT || translate.y.Unit() == DimensionUnit::PERCENT) {
         auto rect = GetPaintRectWithoutTransform();
-        if (!rect.IsValid()) {
+        if (rect.IsEmpty()) {
             // size is not determined yet
             return;
         }
@@ -1077,12 +1110,12 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     }
 #else
     std::shared_ptr<RSImage> image;
-    if (InstanceOf<RosenImage>(bdImage_)) {
-        image = DynamicCast<RosenImage>(bdImage_)->GetImage();
+    if (InstanceOf<DrawingImage>(bdImage_)) {
+        image = DynamicCast<DrawingImage>(bdImage_)->GetImage();
     } else if (InstanceOf<PixelMapImage>(bdImage_)) {
         auto pixmap = DynamicCast<PixelMapImage>(bdImage_)->GetPixelMap();
         CHECK_NULL_VOID(pixmap);
-        image = RosenImage::MakeRSImageFromPixmap(pixmap);
+        image = DrawingImage::MakeRSImageFromPixmap(pixmap);
     } else {
         return;
     }
@@ -1284,6 +1317,11 @@ void RosenRenderContext::OnModifyDone()
     }
 }
 
+RectF RosenRenderContext::GetPropertyOfPosition()
+{
+    return AdjustPaintRect();
+}
+
 RectF RosenRenderContext::AdjustPaintRect()
 {
     RectF rect;
@@ -1291,12 +1329,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     CHECK_NULL_RETURN(frameNode, rect);
     CHECK_NULL_RETURN(rsNode_, rect);
     const auto& geometryNode = frameNode->GetGeometryNode();
-    if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
-        rect = geometryNode->GetContent() ? geometryNode->GetContent()->GetRect() : RectF();
-        rect.SetOffset(geometryNode->GetFrameOffset() + geometryNode->GetContentOffset());
-    } else {
-        rect = geometryNode->GetFrameRect();
-    }
+    rect = geometryNode->GetFrameRect();
     if (!rect.GetSize().IsPositive()) {
         LOGD("paint size is zero");
         return rect;
@@ -1325,10 +1358,11 @@ RectF RosenRenderContext::AdjustPaintRect()
         return rect;
     }
     if (HasOffset()) {
-        CombinePaddingAndOffset(
-            resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
-        rect.SetLeft(rect.GetX() + resultX.ConvertToPx() - anchorX.value_or(0));
-        rect.SetTop(rect.GetY() + resultY.ConvertToPx() - anchorY.value_or(0));
+        auto offset = GetOffsetValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
+        auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
+        auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
+        rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
+        rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
         return rect;
     }
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
@@ -1376,31 +1410,6 @@ void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension&
             DimensionUnit::PX);
     } else {
         resultY = selfMarginTop + GetPositionValue({}).GetY() + parentPaddingTop;
-    }
-}
-
-void RosenRenderContext::CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY,
-    const Dimension& parentPaddingLeft, const Dimension& parentPaddingTop, float widthPercentReference,
-    float heightPercentReference)
-{
-    // to distinguish cases ex. offset has percentage unit and padding has vp unit
-    if (parentPaddingLeft.Unit() != GetOffsetValue({}).GetX().Unit()) {
-        resultX = Dimension(
-            ConvertToPx(parentPaddingLeft, ScaleProperty::CreateScaleProperty(), widthPercentReference).value_or(0) +
-                ConvertToPx(GetOffsetValue({}).GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
-                    .value_or(0),
-            DimensionUnit::PX);
-    } else {
-        resultX = parentPaddingLeft + GetOffsetValue({}).GetX();
-    }
-    if (parentPaddingTop.Unit() != GetOffsetValue({}).GetY().Unit()) {
-        resultY = Dimension(
-            ConvertToPx(parentPaddingTop, ScaleProperty::CreateScaleProperty(), heightPercentReference).value_or(0) +
-                ConvertToPx(GetOffsetValue({}).GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
-                    .value_or(0),
-            DimensionUnit::PX);
-    } else {
-        resultY = parentPaddingTop + GetOffsetValue({}).GetY();
     }
 }
 
@@ -3014,7 +3023,7 @@ void RosenRenderContext::PaintSkBgImage()
 #else
 void RosenRenderContext::PaintRSBgImage()
 {
-    auto image = DynamicCast<NG::RosenImage>(bgImage_);
+    auto image = DynamicCast<NG::DrawingImage>(bgImage_);
 #endif
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
 

@@ -47,7 +47,7 @@ void ForEachModelNG::Create()
     forEachNode->CreateTempItems();
 }
 
-const std::list<std::string>& ForEachModelNG::GetCurrentIdList(int32_t nodeId)
+std::list<std::string> ForEachModelNG::GetCurrentIdList(int32_t nodeId)
 {
     // FIXME: is the nodeId needed, or can we do lile SetNewIds ?
     auto forEachNode = ForEachNode::GetOrCreateForEachNode(nodeId);

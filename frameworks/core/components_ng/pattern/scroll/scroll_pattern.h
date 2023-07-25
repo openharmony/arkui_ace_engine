@@ -271,7 +271,6 @@ protected:
 
 private:
     void OnModifyDone() override;
-    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     bool IsCrashTop() const;

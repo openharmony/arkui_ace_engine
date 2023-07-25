@@ -177,10 +177,22 @@ bool SliderPattern::AtMousePanArea(const Offset& offsetInFrame)
     CHECK_NULL_RETURN(content, false);
     auto contentOffset = content->GetRect().GetOffset();
     auto offset = Offset(offsetInFrame.GetX() - contentOffset.GetX(), offsetInFrame.GetY() - contentOffset.GetY());
-    double distanceCircle = std::min(blockSize_.Width(), blockSize_.Height()) * HALF + hotBlockShadowWidth_;
-    auto diffX = circleCenter_.GetX() - offset.GetX();
-    auto diffY = circleCenter_.GetY() - offset.GetY();
-    return diffX * diffX + diffY * diffY <= distanceCircle * distanceCircle;
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto blockType = paintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT);
+    if (blockType == SliderModelNG::BlockStyleType::DEFAULT) {
+        double distanceCircle = std::min(blockSize_.Width(), blockSize_.Height()) * HALF + hotBlockShadowWidth_;
+        auto diffX = circleCenter_.GetX() - offset.GetX();
+        auto diffY = circleCenter_.GetY() - offset.GetY();
+        return diffX * diffX + diffY * diffY <= distanceCircle * distanceCircle;
+    } else {
+        float sideHotSizeX = blockSize_.Width() * HALF;
+        float sideHotSizeY = blockSize_.Height() * HALF;
+        return !(circleCenter_.GetX() - sideHotSizeX > offset.GetX() ||
+                 circleCenter_.GetY() - sideHotSizeY > offset.GetY() ||
+                 circleCenter_.GetX() + sideHotSizeX < offset.GetX() ||
+                 circleCenter_.GetY() + sideHotSizeY < offset.GetY());
+    }
 }
 
 bool SliderPattern::AtTouchPanArea(const Offset& offsetInFrame)
@@ -189,15 +201,22 @@ bool SliderPattern::AtTouchPanArea(const Offset& offsetInFrame)
     CHECK_NULL_RETURN(content, false);
     auto contentOffset = content->GetRect().GetOffset();
     auto offset = Offset(offsetInFrame.GetX() - contentOffset.GetX(), offsetInFrame.GetY() - contentOffset.GetY());
-    float sideHotSize = blockHotSize_ * HALF;
-    return !(circleCenter_.GetX() - sideHotSize > offset.GetX() ||
-        circleCenter_.GetY() - sideHotSize > offset.GetY() ||
-        circleCenter_.GetX() + sideHotSize < offset.GetX() ||
-        circleCenter_.GetY() + sideHotSize < offset.GetY());
+    float sideHotSizeX = blockHotSize_.Width() * HALF;
+    float sideHotSizeY = blockHotSize_.Height() * HALF;
+    return !(circleCenter_.GetX() - sideHotSizeX > offset.GetX() ||
+        circleCenter_.GetY() - sideHotSizeY > offset.GetY() ||
+        circleCenter_.GetX() + sideHotSizeX < offset.GetX() ||
+        circleCenter_.GetY() + sideHotSizeY < offset.GetY());
 }
 
 bool SliderPattern::AtPanArea(const Offset& offset, const SourceType& sourceType)
 {
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, false);
+    if (sliderPaintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT) !=
+        SliderModelNG::BlockStyleType::DEFAULT) {
+        return false;
+    }
     bool flag = false;
     switch (sourceType) {
         case SourceType::MOUSE:
@@ -220,7 +239,6 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
-        hotFlag_ = true;
         // when Touch Down area is at Pan Area, value is unchanged.
         if (!AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
             UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
@@ -233,7 +251,6 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         FireChangeEvent(SliderChangeMode::Begin);
         OpenTranslateAnimation();
     } else if (touchType == TouchType::UP) {
-        hotFlag_ = false;
         if (bubbleFlag_) {
             bubbleFlag_ = false;
         }
@@ -275,10 +292,22 @@ void SliderPattern::HandlingGestureStart(const GestureEvent& info)
 
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 {
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
     if (info.GetInputEventType() == InputEventType::AXIS) {
         auto offset = NearZero(info.GetOffsetX()) ? info.GetOffsetY() : info.GetOffsetX();
-        offset > 0.0 ? MoveStep(-1) : MoveStep(1);
-        if (showTips_) {
+        // offset > 0 when Wheel Up, offset < 0 when Wheel Down
+        if (direction_ == Axis::HORIZONTAL) {
+            offset > 0.0 ? MoveStep(1) : MoveStep(-1);
+        } else {
+            auto reverse = paintProperty->GetReverseValue(false);
+            reverse ? (offset > 0.0 ? MoveStep(1) : MoveStep(-1)) : (offset > 0.0 ? MoveStep(-1) : MoveStep(1));
+        }
+        if (hotFlag_) {
+            // Only when the mouse hovers over the slider, AxisFlag_ can be set true
+            AxisFlag_ = true;
+        }
+        if (showTips_ && AxisFlag_) {
             bubbleFlag_ = true;
             InitializeBubble();
         }
@@ -292,11 +321,8 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 
 void SliderPattern::HandledGestureEvent()
 {
-    hotFlag_ = false;
-    if (bubbleFlag_) {
-        bubbleFlag_ = false;
-    }
     panMoveFlag_ = false;
+
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -398,6 +424,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandledGestureEvent();
         pattern->FireChangeEvent(SliderChangeMode::End);
+        pattern->AxisFlag_ = false;
     };
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
@@ -584,6 +611,7 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
 
 bool SliderPattern::MoveStep(int32_t stepCount)
 {
+    // stepCount > 0, slider value increases, block moves in the direction of growth
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
@@ -641,9 +669,11 @@ void SliderPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub)
 
 void SliderPattern::HandleHoverEvent(bool isHover)
 {
+    hotFlag_ = isHover;
     mouseHoverFlag_ = mouseHoverFlag_ && isHover;
-    if (!mouseHoverFlag_ && !mousePressedFlag_ && !focusFlag_) {
+    if (!mouseHoverFlag_) {
         bubbleFlag_ = false;
+        AxisFlag_ = false;
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -652,15 +682,15 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
 {
     UpdateCircleCenterOffset();
     // MouseInfo's LocalLocation is relative to the frame area, circleCenter_ is relative to the content area
-    bool mouseHoverFlag = AtMousePanArea(info.GetLocalLocation());
-    if (!mouseHoverFlag_ && mouseHoverFlag) {
+    mouseHoverFlag_ = AtMousePanArea(info.GetLocalLocation());
+    if (mouseHoverFlag_) {
         if (showTips_) {
             bubbleFlag_ = true;
             InitializeBubble();
         }
     }
-    mouseHoverFlag_ = mouseHoverFlag;
-    if (!mouseHoverFlag_ && !mousePressedFlag_ && !focusFlag_) {
+    // when mouse hovers over slider, distinguish between hover block and Wheel operation.
+    if (!mouseHoverFlag_ && !AxisFlag_) {
         bubbleFlag_ = false;
     }
 

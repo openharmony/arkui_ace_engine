@@ -17,6 +17,8 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -410,6 +412,7 @@ void NavigationGroupNode::NavTransitionInAnimation(
                             RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     }
                     navigationNode->SetIsOnAnimation(false);
+                    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
                     LOGI("navigation animation end");
                 },
                 TaskExecutor::TaskType::UI);
@@ -423,6 +426,7 @@ void NavigationGroupNode::NavTransitionInAnimation(
         option,
         [transitionOutNodeContext, transitionInNodeContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             LOGI("navigation animation start");
             transitionOutNodeContext->OnTransformTranslateUpdate({ -nodeWidth * PARENT_PAGE_OFFSET, 0.0f, 0.0f });
             transitionInNodeContext->ClipWithRRect(
@@ -479,11 +483,13 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
                     navDestination->GetRenderContext()->ClipWithRRect(
                         RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     ContainerScope scope(id);
+                    navigationContentNode->Clean();
                     navigationPattern->RemoveNavDestination();
                     navigationContentNode->MarkModifyDone();
                     navigationNode->MarkModifyDone();
                     navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                     navigationNode->SetIsOnAnimation(false);
+                    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
                     LOGI("navigation animation end");
                 },
                 TaskExecutor::TaskType::UI);
@@ -496,6 +502,7 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
         option,
         [navDestinationContext, navigationContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             LOGI("navigation animation start");
             if (navDestinationContext) {
                 navDestinationContext->ClipWithRRect(
@@ -559,10 +566,13 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
                 curNavDestination->GetRenderContext()->ClipWithRRect(
                     RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                 ContainerScope scope(id);
+                navigationContentNode->Clean();
+                navigationNode->AddNavDestinationToNavigation();
                 navigationContentNode->MarkModifyDone();
                 navigationNode->MarkModifyDone();
                 navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 navigationNode->SetIsOnAnimation(false);
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
                 LOGI("navigation animation end");
             },
             TaskExecutor::TaskType::UI);
@@ -575,6 +585,7 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
         option,
         [navDestinationContext, preDestinationContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             LOGI("navigation animation start");
             if (navDestinationContext) {
                 navDestinationContext->ClipWithRRect(

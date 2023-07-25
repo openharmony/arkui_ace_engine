@@ -135,13 +135,13 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     }
     // for default style, selection height is equal to the content height
     for (const auto& textBox : textBoxes) {
-        canvas.DrawRect(RSRect(textBox.rect.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+        canvas.DrawRect(RSRect(textBox.rect_.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
                 : 0.0f,
-            textBox.rect.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+            textBox.rect_.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
                 : textFieldPattern->GetFrameRect().Height()));
     }
     canvas.Restore();

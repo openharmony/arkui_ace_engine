@@ -1793,10 +1793,10 @@ void FrontendDelegateDeclarative::OnSurfaceChanged()
         mediaQueryInfo_->SetIsInit(false);
     }
     mediaQueryInfo_->EnsureListenerIdValid();
-    OnMediaQueryUpdate();
+    OnMediaQueryUpdate(true);
 }
 
-void FrontendDelegateDeclarative::OnMediaQueryUpdate()
+void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
 {
     auto containerId = Container::CurrentId();
     if (containerId < 0) {
@@ -1830,10 +1830,7 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
         delegate->mediaQueryInfo_->ResetListenerId();
     };
     auto container = Container::Current();
-    if (!container) {
-        return;
-    }
-    if (container->IsUseStageModel()) {
+    if (container && container->IsUseStageModel() && isSynchronous) {
         callback();
         return;
     }

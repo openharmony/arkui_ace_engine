@@ -21,6 +21,9 @@
 #include "napi_perf_monitor.h"
 
 namespace OHOS::Ace::Napi {
+static constexpr uint32_t LAST_DOWN = 0;
+static constexpr uint32_t LAST_UP = 1;
+static constexpr uint32_t FIRST_MOVE = 2;
 constexpr int FIRST_ARG_INDEX = 0;
 constexpr int SECOND_ARG_INDEX = 1;
 constexpr int THIRD_ARG_INDEX = 2;
@@ -163,17 +166,26 @@ static napi_value JSSceneEnd(napi_env env, napi_callback_info info)
 /*
  * function for module exports
  */
-EXTERN_C_START
 static napi_value PerfMonitorInit(napi_env env, napi_value exports)
 {
+    napi_value actionType = nullptr;
+    napi_create_object(env, &actionType);
+    napi_value prop = nullptr;
+    napi_create_uint32(env, LAST_DOWN, &prop);
+    napi_set_named_property(env, actionType, "LAST_DOWN", prop);
+    napi_create_uint32(env, LAST_UP, &prop);
+    napi_set_named_property(env, actionType, "LAST_UP", prop);
+    napi_create_uint32(env, FIRST_MOVE, &prop);
+    napi_set_named_property(env, actionType, "FIRST_MOVE", prop);
+
     static napi_property_descriptor desc[] = {
-        DECLARE_NAPI_FUNCTION("start", JSSceneStart),
+        DECLARE_NAPI_FUNCTION("begin", JSSceneStart),
         DECLARE_NAPI_FUNCTION("end", JSSceneEnd),
+        DECLARE_NAPI_PROPERTY("ActionType", actionType),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }
-EXTERN_C_END
 
 /*
  * performanceMonitor module definition
@@ -183,7 +195,7 @@ static napi_module perfmonitor_module = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_register_func = PerfMonitorInit,
-    .nm_modname = "performanceMonitor",
+    .nm_modname = "arkui.performanceMonitor",
     .nm_priv = ((void *)0),
     .reserved = {0}
 };

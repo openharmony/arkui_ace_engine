@@ -119,6 +119,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.deviceId = keyEvent->deviceId;
     event.sourceType = static_cast<SourceType>(static_cast<int32_t>(keyEvent->sourceType));
     event.rawKeyEvent = keyEvent;
+    event.enableCapsLock = keyEvent->enableCapsLock_;
 }
 
 } // namespace

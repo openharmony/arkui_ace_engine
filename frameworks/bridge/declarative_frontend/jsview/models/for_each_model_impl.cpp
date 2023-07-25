@@ -65,7 +65,7 @@ void ForEachModelImpl::Pop()
     ViewStackProcessor::GetInstance()->PopContainer();
 }
 
-const std::list<std::string>& ForEachModelImpl::GetCurrentIdList(int32_t nodeId)
+std::list<std::string> ForEachModelImpl::GetCurrentIdList(int32_t nodeId)
 {
     LOGE("GetCurrentIdList unsupported by ForEachModelImpl");
     return {};

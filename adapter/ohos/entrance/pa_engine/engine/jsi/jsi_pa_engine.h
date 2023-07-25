@@ -42,9 +42,10 @@ namespace OHOS::Ace {
 using namespace OHOS::Ace::Framework;
 using RdbValueBucketNewInstance = napi_value (*)(napi_env env, OHOS::NativeRdb::ValuesBucket& valueBucket);
 using RdbValueBucketGetNativeObject = OHOS::NativeRdb::ValuesBucket* (*)(napi_env env, napi_value& value);
-using RdbResultSetProxyNewInstance = napi_value (*)(napi_env env, OHOS::NativeRdb::AbsSharedResultSet* resultSet);
-using RdbResultSetProxyGetNativeObject = OHOS::NativeRdb::AbsSharedResultSet* (*)(const napi_env& env,
-    const napi_value& arg);
+using RdbResultSetProxyNewInstance =
+    napi_value (*)(napi_env env, std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> resultSet);
+using RdbResultSetProxyGetNativeObject = std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> (*)(napi_env env,
+    napi_value arg);
 using DataAbilityPredicatesNewInstance = napi_value (*)(
     napi_env env, OHOS::NativeRdb::DataAbilityPredicates* predicates);
 using DataAbilityPredicatesGetNativeObject = OHOS::NativeRdb::DataAbilityPredicates* (*)(const napi_env env,

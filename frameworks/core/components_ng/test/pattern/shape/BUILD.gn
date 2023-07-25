@@ -21,7 +21,7 @@ config("config_shape_test") {
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
@@ -36,6 +36,7 @@ ace_unittest("circle_pattern_test_ng") {
   flutter_skia = true
   render = true
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/circle_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_abstract_model_ng.cpp",
@@ -55,6 +56,7 @@ ace_unittest("ellipse_pattern_test_ng") {
   flutter_skia = true
   render = true
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/ellipse_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_abstract_model_ng.cpp",
@@ -74,6 +76,7 @@ ace_unittest("line_pattern_test_ng") {
   flutter_skia = true
   render = true
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/line_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/line_model_ng.cpp",
@@ -94,6 +97,7 @@ ace_unittest("rect_pattern_test_ng") {
   flutter_skia = true
   render = true
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/rect_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_abstract_model_ng.cpp",
@@ -113,6 +117,7 @@ ace_unittest("path_pattern_test_ng") {
   flutter_skia = true
   render = true
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/path_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/path_model_ng.cpp",
@@ -134,6 +139,7 @@ ace_unittest("polygon_pattern_test_ng") {
   flutter_skia = true
   render = true
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/polygon_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_abstract_model_ng.cpp",
@@ -154,6 +160,7 @@ ace_unittest("polyline_pattern_test_ng") {
   flutter_skia = true
   render = true
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/polygon_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_abstract_model_ng.cpp",

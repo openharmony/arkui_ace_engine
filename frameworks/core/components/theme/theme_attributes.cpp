@@ -223,4 +223,7 @@ const char INLINE_BORDER_COLOR[] = "inline_border_color";
 
 // linear split attributes
 const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";
+
+// stepper attributes
+const char STEPPER_FOCUS_COLOR[] = "stepper_focus_color";
 } // namespace OHOS::Ace

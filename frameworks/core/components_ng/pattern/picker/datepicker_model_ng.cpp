@@ -32,10 +32,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-} // namespace
-
 void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -55,10 +51,6 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 
     CHECK_NULL_VOID(pickerTheme);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
     datePickerPattern->SetShowCount(showCount);
 
     auto yearColumnNode = FrameNode::GetOrCreateFrameNode(
@@ -196,6 +188,15 @@ void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void DatePickerModelNG::SetOnDateChange(DateChangeEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDateChange(std::move(onChange));
+}
+
 void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
@@ -209,6 +210,10 @@ void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
         DataPickerRowLayoutProperty, DisappearColor, value.textColor.value_or(disappearStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, DisappearWeight, value.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, DisappearFontFamily, value.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, DisappearFontStyle, value.fontStyle.value_or(disappearStyle.GetFontStyle()));
 }
 
 void DatePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -224,6 +229,10 @@ void DatePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
         DataPickerRowLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()));
 }
 
 void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -239,6 +248,10 @@ void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
         DataPickerRowLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, SelectedWeight, value.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, SelectedFontFamily, value.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
 void DatePickerModelNG::SetBackgroundColor(const Color& color)
@@ -262,6 +275,7 @@ void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
 void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::DatePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
+    std::function<void(const std::string&)>&& onDateAccept, std::function<void(const std::string&)>&& onDateChange,
     DatePickerType pickerType)
 {
     auto container = Container::Current();
@@ -279,9 +293,9 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     }
     auto startDays = pickerDialog.parseStartDate.ToDays();
     auto endDays = pickerDialog.parseEndDate.ToDays();
-    auto selectedDays = pickerDialog.parseSelectedDate.ToDays();
-    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
-        LOGE("date error");
+    if (startDays > endDays) {
+        pickerDialog.parseStartDate.SetYear(0);
+        pickerDialog.parseEndDate.SetYear(0);
     }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -294,6 +308,8 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogEvent["changeId"] = onChange;
     dialogEvent["acceptId"] = onAccept;
+    dialogEvent["dateChangeId"] = onDateChange;
+    dialogEvent["dateAcceptId"] = onDateAccept;
     auto func = [onCancel](const GestureEvent& /* info */) {
         if (onCancel) {
             onCancel();

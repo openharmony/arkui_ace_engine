@@ -541,19 +541,20 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
-    if (textPickerLayoutProperty->HasDisappearColor()) {
-        textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetDisappearColor().value());
-    }
+    textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetDisappearColor().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (textPickerLayoutProperty->HasDisappearFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetDisappearFontSize().value());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
-        textLayoutProperty->UpdateAdaptMinFontSize(
-            pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
+        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
     }
-    if (textPickerLayoutProperty->HasDisappearWeight()) {
-        textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetDisappearWeight().value());
-    }
+    textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetDisappearWeight().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(textPickerLayoutProperty->GetDisappearFontFamily().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetDisappearFontStyle().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -561,9 +562,8 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    if (textPickerLayoutProperty->HasColor()) {
-        textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetColor().value());
-    }
+    textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetColor().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (textPickerLayoutProperty->HasFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetFontSize().value());
     } else {
@@ -571,9 +571,12 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         textLayoutProperty->UpdateAdaptMinFontSize(
             pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
     }
-    if (textPickerLayoutProperty->HasWeight()) {
-        textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetWeight().value());
-    }
+    textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetWeight().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(textPickerLayoutProperty->GetFontFamily().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetFontStyle().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -581,18 +584,20 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    Color themeSelectedColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
-    Color selectedColor = textPickerLayoutProperty->GetSelectedColor().value_or(themeSelectedColor);
-    textLayoutProperty->UpdateTextColor(selectedColor);
-    FontWeight themeFontWeight = pickerTheme->GetOptionStyle(true, false).GetFontWeight();
-    FontWeight selectedFontWeight = textPickerLayoutProperty->GetSelectedWeight().value_or(themeFontWeight);
-    textLayoutProperty->UpdateFontWeight(selectedFontWeight);
+    textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetSelectedColor().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetSelectedFontSize().value());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
         textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
     }
+    textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetSelectedWeight().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(textPickerLayoutProperty->GetSelectedFontFamily().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetSelectedFontStyle().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
 }
 
 void TextPickerColumnPattern::AddAnimationTextProperties(uint32_t currentIndex,

@@ -53,7 +53,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
-#include "rosen_text/typography.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -449,7 +448,7 @@ public:
         return isUsingMouse_;
     }
     int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove);
-    int32_t GetLineBeginPosision(int32_t originCaretPosition, bool needToCheckLineChanged = true);
+    int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
@@ -473,11 +472,11 @@ public:
     bool CursorMoveDown();
     void SetCaretPosition(int32_t position);
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
-    void HandleSetSelection(int32_t start, int32_t end);
+    void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
-    std::vector<RSTextRect> GetTextBoxes() override
+    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override
     {
         return textBoxes_;
     }
@@ -739,10 +738,16 @@ public:
         }
         Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
                         Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
-        auto position = ConvertTouchOffsetToCaretPosition(offset);
-        auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
-        auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
-        return offset.GetX() >= 0 && (position >= selectStart) && (position < selectEnd);
+        for (const auto& textBoxes : textBoxes_) {
+            bool isInRange = LessOrEqual(textBoxes.rect_.GetLeft(), offset.GetX()) &&
+                LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
+                LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
+                LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
+            if (isInRange) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // xts
@@ -892,11 +897,6 @@ public:
         caretUpdateType_ = CaretUpdateType::EVENT;
     }
 
-    void SetTextInputFlag(bool enable)
-    {
-        isTextInput_ = enable;
-    }
-
     bool GetTextInputFlag() const
     {
         return isTextInput_;
@@ -994,11 +994,13 @@ private:
 
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool LastTouchIsInSelectRegion(const std::vector<RSTypographyProperties::TextBox>& boxes);
 
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
+    bool FilterWithAscii(const std::string& valueToUpdate, std::string& result);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
-    void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTextRect>& textBoxes);
+    void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     float FitCursorInSafeArea();
     bool OffsetInContentRegion(const Offset& offset);
@@ -1086,7 +1088,7 @@ private:
     bool isMousePressed_ = false;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
-#if defined(ENABLE_STANDARD_INPUT)
+#if defined(ENABLE_STANDARD_INPUT) || defined(PREVIEW)
     bool textObscured_ = true;
 #else
     bool textObscured_ = false;
@@ -1113,9 +1115,11 @@ private:
     bool isTextInput_ = false;
     bool inlineSelectAllFlag_ = false;
     bool inlineFocusState_ = false;
+    bool blockPress_ = false;
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
     float previewWidth_ = 0.0f;
+    InputStyle preInputStyle_ = InputStyle::DEFAULT;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
@@ -1134,7 +1138,7 @@ private:
     TextEditingValueNG textEditingValue_;
     TextSelector textSelector_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
-    std::vector<RSTextRect> textBoxes_;
+    std::vector<RSTypographyProperties::TextBox> textBoxes_;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);

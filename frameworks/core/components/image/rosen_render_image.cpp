@@ -38,7 +38,11 @@
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "core/components/text_overlay/text_overlay_component.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
@@ -447,17 +451,11 @@ void RosenRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& co
         return;
     }
     auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
-    if (sharedImageManager->RegisterLoader(nameOfSharedImage, AceType::WeakClaim(this))) {
-        // This case means that the image to load is a memory image and its data is not ready.
-        // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
-        // When the data is ready, [SharedImageManager] will call [UpdateData] in [AddImageData].
-        return;
-    }
-    // this is when current picName is not found in [ProviderMapToReload], indicating that image data of this
-    // image may have been written to [SharedImageMap], so start loading
-    if (sharedImageManager->FindImageInSharedImageMap(nameOfSharedImage, AceType::WeakClaim(this))) {
-        return;
-    }
+    sharedImageManager->RegisterLoader(nameOfSharedImage, AceType::WeakClaim(this));
+    // This case means that the image to load is a memory image.
+    // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
+    // When the data is ready, [SharedImageManager] will call [UpdateData] in [AddImageData].
+    sharedImageManager->FindImageInSharedImageMap(nameOfSharedImage, AceType::WeakClaim(this));
 }
 
 void RosenRenderImage::PerformLayoutPixmap()
@@ -745,7 +743,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
     ApplyColorFilter(brush);
     ApplyInterpolation(brush);
     auto colorSpace = RSColorSpace::CreateSRGB();
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (rsImage && rsImage->GetImage()) {
         colorSpace = RSColorSpace::CreateRefImage(*rsImage->GetImage());
     }
@@ -779,7 +777,7 @@ void RosenRenderImage::ApplyBorderRadius(const Offset& offset, const Rect& paint
     recordingCanvas->ClipAdaptiveRRect(radii_);
 #else
     auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
-    LOGE("Drawing is not supported");
+    recordingCanvas->ClipAdaptiveRoundRect(radii_);
 #endif
 #else
     // There are three situations in which we apply border radius to the whole image component:
@@ -959,7 +957,7 @@ void RosenRenderImage::CanvasDrawImageRect(
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     if (!skImage || (!skImage->GetImage() && !skImage->GetCompressData())) {
 #else
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (!rsImage || (!rsImage->GetImage() && !rsImage->GetCompressData())) {
 #endif
         imageDataNotReady_ = true;
@@ -988,7 +986,7 @@ void RosenRenderImage::CanvasDrawImageRect(
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->Translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
         Rosen::RsImageInfo rsImageInfo(
-            fitNum, repeatNum, radii_, scale_, 0, rsImage->GetCompressWidth(), rsImage->GetCompressHeight());
+            fitNum, repeatNum, radii_.data(), scale_, 0, rsImage->GetCompressWidth(), rsImage->GetCompressHeight());
         recordingCanvas->AttachBrush(brush);
         LOGE("Drawing is not supported");
         recordingCanvas->DetachBrush();
@@ -1132,7 +1130,7 @@ void RosenRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRec
     recordingCanvas->Save();
     recordingCanvas->ConcatMatrix(sampleMatrix);
 
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (rsImage && rsImage->GetImage()) {
         recordingCanvas->AttachBrush(brush);
         recordingCanvas->DrawImageRect(*rsImage->GetImage(), drSrcRect, drDstRect, sampling,
@@ -1163,7 +1161,7 @@ bool RosenRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixma
 #else
 bool RosenRenderImage::VerifyRSImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
 {
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (!rsImage || !rsImage->GetImage()) {
         LOGE("image data made from pixmap is null");
         return false;
@@ -1201,7 +1199,7 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
     auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
     if (currentDstRectList_.empty() || !skImage || !skImage->GetImage()) {
 #else
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (currentDstRectList_.empty() || !rsImage || !rsImage->GetImage()) {
 #endif
         return;
@@ -1637,7 +1635,7 @@ bool RosenRenderImage::IsSourceWideGamut() const
     }
     return ImageProvider::IsWideGamut(skImage->GetImage()->refColorSpace());
 #else
-    auto rsImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (sourceInfo_.IsSvg() || !rsImage || !rsImage->GetImage()) {
         return false;
     }
@@ -1863,7 +1861,7 @@ SkPixmap RosenRenderImage::CloneSkPixmap(SkPixmap& srcPixmap)
 #else
 RefPtr<PixelMap> RosenRenderImage::GetPixmapFromDrawingImage()
 {
-    auto rosenImage = AceType::DynamicCast<NG::RosenImage>(image_);
+    auto rosenImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (!rosenImage || !rosenImage->GetImage()) {
         return nullptr;
     }

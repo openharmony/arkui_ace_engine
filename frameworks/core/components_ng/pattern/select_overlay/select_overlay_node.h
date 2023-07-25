@@ -55,6 +55,16 @@ public:
 
     void SetClosedByGlobalEvent(bool closedByGlobalEvent);
 
+    bool GetAnimationStatus()
+    {
+        return isDoingAnimation_;
+    }
+
+    bool GetIsExtensionMenu()
+    {
+        return isExtensionMenu_;
+    }
+
 private:
     void CreateToolBar();
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);

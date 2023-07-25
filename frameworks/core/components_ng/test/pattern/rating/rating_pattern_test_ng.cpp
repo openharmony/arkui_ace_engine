@@ -456,11 +456,11 @@ HWTEST_F(RatingPatternTestNg, RatingMeasureTest009, TestSize.Level1)
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
 
     /**
-     * @tc.steps: step2. Create LayoutWrapper and set ratingLayoutAlgorithm.
+     * @tc.steps: step2. Create LayoutWrapperNode and set ratingLayoutAlgorithm.
      */
     const RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
@@ -521,7 +521,8 @@ HWTEST_F(RatingPatternTestNg, RatingMeasureTest009, TestSize.Level1)
      * @tc.expected: OnDirtyLayoutWrapperSwap return the false.
      */
     DirtySwapConfig config;
-    auto layoutWrapper2 = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper2 =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     layoutWrapper2->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(ratingLayoutAlgorithm));
     bool skipMeasureChanges[2] = { true, false };
     bool skipMeasureContentChanges[2] = { true, false };
@@ -745,13 +746,13 @@ HWTEST_F(RatingPatternTestNg, RatingMeasureTest013, TestSize.Level1)
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
     /**
-     * @tc.steps: step1. Create LayoutWrapper and RatingLayoutAlgorithm.
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
      */
     auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
     ratingLayoutProperty->UpdateIndicator(true);
     ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
     ASSERT_NE(ratingLayoutProperty, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, ratingLayoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(nullptr, nullptr, ratingLayoutProperty);
     auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr);
     ASSERT_NE(ratingLayoutAlgorithm, nullptr);
     LayoutConstraintF layoutConstraint;

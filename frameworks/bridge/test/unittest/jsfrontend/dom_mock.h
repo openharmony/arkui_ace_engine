@@ -30,13 +30,13 @@ public:
     ~MockPlatformWindow() override = default;
 
     // Request next vsync.
-    void RequestFrame() override {};
+    void RequestFrame() override {}
 
     // Register Vsync callback.
-    void RegisterVsyncCallback(AceVsyncCallback&& callback) override {};
+    void RegisterVsyncCallback(AceVsyncCallback&& callback) override {}
 
     // Attach root render node to container
-    void SetRootRenderNode(const RefPtr<RenderNode>& root) override {};
+    void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
 };
 
 class MockFrontend : public Frontend {
@@ -64,11 +64,6 @@ public:
     WindowConfig& GetWindowConfig() override
     {
         return windowConfig_;
-    }
-
-    FrontendType GetType() override
-    {
-        return FrontendType::JS;
     }
 
     bool OnBackPressed() override

@@ -19,7 +19,11 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -29,11 +33,18 @@ void GradientStyleModifier::Draw(RSDrawingContext& context) const
 {
     CHECK_NULL_VOID(colors_);
     CHECK_NULL_VOID(colorStops_);
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
     SizeF contentSize(context.width, context.height);
     PaintGradient(*skCanvas, contentSize);
+#else
+    CHECK_NULL_VOID(context.canvas);
+    SizeF contentSize(context.width, context.height);
+    PaintGradient(*context.canvas, contentSize);
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void GradientStyleModifier::PaintGradient(SkCanvas& canvas, const SizeF& frameSize) const
 {
     if (Negative(frameSize.Height()) || Negative(frameSize.Width())) {
@@ -57,6 +68,33 @@ void GradientStyleModifier::PaintGradient(SkCanvas& canvas, const SizeF& frameSi
     canvas.drawRect(SkRect::MakeXYWH(0, 0, frameSize.Width(), frameSize.Height()), paint);
     canvas.restore();
 }
+#else
+void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSize) const
+{
+    if (Negative(frameSize.Height()) || Negative(frameSize.Width())) {
+        return;
+    }
+    auto shader = DrawingDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetShaderEffect(shader);
+
+    RSRoundRect rRect;
+    canvas.Save();
+    if (borderRadius_.has_value()) {
+        std::vector<RSPoint> fRadii = { { borderRadius_.value().x_, borderRadius_.value().x_ },
+            { borderRadius_.value().y_, borderRadius_.value().y_ },
+            { borderRadius_.value().z_, borderRadius_.value().z_ },
+            { borderRadius_.value().w_, borderRadius_.value().w_ } };
+        rRect = RSRoundRect(RSRect(0, 0, frameSize.Width(), frameSize.Height()), fRadii);
+        canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
+    }
+    canvas.AttachBrush(brush);
+    canvas.DrawRect(RSRect(0, 0, frameSize.Width(), frameSize.Height()));
+    canvas.DetachBrush();
+    canvas.Restore();
+}
+#endif
 
 Gradient GradientStyleModifier::GetGradient() const
 {

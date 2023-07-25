@@ -43,12 +43,6 @@ config("ace_unittest_config") {
     "$ace_root",
     "$ace_root/frameworks",
     "$root_out_dir/arkui/framework",
-    "$ace_graphic/rosen/modules/2d_engine/rosen_text/export",
-    "$ace_graphic/rosen/modules/2d_graphics/include",
-    "$ace_graphic/rosen/modules/2d_graphics/src",
-    "$ace_graphic/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-    "//third_party/skia",
-    "//third_party/flutter/build/skia",
   ]
   cflags_cc = []
   defines = []
@@ -120,6 +114,8 @@ ohos_source_set("ace_components_base") {
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll/inner/scroll_bar.cpp",
   ]
   configs = [ ":ace_unittest_config" ]
 }
@@ -186,6 +182,8 @@ ohos_source_set("ace_components_layout") {
     "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
   ]
   configs = [ ":ace_unittest_config" ]
 }

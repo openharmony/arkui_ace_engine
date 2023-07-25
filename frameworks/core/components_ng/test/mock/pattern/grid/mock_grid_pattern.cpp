@@ -17,7 +17,6 @@
 
 namespace OHOS::Ace::NG {
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
-void GridPattern::OnAttachToFrameNode() {}
 void GridPattern::OnModifyDone() {}
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
@@ -48,6 +47,11 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
 }
 
 void GridPattern::ScrollToFocusNodeIndex(int32_t index) {}
+
+bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    return false;
+}
 
 CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */)
 {
@@ -86,6 +90,11 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
 }
 
 float GridPattern::EstimateHeight() const
+{
+    return 0.0f;
+}
+
+float GridPattern::GetTotalHeight() const
 {
     return 0.0f;
 }

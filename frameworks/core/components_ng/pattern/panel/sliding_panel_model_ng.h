@@ -26,6 +26,7 @@ public:
     void SetPanelType(PanelType type) override;
     void SetPanelMode(PanelMode mode) override;
     void SetHasDragBar(bool hasDragBar) override;
+    void SetCustomHeight(const Dimension& customHeight) override;
     void SetMiniHeight(const Dimension& miniHeight) override;
     void SetHalfHeight(const Dimension& halfHeight) override;
     void SetFullHeight(const Dimension& fullHeight) override;

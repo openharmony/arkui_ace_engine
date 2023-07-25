@@ -179,7 +179,7 @@ private:
 #ifndef USE_ROSEN_DRAWING
     SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
 #else
-    RSPoint radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    std::vector<RSPoint> radii_ = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
 #endif
     Size formerRawImageSize_;
     bool imageDataNotReady_ = false;

@@ -62,6 +62,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // inActive means updates are delayed
   private isActive_ : boolean = true;
 
+  // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
+  private isDeleting_: boolean = false;
+
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
 
@@ -176,6 +179,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
       removedElmtIds.push(key);
     });
     this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
+    if (this.hasRecycleManager()) {
+      this.getRecycleManager().purgeAllCachedRecycleNode();
+    }
 
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
@@ -185,6 +191,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.parent_.removeChild(this);
     }
     this.localStoragebackStore_ = undefined;
+    this.isDeleting_ = true;
   }
 
   
@@ -493,31 +500,35 @@ abstract class ViewPU extends NativeViewPartialUpdate
   /**
    * Method for the sub-class to call from its constructor for resolving
    *       a @Consume variable and initializing its backing store
-   *       with the yncedPropertyTwoWay<T> object created from the
+   *       with the SyncedPropertyTwoWay<T> object created from the
    *       @Provide variable's backing store.
    * @param providedPropName the name of the @Provide'd variable.
-   *     This is either the @Consume decortor parameter, or variable name.
+   *     This is either the @Consume decorator parameter, or variable name.
    * @param consumeVarName the @Consume variable name (not the
-   *            @Consume decortor parameter)
-   * @returns initiaizing value of the @Consume backing store
+   *            @Consume decorator parameter)
+   * @returns initializing value of the @Consume backing store
    */
   protected initializeConsume<T>(providedPropName: string,
     consumeVarName: string): ObservedPropertyAbstractPU<T> {
-    let providedVarStore = this.providedVars_.get(providedPropName);
+    let providedVarStore : ObservedPropertyAbstractPU<any> = this.providedVars_.get(providedPropName);
     if (providedVarStore === undefined) {
       throw new ReferenceError(`${this.constructor.name}: missing @Provide property with name ${providedPropName}.
-     Fail to resolve @Consume(${providedPropName}).`);
+          Fail to resolve @Consume(${providedPropName}).`);
     }
 
-    return providedVarStore.createSync(
-      <T>(source: ObservedPropertyAbstract<T>) => (source instanceof ObservedPropertySimple)
-        ? new SynchedPropertySimpleTwoWayPU<T>(source, this, consumeVarName)
-        : new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName)) as ObservedPropertyAbstractPU<T>;
+    const factory = <T>(source: ObservedPropertyAbstract<T>) => {
+      const result : ObservedPropertyAbstractPU<T> = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
+          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName) 
+          : new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName);
+      stateMgmtConsole.error(`The @Consume is instance of ${result.constructor.name}`);
+      return result;
+    };
+    return providedVarStore.createSync(factory) as  ObservedPropertyAbstractPU<T>;
   }
 
 
   /**
-   * given the elmtid of a child or child of child within this custom component
+   * given the elmtId of a child or child of child within this custom component
    * remember this component needs a partial update
    * @param elmtId
    */
@@ -655,7 +666,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // add current JS object to it's parent recycle manager
   public recycleSelf(name: string): void {
-    if (this.parent_) {
+    if (this.parent_ && !this.parent_.isDeleting_) {
       this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
     } else {
       this.resetRecycleCustomNode();
@@ -786,7 +797,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertySimpleTwoWayPU<T>(source, this, viewVariableName)
+          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
     this.ownStorageLinksProps_.add(appStorageLink);
@@ -798,7 +809,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
+          ? new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
     this.ownStorageLinksProps_.add(appStorageProp);
@@ -811,7 +822,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertySimpleTwoWayPU<T>(source, this, viewVariableName)
+          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
     this.ownStorageLinksProps_.add(localStorageLink);
@@ -824,7 +835,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
+          ? new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
     this.ownStorageLinksProps_.add(localStorageProp);

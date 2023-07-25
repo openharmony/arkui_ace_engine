@@ -61,6 +61,9 @@ ACE_EXPORT extern const char STAGE_ETS_TAG[];
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
+
+ACE_EXPORT extern const char ATOMIC_SERVICE_ETS_TAG[];
+ACE_EXPORT extern const char APP_BAR_ETS_TAG[];
 // js custom view
 ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_VIEW_COMPONENT_TAG[];
@@ -350,6 +353,7 @@ ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[];
 ACE_EXPORT extern const char SHEET_COMPONENT_TAG[];
 ACE_EXPORT extern const char SHEET_ETS_TAG[];
 ACE_EXPORT extern const char SHEET_MASK_TAG[];
+ACE_EXPORT extern const char SHEET_PAGE_TAG[];
 
 // hyperlink
 ACE_EXPORT extern const char HYPERLINK_COMPONENT_TAG[];
@@ -526,15 +530,15 @@ ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
 
 // LocationButton
-ACE_EXPORT extern const char SEC_LOCATION_BUTTON_COMPONENT_TAG[];
-ACE_EXPORT extern const char SEC_LOCATION_BUTTON_ETS_TAG[];
+ACE_EXPORT extern const char LOCATION_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char LOCATION_BUTTON_ETS_TAG[];
 
 // PasteButton
-ACE_EXPORT extern const char SEC_PASTE_BUTTON_COMPONENT_TAG[];
-ACE_EXPORT extern const char SEC_PASTE_BUTTON_ETS_TAG[];
+ACE_EXPORT extern const char PASTE_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char PASTE_BUTTON_ETS_TAG[];
 
 // SaveButton
-ACE_EXPORT extern const char SEC_SAVE_BUTTON_COMPONENT_TAG[];
-ACE_EXPORT extern const char SEC_SAVE_BUTTON_ETS_TAG[];
+ACE_EXPORT extern const char SAVE_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char SAVE_BUTTON_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H
