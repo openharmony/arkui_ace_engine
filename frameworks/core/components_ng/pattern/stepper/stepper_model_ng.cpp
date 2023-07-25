@@ -96,12 +96,15 @@ RefPtr<FrameNode> StepperModelNG::CreateSwiperChild(int32_t id, uint32_t index)
     auto swiperNode =
         FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, id, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    swiperPaintProperty->UpdateLoop(false);
+    CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::NONE);
     swiperPaintProperty->UpdateDisableSwipe(true);
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateCachedCount(0);
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(static_cast<int32_t>(index));
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateLoop(false);
+    swiperLayoutProperty->UpdateCachedCount(0);
+    swiperLayoutProperty->UpdateIndex(static_cast<int32_t>(index));
+    swiperLayoutProperty->UpdateShowIndicator(false);
     swiperNode->MarkModifyDone();
     return swiperNode;
 }
