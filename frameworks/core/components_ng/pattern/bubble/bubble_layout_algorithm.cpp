@@ -160,7 +160,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             rects.emplace_back(parentWindowRect);
             rects.emplace_back(rect);
         }
-        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId());
+        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId(), bubblePattern->GetContainerId());
     }
 }
 
