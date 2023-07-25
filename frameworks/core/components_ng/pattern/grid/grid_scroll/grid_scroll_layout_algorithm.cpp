@@ -839,10 +839,16 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         if (LessOrEqual(estimatedHeight, 0)) {
             return;
         }
-        auto averageHeight = estimatedHeight / gridLayoutInfo_.childrenCount_;
+        auto averageHeight = pattern->GetAverageHeight();
+        if (LessOrEqual(averageHeight, 0.0)) {
+            return;
+        }
         int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
-        gridLayoutInfo_.startIndex_ = std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0);
-        gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_;
+        gridLayoutInfo_.startIndex_ = gridLayoutInfo_.startIndex_ > estimatedIndex
+                                          ? std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0)
+                                          : 0;
+        gridLayoutInfo_.currentOffset_ =
+            gridLayoutInfo_.startIndex_ > estimatedIndex ? gridLayoutInfo_.prevOffset_ : 0.0f;
         LOGI("estimatedIndex:%{public}d", gridLayoutInfo_.startIndex_);
         grid->ChildrenUpdatedFrom(0);
     }
@@ -884,7 +890,10 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         if (LessOrEqual(estimatedHeight, 0)) {
             return;
         }
-        auto averageHeight = estimatedHeight / gridLayoutInfo_.childrenCount_;
+        auto averageHeight = pattern->GetAverageHeight();
+        if (LessOrEqual(averageHeight, 0.0)) {
+            return;
+        }
         int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
         gridLayoutInfo_.startIndex_ =
             std::min(gridLayoutInfo_.startIndex_ - estimatedIndex, gridLayoutInfo_.childrenCount_);
