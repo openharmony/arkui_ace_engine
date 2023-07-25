@@ -68,7 +68,6 @@ ohos_source_set("preview_osal_source") {
       "fetch_manager.cpp",
       "frame_report.cpp",
       "image_source_preview.cpp",
-      "modal_ui_extension_impl.cpp",
       "mouse_style_ohos.cpp",
       "pixel_map_preview.cpp",
       "response_data.cpp",
