@@ -1038,7 +1038,7 @@ bool OverlayManager::RemoveModalInOverlay()
             rootNode->RemoveChild(topModalNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
-    } else if (topModalNode->GetTag() == "SheetPage") {
+    } else if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         topModalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
         auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetLastChild());
         CHECK_NULL_RETURN(topModalNode, false);
@@ -1434,7 +1434,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         if (!modalStack_.empty()) {
             auto topModalNode = modalStack_.top().Upgrade();
             CHECK_NULL_VOID(topModalNode);
-            if (topModalNode->GetTag() == "SheetPage") {
+            if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
                 if (topModalNode->GetPattern<SheetPresentationPattern>()->GetTargetId() == targetId) {
                     if (sheetStyle.backgroundColor.has_value()) {
                         topModalNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
@@ -1484,7 +1484,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     if (!modalStack_.empty()) {
         auto topSheetNode = modalStack_.top().Upgrade();
         CHECK_NULL_VOID(topSheetNode);
-        if (topSheetNode->GetTag() != "SheetPage") {
+        if (topSheetNode->GetTag() != V2::SHEET_PAGE_TAG) {
             return;
         }
         if (topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
@@ -1605,25 +1605,26 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle)
 
 void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId)
 {
-    auto topSheetNode = modalStack_.top().Upgrade();
-    CHECK_NULL_VOID(topSheetNode);
-    if (topSheetNode->GetTag() != "SheetPage") {
-        return;
+    if (!modalStack_.empty()) {
+        auto topSheetNode = modalStack_.top().Upgrade();
+        CHECK_NULL_VOID(topSheetNode);
+        if (topSheetNode->GetTag() != V2::SHEET_PAGE_TAG) {
+            return;
+        }
+        if (topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
+            return;
+        }
+        auto rootNode = rootNodeWeak_.Upgrade();
+        CHECK_NULL_VOID(rootNode);
+        auto root = DynamicCast<FrameNode>(rootNode);
+        OverlayManager::DestroySheetMask(sheetNode);
+        root->RemoveChild(sheetNode);
+        root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        modalStack_.pop();
+        modalList_.pop_back();
+        FireModalPageHide();
+        SaveLastModalNode();
     }
-    if (topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
-        return;
-    }
-    topSheetNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    auto root = DynamicCast<FrameNode>(rootNode);
-    OverlayManager::DestroySheetMask(sheetNode);
-    root->RemoveChild(sheetNode);
-    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    modalStack_.pop();
-    modalList_.pop_back();
-    FireModalPageHide();
-    SaveLastModalNode();
 }
 
 void OverlayManager::DestroySheetMask(const RefPtr<FrameNode>& sheetNode)
