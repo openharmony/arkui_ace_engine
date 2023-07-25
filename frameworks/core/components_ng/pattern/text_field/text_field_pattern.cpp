@@ -2181,6 +2181,7 @@ void TextFieldPattern::OnModifyDone()
         SetAxis(Axis::HORIZONTAL);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
+            SetScrollEnable(false);
         }
     }
 
