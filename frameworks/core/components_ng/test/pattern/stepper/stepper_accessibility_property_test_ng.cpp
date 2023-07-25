@@ -159,9 +159,9 @@ HWTEST_F(StepperAccessibilityPropertyTestNg, StepperAccessibilityPropertyIsScrol
 {
     InitStepperTestNg();
 
-    auto swiperLayoutProperty = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();
-    ASSERT_NE(swiperLayoutProperty, nullptr);
-    swiperLayoutProperty->UpdateLoop(false);
+    auto swiperPaintProperty = swiperNode_->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+    swiperPaintProperty->UpdateLoop(false);
     EXPECT_FALSE(stepperAccessibilityProperty_->IsScrollable());
 
     for (int i = 0; i <= INDEX_NUM; i++) {
@@ -207,9 +207,9 @@ HWTEST_F(StepperAccessibilityPropertyTestNg, StepperAccessibilityPropertyGetSupp
 {
     InitStepperTestNg();
 
-    auto swiperLayoutProperty = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();
-    ASSERT_NE(swiperLayoutProperty, nullptr);
-    swiperLayoutProperty->UpdateLoop(false);
+    auto swiperPaintProperty = swiperNode_->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+    swiperPaintProperty->UpdateLoop(false);
     swiperLayoutProperty_->UpdateShowIndicator(false);
     for (int index = 0; index <= INDEX_NUM; index++) {
         RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
@@ -230,7 +230,7 @@ HWTEST_F(StepperAccessibilityPropertyTestNg, StepperAccessibilityPropertyGetSupp
     }
     EXPECT_EQ(actions, expectActions);
 
-    swiperLayoutProperty->UpdateLoop(true);
+    swiperPaintProperty->UpdateLoop(true);
     stepperAccessibilityProperty_->ResetSupportAction();
     supportAceActions = stepperAccessibilityProperty_->GetSupportAction();
     actions = 0;

@@ -29,6 +29,7 @@ void SwiperPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("autoPlay", GetAutoPlay().value_or(false) ? "true" : "false");
     json->Put(
         "interval", std::to_string(GetAutoPlayInterval().value_or(SwiperAnimationStyle::DEFAULT_INTERVAL)).c_str());
+    json->Put("loop", GetLoop().value_or(true) ? "true" : "false");
     json->Put("duration", std::to_string(GetDuration().value_or(SwiperAnimationStyle::DEFAULT_DURATION)).c_str());
     json->Put("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false");
     static const char* EDGE_EFFECT[] = { "EdgeEffect.Spring", "EdgeEffect.Fade", "EdgeEffect.None" };
@@ -41,6 +42,7 @@ void SwiperPaintProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     UpdateAutoPlay(json->GetBool("autoPlay"));
     UpdateAutoPlayInterval(StringUtils::StringToInt(json->GetString("interval")));
+    UpdateLoop(json->GetBool("loop"));
     UpdateDuration(StringUtils::StringToInt(json->GetString("duration")));
     UpdateDisableSwipe(json->GetBool("disableSwipe"));
     static const std::unordered_map<std::string, EdgeEffect> uMap {

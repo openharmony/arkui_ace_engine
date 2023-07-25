@@ -543,7 +543,6 @@ private:
     void OnFadeAnimationStart();
     int32_t TotalDisPlayCount() const;
     void StopAndResetSpringAnimation();
-    void OnLoopChange();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -592,7 +591,6 @@ private:
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
     bool isTouchDown_ = false;
-    std::optional<bool> preLoop_;
 
     Axis direction_ = Axis::HORIZONTAL;
 

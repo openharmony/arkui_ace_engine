@@ -59,11 +59,11 @@ void CalendarModelNG::Create(const CalendarData& calendarData)
         V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateLoop(true);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
     swiperPaintProperty->UpdateDisableSwipe(true);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    swiperLayoutProperty->UpdateLoop(true);
     swiperLayoutProperty->UpdateIndex(1);
     swiperLayoutProperty->UpdateShowIndicator(false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
