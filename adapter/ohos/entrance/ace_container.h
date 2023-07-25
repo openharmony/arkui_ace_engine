@@ -417,7 +417,8 @@ public:
     bool IsScenceBoardWindow() override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
-    void GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType) override;
+    bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+        StopDragCallback&& stopDragCallback) override;
 
 private:
     void InitializeFrontend();
@@ -430,6 +431,9 @@ private:
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
+
+    void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
+
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -476,6 +480,7 @@ private:
     // For custom drag event
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
+    std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
 
