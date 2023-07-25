@@ -40,6 +40,11 @@ public:
     ImagePattern() = default;
     ~ImagePattern() override = default;
 
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
+    {
+        return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
