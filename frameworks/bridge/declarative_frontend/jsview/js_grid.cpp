@@ -270,7 +270,7 @@ void JSGrid::SetScrollBar(int32_t displayMode)
 
 void JSGrid::SetScrollBarColor(const std::string& color)
 {
-    if (!color.empty()) {
+    if (!color.empty() && color != "undefined") {
         GridModel::GetInstance()->SetScrollBarColor(color);
         return;
     }
