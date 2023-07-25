@@ -61,6 +61,7 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("style", jsonValue->ToString().c_str());
     ToJsonValueForRingStyleOptions(json);
     ToJsonValueForLinearStyleOptions(json);
+    json->Put("enableSmoothEffect", paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false");
 }
 
 void ProgressPattern::InitTouchEvent()
