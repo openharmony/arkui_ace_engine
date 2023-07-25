@@ -221,7 +221,7 @@ private:
 
     GridLayoutInfo gridLayoutInfo_;
     void ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
-                      bool prevReachEnd, bool reachStart, bool isChangedUpToEnd);
+                      bool prevReachEnd, bool reachStart);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
     void FireOnScrollStart();
@@ -232,6 +232,8 @@ private:
     bool scrollStop_ = false;
     bool initialIndex_ = false;
     int32_t offsetCount_ = 0;
+    float prevHeight_ = 0;
+    float currentHeight_ = 0;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
