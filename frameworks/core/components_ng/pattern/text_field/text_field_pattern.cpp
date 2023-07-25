@@ -841,13 +841,13 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
     UpdateSelectionOffset();
     if (SelectOverlayIsOn()) {
         SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-        textSelector_.firstHandleOffset_.SetY(textSelector_.firstHandleOffset_.GetY() + offset);
-        std::optional<RectF> firstHandle = RectF(textSelector_.firstHandleOffset_, handlePaintSize);
+        textSelector_.secondHandleOffset_.SetY(textSelector_.secondHandleOffset_.GetY() + offset);
+        std::optional<RectF> secondHandle = RectF(textSelector_.secondHandleOffset_, handlePaintSize);
 
-        std::optional<RectF> secondHandle;
+        std::optional<RectF> firstHandle;
         if (!isSingleHandle_) {
-            textSelector_.secondHandleOffset_.SetY(textSelector_.secondHandleOffset_.GetY() + offset);
-            secondHandle = { textSelector_.secondHandleOffset_, handlePaintSize };
+            textSelector_.firstHandleOffset_.SetY(textSelector_.firstHandleOffset_.GetY() + offset);
+            firstHandle = { textSelector_.firstHandleOffset_, handlePaintSize };
         }
         auto firstHandleHeight = 0.0f;
         auto secondHandleHeight = 0.0f;
@@ -869,7 +869,6 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
                 secondHandleHeight = secondHandle->Height();
             }
         }
-        CheckHandles(firstHandle, secondHandle, firstHandleHeight, secondHandleHeight);
         ShowSelectOverlay(firstHandle, secondHandle);
     }
     UpdateScrollBarOffset();
@@ -2469,6 +2468,12 @@ void TextFieldPattern::ShowSelectOverlay(
             } else {
                 selectInfo.secondHandle.isShow = false;
             }
+        }
+        if (firstHandle.has_value()) {
+            selectInfo.firstHandle.isShow = pattern->CheckHandleVisible(firstHandle.value());
+        }
+        if (secondHandle.has_value()) {
+            selectInfo.secondHandle.isShow = pattern->CheckHandleVisible(secondHandle.value());
         }
         selectInfo.isSingleHandle = !firstHandle.has_value() || !secondHandle.has_value();
         if (selectInfo.isSingleHandle && pattern->IsTextArea() &&
@@ -5459,5 +5464,12 @@ bool TextFieldPattern::LastTouchIsInSelectRegion(const std::vector<RSTypographyP
         }
     }
     return false;
+}
+bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
+{
+    OffsetF offset(paintRect.GetX() - parentGlobalOffset_.GetX(),
+        paintRect.GetY() - parentGlobalOffset_.GetY());
+    return !(!contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) ||
+        !contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON }));
 }
 } // namespace OHOS::Ace::NG
