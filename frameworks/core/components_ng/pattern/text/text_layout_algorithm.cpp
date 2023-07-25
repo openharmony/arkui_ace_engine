@@ -141,7 +141,7 @@ bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,
 
 void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  const TextStyle& textStyle)
 {
-    auto callback = [weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))] {
+    auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
         auto frameNode = weakNode.Upgrade();
         if (frameNode) {
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
