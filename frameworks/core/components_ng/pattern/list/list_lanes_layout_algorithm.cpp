@@ -33,6 +33,7 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
         if (lanes_ > 1) {
             float laneGutter = GetLaneGutter();
             crossSize = (crossSize + laneGutter) / lanes_ - laneGutter;
+            crossSize = crossSize <= 0 ? 1 : crossSize;
         }
         if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
             crossSize = maxLaneLength_.value();

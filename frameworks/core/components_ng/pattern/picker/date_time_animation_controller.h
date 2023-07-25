@@ -99,6 +99,8 @@ private:
     std::shared_ptr<AnimationUtils::Animation> oldColumnOpacityInAnimation_;
     std::shared_ptr<AnimationUtils::Animation> oldColumnOpacityOutAnimation_;
     bool created_ = false;
+    bool isInAnimationPlaying_ = false;
+    bool isOutAnimationPlaying_ = false;
 };
 } // namespace OHOS::Ace
 

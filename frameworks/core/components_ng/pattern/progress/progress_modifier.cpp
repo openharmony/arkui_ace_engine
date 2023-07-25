@@ -44,6 +44,8 @@ constexpr int32_t DEFAULT_SCALE_COUNT = 100;
 constexpr double DEFAULT_CAPSULE_BORDER_WIDTH = 0.0;
 constexpr float FLOAT_ZERO_FIVE = 0.5f;
 constexpr float FLOAT_TWO_ZERO = 2.0f;
+constexpr float SPRING_MOTION_RESPONSE = 0.314f;
+constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr Dimension SWEEP_WIDTH = 80.0_vp;
 constexpr float RING_SHADOW_OFFSET_X = 5.0f;
 constexpr float RING_SHADOW_OFFSET_Y = 5.0f;
@@ -76,7 +78,8 @@ ProgressModifier::ProgressModifier()
       linearSweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
       paintShadow_(AceType::MakeRefPtr<PropertyBool>(false)),
       progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING))),
-      isItalic_(AceType::MakeRefPtr<PropertyBool>(false))
+      isItalic_(AceType::MakeRefPtr<PropertyBool>(false)),
+      smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true))
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -99,6 +102,7 @@ ProgressModifier::ProgressModifier()
     AttachProperty(ringSweepEffect_);
     AttachProperty(linearSweepEffect_);
     AttachProperty(isItalic_);
+    AttachProperty(smoothEffect_);
 }
 
 void ProgressModifier::onDraw(DrawingContext& context)
@@ -247,6 +251,12 @@ void ProgressModifier::SetVisible(bool isVisible)
             StopSweepingAnimation();
         }
     }
+}
+
+void ProgressModifier::SetSmoothEffect(bool value)
+{
+    CHECK_NULL_VOID(smoothEffect_);
+    smoothEffect_->Set(value);
 }
 
 void ProgressModifier::StartRingLoadingAnimation()
@@ -553,7 +563,19 @@ void ProgressModifier::SetValue(float value)
     }
 
     CHECK_NULL_VOID(value_);
-    value_->Set(value);
+    AnimationOption option = AnimationOption();
+    if (smoothEffect_->Get()) {
+        if (isVisible_) {
+            auto motion =
+                AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
+            option.SetCurve(motion);
+        } else {
+            option.SetDuration(0);
+        }
+        AnimationUtils::Animate(option, [&]() { value_->Set(value); });
+    } else {
+        value_->Set(value);
+    }
     ProcessSweepingAnimation(ProgressType(progressType_->Get()), value);
 }
 

@@ -277,7 +277,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/rosen/testing_typography_style.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
-    "$ace_root/test/mock/adapter/mock_ui_extension_helper_impl.cpp",
+    "$ace_root/test/mock/adapter/mock_app_bar_helper_impl.cpp",
     "$ace_root/test/mock/base/mock_event_report.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_font_loader_ng.cpp",

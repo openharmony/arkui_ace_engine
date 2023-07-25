@@ -22,6 +22,8 @@ void PluginFrontend::Destroy() {}
 
 bool PluginFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
+    type_ = type;
+    taskExecutor_ = taskExecutor;
     return true;
 }
 

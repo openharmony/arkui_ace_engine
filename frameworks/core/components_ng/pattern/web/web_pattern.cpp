@@ -247,7 +247,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
     PanDirection panDirection;
-    panDirection.type = PanDirection::ALL;
+    panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
@@ -373,14 +373,41 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 
 void WebPattern::ResetDragAction()
 {
-    LOGI("reset drag action flag in framework");
     auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID_NOLOG(frameNode);
+    frameNode->SetDraggable(false);
     auto eventHub = frameNode->GetEventHub<WebEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_VOID_NOLOG(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
+    CHECK_NULL_VOID_NOLOG(gestureHub);
     gestureHub->ResetDragActionForWeb();
+
+    if (!isDragging_) {
+        return;
+    }
+
+    isDragging_ = false;
+    LOGI("need to cancel web kernel drag action");
+    // cancel drag action to avoid web kernel can't process other input event
+    CHECK_NULL_VOID_NOLOG(delegate_);
+    delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
+    gestureHub->CancelDragForWeb();
+}
+
+Offset WebPattern::GetDragOffset() const
+{
+    Offset webDragOffset;
+    int x = 0;
+    int y = 0;
+    if (delegate_ && delegate_->dragData_) {
+        delegate_->dragData_->GetDragStartPosition(x, y);
+    }
+
+    webDragOffset.SetX(x);
+    webDragOffset.SetY(y);
+
+    LOGD("web drag start position = (%{public}d, %{public}d)", x, y);
+    return webDragOffset;
 }
 
 bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
@@ -625,6 +652,7 @@ bool WebPattern::NotifyStartDragTask()
     }
 
     LOGI("notify to start web drag task");
+    isDragging_ = true;
     auto frameNode = GetHost();
     CHECK_NULL_RETURN_NOLOG(frameNode, false);
     auto eventHub = frameNode->GetEventHub<WebEventHub>();
@@ -636,38 +664,10 @@ bool WebPattern::NotifyStartDragTask()
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
     if (!isMouseEvent_) {
         // mouse drag does not need long press action
-        LOGI("is not mouse drag, do not need to do long press action");
+        LOGI("is not mouse drag, need to do long press action");
         gestureHub->StartLongPressActionForWeb();
     }
     gestureHub->StartDragTaskForWeb();
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(pipeline, false);
-    auto taskScheduler = pipeline->GetTaskExecutor();
-    CHECK_NULL_RETURN_NOLOG(taskScheduler, false);
-    if (isMouseEvent_) {
-        taskScheduler->PostDelayedTask(
-            [weak = WeakClaim(this)]() {
-                auto webPattern = weak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(webPattern);
-                if (!(webPattern->isDragging_)) {
-                    LOGE("timeout, need to cancel drag action");
-                    // timeout, cancel drag action to avoid web kernel can't process other input event
-                    CHECK_NULL_VOID_NOLOG(webPattern->delegate_);
-                    webPattern->delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
-                    auto frameNode = webPattern->GetHost();
-                    CHECK_NULL_VOID_NOLOG(frameNode);
-                    frameNode->SetDraggable(false);
-                    auto eventHub = frameNode->GetEventHub<WebEventHub>();
-                    CHECK_NULL_VOID_NOLOG(eventHub);
-                    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
-                    CHECK_NULL_VOID_NOLOG(gestureHub);
-                    gestureHub->CancelDragForWeb();
-                }
-            },
-            TaskExecutor::TaskType::UI, 100); // 100: 100ms
-    }
-
     return true;
 }
 
@@ -1491,6 +1491,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
+    ResetDragAction();
     CHECK_NULL_VOID(delegate_);
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {

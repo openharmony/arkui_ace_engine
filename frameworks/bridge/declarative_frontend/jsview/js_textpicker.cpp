@@ -251,7 +251,7 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, Pa
     bool ret = true;
     auto getRange = paramObjec->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
-        return false;
+        return ret;
     }
     if (!JSTextPickerParser::ParseTextArray(paramObjec, param)) {
         if (!JSTextPickerParser::ParseIconTextArray(paramObjec, param.result, param.kind, param.selected)) {
@@ -489,7 +489,9 @@ bool JSTextPickerParser::ParseMultiTextArrayValue(const JsiRef<JsiValue>& jsValu
             ParseMultiTextArrayValueSingleInternal(param.options, value, param.values);
         } else {
             for (uint32_t i = 0; i < param.options.size(); i++) {
-                param.values.emplace_back(param.options[i].rangeResult.front());
+                if (param.options[i].rangeResult.size() > 0) {
+                    param.values.emplace_back(param.options[i].rangeResult.front());
+                }
             }
         }
     }
@@ -722,20 +724,22 @@ bool JSTextPickerParser::ParseIconTextArray(
 void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
 {
     auto fontColor = paramObj->GetProperty("color");
-    auto fontStyle = paramObj->GetProperty("font");
+    auto fontOptions = paramObj->GetProperty("font");
 
     Color textColor;
     if (ParseJsColor(fontColor, textColor)) {
         textStyle.textColor = textColor;
     }
 
-    if (!fontStyle->IsObject()) {
+    if (!fontOptions->IsObject()) {
         LOGE("fontStyle is not obj.");
         return;
     }
-    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontStyle);
+    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontOptions);
     auto fontSize = fontObj->GetProperty("size");
     auto fontWeight = fontObj->GetProperty("weight");
+    auto fontFamily = fontObj->GetProperty("family");
+    auto fontStyle = fontObj->GetProperty("style");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         textStyle.fontSize = Dimension(-1);
     } else {
@@ -756,6 +760,22 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
             ParseJsString(fontWeight, weight);
         }
         textStyle.fontWeight = ConvertStrToFontWeight(weight);
+    }
+
+    if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
+        std::vector<std::string> families;
+        if (ParseJsFontFamilies(fontFamily, families)) {
+            textStyle.fontFamily = families;
+        }
+    }
+
+    if (fontStyle->IsNumber()) {
+        auto style = fontStyle->ToNumber<int32_t>();
+        if (style < 0 || style > 1) {
+            LOGE("Text fontStyle(%d) is invalid value", style);
+            return;
+        }
+        textStyle.fontStyle = static_cast<FontStyle>(style);
     }
 }
 
@@ -1216,7 +1236,6 @@ bool JSTextPickerDialog::ParseShowDataAttribute(
     const JSRef<JSObject>& paramObject, NG::TextPickerSettingData& settingData)
 {
     CalcDimension height;
-    NG::PickerTextProperties textProperties;
     auto defaultHeight = paramObject->GetProperty("defaultPickerItemHeight");
     if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
         if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
@@ -1224,12 +1243,7 @@ bool JSTextPickerDialog::ParseShowDataAttribute(
         }
     }
     settingData.height = height;
-    ParseTextProperties(paramObject, textProperties);
-    if (memcpy_s(&settingData.properties, sizeof(NG::PickerTextProperties), &textProperties,
-        sizeof(NG::PickerTextProperties)) != EOK) {
-        LOGE("memcpy properties error.");
-        return false;
-    }
+    ParseTextProperties(paramObject, settingData.properties);
     return true;
 }
 bool JSTextPickerDialog::ParseCanLoop(const JSRef<JSObject>& paramObject, bool& canLoop)

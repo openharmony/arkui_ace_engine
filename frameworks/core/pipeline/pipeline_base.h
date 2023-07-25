@@ -910,6 +910,7 @@ public:
     }
 
 protected:
+    virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
     {
         if (isForegroundCalled_ && nextFrameLayoutCallback_) {

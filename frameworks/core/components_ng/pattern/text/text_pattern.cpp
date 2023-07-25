@@ -65,7 +65,7 @@ void TextPattern::OnAttachToFrameNode()
         PipelineContext::GetCurrentContext()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->GetRenderContext()->SetClipToFrame(true);
+        host->GetRenderContext()->UpdateClipEdge(true);
     }
 }
 

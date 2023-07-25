@@ -354,7 +354,7 @@ RefPtr<V2::InspectorComposedElement> JsInspectorManager::GetInspectorElementById
     return inspectorElement;
 }
 
-const WeakPtr<Element>& JsInspectorManager::GetRootElement()
+WeakPtr<Element> JsInspectorManager::GetRootElement()
 {
     auto node = GetAccessibilityNodeFromPage(0);
     if (!node) {

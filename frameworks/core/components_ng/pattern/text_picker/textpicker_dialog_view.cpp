@@ -337,15 +337,21 @@ RefPtr<FrameNode> TextPickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto dividerNode = FrameNode::GetOrCreateFrameNode(V2::DIVIDER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
-    auto dividerRenderContext = dividerNode->GetRenderContext();
-    CHECK_NULL_RETURN(dividerRenderContext, nullptr);
-    dividerRenderContext->UpdateBackgroundColor(dialogTheme->GetDividerColor());
+    CHECK_NULL_RETURN(dividerNode, nullptr);
+
+    auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_RETURN(dividerPaintProps, nullptr);
+    dividerPaintProps->UpdateDividerColor(dialogTheme->GetDividerColor());
+
+    auto dividerLayoutProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
+    dividerLayoutProps->UpdateVertical(true);
 
     MarginProperty margin;
     margin.top = CalcLength(dialogTheme->GetDividerHeight());
     margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    dividerNode->GetLayoutProperty()->UpdateMargin(margin);
-    dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+    dividerLayoutProps->UpdateMargin(margin);
+    dividerLayoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
 
     return dividerNode;
@@ -535,6 +541,10 @@ void TextPickerDialogView::SetTextProperties(
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearWeight,
         properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontFamily,
+        properties.disappearTextStyle_.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontStyle,
+        properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, properties.normalTextStyle_.fontSize.value());
@@ -545,6 +555,10 @@ void TextPickerDialogView::SetTextProperties(
         TextPickerLayoutProperty, Color, properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, Weight, properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontFamily,
+        properties.normalTextStyle_.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle,
+        properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(
@@ -556,6 +570,10 @@ void TextPickerDialogView::SetTextProperties(
         properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight,
         properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontFamily,
+        properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontStyle,
+        properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
 void TextPickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange)

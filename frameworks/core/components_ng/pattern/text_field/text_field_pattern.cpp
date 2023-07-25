@@ -351,6 +351,7 @@ bool TextFieldPattern::UpdateCaretPosition()
         LOGW("Not on focus, cannot update caret");
         return true;
     }
+    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
     // text input has higher priority than events such as mouse press
     if (caretUpdateType_ == CaretUpdateType::INPUT) {
         UpdateCaretPositionByTextEdit();
@@ -849,7 +850,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
         auto secondHandleHeight = 0.0f;
         auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
         auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
-        if (GreatNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
+        if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
             firstHandleHeight = firstHandle->Height();
         }
         if (LessNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY() + firstHandle->Height(),
@@ -857,7 +858,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
             firstHandleHeight = firstHandle->Height();
         }
         if (!isSingleHandle_) {
-            if (GreatNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
+            if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
                 secondHandleHeight = secondHandle->Height();
             }
             if (LessNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY() + secondHandle->Height(),
@@ -1148,7 +1149,7 @@ void TextFieldPattern::HandleFocusEvent()
                                                                                       : PROPERTY_UPDATE_MEASURE);
 }
 
-void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
+void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
 {
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
     CloseSelectOverlay();
@@ -1159,10 +1160,12 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     AdjustTextSelectionRectOffsetX();
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
-    if (start == end) {
-        CreateSingleHandle();
-    } else {
-        CreateHandles();
+    if (showHandle) {
+        if (start == end) {
+            CreateSingleHandle();
+        } else {
+            CreateHandles();
+        }
     }
     UpdateCaretInfoToController();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1316,13 +1319,9 @@ void TextFieldPattern::HandleBlurEvent()
     caretRect_.Reset();
     StopTwinkling();
     CloseKeyboard(true);
-    auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     MarkRedrawOverlay();
-    UpdateCaretPositionWithClamp(pos);
-    textEditingValue_.CursorMoveToPosition(pos);
     textSelector_.Update(-1);
     selectionMode_ = SelectionMode::NONE;
-    caretUpdateType_ = CaretUpdateType::EVENT;
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     ResetBackgroundColor();
@@ -1354,6 +1353,7 @@ void TextFieldPattern::HandleOnUndoAction()
     redoOperationRecords_.push_back(value);
     if (operationRecords_.empty()) {
         LOGW("No record left, clear");
+        FireEventHubOnChange("");
         ClearEditingValue();
         return;
     }
@@ -2181,6 +2181,7 @@ void TextFieldPattern::OnModifyDone()
         SetAxis(Axis::HORIZONTAL);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
+            SetScrollEnable(false);
         }
     }
 
@@ -2198,13 +2199,22 @@ void TextFieldPattern::OnModifyDone()
         }
         HandleCounterBorder();
     }
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !inlineFocusState_) {
+    if (!IsTextArea()) {
+        isTextInput_ = true;
+    }
+    auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
+    if ((!IsSelected() && inputStyle == InputStyle::INLINE) ||
+        ((inputStyle == InputStyle::DEFAULT) && preInputStyle_ != InputStyle::INLINE)) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
     }
-    if (IsSelected() && paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
-        ApplyInlineStates(false);
+    if (IsSelected() && inputStyle == InputStyle::INLINE) {
+        preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
+    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
+        RestorePreInlineStates();
+    }
+    preInputStyle_ = inputStyle;
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }

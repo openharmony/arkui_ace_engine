@@ -714,7 +714,7 @@ std::shared_ptr<RSData> DecodedDataProviderImageLoader::LoadImageData(
 }
 
 // return orientation of pixmap for cache key
-const std::string& DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
+std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, "");

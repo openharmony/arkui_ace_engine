@@ -83,21 +83,21 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(Layout
     }
 
     auto grid = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(grid);
+    CHECK_NULL_VOID_NOLOG(grid);
     auto focusHub = grid->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID_NOLOG(focusHub);
     // textField not in Grid
     if (!focusHub->IsCurrentFocus()) {
         return;
     }
 
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID_NOLOG(context);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    CHECK_NULL_VOID(textFieldManager);
+    CHECK_NULL_VOID_NOLOG(textFieldManager);
     // only when textField is onFocus
     auto focused = textFieldManager->GetOnFocusTextField().Upgrade();
-    CHECK_NULL_VOID(focused);
+    CHECK_NULL_VOID_NOLOG(focused);
     auto position = textFieldManager->GetClickPosition().GetY();
     auto gridOffset = grid->GetTransformRelativeOffset();
     auto offset = mainSize + gridOffset.GetY() - position;
@@ -394,6 +394,8 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
             gridLayoutInfo_.currentOffset_ = 0;
             gridLayoutInfo_.prevOffset_ = 0;
         }
+        gridLayoutInfo_.reachStart_ = true;
+        gridLayoutInfo_.offsetEnd_ = true;
         return;
     }
 
@@ -717,27 +719,11 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(LayoutWrapper* layo
         if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER) {
             gridLayoutInfo_.currentOffset_ /= 2;
         }
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         return;
     }
     /* targetIndex is out of the matrix */
-    if (gridLayoutInfo_.gridMatrix_.empty()) {
-        LOGW("no grid for jump to index:%{public}d", gridLayoutInfo_.jumpIndex_);
-        return;
-    }
-    auto grid = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(grid);
-    auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(gridLayoutInfo_.jumpIndex_);
-    if (!itemWrapper) {
-        return;
-    }
-    bool hasNormalItem = false;
-    LargeItemLineHeight(itemWrapper, hasNormalItem);
-    // scroll to end of the screen
-    gridLayoutInfo_.currentOffset_ = mainSize - cellAveLength_;
-    // scroll to center of the screen
-    if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER) {
-        gridLayoutInfo_.currentOffset_ /= 2;
-    }
+    LOGW("can not find jumpIndex in Grid Matrix :%{public}d", gridLayoutInfo_.jumpIndex_);
 }
 
 float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
@@ -853,10 +839,16 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         if (LessOrEqual(estimatedHeight, 0)) {
             return;
         }
-        auto averageHeight = estimatedHeight / gridLayoutInfo_.childrenCount_;
+        auto averageHeight = pattern->GetAverageHeight();
+        if (LessOrEqual(averageHeight, 0.0)) {
+            return;
+        }
         int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
-        gridLayoutInfo_.startIndex_ = std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0);
-        gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_;
+        gridLayoutInfo_.startIndex_ = gridLayoutInfo_.startIndex_ > estimatedIndex
+                                          ? std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0)
+                                          : 0;
+        gridLayoutInfo_.currentOffset_ =
+            gridLayoutInfo_.startIndex_ > estimatedIndex ? gridLayoutInfo_.prevOffset_ : 0.0f;
         LOGI("estimatedIndex:%{public}d", gridLayoutInfo_.startIndex_);
         grid->ChildrenUpdatedFrom(0);
     }
@@ -898,7 +890,10 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         if (LessOrEqual(estimatedHeight, 0)) {
             return;
         }
-        auto averageHeight = estimatedHeight / gridLayoutInfo_.childrenCount_;
+        auto averageHeight = pattern->GetAverageHeight();
+        if (LessOrEqual(averageHeight, 0.0)) {
+            return;
+        }
         int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
         gridLayoutInfo_.startIndex_ =
             std::min(gridLayoutInfo_.startIndex_ - estimatedIndex, gridLayoutInfo_.childrenCount_);

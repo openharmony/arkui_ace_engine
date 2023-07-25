@@ -292,7 +292,8 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
     }
 
     auto widthSegment = offset.GetX();
-    PaintBackground(canvas, offset, totalWidth, context.height);
+    auto firstSegmentWidth = values_[0]->Get() * scaleMaxValue;
+    PaintBackground(canvas, offset, totalWidth, context.height, firstSegmentWidth);
     bool isStopPaint = false;
     float totalPaintWidth = 0.0f;
     float preWidthSegment = 0.0f;
@@ -336,14 +337,20 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
     }
 }
 
-void DataPanelModifier::PaintBackground(RSCanvas& canvas, OffsetF offset, float totalWidth, float height) const
+void DataPanelModifier::PaintBackground(
+    RSCanvas& canvas, OffsetF offset, float totalWidth, float height, float segmentWidth) const
 {
     RSBrush brush;
     brush.SetColor(ToRSColor(trackBackgroundColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     RSRect rRect(offset.GetX(), offset.GetY(), totalWidth + offset.GetX(), height + offset.GetY());
-    RSRoundRect rrRect(rRect, height, height);
+    RSRoundRect rrRect;
+    if (height <= segmentWidth) {
+        rrRect = RSRoundRect(rRect, height, height);
+    } else {
+        rrRect = RSRoundRect(rRect, segmentWidth, segmentWidth);
+    }
     canvas.DrawRoundRect(rrRect);
     canvas.DetachBrush();
 }

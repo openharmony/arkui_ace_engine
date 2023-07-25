@@ -64,14 +64,12 @@ public:
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override;
     void HidePopupNG(int32_t targetId) override;
-    void HidePopupNG() override;
     void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
     void ClearMenuNG() override;
-    RefPtr<NG::FrameNode> ShowDialogNG(
-        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) override;
+    RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
     void HideSubWindowNG() override;
     bool GetShown() override
     {

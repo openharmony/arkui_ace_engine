@@ -110,13 +110,21 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
         return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto defaultHeight = textFieldTheme->GetHeight().ConvertToPx();
     if (!frameSize.Height().has_value()) {
         if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
             calcLayoutConstraint->maxSize.value().Height().has_value()) {
             frameSize.SetHeight(std::max(layoutConstraint->maxSize.Height(), layoutConstraint->minSize.Height()));
         } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
+            auto height = contentHeight + pattern->GetVerticalPaddingSum() < defaultHeight
+                              ? defaultHeight
+                              : contentHeight + pattern->GetVerticalPaddingSum();
             frameSize.SetHeight(
-                std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
+                std::min(layoutConstraint->maxSize.Height(), static_cast<float>(height)));
         } else {
             frameSize.SetHeight(layoutConstraint->minSize.Height());
         }
@@ -185,7 +193,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         textContent = textFieldLayoutProperty->GetValueValue("");
         if (!pattern->IsTextArea()) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-            pattern->SetTextInputFlag(true);
         }
     } else {
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
@@ -248,7 +255,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
-    if (isInlineStyle && pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
+    if (pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
         pattern->SetSingleLineHeight(preferredHeight);
     }
     if (pattern->IsTextArea()) {
@@ -504,7 +511,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
     paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
-    paraStyle.fontFamily_ = textStyle.GetFontFamilies().at(0);
+    auto fontFamilies = textStyle.GetFontFamilies();
+    if (!fontFamilies.empty()) {
+        paraStyle.fontFamily_ = fontFamilies.at(0);
+    }
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
@@ -536,7 +546,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle->GetWordBreak());
     paraStyle.fontSize_ = textStyle->GetFontSize().ConvertToPx();
-    paraStyle.fontFamily_ = textStyle->GetFontFamilies().at(0);
+    auto fontFamilies = textStyle->GetFontFamilies();
+    if (!fontFamilies.empty()) {
+        paraStyle.fontFamily_ = fontFamilies.at(0);
+    }
     if (textStyle->GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
