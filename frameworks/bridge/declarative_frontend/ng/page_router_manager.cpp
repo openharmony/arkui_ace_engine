@@ -1168,7 +1168,7 @@ void PageRouterManager::CleanPageOverlay()
         sharedManager->StopSharedTransition();
     }
 
-    if (overlayManager->RemoveOverlay(true)) {
+    if (overlayManager->RemoveOverlay(true, true)) {
         LOGI("clean page overlay.");
     }
 }

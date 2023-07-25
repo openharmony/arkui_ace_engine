@@ -80,7 +80,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     removeOverlayFlag = (dialogNode != nullptr);
 }
 
-bool OverlayManager::RemoveOverlay(bool isBackPressed)
+bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
 {
     return removeOverlayFlag;
 }
