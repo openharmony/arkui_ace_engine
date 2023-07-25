@@ -49,6 +49,10 @@ public:
     {
         return height_;
     }
+    bool IsSucceed()
+    {
+        return isSucceed_;
+    }
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
@@ -85,6 +89,7 @@ private:
 
     int32_t width_;
     int32_t height_;
+    bool isSucceed_ = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -111,6 +111,8 @@ public:
     TransformParam GetTransform() const;
     std::string ToDataURL(const std::string& type, const double quality);
 
+    bool IsSucceed();
+
 private:
     RefPtr<OffscreenCanvasPaintMethod> offscreenPaintMethod_;
     ACE_DISALLOW_COPY_AND_MOVE(OffscreenCanvasPattern);
