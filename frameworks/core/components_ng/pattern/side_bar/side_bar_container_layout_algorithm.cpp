@@ -475,9 +475,6 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
         }
     }
     contentWidth = std::max(contentWidth, minContentWidth_);
-    if (contentWidth < minContentWidth_) {
-        contentWidth = minContentWidth_;
-    }
 
     auto contentIdealSize = CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
