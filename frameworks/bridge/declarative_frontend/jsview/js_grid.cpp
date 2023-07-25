@@ -390,15 +390,15 @@ void JSGrid::SetLayoutDirection(int32_t value)
 
 void JSGrid::SetDirection(const std::string& dir)
 {
-    bool rightToLeft = false;
+    TextDirection direction;
     if (dir == "Ltr") {
-        rightToLeft = false;
+        direction = TextDirection::LTR;
     } else if (dir == "Rtl") {
-        rightToLeft = true;
+        direction = TextDirection::RTL;
     } else {
-        rightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        direction = TextDirection::AUTO;
     }
-    GridModel::GetInstance()->SetIsRTL(rightToLeft);
+    GridModel::GetInstance()->SetIsRTL(direction);
 }
 
 void JSGrid::JsOnGridDragEnter(const JSCallbackInfo& info)
