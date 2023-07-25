@@ -572,10 +572,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
 
     auto rootNode = rootNodeWeak_.Upgrade();
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        rootNode = FindWindowScene(popupMap_[targetId].popupNode);
-    }
     CHECK_NULL_VOID(rootNode);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);

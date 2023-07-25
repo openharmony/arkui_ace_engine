@@ -1051,10 +1051,6 @@ void ViewAbstract::BindPopup(
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
-    // windowScene will not use subwindow
-    if (container->IsScenceBoardWindow()) {
-        param->SetShowInSubWindow(false);
-    }
     auto showInSubWindow = param->IsShowInSubWindow();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
