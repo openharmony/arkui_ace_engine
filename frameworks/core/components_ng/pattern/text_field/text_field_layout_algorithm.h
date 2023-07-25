@@ -104,7 +104,8 @@ public:
 
 private:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
-    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText, bool disableTextAlign);
+    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
+        int32_t nakedCharPosition, bool disableTextAlign);
     void CreateParagraph(const std::vector<TextStyle>& textStyles, const std::vector<std::string>& contents,
         const std::string& content, bool needObscureText, bool disableTextAlign);
     void CreateCounterParagraph(int32_t textLength, int32_t maxLength, const RefPtr<TextFieldTheme>& theme);
