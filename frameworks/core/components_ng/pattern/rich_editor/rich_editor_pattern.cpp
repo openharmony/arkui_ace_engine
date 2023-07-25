@@ -154,8 +154,8 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options)
     if (options.imageAttribute.has_value()) {
         if (options.imageAttribute.value().size.has_value()) {
             imageLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(options.imageAttribute.value().size.value().width.Value()),
-                    CalcLength(options.imageAttribute.value().size.value().height.Value())));
+                CalcSize(CalcLength(options.imageAttribute.value().size.value().width),
+                    CalcLength(options.imageAttribute.value().size.value().height)));
         }
         if (options.imageAttribute.value().verticalAlign.has_value()) {
             imageLayoutProperty->UpdateVerticalAlign(options.imageAttribute.value().verticalAlign.value());
