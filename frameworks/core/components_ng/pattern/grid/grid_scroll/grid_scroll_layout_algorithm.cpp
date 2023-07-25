@@ -202,8 +202,15 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             auto frSize = itemsCrossSize_.at(iter->first);
             SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
-            auto translate = Alignment::GetAlignPosition(
-                blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::TOP_CENTER);
+            auto translate = OffsetF(0.0f, 0.0f);
+            if (axis_ == Axis::VERTICAL) {
+                translate = Alignment::GetAlignPosition(
+                    blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::TOP_CENTER);
+            } else {
+                translate = Alignment::GetAlignPosition(
+                    blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::CENTER_LEFT);
+            }
+
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
             wrapper->Layout();
             auto layoutProperty = wrapper->GetLayoutProperty();
@@ -462,27 +469,29 @@ OffsetF GridScrollLayoutAlgorithm::CalculateLargeItemOffset(
 bool GridScrollLayoutAlgorithm::NeedAdjust(const RefPtr<GridItemLayoutProperty>& itemLayoutProperty)
 {
     bool needAdjust = false;
+    auto main = axis_ == Axis::VERTICAL ? mainCount_: crossCount_;
+    auto cross = axis_ == Axis::VERTICAL ? crossCount_: mainCount_;
     if (itemLayoutProperty->GetRowStart().has_value()) {
         currentItemRowStart_ = itemLayoutProperty->GetRowStart().value_or(-1);
-        if ((currentItemRowStart_ < 0) || (currentItemRowStart_ >= static_cast<int32_t>(mainCount_))) {
+        if ((currentItemRowStart_ < 0) || (currentItemRowStart_ >= static_cast<int32_t>(main))) {
             needAdjust = true;
         }
     }
     if (itemLayoutProperty->GetRowEnd().has_value()) {
         currentItemRowEnd_ = itemLayoutProperty->GetRowEnd().value_or(-1);
-        if ((currentItemRowEnd_ < 0) || (currentItemRowEnd_ >= static_cast<int32_t>(mainCount_))) {
+        if ((currentItemRowEnd_ < 0) || (currentItemRowEnd_ >= static_cast<int32_t>(main))) {
             needAdjust = true;
         }
     }
     if (itemLayoutProperty->GetColumnStart().has_value()) {
         currentItemColStart_ = itemLayoutProperty->GetColumnStart().value_or(-1);
-        if ((currentItemColStart_ < 0) || (currentItemColStart_ >= static_cast<int32_t>(crossCount_))) {
+        if ((currentItemColStart_ < 0) || (currentItemColStart_ >= static_cast<int32_t>(cross))) {
             needAdjust = true;
         }
     }
     if (itemLayoutProperty->GetColumnEnd().has_value()) {
         currentItemColEnd_ = itemLayoutProperty->GetColumnEnd().value_or(-1);
-        if ((currentItemColEnd_ < 0) || (currentItemColEnd_ >= static_cast<int32_t>(crossCount_))) {
+        if ((currentItemColEnd_ < 0) || (currentItemColEnd_ >= static_cast<int32_t>(cross))) {
             needAdjust = true;
         }
     }
@@ -1383,7 +1392,9 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
             }
             auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
             CHECK_NULL_RETURN(childLayoutProperty, 0);
-            auto crossIndex = childLayoutProperty->GetCustomCrossIndex(axis_);
+
+            AdjustRowColSpan(childLayoutWrapper);
+            auto crossIndex = axis_ == Axis::VERTICAL ? currentItemColStart_ : currentItemRowStart_;
             if (crossIndex == 0) {
                 firstIndex = index;
                 break;
@@ -1400,7 +1411,8 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
             }
             auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
             CHECK_NULL_RETURN(childLayoutProperty, 0);
-            auto crossIndex = childLayoutProperty->GetCustomCrossIndex(axis_);
+            AdjustRowColSpan(childLayoutWrapper);
+            auto crossIndex = axis_ == Axis::VERTICAL ? currentItemColStart_ : currentItemRowStart_;
             // Grid may change from no big item to has big item
             if (crossIndex >= 0) {
                 gridLayoutInfo_.hasBigItem_ = true;
