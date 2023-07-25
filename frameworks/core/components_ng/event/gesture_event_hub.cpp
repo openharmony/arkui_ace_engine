@@ -69,7 +69,8 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
-        scrollableActuator_->CollectTouchTarget(coordinateOffset, localPoint, getEventTargetImpl, innerTargets);
+        scrollableActuator_->CollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, localPoint);
     }
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
