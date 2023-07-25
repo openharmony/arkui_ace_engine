@@ -1843,13 +1843,13 @@ RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t
     auto context = context_.Upgrade();
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
         CHECK_NULL_RETURN_NOLOG(context, nullptr);
-        if (context->GetWindowId() == windowId) {
+        if (context->GetWindowId() == static_cast<uint32_t>(windowId)) {
             return context;
         }
         for (auto& subContext : GetSubPipelineContexts()) {
             context = subContext.Upgrade();
             CHECK_NULL_RETURN_NOLOG(context, nullptr);
-            if (context->GetWindowId() == windowId) {
+            if (context->GetWindowId() == static_cast<uint32_t>(windowId)) {
                 return context;
             }
         }
