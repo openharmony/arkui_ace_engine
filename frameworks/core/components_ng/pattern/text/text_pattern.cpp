@@ -980,6 +980,11 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
 void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(child);
+    auto chidNode = DynamicCast<FrameNode>(child);
+    if (chidNode && chidNode->GetLayoutProperty() && chidNode->GetLayoutProperty()->IsOverlayNode()) {
+        return;
+    }
+
     if (child->GetTag() == V2::SPAN_ETS_TAG) {
         auto spanNode = DynamicCast<SpanNode>(child);
         if (spanNode) {
