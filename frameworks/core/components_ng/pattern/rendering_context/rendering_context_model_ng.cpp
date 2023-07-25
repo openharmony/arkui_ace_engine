@@ -40,6 +40,9 @@ void RenderingContextModelNG::SetTransferFromImageBitmap(RefPtr<AceType>& canvas
     if (customPaintPattern) {
         auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(offscreenCPattern);
         CHECK_NULL_VOID(offscreenCanvasPattern);
+        if (!offscreenCanvasPattern->IsSucceed()) {
+            return;
+        }
         customPaintPattern->TransferFromImageBitmap(offscreenCanvasPattern);
     }
 }

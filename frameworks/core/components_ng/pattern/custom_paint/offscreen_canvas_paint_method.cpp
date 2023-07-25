@@ -95,7 +95,11 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
 #ifndef USE_ROSEN_DRAWING
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
-    canvasCache_.allocPixels(imageInfo);
+    if (!canvasCache_.tryAllocPixels(imageInfo)) {
+        LOGE("The OffScreenCanvas fail to constructor due to the width and height being too large");
+        isSucceed_ = false;
+        return;
+    }
     canvasCache_.eraseColor(SK_ColorTRANSPARENT);
     skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
 #else
