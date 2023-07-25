@@ -277,7 +277,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         MarkRedrawOverlay();
     } else if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE_DONE) {
         SetHandlerOnMoveDone();
-    } else if ((!NearZero(dx) || !NearZero(dy)) && SelectOverlayIsOn()) {
+    } else if ((!NearZero(dx) || !NearZero(dy)) && SelectOverlayIsOn() && selectionMode_ == SelectionMode::SELECT) {
         SelectHandleInfo firstInfo, secondInfo;
         SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
         textSelector_.firstHandleOffset_.AddX(dx);
