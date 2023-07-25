@@ -2204,8 +2204,9 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         }
         CalcDimension x;
         CalcDimension y;
-        ParseJsonDimensionVp(imageArgs->GetValue("x"), x);
-        ParseJsonDimensionVp(imageArgs->GetValue("y"), y);
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        ParseJsDimensionVp(object->GetProperty("x"), x);
+        ParseJsDimensionVp(object->GetProperty("y"), y);
         double valueX = x.Value();
         double valueY = y.Value();
         DimensionUnit typeX = DimensionUnit::PX;
