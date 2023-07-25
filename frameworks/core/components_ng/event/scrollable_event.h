@@ -26,6 +26,9 @@
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float HTMBLOCK_VELOCITY = 20;
+}
 
 class GestureEventHub;
 
@@ -144,6 +147,14 @@ public:
         return true;
     }
 
+    bool IsHitTestBlock() const
+    {
+        if (scrollable_ && !scrollable_->Idle()) {
+            return std::abs(scrollable_->GetCurrentVelocity()) > SystemProperties::Vp2Px(HTMBLOCK_VELOCITY);
+        }
+        return false;
+    }
+
     void SetFriction(double friction)
     {
         friction_ = friction;
@@ -234,6 +245,8 @@ public:
             }
         }
     }
+
+    bool IsHitTestBlock() const;
 
 private:
     void InitializeScrollable(RefPtr<ScrollableEvent> event);
