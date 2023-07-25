@@ -67,7 +67,6 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
         V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    swiperPaintProperty->UpdateLoop(false);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -75,6 +74,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     CHECK_NULL_VOID(tabTheme);
     swiperPaintProperty->UpdateDuration(tabTheme->GetTabContentAnimationDuration());
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    swiperLayoutProperty->UpdateLoop(false);
     swiperLayoutProperty->UpdateCachedCount(0);
     swiperLayoutProperty->UpdateShowIndicator(false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
