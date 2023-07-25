@@ -102,7 +102,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             auto pageFocusHub = page->GetFocusHub();
             CHECK_NULL_VOID(pageFocusHub);
             pageFocusHub->SetParentFocusable(true);
-            pageFocusHub->RequestFocus();
+            pageFocusHub->RequestFocusWithDefaultFocusFirstly();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
@@ -411,7 +411,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
     pageFocusHub->SetParentFocusable(true);
-    pageFocusHub->RequestFocus();
+    pageFocusHub->RequestFocusWithDefaultFocusFirstly();
 
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);

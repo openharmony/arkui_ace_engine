@@ -1122,7 +1122,7 @@ void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool
     CHECK_NULL_VOID(overlayNode);
     auto focusHub = overlayNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocus();
+    focusHub->RequestFocusWithDefaultFocusFirstly();
 
     if (isInSubWindow) {
         // no need to set page lost focus in sub window.
@@ -1316,7 +1316,7 @@ void OverlayManager::FireModalPageShow()
     auto topModalFocusHub = topModalNode->GetFocusHub();
     CHECK_NULL_VOID(topModalFocusHub);
     topModalFocusHub->SetParentFocusable(true);
-    topModalFocusHub->RequestFocus();
+    topModalFocusHub->RequestFocusWithDefaultFocusFirstly();
 }
 
 void OverlayManager::FireModalPageHide()
