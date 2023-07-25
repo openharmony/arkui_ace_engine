@@ -178,8 +178,13 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     };
 
     if (Container::IsCurrentUseNewPipeline()) {
-        panRecognizerNG_ =
-            AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+        const static int32_t PLATFORM_VERSION_TEN = 10;
+        float distance = DEFAULT_PAN_DISTANCE;
+        auto context = context_.Upgrade();
+        if (context && (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN)) {
+            distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
+        }
+        panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distance);
 
         panRecognizerNG_->SetOnActionStart(actionStart);
         panRecognizerNG_->SetOnActionUpdate(actionUpdate);
