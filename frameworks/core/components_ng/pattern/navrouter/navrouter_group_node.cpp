@@ -167,6 +167,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(name);
         navDestinationPattern->SetNavDestinationNode(uiNode);
+        navDestinationPattern->SetIsUnderNavRouter(true);
         navDestinationPattern->SetRouteInfo(routeInfo);
         navRouterPattern->SetNavDestination(name);
     } else if (navDestination) {
