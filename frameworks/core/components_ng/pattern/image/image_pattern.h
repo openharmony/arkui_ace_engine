@@ -128,7 +128,7 @@ private:
 
     void OnModifyDone() override;
 
-    void PaintImage(RenderContext* renderContext, const OffsetF& offset);
+    void OnLanguageConfigurationUpdate() override;
 
     void OnImageDataReady();
     void OnImageLoadFail();
