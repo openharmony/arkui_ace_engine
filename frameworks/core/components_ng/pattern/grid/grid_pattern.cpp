@@ -1127,13 +1127,47 @@ float GridPattern::EstimateHeight() const
         itemCount += (lineEnd - lineStart + 1);
         heightSum += item.second + mainGap;
     }
-
+    if (itemCount == 0) {
+        return 0;
+    }
     auto averageHeight = heightSum / itemCount;
     height = info.startIndex_ * averageHeight - info.currentOffset_;
     if (itemCount >= (info.childrenCount_ - 1)) {
         height = info.GetStartLineOffset(mainGap);
     }
     return height;
+}
+
+float GridPattern::GetAverageHeight() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN_NOLOG(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0);
+    const auto& info = gridLayoutInfo_;
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+
+    float heightSum = 0;
+    int32_t itemCount = 0;
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+    for (const auto& item : info.lineHeightMap_) {
+        auto line = info.gridMatrix_.find(item.first);
+        if (line == info.gridMatrix_.end()) {
+            continue;
+        }
+        if (line->second.empty()) {
+            continue;
+        }
+        auto lineStart = line->second.begin()->second;
+        auto lineEnd = line->second.rbegin()->second;
+        itemCount += (lineEnd - lineStart + 1);
+        heightSum += item.second + mainGap;
+    }
+    if (itemCount == 0) {
+        return 0;
+    }
+    return heightSum / itemCount;
 }
 
 float GridPattern::GetTotalHeight() const
@@ -1208,7 +1242,7 @@ void GridPattern::UpdateScrollBarOffset()
             itemCount += (lineEnd - lineStart + 1);
             heightSum += item.second + mainGap;
         }
-        auto averageHeight = heightSum / itemCount;
+        auto averageHeight = itemCount == 0 ? 0.0 : heightSum / itemCount;
         offset = info.startIndex_ * averageHeight - info.currentOffset_;
         if (itemCount >= (info.childrenCount_ - 1)) {
             estimatedHeight = heightSum - mainGap;

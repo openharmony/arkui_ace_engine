@@ -183,6 +183,7 @@ public:
     void MoveItems(int32_t itemIndex, int32_t insertIndex);
     void ClearDragState();
     float EstimateHeight() const;
+    float GetAverageHeight() const;
 
 private:
     float GetMainGap();
