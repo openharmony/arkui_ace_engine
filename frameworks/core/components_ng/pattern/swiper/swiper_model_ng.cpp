@@ -135,7 +135,7 @@ void SwiperModelNG::SetDuration(uint32_t duration)
 
 void SwiperModelNG::SetLoop(bool loop)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, Loop, loop);
+    ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, Loop, loop);
 }
 
 void SwiperModelNG::SetEnabled(bool enabled)

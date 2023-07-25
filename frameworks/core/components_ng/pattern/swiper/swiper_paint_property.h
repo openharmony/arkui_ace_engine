@@ -45,6 +45,7 @@ public:
     {
         auto paintProperty = MakeRefPtr<SwiperPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
+        paintProperty->propLoop_ = CloneLoop();
         paintProperty->propSwiperAnimationStyle_ = CloneSwiperAnimationStyle();
         paintProperty->propEnabled_ = CloneEnabled();
         paintProperty->propDisableSwipe_ = CloneDisableSwipe();
@@ -56,6 +57,7 @@ public:
     void Reset() override
     {
         PaintProperty::Reset();
+        ResetLoop();
         ResetSwiperAnimationStyle();
         ResetEnabled();
         ResetDisableSwipe();
@@ -73,6 +75,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, Duration, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, Curve, RefPtr<Curve>, PROPERTY_UPDATE_RENDER);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Enabled, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_RENDER);

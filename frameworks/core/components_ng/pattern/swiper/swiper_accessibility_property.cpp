@@ -66,9 +66,9 @@ bool SwiperAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(frameNode, false);
     auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, false);
-    auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty, false);
-    bool isLoop = swiperLayoutProperty->GetLoop().value_or(true);
+    auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, false);
+    bool isLoop = swiperPaintProperty->GetLoop().value_or(true);
     if (!isLoop && swiperPattern->TotalCount() <= 1) {
         return false;
     }
@@ -88,9 +88,9 @@ void SwiperAccessibilityProperty::SetSpecificSupportAction()
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_VOID(frameNode);
-    auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    bool isLoop = swiperLayoutProperty->GetLoop().value_or(true);
+    auto swiperPaintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    bool isLoop = swiperPaintProperty->GetLoop().value_or(true);
     if (IsScrollable()) {
         if (!isLoop) {
             if (GetCurrentIndex() > 0) {
