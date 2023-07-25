@@ -35,7 +35,8 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutConstraint);
     const auto& padding = props->CreatePaddingAndBorderWithDefault(horInterval_, 0.0f, 0.0f, 0.0f);
     float maxRowWidth = layoutConstraint->maxSize.Width() - padding.Width();
-    if (layoutConstraint->selfIdealSize.Width()) {
+    if (layoutConstraint->selfIdealSize.Width() &&
+        layoutConstraint->selfIdealSize.Width().value() < layoutConstraint->maxSize.Width()) {
         maxRowWidth = layoutConstraint->selfIdealSize.Width().value() - padding.Width();
     }
     float minRowWidth = layoutConstraint->minSize.Width();
@@ -65,6 +66,9 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!layoutConstraint->selfIdealSize.Width().has_value()) {
         float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
         layoutConstraint->selfIdealSize.SetWidth(std::max(minRowWidth, contentWidth));
+        props->UpdateLayoutConstraint(layoutConstraint.value());
+    } else if (layoutConstraint->selfIdealSize.Width().value() >= layoutConstraint->maxSize.Width()) {
+        layoutConstraint->selfIdealSize.SetWidth(layoutConstraint->maxSize.Width());
         props->UpdateLayoutConstraint(layoutConstraint.value());
     }
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
