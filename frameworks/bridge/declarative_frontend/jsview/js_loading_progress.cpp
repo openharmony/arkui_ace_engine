@@ -107,9 +107,10 @@ void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
 
 void JSLoadingProgress::SetEnableLoading(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsBoolean()) {
-        return;
+    bool enable = true;
+    if (info[0]->IsBoolean()) {
+        enable = info[0]->ToBoolean();
     }
-    LoadingProgressModel::GetInstance()->SetEnableLoading(info[0]->ToBoolean());
+    LoadingProgressModel::GetInstance()->SetEnableLoading(enable);
 }
 }; // namespace OHOS::Ace::Framework
