@@ -146,6 +146,7 @@ public:
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
+    void CloseSelectOverlay() override;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif

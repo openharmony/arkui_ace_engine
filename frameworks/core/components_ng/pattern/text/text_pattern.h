@@ -207,7 +207,7 @@ public:
     {
         return true;
     }
-    void CloseSelectOverlay() override;
+    virtual void CloseSelectOverlay() override;
     void CreateHandles() override;
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
