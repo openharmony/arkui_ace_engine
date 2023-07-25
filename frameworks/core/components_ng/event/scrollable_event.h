@@ -188,7 +188,9 @@ public:
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
         scrollableEvents_[scrollableEvent->GetAxis()] = scrollableEvent;
-        InitializeScrollable(scrollableEvent);
+        if (scrollableEvent && !scrollableEvent->GetScrollable()) {
+            InitializeScrollable(scrollableEvent);
+        }
     }
 
     void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
