@@ -8655,4 +8655,187 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmGetChildMaxSize001, TestSize.Level1)
         isMainAxis = false;
     }
 }
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmMeasureSwiper001
+ * @tc.desc: MeasureSwiper
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(swiperPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(swiperLayoutAlgorithm, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    layoutWrapper.currentChildCount_ = 2;
+    layoutWrapper.childrenMap_.emplace(std::make_pair(
+        0, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty())));
+    layoutWrapper.childrenMap_.emplace(std::make_pair(
+        1, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, nullptr, indicatorNode->GetLayoutProperty())));
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    Axis axis = Axis::HORIZONTAL;
+    swiperLayoutAlgorithm->totalItemCount_ = 2;
+
+    /**
+     * @tc.steps: step2. call MeasureSwiper
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+            if (i == 1) {
+                int32_t targetIndex_test = 1;
+                swiperLayoutAlgorithm->SetTargetIndex(targetIndex_test);
+                continue;
+            }
+            swiperLayoutAlgorithm->prevMargin_ = 1.0f;
+            swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 1 }));
+            swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, -1 }));
+        }
+        swiperLayoutAlgorithm->isLoop_ = false;
+    }
+
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+                if (j == 1) {
+                    swiperLayoutAlgorithm->startMainPos_ = -1.0f;
+                    continue;
+                }
+                if (i == 1) {
+                    break;
+                }
+                swiperLayoutAlgorithm->jumpIndex_ = 1;
+                swiperLayoutAlgorithm->startMainPos_ = 1.0f;
+            }
+            if (i == 1) {
+                break;
+            }
+            swiperLayoutAlgorithm->jumpIndex_ = 0;
+        }
+        swiperLayoutAlgorithm->jumpIndex_ = 1;
+        swiperLayoutAlgorithm->startMainPos_ = -1.0f;
+    }
+
+    swiperLayoutAlgorithm->startMainPos_ = -1.0f;
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+                if (j == 1) {
+                    swiperLayoutAlgorithm->startMainPos_ = -1.0f;
+                    swiperLayoutAlgorithm->spaceWidth_ = 0.0f;
+                    continue;
+                }
+                if (i == 1 && j == 1) {
+                    break;
+                }
+                swiperLayoutAlgorithm->startMainPos_ = 2.0f;
+                swiperLayoutAlgorithm->spaceWidth_ = -2.0f;
+            }
+            if (i == 1) {
+                swiperLayoutAlgorithm->isLoop_ = true;
+                continue;
+            }
+            if (i == 1 && j == 1) {
+                break;
+            }
+            swiperLayoutAlgorithm->isLoop_ = false;
+        }
+        swiperLayoutAlgorithm->prevMargin_ = -1.0f;
+    }
+
+    swiperLayoutAlgorithm->jumpIndex_.reset();
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+                if (i == 1 && j == 0) {
+                    swiperLayoutAlgorithm->endMainPos_ = -2.0f;
+                    continue;
+                }
+                if (i == 1 && j == 1) {
+                    swiperLayoutAlgorithm->prevMargin_ = 1.0f;
+                    continue;
+                }
+                if (i == 1 && j == 1 && k == 1) {
+                    break;
+                }
+                swiperLayoutAlgorithm->targetIndex_ = 1;
+                swiperLayoutAlgorithm->itemPosition_.clear();
+            }
+            if (i == 1) {
+                swiperLayoutAlgorithm->targetIndex_ = 0;
+                continue;
+            }
+            swiperLayoutAlgorithm->startMainPos_ = 2.0f;
+        }
+        swiperLayoutAlgorithm->targetIndex_ = -1.0f;
+    }
+
+    swiperLayoutAlgorithm->targetIndex_.reset();
+    swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 1 }));
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            for (int k = 0; k <= 1; k++) {
+                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+                if (j == 1) {
+                    swiperLayoutAlgorithm->itemPosition_.clear();
+                    swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 1 }));
+                    continue;
+                }
+                swiperLayoutAlgorithm->itemPosition_.clear();
+                swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 3, 1 }));
+                swiperLayoutAlgorithm->currentOffset_ = -1.0f;
+            }
+            swiperLayoutAlgorithm->itemPosition_.clear();
+            swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 3, 1 }));
+        }
+        swiperLayoutAlgorithm->overScrollFeature_ = true;
+    }
+
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+            if (i == 1) {
+                swiperLayoutAlgorithm->endMainPos_ = 1.0f;
+                continue;
+            }
+            swiperLayoutAlgorithm->endMainPos_ = 2.0f;
+        }
+        swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(-1, SwiperItemInfo { 3, 1 }));
+    }
+    swiperLayoutAlgorithm->overScrollFeature_ = false;
+    swiperLayoutAlgorithm->currentOffset_ = 0;
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+            if (i == 1) {
+                swiperLayoutAlgorithm->startMainPos_ = 0;
+                continue;
+            }
+            swiperLayoutAlgorithm->startMainPos_ = 4;
+        }
+        swiperLayoutAlgorithm->itemPosition_.clear();
+        swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(-1, SwiperItemInfo { 1, 1 }));
+    }
+}
 } // namespace OHOS::Ace::NG
