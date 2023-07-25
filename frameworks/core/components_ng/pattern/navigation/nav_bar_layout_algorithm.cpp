@@ -53,10 +53,11 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     auto titleBarLayoutProperty = titleBarFrameNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_RETURN(titleBarLayoutProperty, 0.0f);
     if (titleBarLayoutProperty->HasTitleHeight()) {
-        constraint.selfIdealSize.SetHeight(
-            static_cast<float>(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx()));
+        auto titleHeight =
+            titleBarLayoutProperty->GetTitleHeightValue().ConvertToPxWithSize(constraint.percentReference.Height());
+        constraint.selfIdealSize.SetHeight(static_cast<float>(titleHeight));
         titleBarWrapper->Measure(constraint);
-        return titleBarLayoutProperty->GetTitleHeight()->ConvertToPx();
+        return static_cast<float>(titleHeight);
     }
 
     // MINI 模式
