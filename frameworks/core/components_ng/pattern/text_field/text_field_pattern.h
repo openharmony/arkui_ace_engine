@@ -548,6 +548,8 @@ public:
     }
 
     static std::u16string CreateObscuredText(int32_t len);
+    static std::u16string CreateDisplayText(
+        const std::string& content, int32_t nakedCharPosition, bool needObscureText);
     bool IsTextArea() const override;
     const RectF& GetImageRect() const
     {
@@ -773,6 +775,7 @@ public:
     std::string GetBarStateString() const;
     bool GetErrorTextState() const;
     std::string GetShowPasswordIconString() const;
+    int32_t GetNakedCharPosition() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     void HandleBlurEvent();
     void HandleFocusEvent();
@@ -1033,6 +1036,8 @@ private:
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
 
+    bool ResetObscureTickCountDown();
+
     RectF frameRect_;
     RectF contentRect_;
     RectF textRect_;
@@ -1123,6 +1128,8 @@ private:
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
+    int32_t nakedCharPosition_ = -1;
+    bool updateSelectionAfterObscure_ = false;
     float currentOffset_ = 0.0f;
     float unitWidth_ = 0.0f;
     float countHeight_ = 0.0f;

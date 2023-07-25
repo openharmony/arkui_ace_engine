@@ -216,8 +216,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         CreateParagraph(textStyles, pattern->GetDragContents(), textContent,
             isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
     } else {
-        CreateParagraph(textStyle, textContent,
-            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
+        CreateParagraph(textStyle, textContent, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder,
+            pattern->GetNakedCharPosition(), disableTextAlign);
     }
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder && !isInlineStyle) {
         // for text input case, need to measure in one line without constraint.
@@ -506,7 +506,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content,
-    bool needObscureText, bool disableTextAlign)
+    bool needObscureText, int32_t nakedCharPosition, bool disableTextAlign)
 {
     RSParagraphStyle paraStyle;
     paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
@@ -527,12 +527,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    if (!content.empty() && needObscureText) {
-        builder->AddText(
-            TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length())));
-    } else {
-        builder->AddText(StringUtils::Str8ToStr16(content));
-    }
+    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition, needObscureText);
+    builder->AddText(displayText);
     builder->Pop();
 
     auto paragraph = builder->Build();
