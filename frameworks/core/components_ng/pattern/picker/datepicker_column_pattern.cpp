@@ -634,7 +634,7 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
+        if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             return;
         }
         pattern->HandleDragEnd();
@@ -668,7 +668,7 @@ void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 
 void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
-    if (event.GetInputEventType() == InputEventType::AXIS) {
+    if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
     }
@@ -676,7 +676,8 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
     CHECK_NULL_VOID_NOLOG(GetHost());
     CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
-    auto offsetY = event.GetGlobalPoint().GetY();
+    auto offsetY =
+        event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
         return;
     }
