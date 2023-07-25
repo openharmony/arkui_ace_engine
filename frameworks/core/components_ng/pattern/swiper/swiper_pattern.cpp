@@ -1101,7 +1101,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             AnimationCallbackInfo callbackInfo;
             callbackInfo.currentOffset =
                 GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-            FireGestureSwipeEvent(gestureSwipeIndex_, callbackInfo);
+            FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     } else if (!IsLoop() && IsOutOfBoundary(offset) &&
                (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE)) {
@@ -1117,12 +1117,12 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         }
     } else {
         currentDelta_ = currentDelta_ - offset;
+        currentIndexOffset_ += offset;
         if (isDragging_) {
-            currentIndexOffset_ += offset;
             AnimationCallbackInfo callbackInfo;
             callbackInfo.currentOffset =
                 GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-            FireGestureSwipeEvent(gestureSwipeIndex_, callbackInfo);
+            FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
     auto host = GetHost();
@@ -2841,10 +2841,15 @@ float SwiperPattern::GetCustomPropertyOffset() const
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0);
     auto paddingAndBorder = layoutProperty->CreatePaddingAndBorder();
-    auto preMargin = layoutProperty->GetPrevMargin().value_or(0.0_vp);
     auto paddingAndBorderValue =
         GetDirection() == Axis::HORIZONTAL ? paddingAndBorder.left.value_or(0.0) : paddingAndBorder.top.value_or(0.0);
-    return Dimension(paddingAndBorderValue, DimensionUnit::PX).ConvertToVp() + preMargin.Value();
+
+    auto preMarginPX = GetPrevMargin();
+    if (layoutProperty->GetPrevMargin().has_value() && preMarginPX > 0.0) {
+        preMarginPX += GetItemSpace();
+    }
+
+    return Dimension(paddingAndBorderValue + preMarginPX, DimensionUnit::PX).ConvertToVp();
 }
 
 float SwiperPattern::GetCurrentFirstIndexStartPos() const
