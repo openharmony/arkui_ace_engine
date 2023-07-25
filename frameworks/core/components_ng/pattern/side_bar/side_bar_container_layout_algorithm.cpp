@@ -222,11 +222,7 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
 
     MeasureTypeUpdateWidth();
     if (minContentWidth_ < 0.0f) {
-        if (maxSideBarWidth_ >= 0.0f) {
-            minContentWidth_ = 0.0f;
-        } else {
-            minContentWidth_ = defaultMinContentWidth_;
-        }
+        minContentWidth_ = 0.0f;
     }
     InitSideBarWidth(parentWidth);
     MeasureRealSideBarWidth(parentWidth);
@@ -479,6 +475,9 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
                                ? (parentWidth - realSideBarWidth_ - realDividerWidth_ - currentOffset_)
                                : (parentWidth - realDividerWidth_ + currentOffset_);
         }
+    }
+    if (contentWidth < minContentWidth_) {
+        contentWidth = minContentWidth_;
     }
 
     auto contentIdealSize = CreateIdealSize(
