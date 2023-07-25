@@ -155,6 +155,11 @@ common_bin = [
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor:drawable_descriptor"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
 ]
 
 if (defined(use_new_skia) && use_new_skia) {
@@ -168,6 +173,17 @@ if (defined(use_new_skia) && use_new_skia) {
 }
 
 napi_modules = [
+  {
+    prefix = "arkui"
+    shard_libs = [
+      {
+        label = "//foundation/arkui/ace_engine/interfaces/napi/kits/drawabledescriptor:drawabledescriptor"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "drawabledescriptor" ]
+      },
+    ]
+  },
   {
     prefix = "multimedia"
     shard_libs = [
