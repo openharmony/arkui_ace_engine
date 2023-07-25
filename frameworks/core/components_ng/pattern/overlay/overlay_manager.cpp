@@ -28,6 +28,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/modal_ui_extension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
@@ -1933,4 +1934,30 @@ void OverlayManager::RemoveEventColumn()
     hasEvent_ = false;
 }
 #endif // ENABLE_DRAG_FRAMEWORK
+
+int32_t OverlayManager::CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+{
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = NG::ModalTransition::NONE;
+    auto uiExtNode = ModalUIExtension::Create(want, callbacks);
+    auto layoutProperty = uiExtNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    auto full = CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(full, full));
+    auto buildNodeFunc = [uiExtNode]() -> RefPtr<UINode> {
+        uiExtNode->MarkModifyDone();
+        return uiExtNode;
+    };
+    auto sessionId = ModalUIExtension::GetSessionId(uiExtNode);
+    // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
+    BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, -(sessionId));
+    return sessionId;
+}
+
+void OverlayManager::CloseModalUIExtension(int32_t sessionId)
+{
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = NG::ModalTransition::NONE;
+    BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, -(sessionId));
+}
 } // namespace OHOS::Ace::NG

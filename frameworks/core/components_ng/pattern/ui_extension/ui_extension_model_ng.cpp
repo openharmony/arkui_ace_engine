@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
+#include "interfaces/inner_api/ace/modal_ui_extension_callbacks.h"
+
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
@@ -35,6 +37,23 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->SetOnReleaseCallback(std::move(onRelease));
     pattern->SetOnErrorCallback(std::move(onError));
+    return frameNode;
+}
+
+RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, [want]() { return AceType::MakeRefPtr<UIExtensionPattern>(want); });
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, frameNode);
+    pipeline->AddWindowStateChangedCallback(nodeId);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->SetOnReleaseCallback(std::move(callbacks.onRelease));
+    pattern->SetOnErrorCallback(std::move(callbacks.onError));
+    pattern->SetOnResultCallback(std::move(callbacks.onResult));
+    pattern->SetOnReceiveCallback(std::move(callbacks.onReceive));
     return frameNode;
 }
 
