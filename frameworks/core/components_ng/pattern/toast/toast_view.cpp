@@ -30,22 +30,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-float GetTextHeight(const RefPtr<FrameNode>& textNode)
-{
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
-    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
-
-    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
-    CHECK_NULL_RETURN(textLayoutWrapper, 0.0f);
-    textLayoutWrapper->Measure(layoutConstraint);
-    auto textGeometry = textLayoutWrapper->GetGeometryNode();
-    CHECK_NULL_RETURN(textGeometry, 0.0f);
-    auto textSize = textGeometry->GetMarginFrameSize();
-    return textSize.Height();
-}
-} // namespace
 RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft)
 {
     auto context = PipelineBase::GetCurrentContext();
@@ -72,11 +56,6 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
 
     UpdateTextLayoutProperty(textNode, message, isRightToLeft);
     UpdateTextContext(textNode);
-    auto textHeight = GetTextHeight(textNode);
-    if (textHeight > toastTheme->GetMinHeight().ConvertToPx()) {
-        textLayoutProperty->UpdateTextAlign(TextAlign::START);
-        textHeight = GetTextHeight(textNode);
-    }
     textNode->MountToParent(toastNode);
 
     toastProperty->UpdateBottom(StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom()));
