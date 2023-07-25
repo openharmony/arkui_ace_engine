@@ -279,6 +279,11 @@ public:
         return onShow_;
     }
 
+    void MarkRootFocusNeedUpdate()
+    {
+        isRootFocusNeedUpdate_ = true;
+    }
+
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
 
     bool RequestDefaultFocus();
@@ -470,6 +475,7 @@ private:
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
+    bool isRootFocusNeedUpdate_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;

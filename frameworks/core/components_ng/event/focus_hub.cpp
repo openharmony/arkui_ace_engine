@@ -294,6 +294,7 @@ void FocusHub::SetFocusable(bool focusable)
     focusable_ = focusable;
     RefreshParentFocusable(IsFocusable());
     RefreshFocus();
+    MarkRootFocusNeedUpdate();
 }
 
 bool FocusHub::IsEnabled() const
@@ -310,6 +311,7 @@ void FocusHub::SetEnabled(bool enabled)
     } else if (focusType_ == FocusType::SCOPE) {
         SetEnabledScope(enabled);
     }
+    MarkRootFocusNeedUpdate();
 }
 
 void FocusHub::SetEnabledNode(bool enabled)
@@ -349,6 +351,7 @@ void FocusHub::SetShow(bool show)
     } else if (focusType_ == FocusType::SCOPE) {
         SetShowScope(show);
     }
+    MarkRootFocusNeedUpdate();
 }
 
 void FocusHub::SetShowNode(bool show)
@@ -361,6 +364,35 @@ void FocusHub::SetShowNode(bool show)
 void FocusHub::SetShowScope(bool show)
 {
     SetShowNode(show);
+}
+
+void FocusHub::MarkRootFocusNeedUpdate()
+{
+    if (focusType_ != FocusType::NODE || !IsFocusable()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->MarkRootFocusNeedUpdate();
+}
+
+bool FocusHub::IsCurrentFocusWholePath()
+{
+    if (!currentFocus_) {
+        return false;
+    }
+    if (focusType_ == FocusType::NODE) {
+        return true;
+    }
+    if (focusType_ == FocusType::SCOPE) {
+        std::list<RefPtr<FocusHub>> focusNodes;
+        auto itLastFocusNode = FlushChildrenFocusHub(focusNodes);
+        if (itLastFocusNode == focusNodes.end() || !(*itLastFocusNode)) {
+            return false;
+        }
+        return (*itLastFocusNode)->IsCurrentFocusWholePath();
+    }
+    return false;
 }
 
 void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
