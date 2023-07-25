@@ -283,6 +283,7 @@ private:
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
+    std::optional<MarginPropertyF> marginResult_;
 
     std::unique_ptr<SafeAreaExpandOpts> safeAreaExpandOpts_;
     std::unique_ptr<SafeAreaInsets> safeAreaInsets_;

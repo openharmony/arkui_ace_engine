@@ -222,6 +222,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     layoutConstraint_ = parentConstraint;
     if (margin_) {
         // TODO: add margin is negative case.
+        marginResult_.reset();
         auto margin = CreateMargin();
         MinusPaddingToSize(margin, layoutConstraint_->maxSize);
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
@@ -497,13 +498,18 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 
 MarginPropertyF LayoutProperty::CreateMargin()
 {
-    if (layoutConstraint_.has_value()) {
-        return ConvertToMarginPropertyF(
-            margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    CHECK_NULL_RETURN(margin_, MarginPropertyF());
+    if (!marginResult_.has_value() && margin_) {
+        if (layoutConstraint_.has_value()) {
+            marginResult_ = ConvertToMarginPropertyF(
+                margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+        } else {
+            // root node
+            marginResult_ = ConvertToMarginPropertyF(
+                margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+        }
     }
-    // root node
-    return ConvertToMarginPropertyF(
-        margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    return marginResult_.value_or(MarginPropertyF());
 }
 
 void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)
