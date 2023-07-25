@@ -50,7 +50,6 @@ ohos_unittest("CommonEventTest") {
 
   part_name = ace_engine_part
   sources += [
-    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
     "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
   ]
