@@ -42,6 +42,9 @@ void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraint
 {
     SizeF safeSize { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
     safeSize.MinusPadding(insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
+    safeSize.SetWidth(std::min(safeSize.Width(), constraint.maxSize.Width()));
+    safeSize.SetHeight(std::min(safeSize.Height(), constraint.maxSize.Height()));
+
     constraint.maxSize = safeSize;
     constraint.parentIdealSize = OptionalSizeF(safeSize);
     constraint.percentReference = safeSize;
@@ -191,6 +194,8 @@ void LayoutWrapper::ExpandIntoKeyboard()
 
 void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
 {
+    GetGeometryNode()->SetParentLayoutConstraint(constraint);
+
     auto layoutProperty = GetLayoutProperty();
     const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
     if (magicItemProperty && magicItemProperty->HasAspectRatio()) {
@@ -206,7 +211,6 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
         ApplySafeArea(*insets, constraint);
     }
 
-    GetGeometryNode()->SetParentLayoutConstraint(constraint);
     layoutProperty->UpdateLayoutConstraint(constraint);
 }
 
