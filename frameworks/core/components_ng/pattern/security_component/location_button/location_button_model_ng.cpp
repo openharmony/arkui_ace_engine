@@ -44,7 +44,7 @@ LocationButtonModelNG* LocationButtonModelNG::GetInstance()
 void LocationButtonModelNG::Create(int32_t text, int32_t icon,
     int32_t backgroundType)
 {
-    SecurityComponentModelNG::CreateCommon(V2::SEC_LOCATION_BUTTON_ETS_TAG,
+    SecurityComponentModelNG::CreateCommon(V2::LOCATION_BUTTON_ETS_TAG,
         text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
 }
 

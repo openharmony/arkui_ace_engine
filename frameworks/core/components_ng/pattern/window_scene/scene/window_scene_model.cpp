@@ -24,7 +24,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void WindowSceneModel::Create(uint64_t persistentId)
+void WindowSceneModel::Create(int32_t persistentId)
 {
     auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
@@ -46,11 +46,13 @@ void WindowSceneModel::Create(uint64_t persistentId)
     auto nodeId = stack->ClaimNodeId();
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
+    stack->Push(windowNode);
+
+    auto windowScene = windowNode->GetPattern<WindowScene>();
+    windowScene->UpdateSession(sceneSession);
+
     if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);
     }
-    stack->Push(windowNode);
-    auto windowScene = windowNode->GetPattern<WindowScene>();
-    windowScene->UpdateSession(sceneSession);
 }
 } // namespace OHOS::Ace::NG

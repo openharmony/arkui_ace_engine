@@ -309,13 +309,13 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, frameSize);
     layoutWrapper->RemoveAllChildInRenderTree();
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childWrapper) {
-            break;
-        }
         OffsetF childOffset;
         auto childPosition = itemsPosition_.find(index);
         if (childPosition != itemsPosition_.end()) {
+            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!childWrapper) {
+                break;
+            }
             childOffset = itemsPosition_.at(index);
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
             childWrapper->Layout();

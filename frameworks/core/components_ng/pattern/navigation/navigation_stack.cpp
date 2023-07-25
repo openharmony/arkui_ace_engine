@@ -173,7 +173,7 @@ int32_t NavigationStack::FindIndex(const std::string& name, const RefPtr<UINode>
     return NOT_EXIST;
 }
 
-const RefPtr<UINode>& NavigationStack::Get()
+RefPtr<UINode> NavigationStack::Get()
 {
     if (navPathList_.empty()) {
         return nullptr;
@@ -182,7 +182,7 @@ const RefPtr<UINode>& NavigationStack::Get()
     return navPathList_[top].second;
 }
 
-const RefPtr<UINode>& NavigationStack::Get(const std::string& name)
+RefPtr<UINode> NavigationStack::Get(const std::string& name)
 {
     // from bottom to top
     if (navPathList_.empty()) {
@@ -196,7 +196,7 @@ const RefPtr<UINode>& NavigationStack::Get(const std::string& name)
     return nullptr;
 }
 
-const RefPtr<UINode>& NavigationStack::GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode)
+RefPtr<UINode> NavigationStack::GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode)
 {
     if (navPathList_.empty() || navPathList_.size() == 1) {
         return nullptr;

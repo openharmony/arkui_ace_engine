@@ -89,6 +89,11 @@ bool JsiValue::IsArray() const
     }
 }
 
+bool JsiValue::IsUint8ClampedArray() const
+{
+    return (!GetHandle().IsEmpty()) && (GetHandle()->IsUint8ClampedArray());
+}
+
 bool JsiValue::IsUndefined() const
 {
     if (GetHandle().IsEmpty()) {
@@ -193,6 +198,44 @@ bool JsiArray::IsArray() const
 }
 
 // -----------------------
+// Implementation of JsiArrayBuffer
+// -----------------------
+JsiArrayBuffer::JsiArrayBuffer(panda::Local<panda::ArrayBufferRef> val) : JsiType(val) {}
+JsiArrayBuffer::JsiArrayBuffer(const panda::CopyableGlobal<panda::ArrayBufferRef>& val) : JsiType(val) {}
+
+int32_t JsiArrayBuffer::ByteLength() const
+{
+    return GetHandle()->ByteLength(GetEcmaVM());
+}
+
+void* JsiArrayBuffer::GetBuffer() const
+{
+    return GetHandle()->GetBuffer();
+}
+
+void JsiArrayBuffer::Detach() const
+{
+    GetHandle()->Detach(GetEcmaVM());
+}
+
+bool JsiArrayBuffer::IsDetach() const
+{
+    return GetHandle()->IsDetach();
+}
+
+// -----------------------
+// Implementation of JsiArrayBufferRef
+// -----------------------
+JsiUint8ClampedArray::JsiUint8ClampedArray(panda::Local<panda::Uint8ClampedArrayRef> val) : JsiType(val) {}
+JsiUint8ClampedArray::JsiUint8ClampedArray(const panda::CopyableGlobal<panda::Uint8ClampedArrayRef>& val) : JsiType(val)
+{}
+
+JsiRef<JsiArrayBuffer> JsiUint8ClampedArray::GetArrayBuffer() const
+{
+    return JsiRef<JsiArrayBuffer>(JsiArrayBuffer(GetHandle()->GetArrayBuffer(GetEcmaVM())));
+}
+
+// -----------------------
 // Implementation of JsiObject
 // -----------------------
 JsiObject::JsiObject() : JsiType() {}
@@ -277,6 +320,7 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     }
     auto thisObj = thisVal.Get().GetLocalHandle();
     auto result = GetHandle()->Call(vm, thisObj, arguments.data(), argc);
+    JSNApi::ExecutePendingJob(vm);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (result.IsEmpty() || runtime->HasPendingException()) {
         runtime->HandleUncaughtException();

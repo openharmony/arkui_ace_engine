@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 TextOverlayModifier::TextOverlayModifier()
@@ -35,6 +36,10 @@ void TextOverlayModifier::onDraw(DrawingContext& drawingContext)
     brush.SetAntiAlias(true);
     brush.SetColor(selectedColor_->Get());
     drawingContext.canvas.AttachBrush(brush);
+
+    if (contentRect_.has_value() && isClip_) {
+        drawingContext.canvas.ClipRect(ToRSRect(contentRect_.value()), RSClipOp::INTERSECT);
+    }
 
     auto paintOffset = paintOffset_->Get();
     for (const auto& selectedRect : selectedRects_) {

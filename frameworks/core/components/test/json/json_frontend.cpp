@@ -26,10 +26,10 @@ RefPtr<Frontend> Frontend::CreateDefault()
     return AceType::MakeRefPtr<JsonFrontend>();
 }
 
-bool JsonFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>&)
+bool JsonFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
-    // This interface is inherited from base class 'Frontend', but we never use 'TaskExecutor'.
     type_ = type;
+    taskExecutor_ = taskExecutor;
     return true;
 }
 

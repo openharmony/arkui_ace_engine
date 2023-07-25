@@ -360,7 +360,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg008, TestSize.Level1)
     navDestinationLayoutProperty->layoutConstraint_ = constraint;
     navDestinationLayoutProperty->contentConstraint_ = constraint;
 
-    LayoutWrapper* layoutWrapper = new LayoutWrapper(
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(
         AceType::WeakClaim(AceType::RawPtr(navDestinationNode)), geometryNode, navDestinationLayoutProperty);
     SizeF sizeF(5.0f, 5.0f);
 
@@ -371,7 +371,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg008, TestSize.Level1)
     auto navDestinationNode2 = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
     auto geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
     auto navDestinationLayoutProperty2 = AceType::MakeRefPtr<NavDestinationLayoutProperty>();
-    layoutWrapper->childrenMap_[0] = AceType::MakeRefPtr<LayoutWrapper>(
+    layoutWrapper->childrenMap_[0] = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(navDestinationNode2)), geometryNode2, navDestinationLayoutProperty2);
     algorithm->Measure(layoutWrapper);
     ASSERT_NE(geometryNode2, nullptr);
@@ -416,7 +416,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg009, TestSize.Level1)
     navDestinationLayoutProperty->layoutConstraint_ = constraint;
     navDestinationLayoutProperty->contentConstraint_ = constraint;
 
-    LayoutWrapper* layoutWrapper = new LayoutWrapper(
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(
         AceType::WeakClaim(AceType::RawPtr(navDestinationNode)), geometryNode, navDestinationLayoutProperty);
     SizeF sizeF(5.0f, 5.0f);
 
@@ -427,7 +427,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg009, TestSize.Level1)
     auto navDestinationNode2 = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
     auto geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
     auto navDestinationLayoutProperty2 = AceType::MakeRefPtr<NavDestinationLayoutProperty>();
-    layoutWrapper->childrenMap_[0] = AceType::MakeRefPtr<LayoutWrapper>(
+    layoutWrapper->childrenMap_[0] = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(navDestinationNode2)), geometryNode2, navDestinationLayoutProperty2);
     algorithm->Layout(layoutWrapper);
     ASSERT_NE(geometryNode2, nullptr);
@@ -1423,8 +1423,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0027, TestSize.Level1)
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto textNode = FrameNode::CreateFrameNode("textNode", 22, AceType::MakeRefPtr<TextPattern>());
 
-    auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(AceType::WeakClaim(AceType::RawPtr(barItem)), geometryNode, layoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(barItem)), geometryNode, layoutProperty);
 
     algorithm->Layout(AceType::RawPtr(layoutWrapper));
     ASSERT_EQ(barItem->text_, nullptr);
@@ -1540,8 +1540,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
-    auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(AceType::WeakClaim(AceType::RawPtr(navBar)), geometryNode, layoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(navBar)), geometryNode, layoutProperty);
 
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
@@ -1550,7 +1550,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     auto titleLayoutProperty = AceType::MakeRefPtr<TitleBarLayoutProperty>();
     auto titleBarNode2 = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 23, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto childWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(titleBarNode2)), titleGeometryNode, titleLayoutProperty);
     auto subTitle =
         TitleBarNode::GetOrCreateTitleBarNode("subTitle", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
@@ -1952,7 +1952,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
 
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(titleBarNode)), geometryNode, layoutProperty);
     DirtySwapConfig config;
     auto algorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
@@ -2004,14 +2004,14 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0035, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     auto geometryNode = titleBarNode->geometryNode_;
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(titleBarNode)), geometryNode, layoutProperty);
 
     auto backLayoutProperty = backButton2->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(backLayoutProperty, nullptr);
     auto backGeometryNode = backButton2->geometryNode_;
     ASSERT_NE(backGeometryNode, nullptr);
-    auto backButtonWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto backButtonWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(backButton2)), backGeometryNode, backLayoutProperty);
     ASSERT_NE(backButtonWrapper, nullptr);
     layoutWrapper->childrenMap_[0] = backButtonWrapper;
@@ -2061,7 +2061,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0035, TestSize.Level1)
     ASSERT_NE(menuLayoutProperty, nullptr);
     auto menuGeometryNode = menu2->geometryNode_;
     ASSERT_NE(menuGeometryNode, nullptr);
-    auto menuWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto menuWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(menu2)), menuGeometryNode, menuLayoutProperty);
     ASSERT_NE(menuWrapper, nullptr);
     layoutWrapper->childrenMap_[1] = menuWrapper;
@@ -2092,7 +2092,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0035, TestSize.Level1)
     ASSERT_NE(titleLayoutProperty, nullptr);
     auto titleGeometryNode = title->geometryNode_;
     ASSERT_NE(titleGeometryNode, nullptr);
-    auto titleWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto titleWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(title)), titleGeometryNode, titleLayoutProperty);
     ASSERT_NE(titleWrapper, nullptr);
     layoutWrapper->childrenMap_[2] = titleWrapper;
@@ -2153,7 +2153,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0035, TestSize.Level1)
     ASSERT_NE(subtitleLayoutProperty, nullptr);
     auto subtitleGeometryNode = subtitle->geometryNode_;
     ASSERT_NE(subtitleGeometryNode, nullptr);
-    auto subtitleWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto subtitleWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(subtitle)), subtitleGeometryNode, subtitleLayoutProperty);
     ASSERT_NE(subtitleWrapper, nullptr);
     layoutWrapper->childrenMap_[3] = subtitleWrapper;
@@ -2214,7 +2214,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     auto geometryNode = titleBarNode->geometryNode_;
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(titleBarNode)), geometryNode, layoutProperty);
 
     LayoutConstraintF constraint;
@@ -2237,7 +2237,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
     ASSERT_NE(backLayoutProperty, nullptr);
     auto backGeometryNode = backButton->geometryNode_;
     ASSERT_NE(backGeometryNode, nullptr);
-    auto backButtonWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto backButtonWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(backButton)), backGeometryNode, backLayoutProperty);
     ASSERT_NE(backButtonWrapper, nullptr);
     layoutWrapper->childrenMap_[0] = backButtonWrapper;
@@ -2275,7 +2275,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
     ASSERT_NE(titleLayoutProperty, nullptr);
     auto titleGeometryNode = title->geometryNode_;
     ASSERT_NE(titleGeometryNode, nullptr);
-    auto titleWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto titleWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(title)), titleGeometryNode, titleLayoutProperty);
     ASSERT_NE(titleWrapper, nullptr);
     layoutWrapper->childrenMap_[1] = titleWrapper;
@@ -2356,7 +2356,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
     ASSERT_NE(subtitleLayoutProperty, nullptr);
     auto subtitleGeometryNode = subtitle->geometryNode_;
     ASSERT_NE(subtitleGeometryNode, nullptr);
-    auto subtitleWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto subtitleWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(subtitle)), subtitleGeometryNode, subtitleLayoutProperty);
     ASSERT_NE(subtitleWrapper, nullptr);
     layoutWrapper->childrenMap_[2] = subtitleWrapper;
@@ -2425,7 +2425,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
     ASSERT_NE(menuLayoutProperty, nullptr);
     auto menuGeometryNode = menu2->geometryNode_;
     ASSERT_NE(menuGeometryNode, nullptr);
-    auto menuWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto menuWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(menu2)), menuGeometryNode, menuLayoutProperty);
     ASSERT_NE(menuWrapper, nullptr);
     layoutWrapper->childrenMap_[3] = menuWrapper;
@@ -2473,9 +2473,9 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0037, TestSize.Level1)
     /**
      * @tc.steps: step3. add element to navigationStack->navPathList_.
      */
-    navigationStack->navPathList_.push_back({"test", backButton});
+    navigationStack->navPathList_.push_back({ "test", backButton });
     navigationStack->GetPre("test", backButton);
-    navigationStack->navPathList_.push_back({"test1", backButton});
+    navigationStack->navPathList_.push_back({ "test1", backButton });
     navigationStack->GetPre("test", backButton);
     navigationStack->GetPre("test2", backButton);
     navigationStack->Get("test3");

@@ -153,7 +153,7 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED &&
-        tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && axis == Axis::VERTICAL) {
+        tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
         indicator_ = indicator;
         currentOffset_ = 0.0f;
         OffsetF childOffset = OffsetF(0.0f, 0.0f);
@@ -293,8 +293,8 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(unselectedMaskWrapper);
     for (int32_t i = 0; i < MASK_COUNT; i++) {
         auto currentWrapper = (i == 0 ? selectedMaskWrapper : unselectedMaskWrapper);
-        auto currentMask = (i == 0 ? layoutProperty->GetSelectedMask().value_or(-1) :
-            layoutProperty->GetUnselectedMask().value_or(-1));
+        auto currentMask = (i == 0 ? layoutProperty->GetSelectedMask().value_or(-1)
+                                   : layoutProperty->GetUnselectedMask().value_or(-1));
         if (currentMask < 0) {
             currentWrapper->GetGeometryNode()->SetFrameSize(SizeF());
         } else {

@@ -202,7 +202,7 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
         if (lastTouchOffset_.has_value() &&
             (touchUpOffset - lastTouchOffset_.value()).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
-            HideMenu();
+            HideMenu(true);
         }
         lastTouchOffset_.reset();
     }
@@ -321,7 +321,7 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuPattern::HideMenu() const
+void MenuPattern::HideMenu(bool isMenuOnTouch) const
 {
     if (IsContextMenu()) {
         SubwindowManager::GetInstance()->HideMenuNG(targetId_);
@@ -331,7 +331,7 @@ void MenuPattern::HideMenu() const
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->HideMenu(targetId_);
+    overlayManager->HideMenu(targetId_, isMenuOnTouch);
     LOGI("MenuPattern closing menu %{public}d", targetId_);
 }
 

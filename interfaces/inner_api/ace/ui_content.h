@@ -80,6 +80,10 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
+
+    // UIExtensionAbility initialize for focusWindow ID
+    virtual void Initialize(
+        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowID) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;

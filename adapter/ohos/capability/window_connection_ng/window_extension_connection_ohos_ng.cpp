@@ -143,8 +143,7 @@ void WantConverterNG(const std::string& want, AppExecFwk::ElementName& element)
     element.SetBundleName(json->GetValue("bundleName")->GetString());
 }
 
-void WindowExtensionConnectionAdapterOhosNG::ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId,
-    sptr<Rosen::ExtensionSession>& extensionSession)
+void WindowExtensionConnectionAdapterOhosNG::ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId)
 {
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OS_ACCOUNT_EXISTS)
     LOGI("connect to windows extension begin");
@@ -177,7 +176,11 @@ void WindowExtensionConnectionAdapterOhosNG::ConnectExtension(const RefPtr<NG::F
         instanceId = container->GetInstanceId();
     }
     sptr<Rosen::IWindowExtensionCallback> callback = new NGConnectionCallback(node, instanceId);
-    windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback, extensionSession);
+    if (extensionSession_ != nullptr) {
+        windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback, extensionSession_);
+    } else {
+        windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback);
+    }
 #else
     LOGI("unrosen engine doesn't support ability component");
 #endif

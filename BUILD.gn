@@ -46,6 +46,7 @@ config("ace_config") {
     "-ffunction-sections",
     "-Wno-non-c-typedef-for-linkage",
     "-Os",
+    "-Werror=return-stack-address",
   ]
 
   cflags_cc = [

@@ -286,7 +286,7 @@ bool SvgAnimate::CreateLinearAnimate(
         animation->AddListener(std::move(callback));
         animator->AddInterpolator(animation);
     } else {
-        if (!LinearAnimate(std::move(callback), originalValue, animator)) {
+        if (!LinearAnimateFromTo(std::move(callback), originalValue, animator)) {
             LOGW("create linear animate failed");
             return false;
         }
@@ -300,7 +300,7 @@ bool SvgAnimate::CreateLinearAnimate(
 }
 
 template<typename T>
-bool SvgAnimate::LinearAnimate(
+bool SvgAnimate::LinearAnimateFromTo(
     std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator)
 {
     if (!animator) {
@@ -416,7 +416,7 @@ bool SvgAnimate::CreatePacedAnimate(
         animation->AddListener(std::move(callback));
         animator->AddInterpolator(animation);
     } else {
-        if (!LinearAnimate(std::move(callback), originalValue, animator)) {
+        if (!LinearAnimateFromTo(std::move(callback), originalValue, animator)) {
             LOGW("create linear animate failed");
             return false;
         }

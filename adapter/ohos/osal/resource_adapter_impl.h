@@ -75,8 +75,6 @@ public:
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(
-        const std::string& bundleName, const std::string& moduleName);
 
     inline std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const
     {

@@ -333,13 +333,20 @@ void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 
 void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsNumber()) {
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    int32_t value = args[0]->ToNumber<int32_t>();
-    if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
-        IndexerModel::GetInstance()->SetAlignStyle(value);
+    int32_t value = Container::IsCurrentUseNewPipeline() ? static_cast<int32_t>(NG::AlignStyle::RIGHT)
+                                                         : static_cast<int32_t>(V2::AlignStyle::RIGHT);
+    auto alignValue = -1;
+    if (args[0]->IsNumber()) {
+        alignValue = args[0]->ToNumber<int32_t>();
     }
+    if (alignValue >= 0 && alignValue < static_cast<int32_t>(ALIGN_STYLE.size())) {
+        value = alignValue;
+    }
+    IndexerModel::GetInstance()->SetAlignStyle(value);
     CalcDimension popupHorizontalSpace(-1.0);
     if (args.Length() > 1) {
         ParseJsDimensionVp(args[1], popupHorizontalSpace);

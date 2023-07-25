@@ -339,6 +339,10 @@ public:
     {
         return toolbarItemSpecialMargin_;
     }
+    uint32_t GetToolbarRotationLimitGridCount() const
+    {
+        return toolbarLimitGridCount_;
+    }
 
 protected:
     NavigationBarTheme() = default;
@@ -399,6 +403,7 @@ private:
     Dimension toolbarItemBottomPadding_ = 4.0_vp;
     Dimension toolbarItemMargin_ = 4.0_vp;
     Dimension toolbarItemSpecialMargin_ = 0.0_vp;
+    uint32_t toolbarLimitGridCount_ = 8;
 };
 
 } // namespace OHOS::Ace

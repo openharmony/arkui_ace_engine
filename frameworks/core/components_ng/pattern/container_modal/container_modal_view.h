@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ContainerModalView {
+class ACE_EXPORT ContainerModalView : public AceType {
 public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
    

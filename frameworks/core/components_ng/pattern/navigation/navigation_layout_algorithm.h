@@ -81,38 +81,12 @@ private:
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
     void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
-        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize_);
-
-    void GetRange(const RefPtr<NavigationGroupNode>& hostNode);
-
-    void UpdateNavigationMode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
-        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
-
-    void SizeCalculation(const RefPtr<NavigationGroupNode>& hostNode,
-        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
-
-    void SizeCalculationSplit(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
-
-    void SizeCalculationStack(const RefPtr<NavigationGroupNode>& hostNode,
-        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
-
-    bool ifNeedInit_ = true;
-    OffsetF navBarOffset_;
-
-    bool userSetNavBarRangeFlag_ = false;
-    bool userSetMinContentFlag_ = false;
-    Dimension minNavBarWidthValue_ = 0.0_vp;
-    Dimension maxNavBarWidthValue_ = 0.0_vp;
-    Dimension minContentWidthValue_ = 0.0_vp;
-
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize);
     float realNavBarWidth_ = 0.0f;
     float realDividerWidth_ = 0.0f;
     float realNavBarHeight_ = 0.0f;
-    float realContentWidth_ = 0.0f;
-
-    SizeF navBarSize_ = SizeF(0.0f, 0.0f);
-    SizeF contentSize_ = SizeF(0.0f, 0.0f);
-    SizeF dividerSize_ = SizeF(0.0f, 0.0f);
+    bool ifNeedInit_ = true;
+    OffsetF navBarOffset_;
 };
 
 } // namespace OHOS::Ace::NG

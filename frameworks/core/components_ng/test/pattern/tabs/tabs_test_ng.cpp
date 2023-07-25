@@ -248,7 +248,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure001, TestSize.Level1)
     auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(tabsLayoutAlgorithm, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper layoutWrapper = LayoutWrapper(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
     LayoutConstraintF layoutConstraintVaild;
     float layoutSize = 10000.0f;
     layoutConstraintVaild.selfIdealSize.SetSize(SizeF(layoutSize, layoutSize));
@@ -263,8 +264,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure001, TestSize.Level1)
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
     ASSERT_NE(swiperNode, nullptr);
     RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> swiperLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(swiperNode, geometryNode1, swiperNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode, geometryNode1, swiperNode->GetLayoutProperty());
     swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
@@ -273,8 +274,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure001, TestSize.Level1)
     auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_DIVIDER_INDEX));
     ASSERT_NE(dividerNode, nullptr);
     RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> dividerLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(dividerNode, geometryNode2, dividerNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> dividerLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dividerNode, geometryNode2, dividerNode->GetLayoutProperty());
     dividerLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     dividerLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
@@ -283,8 +284,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure001, TestSize.Level1)
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
     ASSERT_NE(tabBarNode, nullptr);
     RefPtr<GeometryNode> geometryNode3 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> tabBarLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, geometryNode3, tabBarNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> tabBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, geometryNode3, tabBarNode->GetLayoutProperty());
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
@@ -351,7 +352,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(tabsLayoutAlgorithm, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
     LayoutConstraintF layoutConstrain;
     layoutConstrain.maxSize = FIRST_ITEM_SIZE;
     layoutConstrain.percentReference = FIRST_ITEM_SIZE;
@@ -366,8 +368,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
     ASSERT_NE(swiperNode, nullptr);
     RefPtr<GeometryNode> swiperGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> swiperLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
 
     auto swipeLayoutAlgorithm = swiperNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(swipeLayoutAlgorithm, nullptr);
@@ -382,8 +384,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_DIVIDER_INDEX));
     ASSERT_NE(dividerNode, nullptr);
     RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> dividerLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> dividerLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
 
     auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(dividerLayoutAlgorithm, nullptr);
@@ -398,8 +400,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
     ASSERT_NE(tabBarNode, nullptr);
     RefPtr<GeometryNode> tabbarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> tabBarLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, tabbarGeometryNode, tabBarNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> tabBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, tabbarGeometryNode, tabBarNode->GetLayoutProperty());
 
     auto tabbarLayoutAlgorithm = tabBarNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(tabbarLayoutAlgorithm, nullptr);
@@ -469,7 +471,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(tabsLayoutAlgorithm, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
     LayoutConstraintF layoutConstrain;
     layoutConstrain.maxSize = FIRST_ITEM_SIZE;
     layoutConstrain.percentReference = FIRST_ITEM_SIZE;
@@ -484,8 +487,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
     ASSERT_NE(swiperNode, nullptr);
     RefPtr<GeometryNode> swiperGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> swiperLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode, swiperGeometryNode, swiperNode->GetLayoutProperty());
 
     auto swipeLayoutAlgorithm = swiperNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(swipeLayoutAlgorithm, nullptr);
@@ -499,8 +502,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_DIVIDER_INDEX));
     ASSERT_NE(dividerNode, nullptr);
     RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> dividerLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> dividerLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
 
     auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(dividerLayoutAlgorithm, nullptr);
@@ -514,8 +517,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
     ASSERT_NE(tabBarNode, nullptr);
     RefPtr<GeometryNode> tabbarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> tabBarLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, tabbarGeometryNode, tabBarNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> tabBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, tabbarGeometryNode, tabBarNode->GetLayoutProperty());
 
     auto tabbarLayoutAlgorithm = tabBarNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(tabbarLayoutAlgorithm, nullptr);
@@ -585,7 +588,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure004, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(tabsLayoutAlgorithm, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
     LayoutConstraintF layoutConstrain;
     layoutConstrain.selfIdealSize.SetSize(SizeF(FIRST_ITEM_WIDTH, INFINITY_NUM));
     AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
@@ -635,8 +639,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure004, TestSize.Level1)
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(0));
     ASSERT_NE(tabBarNode, nullptr);
     RefPtr<GeometryNode> tabbarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> tabBarLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, tabbarGeometryNode, tabBarNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> tabBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, tabbarGeometryNode, tabBarNode->GetLayoutProperty());
 
     auto tabbarLayoutAlgorithm = tabBarNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(tabbarLayoutAlgorithm, nullptr);
@@ -658,8 +662,8 @@ HWTEST_F(TabsTestNg, TabsModelMeasure004, TestSize.Level1)
     auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(1));
     ASSERT_NE(dividerNode, nullptr);
     RefPtr<GeometryNode> dividerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> dividerLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> dividerLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dividerNode, dividerGeometryNode, dividerNode->GetLayoutProperty());
 
     auto dividerLayoutAlgorithm = dividerNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     ASSERT_NE(dividerLayoutAlgorithm, nullptr);
@@ -714,8 +718,8 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasure001, TestSize.Level1)
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
     LayoutConstraintF layoutConstraintVaild;
     float layoutSize = 10000.0f;
     float layoutSize_test = 5000.0f;
@@ -735,8 +739,8 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasure001, TestSize.Level1)
         auto tabBarNode_test = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
         ASSERT_NE(tabBarNode_test, nullptr);
         RefPtr<GeometryNode> geometryNode3 = AceType::MakeRefPtr<GeometryNode>();
-        RefPtr<LayoutWrapper> tabBarLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(tabBarNode_test, geometryNode3, tabBarNode->GetLayoutProperty());
+        RefPtr<LayoutWrapperNode> tabBarLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode_test, geometryNode3, tabBarNode->GetLayoutProperty());
         tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
         tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
@@ -793,8 +797,8 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayout001, TestSize.Level1)
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
     LayoutConstraintF layoutConstraintVaild;
     float layoutSize = 10000.0f;
     float layoutSize_test = 5000.0f;
@@ -810,8 +814,8 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayout001, TestSize.Level1)
         auto tabBarNode_test = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
         ASSERT_NE(tabBarNode_test, nullptr);
         RefPtr<GeometryNode> geometryNode3 = AceType::MakeRefPtr<GeometryNode>();
-        RefPtr<LayoutWrapper> tabBarLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(tabBarNode_test, geometryNode3, tabBarNode->GetLayoutProperty());
+        RefPtr<LayoutWrapperNode> tabBarLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode_test, geometryNode3, tabBarNode->GetLayoutProperty());
         tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
         tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
@@ -901,18 +905,18 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmGetSpace001, TestSize.Level1)
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
-    LayoutWrapper layoutWrapper_test =
-        LayoutWrapper(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    LayoutWrapperNode layoutWrapper_test =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
     auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
 
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
     ASSERT_NE(swiperNode, nullptr);
     RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> swiperLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(swiperNode, geometryNode1, swiperNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode, geometryNode1, swiperNode->GetLayoutProperty());
     swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
@@ -1427,7 +1431,7 @@ HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
     DirtySwapConfig config;
     auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, tabBarNode->GetGeometryNode(), tabBarLayoutProperty);
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, tabBarNode->GetGeometryNode(), tabBarLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto algorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false, false);
     ASSERT_NE(algorithmWrapper, nullptr);
@@ -3097,7 +3101,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask001, TestSize.Level1)
     tabBarLayoutProperty->UpdateSelectedMask(0);
     tabBarLayoutProperty->UpdateUnselectedMask(1);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper layoutWrapper = LayoutWrapper(tabBarNode, geometryNode, tabBarLayoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode, geometryNode, tabBarLayoutProperty);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
 
     /**
@@ -3107,16 +3111,17 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask001, TestSize.Level1)
     auto selectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(selectedmaskPosition));
     ASSERT_NE(selectedMaskNode, nullptr);
     RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> selectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> selectedMaskLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
     layoutWrapper.AppendChild(selectedMaskLayoutWrapper);
 
     auto unselectedmaskPosition = tabBarNode->GetChildren().size() - TEST_UNSELECTED_MASK_COUNT;
     auto unselectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(unselectedmaskPosition));
     ASSERT_NE(unselectedMaskNode, nullptr);
     RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> unselectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(unselectedMaskNode, geometryNode2, unselectedMaskNode->GetLayoutProperty());
+    auto unselectedProperty = unselectedMaskNode->GetLayoutProperty();
+    RefPtr<LayoutWrapperNode> unselectedMaskLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(unselectedMaskNode, geometryNode2, unselectedProperty);
     layoutWrapper.AppendChild(unselectedMaskLayoutWrapper);
 
     /**
@@ -3160,23 +3165,24 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask002, TestSize.Level1)
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper layoutWrapper = LayoutWrapper(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
 
     auto selectedmaskPosition = tabBarNode->GetChildren().size() - TEST_SELECTED_MASK_COUNT;
     auto selectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(selectedmaskPosition));
     ASSERT_NE(selectedMaskNode, nullptr);
     RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> selectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> selectedMaskLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
     layoutWrapper.AppendChild(selectedMaskLayoutWrapper);
 
     auto unselectedmaskPosition = tabBarNode->GetChildren().size() - TEST_UNSELECTED_MASK_COUNT;
     auto unselectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(unselectedmaskPosition));
     ASSERT_NE(unselectedMaskNode, nullptr);
     RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> unselectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(unselectedMaskNode, geometryNode2, unselectedMaskNode->GetLayoutProperty());
+    auto unselectedProperty = unselectedMaskNode->GetLayoutProperty();
+    RefPtr<LayoutWrapperNode> unselectedMaskLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(unselectedMaskNode, geometryNode2, unselectedProperty);
     layoutWrapper.AppendChild(unselectedMaskLayoutWrapper);
 
     /**
@@ -3220,7 +3226,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask003, TestSize.Level1)
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper layoutWrapper = LayoutWrapper(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
 
     /**
@@ -3314,7 +3320,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateBackChildrenMainSize001, Test
     tabBarLayoutProperty->UpdateSelectedMask(0);
     tabBarLayoutProperty->UpdateUnselectedMask(1);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapper(tabBarNode, geometryNode, tabBarLayoutProperty);
+    auto layoutWrapper = LayoutWrapperNode(tabBarNode, geometryNode, tabBarLayoutProperty);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
 
     int32_t indicator = -2;
@@ -3328,8 +3334,8 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateBackChildrenMainSize001, Test
         auto selectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(selectedmaskPosition));
         ASSERT_NE(selectedMaskNode, nullptr);
         RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-        RefPtr<LayoutWrapper> selectedMaskLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
+        RefPtr<LayoutWrapperNode> selectedMaskLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+            selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
         layoutWrapper.AppendChild(selectedMaskLayoutWrapper);
     }
 
@@ -5320,8 +5326,8 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayout002, TestSize.Level1)
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
     AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper.GetLayoutProperty())->UpdateTabBarMode(TabBarMode::FIXED);
     auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
     ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
@@ -5360,21 +5366,21 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayout003, TestSize.Level1)
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper =
-        LayoutWrapper(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
-    auto layoutWrapper1 = AceType::MakeRefPtr<LayoutWrapper>(
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    auto layoutWrapper1 = AceType::MakeRefPtr<LayoutWrapperNode>(
         tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
     ASSERT_NE(layoutWrapper1, nullptr);
-    auto layoutWrapper2 = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper2 = AceType::MakeRefPtr<LayoutWrapperNode>(
         tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
     ASSERT_NE(layoutWrapper2, nullptr);
-    auto layoutWrapper3 = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper3 = AceType::MakeRefPtr<LayoutWrapperNode>(
         tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
     ASSERT_NE(layoutWrapper3, nullptr);
-    auto layoutWrapper4 = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper4 = AceType::MakeRefPtr<LayoutWrapperNode>(
         tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
     ASSERT_NE(layoutWrapper4, nullptr);
-    auto layoutWrapper5 = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper5 = AceType::MakeRefPtr<LayoutWrapperNode>(
         tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
     ASSERT_NE(layoutWrapper5, nullptr);
     AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper.GetLayoutProperty())

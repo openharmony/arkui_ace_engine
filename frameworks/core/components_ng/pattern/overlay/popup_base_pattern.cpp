@@ -23,6 +23,9 @@ void PopupBasePattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(pipeline);
 
     auto inset = pipeline->GetSafeArea();
+    // popup shouldn't avoid status bar
+    inset.top_ = { 0, 0 };
+
     auto manager = pipeline->GetSafeAreaManager();
     inset.bottom_ = inset.bottom_.Combine(manager->GetKeyboardInset());
     auto host = GetHost();

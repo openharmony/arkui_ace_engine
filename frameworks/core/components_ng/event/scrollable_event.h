@@ -27,10 +27,10 @@
 
 namespace OHOS::Ace::NG {
 
-using OnScrollCallback = std::function<void(Dimension, Dimension)>;
-using ScrollEndCallback = std::function<void()>;
-
 class GestureEventHub;
+
+using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const GetEventTargetImpl&, TouchTestResult&)>;
+using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)>;
 
 class ScrollableEvent : public AceType {
     DECLARE_ACE_TYPE(ScrollableEvent, AceType)
@@ -77,19 +77,6 @@ public:
         return scrollFrameBeginCallback_;
     }
 
-    void SetOnScrollCallback(OnScrollCallback&& onScrollCallback)
-    {
-        if (!onScrollCallback) {
-            return;
-        }
-        onScrollCallback_ = std::move(onScrollCallback);
-    }
-
-    const OnScrollCallback& GetOnScrollCallback() const
-    {
-        return onScrollCallback_;
-    }
-
     void SetScrollEndCallback(ScrollEndCallback&& scrollEndCallback)
     {
         if (!scrollEndCallback) {
@@ -114,19 +101,6 @@ public:
     const OutBoundaryCallback& GetOutBoundaryCallback() const
     {
         return outBoundaryCallback_;
-    }
-
-    void SetMouseLeftButtonScroll(MouseLeftButtonScroll&& mouseLeftButtonScroll)
-    {
-        mouseLeftButtonScroll_ = std::move(mouseLeftButtonScroll);
-        if (scrollable_) {
-            scrollable_->SetMouseLeftButtonScroll(mouseLeftButtonScroll_);
-        }
-    }
-
-    const MouseLeftButtonScroll& GetMouseLeftButtonScroll() const
-    {
-        return mouseLeftButtonScroll_;
     }
 
     Axis GetAxis() const
@@ -183,18 +157,41 @@ public:
         return friction_;
     }
 
+    void SetBarCollectTouchTargetCallback(const BarCollectTouchTargetCallback&& barCollectTouchTarget)
+    {
+        barCollectTouchTarget_ = std::move(barCollectTouchTarget);
+    }
+
+    void SetInBarRegionCallback(const InBarRegionCallback&& inBarRegionCallback)
+    {
+        inBarRegionCallback_ = std::move(inBarRegionCallback);
+    }
+
+    bool InBarRegion(const PointF& localPoint, SourceType source) const
+    {
+        return inBarRegionCallback_ && barCollectTouchTarget_ && inBarRegionCallback_(localPoint, source);
+    }
+
+    void BarCollectTouchTarget(const OffsetF& coordinateOffset,
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+    {
+        if (barCollectTouchTarget_) {
+            barCollectTouchTarget_(coordinateOffset, getEventTargetImpl, result);
+        }
+    }
+
 private:
     ScrollPositionCallback callback_;
-    OnScrollCallback onScrollCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     ScrollFrameBeginCallback scrollFrameBeginCallback_;
     ScrollEndCallback scrollEndCallback_;
     OutBoundaryCallback outBoundaryCallback_;
-    MouseLeftButtonScroll mouseLeftButtonScroll_;
 
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
     RefPtr<Scrollable> scrollable_;
+    BarCollectTouchTargetCallback barCollectTouchTarget_;
+    InBarRegionCallback inBarRegionCallback_;
     double friction_ = -1.0;
 };
 
@@ -207,7 +204,9 @@ public:
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
         scrollableEvents_[scrollableEvent->GetAxis()] = scrollableEvent;
-        InitializeScrollable(scrollableEvent);
+        if (scrollableEvent && !scrollableEvent->GetScrollable()) {
+            InitializeScrollable(scrollableEvent);
+        }
     }
 
     void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
@@ -218,8 +217,23 @@ public:
     void AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect);
     bool RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect);
 
-    void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
+    void CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint)
+    {
+        for (const auto& [axis, event] : scrollableEvents_) {
+            if (!event || !event->GetEnable()) {
+                continue;
+            }
+            if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
+                event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+            } else {
+                const auto& scrollable = event->GetScrollable();
+                scrollable->SetGetEventTargetImpl(getEventTargetImpl);
+                scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+                scrollable->OnCollectTouchTarget(result);
+            }
+        }
+    }
 
 private:
     void InitializeScrollable(RefPtr<ScrollableEvent> event);

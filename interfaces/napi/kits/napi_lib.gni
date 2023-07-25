@@ -57,6 +57,13 @@ template("ace_napi_lib") {
     }
     deps = [ "$ace_root/interfaces/napi/kits/${module_path}:${module_name}_static_${platform}" ]
 
+    cflags = []
+    ldflags = []
+    if (ace_engine_feature_enable_coverage) {
+      cflags += [ "--coverage" ]
+      ldflags += [ "--coverage" ]
+    }
+
     relative_install_dir = "module" + install_dir
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem

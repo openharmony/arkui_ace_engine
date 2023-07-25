@@ -319,4 +319,9 @@ void ProgressModelNG::SetLinearSweepingEffect(bool value)
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableLinearScanEffect, value);
 }
 
+void ProgressModelNG::SetSmoothEffect(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, value);
+}
+
 } // namespace OHOS::Ace::NG

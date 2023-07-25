@@ -593,9 +593,14 @@ public:
         focusWindowId_ = windowId;
     }
 
-    uint32_t GetFocusWindowId()
+    uint32_t GetFocusWindowId() const
     {
         return focusWindowId_.value_or(windowId_);
+    }
+
+    bool IsFocusWindowIdSetted() const
+    {
+        return focusWindowId_.has_value();
     }
 
     float GetViewScale() const
@@ -903,23 +908,20 @@ public:
         return lastTouchTime_;
     }
 
-    void AddFormLinkInfo(const std::string& info)
+    void AddFormLinkInfo(int32_t id, const std::string& info)
     {
-        LOGI("AddFormLinkInfo is %{public}s", info.c_str());
-        formLinkInfos_.push_back(info);
+        LOGI("AddFormLinkInfo is %{public}s, id is %{public}d", info.c_str(), id);
+        formLinkInfoMap_[id] = info;
     }
 
 protected:
+    virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
     {
         if (isForegroundCalled_ && nextFrameLayoutCallback_) {
             isForegroundCalled_ = false;
             nextFrameLayoutCallback_();
             LOGI("nextFrameLayoutCallback called");
-        }
-        // Update FormLinkInfo after layout. (For static form use only)
-        if (formLinkInfoUpdateHandler_) {
-            formLinkInfoUpdateHandler_(formLinkInfos_);
         }
     }
 
@@ -1021,7 +1023,7 @@ protected:
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
     uint64_t lastTouchTime_ = 0;
-    std::vector<std::string> formLinkInfos_;
+    std::map<int32_t, std::string> formLinkInfoMap_;
 
 private:
     void DumpFrontend() const;

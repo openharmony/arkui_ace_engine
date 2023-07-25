@@ -255,10 +255,10 @@ public:
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [] {
+            [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->ClearMenuNG();
-                SubwindowManager::GetInstance()->HidePopupNG();
+                SubwindowManager::GetInstance()->ClearMenuNG(instanceId);
+                SubwindowManager::GetInstance()->HidePopupNG(-1, instanceId);
             },
             TaskExecutor::TaskType::UI);
     }
@@ -349,6 +349,28 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     if (isFormRender_ && !window) {
         LOGI("CommonInitializeForm url = %{public}s", url.c_str());
         CommonInitializeForm(window, url, storage);
+    }
+
+    LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGD("Initialize UIContentImpl done.");
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+}
+
+void UIContentImpl::Initialize(
+    OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId)
+{
+    if (window) {
+        CommonInitialize(window, url, storage);
+    }
+
+    if (focusWindowId != 0) {
+        LOGI("Initialize focusWindow id:%{public}u", focusWindowId);
+        Platform::AceContainer::GetContainer(instanceId_)->SetFocusWindowId(focusWindowId);
     }
 
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
@@ -884,7 +906,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         if (abilityContext) {
             int32_t missionId = -1;
             abilityContext->GetMissionId(missionId);
-            AceApplicationInfo::GetInstance().SetMissionId(abilityContext->GetMissionId(missionId));
+            AceApplicationInfo::GetInstance().SetMissionId(missionId);
         }
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
@@ -1288,8 +1310,10 @@ void UIContentImpl::ReloadForm(const std::string& url)
     startUrl_ = url;
     LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
+    container->ReloadForm();
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
 }

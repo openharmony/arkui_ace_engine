@@ -71,6 +71,7 @@ public:
         linearSweepEffect_ = paintProperty->GetEnableLinearScanEffect().value_or(false);
         bool paintShadow = paintProperty->GetPaintShadow().value_or(false);
         ProgressStatus progressStatus = paintProperty->GetProgressStatus().value_or(ProgressStatus::PROGRESSING);
+        progressModifier_->SetSmoothEffect(paintProperty->GetEnableSmoothEffect().value_or(true));
         progressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
         progressModifier_->SetContentSize(paintWrapper->GetContentSize());
         CalculateStrokeWidth(paintWrapper->GetContentSize());

@@ -135,6 +135,18 @@ struct BlurStyleOption {
     }
 };
 
+struct EffectOption {
+    Dimension radius;
+    double saturation { 1.0f };
+    double brightness { 1.0f };
+    Color color { Color::TRANSPARENT };
+    bool operator == (const EffectOption& other) const
+    {
+        return radius == other.radius && NearEqual(saturation, other.saturation) &&
+            NearEqual(brightness, other.brightness) && color == other.color;
+    }
+};
+
 struct PixStretchEffectOption {
     Dimension left;
     Dimension top;

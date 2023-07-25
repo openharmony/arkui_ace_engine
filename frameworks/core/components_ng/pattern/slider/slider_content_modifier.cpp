@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
-#include <optional>
-#include <utility>
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
@@ -30,7 +27,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5f;
-constexpr Dimension CIRCLE_SHADOW_WIDTH = 1.0_vp;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 } // namespace
@@ -126,8 +122,8 @@ void SliderContentModifier::onDraw(DrawingContext& context)
     DrawBackground(context);
     DrawStep(context);
     DrawSelect(context);
-    DrawBlock(context);
     DrawShadow(context);
+    DrawBlock(context);
     DrawHoverOrPress(context);
 }
 
@@ -289,19 +285,26 @@ void SliderContentModifier::DrawShadow(DrawingContext& context)
         return;
     }
 
-    auto& canvas = context.canvas;
     if (!mouseHoverFlag_ && !mousePressedFlag_) {
-        RSPen circleShadowPen;
-        circleShadowPen.SetAntiAlias(true);
-        circleShadowPen.SetColor(ToRSColor(blockOuterEdgeColor_));
-        circleShadowPen.SetWidth(static_cast<float>(CIRCLE_SHADOW_WIDTH.ConvertToPx()));
-        canvas.AttachPen(circleShadowPen);
+        auto& canvas = context.canvas;
         auto blockSize = blockSize_->Get();
-        float diameter = std::min(blockSize.Width(), blockSize.Height());
-        auto penRadius = (diameter + static_cast<float>(CIRCLE_SHADOW_WIDTH.ConvertToPx())) * HALF;
         auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
-        canvas.DrawCircle(ToRSPoint(blockCenter), penRadius);
-        canvas.DetachPen();
+        float radius = std::min(blockSize.Width(), blockSize.Height()) * HALF;
+        canvas.Save();
+        RSBrush shadowBrush;
+        shadowBrush.SetAntiAlias(true);
+        shadowBrush.SetColor(ToRSColor(blockShadowColor_));
+        RSFilter filter;
+        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+            RSBlurType::NORMAL, RSDrawing::ConvertRadiusToSigma(hotCircleShadowWidth_)));
+        shadowBrush.SetFilter(filter);
+
+        canvas.AttachBrush(shadowBrush);
+        RSPath path;
+        path.AddCircle(ToRSPoint(blockCenter).GetX(), ToRSPoint(blockCenter).GetY(), radius);
+        canvas.DrawPath(path);
+        canvas.DetachBrush();
+        canvas.Restore();
     }
 }
 

@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_sec_paste_button.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_location_button.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 
-using OHOS::Ace::NG::PasteButtonModelNG;
+using OHOS::Ace::NG::LocationButtonModelNG;
 using OHOS::Ace::NG::SecurityComponentTheme;
 
 namespace OHOS::Ace::Framework {
-bool JSSecPasteButton::ParseComponentStyle(const JSCallbackInfo& info,
-    PasteButtonPasteDescription& text, PasteButtonIconStyle& icon, int32_t& bg)
+bool JSLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
+    LocationButtonLocationDescription& text, LocationButtonIconStyle& icon, int32_t& bg)
 {
     if (!info[0]->IsObject()) {
         return false;
@@ -36,27 +36,28 @@ bool JSSecPasteButton::ParseComponentStyle(const JSCallbackInfo& info,
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto value = paramObject->GetProperty("text");
     if (value->IsNumber()) {
-        text = static_cast<PasteButtonPasteDescription>(value->ToNumber<int32_t>());
-        if ((text < PasteButtonPasteDescription::PASTE) ||
-            (text > PasteButtonPasteDescription::MAX_LABEL_TYPE)) {
+        text = static_cast<LocationButtonLocationDescription>(value->ToNumber<int32_t>());
+        if ((text < LocationButtonLocationDescription::CURRENT_LOCATION) ||
+            (text > LocationButtonLocationDescription::CURRENT_POSITION)) {
             return false;
         }
     } else {
-        text = PasteButtonPasteDescription::TEXT_NULL;
+        text = LocationButtonLocationDescription::TEXT_NULL;
     }
 
     value = paramObject->GetProperty("icon");
     if (value->IsNumber()) {
-        icon = static_cast<PasteButtonIconStyle>(value->ToNumber<int32_t>());
-        if ((icon != PasteButtonIconStyle::ICON_LINE)) {
+        icon = static_cast<LocationButtonIconStyle>(value->ToNumber<int32_t>());
+        if ((icon < LocationButtonIconStyle::ICON_FULL_FILLED) ||
+            (icon > LocationButtonIconStyle::ICON_LINE)) {
             return false;
         }
     } else {
-        icon = PasteButtonIconStyle::ICON_NULL;
+        icon = LocationButtonIconStyle::ICON_NULL;
     }
 
-    if ((text == PasteButtonPasteDescription::TEXT_NULL) &&
-        (icon == PasteButtonIconStyle::ICON_NULL)) {
+    if ((text == LocationButtonLocationDescription::TEXT_NULL) &&
+        (icon == LocationButtonIconStyle::ICON_NULL)) {
         return false;
     }
 
@@ -73,23 +74,23 @@ bool JSSecPasteButton::ParseComponentStyle(const JSCallbackInfo& info,
     return true;
 }
 
-void JSSecPasteButton::Create(const JSCallbackInfo& info)
+void JSLocationButton::Create(const JSCallbackInfo& info)
 {
-    PasteButtonPasteDescription textDesc;
-    PasteButtonIconStyle iconType;
+    LocationButtonLocationDescription textDesc;
+    LocationButtonIconStyle iconType;
     int32_t backgroundType = 0;
     if (!ParseComponentStyle(info, textDesc, iconType, backgroundType)) {
-        PasteButtonModelNG::GetInstance()->Create(
-            static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-            static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE),
+        LocationButtonModelNG::GetInstance()->Create(
+            static_cast<int32_t>(LocationButtonLocationDescription::CURRENT_LOCATION),
+            static_cast<int32_t>(LocationButtonIconStyle::ICON_LINE),
             static_cast<int32_t>(ButtonType::CAPSULE));
     } else {
-        PasteButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
+        LocationButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
             static_cast<int32_t>(iconType), backgroundType);
     }
 }
 
-void JsSecPasteButtonClickFunction::Execute(GestureEvent& info)
+void JsLocationButtonClickFunction::Execute(GestureEvent& info)
 {
     JSRef<JSObject> clickEventParam = JSRef<JSObject>::New();
     Offset globalOffset = info.GetGlobalLocation();
@@ -124,12 +125,12 @@ void JsSecPasteButtonClickFunction::Execute(GestureEvent& info)
     JsFunction::ExecuteJS(2, params);
 }
 
-void JSSecPasteButton::JsOnClick(const JSCallbackInfo& info)
+void JSLocationButton::JsOnClick(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsOnClickFunc = AceType::MakeRefPtr<JsSecPasteButtonClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto jsOnClickFunc = AceType::MakeRefPtr<JsLocationButtonClickFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
@@ -139,36 +140,35 @@ void JSSecPasteButton::JsOnClick(const JSCallbackInfo& info)
     NG::ViewAbstract::SetOnClick(std::move(onTap));
 }
 
-void JSSecPasteButton::JSBind(BindingTarget globalObj)
+void JSLocationButton::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSSecPasteButton>::Declare("SecPasteButton");
+    JSClass<JSLocationButton>::Declare("LocationButton");
     MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSSecPasteButton>::StaticMethod("create", &JSSecPasteButton::Create, opt);
-    JSClass<JSSecPasteButton>::StaticMethod("iconSize", &JSSecButtonBase::SetIconSize);
-    JSClass<JSSecPasteButton>::StaticMethod("layoutDirection", &JSSecButtonBase::SetLayoutDirection);
-    JSClass<JSSecPasteButton>::StaticMethod("layoutOrder", &JSSecButtonBase::SetlayoutOrder);
-    JSClass<JSSecPasteButton>::StaticMethod("fontSize", &JSSecButtonBase::SetFontSize);
-    JSClass<JSSecPasteButton>::StaticMethod("fontStyle", &JSSecButtonBase::SetFontStyle);
-    JSClass<JSSecPasteButton>::StaticMethod("iconColor", &JSSecButtonBase::SetIconColor);
-    JSClass<JSSecPasteButton>::StaticMethod("fontWeight", &JSSecButtonBase::SetFontWeight);
-    JSClass<JSSecPasteButton>::StaticMethod("fontFamily", &JSSecButtonBase::SetFontFamily);
-    JSClass<JSSecPasteButton>::StaticMethod("fontColor", &JSSecButtonBase::SetFontColor);
-    JSClass<JSSecPasteButton>::StaticMethod("backgroundColor", &JSSecButtonBase::SetBackgroundColor);
-    JSClass<JSSecPasteButton>::StaticMethod("borderStyle", &JSSecButtonBase::SetBackgroundBorderStyle);
-    JSClass<JSSecPasteButton>::StaticMethod("borderWidth", &JSSecButtonBase::SetBackgroundBorderWidth);
-    JSClass<JSSecPasteButton>::StaticMethod("borderColor", &JSSecButtonBase::SetBackgroundBorderColor);
-    JSClass<JSSecPasteButton>::StaticMethod("borderRadius", &JSSecButtonBase::SetBackgroundBorderRadius);
-    JSClass<JSSecPasteButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
-    JSClass<JSSecPasteButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
-    JSClass<JSSecPasteButton>::StaticMethod("onClick", &JSSecPasteButton::JsOnClick);
-    JSClass<JSSecPasteButton>::StaticMethod("key", &JSViewAbstract::JsKey);
-    JSClass<JSSecPasteButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
-    JSClass<JSSecPasteButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
-    JSClass<JSSecPasteButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
-    JSClass<JSSecPasteButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
+    JSClass<JSLocationButton>::StaticMethod("create", &JSLocationButton::Create, opt);
+    JSClass<JSLocationButton>::StaticMethod("iconSize", &JSSecButtonBase::SetIconSize);
+    JSClass<JSLocationButton>::StaticMethod("layoutDirection", &JSSecButtonBase::SetLayoutDirection);
+    JSClass<JSLocationButton>::StaticMethod("fontSize", &JSSecButtonBase::SetFontSize);
+    JSClass<JSLocationButton>::StaticMethod("fontStyle", &JSSecButtonBase::SetFontStyle);
+    JSClass<JSLocationButton>::StaticMethod("iconColor", &JSSecButtonBase::SetIconColor);
+    JSClass<JSLocationButton>::StaticMethod("fontWeight", &JSSecButtonBase::SetFontWeight);
+    JSClass<JSLocationButton>::StaticMethod("fontFamily", &JSSecButtonBase::SetFontFamily);
+    JSClass<JSLocationButton>::StaticMethod("fontColor", &JSSecButtonBase::SetFontColor);
+    JSClass<JSLocationButton>::StaticMethod("backgroundColor", &JSSecButtonBase::SetBackgroundColor);
+    JSClass<JSLocationButton>::StaticMethod("borderStyle", &JSSecButtonBase::SetBackgroundBorderStyle);
+    JSClass<JSLocationButton>::StaticMethod("borderWidth", &JSSecButtonBase::SetBackgroundBorderWidth);
+    JSClass<JSLocationButton>::StaticMethod("borderColor", &JSSecButtonBase::SetBackgroundBorderColor);
+    JSClass<JSLocationButton>::StaticMethod("borderRadius", &JSSecButtonBase::SetBackgroundBorderRadius);
+    JSClass<JSLocationButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
+    JSClass<JSLocationButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
+    JSClass<JSLocationButton>::StaticMethod("onClick", &JSLocationButton::JsOnClick);
+    JSClass<JSLocationButton>::StaticMethod("key", &JSViewAbstract::JsKey);
+    JSClass<JSLocationButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
+    JSClass<JSLocationButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
+    JSClass<JSLocationButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
+    JSClass<JSLocationButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
 #if defined(PREVIEW)
-    JSClass<JSSecPasteButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
+    JSClass<JSLocationButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
-    JSClass<JSSecPasteButton>::Bind<>(globalObj);
+    JSClass<JSLocationButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

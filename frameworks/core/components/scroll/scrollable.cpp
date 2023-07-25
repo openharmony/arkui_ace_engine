@@ -124,7 +124,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
                 return;
             }
             // Send event to accessibility when scroll start.
@@ -142,7 +142,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionUpdate = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
                 return;
             }
             scroll->HandleDragUpdate(info);
@@ -152,7 +152,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionEnd = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && !scroll->NeedMouseLeftButtonScroll()) {
+            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
                 return;
             }
             scroll->HandleDragEnd(info);
@@ -262,7 +262,7 @@ void Scrollable::HandleTouchDown()
     springController_->Stop();
     if (!controller_->IsStopped()) {
         controller_->Stop();
-    } else if (!snapController_->IsStopped()) {
+    } else if (snapController_->IsRunning()) {
         snapController_->Stop();
     } else {
         // Resets values.
@@ -988,7 +988,7 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::ProcessScrollMotionStop()
 {
-    if (needScrollSnapChange_ && calePredictSnapOffsetCallback_) {
+    if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && motion_) {
         needScrollSnapChange_ = false;
         auto predictSnapOffset = calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - currentPos_);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
@@ -1107,7 +1107,7 @@ bool Scrollable::HandleOverScroll(double velocity)
 {
     auto parent = parent_.Upgrade();
     if (!parent || !nestedOpt_.NeedParent()) {
-        if (edgeEffect_ != EdgeEffect::NONE) {
+        if (edgeEffect_ == EdgeEffect::SPRING) {
             ProcessScrollOverCallback(velocity);
             return true;
         }
@@ -1125,14 +1125,14 @@ bool Scrollable::HandleOverScroll(double velocity)
             }
             return true;
         }
-        if (edgeEffect_ != EdgeEffect::NONE) {
+        if (edgeEffect_ == EdgeEffect::SPRING) {
             ProcessScrollOverCallback(velocity);
             return true;
         }
     }
 
     // self handle over scroll first
-    if (edgeEffect_ != EdgeEffect::NONE) {
+    if (edgeEffect_ == EdgeEffect::SPRING) {
         ProcessScrollOverCallback(velocity);
         return true;
     }

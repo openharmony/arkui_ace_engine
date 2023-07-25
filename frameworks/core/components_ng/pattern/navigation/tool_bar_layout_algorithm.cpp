@@ -26,6 +26,7 @@ namespace {
 constexpr uint32_t GRID_COUNTS_4 = 4;
 constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
+constexpr uint32_t GRID_COUNTS_12 = 12;
 constexpr uint32_t TOOLBAR_ITEMS_NUM_4 = 4;
 
 float GetToolbarContainerMaxWidth(const float& toolbarWidth, size_t toolbarItemNum)
@@ -34,21 +35,41 @@ float GetToolbarContainerMaxWidth(const float& toolbarWidth, size_t toolbarItemN
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::NAVIGATION_TOOLBAR);
     columnInfo->GetParent()->BuildColumnWidth();
 
+    float fourGridWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4));
+    float eightGridWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_8));
+    float gutterWidth = columnInfo->GetParent()->GetGutterWidth().ConvertToPx();
+
     auto currentColumns = columnInfo->GetParent()->GetColumns();
-    if (currentColumns == GRID_COUNTS_4) {
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+        (currentColumns == GRID_COUNTS_4 || currentColumns == GRID_COUNTS_8) &&
+        NearEqual(toolbarWidth, fourGridWidth + gutterWidth * 2)) {
         if (toolbarItemNum >= TOOLBAR_ITEMS_NUM_4) {
             return toolbarWidth;
         } else {
             return static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4));
         }
-    } else if (currentColumns == GRID_COUNTS_8) {
+    }
+
+    if (SystemProperties::GetDeviceType() == DeviceType::TABLET &&
+        (currentColumns == GRID_COUNTS_8 || currentColumns == GRID_COUNTS_12) &&
+        NearEqual(toolbarWidth, eightGridWidth + gutterWidth * 2)) {
         if (toolbarItemNum >= GRID_COUNTS_4) {
             return static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_8));
         } else {
             return static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_6));
         }
     }
-    return 0.0f;
+
+    if (SystemProperties::GetDeviceType() == DeviceType::TABLET &&
+        (currentColumns == GRID_COUNTS_8 || currentColumns == GRID_COUNTS_12) &&
+        NearEqual(toolbarWidth, fourGridWidth + gutterWidth * 2)) {
+        if (toolbarItemNum >= TOOLBAR_ITEMS_NUM_4) {
+            return toolbarWidth;
+        } else {
+            return static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4));
+        }
+    }
+    return toolbarWidth;
 }
 
 float CalcToolbarItemWidth(const float& toolbarWidth, size_t toolbarItemNum)
@@ -169,10 +190,14 @@ void ToolbarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(toolbarNode);
+    if (!toolbarNode->IsUsedNewToolbar()) {
+        LinearLayoutAlgorithm::Measure(layoutWrapper);
+        return;
+    }
+
     auto containerNode = toolbarNode->GetToolbarContainerNode();
     auto toolbarItemNum = containerNode->GetChildren().size();
     if (!containerNode || toolbarItemNum == 0) {
-        LinearLayoutAlgorithm::Measure(layoutWrapper);
         return;
     }
 
@@ -182,6 +207,9 @@ void ToolbarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(constraint);
     auto toolbarWidth = constraint->selfIdealSize.Width().value();
     auto toolbarHeight = constraint->selfIdealSize.Height().value();
+    if (NearZero(toolbarWidth) || NearZero(toolbarHeight)) {
+        return;
+    }
     auto toolbarItemWidth = UpdateToolBarItemsContainer(layoutWrapper, toolbarItemNum, toolbarWidth);
     LinearLayoutAlgorithm::Measure(layoutWrapper);
 

@@ -86,13 +86,16 @@ void SwiperIndicatorPattern::OnModifyDone()
             }
             indicator->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         });
-
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    InitClickEvent(gestureHub);
-    InitHoverMouseEvent();
-    InitTouchEvent(gestureHub);
-    InitPanEvent(gestureHub);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
+        auto gestureHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitClickEvent(gestureHub);
+        InitHoverMouseEvent();
+        InitTouchEvent(gestureHub);
+        InitPanEvent(gestureHub);
+    }
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -469,13 +472,19 @@ void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
 
 void SwiperIndicatorPattern::HandleDragUpdate(const GestureEvent& info)
 {
-    if (CheckIsTouchBottom(info)) {
-        return;
-    }
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
+    if (swiperPattern->TotalCount() <= displayCount) {
+        return;
+    }
+    if (CheckIsTouchBottom(info)) {
+        return;
+    }
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
     auto offset = dragPoint - dragStartPoint_;

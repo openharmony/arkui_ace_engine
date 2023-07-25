@@ -62,6 +62,7 @@ ohos_source_set("preview_osal_source") {
       "ace_checker.cpp",
       "ace_engine_ext.cpp",
       "ace_trace.cpp",
+      "app_bar_helper_impl.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
       "fetch_manager.cpp",
@@ -75,7 +76,6 @@ ohos_source_set("preview_osal_source") {
       "stage_card_parser.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",
-      "ui_extension_helper_impl.cpp",
     ]
 
     cflags_cc = [
@@ -85,10 +85,11 @@ ohos_source_set("preview_osal_source") {
 
     deps = [
       ":utilsecurec_source",
-      "//base/hiviewdfx/hilog/frameworks/libhilog:libhilog_source_$platform",
       "//foundation/graphic/graphic_2d/rosen/modules/platform:image_native",
       "//third_party/curl:curl_shared",
     ]
+
+    external_deps = [ "hilog:libhilog" ]
 
     configs = [
       "$ace_root:ace_config",

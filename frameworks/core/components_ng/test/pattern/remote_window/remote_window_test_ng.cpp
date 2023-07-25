@@ -137,7 +137,8 @@ HWTEST_F(RemoteWindowTestNg, RemoteWindowLayoutAlgorithmTest001, TestSize.Level1
     ASSERT_NE(frameNode, nullptr);
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(frameNode->geometryNode_, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, frameNode->geometryNode_, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode, frameNode->geometryNode_, frameNode->GetLayoutProperty());
     auto layoutAlgorithm = AceType::MakeRefPtr<RemoteWindowLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));

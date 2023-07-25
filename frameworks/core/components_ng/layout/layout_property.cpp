@@ -222,6 +222,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     layoutConstraint_ = parentConstraint;
     if (margin_) {
         // TODO: add margin is negative case.
+        marginResult_.reset();
         auto margin = CreateMargin();
         MinusPaddingToSize(margin, layoutConstraint_->maxSize);
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
@@ -355,6 +356,9 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
     }
 
     RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame();
+    if (!parent) {
+        return false;
+    }
     auto parentOffset = parent->GetOffsetRelativeToWindow();
     auto globalOffset = gridProperty_->GetContainerPosition();
 
@@ -494,13 +498,18 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 
 MarginPropertyF LayoutProperty::CreateMargin()
 {
-    if (layoutConstraint_.has_value()) {
-        return ConvertToMarginPropertyF(
-            margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    CHECK_NULL_RETURN(margin_, MarginPropertyF());
+    if (!marginResult_.has_value() && margin_) {
+        if (layoutConstraint_.has_value()) {
+            marginResult_ = ConvertToMarginPropertyF(
+                margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+        } else {
+            // root node
+            marginResult_ = ConvertToMarginPropertyF(
+                margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+        }
     }
-    // root node
-    return ConvertToMarginPropertyF(
-        margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    return marginResult_.value_or(MarginPropertyF());
 }
 
 void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)
@@ -743,6 +752,51 @@ void LayoutProperty::ResetCalcMinSize()
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
     calcLayoutConstraint_->minSize.reset();
+}
+
+void LayoutProperty::ResetCalcMaxSize()
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    if (calcLayoutConstraint_->maxSize.has_value()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    calcLayoutConstraint_->maxSize.reset();
+}
+
+void LayoutProperty::ResetCalcMinSize(bool resetWidth)
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    CHECK_NULL_VOID(calcLayoutConstraint_->minSize.has_value());
+    bool resetSizeHasValue = resetWidth ? calcLayoutConstraint_->minSize.value().Width().has_value()
+                                        : calcLayoutConstraint_->minSize.value().Height().has_value();
+    CHECK_NULL_VOID(resetSizeHasValue);
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    if (resetWidth) {
+        calcLayoutConstraint_->minSize.value().SetWidth(std::nullopt);
+    } else {
+        calcLayoutConstraint_->minSize.value().SetHeight(std::nullopt);
+    }
+}
+
+void LayoutProperty::ResetCalcMaxSize(bool resetWidth)
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    CHECK_NULL_VOID(calcLayoutConstraint_->maxSize.has_value());
+    bool resetSizeHasValue = resetWidth ? calcLayoutConstraint_->maxSize.value().Width().has_value()
+                                        : calcLayoutConstraint_->maxSize.value().Height().has_value();
+    CHECK_NULL_VOID(resetSizeHasValue);
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    if (resetWidth) {
+        calcLayoutConstraint_->maxSize.value().SetWidth(std::nullopt);
+    } else {
+        calcLayoutConstraint_->maxSize.value().SetHeight(std::nullopt);
+    }
 }
 
 void LayoutProperty::UpdateFlexGrow(float flexGrow)

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_MULTIMODALINPUT_POINTER_EVENT_H
 
 #include <optional>
+#include <vector>
 
 #include "adapter/preview/external/multimodalinput/common_type.h"
 

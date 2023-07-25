@@ -365,12 +365,12 @@ void PluginPattern::SplitString(const std::string& str, char tag, std::vector<st
 std::string PluginPattern::GetPackagePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const
 {
     std::string packagePathStr;
-    size_t pos = info.pluginName.rfind(JS_EXT);
     size_t pos_ets = info.pluginName.rfind(ETS_EXT);
     if (pos_ets != std::string::npos && info.pluginName.substr(pos_ets) == ETS_EXT) {
         info.pluginName = info.pluginName.substr(0, info.pluginName.length() - SIZE_OF_ETS_EXT);
         info.pluginName = info.pluginName + JS_EXT;
     }
+    size_t pos = info.pluginName.rfind(JS_EXT);
     if (info.pluginName.front() == '/' && pos != std::string::npos && info.pluginName.substr(pos) == JS_EXT) {
         packagePathStr = GetPackagePathByAbsolutePath(weak, info);
     } else {
@@ -446,12 +446,12 @@ void PluginPattern::GetAbilityNameByWant(const WeakPtr<PluginPattern>& weak, Req
             info.abilityName = info.pluginName;
         }
     } else {
-        auto pos = strList[0].rfind(JS_EXT);
-        size_t pos_ets = info.pluginName.rfind(ETS_EXT);
-        if (pos_ets != std::string::npos && info.pluginName.substr(pos_ets) == ETS_EXT) {
-            info.pluginName = info.pluginName.substr(0, info.pluginName.length() - SIZE_OF_ETS_EXT);
-            info.pluginName = info.pluginName + JS_EXT;
+        size_t pos_ets = strList[0].rfind(ETS_EXT);
+        if (pos_ets != std::string::npos && strList[0].substr(pos_ets) == ETS_EXT) {
+            strList[0] = strList[0].substr(0, strList[0].length() - SIZE_OF_ETS_EXT);
+            strList[0] = strList[0] + JS_EXT;
         }
+        auto pos = strList[0].rfind(JS_EXT);
         if (pos != std::string::npos && (strList[0].substr(pos) == JS_EXT)) {
             info.source = strList[0];
         } else {

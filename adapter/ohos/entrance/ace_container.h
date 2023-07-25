@@ -288,6 +288,13 @@ public:
         return parentId_;
     }
 
+    void SetFocusWindowId(uint32_t focusWindowId)
+    {
+        if (pipelineContext_) {
+            pipelineContext_->SetFocusWindowId(focusWindowId);
+        }
+    }
+
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
@@ -405,6 +412,7 @@ public:
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
+    void ReloadForm();
 
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,

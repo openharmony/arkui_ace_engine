@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,12 @@
  * limitations under the License.
  */
 
-/**
- * ObservedPropertyObjectAbstractPU
- * 
- * common bbase class of ObservedPropertyObjectPU and
- * SyncedObjectPropertyTwoWayPU
- * adds the createObjectLink to the ObservedPropertyAbstract base
- * 
- * all definitions in this file are framework internal
- */
+#include "base/geometry/size.h"
+#include "base/utils/measure_util.h"
 
-abstract class ObservedPropertyObjectAbstractPU<C extends Object>
-  extends ObservedPropertyAbstractPU<C> {
-
-  constructor(owningView: IPropertySubscriber, thisPropertyName: PropertyInfo) {
-    super(owningView, thisPropertyName)
-  }
+namespace OHOS::Ace {
+Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
+{
+    return Size(0.0, 0.0);
 }
+} // namespace OHOS::Ace

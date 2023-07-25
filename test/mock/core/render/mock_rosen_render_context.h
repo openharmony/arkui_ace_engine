@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_RENDER_CONTEXT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_RENDER_CONTEXT_H
 
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 class RosenRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(RosenRenderContext, RenderContext)
+    DECLARE_ACE_TYPE(RosenRenderContext, RenderContext);
 
 public:
+    const std::shared_ptr<Rosen::RSNode>& GetRSNode();
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_RENDER_CONTEXT_H

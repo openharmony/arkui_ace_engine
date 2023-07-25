@@ -68,7 +68,7 @@ DirtySwapConfig config;
 string testText = "testText";
 } // namespace
 
-class pluginPatternTestNg : public testing::Test {
+class PluginPatternTestNg : public testing::Test {
 public:
     void CheckValue(const RefPtr<FrameNode>& frameNode, const TestProperty& testProperty);
     static void SetUpTestCase();
@@ -80,19 +80,19 @@ protected:
     RefPtr<FrameNode> CreatePluginParagraph();
 };
 
-void pluginPatternTestNg::SetUpTestCase()
+void PluginPatternTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
     pluginInfo.pluginName = "plugin1";
     pluginInfo.bundleName = "com.example.plugin";
 }
 
-void pluginPatternTestNg::TearDownTestCase()
+void PluginPatternTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
-RefPtr<FrameNode> pluginPatternTestNg::CreatePluginParagraph()
+RefPtr<FrameNode> PluginPatternTestNg::CreatePluginParagraph()
 {
     pluginModel.Create(pluginInfo);
     pluginModel.SetPluginSize(WIDTH, HEIGHT);
@@ -108,7 +108,7 @@ RefPtr<FrameNode> pluginPatternTestNg::CreatePluginParagraph()
  * @tc.desc: Test SplitString in Plugin Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, ReplaceAll, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, ReplaceAll, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -122,11 +122,11 @@ HWTEST_F(pluginPatternTestNg, ReplaceAll, TestSize.Level1)
 }
 
 /**
- * @tc.name: pluginPattern002
+ * @tc.name: PluginPattern002
  * @tc.desc: Test SplitString in Plugin Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, SplitString, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, SplitString, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -137,11 +137,11 @@ HWTEST_F(pluginPatternTestNg, SplitString, TestSize.Level1)
 }
 
 /**
- * @tc.name: pluginEventHubTestNg
- * @tc.desc: Test pluginEventHub.
+ * @tc.name: PluginEventHubTestNg
+ * @tc.desc: Test PluginEventHub.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, pluginEventHubTestNg, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, PluginEventHubTestNg, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -164,11 +164,11 @@ HWTEST_F(pluginPatternTestNg, pluginEventHubTestNg, TestSize.Level1)
 }
 
 /**
- * @tc.name: pluginPatternTestNg
+ * @tc.name: PluginPatternTestNg
  * @tc.desc: Test OnDirtyLayoutWrapperSwap in Plugin Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, OnDirtyLayoutWrapperSwap2, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, OnDirtyLayoutWrapperSwap2, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -177,7 +177,7 @@ HWTEST_F(pluginPatternTestNg, OnDirtyLayoutWrapperSwap2, TestSize.Level1)
     geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
     geometryNode->SetContentOffset(OffsetF(0, 0));
     RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
     EXPECT_NE(layoutWrapper, nullptr);
     auto host = pattern->GetHost();
     EXPECT_NE(host, nullptr);
@@ -264,11 +264,11 @@ HWTEST_F(pluginPatternTestNg, OnDirtyLayoutWrapperSwap2, TestSize.Level1)
 }
 
 /**
- * @tc.name: pluginPatternTestNg
+ * @tc.name: PluginPatternTestNg
  * @tc.desc: Test CreatePluginSubContainer in Plugin Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, CreatePluginSubContainerTestNg, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, CreatePluginSubContainerTestNg, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -284,7 +284,7 @@ HWTEST_F(pluginPatternTestNg, CreatePluginSubContainerTestNg, TestSize.Level1)
  * @tc.desc: Test GetPackagePath throw GetPackagePathByAbsolutePath in Plugin Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, GetPackagePathTestNg1, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, GetPackagePathTestNg1, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -326,10 +326,10 @@ HWTEST_F(pluginPatternTestNg, GetPackagePathTestNg1, TestSize.Level1)
 
 /**
  * @tc.name: GetPackagePathTestNg2
- * @tc.desc: Test GetPackagePath throw GetPackagePathByWant when hapPath is not empty  in Plugin Pattern.
+ * @tc.desc: Test GetPackagePath throw GetPackagePathByWant when hapPath is not empty in Plugin Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, GetPackagePathTestNg2, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, GetPackagePathTestNg2, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -408,7 +408,7 @@ HWTEST_F(pluginPatternTestNg, GetPackagePathTestNg2, TestSize.Level1)
  * @tc.desc: Test GetPackagePath throw GetPackagePathByWant when hapPath is empty  in Plugin Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, GetPackagePathTestNg3, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, GetPackagePathTestNg3, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -481,7 +481,7 @@ HWTEST_F(pluginPatternTestNg, GetPackagePathTestNg3, TestSize.Level1)
  * @tc.desc : Test GetPackagePath.
  * @tc.type : FUNC
  */
-HWTEST_F(pluginPatternTestNg, GetPackagePathTestNg4, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, GetPackagePathTestNg4, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -502,11 +502,71 @@ HWTEST_F(pluginPatternTestNg, GetPackagePathTestNg4, TestSize.Level1)
     AppExecFwk::MOCKIBundleMgr::ReleaseInstance();
 }
 
+/**@tc.name : GetPackagePathTestNg5
+ * @tc.desc : Test GetPackagePath.
+ * @tc.type : FUNC
+ */
+HWTEST_F(PluginPatternTestNg, GetPackagePathTestNg5, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreatePluginParagraph();
+    auto pattern = frameNode->GetPattern<PluginPattern>();
+    ASSERT_NE(pattern, nullptr);
+    AppExecFwk::BundleInfo bundleInfo;
+    AppExecFwk::MOCKIBundleMgr::CreateInstance();
+    auto bms = (PluginComponentManager::GetInstance()->GetBundleManager());
+    auto* bundleMgr = static_cast<AppExecFwk::MOCKIBundleMgr*>(bms.GetRefPtr());
+
+    /**
+     *     corresponding ets code:
+     *     PluginComponent({template: { source: "plugin/index.ets", bundleName:"com.example.plugin/plugin"},data:
+     * {}})
+     */
+    pluginInfo.pluginName = "plugin/index.ets";
+    pluginInfo.bundleName = "com.example.plugin";
+
+    bundleInfo.moduleResPaths.emplace_back("moduleResPaths");
+    bundleInfo.moduleDirs.emplace_back("/data/storage/com.example.plugin");
+    EXPECT_CALL(*bundleMgr, GetBundleInfo(_, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(bundleInfo), Return(true)));
+    auto packagePathStr = pattern->GetPackagePath(AceType::WeakClaim(AceType::RawPtr(pattern)), pluginInfo);
+    EXPECT_EQ(pluginInfo.source, "plugin/index.js");
+    EXPECT_EQ(packagePathStr, "/data/storage/com.example.plugin/");
+
+    /**
+     *     corresponding ets code:
+     *     PluginComponent({template: { source: "plugin.ets/index.js", bundleName:"com.example.plugin/plugin"},data:
+     * {}})
+     */
+    pluginInfo.pluginName = "plugin.ets/index.js";
+    packagePathStr = pattern->GetPackagePath(AceType::WeakClaim(AceType::RawPtr(pattern)), pluginInfo);
+    EXPECT_EQ(pluginInfo.source, "plugin.ets/index.js");
+
+    /**
+     *     corresponding ets code:
+     *     PluginComponent({template: { source: "plugin.ets/index.js&plugin",
+     *     bundleName:"com.example.plugin/plugin"},data:{}})
+     */
+    pluginInfo.pluginName = "plugin.ets/index.ets&plugin";
+    packagePathStr = pattern->GetPackagePath(AceType::WeakClaim(AceType::RawPtr(pattern)), pluginInfo);
+    EXPECT_EQ(pluginInfo.source, "plugin.ets/index.js");
+
+    /**
+     *     corresponding ets code:
+     *     PluginComponent({template: { source: "plugin/index.ets&plugin", bundleName:"com.example.plugin/plugin"},data:
+     * {}})
+     */
+    pluginInfo.pluginName = "plugin/index.ets&plugin";
+    packagePathStr = pattern->GetPackagePath(AceType::WeakClaim(AceType::RawPtr(pattern)), pluginInfo);
+    EXPECT_EQ(pluginInfo.source, "plugin/index.js");
+
+    AppExecFwk::MOCKIBundleMgr::ReleaseInstance();
+}
+
 /**@tc.name : GetAbilityNameByWant
  * @tc.desc : Test GetPackagePath.
  * @tc.type : FUNC
  */
-HWTEST_F(pluginPatternTestNg, GetAbilityNameByWant, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, GetAbilityNameByWant, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -527,11 +587,11 @@ HWTEST_F(pluginPatternTestNg, GetAbilityNameByWant, TestSize.Level1)
 }
 
 /**
- * @tc.name: pluginPatternTestNg
+ * @tc.name: PluginPatternTestNg
  * @tc.desc: Test FireEvent in Plugin Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, FireEvent, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, FireEvent, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -546,7 +606,7 @@ HWTEST_F(pluginPatternTestNg, FireEvent, TestSize.Level1)
  * @tc.desc: Test OnActionEvent in Plugin Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, GetDrawDelegate, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, GetDrawDelegate, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
@@ -561,7 +621,7 @@ HWTEST_F(pluginPatternTestNg, GetDrawDelegate, TestSize.Level1)
  * @tc.desc: Test funcions in PluginLayoutProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(pluginPatternTestNg, pluginLayoutTestNg, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, PluginLayoutTestNg, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();

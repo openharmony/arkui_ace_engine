@@ -16,13 +16,10 @@
 #include "core/components_ng/pattern/toast/toast_view.h"
 
 #include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/toast/toast_theme.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
@@ -63,8 +60,6 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(toastNode, nullptr);
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_RETURN(toastProperty, nullptr);
-    auto toastContext = toastNode->GetRenderContext();
-    CHECK_NULL_RETURN(toastContext, nullptr);
 
     auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
@@ -75,17 +70,6 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
 
-    // update toast props
-    auto rootHeight = Dimension(context->GetRootHeight());
-    auto rootWidth = Dimension(context->GetRootWidth());
-    toastProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(rootWidth), std::nullopt));
-    auto bottomPosition = StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom());
-    if ((bottomPosition.Unit() == DimensionUnit::PERCENT)) {
-        bottomPosition = rootHeight * bottomPosition.Value();
-    }
-    auto toastBottom =
-        Dimension(GreatOrEqual(bottomPosition.ConvertToPx(), 0.0) ? bottomPosition.ConvertToPx()
-                                                                  : toastTheme->GetBottom().ConvertToPx());
     UpdateTextLayoutProperty(textNode, message, isRightToLeft);
     UpdateTextContext(textNode);
     auto textHeight = GetTextHeight(textNode);
@@ -94,7 +78,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
         textHeight = GetTextHeight(textNode);
     }
     textNode->MountToParent(toastNode);
-    toastProperty->UpdateBottom(toastBottom);
+
+    toastProperty->UpdateBottom(StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom()));
     toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     toastNode->MarkModifyDone();
     return toastNode;
@@ -112,14 +97,6 @@ void ToastView::UpdateTextLayoutProperty(
     auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
     auto textColor = toastTheme->GetTextStyle().GetTextColor();
     auto fontSize = toastTheme->GetTextStyle().GetFontSize();
-    auto minWidth = Dimension(toastTheme->GetMinWidth().ConvertToPx());
-    auto minHeight = Dimension(toastTheme->GetMinHeight().ConvertToPx());
-    auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST);
-    auto parent = gridColumnInfo->GetParent();
-    if (parent) {
-        parent->BuildColumnWidth(context->GetRootWidth());
-    }
-    auto maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
     auto padding = toastTheme->GetPadding();
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(padding.Top());
@@ -132,8 +109,6 @@ void ToastView::UpdateTextLayoutProperty(
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textLayoutProperty->UpdateFontWeight(fontWeight);
     textLayoutProperty->UpdateFontSize(fontSize);
-    textLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
-    textLayoutProperty->UpdateCalcMinSize(CalcSize(NG::CalcLength(minWidth), NG::CalcLength(minHeight)));
     textLayoutProperty->UpdateLayoutDirection((isRightToLeft ? TextDirection::RTL : TextDirection::LTR));
     textLayoutProperty->UpdatePadding(paddings);
 }

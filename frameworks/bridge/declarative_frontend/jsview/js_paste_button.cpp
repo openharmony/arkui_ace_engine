@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_sec_save_button.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_paste_button.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 
-using OHOS::Ace::NG::SaveButtonModelNG;
+using OHOS::Ace::NG::PasteButtonModelNG;
 using OHOS::Ace::NG::SecurityComponentTheme;
 
 namespace OHOS::Ace::Framework {
-bool JSSecSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
-    SaveButtonSaveDescription& text, SaveButtonIconStyle& icon, int32_t& bg)
+bool JSPasteButton::ParseComponentStyle(const JSCallbackInfo& info,
+    PasteButtonPasteDescription& text, PasteButtonIconStyle& icon, int32_t& bg)
 {
     if (!info[0]->IsObject()) {
         return false;
@@ -36,28 +36,27 @@ bool JSSecSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto value = paramObject->GetProperty("text");
     if (value->IsNumber()) {
-        text = static_cast<SaveButtonSaveDescription>(value->ToNumber<int32_t>());
-        if ((text < SaveButtonSaveDescription::DOWNLOAD) ||
-            (text > SaveButtonSaveDescription::MAX_LABEL_TYPE)) {
+        text = static_cast<PasteButtonPasteDescription>(value->ToNumber<int32_t>());
+        if ((text < PasteButtonPasteDescription::PASTE) ||
+            (text > PasteButtonPasteDescription::MAX_LABEL_TYPE)) {
             return false;
         }
     } else {
-        text = SaveButtonSaveDescription::TEXT_NULL;
+        text = PasteButtonPasteDescription::TEXT_NULL;
     }
 
     value = paramObject->GetProperty("icon");
     if (value->IsNumber()) {
-        icon = static_cast<SaveButtonIconStyle>(value->ToNumber<int32_t>());
-        if ((icon < SaveButtonIconStyle::ICON_FULL_FILLED) ||
-            (icon > SaveButtonIconStyle::ICON_LINE)) {
+        icon = static_cast<PasteButtonIconStyle>(value->ToNumber<int32_t>());
+        if ((icon != PasteButtonIconStyle::ICON_LINE)) {
             return false;
         }
     } else {
-        icon = SaveButtonIconStyle::ICON_NULL;
+        icon = PasteButtonIconStyle::ICON_NULL;
     }
 
-    if ((text == SaveButtonSaveDescription::TEXT_NULL) &&
-        (icon == SaveButtonIconStyle::ICON_NULL)) {
+    if ((text == PasteButtonPasteDescription::TEXT_NULL) &&
+        (icon == PasteButtonIconStyle::ICON_NULL)) {
         return false;
     }
 
@@ -74,23 +73,23 @@ bool JSSecSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
     return true;
 }
 
-void JSSecSaveButton::Create(const JSCallbackInfo& info)
+void JSPasteButton::Create(const JSCallbackInfo& info)
 {
-    SaveButtonSaveDescription textDesc;
-    SaveButtonIconStyle iconType;
+    PasteButtonPasteDescription textDesc;
+    PasteButtonIconStyle iconType;
     int32_t backgroundType = 0;
     if (!ParseComponentStyle(info, textDesc, iconType, backgroundType)) {
-        SaveButtonModelNG::GetInstance()->Create(
-            static_cast<int32_t>(SaveButtonSaveDescription::DOWNLOAD),
-            static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED),
+        PasteButtonModelNG::GetInstance()->Create(
+            static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+            static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE),
             static_cast<int32_t>(ButtonType::CAPSULE));
     } else {
-        SaveButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
+        PasteButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
             static_cast<int32_t>(iconType), backgroundType);
     }
 }
 
-void JsSecSaveButtonClickFunction::Execute(GestureEvent& info)
+void JsPasteButtonClickFunction::Execute(GestureEvent& info)
 {
     JSRef<JSObject> clickEventParam = JSRef<JSObject>::New();
     Offset globalOffset = info.GetGlobalLocation();
@@ -125,12 +124,12 @@ void JsSecSaveButtonClickFunction::Execute(GestureEvent& info)
     JsFunction::ExecuteJS(2, params);
 }
 
-void JSSecSaveButton::JsOnClick(const JSCallbackInfo& info)
+void JSPasteButton::JsOnClick(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsOnClickFunc = AceType::MakeRefPtr<JsSecSaveButtonClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto jsOnClickFunc = AceType::MakeRefPtr<JsPasteButtonClickFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
@@ -140,36 +139,35 @@ void JSSecSaveButton::JsOnClick(const JSCallbackInfo& info)
     NG::ViewAbstract::SetOnClick(std::move(onTap));
 }
 
-void JSSecSaveButton::JSBind(BindingTarget globalObj)
+void JSPasteButton::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSSecSaveButton>::Declare("SecSaveButton");
+    JSClass<JSPasteButton>::Declare("PasteButton");
     MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSSecSaveButton>::StaticMethod("create", &JSSecSaveButton::Create, opt);
-    JSClass<JSSecSaveButton>::StaticMethod("iconSize", &JSSecButtonBase::SetIconSize);
-    JSClass<JSSecSaveButton>::StaticMethod("layoutDirection", &JSSecButtonBase::SetLayoutDirection);
-    JSClass<JSSecSaveButton>::StaticMethod("layoutOrder", &JSSecButtonBase::SetlayoutOrder);
-    JSClass<JSSecSaveButton>::StaticMethod("fontSize", &JSSecButtonBase::SetFontSize);
-    JSClass<JSSecSaveButton>::StaticMethod("fontStyle", &JSSecButtonBase::SetFontStyle);
-    JSClass<JSSecSaveButton>::StaticMethod("iconColor", &JSSecButtonBase::SetIconColor);
-    JSClass<JSSecSaveButton>::StaticMethod("fontWeight", &JSSecButtonBase::SetFontWeight);
-    JSClass<JSSecSaveButton>::StaticMethod("fontFamily", &JSSecButtonBase::SetFontFamily);
-    JSClass<JSSecSaveButton>::StaticMethod("fontColor", &JSSecButtonBase::SetFontColor);
-    JSClass<JSSecSaveButton>::StaticMethod("backgroundColor", &JSSecButtonBase::SetBackgroundColor);
-    JSClass<JSSecSaveButton>::StaticMethod("borderStyle", &JSSecButtonBase::SetBackgroundBorderStyle);
-    JSClass<JSSecSaveButton>::StaticMethod("borderWidth", &JSSecButtonBase::SetBackgroundBorderWidth);
-    JSClass<JSSecSaveButton>::StaticMethod("borderColor", &JSSecButtonBase::SetBackgroundBorderColor);
-    JSClass<JSSecSaveButton>::StaticMethod("borderRadius", &JSSecButtonBase::SetBackgroundBorderRadius);
-    JSClass<JSSecSaveButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
-    JSClass<JSSecSaveButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
-    JSClass<JSSecSaveButton>::StaticMethod("onClick", &JSSecSaveButton::JsOnClick);
-    JSClass<JSSecSaveButton>::StaticMethod("key", &JSViewAbstract::JsKey);
-    JSClass<JSSecSaveButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
-    JSClass<JSSecSaveButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
-    JSClass<JSSecSaveButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
-    JSClass<JSSecSaveButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
+    JSClass<JSPasteButton>::StaticMethod("create", &JSPasteButton::Create, opt);
+    JSClass<JSPasteButton>::StaticMethod("iconSize", &JSSecButtonBase::SetIconSize);
+    JSClass<JSPasteButton>::StaticMethod("layoutDirection", &JSSecButtonBase::SetLayoutDirection);
+    JSClass<JSPasteButton>::StaticMethod("fontSize", &JSSecButtonBase::SetFontSize);
+    JSClass<JSPasteButton>::StaticMethod("fontStyle", &JSSecButtonBase::SetFontStyle);
+    JSClass<JSPasteButton>::StaticMethod("iconColor", &JSSecButtonBase::SetIconColor);
+    JSClass<JSPasteButton>::StaticMethod("fontWeight", &JSSecButtonBase::SetFontWeight);
+    JSClass<JSPasteButton>::StaticMethod("fontFamily", &JSSecButtonBase::SetFontFamily);
+    JSClass<JSPasteButton>::StaticMethod("fontColor", &JSSecButtonBase::SetFontColor);
+    JSClass<JSPasteButton>::StaticMethod("backgroundColor", &JSSecButtonBase::SetBackgroundColor);
+    JSClass<JSPasteButton>::StaticMethod("borderStyle", &JSSecButtonBase::SetBackgroundBorderStyle);
+    JSClass<JSPasteButton>::StaticMethod("borderWidth", &JSSecButtonBase::SetBackgroundBorderWidth);
+    JSClass<JSPasteButton>::StaticMethod("borderColor", &JSSecButtonBase::SetBackgroundBorderColor);
+    JSClass<JSPasteButton>::StaticMethod("borderRadius", &JSSecButtonBase::SetBackgroundBorderRadius);
+    JSClass<JSPasteButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
+    JSClass<JSPasteButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
+    JSClass<JSPasteButton>::StaticMethod("onClick", &JSPasteButton::JsOnClick);
+    JSClass<JSPasteButton>::StaticMethod("key", &JSViewAbstract::JsKey);
+    JSClass<JSPasteButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
+    JSClass<JSPasteButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
+    JSClass<JSPasteButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
+    JSClass<JSPasteButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
 #if defined(PREVIEW)
-    JSClass<JSSecSaveButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
+    JSClass<JSPasteButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
-    JSClass<JSSecSaveButton>::Bind<>(globalObj);
+    JSClass<JSPasteButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

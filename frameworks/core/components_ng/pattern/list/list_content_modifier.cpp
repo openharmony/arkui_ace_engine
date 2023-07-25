@@ -21,10 +21,10 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-ListContentModifier::ListContentModifier()
+ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize)
 {
-    clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
-    clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
+    clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(clipOffset);
+    clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(clipSize);
     clip_ = AceType::MakeRefPtr<PropertyBool>(true);
     flushDivider_ = AceType::MakeRefPtr<PropertyBool>(true);
 
