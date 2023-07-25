@@ -722,7 +722,7 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(LayoutWrapper* layo
     }
     /* targetIndex is out of the matrix */
     LOGW("can not find jumpIndex in Grid Matrix :%{public}d", gridLayoutInfo_.jumpIndex_);
-}   
+}
 
 float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
