@@ -258,10 +258,11 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
     CalcDimension fontSize;
-    if (ParseJsDimensionFp(size, fontSize)) {
+    if (ParseJsDimensionFp(size, fontSize) && NonNegative(fontSize.Value()) &&
+        fontSize.Unit() != DimensionUnit::PERCENT) {
         labelStyle.fontSize = fontSize;
     }
-    
+
     JSRef<JSVal> weight = obj->GetProperty("weight");
     if (weight->IsString() || weight->IsNumber()) {
         labelStyle.fontWeight = ConvertStrToFontWeight(weight->ToString());
@@ -292,8 +293,7 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
         JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
         if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
             auto overflow = overflowValue->ToNumber<int32_t>();
-            if (overflow >= 0 &&
-                overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+            if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
                 labelStyle.textOverflow = TEXT_OVERFLOWS[overflow];
             }
         }
@@ -305,13 +305,15 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
 
         JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
         CalcDimension minFontSize;
-        if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
+        if (ParseJsDimensionFp(minFontSizeValue, minFontSize) && NonNegative(minFontSize.Value()) &&
+            minFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.minFontSize = minFontSize;
         }
 
         JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
         CalcDimension maxFontSize;
-        if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
+        if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize) && NonNegative(maxFontSize.Value()) &&
+            maxFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.maxFontSize = maxFontSize;
         }
 
@@ -326,7 +328,6 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
 
         JSRef<JSVal> font = obj->GetProperty("font");
         if (!font->IsNull() && font->IsObject()) {
-            TextStyle textStyle;
             GetFontContent(font, labelStyle);
         }
     }
