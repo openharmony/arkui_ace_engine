@@ -552,7 +552,8 @@ struct KeyEvent final {
         }
         if (IsLetterKey()) {
             int32_t codeValue = static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_A);
-            if (IsShiftWith(code)) {
+            auto shiftWithLetter = IsShiftWith(code);
+            if ((shiftWithLetter || enableCapsLock) && !(shiftWithLetter && enableCapsLock)) {
                 return std::string(1, static_cast<char>(codeValue + ASCII_START_UPPER_CASE_LETTER));
             }
             return std::string(1, static_cast<char>(codeValue + ASCII_START_LOWER_CASE_LETTER));
@@ -575,6 +576,7 @@ struct KeyEvent final {
     int64_t deviceId = 0;
     SourceType sourceType { SourceType::NONE };
     KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
+    bool enableCapsLock = false;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
 };
 
