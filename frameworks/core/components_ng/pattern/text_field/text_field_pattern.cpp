@@ -1150,7 +1150,7 @@ void TextFieldPattern::HandleFocusEvent()
                                                                                       : PROPERTY_UPDATE_MEASURE);
 }
 
-void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
+void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
 {
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
     CloseSelectOverlay();
@@ -1161,10 +1161,12 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     AdjustTextSelectionRectOffsetX();
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
-    if (start == end) {
-        CreateSingleHandle();
-    } else {
-        CreateHandles();
+    if (showHandle) {
+        if (start == end) {
+            CreateSingleHandle();
+        } else {
+            CreateHandles();
+        }
     }
     UpdateCaretInfoToController();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
