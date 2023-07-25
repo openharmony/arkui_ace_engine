@@ -37,6 +37,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/pattern/plugin/mock/mock_plugin_frontend.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/plugin/mock/mock_plugin_frontend_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/plugin/mock/mock_plugin_sub_container.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
 
     #slef
     "$ace_root/frameworks/core/components_ng/pattern/plugin/plugin_model_ng.cpp",
