@@ -192,6 +192,9 @@ void NavigationPattern::OnModifyDone()
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(false);
             focusHub->LostFocus();
+            if (!navDestinationPattern->GetIsUnderNavRouter()) {
+                navDestinationPattern->ResetNavDestinationNode();
+            }
         }
 
         // fire onShown and requestFocus event
