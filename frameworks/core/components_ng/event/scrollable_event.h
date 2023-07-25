@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 class GestureEventHub;
 
 using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const GetEventTargetImpl&, TouchTestResult&)>;
-using InBarRegionCallback = std::function<bool(const PointF&)>;
+using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)>;
 
 class ScrollableEvent : public AceType {
     DECLARE_ACE_TYPE(ScrollableEvent, AceType)
@@ -167,9 +167,9 @@ public:
         inBarRegionCallback_ = std::move(inBarRegionCallback);
     }
 
-    bool InBarRegion(const PointF& localPoint) const
+    bool InBarRegion(const PointF& localPoint, SourceType source) const
     {
-        return inBarRegionCallback_ && barCollectTouchTarget_ && inBarRegionCallback_(localPoint);
+        return inBarRegionCallback_ && barCollectTouchTarget_ && inBarRegionCallback_(localPoint, source);
     }
 
     void BarCollectTouchTarget(const OffsetF& coordinateOffset,
@@ -217,14 +217,14 @@ public:
     void AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect);
     bool RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect);
 
-    void CollectTouchTarget(const OffsetF& coordinateOffset, const PointF& localPoint,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+    void CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint)
     {
         for (const auto& [axis, event] : scrollableEvents_) {
             if (!event || !event->GetEnable()) {
                 continue;
             }
-            if (event->InBarRegion(localPoint)) {
+            if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
                 event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
             } else {
                 const auto& scrollable = event->GetScrollable();
