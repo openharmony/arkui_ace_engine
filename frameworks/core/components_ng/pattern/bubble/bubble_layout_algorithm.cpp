@@ -185,7 +185,7 @@ OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr
             rects.emplace_back(parentWindowRect);
             rects.emplace_back(rect);
         }
-        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId());
+        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId(), bubblePattern->GetContainerId());
     }
 
     Dimension childOffsetX(childOffset_.GetX());

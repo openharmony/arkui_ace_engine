@@ -30,7 +30,7 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
     return instance_;
 }
 
-void SubwindowManager::HidePopupNG(int32_t targetId)
+void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
 {
     LOGI("SubwindowManager::HidePopupNG MOCK");
 }
@@ -41,7 +41,7 @@ void SubwindowManager::HideMenuNG(int32_t targetId) {}
 
 void SubwindowManager::HideMenuNG() {}
 
-void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {}
+void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId) {}
 
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {

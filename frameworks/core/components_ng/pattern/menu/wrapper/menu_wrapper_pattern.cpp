@@ -204,7 +204,7 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 
         rects.emplace_back(rect);
     }
-    SubwindowManager::GetInstance()->SetHotAreas(rects, GetHost()->GetId());
+    SubwindowManager::GetInstance()->SetHotAreas(rects, GetHost()->GetId(), GetContainerId());
 }
 
 void MenuWrapperPattern::StartShowAnimation()
