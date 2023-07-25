@@ -231,7 +231,7 @@ void MenuItemPattern::ShowSubMenu()
 
     auto focusHub = subMenu->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocus();
+    focusHub->RequestFocusWithDefaultFocusFirstly();
     parentMenuPattern->SetShowedSubMenu(subMenu);
 }
 

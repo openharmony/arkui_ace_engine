@@ -510,6 +510,7 @@ public:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool RequestFocusImmediately();
     void RequestFocus() const;
+    void RequestFocusWithDefaultFocusFirstly() const;
     void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
