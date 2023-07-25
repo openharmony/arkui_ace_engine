@@ -3179,7 +3179,7 @@ void TextFieldPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     if (IsDisabled()) {
-        sourceInfo.SetSrc(iconPath, theme->GetDisabledIconFillColor());
+        sourceInfo.SetSrc(iconPath, theme->GetDisableTextColor());
     } else {
         sourceInfo.SetSrc(iconPath);
     }
