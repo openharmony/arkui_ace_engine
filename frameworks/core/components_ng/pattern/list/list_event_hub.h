@@ -227,6 +227,16 @@ public:
         return json->ToString();
     }
 
+    bool HasOnItemDragMove() override
+    {
+        return static_cast<bool>(onItemDragMoveEvent_);
+    }
+
+    bool HasOnItemDrop() override
+    {
+        return static_cast<bool>(onItemDropEvent_);
+    }
+
     void InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleOnItemDragStart(const GestureEvent& info);
     void HandleOnItemDragUpdate(const GestureEvent& info);
