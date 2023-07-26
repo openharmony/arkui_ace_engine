@@ -1196,7 +1196,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
-        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
     BindMenu(menuNode, targetNode->GetId(), offset);

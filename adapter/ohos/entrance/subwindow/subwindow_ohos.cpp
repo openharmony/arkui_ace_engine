@@ -92,6 +92,8 @@ void SubwindowOhos::InitContainer()
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
+        } else if (GetAboveApps()) {
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);

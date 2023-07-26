@@ -71,6 +71,7 @@ struct MenuParam {
     std::function<void()> onDisappear;
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
+    bool isAboveApps = false;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {

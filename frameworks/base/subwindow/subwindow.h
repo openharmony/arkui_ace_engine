@@ -71,6 +71,16 @@ public:
         subwindowId_ = id;
     }
 
+    void SetAboveApps(bool isAboveApps)
+    {
+        isAboveApps_ = isAboveApps;
+    }
+
+    bool GetAboveApps() const
+    {
+        return isAboveApps_;
+    }
+
     virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) = 0;
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
@@ -83,6 +93,7 @@ public:
 
 private:
     int32_t subwindowId_ = 0;
+    bool isAboveApps_ = false;
 };
 
 } // namespace OHOS::Ace
