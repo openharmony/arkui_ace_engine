@@ -65,6 +65,7 @@ public:
             auto geometryNode = host->GetGeometryNode();
             auto frameOffset = geometryNode->GetFrameOffset();
             auto frameSize = geometryNode->GetFrameSize();
+            CHECK_NULL_RETURN(paragraph_, paintMethod);
             auto height = static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
             if (context->GetClipEdge().value() == false && LessNotEqual(frameSize.Height(), height)) {
                 RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
