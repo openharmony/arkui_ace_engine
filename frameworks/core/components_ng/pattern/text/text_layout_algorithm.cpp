@@ -77,13 +77,17 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    
+    // Register callback for fonts.
+    FontRegisterCallback(frameNode, textStyle);
+
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
+        if (isCustomFont_) {
+            contentModifier->SetIsCustomFont(isCustomFont_);
+        }
     }
-
-    // Register callback for fonts.
-    FontRegisterCallback(frameNode, textStyle);
 
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
@@ -152,7 +156,10 @@ void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  con
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
         for (const auto& familyName : textStyle.GetFontFamilies()) {
-            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            bool isCustomFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (isCustomFont) {
+                isCustomFont_ = true;
+            }
         }
         fontManager->AddVariationNodeNG(frameNode);
     }

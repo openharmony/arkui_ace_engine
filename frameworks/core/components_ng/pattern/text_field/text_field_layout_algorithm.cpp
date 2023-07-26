@@ -205,6 +205,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (contentModifier) {
         SetPropertyToModifier(textStyle, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
+        if (isCustomFont_) {
+            contentModifier->SetIsCustomFont(isCustomFont_);
+        }
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
@@ -511,6 +514,29 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
 }
 
+void TextFieldLayoutAlgorithm::FontRegisterCallback(
+    const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies)
+{
+    auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        auto textFieldLayoutAlgorithm = DynamicCast<TextFieldLayoutAlgorithm>(frameNode->GetLayoutAlgorithm());
+        for (const auto& familyName : fontFamilies) {
+            bool isCustomFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (isCustomFont && textFieldLayoutAlgorithm) {
+                textFieldLayoutAlgorithm->isCustomFont_ = true;
+            }
+        }
+        fontManager->AddVariationNodeNG(frameNode);
+    }
+}
+
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content,
     bool needObscureText, int32_t nakedCharPosition, bool disableTextAlign)
 {
@@ -539,25 +565,6 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
 
     auto paragraph = builder->Build();
     paragraph_.reset(paragraph.release());
-}
-
-void TextFieldLayoutAlgorithm::FontRegisterCallback(
-    const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies)
-{
-    auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
-        auto frameNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    if (fontManager) {
-        for (const auto& familyName : fontFamilies) {
-            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-        }
-        fontManager->AddVariationNodeNG(frameNode);
-    }
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& textStyles,

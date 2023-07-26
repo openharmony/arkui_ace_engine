@@ -133,6 +133,7 @@ private:
 
     float caretOffsetX_ = 0.0f;
     float unitWidth_ = 0.0f;
+    bool isCustomFont_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
