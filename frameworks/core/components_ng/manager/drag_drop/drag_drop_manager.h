@@ -119,7 +119,7 @@ public:
     }
 
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
-        std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
+        std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
