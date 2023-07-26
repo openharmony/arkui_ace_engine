@@ -368,7 +368,11 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (needToKeepTextRect) {
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
     }
-    if (!pattern->IsTextArea() && !needToKeepTextRect) {
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!pattern->IsTextArea() && !needToKeepTextRect && !(paintProperty->GetInputStyleValue(InputStyle::DEFAULT) ==
+        InputStyle::INLINE && layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
+        TextInputType::UNSPECIFIED)) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft();
