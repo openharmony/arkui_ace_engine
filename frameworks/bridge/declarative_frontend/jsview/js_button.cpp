@@ -67,11 +67,10 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
-        return;
-    }
-
+    auto buttonTheme = GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    CalcDimension fontSize = buttonTheme->GetTextStyle().GetFontSize();
+    ParseJsDimensionFp(info[0], fontSize);
     ButtonModel::GetInstance()->SetFontSize(fontSize);
 }
 
