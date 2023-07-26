@@ -2260,15 +2260,6 @@ HWTEST_F(ProgressTestNg, RingProgressModifier005, TestSize.Level1)
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
     Gradient gradient;
-    GradientColor gradientColorEnd;
-    GradientColor gradientColorStart;
-    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
-    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
-    gradientColorEnd.SetDimension(Dimension(0.0));
-    gradient.AddColor(gradientColorEnd);
-    gradientColorStart.SetDimension(Dimension(1.0));
-    gradient.AddColor(gradientColorStart);
-
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
