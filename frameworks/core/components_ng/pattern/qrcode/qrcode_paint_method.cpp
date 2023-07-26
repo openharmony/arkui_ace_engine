@@ -101,11 +101,22 @@ RSBitmap QRCodePaintMethod::CreateBitMap(
     void* rawData = bitMap.GetPixels();
     auto* data = reinterpret_cast<uint32_t*>(rawData);
     int32_t blockWidth = width / qrCode.getSize();
+    int32_t maxWidth = 0;
+    int32_t maxHeight = 0;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            data[i * width + j] = qrCode.getModule(i / blockWidth, j / blockWidth)
-                                      ? ConvertColorFromHighToLow(color)
-                                      : ConvertColorFromHighToLow(backgroundColor);
+            if (qrCode.getModule(i / blockWidth, j / blockWidth)) {
+                data[i * width + j] = ConvertColorFromHighToLow(color);
+                maxWidth = i > maxWidth ? i : maxWidth;
+                maxHeight = j > maxHeight ? j : maxHeight;
+            }
+        }
+    }
+    for (int32_t i = 0; i <= maxWidth; i++) {
+        for (int32_t j = 0; j <= maxHeight; j++) {
+            if (!qrCode.getModule(i / blockWidth, j / blockWidth)) {
+                data[i * width + j] = ConvertColorFromHighToLow(backgroundColor);
+            }
         }
     }
     return bitMap;
