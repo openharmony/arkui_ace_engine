@@ -49,7 +49,8 @@ std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(gaugeTheme, std::nullopt);
     auto defaultThickness = gaugeTheme->GetTrackWidth().ConvertToPx();
     auto size = SizeF(defaultThickness, defaultThickness);
-    size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    size.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     if (!NearEqual(size.Width(), size.Height())) {
