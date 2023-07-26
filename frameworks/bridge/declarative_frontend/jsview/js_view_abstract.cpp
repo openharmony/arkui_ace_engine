@@ -2022,7 +2022,7 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
-    EffectOption option = {radius, saturation, brightness, color};
+    EffectOption option = { radius, saturation, brightness, color };
     ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
 }
 
@@ -3123,7 +3123,8 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
-bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
+bool JSViewAbstract::ParseJsDimensionNG(
+    const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
         return false;
@@ -3134,6 +3135,10 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
         return true;
     }
     if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        if (value.back() == '%' && !isSupportPercent) {
+            return false;
+        }
         return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
@@ -3240,10 +3245,10 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     return true;
 }
 
-bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result)
+bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent)
 {
     // 'vp' -> the value varies with pixel density of device.
-    return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP);
+    return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
 }
 
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result)
@@ -5215,8 +5220,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     }
     // parse maskColor
     Color parseMaskColor;
-    if (maskColor->IsNull() || maskColor->IsUndefined() ||
-        !JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
+    if (maskColor->IsNull() || maskColor->IsUndefined() || !JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
         parseMaskColor.SetValue(0x00000000);
     }
     sheetStyle.maskColor = std::move(parseMaskColor);
