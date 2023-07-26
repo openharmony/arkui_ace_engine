@@ -139,6 +139,7 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
             }
         }
         navigationContentNode->AddChild(navDestination);
+        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
