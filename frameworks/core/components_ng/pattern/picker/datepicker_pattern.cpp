@@ -369,6 +369,7 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
         focusKeyID_ -= 1;
         if (focusKeyID_ < 0) {
             focusKeyID_ = 0;
+            return false;
         }
         PaintFocusState();
         return true;
@@ -381,6 +382,7 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
         }
         if (focusKeyID_ > childSize -1) {
             focusKeyID_ = childSize -1;
+            return false;
         }
         PaintFocusState();
         return true;
@@ -524,6 +526,7 @@ void DatePickerPattern::ShowTitle(int32_t titleId)
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(dateStr.ToString(false));
         textTitleNode->MarkModifyDone();
+        textTitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 

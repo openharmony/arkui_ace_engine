@@ -769,6 +769,7 @@ bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
         focusKeyID_ -= 1;
         if (focusKeyID_ < 0) {
             focusKeyID_ = 0;
+            return false;
         }
         PaintFocusState();
         return true;
@@ -777,6 +778,7 @@ bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
         focusKeyID_ += 1;
         if (focusKeyID_ > static_cast<int32_t>(childSize) - 1) {
             focusKeyID_ = static_cast<int32_t>(childSize) - 1;
+            return false;
         }
         PaintFocusState();
         return true;
