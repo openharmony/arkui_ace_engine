@@ -177,7 +177,7 @@ public:
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
-    void HideMenu() const;
+    void HideMenu(bool isMenuOnTouch = false) const;
 
     void MountOption(const RefPtr<FrameNode>& option);
 
