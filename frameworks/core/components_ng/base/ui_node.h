@@ -466,7 +466,7 @@ public:
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
-    virtual void OnSetCacheCount(int32_t cacheCount);
+    virtual void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()

@@ -241,10 +241,10 @@ public:
         return info;
     }
 
-    void SetCacheCount(int32_t cacheCount)
+    void SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
     {
         for (const auto& child : children_) {
-            child.node->OnSetCacheCount(cacheCount);
+            child.node->OnSetCacheCount(cacheCount, itemConstraint);
         }
     }
 
@@ -2470,7 +2470,7 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 
 void FrameNode::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
 {
-    frameProxy_->SetCacheCount(cacheCount);
+    frameProxy_->SetCacheCount(cacheCount, itemConstraint);
 }
 
 void FrameNode::LayoutOverlay()

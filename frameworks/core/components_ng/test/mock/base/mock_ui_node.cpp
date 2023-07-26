@@ -166,5 +166,5 @@ RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index)
 
 void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll) {}
 
-void UINode::OnSetCacheCount(int32_t) {}
+void UINode::OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) {}
 } // namespace OHOS::Ace::NG

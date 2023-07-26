@@ -20,12 +20,12 @@
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -123,82 +123,32 @@ void LazyForEachNode::PostIdleTask()
         return;
     }
     needPredict_ = true;
-    useLongPredictTask_ = false;
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->needPredict_ = false;
-        ACE_SCOPED_TRACE("LazyForEach predict [%d-%d] %d", node->startIndex_, node->endIndex_, node->cacheCount_);
+        ACE_SCOPED_TRACE(
+            "LazyForEach predict [%d-%d] cache size [%d]", node->startIndex_, node->endIndex_, node->cacheCount_);
+        auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
         if (node->builder_) {
-            // ViewStackProcessor::GetInstance()->SetPredict(true);
-            node->builder_->PreBuild(node->startIndex_, node->endIndex_, node->cacheCount_);
-            // ViewStackProcessor::GetInstance()->SetPredict(false);
+            ViewStackProcessor::GetInstance()->SetPredict(true);
+            auto preBuildResult = node->builder_->PreBuild(node->startIndex_, node->endIndex_, node->cacheCount_,
+                deadline, node->itemConstraint_, canRunLongPredictTask);
+            ViewStackProcessor::GetInstance()->SetPredict(false);
+            if (!preBuildResult) {
+                node->PostIdleTask();
+            }
         }
         node->requestLongPredict_ = false;
+        node->itemConstraint_.reset();
     });
 }
 
 void LazyForEachNode::PostIdleTask(
     std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint, bool longPredictTask)
-{
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    predictItems_ = std::move(items);
-    itemConstraint_ = itemConstraint;
-    useLongPredictTask_ = longPredictTask;
-    if (needPredict_) {
-        return;
-    }
-    needPredict_ = true;
-    context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
-        auto node = weak.Upgrade();
-        CHECK_NULL_VOID(node);
-        node->needPredict_ = false;
-        ACE_SCOPED_TRACE("LazyForEach predict size[%zu]", node->predictItems_.size());
-        decltype(node->predictItems_) items(std::move(node->predictItems_));
-        decltype(node->itemConstraint_) itemConstraint(node->itemConstraint_);
-        bool useLongPredictTask = node->useLongPredictTask_;
-        node->useLongPredictTask_ = false;
-        node->itemConstraint_.reset();
-        auto item = items.begin();
-        while (item != items.end()) {
-            auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
-            if ((GetSysTimestamp() > deadline) || (useLongPredictTask && !canRunLongPredictTask)) {
-                std::list<int32_t> predictItems;
-                predictItems.insert(predictItems.begin(), item, items.end());
-                node->PostIdleTask(std::move(predictItems), itemConstraint, useLongPredictTask);
-                return;
-            }
-            auto itemInfo = node->builder_->CreateChildByIndex(*item);
-            node->builder_->SetCacheItemInfo(*item, itemInfo.first);
-            auto uiNode = itemInfo.second;
-            if (uiNode) {
-                ViewStackProcessor::GetInstance()->SetPredict(true);
-                uiNode->Build();
-                ViewStackProcessor::GetInstance()->SetPredict(false);
-            }
-            // if itemConstraint is provided, just call cache layout and render.
-            if (itemConstraint) {
-                RefPtr<FrameNode> frameNode = DynamicCast<FrameNode>(uiNode);
-                while (!frameNode) {
-                    uiNode = uiNode->GetFirstChild();
-                    if (!uiNode) {
-                        break;
-                    }
-                    frameNode = DynamicCast<FrameNode>(uiNode);
-                }
-                if (frameNode) {
-                    frameNode->GetGeometryNode()->SetParentLayoutConstraint(itemConstraint.value());
-                    FrameNode::ProcessOffscreenNode(frameNode);
-                }
-            }
-            item++;
-        }
-        node->requestLongPredict_ = false;
-    });
-}
+{}
 
 void LazyForEachNode::OnDataReloaded()
 {

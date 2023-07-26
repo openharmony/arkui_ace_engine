@@ -424,7 +424,7 @@ public:
     void OnSetDepth(const int32_t depth) override;
 
     OffsetF GetParentGlobalOffsetDuringLayout() const;
-    void OnSetCacheCount(int32_t cacheCount) override {};
+    void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
 
     // layoutwrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
