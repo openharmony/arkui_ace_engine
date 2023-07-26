@@ -147,6 +147,7 @@ public:
     void OnAreaChangedInner() override;
     void CreateHandles() override;
     void CloseSelectOverlay() override;
+    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif
