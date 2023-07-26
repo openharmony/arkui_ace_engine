@@ -26,7 +26,6 @@ namespace OHOS::Ace {
 constexpr int32_t US_TO_MS = 1000;
 constexpr int32_t NS_TO_MS = 1000000;
 constexpr int32_t NS_TO_S = 1000000000;
-void ConvertUptimeToSystime(int64_t uptime, int64_t& systime);
 
 enum PerfActionType {
     ERROR_TYPE = -1,
@@ -38,7 +37,9 @@ enum PerfActionType {
 enum PerfSourceType {
     UNKNOWN_TYPE = -1,
     PERF_TOUCH_EVENT = 0,
-    PERF_MOUSE_EVENT = 2
+    PERF_MOUSE_EVENT = 1,
+    PERF_TOUCH_PAD = 2,
+    PERF_JOY_STICK = 3
 };
 
 enum PerfEventType {
@@ -50,7 +51,7 @@ enum PerfEventType {
 
 struct BaseInfo {
     int32_t pid {-1};
-    std::string versionCode {""};
+    int32_t versionCode {0};
     std::string versionName {""};
     std::string bundleName {""};
     std::string processName {""};
@@ -68,9 +69,14 @@ struct DataBase {
     int64_t beginVsyncTime {0};
     int64_t endVsyncTime {0};
     bool needReportToRS {false};
+    PerfSourceType sourceType {UNKNOWN_TYPE};
+    PerfActionType actionType {ERROR_TYPE};
     PerfEventType eventType {EVENT_ERROR};
     BaseInfo baseInfo;
 };
+
+void ConvertRealtimeToSystime(int64_t realTime, int64_t& sysTime);
+std::string GetSourceTypeName(PerfSourceType sourceType);
 
 class SceneRecord {
 public:
@@ -87,6 +93,9 @@ public:
     int32_t maxSuccessiveFrames {0};
     int32_t totalMissed {0};
     int32_t totalFrames {0};
+    int32_t seqMissFrames {0};
+    bool isSuccessive {false};
+    bool isFirstFrame {false};
     std::string sceneId {""};
     PerfActionType actionType {ERROR_TYPE};
     std::string note {""};
@@ -117,6 +126,7 @@ private:
     int64_t lastInputDownTime {0};
     int64_t lastInputUpTime {0};
     int64_t mVsyncTime {0};
+    PerfSourceType mSourceType {UNKNOWN_TYPE};
     BaseInfo baseInfo;
     mutable std::mutex mMutex;
     std::map<std::string, SceneRecord*> mRecords;
