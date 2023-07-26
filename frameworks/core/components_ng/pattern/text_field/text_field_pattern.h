@@ -1022,6 +1022,7 @@ private:
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
     void SaveUnderlineStates();
+    void ApplyUnderlineStates();
     void SavePasswordModeStates();
     void SetAccessibilityAction();
     void SetAccessibilityMoveTextAction();
