@@ -213,6 +213,14 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
+    bool IsClickEventsEmpty() const
+    {
+        if (!clickEventActuator_) {
+            return true;
+        }
+        return clickEventActuator_->IsClickEventsEmpty();
+    }
+
     void BindMenu(GestureEventFunc&& showMenu);
 
     bool IsLongClickable() const
@@ -277,7 +285,7 @@ public:
 
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId);
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -378,6 +386,16 @@ public:
     {
         textDraggable_ = draggable;
     }
+
+    bool IsTextField() const
+    {
+        return isTextField_;
+    }
+
+    void SetTextField(bool isTextField)
+    {
+        isTextField_ = isTextField;
+    }
 #endif // ENABLE_DRAG_FRAMEWORK
 
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
@@ -410,6 +428,7 @@ public:
         return static_cast<bool>(callback_);
     }
 
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f) const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -425,6 +444,7 @@ public:
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
     bool IsAllowedDrag(RefPtr<EventHub> eventHub);
+    void HandleNotallowDrag(const GestureEvent& info);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -466,9 +486,11 @@ private:
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
     GestureEvent gestureInfoForWeb_;
+    bool isReceivedDragGestureInfo_ = false;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;
+    bool isTextField_ = false;
     std::function<void()> callback_;
 #endif
 };

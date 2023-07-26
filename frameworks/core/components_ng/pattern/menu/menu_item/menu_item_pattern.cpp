@@ -83,7 +83,8 @@ void UpdateFontColor(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayout
     }
 }
 
-void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& size, const Color& color)
+void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& horizontalSize,
+    const Dimension& verticalSize, const Color& color)
 {
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetSrc(src);
@@ -93,7 +94,7 @@ void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimens
     CHECK_NULL_VOID(props);
     props->UpdateImageSourceInfo(imageSourceInfo);
     props->UpdateAlignment(Alignment::CENTER);
-    CalcSize idealSize = { CalcLength(size), CalcLength(size) };
+    CalcSize idealSize = { CalcLength(horizontalSize), CalcLength(verticalSize) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     props->UpdateCalcLayoutProperty(layoutConstraint);
@@ -111,10 +112,10 @@ void MenuItemPattern::OnMountToParentDone()
 
 void MenuItemPattern::OnAttachToFrameNode()
 {
+    RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
-    RegisterOnKeyEvent();
 }
 
 void CustomMenuItemPattern::OnAttachToFrameNode()
@@ -230,7 +231,7 @@ void MenuItemPattern::ShowSubMenu()
 
     auto focusHub = subMenu->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocus();
+    focusHub->RequestFocusWithDefaultFocusFirstly();
     parentMenuPattern->SetShowedSubMenu(subMenu);
 }
 
@@ -527,7 +528,8 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetMenuIconColor());
+    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
+        selectTheme->GetMenuIconColor());
 
     auto renderContext = selectIcon_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -561,7 +563,9 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    UpdateIconSrc(iconNode, iconSrc, selectTheme->GetIconSideLength(), selectTheme->GetMenuIconColor());
+    auto iconWidth = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconWidth();
+    auto iconHeight = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconHeight();
+    UpdateIconSrc(iconNode, iconSrc, iconWidth, iconHeight, selectTheme->GetMenuIconColor());
 
     iconNode->MountToParent(row, ((isStart && selectIcon_) || (!isStart && label_)) ? 1 : 0);
     iconNode->MarkModifyDone();

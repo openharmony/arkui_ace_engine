@@ -93,15 +93,10 @@ public:
         return JsiRef<T>::Make(T::Cast(that.Get()));
     }
 
-    static JsiRef<T> New()
+    template<class... Args>
+    static JsiRef<T> New(Args&&... args)
     {
-        return JsiRef<T>::Make(T::New());
-    }
-
-    template<typename S>
-    static JsiRef<T> New(S param)
-    {
-        return JsiRef<T>::Make(T::New(param));
+        return JsiRef<T>::Make(T::New(std::forward<Args>(args)...));
     }
 
     JsiRef(const JsiRef<T>& rhs) : value_(rhs.value_) {}

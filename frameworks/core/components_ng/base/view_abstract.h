@@ -43,8 +43,8 @@
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
-#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
 struct OptionParam {
@@ -53,15 +53,12 @@ struct OptionParam {
     std::function<void()> action;
 
     OptionParam() = default;
-    OptionParam(
-        const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(iconParam),
-          action(actionParam) {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+        : value(valueParam), icon(iconParam), action(actionParam)
+    {}
     OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(""),
-          action(actionParam) {}
+        : value(valueParam), icon(""), action(actionParam)
+    {}
 
     ~OptionParam() = default;
 };
@@ -85,17 +82,20 @@ public:
     static void SetMinHeight(const CalcLength& minHeight);
     static void SetMaxWidth(const CalcLength& maxWidth);
     static void SetMaxHeight(const CalcLength& maxHeight);
+    static void ResetMinSize(bool resetWidth);
+    static void ResetMaxSize(bool resetWidth);
 
     static void SetAspectRatio(float ratio);
     static void SetLayoutWeight(int32_t value);
     static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color& color);
-    static void SetBackgroundImage(const std::string& src);
+    static void SetBackgroundImage(const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat);
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
+    static void SetBackgroundEffect(const EffectOption& effectOption);
     static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
@@ -125,7 +125,7 @@ public:
 
     // customBackground
     static void SetBackgroundAlign(const Alignment& align);
-    
+
     // decoration
     static void SetBackdropBlur(const Dimension& radius);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
@@ -283,15 +283,16 @@ public:
     static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
 
     // custom animatable property
-    static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent);
+    static void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
     static void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     static void CreateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<CustomAnimatableArithmetic>& value,
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
-    static void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-        RefPtr<CustomAnimatableArithmetic>& value);
+    static void UpdateAnimatableArithmeticProperty(
+        const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
+
 private:
     static void AddDragFrameNodeToManager();
 };

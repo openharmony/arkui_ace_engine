@@ -18,6 +18,7 @@
 #include "gtest/internal/gtest-port.h"
 
 #define private public
+#define protected public
 #include "base/log/log_wrapper.h"
 #include "base/geometry/offset.h"
 #include "core/components/theme/theme.h"
@@ -31,6 +32,7 @@
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components/progress/progress_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -78,34 +80,19 @@ const Alignment ALIGNMENT = Alignment::BOTTOM_RIGHT;
 
 class GaugeTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
 
-void GaugeTestNg::SetUpTestCase()
+void GaugeTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
 }
 
-void GaugeTestNg::TearDownTestCase()
+void GaugeTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
 }
-
-class ProgressTheme : public Theme {
-    DECLARE_ACE_TYPE(ProgressTheme, Theme)
-public:
-    ProgressTheme() = default;
-    ~ProgressTheme() override = default;
-
-    Dimension GetTrackWidth() const
-    {
-        return dimension_;
-    }
-
-private:
-    Dimension dimension_;
-};
 
 /**
  * @tc.name: GaugePatternTest001
@@ -199,7 +186,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto gaugePattern = frameNode->GetPattern<GaugePattern>();
     EXPECT_NE(gaugePattern, nullptr);
     auto gaugeLayoutAlgorithm = gaugePattern->CreateLayoutAlgorithm();
@@ -222,7 +209,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
     auto gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintSizevalid, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
 
@@ -235,9 +222,11 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
     LayoutConstraintF layoutConstraintHeightUnvalid;
     layoutConstraintHeightUnvalid.maxSize = MAX_SIZE;
     layoutConstraintHeightUnvalid.selfIdealSize.SetHeight(NEGATIVE_NUMBER);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    auto gaugeTheme = AceType::MakeRefPtr<ProgressTheme>();
+    gaugeTheme->trackWidth_ = WIDTH;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(gaugeTheme));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintHeightUnvalid, &layoutWrapper).value();
-    EXPECT_EQ(gaugeSize, SizeF(MAX_WIDTH, MAX_HEIGHT));
+    EXPECT_EQ(gaugeSize, SizeF(WIDTH.ConvertToPx(), WIDTH.ConvertToPx()));
 
     /**
      *     corresponding ets code:
@@ -248,9 +237,9 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
     LayoutConstraintF layoutConstraintWidthUnvalid;
     layoutConstraintWidthUnvalid.maxSize = MAX_SIZE;
     layoutConstraintWidthUnvalid.selfIdealSize.SetWidth(NEGATIVE_NUMBER);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(gaugeTheme));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintWidthUnvalid, &layoutWrapper).value();
-    EXPECT_EQ(gaugeSize, SizeF(MAX_WIDTH, MAX_HEIGHT));
+    EXPECT_EQ(gaugeSize, SizeF(WIDTH.ConvertToPx(), WIDTH.ConvertToPx()));
 
     /**
      *     corresponding ets code:
@@ -261,7 +250,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
     LayoutConstraintF layoutConstraintWidth;
     layoutConstraintWidth.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
     layoutConstraintWidth.maxSize = MAX_SIZE;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintWidth, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(WIDTH.ConvertToPx(), WIDTH.ConvertToPx()));
 
@@ -274,7 +263,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
     LayoutConstraintF layoutConstraintHeight;
     layoutConstraintHeight.selfIdealSize.SetHeight(HEIGHT.ConvertToPx());
     layoutConstraintHeight.maxSize = MAX_SIZE;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintHeight, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(HEIGHT.ConvertToPx(), HEIGHT.ConvertToPx()));
 
@@ -286,7 +275,8 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
      */
     LayoutConstraintF layoutConstraintSmallWidth;
     layoutConstraintSmallWidth.maxSize = SizeF(SMALL_WIDTH, MAX_HEIGHT);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    gaugeTheme->trackWidth_ = 500.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(gaugeTheme));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintSmallWidth, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(SMALL_WIDTH, SMALL_WIDTH));
 
@@ -298,14 +288,14 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
      */
     LayoutConstraintF layoutConstraintSmallHeight;
     layoutConstraintSmallWidth.maxSize = SizeF(MAX_WIDTH, SMALL_HEIGHT);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(gaugeTheme));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintSmallWidth, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(SMALL_HEIGHT, SMALL_HEIGHT));
 
     LayoutConstraintF layoutConstraintInfinite;
     layoutConstraintInfinite.maxSize = MAX_SIZE;
     layoutConstraintInfinite.maxSize.SetWidth(INFINITE);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(gaugeTheme));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintInfinite, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(MAX_HEIGHT, MAX_HEIGHT));
 }
@@ -368,7 +358,8 @@ HWTEST_F(GaugeTestNg, GaugePaintPropertyTest005, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
 
     /**
@@ -386,13 +377,13 @@ HWTEST_F(GaugeTestNg, GaugePaintPropertyTest005, TestSize.Level1)
      */
 
     /**
-     *      case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     *      case 1: LayoutWrapperNode::SkipMeasureContent = true , skipMeasure = true;
      */
     bool first_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(first_case);
 
     /**
-     *     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     *     case 2: LayoutWrapperNode::SkipMeasureContent = true , skipMeasure = true;
      */
     bool second_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(second_case);
@@ -401,13 +392,13 @@ HWTEST_F(GaugeTestNg, GaugePaintPropertyTest005, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     /**
-     *     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     *     case 3: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = true;
      */
     bool third_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(third_case);
 
     /**
-     *     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
+     *     case 4: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = false;
      */
     bool forth_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forth_case);

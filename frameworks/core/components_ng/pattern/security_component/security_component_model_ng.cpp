@@ -69,7 +69,6 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
     }
 
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::HORIZONTAL);
-    property->UpdateLayoutOrder(SecSecurityComponentLayoutOrder::ICON_FIRST);
 }
 
 void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text, int32_t icon,
@@ -376,10 +375,5 @@ void SecurityComponentModelNG::SetTextIconSpace(const Dimension& value)
 void SecurityComponentModelNG::SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, value);
-}
-
-void SecurityComponentModelNG::SetlayoutOrder(const SecSecurityComponentLayoutOrder& value)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, LayoutOrder, value);
 }
 } // namespace OHOS::Ace::NG

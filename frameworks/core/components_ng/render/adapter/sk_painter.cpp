@@ -154,4 +154,16 @@ void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const Of
     rsSkPath->Offset(offset.GetX(), offset.GetY());
     canvas.DrawPath(rsPath);
 }
+
+SizeF SkPainter::GetPathSize(const std::string& commands)
+{
+    SkPath skPath;
+    if (!SkParsePath::FromSVGString(commands.c_str(), &skPath)) {
+        LOGE("Invalid path value.");
+        return SizeF();
+    }
+
+    auto skRect = skPath.getBounds();
+    return SizeF(skRect.right(), skRect.bottom());
+}
 } // namespace OHOS::Ace::NG

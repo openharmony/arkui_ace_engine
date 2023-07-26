@@ -36,6 +36,9 @@ public:
     static void OnChange(const JSCallbackInfo& info);
     static NG::PaddingPropertyF GetOldPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
+    static NG::PaddingProperty GetPadding(const std::optional<CalcDimension>& top,
+        const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+        const std::optional<CalcDimension>& right);
 };
 
 } // namespace OHOS::Ace::Framework

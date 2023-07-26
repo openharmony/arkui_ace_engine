@@ -70,7 +70,7 @@ public:
     static void SetWidth(const Dimension& width);
     static void SetHeight(const Dimension& height);
     void GetInstance();
-    RefPtr<LayoutWrapper> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
+    RefPtr<LayoutWrapperNode> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     void CreateImageAnimator(int32_t number = 1);
 
     RefPtr<FrameNode> frameNode_;
@@ -122,9 +122,9 @@ void ImageAnimatorTestNg::GetInstance()
     layoutProperty_ = frameNode_->GetLayoutProperty();
 }
 
-RefPtr<LayoutWrapper> ImageAnimatorTestNg::RunMeasureAndLayout(float width, float height)
+RefPtr<LayoutWrapperNode> ImageAnimatorTestNg::RunMeasureAndLayout(float width, float height)
 {
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     layoutWrapper->SetRootMeasureNode();
     LayoutConstraintF LayoutConstraint;

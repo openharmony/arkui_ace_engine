@@ -207,7 +207,7 @@ int32_t OffscreenCanvasPattern::GetHeight()
     return offscreenPaintMethod_->GetHeight();
 }
 
-const LineDashParam& OffscreenCanvasPattern::GetLineDash() const
+LineDashParam OffscreenCanvasPattern::GetLineDash() const
 {
     return offscreenPaintMethod_->GetLineDash();
 }

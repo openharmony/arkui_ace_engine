@@ -17,6 +17,8 @@
 
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
@@ -220,6 +222,7 @@ float GridPattern::GetMainContentSize() const
 
 void GridPattern::FireOnScrollStart()
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -363,6 +366,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
+    bool isChangedUpToEnd = gridLayoutInfo.startIndex_ > gridLayoutInfo_.startIndex_;
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     float currentOffset = gridLayoutInfo_.currentOffset_;
     bool reachEnd = gridLayoutInfo_.reachEnd_;
@@ -370,7 +374,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     ProcessEvent(indexChanged, gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, currentOffset,
-                 offsetEnd, reachEnd, reachStart);
+                 offsetEnd, reachEnd, reachStart, isChangedUpToEnd);
 
     SetScrollState(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
@@ -406,7 +410,7 @@ void GridPattern::CheckScrollable()
 }
 
 void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
-                               bool reachEnd, bool reachStart)
+                               bool reachEnd, bool reachStart, bool isChangedUpToEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -423,7 +427,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
                 onScroll(offsetVP, ScrollState::SCROLL);
                 onScroll(0.0_vp, ScrollState::IDLE);
             } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-                source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
                 onScroll(offsetVP, ScrollState::FLING);
                 onScroll(0.0_vp, ScrollState::IDLE);
             } else {
@@ -437,7 +441,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
         if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR) {
             onScroll(offsetVP, ScrollState::SCROLL);
         } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING ||
-            source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+            source == SCROLL_FROM_ANIMATION_CONTROLLER || source == SCROLL_FROM_BAR_FLING) {
             onScroll(offsetVP, ScrollState::FLING);
         } else {
             onScroll(offsetVP, ScrollState::IDLE);
@@ -452,24 +456,58 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
     }
 
     auto onReachStart = gridEventHub->GetOnReachStart();
-	// want to call onReachStart(), must be:
-	//    onReachStart function pointer existing,
-	//    first time to reach top: currentOffset equal to 0,
-	//    Or Spring end to reach top again: reachStart_ is true and last time reachStart_ is false.
-    if (onReachStart && gridLayoutInfo_.startIndex_ == 0 &&
-        (NearZero(gridLayoutInfo_.currentOffset_) || (gridLayoutInfo_.reachStart_ && !reachStart))) {
+    if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
+        if ((scrollState_ == SCROLL_FROM_UPDATE || scrollState_ == SCROLL_FROM_ANIMATION_SPRING ||
+                scrollState_ == SCROLL_FROM_ANIMATION) &&
+            gridLayoutInfo_.reachStart_ && !reachStart && !NearZero(gridLayoutInfo_.currentOffset_)) {
+            onReachStart();
+            initialIndex_ = true;
+        }
+        if (scrollState_ == SCROLL_FROM_ANIMATION_SPRING && NearZero(gridLayoutInfo_.currentOffset_)) {
+            onReachStart();
+            initialIndex_ = true;
+        }
+        if (scrollState_ == SCROLL_FROM_JUMP && NearZero(finalOffset) && gridLayoutInfo_.reachStart_) {
+            onReachStart();
+            initialIndex_ = true;
+        }
+        if (!NearZero(gridLayoutInfo_.currentOffset_)) {
+            offsetCount_++;
+        }
+        if (scrollState_ == SCROLL_FROM_NONE && reachStart && NearZero(gridLayoutInfo_.currentOffset_) &&
+            offsetCount_ > 1) {
+            onReachStart();
+            initialIndex_ = true;
+            offsetCount_ = 0;
+        }
+    }
+    if (onReachStart && !initialIndex_ && gridLayoutInfo_.startIndex_ == 0) {
         onReachStart();
+        initialIndex_ = true;
     }
 
     auto onReachEnd = gridEventHub->GetOnReachEnd();
-	// want to call onReachEnd(), must be:
-	//    onReachEnd function pointer existing and endIndex_ equal to sub windows count,
-	//    first time to reach bottom: reachEnd_ is true and offsetEnd_ is different from last time,
-	//    Or spring end to reach bottom again: reachEnd_ is false and offsetEnd_ is false.
-    if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1) &&
-        ((gridLayoutInfo_.reachEnd_ && gridLayoutInfo_.offsetEnd_ != offsetEnd) ||
-        (!gridLayoutInfo_.reachEnd_ && !gridLayoutInfo_.offsetEnd_))) {
-        onReachEnd();
+    if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
+        if (scrollState_ == SCROLL_FROM_UPDATE && gridLayoutInfo_.reachEnd_ && !reachEnd &&
+            gridLayoutInfo_.offsetEnd_ != offsetEnd) {
+            onReachEnd();
+        }
+        if (scrollState_ == SCROLL_FROM_ANIMATION_SPRING && !gridLayoutInfo_.reachEnd_ &&
+            !gridLayoutInfo_.offsetEnd_) {
+            onReachEnd();
+        }
+        if (scrollState_ == SCROLL_FROM_ANIMATION && gridLayoutInfo_.reachEnd_ && !reachEnd &&
+            !gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
+            onReachEnd();
+        }
+        if (NearZero(finalOffset) && isChangedUpToEnd && gridLayoutInfo_.reachEnd_ && reachEnd &&
+            !gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
+            if (scrollState_ == SCROLL_FROM_ANIMATION) {
+                onReachEnd();
+            } else if (scrollState_ == SCROLL_FROM_UPDATE) {
+                onReachEnd();
+            }
+        }
     }
 
     if (scrollStop_) {
@@ -477,6 +515,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
         if (!GetScrollAbort() && onScrollStop) {
             scrollState_ = SCROLL_FROM_NONE;
             onScrollStop();
+        }
+        if (!GetScrollAbort()) {
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         }
         scrollStop_ = false;
         SetScrollAbort(false);
@@ -521,7 +562,7 @@ void GridPattern::FlushCurrentFocus()
         }
     }
     if (gridLayoutInfo_.gridMatrix_.find(lastFocusItemMainIndex_) == gridLayoutInfo_.gridMatrix_.end()) {
-        LOGE("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
+        LOGD("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
         return;
     }
     auto curCrossNum = GetCrossCount();
@@ -836,7 +877,7 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
             }
         }
     }
-    LOGW("Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex, tarCrossIndex, tarIndex);
+    LOGD("Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex, tarCrossIndex, tarIndex);
     return nullptr;
 }
 
@@ -1007,6 +1048,7 @@ void GridPattern::SetPositionController(const RefPtr<ScrollableController>& cont
 
 void GridPattern::ScrollPage(bool reverse)
 {
+    StopAnimate();
     if (!isConfigScrollable_) {
         return;
     }
@@ -1103,13 +1145,85 @@ float GridPattern::EstimateHeight() const
         itemCount += (lineEnd - lineStart + 1);
         heightSum += item.second + mainGap;
     }
-
+    if (itemCount == 0) {
+        return 0;
+    }
     auto averageHeight = heightSum / itemCount;
     height = info.startIndex_ * averageHeight - info.currentOffset_;
     if (itemCount >= (info.childrenCount_ - 1)) {
         height = info.GetStartLineOffset(mainGap);
     }
     return height;
+}
+
+float GridPattern::GetAverageHeight() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN_NOLOG(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0);
+    const auto& info = gridLayoutInfo_;
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+
+    float heightSum = 0;
+    int32_t itemCount = 0;
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+    for (const auto& item : info.lineHeightMap_) {
+        auto line = info.gridMatrix_.find(item.first);
+        if (line == info.gridMatrix_.end()) {
+            continue;
+        }
+        if (line->second.empty()) {
+            continue;
+        }
+        auto lineStart = line->second.begin()->second;
+        auto lineEnd = line->second.rbegin()->second;
+        itemCount += (lineEnd - lineStart + 1);
+        heightSum += item.second + mainGap;
+    }
+    if (itemCount == 0) {
+        return 0;
+    }
+    return heightSum / itemCount;
+}
+
+float GridPattern::GetTotalHeight() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN_NOLOG(host, 0.0f);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0f);
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    float heightSum = 0;
+    int32_t itemCount = 0;
+    float estimatedHeight = 0.f;
+    if (scrollbarInfo_.first.has_value() && scrollbarInfo_.second.has_value()) {
+        estimatedHeight = scrollbarInfo_.second.value();
+    } else {
+        auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, gridLayoutInfo_.axis_);
+        for (const auto& item : gridLayoutInfo_.lineHeightMap_) {
+            auto line = gridLayoutInfo_.gridMatrix_.find(item.first);
+            if (line == gridLayoutInfo_.gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
+                continue;
+            }
+            auto lineStart = line->second.begin()->second;
+            auto lineEnd = line->second.rbegin()->second;
+            itemCount += (lineEnd - lineStart + 1);
+            heightSum += item.second + mainGap;
+        }
+        auto averageHeight = heightSum / itemCount;
+        if (itemCount >= (gridLayoutInfo_.childrenCount_ - 1)) {
+            estimatedHeight = heightSum - mainGap;
+        } else {
+            estimatedHeight = heightSum + (gridLayoutInfo_.childrenCount_ - itemCount) * averageHeight;
+        }
+    }
+    return estimatedHeight;
 }
 
 void GridPattern::UpdateScrollBarOffset()
@@ -1146,7 +1260,7 @@ void GridPattern::UpdateScrollBarOffset()
             itemCount += (lineEnd - lineStart + 1);
             heightSum += item.second + mainGap;
         }
-        auto averageHeight = heightSum / itemCount;
+        auto averageHeight = itemCount == 0 ? 0.0 : heightSum / itemCount;
         offset = info.startIndex_ * averageHeight - info.currentOffset_;
         if (itemCount >= (info.childrenCount_ - 1)) {
             estimatedHeight = heightSum - mainGap;

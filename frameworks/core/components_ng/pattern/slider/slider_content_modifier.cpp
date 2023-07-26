@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
-#include <optional>
-#include <utility>
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
@@ -30,7 +27,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5f;
-constexpr Dimension CIRCLE_SHADOW_WIDTH = 1.0_vp;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 } // namespace
@@ -126,8 +122,8 @@ void SliderContentModifier::onDraw(DrawingContext& context)
     DrawBackground(context);
     DrawStep(context);
     DrawSelect(context);
-    DrawBlock(context);
     DrawShadow(context);
+    DrawBlock(context);
     DrawHoverOrPress(context);
 }
 
@@ -289,19 +285,26 @@ void SliderContentModifier::DrawShadow(DrawingContext& context)
         return;
     }
 
-    auto& canvas = context.canvas;
     if (!mouseHoverFlag_ && !mousePressedFlag_) {
-        RSPen circleShadowPen;
-        circleShadowPen.SetAntiAlias(true);
-        circleShadowPen.SetColor(ToRSColor(blockOuterEdgeColor_));
-        circleShadowPen.SetWidth(static_cast<float>(CIRCLE_SHADOW_WIDTH.ConvertToPx()));
-        canvas.AttachPen(circleShadowPen);
+        auto& canvas = context.canvas;
         auto blockSize = blockSize_->Get();
-        float diameter = std::min(blockSize.Width(), blockSize.Height());
-        auto penRadius = (diameter + static_cast<float>(CIRCLE_SHADOW_WIDTH.ConvertToPx())) * HALF;
         auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
-        canvas.DrawCircle(ToRSPoint(blockCenter), penRadius);
-        canvas.DetachPen();
+        float radius = std::min(blockSize.Width(), blockSize.Height()) * HALF;
+        canvas.Save();
+        RSBrush shadowBrush;
+        shadowBrush.SetAntiAlias(true);
+        shadowBrush.SetColor(ToRSColor(blockShadowColor_));
+        RSFilter filter;
+        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+            RSBlurType::NORMAL, RSDrawing::ConvertRadiusToSigma(hotCircleShadowWidth_)));
+        shadowBrush.SetFilter(filter);
+
+        canvas.AttachBrush(shadowBrush);
+        RSPath path;
+        path.AddCircle(ToRSPoint(blockCenter).GetX(), ToRSPoint(blockCenter).GetY(), radius);
+        canvas.DrawPath(path);
+        canvas.DetachBrush();
+        canvas.Restore();
     }
 }
 
@@ -456,11 +459,28 @@ void SliderContentModifier::DrawBlockShapeCircle(DrawingContext& context, RefPtr
     auto blockSize = blockSize_->Get();
     auto shapeWidth = shapeWidth_->Get();
     auto shapeHeight = shapeHeight_->Get();
+    auto blockBorderWidth = blockBorderWidth_->Get();
+    if (NearZero(shapeWidth) || NearZero(shapeHeight)) {
+        return;
+    }
+
+    auto blockCenter = GetBlockCenter();
+    float scale = std::max(blockSize.Width() / shapeWidth, blockSize.Height() / shapeHeight);
+    if (NearZero(scale)) {
+        return;
+    }
+    float blockBorderWidthUnscale = blockBorderWidth / scale;
 
     auto& canvas = context.canvas;
+    canvas.Save();
+    SetBlockClip(context);
+    canvas.Translate(blockCenter.GetX(), blockCenter.GetY());
+    canvas.Scale(scale, scale);
+    canvas.Translate(-blockCenter.GetX(), -blockCenter.GetY());
+
     RSPen pen;
     pen.SetAntiAlias(true);
-    pen.SetWidth(blockBorderWidth_->Get());
+    pen.SetWidth(blockBorderWidthUnscale);
     pen.SetColor(ToRSColor(blockBorderColor_->Get()));
     canvas.AttachPen(pen);
     RSBrush brush;
@@ -468,17 +488,15 @@ void SliderContentModifier::DrawBlockShapeCircle(DrawingContext& context, RefPtr
     brush.SetColor(ToRSColor(blockColor_->Get()));
     canvas.AttachBrush(brush);
 
-    float width = std::min(shapeWidth, blockSize.Width());
-    float height = std::min(shapeHeight, blockSize.Height());
-    float radius = std::min(width, height) * HALF;
-    if (circle->GetRadius().IsValid()) {
-        radius = circleRadius_->Get();
-    }
+    float radius = std::min(shapeWidth, shapeHeight) * HALF;
+    float drawRadius = radius - blockBorderWidthUnscale * HALF;
+    PointF drawCenter(
+        blockCenter.GetX() - shapeWidth * HALF + radius, blockCenter.GetY() - shapeHeight * HALF + radius);
+    canvas.DrawCircle(ToRSPoint(drawCenter), drawRadius);
 
-    auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
-    canvas.DrawCircle(ToRSPoint(blockCenter), radius);
     canvas.DetachBrush();
     canvas.DetachPen();
+    canvas.Restore();
 }
 
 void SliderContentModifier::DrawBlockShapeEllipse(DrawingContext& context, RefPtr<Ellipse>& ellipse)
@@ -486,11 +504,28 @@ void SliderContentModifier::DrawBlockShapeEllipse(DrawingContext& context, RefPt
     auto blockSize = blockSize_->Get();
     auto shapeWidth = shapeWidth_->Get();
     auto shapeHeight = shapeHeight_->Get();
+    auto blockBorderWidth = blockBorderWidth_->Get();
+    if (NearZero(shapeWidth) || NearZero(shapeHeight)) {
+        return;
+    }
+
+    auto blockCenter = GetBlockCenter();
+    float scale = std::max(blockSize.Width() / shapeWidth, blockSize.Height() / shapeHeight);
+    if (NearZero(scale)) {
+        return;
+    }
+    float blockBorderWidthUnscale = blockBorderWidth / scale;
 
     auto& canvas = context.canvas;
+    canvas.Save();
+    SetBlockClip(context);
+    canvas.Translate(blockCenter.GetX(), blockCenter.GetY());
+    canvas.Scale(scale, scale);
+    canvas.Translate(-blockCenter.GetX(), -blockCenter.GetY());
+
     RSPen pen;
     pen.SetAntiAlias(true);
-    pen.SetWidth(blockBorderWidth_->Get());
+    pen.SetWidth(blockBorderWidth);
     pen.SetColor(ToRSColor(blockBorderColor_->Get()));
     canvas.AttachPen(pen);
     RSBrush brush;
@@ -498,30 +533,42 @@ void SliderContentModifier::DrawBlockShapeEllipse(DrawingContext& context, RefPt
     brush.SetColor(ToRSColor(blockColor_->Get()));
     canvas.AttachBrush(brush);
 
-    auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
-    float width = std::min(shapeWidth, blockSize.Width());
-    float height = std::min(shapeHeight, blockSize.Height());
-    float x = blockCenter.GetX() - width * HALF;
-    float y = blockCenter.GetY() - height * HALF;
-    if (ellipse->GetRadiusX().IsValid() && ellipse->GetRadiusY().IsValid()) {
-        float radiusX = ellipseRadiusX_->Get();
-        float radiusY = ellipseRadiusY_->Get();
-        x = blockCenter.GetX() - radiusX;
-        y = blockCenter.GetY() - radiusY;
-        width = radiusX / HALF;
-        height = radiusY / HALF;
-    }
-    canvas.DrawOval(ToRSRect(RectF(x, y, width, height)));
+    RectF drawRect(blockCenter.GetX() - shapeWidth * HALF + blockBorderWidthUnscale * HALF,
+        blockCenter.GetY() - shapeHeight * HALF + blockBorderWidthUnscale * HALF, shapeWidth - blockBorderWidthUnscale,
+        shapeHeight - blockBorderWidthUnscale);
+    canvas.DrawOval(ToRSRect(drawRect));
+
     canvas.DetachBrush();
     canvas.DetachPen();
+    canvas.Restore();
 }
 
 void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<Path>& path)
 {
+    auto blockSize = blockSize_->Get();
+    auto blockBorderWidth = blockBorderWidth_->Get();
+
+    auto blockCenter = GetBlockCenter();
+    SizeF shapeSize = PathPainter::GetPathSize(path->GetValue());
+    if (NearZero(shapeSize.Width()) || NearZero(shapeSize.Height())) {
+        return;
+    }
+    float scale = std::max(blockSize.Width() / (shapeSize.Width() + blockBorderWidth),
+        blockSize.Height() / (shapeSize.Height() + blockBorderWidth));
+    if (NearZero(scale)) {
+        return;
+    }
+
     auto& canvas = context.canvas;
+    canvas.Save();
+    SetBlockClip(context);
+    canvas.Translate(blockCenter.GetX(), blockCenter.GetY());
+    canvas.Scale(scale, scale);
+    canvas.Translate(-blockCenter.GetX(), -blockCenter.GetY());
+
     RSPen pen;
     pen.SetAntiAlias(true);
-    pen.SetWidth(blockBorderWidth_->Get());
+    pen.SetWidth(blockBorderWidth);
     pen.SetColor(ToRSColor(blockBorderColor_->Get()));
     canvas.AttachPen(pen);
     RSBrush brush;
@@ -529,21 +576,55 @@ void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<P
     brush.SetColor(ToRSColor(blockColor_->Get()));
     canvas.AttachBrush(brush);
 
-    auto blockSize = blockSize_->Get();
-    auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
-    OffsetF offset(blockCenter.GetX() - blockSize.Width() * HALF, blockCenter.GetY() - blockSize.Height() * HALF);
+    OffsetF offset(blockCenter.GetX() - shapeSize.Width() * HALF, blockCenter.GetY() - shapeSize.Height() * HALF);
     PathPainter::DrawPath(canvas, path->GetValue(), offset);
     canvas.DetachBrush();
     canvas.DetachPen();
+    canvas.Restore();
+}
+
+void SliderContentModifier::SetShapeRectRadius(RSRoundRect& roundRect, float borderWidth)
+{
+    float radiusX = rectTopLeftRadiusX_->Get() - borderWidth * HALF;
+    float radiusY = rectTopLeftRadiusY_->Get() - borderWidth * HALF;
+    roundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, radiusX, radiusY);
+
+    radiusX = rectTopRightRadiusX_->Get() - borderWidth * HALF;
+    radiusY = rectTopRightRadiusY_->Get() - borderWidth * HALF;
+    roundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, radiusX, radiusY);
+
+    radiusX = rectBottomLeftRadiusX_->Get() - borderWidth * HALF;
+    radiusY = rectBottomLeftRadiusY_->Get() - borderWidth * HALF;
+    roundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, radiusX, radiusY);
+
+    radiusX = rectBottomRightRadiusX_->Get() - borderWidth * HALF;
+    radiusY = rectBottomRightRadiusY_->Get() - borderWidth * HALF;
+    roundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, radiusX, radiusY);
 }
 
 void SliderContentModifier::DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect)
 {
-    auto blockSize = blockSize_->Get();
     auto shapeWidth = shapeWidth_->Get();
     auto shapeHeight = shapeHeight_->Get();
+    if (NearZero(shapeWidth) || NearZero(shapeHeight)) {
+        return;
+    }
+    auto blockSize = blockSize_->Get();
+    float scale = std::max(blockSize.Width() / shapeWidth, blockSize.Height() / shapeHeight);
+    if (NearZero(scale)) {
+        return;
+    }
+    auto blockBorderWidth = blockBorderWidth_->Get();
+    float blockBorderWidthUnscale = blockBorderWidth / scale;
+    auto blockCenter = GetBlockCenter();
 
     auto& canvas = context.canvas;
+    canvas.Save();
+    SetBlockClip(context);
+    canvas.Translate(blockCenter.GetX(), blockCenter.GetY());
+    canvas.Scale(scale, scale);
+    canvas.Translate(-blockCenter.GetX(), -blockCenter.GetY());
+
     RSPen pen;
     pen.SetAntiAlias(true);
     pen.SetWidth(blockBorderWidth_->Get());
@@ -554,37 +635,19 @@ void SliderContentModifier::DrawBlockShapeRect(DrawingContext& context, RefPtr<S
     brush.SetColor(ToRSColor(blockColor_->Get()));
     canvas.AttachBrush(brush);
 
-    auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
-    float width = std::min(shapeWidth, blockSize.Width());
-    float height = std::min(shapeHeight, blockSize.Height());
-
     RSRoundRect roundRect;
     RSRect rsRect;
-    rsRect.SetLeft(blockCenter.GetX() - width * HALF);
-    rsRect.SetRight(blockCenter.GetX() + width * HALF);
-    rsRect.SetTop(blockCenter.GetY() - height * HALF);
-    rsRect.SetBottom(blockCenter.GetY() + height * HALF);
+    rsRect.SetLeft(blockCenter.GetX() - shapeWidth * HALF + blockBorderWidthUnscale * HALF);
+    rsRect.SetRight(blockCenter.GetX() + shapeWidth * HALF - blockBorderWidthUnscale);
+    rsRect.SetTop(blockCenter.GetY() - shapeHeight * HALF + blockBorderWidthUnscale * HALF);
+    rsRect.SetBottom(blockCenter.GetY() + shapeHeight * HALF - blockBorderWidthUnscale);
     roundRect.SetRect(rsRect);
-
-    float radiusX = rectTopLeftRadiusX_->Get();
-    float radiusY = rectTopLeftRadiusY_->Get();
-    roundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, radiusX, radiusY);
-
-    radiusX = rectTopRightRadiusX_->Get();
-    radiusY = rectTopRightRadiusY_->Get();
-    roundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, radiusX, radiusY);
-
-    radiusX = rectBottomLeftRadiusX_->Get();
-    radiusY = rectBottomLeftRadiusY_->Get();
-    roundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, radiusX, radiusY);
-
-    radiusX = rectBottomRightRadiusX_->Get();
-    radiusY = rectBottomRightRadiusY_->Get();
-    roundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, radiusX, radiusY);
+    SetShapeRectRadius(roundRect, blockBorderWidthUnscale);
 
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
     canvas.DetachPen();
+    canvas.Restore();
 }
 
 void SliderContentModifier::SetBlockShape(const RefPtr<BasicShape>& shape)
@@ -648,5 +711,15 @@ void SliderContentModifier::UpdateContentDirtyRect(const SizeF& frameSize)
     }
 
     SetBoundsRect(rect);
+}
+
+void SliderContentModifier::SetBlockClip(DrawingContext& context)
+{
+    auto& canvas = context.canvas;
+    auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
+    auto blockSize = blockSize_->Get();
+    RectF rect(blockCenter.GetX() - blockSize.Width() * HALF, blockCenter.GetY() - blockSize.Height() * HALF,
+        blockSize.Width(), blockSize.Height());
+    canvas.ClipRect(ToRSRect(rect), RSClipOp::INTERSECT);
 }
 } // namespace OHOS::Ace::NG

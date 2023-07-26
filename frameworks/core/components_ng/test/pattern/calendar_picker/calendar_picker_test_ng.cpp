@@ -346,7 +346,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest001, TestSize.Level1)
 
     KeyEvent keyEventEight(KeyCode::KEY_NUMPAD_ENTER, KeyAction::DOWN);
     result = pickerPattern->HandleFocusEvent(keyEventEight);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
@@ -385,11 +385,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest002, TestSize.Level1)
 
     pickerPattern->selected_ = CalendarPickerSelectedType::DAY;
     result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 
     pickerPattern->isKeyWaiting_ = true;
     result = pickerPattern->HandleKeyEvent(keyEventOne);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 
     pickerPattern->selected_ = CalendarPickerSelectedType::MONTH;
     result = pickerPattern->HandleKeyEvent(keyEventOne);
@@ -488,8 +488,10 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest002, TestSize.Level1)
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<PickerTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<CalendarTheme>()));
     CalendarDialogView calendarDialogView;

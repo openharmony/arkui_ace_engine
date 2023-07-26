@@ -20,6 +20,8 @@
 #include "include/core/SkClipOp.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"

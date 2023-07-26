@@ -146,7 +146,7 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest002, TestSize.Level1)
         EXPECT_NE(geometryNode, nullptr);
         RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
         EXPECT_NE(layoutProperty, nullptr);
-        LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+        LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
         dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
     }
     /**
@@ -170,7 +170,7 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest003, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
     bool skipMeasures[2] = { false, true };
     bool isSwaps[4] = {true, false, false, false};
@@ -232,7 +232,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest001, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
     dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
     EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), testProperty.vertical);
     EXPECT_EQ(dividerLayoutAlgorithm->GetConstrainStrokeWidth(), 1.0);
@@ -262,7 +262,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest002, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
     dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
     EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), testProperty.vertical);
 }
@@ -289,7 +289,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest003, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
     dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
     EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), testProperty.vertical);
 }
@@ -316,7 +316,7 @@ HWTEST_F(DividerPatternTestNg, DivideAlgorithmTest004, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<DividerLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<DividerLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
     dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
     EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), testProperty.vertical);
 }

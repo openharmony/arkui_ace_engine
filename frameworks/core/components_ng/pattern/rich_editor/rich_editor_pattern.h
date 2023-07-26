@@ -96,6 +96,11 @@ public:
         richEditorController_ = controller;
     }
 
+    long long GetTimestamp() const
+    {
+        return timestamp_;
+    }
+
     void OnVisibleChange(bool isVisible) override;
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
@@ -139,7 +144,9 @@ public:
     int32_t GetTextIndexAtCursor();
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
-
+    void OnAreaChangedInner() override;
+    void CreateHandles() override;
+    void CloseSelectOverlay() override;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif
@@ -224,6 +231,8 @@ private:
     bool isRichEditorInit_ = false;
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
+    long long timestamp_ = 0;
+    OffsetF parentGlobalOffset_;
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;

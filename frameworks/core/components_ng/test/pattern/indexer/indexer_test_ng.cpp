@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components_ng/test/pattern/test_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -41,8 +42,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float DEFAULT_ROOT_WIDTH = 720.f;
-constexpr float DEFAULT_ROOT_HEIGHT = 1136.f;
 std::vector<std::string> CREATE_ARRAY = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
     "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 std::vector<std::string> GetPopupData(int32_t)
@@ -55,14 +54,13 @@ std::vector<std::string> GetMorePopupData(int32_t)
 }
 } // namespace
 
-class IndexerTestNg : public testing::Test {
+class IndexerTestNg : public testing::Test, public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
-    void RunMeasureAndLayout();
     float GetFirstChildOffsetY();
 
     RefPtr<FrameNode> frameNode_;
@@ -109,24 +107,9 @@ void IndexerTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
 }
 
-void IndexerTestNg::RunMeasureAndLayout()
-{
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
-    layoutWrapper->SetActive();
-    LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
-    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
-    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
-    layoutWrapper->Measure(LayoutConstraint);
-    layoutWrapper->Layout();
-    layoutWrapper->MountToHostOnMainThread();
-}
-
 float IndexerTestNg::GetFirstChildOffsetY()
 {
-    auto firstChild = AceType::DynamicCast<FrameNode>(frameNode_->GetFirstChild());
-    float firstOffsetY = firstChild->GetGeometryNode()->GetFrameOffset().GetY();
-    return firstOffsetY;
+    return GetChildRect(frameNode_, 0).GetY();
 }
 
 /**
@@ -139,7 +122,7 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex001, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
     ASSERT_NE(pattern_->panEvent_, nullptr);
 
     /**
@@ -195,7 +178,7 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex002, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
     ASSERT_NE(pattern_->panEvent_, nullptr);
 
     /**
@@ -236,7 +219,7 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex003, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(arrayValue, 0); // empty array
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
     ASSERT_NE(pattern_->panEvent_, nullptr);
 
     /**
@@ -264,7 +247,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
     ASSERT_NE(pattern_->touchListener_, nullptr);
 
     /**
@@ -308,7 +291,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch002, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
     ASSERT_NE(pattern_->touchListener_, nullptr);
 
     /**
@@ -350,7 +333,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch003, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
     ASSERT_NE(pattern_->touchListener_, nullptr);
 
     /**
@@ -377,7 +360,7 @@ HWTEST_F(IndexerTestNg, IndexerKeyEvent001, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. UNKNOWN keyEvent.
@@ -432,7 +415,7 @@ HWTEST_F(IndexerTestNg, IndexerKeyEvent002, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. IsCombinationKey && KEY_UNKNOWN.
@@ -506,7 +489,7 @@ HWTEST_F(IndexerTestNg, IndexerHover001, TestSize.Level1)
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     IndexerModelNG.SetUsingPopup(true);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     pattern_->OnChildHover(1, true);
     EXPECT_EQ(pattern_->childHoverIndex_, 1);
@@ -533,7 +516,8 @@ HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
     GetInstance();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
@@ -574,7 +558,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
     IndexerModelNG.SetPopupUnselectedColor(Color(0x00000000));
     IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     pattern_->MoveIndexByStep(1);
     ASSERT_NE(pattern_->popupNode_, nullptr);
@@ -600,7 +584,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
     IndexerModelNG1.SetPopupHorizontalSpace(Dimension(50));
     IndexerModelNG1.SetOnRequestPopupData(GetPopupData);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     pattern_->MoveIndexByStep(1);
 
@@ -616,7 +600,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
     IndexerModelNG2.SetPopupHorizontalSpace(Dimension(50));
     IndexerModelNG2.SetOnRequestPopupData(GetPopupData);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     pattern_->MoveIndexByStep(1);
 
@@ -642,7 +626,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
     IndexerModelNG.SetPopupItemBackground(Color(0x00000000));
     IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     pattern_->MoveIndexByStep(1);
     pattern_->OnListItemClick(0);
@@ -669,7 +653,7 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble001, TestSize.Level1)
     IndexerModelNG.SetUsingPopup(true);
     IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. has popListData.
@@ -698,7 +682,7 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble002, TestSize.Level1)
     IndexerModelNG.SetUsingPopup(true);
     IndexerModelNG.SetOnRequestPopupData(GetPopupData);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. childPressIndex_ less than 0.
@@ -727,7 +711,7 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble003, TestSize.Level1)
     IndexerModelNG.SetUsingPopup(true);
     IndexerModelNG.SetOnRequestPopupData(GetMorePopupData); // GetMorePopupData.
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. has popListData and popListData size equal INDEXER_BUBBLE_MAXSIZE.
@@ -755,7 +739,7 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     IndexerModelNG.SetUsingPopup(true); // NeedShowPopupView is true.
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. NeedShowPopupView is true.
@@ -784,7 +768,7 @@ HWTEST_F(IndexerTestNg, IndexerCallback001, TestSize.Level1)
     OnPopupSelectedEvent event = [&isOnPopupSelectedCalled](int32_t) { isOnPopupSelectedCalled = true; };
     IndexerModelNG.SetOnPopupSelected(std::move(event));
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Trigger OnPopupSelected callback.
@@ -808,7 +792,7 @@ HWTEST_F(IndexerTestNg, IndexerCallback002, TestSize.Level1)
     OnSelectedEvent event = [&isOnSelectedCalled](int32_t) { isOnSelectedCalled = true; };
     IndexerModelNG.SetOnSelected(std::move(event));
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Trigger OnSelected callback.
@@ -844,7 +828,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
     IndexerModelNG.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP));
     IndexerModelNG.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Get properties.
@@ -880,7 +864,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest002, TestSize.Level1)
     IndexerModelNG.SetSelected(-1);
     IndexerModelNG.SetItemSize(Dimension(-1));
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Get properties.
@@ -906,7 +890,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest003, TestSize.Level1)
     IndexerModelNG.SetFontSize(Dimension(24));
     IndexerModelNG.SetFontWeight(FontWeight::MEDIUM);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Get properties.
@@ -935,7 +919,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest004, TestSize.Level1)
     IndexerModelNG.SetPopupHorizontalSpace(Dimension(-1));
     IndexerModelNG.SetFontSize(Dimension());
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Get properties.
@@ -997,7 +981,7 @@ HWTEST_F(IndexerTestNg, IndexerAccessibilityTest001, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Test GetEndIndex, GetText func.
@@ -1022,13 +1006,13 @@ HWTEST_F(IndexerTestNg, IndexerAlgorithmTest001, TestSize.Level1)
      * @tc.steps: step1. selfIdealSize is (0, 0).
      * @tc.expected: The layoutAlgorithm value is correct.
      */
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
-    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
     LayoutConstraint.selfIdealSize = { 0, 0 };
-    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
     layoutWrapper->Measure(LayoutConstraint);
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
@@ -1049,7 +1033,7 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     IndexerModelNG.SetUsingPopup(true);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
     pattern_->OnModifyDone();
 
     /**
@@ -1107,7 +1091,7 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage002, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Supplement OnPopupTouchDown branch,
@@ -1129,19 +1113,19 @@ HWTEST_F(IndexerTestNg, IndexerAlgorithmCoverage001, TestSize.Level1)
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Supplement Measure branch,
      * has no condition that itemSize_ is 0.
      */
     layoutProperty_->UpdateItemSize(Dimension(0));
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
     LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
-    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
-    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
     layoutWrapper->Measure(LayoutConstraint);
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();

@@ -13,18 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/common/ui_extension_helper.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_SCALAR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_SCALAR_H
 
-#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-
-namespace OHOS::Ace {
-
-RefPtr<NG::FrameNode> UIExtensionHelper::CreateUIExtensionNode(const std::string& bundleName,
-    const std::string& abilityName, const std::map<std::string, std::string>& params,
-    std::function<void(int32_t)>&& onRelease,
-    std::function<void(int32_t, const std::string&, const std::string&)>&& onError)
+namespace OHOS::Ace::Testing {
+inline float ConvertRadiusToSigma(float radius)
 {
-    return nullptr;
+    return radius;
 }
-
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::Testing
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_SCALAR_H

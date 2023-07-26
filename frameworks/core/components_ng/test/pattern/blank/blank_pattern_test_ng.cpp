@@ -65,14 +65,14 @@ public:
     }
 
 protected:
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateRow();
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateColumn();
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateFlexRow();
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateFlexColumn();
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateRow();
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateColumn();
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateFlexRow();
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateFlexColumn();
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
 };
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateRow()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlankPatternTestNg::CreateRow()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowFrameNode =
@@ -80,8 +80,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateRo
     EXPECT_NE(rowFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     EXPECT_NE(rowLayoutPattern, nullptr);
@@ -102,7 +102,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateRo
     return { rowFrameNode, layoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateColumn()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlankPatternTestNg::CreateColumn()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto columnFrameNode =
@@ -110,8 +110,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateCo
     EXPECT_NE(columnFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(columnFrameNode, geometryNode, columnFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnFrameNode, geometryNode, columnFrameNode->GetLayoutProperty());
 
     auto columnLayoutPattern = columnFrameNode->GetPattern<LinearLayoutPattern>();
     EXPECT_NE(columnLayoutPattern, nullptr);
@@ -132,7 +132,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateCo
     return { columnFrameNode, layoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateFlexRow()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlankPatternTestNg::CreateFlexRow()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowFrameNode =
@@ -140,8 +140,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateFl
     EXPECT_NE(rowFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     EXPECT_NE(rowLayoutPattern, nullptr);
     auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
@@ -165,7 +165,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateFl
     return { rowFrameNode, layoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateFlexColumn()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BlankPatternTestNg::CreateFlexColumn()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto columnFrameNode =
@@ -173,8 +173,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BlankPatternTestNg::CreateFl
     EXPECT_NE(columnFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(columnFrameNode, geometryNode, columnFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnFrameNode, geometryNode, columnFrameNode->GetLayoutProperty());
     auto columnLayoutPattern = columnFrameNode->GetPattern<LinearLayoutPattern>();
     EXPECT_NE(columnLayoutPattern, nullptr);
     auto columnLayoutProperty = columnLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
@@ -281,8 +281,8 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest001, TestSize.Level1)
     auto blankPattern = frameNode->GetPattern<BlankPattern>();
     EXPECT_NE(blankPattern, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
@@ -340,8 +340,8 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest002, TestSize.Level1)
     auto blankPattern = frameNode->GetPattern<BlankPattern>();
     EXPECT_NE(blankPattern, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
@@ -399,8 +399,8 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest003, TestSize.Level1)
     auto blankPattern = frameNode->GetPattern<BlankPattern>();
     EXPECT_NE(blankPattern, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
@@ -458,8 +458,8 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest004, TestSize.Level1)
     auto blankPattern = frameNode->GetPattern<BlankPattern>();
     EXPECT_NE(blankPattern, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
@@ -507,8 +507,8 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest005, TestSize.Level1)
     EXPECT_NE(rowFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     EXPECT_NE(rowLayoutPattern, nullptr);
     auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
@@ -539,8 +539,8 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest005, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
@@ -573,8 +573,8 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest006, TestSize.Level1)
     EXPECT_NE(rowFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     EXPECT_NE(rowLayoutPattern, nullptr);
     auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
@@ -605,8 +605,8 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest006, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));

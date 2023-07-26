@@ -126,8 +126,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
     frameNode->SetGeometryNode(geometryNode);
     auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
     EXPECT_NE(linearSplitLayoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, linearSplitLayoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
     layoutWrapper->skipMeasureContent_ = false;
     std::vector<float> dragSplitOffset;
@@ -140,7 +140,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
      */
 
     /**
-     *     case 1: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     *     case 1: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = true;
      */
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, true);
@@ -149,7 +149,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
     EXPECT_FALSE(firstCase);
 
     /**
-     *     case 2: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
+     *     case 2: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = false;
      */
 
     layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
@@ -218,7 +218,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest003, TestSize.Level1)
      * @tc.steps: step3. call linearSplitPattern OnDirtyLayoutWrapperSwap function, compare result.
      * @tc.expected: the properties of linearSplitPattern are updated rightly
      */
-    RefPtr<LayoutWrapper> linearLayoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    RefPtr<LayoutWrapperNode> linearLayoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     linearSplitPattern->OnDirtyLayoutWrapperSwap(linearLayoutWrapper, true, true);
     EXPECT_EQ(linearSplitPattern->splitLength_, 0.0f);
     EXPECT_EQ(linearSplitPattern->isOverParent_, false);
@@ -330,7 +330,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest006, TestSize.Level1)
         frameNode->SetGeometryNode(geometryNode);
         auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
         ASSERT_NE(linearSplitLayoutProperty, nullptr);
-        LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, linearSplitLayoutProperty);
+        LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
         ASSERT_NE(layoutWrapper, nullptr);
         std::vector<float> dragSplitOffset = { 0.0f, 2.0f };
         RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
@@ -377,7 +377,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     frameNode->SetGeometryNode(geometryNode);
     auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
     ASSERT_NE(linearSplitLayoutProperty, nullptr);
-    LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, linearSplitLayoutProperty);
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     std::vector<float> childrenDragPos;
     RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
@@ -424,8 +424,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, i + 1, AceType::MakeRefPtr<Pattern>());
         RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
         itemGeometryNode->Reset();
-        RefPtr<LayoutWrapper> itemLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
+        RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
         itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
         itemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(RK356_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
@@ -569,7 +569,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     frameNode->SetGeometryNode(geometryNode);
     auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
     ASSERT_NE(linearSplitLayoutProperty, nullptr);
-    LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, linearSplitLayoutProperty);
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     std::vector<float> dragSplitOffset;
     RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
@@ -616,8 +616,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, i + 1, AceType::MakeRefPtr<Pattern>());
         RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
         itemGeometryNode->Reset();
-        RefPtr<LayoutWrapper> itemLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
+        RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
         itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
         itemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(COLUMN_HEIGHT)));

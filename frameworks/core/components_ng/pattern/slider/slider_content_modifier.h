@@ -67,6 +67,7 @@ public:
         auto sliderTheme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(sliderTheme);
         blockOuterEdgeColor_ = sliderTheme->GetBlockOuterEdgeColor();
+        blockShadowColor_ = sliderTheme->GetBlockShadowColor();
     }
 
     void UpdateData(const Parameters& parameters);
@@ -238,6 +239,8 @@ private:
     void DrawBlockShapeEllipse(DrawingContext& context, RefPtr<Ellipse>& ellipse);
     void DrawBlockShapePath(DrawingContext& context, RefPtr<Path>& path);
     void DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect);
+    void SetShapeRectRadius(RSRoundRect& roundRect, float borderWidth);
+    void SetBlockClip(DrawingContext& context);
 
 private:
     std::function<void()> updateImageFunc_;
@@ -295,6 +298,7 @@ private:
     bool needAnimate_ = false; // Translate Animation on-off
     float hotCircleShadowWidth_ = 0.0f;
     Color blockOuterEdgeColor_;
+    Color blockShadowColor_;
     RefPtr<BasicShape> shape_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderContentModifier);
 };

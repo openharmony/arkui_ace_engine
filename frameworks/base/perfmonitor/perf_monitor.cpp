@@ -185,7 +185,7 @@ void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
     SceneRecord* record = GetRecord(sceneId);
     if (record != nullptr) {
         record->Report(sceneId, mVsyncTime);
-        ReportAnimateEnd(sceneId, record, isJsApi);
+        ReportAnimateEnd(sceneId, record, !isJsApi);
         RemoveRecord(sceneId);
     }
     AceAsyncTraceEnd(0, sceneId.c_str());

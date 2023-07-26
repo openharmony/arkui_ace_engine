@@ -173,7 +173,7 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
         }
         RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
         CHECK_NULL_VOID(pixelMap);
-        float scale = pixelMap->GetWidth() / (NearZero(width) ? 1.0f : width);
+        float scale = NearZero(width) ? 1.0f : pixelMap->GetWidth() / width;
         imageContext->UpdatePosition(NG::OffsetT<Dimension>(
             Dimension(globalX - width * PIXELMAP_POSITION_WIDTH * scale - width / 2.0f + width * scale / 2.0f),
             Dimension(globalY - height * PIXELMAP_POSITION_HEIGHT * scale - height / 2.0f + height * scale / 2.0f)));
@@ -186,6 +186,10 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     const RefPtr<UINode> parentNode, std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes, bool findDrop)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
+    if (parentFrameNode && !parentFrameNode->IsActive()) {
+        return nullptr;
+    }
     auto children = parentNode->GetChildren();
 
     for (auto index = static_cast<int>(children.size()) - 1; index >= 0; index--) {
@@ -200,8 +204,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
         }
     }
 
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
-    CHECK_NULL_RETURN(parentFrameNode, nullptr);
+    CHECK_NULL_RETURN_NOLOG(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
         if (parentFrameNode == iter.second) {
             auto eventHub = parentFrameNode->GetEventHub<EventHub>();
@@ -381,7 +384,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!dragFrameNode) {
         LOGD("DragDropManager Not Use DefaultDrop");
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, false);
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_FAIL, isMouseDragged_);
         summaryMap_.clear();
         return;
     }
@@ -399,7 +402,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     InteractionManager::GetInstance()->StopDrag(
-        TranslateDragResult(event->GetResult()), event->IsUseCustomAnimation());
+        TranslateDragResult(event->GetResult()), isMouseDragged_ ? isMouseDragged_ : event->IsUseCustomAnimation());
     summaryMap_.clear();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
@@ -775,6 +778,7 @@ void DragDropManager::DestroyDragWindow()
     }
     LOGI("DestroyDragWindow");
     isDragged_ = false;
+    isMouseDragged_ = false;
     currentId_ = -1;
 }
 

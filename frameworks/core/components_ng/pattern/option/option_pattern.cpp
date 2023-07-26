@@ -32,10 +32,10 @@
 namespace OHOS::Ace::NG {
 void OptionPattern::OnAttachToFrameNode()
 {
+    RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
-    RegisterOnKeyEvent();
 }
 
 void OptionPattern::OnModifyDone()
@@ -400,7 +400,7 @@ Color OptionPattern::GetFontColor()
     return props->GetTextColorValue(defaultColor);
 }
 
-const std::string& OptionPattern::GetText()
+std::string OptionPattern::GetText()
 {
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();

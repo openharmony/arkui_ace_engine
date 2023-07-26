@@ -588,6 +588,30 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     SetBackBlurFilter();
 }
 
+void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+{
+    const auto& groupProperty = GetOrCreateBackground();
+    if (groupProperty->CheckEffectOption(effectOption)) {
+        return;
+    }
+    groupProperty->propEffectOption = effectOption;
+    if (!effectOption.has_value()) {
+        return;
+    }
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    float radiusPx = context->NormalizeToPx(effectOption->radius);
+#ifndef USE_ROSEN_DRAWING
+    float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+    float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
+    std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
+        backblurRadius, static_cast<float>(effectOption->saturation),
+        static_cast<float>(effectOption->brightness), effectOption->color.GetValue());
+    rsNode_->SetBackgroundFilter(backFilter);
+}
+
 void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle)
 {
     const auto& groupProperty = GetOrCreateForeground();
@@ -1293,6 +1317,11 @@ void RosenRenderContext::OnModifyDone()
     }
 }
 
+RectF RosenRenderContext::GetPropertyOfPosition()
+{
+    return AdjustPaintRect();
+}
+
 RectF RosenRenderContext::AdjustPaintRect()
 {
     RectF rect;
@@ -1329,10 +1358,11 @@ RectF RosenRenderContext::AdjustPaintRect()
         return rect;
     }
     if (HasOffset()) {
-        CombinePaddingAndOffset(
-            resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
-        rect.SetLeft(rect.GetX() + resultX.ConvertToPx() - anchorX.value_or(0));
-        rect.SetTop(rect.GetY() + resultY.ConvertToPx() - anchorY.value_or(0));
+        auto offset = GetOffsetValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
+        auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
+        auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
+        rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
+        rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
         return rect;
     }
     rect.SetLeft(rect.GetX() - anchorX.value_or(0));
@@ -1380,31 +1410,6 @@ void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension&
             DimensionUnit::PX);
     } else {
         resultY = selfMarginTop + GetPositionValue({}).GetY() + parentPaddingTop;
-    }
-}
-
-void RosenRenderContext::CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY,
-    const Dimension& parentPaddingLeft, const Dimension& parentPaddingTop, float widthPercentReference,
-    float heightPercentReference)
-{
-    // to distinguish cases ex. offset has percentage unit and padding has vp unit
-    if (parentPaddingLeft.Unit() != GetOffsetValue({}).GetX().Unit()) {
-        resultX = Dimension(
-            ConvertToPx(parentPaddingLeft, ScaleProperty::CreateScaleProperty(), widthPercentReference).value_or(0) +
-                ConvertToPx(GetOffsetValue({}).GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference)
-                    .value_or(0),
-            DimensionUnit::PX);
-    } else {
-        resultX = parentPaddingLeft + GetOffsetValue({}).GetX();
-    }
-    if (parentPaddingTop.Unit() != GetOffsetValue({}).GetY().Unit()) {
-        resultY = Dimension(
-            ConvertToPx(parentPaddingTop, ScaleProperty::CreateScaleProperty(), heightPercentReference).value_or(0) +
-                ConvertToPx(GetOffsetValue({}).GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference)
-                    .value_or(0),
-            DimensionUnit::PX);
-    } else {
-        resultY = parentPaddingTop + GetOffsetValue({}).GetY();
     }
 }
 
@@ -2481,12 +2486,12 @@ void RosenRenderContext::PaintOverlayText()
             rsNode_->SetDrawRegion(overlayRect);
         } else {
             modifier_ = std::make_shared<OverlayTextModifier>();
+            rsNode_->AddModifier(modifier_);
             modifier_->SetCustomData(NG::OverlayTextData(overlayText));
             auto overlayOffset = modifier_->GetOverlayOffset();
             overlayRect = std::make_shared<Rosen::RectF>(paintRect.GetX(), paintRect.GetY(),
                 paintRect.Width() + overlayOffset.GetX(), paintRect.Height() + overlayOffset.GetY());
             rsNode_->SetDrawRegion(overlayRect);
-            rsNode_->AddModifier(modifier_);
         }
     }
 }

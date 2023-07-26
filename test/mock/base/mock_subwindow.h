@@ -35,14 +35,13 @@ public:
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
     MOCK_METHOD2(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo));
     MOCK_METHOD1(HidePopupNG, void(int32_t targetId));
-    MOCK_METHOD0(HidePopupNG, void());
     MOCK_METHOD2(GetPopupInfoNG, void(int32_t targetId, NG::PopupInfo& popupInfo));
     MOCK_METHOD1(CancelPopup, bool(const std::string& id));
     MOCK_METHOD0(CloseMenu, void());
     MOCK_METHOD0(ClearMenu, void());
     MOCK_METHOD0(ClearMenuNG, void());
     MOCK_METHOD2(
-        ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode));
+        ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, std::function<void()>&& buildFunc));
     MOCK_METHOD0(HideSubWindowNG, void());
     MOCK_CONST_METHOD0(GetChildContainerId, int32_t());
     MOCK_METHOD0(GetShown, bool());

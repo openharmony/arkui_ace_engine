@@ -16,8 +16,7 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/core/components_ng/base/view_stack_processor.h"
+
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
     std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
@@ -39,11 +38,6 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
-    buildFunc();
-    auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    CHECK_NULL_VOID(customNode);
-
     dialogProperties.onStatusChanged = [&isShown](bool isShownStatus) {
         if (!isShownStatus) {
             isShown = isShownStatus;
@@ -52,9 +46,9 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
 
     WeakPtr<NG::FrameNode> dialog;
     if (dialogProperties.isShowInSubWindow) {
-        dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, customNode);
+        dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(buildFunc));
     } else {
-        dialog = overlayManager->ShowDialog(dialogProperties, customNode, false);
+        dialog = overlayManager->ShowDialog(dialogProperties, std::move(buildFunc), false);
     }
     dialogs.emplace_back(dialog);
 }

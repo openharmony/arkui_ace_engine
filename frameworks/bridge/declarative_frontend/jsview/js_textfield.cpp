@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <vector>
 
@@ -194,13 +195,10 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
         return;
     }
 
-    Color color;
-    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor")) {
-        auto theme = GetTheme<TextFieldTheme>();
-        if (info[0]->IsUndefined() && theme) {
-            color = theme->GetPlaceholderColor();
-        }
-    }
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    Color color = theme->GetPlaceholderColor();
+    CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor");
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
 
@@ -400,7 +398,13 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
+    if (info[0]->IsString()) {
+        auto value = info[0]->ToString();
+        if (value.back() == '%') {
+            return;
+        }
+    }
+    if (!ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP)) {
         LOGI("Parse to dimension FP failed!");
         return;
     }
@@ -673,16 +677,16 @@ NG::PaddingProperty JSTextField::SetPaddings(const std::optional<CalcDimension>&
     }
     if (left.has_value()) {
         if (left.value().Unit() == DimensionUnit::CALC) {
-            paddings.left = NG::CalcLength(
-                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+            paddings.left =
+                NG::CalcLength(left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
         }
     }
     if (right.has_value()) {
         if (right.value().Unit() == DimensionUnit::CALC) {
-            paddings.right = NG::CalcLength(
-                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+            paddings.right =
+                NG::CalcLength(right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
         }
@@ -1005,6 +1009,10 @@ void JSTextField::SetMaxLines(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsNumber()) {
         LOGI("SetMaxLines create error, info is not number or non-valid");
+        TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
+        return;
+    }
+    if (info[0]->ToNumber<int32_t>() <= 0) {
         TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
         return;
     }

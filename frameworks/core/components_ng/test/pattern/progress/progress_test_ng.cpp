@@ -75,6 +75,7 @@ struct TestProperty {
     std::optional<bool> ringSweepEffect;
     std::optional<bool> linearSweepEffect;
     std::optional<bool> showText;
+    std::optional<bool> smoothEffect;
 };
 
 namespace {
@@ -269,6 +270,10 @@ RefPtr<FrameNode> ProgressTestNg::CreateProgressParagraph(const TestProperty& te
         progressModel.SetShowText(testProperty.showText.value());
     }
 
+    if (testProperty.smoothEffect.has_value()) {
+        progressModel.SetSmoothEffect(testProperty.smoothEffect.value());
+    }
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
 
     return frameNode;
@@ -361,6 +366,10 @@ void ProgressTestNg::CheckValue(const RefPtr<FrameNode>& frameNode, const TestPr
     if (testProperty.showText.has_value()) {
         EXPECT_EQ(progresspaintProperty->GetEnableShowText(), testProperty.showText.value());
     }
+
+    if (testProperty.smoothEffect.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetEnableSmoothEffect(), testProperty.smoothEffect.value());
+    }
 }
 
 /**
@@ -380,8 +389,8 @@ HWTEST_F(ProgressTestNg, ProgressCreate001, TestSize.Level1)
     auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgorithm, nullptr);
     RefPtr<ProgressLayoutAlgorithm> progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, nullptr, nullptr);
-    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, nullptr, nullptr);
+    ASSERT_NE(layoutWrapperNode, nullptr);
     auto progressPaintMethod = pattern->CreateNodePaintMethod();
     ASSERT_NE(progressPaintMethod, nullptr);
     auto host = pattern->GetHost();
@@ -393,9 +402,9 @@ HWTEST_F(ProgressTestNg, ProgressCreate001, TestSize.Level1)
             config.skipMeasure = skipMeasures[i];
             auto layoutAlgorithmWrapper =
                 AceType::MakeRefPtr<LayoutAlgorithmWrapper>(progressLayoutAlgorithm, skipMeasures[i]);
-            layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
-            layoutWrapper->skipMeasureContent_ = skipMeasures[j];
-            auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+            layoutWrapperNode->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+            layoutWrapperNode->skipMeasureContent_ = skipMeasures[j];
+            auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapperNode, config);
             EXPECT_EQ(isSwap, !(skipMeasures[i] || skipMeasures[j]));
         }
     }
@@ -458,7 +467,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
      * @tc.expected: step4. create layoutWrapper success.
      */
-    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, progressLayoutProperty);
 
     /**
      * @tc.steps: step5. do linear porgress LayoutAlgorithm Measure and compare values.
@@ -493,7 +502,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm002, TestSize.Level1)
     progressLayoutProperty->UpdateType(PROGRESS_TYPE_SCALE);
     auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     ASSERT_NE(progressLayoutProperty, nullptr);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, progressLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, progressLayoutProperty);
     /**
      * @tc.steps: step2. get strokeWidth from theme, and return width and height according to RingDiameter.
      */
@@ -556,7 +565,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
      * @tc.expected: step4. create layoutWrapper success.
      */
-    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, progressLayoutProperty);
 
     /**
      * @tc.steps: step5. do linear porgress LayoutAlgorithm Measure and compare values.
@@ -630,7 +639,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator002, TestSize.Level1)
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
      * @tc.expected: step4. create layoutWrapper success.
      */
-    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, progressLayoutProperty);
 
     /**
      * @tc.steps: step5. do linear porgress LayoutAlgorithm Measure and compare values.
@@ -707,7 +716,7 @@ HWTEST_F(ProgressTestNg, RingProgressCreator001, TestSize.Level1)
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
      * @tc.expected: step4. create layoutWrapper success.
      */
-    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, progressLayoutProperty);
     /**
      * @tc.steps: step5. do ring porgress LayoutAlgorithm Measure and compare values.
      * @tc.expected: step5. layout result equals expected result.
@@ -791,7 +800,7 @@ HWTEST_F(ProgressTestNg, ScaleProgressFrameNodeCreator001, TestSize.Level1)
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
      * @tc.expected: step4. create layoutWrapper success.
      */
-    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, progressLayoutProperty);
 
     /**
      * @tc.steps: step5. do ring porgress LayoutAlgorithm Measure and compare values.
@@ -863,7 +872,7 @@ HWTEST_F(ProgressTestNg, CapulseProgressCreator001, TestSize.Level1)
      * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
      * @tc.expected: step4. create layoutWrapper success.
      */
-    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, progressLayoutProperty);
 
     /**
      * @tc.steps: step5. do capsule porgress LayoutAlgorithm Measure and compare values.
@@ -1449,6 +1458,7 @@ HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level1)
     testProperty.ringSweepEffect = std::make_optional(true);
     testProperty.linearSweepEffect = std::make_optional(true);
     testProperty.showText = std::make_optional(true);
+    testProperty.smoothEffect = std::make_optional(false);
 
     /**
      * @tc.steps: step2. create progress frameNode and check the progress properties with expected value .
@@ -1644,7 +1654,7 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure001, TestSize.Level1)
     LayoutConstraintF contentConstraint;
     contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
     contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
-    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, progressLayoutProperty);
     auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     ASSERT_NE(progressLayoutAlgorithm, nullptr);
 
@@ -1657,8 +1667,8 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure001, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(100, 50));
-    RefPtr<LayoutWrapper> textWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textNode, geometryNode, textNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> textWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, geometryNode, textNode->GetLayoutProperty());
     ASSERT_NE(textWrapper, nullptr);
     layoutWrapper.AppendChild(textWrapper);
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
@@ -1696,7 +1706,7 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure002, TestSize.Level1)
     LayoutConstraintF contentConstraint;
     contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
     contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
-    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, progressLayoutProperty);
     auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     ASSERT_NE(progressLayoutAlgorithm, nullptr);
 
@@ -1709,8 +1719,8 @@ HWTEST_F(ProgressTestNg, CapulseProgressMeasure002, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(500, 100));
-    RefPtr<LayoutWrapper> textWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textNode, geometryNode, textNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> textWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, geometryNode, textNode->GetLayoutProperty());
     ASSERT_NE(textWrapper, nullptr);
     layoutWrapper.AppendChild(textWrapper);
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
@@ -2014,6 +2024,8 @@ HWTEST_F(ProgressTestNg, RingProgressModifier001, TestSize.Level1)
     progressModifier->SetPaintShadow(true);
     progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetSmoothEffect(false);
+    EXPECT_EQ(progressModifier->smoothEffect_->Get(), false);
     float value = 50.0f;
     progressModifier->SetValue(value);
     EXPECT_EQ(progressModifier->value_->Get(), value);

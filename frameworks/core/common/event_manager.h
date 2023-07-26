@@ -185,7 +185,7 @@ private:
     AxisTestResult axisTestResults_;
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;
-    TouchTestResult axisTouchTestResult_;
+    std::unordered_map<size_t, TouchTestResult> axisTouchTestResults_;
     MouseHoverTestList mouseHoverTestResults_;
     MouseHoverTestList mouseHoverTestResultsPre_;
     WeakPtr<RenderNode> mouseHoverNodePre_;

@@ -74,8 +74,8 @@ public:
         scrollableEvent_->SetEnabled(enable);
     }
     void SetScrollableAxis(Axis axis);
-    const RefPtr<GestureEventHub>& GetGestureHub();
-    const RefPtr<InputEventHub>& GetInputHub();
+    RefPtr<GestureEventHub> GetGestureHub();
+    RefPtr<InputEventHub> GetInputHub();
 
     // edgeEffect
     const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
@@ -149,14 +149,6 @@ public:
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID_NOLOG(scrollable);
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
-    }
-
-    bool IsScrollBarPressed() const
-    {
-        if (scrollBar_) {
-            return scrollBar_->IsPressed();
-        }
-        return false;
     }
 
     bool IsScrollableSpringEffect() const
@@ -242,13 +234,18 @@ public:
     {
         return 0.0f;
     }
+    // main size of all children
+    virtual float GetTotalHeight() const
+    {
+        return 0.0f;
+    }
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
     virtual void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth);
     bool CanOverScroll(int32_t source)
     {
         return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || AnimateRunning()));
+            IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -273,12 +270,6 @@ protected:
     RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
     {
         return scrollBarProxy_;
-    }
-    void SetScrollBarDriving(bool Driving)
-    {
-        if (scrollBar_) {
-            scrollBar_->SetDriving(Driving);
-        }
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
@@ -331,6 +322,7 @@ private:
     RefPtr<Animator> animator_;
     RefPtr<SpringMotion> springMotion_;
     bool scrollAbort_ = false;
+    bool animateOverScroll_ = false;
 
     NestedScrollOptions nestedScroll_;
 
@@ -339,6 +331,7 @@ private:
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
+    float totalOffsetOfMousePressed_ = 0.0f;
     MouseInfo lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<InputEvent> mouseEvent_;

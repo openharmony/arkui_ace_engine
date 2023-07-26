@@ -337,7 +337,7 @@ HWTEST_F(VideoTestNg, VideoMeasureContentTest004, TestSize.Level1)
     // Create LayoutWrapper and set videoLayoutAlgorithm.
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_NE(videoPattern, nullptr);
     auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
@@ -397,7 +397,7 @@ HWTEST_F(VideoTestNg, VideoMeasureTest005, TestSize.Level1)
     // Create LayoutWrapper and set videoLayoutAlgorithm.
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_NE(videoPattern, nullptr);
     auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
@@ -417,8 +417,8 @@ HWTEST_F(VideoTestNg, VideoMeasureTest005, TestSize.Level1)
     for (const auto& child : children) {
         auto frameNodeChild = AceType::DynamicCast<FrameNode>(child);
         RefPtr<GeometryNode> geometryNodeChild = AceType::MakeRefPtr<GeometryNode>();
-        auto childLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(AceType::WeakClaim(AceType::RawPtr(frameNodeChild)), geometryNodeChild,
+        auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+                AceType::WeakClaim(AceType::RawPtr(frameNodeChild)), geometryNodeChild,
                 frameNodeChild->GetLayoutProperty());
         layoutWrapper.AppendChild(childLayoutWrapper);
     }
@@ -1081,7 +1081,7 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
     // Create LayoutWrapper and set videoLayoutAlgorithm.
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     EXPECT_FALSE(videoPattern == nullptr);
     auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
@@ -1111,8 +1111,8 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
     EXPECT_FALSE(fullScreenPattern == nullptr);
     auto fullScreenLayout = fullScreenPattern->CreateLayoutAlgorithm();
     auto fullScreenGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper fullScreenLayoutWrapper =
-        LayoutWrapper(fullScreenNode, fullScreenGeometryNode, fullScreenNode->GetLayoutProperty());
+    LayoutWrapperNode fullScreenLayoutWrapper =
+        LayoutWrapperNode(fullScreenNode, fullScreenGeometryNode, fullScreenNode->GetLayoutProperty());
     fullScreenLayoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(fullScreenLayout));
     auto videoSize =
         fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper).value_or(SizeF(0.0f, 0.0f));
@@ -1238,7 +1238,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest017, TestSize.Level1)
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     ASSERT_NE(videoLayoutProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, videoLayoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, videoLayoutProperty);
     layoutWrapper->skipMeasureContent_ = true;
     EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
     config.skipMeasure = false;
@@ -1538,7 +1538,7 @@ HWTEST_F(VideoTestNg, VideoFocusTest002, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
     ASSERT_NE(videoLayoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(videoLayoutAlgorithm));

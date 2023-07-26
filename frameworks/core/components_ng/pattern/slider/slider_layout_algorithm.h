@@ -44,7 +44,7 @@ public:
         return blockSize_;
     }
 
-    float GetBlockHotSize() const
+    SizeF GetBlockHotSize() const
     {
         return blockHotSize_;
     }
@@ -52,11 +52,12 @@ public:
 private:
     void CalculateBlockOffset(
         LayoutWrapper* layoutWrapper, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse);
+    SizeF CalculateHotSize(const SizeF& blockSize, float themeBlockHotSize);
 
 private:
     float trackThickness_ = 0.0f;
     SizeF blockSize_;
-    float blockHotSize_ = 0.0f;
+    SizeF blockHotSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderLayoutAlgorithm);
 };
