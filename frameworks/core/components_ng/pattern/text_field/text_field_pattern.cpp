@@ -766,7 +766,8 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
         textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
         return dy;
     }
-    auto dy = contentRect_.GetY() + contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
+    auto dy = contentRect_.GetY() + lastBorderWidth_.topDimen->ConvertToPx() +
+            contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
     // caret does not exceed bottom boundary, still need to check against safeArea
     if (GreatOrEqual(dy, 0.0f)) {
         return FitCursorInSafeArea();
@@ -2268,17 +2269,25 @@ void TextFieldPattern::ProcessInnerPadding()
     auto themePadding = textFieldTheme->GetPadding();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+
+    BorderWidthProperty currentBorderWidth;
+    if (layoutProperty->GetBorderWidthProperty() != nullptr) {
+        currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
+    } else {
+        currentBorderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
+    }
     auto left = layoutProperty->GetPaddingProperty()
                     ->left.value_or(CalcLength(themePadding.Left()))
                     .GetDimension()
                     .ConvertToPx();
-    offsetDifference_.SetX(left - GetPaddingLeft());
+    offsetDifference_.SetX(left + (float)currentBorderWidth.leftDimen->ConvertToPx() - GetPaddingLeft() -
+                           (float)lastBorderWidth_.leftDimen->ConvertToPx());
     utilPadding_.left = left;
     auto top =
         layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
-    offsetDifference_.SetY(top - GetPaddingTop());
+    offsetDifference_.SetY(top + (float)currentBorderWidth.topDimen->ConvertToPx() - GetPaddingTop() -
+                           (float)lastBorderWidth_.topDimen->ConvertToPx());
     utilPadding_.top = top;
-
     utilPadding_.bottom = layoutProperty->GetPaddingProperty()
                               ->bottom.value_or(CalcLength(themePadding.Bottom()))
                               .GetDimension()
@@ -2287,6 +2296,7 @@ void TextFieldPattern::ProcessInnerPadding()
                              ->right.value_or(CalcLength(themePadding.Right()))
                              .GetDimension()
                              .ConvertToPx();
+    lastBorderWidth_ = currentBorderWidth;
 }
 
 void TextFieldPattern::InitLongPressEvent()
@@ -5100,6 +5110,18 @@ void TextFieldPattern::SaveInlineStates()
     }
 }
 
+void TextFieldPattern::TextRectSetOffset(RefPtr<TextFieldLayoutProperty> layoutProperty)
+{
+    BorderWidthProperty currentBorderWidth;
+    if (layoutProperty->GetBorderWidthProperty() != nullptr) {
+        currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
+    } else {
+        currentBorderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
+    }
+    textRect_.SetOffset(OffsetF(GetPaddingLeft() + (float)(currentBorderWidth.leftDimen->ConvertToPx()),
+                                GetPaddingTop() + (float)(currentBorderWidth.topDimen->ConvertToPx())));
+}
+
 void TextFieldPattern::ApplyInlineStates(bool focusStatus)
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -5125,7 +5147,7 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     layoutProperty->UpdatePadding(
         { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
     ProcessInnerPadding();
-    textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
+    TextRectSetOffset(layoutProperty);
     MarginProperty margin;
     margin.bottom =
         CalcLength(inlineState_.padding.bottom->GetDimension() + inlineState_.margin.bottom->GetDimension());
@@ -5174,7 +5196,14 @@ void TextFieldPattern::RestorePreInlineStates()
     layoutProperty->UpdatePadding(inlineState_.padding);
     ProcessInnerPadding();
     inlinePadding_ = 0.0f;
-    textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
+    BorderWidthProperty currentBorderWidth;
+    if (layoutProperty->GetBorderWidthProperty() != nullptr) {
+        currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
+    } else {
+        currentBorderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
+    }
+    textRect_.SetOffset(OffsetF((GetPaddingLeft() + (float)(currentBorderWidth.leftDimen->ConvertToPx())),
+                                (GetPaddingTop() + (float)currentBorderWidth.topDimen->ConvertToPx())));
     layoutProperty->UpdateMargin(inlineState_.margin);
     CalcSize idealSize;
     std::optional<CalcLength> width(inlineState_.frameRect.Width());

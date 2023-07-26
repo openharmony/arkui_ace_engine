@@ -50,10 +50,11 @@ void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper
         auto searchDividerWidth = searchTheme->GetSearchDividerWidth().ConvertToPx();
         auto searchDividerColor = searchTheme->GetSearchDividerColor();
         auto searchSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+        auto rightOffset = *paintWrapper->GetGeometryNode()->GetPadding()->right;
         // Paint divider.
         double dividerVerticalOffset = (searchSize.Height() - iconHeight.ConvertToPx()) / 2.0;
-        double dividerHorizontalOffset =
-            searchSize.Width() - buttonSize_.Width() - dividerSpace - searchSpace - searchDividerWidth / 2;
+        double dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace -
+                                         searchSpace - searchDividerWidth / 2 - rightOffset;
         dividerHorizontalOffset = std::max(dividerHorizontalOffset, 0.0);
         OffsetF dividerOffset = OffsetF(dividerHorizontalOffset, dividerVerticalOffset);
         float originX = dividerOffset.GetX();

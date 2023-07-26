@@ -403,6 +403,26 @@ public:
         return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f);
     }
 
+    float GetBorderLeft() const
+    {
+        return lastBorderWidth_.leftDimen->ConvertToPx();
+    }
+
+    float GetBorderTop() const
+    {
+        return lastBorderWidth_.topDimen->ConvertToPx();
+    }
+
+    float GetBorderBottom() const
+    {
+        return lastBorderWidth_.bottomDimen->ConvertToPx();
+    }
+
+    float GetBorderRight() const
+    {
+        return lastBorderWidth_.rightDimen->ConvertToPx();
+    }
+
     const RectF& GetTextRect() override
     {
         return textRect_;
@@ -1026,6 +1046,7 @@ private:
 
     void UpdateCopyAllStatus();
     void SaveInlineStates();
+    void TextRectSetOffset(RefPtr<TextFieldLayoutProperty> layoutProperty);
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
 
@@ -1068,6 +1089,8 @@ private:
     PaddingPropertyF utilPadding_;
     OffsetF rightClickOffset_;
     OffsetF offsetDifference_;
+
+    BorderWidthProperty lastBorderWidth_;
 
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
