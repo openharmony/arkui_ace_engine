@@ -315,6 +315,9 @@ void NavigationGroupNode::BackToNavBar(const RefPtr<UINode>& navDestinationNode)
     }
     if (backButtonNode) {
         BackButtonAnimation(backButtonNode, false);
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
     // let navBarNode request focus
     auto navBarContentNode = navBarNode->GetNavBarContentNode();
@@ -347,7 +350,6 @@ void NavigationGroupNode::BackToPreNavDestination(const RefPtr<UINode>& preNavDe
     CHECK_NULL_VOID(navigationLayoutProperty);
     if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
-        CHECK_NULL_VOID(navDestination);
         auto preDestinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
         auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
         if (preDestinationTitleBarNode || destinationTitleBarNode) {
@@ -356,6 +358,9 @@ void NavigationGroupNode::BackToPreNavDestination(const RefPtr<UINode>& preNavDe
         auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
         if (backButtonNode) {
             BackButtonAnimation(backButtonNode, false);
+            auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(backButtonLayoutProperty);
+            backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
         }
         NavTransitionBackToPreAnimation(preNavDestination, navDestination, navigationContentNode);
     }
@@ -731,8 +736,7 @@ void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButto
     } else {
         transitionOption.SetDuration(OPACITY_BACKBUTTON_OUT_DURATION);
         transitionOption.SetOnFinishEvent(
-            [backButtonNodeWK = WeakClaim(RawPtr(backButtonNode)),
-                backButtonNodeContextWK = WeakClaim(RawPtr(backButtonNodeContext)), id = Container::CurrentId()] {
+            [backButtonNodeContextWK = WeakClaim(RawPtr(backButtonNodeContext)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID_NOLOG(context);
@@ -740,15 +744,11 @@ void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButto
                 CHECK_NULL_VOID_NOLOG(taskExecutor);
                 // animation finish event should be posted to UI thread.
                 taskExecutor->PostTask(
-                    [backButtonNodeWK, backButtonNodeContextWK, id]() {
+                    [backButtonNodeContextWK, id]() {
                         auto backButtonNodeContext = backButtonNodeContextWK.Upgrade();
-                        auto backButtonNode = backButtonNodeWK.Upgrade();
                         CHECK_NULL_VOID(backButtonNodeContext);
                         ContainerScope scope(id);
                         backButtonNodeContext->UpdateOpacity(1.0);
-                        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-                        CHECK_NULL_VOID(backButtonLayoutProperty);
-                        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
                     },
                     TaskExecutor::TaskType::UI);
             });
