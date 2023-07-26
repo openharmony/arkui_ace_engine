@@ -1361,26 +1361,26 @@ class ACE_EXPORT FirstContentfulPaintEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(FirstContentfulPaintEvent, BaseEventInfo);
 
 public:
-    FirstContentfulPaintEvent(long navigationStartTick, long firstContentfulPaintMs)
+    FirstContentfulPaintEvent(int64_t navigationStartTick, int64_t firstContentfulPaintMs)
         : BaseEventInfo("FirstContentfulPaintEvent"), navigationStartTick_(navigationStartTick),
           firstContentfulPaintMs_(firstContentfulPaintMs)
     {}
 
     ~FirstContentfulPaintEvent() = default;
 
-    long GetNavigationStartTick() const
+    int64_t GetNavigationStartTick() const
     {
         return navigationStartTick_;
     }
 
-    long GetFirstContentfulPaintMs() const
+    int64_t GetFirstContentfulPaintMs() const
     {
         return firstContentfulPaintMs_;
     }
 
 private:
-    long navigationStartTick_;
-    long firstContentfulPaintMs_;
+    int64_t navigationStartTick_;
+    int64_t firstContentfulPaintMs_;
 };
 
 class ACE_EXPORT WebOnOverScrollEvent : public BaseEventInfo {

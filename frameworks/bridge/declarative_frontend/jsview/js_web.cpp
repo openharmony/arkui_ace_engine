@@ -3581,8 +3581,8 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
 JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
-    obj->SetProperty("navigationStartTick", eventInfo.GetNavigationStartTick());
-    obj->SetProperty("firstContentfulPaintMs", eventInfo.GetFirstContentfulPaintMs());
+    obj->SetProperty<int64_t>("navigationStartTick", eventInfo.GetNavigationStartTick());
+    obj->SetProperty<int64_t>("firstContentfulPaintMs", eventInfo.GetFirstContentfulPaintMs());
     return JSRef<JSVal>::Cast(obj);
 }
 
