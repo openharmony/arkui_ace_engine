@@ -794,6 +794,7 @@ void OverlayManager::HideMenu(int32_t targetId, bool isMenuOnTouch)
     } else {
         RemovePixelMapAnimation(false, 0, 0);
     }
+    RemoveFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
