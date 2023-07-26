@@ -980,7 +980,6 @@ void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
 
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    UpdateContentOffset(dirty);
     if (!config.contentSizeChange || isInWindowDrag_) {
         return false;
     }
