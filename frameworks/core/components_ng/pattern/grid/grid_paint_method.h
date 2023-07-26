@@ -35,6 +35,15 @@ public:
         edgeEffect_ = edgeEffect;
     }
 
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
+    {
+        auto scrollBar = scrollBar_.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(scrollBar, nullptr);
+        return scrollBar->GetScrollBarOverlayModifier();
+    }
+
 private:
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;

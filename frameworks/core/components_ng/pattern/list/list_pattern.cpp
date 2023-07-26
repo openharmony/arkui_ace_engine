@@ -193,6 +193,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();
+    if (config.frameSizeChange) {
+        if (GetScrollBar() != nullptr) {
+            GetScrollBar()->PlayScrollBarEndAnimation();
+        }
+    }
     CheckRestartSpring();
 
     DrivenRender(dirty);
@@ -340,9 +345,15 @@ void ListPattern::ProcessEvent(
 
     if (scrollStop_) {
         auto onScrollStop = listEventHub->GetOnScrollStop();
-        if (!GetScrollAbort() && onScrollStop) {
-            SetScrollState(SCROLL_FROM_NONE);
-            onScrollStop();
+        if (!GetScrollAbort()) {
+            auto scrollBar = GetScrollBar();
+            if (scrollBar) {
+                scrollBar->PlayScrollBarEndAnimation();
+            }
+            if (onScrollStop) {
+                scrollState_ = SCROLL_FROM_NONE;
+                onScrollStop();
+            }
         }
         if (!GetScrollAbort()) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
@@ -728,6 +739,10 @@ void ListPattern::FireOnScrollStart()
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
+    }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarStartAnimation();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

@@ -74,6 +74,15 @@ public:
         return laneGutter_;
     }
 
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
+    {
+        auto scrollBar = scrollBar_.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(scrollBar, nullptr);
+        return scrollBar->GetScrollBarOverlayModifier();
+    }
+
 private:
     V2::ItemDivider divider_;
     bool vertical_ = false;

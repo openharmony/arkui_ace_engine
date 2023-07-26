@@ -13,14 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
-TextFieldOverlayModifier::TextFieldOverlayModifier(
-    const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
+ScrollBarOverlayModifier::ScrollBarOverlayModifier() {}
+
+void ScrollBarOverlayModifier::onDraw(DrawingContext& context) {}
+
+void ScrollBarOverlayModifier::SetOpacity(uint8_t opacity) {}
+
+void ScrollBarOverlayModifier::SetRect(
+    const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset, const OffsetF& bgOffset)
 {}
 
-void TextFieldOverlayModifier::onDraw(DrawingContext& context) {}
+void ScrollBarOverlayModifier::SetOffset(OffsetF fgOffset, OffsetF bgOffset) {}
+
+void ScrollBarOverlayModifier::SetFgColor(Color fgColor) {}
+
+void ScrollBarOverlayModifier::SetBgColor(Color bgColor) {}
 } // namespace OHOS::Ace::NG

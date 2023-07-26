@@ -99,6 +99,7 @@ ace_unittest("calendar_picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/list/mock_list_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/list/mock_list_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/list/mock_list_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/mock_scrollable_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",

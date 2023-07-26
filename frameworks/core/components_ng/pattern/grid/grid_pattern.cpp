@@ -226,6 +226,10 @@ void GridPattern::FireOnScrollStart()
     if (GetScrollAbort()) {
         return;
     }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarStartAnimation();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<GridEventHub>();
@@ -378,6 +382,11 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     SetScrollState(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
+    if (config.frameSizeChange) {
+        if (GetScrollBar() != nullptr) {
+            GetScrollBar()->PlayScrollBarEndAnimation();
+        }
+    }
     CheckRestartSpring();
     CheckScrollable();
     FlushCurrentFocus();
@@ -512,9 +521,15 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
 
     if (scrollStop_) {
         auto onScrollStop = gridEventHub->GetOnScrollStop();
-        if (!GetScrollAbort() && onScrollStop) {
-            scrollState_ = SCROLL_FROM_NONE;
-            onScrollStop();
+        if (!GetScrollAbort()) {
+            auto scrollBar = GetScrollBar();
+            if (scrollBar) {
+                scrollBar->PlayScrollBarEndAnimation();
+            }
+            if (onScrollStop) {
+                scrollState_ = SCROLL_FROM_NONE;
+                onScrollStop();
+            }
         }
         if (!GetScrollAbort()) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);

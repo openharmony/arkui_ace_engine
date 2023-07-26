@@ -68,6 +68,7 @@ ace_unittest("grid_test_ng") {
 
     # mock
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/test_ng.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",

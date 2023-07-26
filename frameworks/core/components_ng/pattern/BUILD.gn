@@ -305,6 +305,7 @@ build_component_ng("pattern_ng") {
     "scroll/effect/scroll_fade_effect.cpp",
     "scroll/effect/scroll_fade_painter.cpp",
     "scroll/inner/scroll_bar.cpp",
+    "scroll/inner/scroll_bar_overlay_modifier.cpp",
     "scroll/inner/scroll_bar_painter.cpp",
     "scroll/scroll_accessibility_property.cpp",
     "scroll/scroll_layout_algorithm.cpp",

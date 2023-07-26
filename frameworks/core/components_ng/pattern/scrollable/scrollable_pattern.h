@@ -20,6 +20,7 @@
 #include "core/animation/select_motion.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
@@ -281,6 +282,16 @@ protected:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
 
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
+    {
+        return overlayModifier_;
+    }
+
+    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier)
+    {
+        overlayModifier_ = scrollBarOverlayModifier;
+    }
+
 private:
     void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
@@ -310,6 +321,7 @@ private:
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
+    RefPtr<ScrollBarOverlayModifier> overlayModifier_;
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;

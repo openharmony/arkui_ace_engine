@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 
 namespace OHOS::Ace::NG {
@@ -41,7 +42,6 @@ CanvasDrawFunction WaterFlowPaintMethod::GetForegroundDrawFunction(PaintWrapper*
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto painter = weak.Upgrade();
         CHECK_NULL_VOID(painter);
-        painter->PaintScrollBar(canvas);
         painter->PaintEdgeEffect(paintWrapper, canvas);
     };
     return paintFunc;
@@ -58,5 +58,25 @@ void WaterFlowPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     contentModifier_->SetClipOffset(paddingOffset);
     contentModifier_->SetClipSize(frameSize);
     contentModifier_->SetClip(clip);
+}
+
+void WaterFlowPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID_NOLOG(paintWrapper);
+    auto scrollBar = scrollBar_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(scrollBar);
+    if (!scrollBar->NeedPaint()) {
+        LOGD("no need paint scroll bar.");
+        return;
+    }
+    auto scrollBarOverlayModifier = scrollBar->GetScrollBarOverlayModifier();
+    CHECK_NULL_VOID_NOLOG(scrollBarOverlayModifier);
+    scrollBarOverlayModifier->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
+        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
+        OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
+        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()));
+    scrollBarOverlayModifier->SetFgColor(scrollBar->GetForegroundColor());
+    scrollBarOverlayModifier->SetBgColor(scrollBar->GetBackgroundColor());
+    scrollBarOverlayModifier->SetOpacity(scrollBar->GetOpacity());
 }
 } // namespace OHOS::Ace::NG

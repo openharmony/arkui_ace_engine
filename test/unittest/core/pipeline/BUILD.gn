@@ -269,6 +269,7 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/root/mock_root_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_fade_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/mock_scrollable_pattern.cpp",

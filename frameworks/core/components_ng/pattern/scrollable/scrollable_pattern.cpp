@@ -146,7 +146,7 @@ void ScrollablePattern::OnScrollEnd()
         }
     }
     if (scrollBar_) {
-        scrollBar_->OnScrollEnd();
+        scrollBar_->PlayScrollBarEndAnimation();
     }
     StartScrollBarAnimatorByProxy();
 }
@@ -346,7 +346,7 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
     auto host = GetHost();
     CHECK_NULL_VOID_NOLOG(host);
     if (!scrollBar_) {
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode, overlayModifier_);
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);

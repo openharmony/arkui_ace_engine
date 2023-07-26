@@ -822,6 +822,10 @@ bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
 
 void TextFieldPattern::OnScrollEndCallback()
 {
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarEndAnimation();
+    }
     auto selectOverlayProxy = GetSelectOverlay();
     CHECK_NULL_VOID_NOLOG(selectOverlayProxy);
     selectOverlayProxy->ShowOrHiddenMenu(false);
@@ -2179,6 +2183,10 @@ void TextFieldPattern::OnModifyDone()
         SetAxis(Axis::VERTICAL);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
+        }
+        if (!GetScrollBarOverlayModifier()) {
+            SetScrollBarOverlayModifier(
+                AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect()));
         }
         SetScrollBar(layoutProperty->GetDisplayModeValue(DisplayMode::AUTO));
         auto scrollBar = GetScrollBar();
@@ -4939,6 +4947,10 @@ void TextFieldPattern::UpdateScrollBarOffset()
 bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            scrollBar->PlayScrollBarStartAnimation();
+        }
         return true;
     }
     OnTextInputScroll(offset);
