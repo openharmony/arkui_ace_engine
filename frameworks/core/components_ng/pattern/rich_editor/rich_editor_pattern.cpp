@@ -897,10 +897,20 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (isMousePressed_) {
         return;
     }
-    copyOption_ = CopyOptions::Local;
-    TextPattern::HandleLongPress(info);
+    if (IsDraggable(info.GetLocalLocation())) {
+        // prevent long press event from being triggered when dragging
+        return;
+    }
+    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    showSelectOverlay_ = true;
+    InitSelection(textOffset);
+    CalculateHandleOffsetAndShowOverlay();
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
@@ -1799,7 +1809,20 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
     if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
         eventHub->FireOnSelect(&textSelectInfo);
     }
-    TextPattern::OnHandleMoveDone(handleRect, isFirstHandle);
+    CalculateHandleOffsetAndShowOverlay();
+    if (selectOverlayProxy_) {
+        SelectHandleInfo handleInfo;
+        if (isFirstHandle) {
+            handleInfo.paintRect = textSelector_.firstHandle;
+            selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
+        } else {
+            handleInfo.paintRect = textSelector_.secondHandle;
+            selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
+        }
+        return;
+    }
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 RefPtr<UINode> RichEditorPattern::GetChildByIndex(int32_t index) const
@@ -2094,5 +2117,35 @@ void RichEditorPattern::CloseSelectOverlay()
     CHECK_NULL_VOID(eventHub);
     auto textSelectInfo = GetSpansInfo(-1, -1, GetSpansMethod::ONSELECT);
     eventHub->FireOnSelect(&textSelectInfo);
+}
+
+void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto offset = host->GetPaintRectOffset();
+    auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    float startSelectHeight = 0.0f;
+    float endSelectHeight = 0.0f;
+    auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight);
+    auto endOffset =
+        CalcCursorOffsetByPosition(std::min(textSelector_.destinationOffset, GetTextContentLength()), endSelectHeight);
+    float selectLineHeight = std::max(startSelectHeight, endSelectHeight);
+    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), selectLineHeight };
+    OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
+    OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
+    textSelector_.selectionBaseOffset = firstHandleOffset;
+    textSelector_.selectionDestinationOffset = secondHandleOffset;
+    RectF firstHandle;
+    firstHandle.SetOffset(firstHandleOffset);
+    firstHandle.SetSize(handlePaintSize);
+    textSelector_.firstHandle = firstHandle;
+    RectF secondHandle;
+    secondHandle.SetOffset(secondHandleOffset);
+    secondHandle.SetSize(handlePaintSize);
+    textSelector_.secondHandle = secondHandle;
 }
 } // namespace OHOS::Ace::NG
