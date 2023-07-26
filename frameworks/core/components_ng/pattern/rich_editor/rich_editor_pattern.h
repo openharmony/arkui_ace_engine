@@ -147,6 +147,7 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif
+    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
