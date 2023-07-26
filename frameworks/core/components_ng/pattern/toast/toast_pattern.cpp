@@ -18,12 +18,28 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_VERSION_9 = 9;
+
+float GetTextHeight(const RefPtr<FrameNode>& textNode)
+{
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
+    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
+
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
+    CHECK_NULL_RETURN(textLayoutWrapper, 0.0f);
+    textLayoutWrapper->Measure(layoutConstraint);
+    auto textGeometry = textLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(textGeometry, 0.0f);
+    auto textSize = textGeometry->GetMarginFrameSize();
+    return textSize.Height();
+}
 } // namespace
 
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
@@ -86,6 +102,15 @@ void ToastPattern::BeforeCreateLayoutWrapper()
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     UpdateTextSizeConstraint(textNode);
+
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto toastTheme = context->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+    auto textHeight = GetTextHeight(textNode);
+    if (textHeight > toastTheme->GetMinHeight().ConvertToPx()) {
+        textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::START);
+    }
 }
 
 void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
