@@ -61,6 +61,9 @@ void LoadingProgressPattern::OnVisibleChange(bool isVisible)
 void LoadingProgressPattern::StartAnimation()
 {
     CHECK_NULL_VOID(loadingProgressModifier_);
+    if (loadingProgressModifier_->GetVisible()) {
+        return;
+    }
     LOGD("Loading StartAnimation: isVisibleArea_ = %d, isVisible_ = %d, isShow_ = %d, enableLoading_ = %d",
         isVisibleArea_, isVisible_, isShow_, enableLoading_);
     if (isVisibleArea_ && isVisible_ && isShow_ && enableLoading_) {
@@ -74,6 +77,9 @@ void LoadingProgressPattern::StartAnimation()
 void LoadingProgressPattern::StopAnimation()
 {
     CHECK_NULL_VOID(loadingProgressModifier_);
+    if (!loadingProgressModifier_->GetVisible()) {
+        return;
+    }
     LOGD("Loading StopAnimation");
     loadingProgressModifier_->SetVisible(false);
     auto host = GetHost();
