@@ -717,13 +717,6 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
     CHECK_NULL_VOID(theme);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
-        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
-    } else {
-        textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
-        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
-    }
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     if (!hasSubTitle) {
@@ -1191,6 +1184,8 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
     navBarPattern->SetTitleBarMenuItems(menuItems);
+    navBarPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navBarPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
     navBarNode->UpdatePrevMenuIsCustom(false);
 }
 

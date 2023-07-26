@@ -284,10 +284,10 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
 void NavDestinationModelNG::SetTitleHeight(int32_t height)
 {
     if (height == 0) {
-        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, SINGLE_LINE_TITLEBAR_HEIGHT);
+        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
     }
     if (height == 1) {
-        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, DOUBLE_LINE_TITLEBAR_HEIGHT);
+        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
     }
 }
 
