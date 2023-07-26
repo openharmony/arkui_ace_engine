@@ -263,6 +263,7 @@ public:
     };
 
     void OnAnimateStop();
+    void ProcessScrollSnapStop();
     void StartSpringMotion(
         double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent);
 

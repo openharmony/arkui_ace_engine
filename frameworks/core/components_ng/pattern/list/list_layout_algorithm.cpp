@@ -439,7 +439,7 @@ void ListLayoutAlgorithm::MeasureList(
             scrollSnapOverBottom = LessNotEqual(endPos - contentMainSize_ / 2.0f - startItemHeight / 2.0f, endMainPos_);
         }
         if ((!overScrollFeature_ && NonNegative(currentOffset_) && !scrollSnapOverBottom) ||
-            (overScrollFeature_ && overScrollTop) || scrollSnapOverTop) {
+            (overScrollFeature_ && overScrollTop) || scrollSnapOverTop || scrollSnapOverBottom) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
@@ -704,8 +704,14 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
 
     if (LessNotEqual(predictEndPos, 0.0f)) {
+        if (isSpringEffect_) {
+            return;
+        }
         predictEndPos = 0.0f;
     } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
+        if (isSpringEffect_) {
+            return;
+        }
         predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
     } else {
         int32_t index;
@@ -731,9 +737,15 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
 
     if (LessNotEqual(predictEndPos, itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
+        if (isSpringEffect_) {
+            return;
+        }
         predictEndPos = itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
     } else if (GreatNotEqual(
         predictEndPos + contentMainSize_ / 2.0f, itemHeight * totalItemCount_ - itemHeight / 2.0f)) {
+        if (isSpringEffect_) {
+            return;
+        }
         predictEndPos = itemHeight * totalItemCount_ - itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
     } else {
         int32_t index;
@@ -762,8 +774,14 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
 
     if (LessNotEqual(predictEndPos, 0.0f)) {
+        if (isSpringEffect_) {
+            return;
+        }
         predictEndPos = 0.0f;
     } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
+        if (isSpringEffect_) {
+            return;
+        }
         predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
     } else {
         int32_t index;
