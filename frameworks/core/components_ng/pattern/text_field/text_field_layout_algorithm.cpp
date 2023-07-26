@@ -187,11 +187,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
-    auto isInlineStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE;
+    auto isInlineStyle = pattern->IsNormalInlineState();
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
-        if (!pattern->IsTextArea()) {
+        if (!pattern->IsTextArea() && isInlineStyle) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         }
     } else {

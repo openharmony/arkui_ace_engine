@@ -917,6 +917,8 @@ public:
         return inlinePadding_;
     }
 
+    bool IsNormalInlineState() const;
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);

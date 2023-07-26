@@ -1120,8 +1120,7 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
-        !textEditingValue_.GetWideText().empty()) {
+    if (IsNormalInlineState() && !textEditingValue_.GetWideText().empty()) {
         ApplyInlineStates(true);
         inlineSelectAllFlag_ = true;
         inlineFocusState_ = true;
@@ -1306,8 +1305,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
-        !textEditingValue_.GetWideText().empty()) {
+    if (IsNormalInlineState() && !textEditingValue_.GetWideText().empty()) {
         if (IsTextArea() && isTextInput_) {
             layoutProperty->UpdateMaxLines(1);
         }
@@ -2164,7 +2162,7 @@ void TextFieldPattern::OnModifyDone()
     }
 #endif
     FireOnChangeIfNeeded();
-    if (IsTextArea() || paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+    if (IsTextArea() || IsNormalInlineState()) {
         SetAxis(Axis::VERTICAL);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
@@ -2202,12 +2200,13 @@ void TextFieldPattern::OnModifyDone()
         isTextInput_ = true;
     }
     auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
-    if ((!IsSelected() && inputStyle == InputStyle::INLINE) ||
-        ((inputStyle == InputStyle::DEFAULT) && preInputStyle_ != InputStyle::INLINE)) {
+    if ((!IsSelected() && IsNormalInlineState()) || ((inputStyle == InputStyle::DEFAULT) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED &&
+        preInputStyle_ != InputStyle::INLINE)) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
     }
-    if (IsSelected() && inputStyle == InputStyle::INLINE) {
+    if (IsSelected() && IsNormalInlineState()) {
         preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
     if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
@@ -3955,7 +3954,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+    if (IsNormalInlineState()) {
         HandleBlurEvent();
         eventHub->FireOnSubmit(static_cast<int32_t>(action));
         return;
@@ -4779,7 +4778,7 @@ uint32_t TextFieldPattern::GetMaxLines() const
     CHECK_NULL_RETURN(layoutProperty, Infinity<uint32_t>());
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, Infinity<uint32_t>());
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+    if (IsNormalInlineState()) {
         return layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
     }
     return layoutProperty->HasMaxLines() ? layoutProperty->GetMaxLinesValue(Infinity<uint32_t>())
@@ -5219,6 +5218,16 @@ void TextFieldPattern::RestorePreInlineStates()
         idealSize.SetHeight(height);
     }
     layoutProperty->UpdateUserDefinedIdealSize(idealSize);
+}
+
+bool TextFieldPattern::IsNormalInlineState() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
