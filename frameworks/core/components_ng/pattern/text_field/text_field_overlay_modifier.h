@@ -53,6 +53,7 @@ public:
     void SetUnderlineWidth(float underlineWidth);
     void SetShowCounter(bool value);
     void SetRedrawFlag(int32_t value);
+    void SetScrollBar(const RefPtr<ScrollBar>& scrollBar);
 
 private:
     void PaintSelection(DrawingContext& context) const;

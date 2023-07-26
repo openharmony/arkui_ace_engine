@@ -2174,6 +2174,11 @@ void TextFieldPattern::OnModifyDone()
             scrollBar->SetStartReservedHeight(0.0_px);
             scrollBar->SetEndReservedHeight(0.0_px);
         }
+        if (textFieldOverlayModifier_) {
+            textFieldOverlayModifier_->SetScrollBar(scrollBar);
+            UpdateScrollBarOffset();
+            MarkRedrawOverlay();
+        }
     } else {
         SetAxis(Axis::HORIZONTAL);
         if (!GetScrollableEvent()) {
@@ -4882,7 +4887,14 @@ void TextFieldPattern::UpdateScrollBarOffset()
         return;
     }
     auto paddingHeight = GetPaddingTop() + GetPaddingBottom();
-    Size size(contentRect_.Width() + GetPaddingRight(), contentRect_.Height() + paddingHeight);
+    auto paddingRight = GetPaddingRight();
+    auto contentHeight = contentRect_.Height();
+    if (inlineFocusState_) {
+        paddingHeight = 0.0f;
+        paddingRight = 0.0f;
+        contentHeight = GetSingleLineHeight() * GetMaxLines();
+    }
+    Size size(contentRect_.Width() + paddingRight, contentHeight + paddingHeight);
     UpdateScrollBarRegion(
         contentRect_.GetY() - textRect_.GetY(), textRect_.Height() + paddingHeight, size, Offset(0.0, 0.0));
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
