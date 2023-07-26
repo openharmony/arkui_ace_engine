@@ -111,6 +111,7 @@ public:
         return { false, true, ScopeType::OTHERS };
     }
 
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
     void InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void UpdateSideBarPosition(float value);
