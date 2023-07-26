@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 common_napi_libs = [
   # napi .so needs to be all lower case
+  "arkui/componentutils",
   "arkui/component_snapshot",
   "arkui/drag_controller",
   "arkui/inspector",
@@ -23,7 +24,6 @@ common_napi_libs = [
   "device",
   "font",
   "grid",
-  "componentutils",
   "measure",
   "mediaquery",
   "prompt",
