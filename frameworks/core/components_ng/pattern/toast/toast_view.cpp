@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/toast/toast_view.h"
 
 #include "base/geometry/dimension.h"
@@ -44,7 +43,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(toastNode, nullptr);
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_RETURN(toastProperty, nullptr);
-
+    auto toastContext = toastNode->GetRenderContext();
+    CHECK_NULL_RETURN(toastContext, nullptr);
     auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
     toastAccessibilityProperty->SetText(message);
@@ -53,7 +53,9 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetTextNode(textNode);
     UpdateTextLayoutProperty(textNode, message, isRightToLeft);
     UpdateTextContext(textNode);
     textNode->MountToParent(toastNode);
