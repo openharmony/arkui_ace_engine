@@ -46,6 +46,7 @@ void TextFieldModelNG::CreateNode(
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textEditingValue = pattern->GetTextEditingValue();
     if (value.has_value() && value.value() != textEditingValue.text) {
+        pattern->SetCaretUpdateType(CaretUpdateType::EVENT);
         pattern->InitEditingValueText(value.value());
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
