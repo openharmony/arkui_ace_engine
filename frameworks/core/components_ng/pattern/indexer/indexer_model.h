@@ -54,8 +54,8 @@ public:
     virtual void SetPopupUnselectedColor(const std::optional<Color>& color) {};
     virtual void SetFontSize(const Dimension& fontSize) {};
     virtual void SetFontWeight(const FontWeight weight) {};
-    virtual void SetPopupPositionX(const Dimension& positionX) {};
-    virtual void SetPopupPositionY(const Dimension& positionY) {};
+    virtual void SetPopupPositionX(const std::optional<Dimension>& popupPositionXOpt) {};
+    virtual void SetPopupPositionY(const std::optional<Dimension>& popupPositionYOpt) {};
     virtual void SetOnSelected(std::function<void(const int32_t selected)>&& onSelect) = 0;
     virtual void SetOnRequestPopupData(
         std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData) = 0;
