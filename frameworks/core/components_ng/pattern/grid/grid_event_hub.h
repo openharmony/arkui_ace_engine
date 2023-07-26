@@ -178,7 +178,12 @@ public:
 
     bool FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
 
-    bool HasOnItemDrop() const
+    bool HasOnItemDragMove() override
+    {
+        return static_cast<bool>(onItemDragMove_);
+    }
+
+    bool HasOnItemDrop() override
     {
         return static_cast<bool>(onItemDrop_);
     }

@@ -183,7 +183,7 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
 #endif // ENABLE_DRAG_FRAMEWORK
 
 RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
-    const RefPtr<UINode> parentNode, std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes, bool findDrop)
+    const RefPtr<UINode> parentNode, std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
@@ -206,10 +206,13 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
 
     CHECK_NULL_RETURN_NOLOG(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
-        if (parentFrameNode == iter.second) {
+        if (parentFrameNode == iter) {
             auto eventHub = parentFrameNode->GetEventHub<EventHub>();
-            CHECK_NULL_RETURN(eventHub, nullptr);
-            if ((findDrop && eventHub->HasOnDrop()) || (!findDrop && eventHub->HasOnDragMove())) {
+            if (!eventHub) {
+                continue;
+            }
+            if ((findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))
+                || (!findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))) {
                 return parentFrameNode;
             }
         }
@@ -243,7 +246,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     }
 
     PointF point(globalX, globalY);
-    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
+    std::vector<RefPtr<FrameNode>> hitFrameNodes;
     for (const auto& weakNode : frameNodes) {
         auto frameNode = weakNode.Upgrade();
         if (!frameNode) {
@@ -256,22 +259,24 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
         auto globalFrameRect = geometryNode->GetFrameRect();
         globalFrameRect.SetOffset(frameNode->GetTransformRelativeOffset());
         if (globalFrameRect.IsInRegion(point)) {
-            hitFrameNodes.insert(std::make_pair(frameNode->GetDepth(), frameNode));
+            hitFrameNodes.push_back(frameNode);
         }
     }
 
     if (hitFrameNodes.empty()) {
         return nullptr;
     }
-    RefPtr<UINode> rootNode = hitFrameNodes.rbegin()->second;
-    while (rootNode->GetParent()) {
-        rootNode = rootNode->GetParent();
-    }
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto manager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(manager, nullptr);
+    auto rootNode = pipeline->GetRootElement();
+
     auto result = FindTargetInChildNodes(rootNode, hitFrameNodes, findDrop);
     if (result) {
         return result;
     }
-    return hitFrameNodes.rbegin()->second;
+    return nullptr;
 }
 
 bool DragDropManager::CheckDragDropProxy(int64_t id) const
