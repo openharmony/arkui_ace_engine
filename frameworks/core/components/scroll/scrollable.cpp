@@ -31,9 +31,9 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr double SPRING_SCROLL_MASS = 0.5;
-constexpr double SPRING_SCROLL_STIFFNESS = 100.0;
-constexpr double SPRING_SCROLL_DAMPING = 15.55635;
+constexpr float SPRING_SCROLL_MASS = 1.0f;
+constexpr float SPRING_SCROLL_STIFFNESS = 288.0f;
+constexpr float SPRING_SCROLL_DAMPING = 30.0f;
 constexpr double CAP_COEFFICIENT = 0.45;
 constexpr int32_t FIRST_THRESHOLD = 5;
 constexpr int32_t SECOND_THRESHOLD = 10;
@@ -666,8 +666,10 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         }
 #endif
     } else if (!overScrollOffsetCallback_ && outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
+        ResetContinueDragCount();
         ProcessScrollOverCallback(correctVelocity);
     } else if (canOverScroll_) {
+        ResetContinueDragCount();
         HandleOverScroll(correctVelocity);
     } else {
         if (springController_ && !springController_->IsStopped()) {
@@ -854,7 +856,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     scrollSnapController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
-        scroll->OnAnimateStop();
+        scroll->ProcessScrollSnapStop();
     });
     scrollSnapController_->PlayMotion(scrollSnapMotion_);
 }
@@ -906,7 +908,7 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
         scrollSnapController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
-            scroll->OnAnimateStop();
+            scroll->ProcessScrollSnapStop();
         });
     }
 }
@@ -918,7 +920,8 @@ void Scrollable::ProcessScrollSnapMotion(double position)
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
-        moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
+        auto mainDelta = position - currentPos_;
+        HandleScroll(mainDelta, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
         if (!moved_) {
             scrollSnapController_->Stop();
         } else if (!touchUp_) {
@@ -929,6 +932,21 @@ void Scrollable::ProcessScrollSnapMotion(double position)
         }
     }
     currentPos_ = scrollSnapMotion_->GetCurrentPosition();
+    if (canOverScroll_ || needScrollSnapChange_ ||
+        (!overScrollOffsetCallback_ && (outBoundaryCallback_ && outBoundaryCallback_()))) {
+        scrollPause_ = true;
+        scrollSnapController_->Stop();
+    }
+}
+
+void Scrollable::ProcessScrollSnapStop()
+{
+    if (scrollPause_) {
+        scrollPause_ = false;
+        HandleOverScroll(currentVelocity_);
+    } else {
+        OnAnimateStop();
+    }
 }
 
 void Scrollable::OnAnimateStop()
