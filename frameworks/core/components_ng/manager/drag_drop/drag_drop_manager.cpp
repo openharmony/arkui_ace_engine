@@ -185,10 +185,6 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     const RefPtr<UINode> parentNode, std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes, bool findDrop)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
-    if (parentFrameNode && !parentFrameNode->IsActive()) {
-        return nullptr;
-    }
     auto children = parentNode->GetChildren();
 
     for (auto index = static_cast<int>(children.size()) - 1; index >= 0; index--) {
@@ -203,6 +199,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
         }
     }
 
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
     CHECK_NULL_RETURN(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
         if (parentFrameNode == iter.second) {
@@ -270,7 +267,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     if (result) {
         return result;
     }
-    return nullptr;
+    return hitFrameNodes.rbegin()->second;
 }
 
 bool DragDropManager::CheckDragDropProxy(int64_t id) const
