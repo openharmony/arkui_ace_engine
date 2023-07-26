@@ -111,7 +111,8 @@ public:
     void OnDataReloaded()
     {
         cachedItems_.clear();
-        expiringItem_ = std::move(generatedItem_);
+        expiringItem_.merge(generatedItem_);
+        generatedItem_.clear();
     }
 
     bool OnDataAdded(size_t index)

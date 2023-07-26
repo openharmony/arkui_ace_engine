@@ -25,6 +25,7 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_layout_algorithm.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 
@@ -53,7 +54,21 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig) override;
 
+    void OnColorConfigurationUpdate() override;
+
+    void SetTextNode(RefPtr<FrameNode> textNode)
+    {
+        textNode_ = textNode;
+    }
+
 private:
+    void BeforeCreateLayoutWrapper() override;
+    void UpdateToastSize(const RefPtr<FrameNode>& toast);
+    void UpdateTextSizeConstraint(const RefPtr<FrameNode>& text);
+
+    double GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper);
+
+    RefPtr<FrameNode> textNode_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components/declaration/svg/svg_circle_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -56,4 +57,19 @@ RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
 }
 #endif
 
+void SvgCircle::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
+{
+    auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
+    CHECK_NULL_VOID_NOLOG(declaration);
+    auto attr = animate->GetAttributeName();
+    if (attr == DOM_SVG_CX) {
+        AnimateOnAttribute(animate, declaration->GetCx());
+    } else if (attr == DOM_SVG_CY) {
+        AnimateOnAttribute(animate, declaration->GetCy());
+    } else if (attr == DOM_SVG_R) {
+        AnimateOnAttribute(animate, declaration->GetR());
+    } else {
+        SvgNode::PrepareAnimation(animate);
+    }
+}
 } // namespace OHOS::Ace::NG

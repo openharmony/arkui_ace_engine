@@ -14,9 +14,10 @@
  */
 
 #include "image_converter.h"
-
+#ifndef PREVIEW
 #include "platform/image_native/image_type.h"
 #include "image_utils.h"
+#endif
 
 namespace OHOS::Ace::Napi {
 SkColorType ImageConverter::PixelFormatToSkColorType(Media::PixelFormat pixelFormat)

@@ -50,6 +50,7 @@ void PatternLockPattern::OnModifyDone()
 
     auto gestureHub = host->GetOrCreateGestureEventHub();
     InitTouchEvent(gestureHub, touchDownListener_);
+    InitPanEvent(gestureHub);
     InitPatternLockController();
 }
 
@@ -83,8 +84,6 @@ void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
         OnTouchDown(info);
     } else if (touchType == TouchType::UP) {
         OnTouchUp();
-    } else if (touchType == TouchType::MOVE) {
-        OnTouchMove(info);
     }
 }
 
@@ -226,11 +225,33 @@ void PatternLockPattern::OnTouchDown(const TouchEventInfo& info)
     isMoveEventValid_ = true;
 }
 
-void PatternLockPattern::OnTouchMove(const TouchEventInfo& info)
+void PatternLockPattern::OnTouchUp()
 {
-    const auto& locationInfo = info.GetTouches().front();
-    float moveDeltaX = locationInfo.GetLocalLocation().GetX();
-    float moveDeltaY = locationInfo.GetLocalLocation().GetY();
+    if (!CheckAutoReset()) {
+        return;
+    }
+    isMoveEventValid_ = false;
+    std::vector<int> chooseCellVec;
+    for (auto& it : choosePoint_) {
+        chooseCellVec.emplace_back(it.GetCode());
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto patternCompleteEvent = V2::PatternCompleteEvent(chooseCellVec);
+    eventHub->UpdateCompleteEvent(&patternCompleteEvent);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void PatternLockPattern::HandleGestureUpdate(const GestureEvent& info)
+{
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        return;
+    }
+    auto moveDeltaX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto moveDeltaY = static_cast<float>(info.GetLocalLocation().GetY());
     OffsetF touchPoint;
     touchPoint.SetX(moveDeltaX);
     touchPoint.SetY(moveDeltaY);
@@ -251,23 +272,28 @@ void PatternLockPattern::OnTouchMove(const TouchEventInfo& info)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void PatternLockPattern::OnTouchUp()
+void PatternLockPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (!CheckAutoReset()) {
-        return;
-    }
-    isMoveEventValid_ = false;
-    std::vector<int> chooseCellVec;
-    for (auto& it : choosePoint_) {
-        chooseCellVec.emplace_back(it.GetCode());
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<PatternLockEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto patternCompleteEvent = V2::PatternCompleteEvent(chooseCellVec);
-    eventHub->UpdateCompleteEvent(&patternCompleteEvent);
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) { LOGD("Pan event start"); };
 
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleGestureUpdate(info);
+    };
+
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) { LOGD("Pan event End"); };
+
+    auto actionCancelTask = [weak = WeakClaim(this)]() { LOGD("Pan event cancel"); };
+    if (panEvent_) {
+        gestureHub->RemovePanEvent(panEvent_);
+    }
+
+    float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    panEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
 }
 } // namespace OHOS::Ace::NG

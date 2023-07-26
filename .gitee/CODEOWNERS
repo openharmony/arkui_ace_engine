@@ -93,7 +93,7 @@ frameworks/core/components_ng/pattern/refresh/  @aryawang
 frameworks/core/components_ng/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @zhangbingce
-frameworks/core/components_ng/pattern/rich_editor/  @cc520bf
+frameworks/core/components_ng/pattern/rich_editor/  @jyj-0306
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
@@ -101,7 +101,7 @@ frameworks/core/components_ng/pattern/scrollable/  @yeyinglong_admin
 frameworks/core/components_ng/pattern/search/  @zhang-xiao150
 frameworks/core/components_ng/pattern/security_component/  @
 frameworks/core/components_ng/pattern/select/  @zhao-xinyu007
-frameworks/core/components_ng/pattern/select_overlay/  @zhao-xinyu007
+frameworks/core/components_ng/pattern/select_overlay/  @lijuan124
 frameworks/core/components_ng/pattern/shape/  @sunbees
 frameworks/core/components_ng/pattern/side_bar/  @xuzhidan
 frameworks/core/components_ng/pattern/slider/  @cheng-feiwang
@@ -118,7 +118,7 @@ frameworks/core/components_ng/pattern/text_field/  @xiexiyun
 frameworks/core/components_ng/pattern/text_picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/texttimer/  @lijuan124
 frameworks/core/components_ng/pattern/time_picker/  @cheng-feiwang
-frameworks/core/components_ng/pattern/toast/  @makangcheng
+frameworks/core/components_ng/pattern/toast/  @zhao-xinyu007
 frameworks/core/components_ng/pattern/toggle/  @zhang-xiao150
 frameworks/core/components_ng/pattern/ui_extension/  @lushi1202
 frameworks/core/components_ng/pattern/video/  @jinweiliu
@@ -159,7 +159,7 @@ frameworks/core/components/flex/  @yangfan229
 frameworks/core/components/focus_animation/  @catpoison
 frameworks/core/components/focus_collaboration/  @catpoison
 frameworks/core/components/focusable/  @catpoison
-frameworks/core/components/font/  @cc520bf
+frameworks/core/components/font/  @jyj-0306
 frameworks/core/components/foreach/  @yan-shuifeng
 frameworks/core/components/form/  @wangchensu1
 frameworks/core/components/gesture_listener/  @zheng-qiyi
@@ -302,8 +302,6 @@ frameworks/core/components_ng/components_plugin.gni  @sunfei2021
 frameworks/core/components_ng/components.gni  @sunfei2021
 
 [Test source]
-frameworks/core/components_ng/test/  @liyujie43
-frameworks/core/components/test/  @liyujie43
 frameworks/bridge/test/  @liyujie43
 test/mock/  @liyujie43
 test/unittest/  @liyujie43
@@ -367,7 +365,7 @@ frameworks/core/components_ng/test/pattern/refresh/  @suiwuyue
 frameworks/core/components_ng/test/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/test/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/test/pattern/rendering_context/  @zhangbingce
-frameworks/core/components_ng/test/pattern/rich_editor/  @cc520bf
+frameworks/core/components_ng/test/pattern/rich_editor/  @jyj-0306
 frameworks/core/components_ng/test/pattern/root/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/scroll/  @suiwuyue
 frameworks/core/components_ng/test/pattern/scroll_bar/  @suiwuyue

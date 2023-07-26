@@ -472,7 +472,7 @@ public:
     bool CursorMoveDown();
     void SetCaretPosition(int32_t position);
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
-    void HandleSetSelection(int32_t start, int32_t end);
+    void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
@@ -738,10 +738,16 @@ public:
         }
         Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
                         Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
-        auto position = ConvertTouchOffsetToCaretPosition(offset);
-        auto selectStart = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
-        auto selectEnd = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
-        return offset.GetX() >= 0 && (position >= selectStart) && (position < selectEnd);
+        for (const auto& textBoxes : textBoxes_) {
+            bool isInRange = LessOrEqual(textBoxes.rect_.GetLeft(), offset.GetX()) &&
+                LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
+                LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
+                LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
+            if (isInRange) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // xts
@@ -891,11 +897,6 @@ public:
         caretUpdateType_ = CaretUpdateType::EVENT;
     }
 
-    void SetTextInputFlag(bool enable)
-    {
-        isTextInput_ = enable;
-    }
-
     bool GetTextInputFlag() const
     {
         return isTextInput_;
@@ -915,6 +916,8 @@ public:
     {
         return inlinePadding_;
     }
+
+    bool IsNormalInlineState() const;
 
 private:
     bool HasFocus() const;
@@ -993,9 +996,11 @@ private:
 
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool LastTouchIsInSelectRegion(const std::vector<RSTypographyProperties::TextBox>& boxes);
 
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
+    bool FilterWithAscii(const std::string& valueToUpdate, std::string& result);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
@@ -1019,6 +1024,7 @@ private:
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
     void SaveUnderlineStates();
+    void ApplyUnderlineStates();
     void SavePasswordModeStates();
     void SetAccessibilityAction();
     void SetAccessibilityMoveTextAction();
@@ -1085,7 +1091,7 @@ private:
     bool isMousePressed_ = false;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
-#if defined(ENABLE_STANDARD_INPUT)
+#if defined(ENABLE_STANDARD_INPUT) || defined(PREVIEW)
     bool textObscured_ = true;
 #else
     bool textObscured_ = false;
@@ -1112,9 +1118,11 @@ private:
     bool isTextInput_ = false;
     bool inlineSelectAllFlag_ = false;
     bool inlineFocusState_ = false;
+    bool blockPress_ = false;
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
     float previewWidth_ = 0.0f;
+    InputStyle preInputStyle_ = InputStyle::DEFAULT;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;

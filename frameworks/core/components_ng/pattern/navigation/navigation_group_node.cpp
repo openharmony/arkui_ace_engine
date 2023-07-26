@@ -17,9 +17,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/perfmonitor/perf_monitor.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/common/container.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -121,6 +122,14 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(childNode.first);
         navDestinationPattern->SetNavDestinationNode(uiNode);
+        auto navDestinationContext = AceType::DynamicCast<FrameNode>(navDestination)->GetRenderContext();
+        CHECK_NULL_VOID(navDestinationContext);
+        if (!(navDestinationContext->GetBackgroundColor().has_value())) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<AppTheme>();
+            navDestinationContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+        }
         if (!(navigationContentNode->GetChildren().empty() &&
                 navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT)) {
             // add backButton except for the first level page in SPLIT mode
@@ -130,6 +139,7 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
             }
         }
         navigationContentNode->AddChild(navDestination);
+        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -483,7 +493,6 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
                     navDestination->GetRenderContext()->ClipWithRRect(
                         RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     ContainerScope scope(id);
-                    navigationContentNode->Clean();
                     navigationPattern->RemoveNavDestination();
                     navigationContentNode->MarkModifyDone();
                     navigationNode->MarkModifyDone();
@@ -566,8 +575,6 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
                 curNavDestination->GetRenderContext()->ClipWithRRect(
                     RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                 ContainerScope scope(id);
-                navigationContentNode->Clean();
-                navigationNode->AddNavDestinationToNavigation();
                 navigationContentNode->MarkModifyDone();
                 navigationNode->MarkModifyDone();
                 navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

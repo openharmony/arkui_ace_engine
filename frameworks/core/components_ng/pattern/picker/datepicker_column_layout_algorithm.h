@@ -37,19 +37,19 @@ public:
     void ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper);
 
-    double GetCurrentOffset() const
+    std::vector<int32_t> GetCurrentOffset() const
     {
         return currentOffset_;
     }
 
-    void SetCurrentOffset(double currentOffset)
+    void SetCurrentOffset(const std::vector<int32_t>& currentOffset)
     {
         currentOffset_ = currentOffset;
     }
 
 private:
-    double currentOffset_ = 0.0;
-
+    float pickerItemHeight_ = 0.0f;
+    std::vector<int32_t> currentOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

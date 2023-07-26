@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/drawing.h"
@@ -75,10 +76,10 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {
-            if (NearEqual<float>(box.rect_.GetLeft(), rect.Left()) &&
-                NearEqual<float>(box.rect_.GetRight(), rect.Right()) &&
-                NearEqual<float>(box.rect_.GetTop(), rect.Top()) &&
-                NearEqual<float>(box.rect_.GetBottom(), rect.Bottom())) {
+            if (LessOrEqual(box.rect_.GetLeft(), rect.Left()) &&
+                GreatOrEqual(box.rect_.GetRight(), rect.Right()) &&
+                LessOrEqual(box.rect_.GetTop(), rect.Top()) &&
+                GreatOrEqual(box.rect_.GetBottom(), rect.Bottom())) {
                 realImageChildren.emplace_back(child);
                 realRectsForPlaceholders.emplace_back(rect);
             }
@@ -122,7 +123,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
             leftHandleX = contentRect.Left();
             leftHandleY = contentRect.Top();
         }
-        if (boxLast.rect_.GetBottom() > contentRect.Bottom()) {
+        if ((boxLast.rect_.GetBottom() + textStartY) > contentRect.Bottom()) {
             rightHandleX = contentRect.Right();
             rightHandleY = contentRect.Bottom() - lineHeight;
         }

@@ -74,7 +74,8 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     CHECK_NULL_VOID(textFieldPattern);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetShowUnderlineValue(false)) {
+    if (!layoutProperty->GetShowUnderlineValue(false) ||
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::UNSPECIFIED) {
         return;
     }
     auto textRect = textFieldPattern->GetContentRect();
@@ -271,5 +272,10 @@ void TextFieldOverlayModifier::SetUnderlineColor(const Color& value)
 void TextFieldOverlayModifier::SetShowCounter(bool value)
 {
     showCounter_->Set(value);
+}
+
+void TextFieldOverlayModifier::SetScrollBar(const RefPtr<ScrollBar>& scrollBar)
+{
+    scrollBar_ = scrollBar;
 }
 } // namespace OHOS::Ace::NG

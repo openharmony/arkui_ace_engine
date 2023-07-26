@@ -42,6 +42,8 @@ public:
 
     // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
+    void Initialize(
+        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -150,6 +152,9 @@ public:
     NativeValue* GetUIContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
     void SetFocusWindowId(uint32_t focusWindowId) override;
+
+    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks) override;
+    void CloseModalUIExtension(int32_t sessionId) override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

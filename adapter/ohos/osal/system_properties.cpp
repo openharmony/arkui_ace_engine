@@ -23,7 +23,6 @@
 
 #include "parameter.h"
 #include "parameters.h"
-#include "scene_board_judgement.h"
 
 #include "base/log/log.h"
 #include "base/utils/utils.h"
@@ -439,17 +438,6 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 bool SystemProperties::IsFormAnimationLimited()
 {
     return system::GetBoolParameter("persist.sys.arkui.formAnimationLimit", true);
-}
-
-bool SystemProperties::IsSceneBoardEnabled()
-{
-    return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
-}
-
-void SystemProperties::GetAppBarInfo(std::string& bundleName, std::string& abilityName)
-{
-    bundleName = system::GetParameter("persist.ace.appbar.bundlename", "");
-    abilityName = system::GetParameter("persist.ace.appbar.abilityname", "");
 }
 
 } // namespace OHOS::Ace

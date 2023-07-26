@@ -41,6 +41,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 
@@ -66,14 +67,17 @@ public:
     virtual void SetMinHeight(const CalcDimension& minHeight) = 0;
     virtual void SetMaxWidth(const CalcDimension& maxWidth) = 0;
     virtual void SetMaxHeight(const CalcDimension& maxHeight) = 0;
+    virtual void ResetMinSize(bool resetWidth) = 0;
+    virtual void ResetMaxSize(bool resetWidth) = 0;
 
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
-    virtual void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) = 0;
+    virtual void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
+    virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}

@@ -26,6 +26,25 @@ DeclarativeFrontendNG::~DeclarativeFrontendNG() noexcept
     LOG_DESTROY();
 }
 
+bool Frontend::MaybeRelease()
+{
+    CHECK_RUN_ON(JS);
+    CHECK_NULL_RETURN(taskExecutor_, (Destroy(), true));
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
+        LOGI("Destroy Frontend on JS thread.");
+        Destroy();
+        return true;
+    } else {
+        LOGI("Post Destroy Frontend Task to JS thread.");
+        return !taskExecutor_->PostTask(
+            [this]() {
+                Destroy();
+                delete this;
+            },
+            TaskExecutor::TaskType::JS);
+    }
+}
+
 void DeclarativeFrontendNG::Destroy()
 {
     CHECK_RUN_ON(JS);
@@ -41,6 +60,7 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
 {
     LOGI("DeclarativeFrontendNG initialize begin.");
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeDelegate(taskExecutor);
     bool needPostJsTask = true;
@@ -61,7 +81,6 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
     } else {
         initJSEngineTask();
     }
-    taskExecutor_ = taskExecutor;
     LOGI("DeclarativeFrontendNG initialize end.");
     return true;
 }
@@ -217,7 +236,17 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
         jsEngine->TimerCallback(callbackId, delay, isInterval);
     };
 
+    auto loadNamedRouterCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                       const std::string& namedRouter, bool isTriggeredByJs) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
+    };
+
     pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
 
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarativeNG>(taskExecutor);
     delegate_->SetMediaQueryCallback(std::move(mediaQueryCallback));
@@ -371,6 +400,12 @@ void DeclarativeFrontendNG::PushPage(const std::string& url, const std::string& 
     if (delegate_) {
         delegate_->Push(url, params);
     }
+}
+
+
+NativeValue* DeclarativeFrontendNG::GetContextValue()
+{
+    return jsEngine_->GetContextValue();
 }
 
 void DeclarativeFrontendNG::NavigatePage(uint8_t type, const PageTarget& target, const std::string& params)

@@ -37,6 +37,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -65,6 +66,14 @@ public:
     void ClearWidthOrHeight(bool isWidth) override
     {
         ViewAbstract::ClearWidthOrHeight(isWidth);
+    }
+    void ResetMinSize(bool resetWidth) override
+    {
+        ViewAbstract::ResetMinSize(resetWidth);
+    }
+    void ResetMaxSize(bool resetWidth) override
+    {
+        ViewAbstract::ResetMaxSize(resetWidth);
     }
 
     void SetMinWidth(const CalcDimension& minWidth) override
@@ -108,7 +117,7 @@ public:
         ViewAbstract::SetBackgroundColor(color);
     }
 
-    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override
+    void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override
     {
         ViewAbstract::SetBackgroundImage(src);
     }
@@ -131,6 +140,11 @@ public:
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override
     {
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
+    }
+
+    void SetBackgroundEffect(const EffectOption& effectOption) override
+    {
+        ViewAbstract::SetBackgroundEffect(effectOption);
     }
 
     void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
@@ -453,8 +467,9 @@ public:
                 };
                 overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
                 CHECK_NULL_VOID(overlayNode);
-                frameNode->AddChild(overlayNode);
-                frameNode->SetOverlayNode(AceType::WeakClaim(AceType::RawPtr(overlayNode)));
+                frameNode->SetOverlayNode(overlayNode);
+                overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+                overlayNode->SetActive(true);
             } else {
                 overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
@@ -874,8 +889,7 @@ public:
         std::function<void()>&& onDisappear) override;
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
-        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) override;
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear) override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -951,8 +965,8 @@ private:
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 
-    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent) override
+    void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) override
     {
         ViewAbstract::CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
     }
@@ -968,8 +982,8 @@ private:
         ViewAbstract::CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
     }
 
-    void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-        RefPtr<CustomAnimatableArithmetic>& value) override
+    void UpdateAnimatableArithmeticProperty(
+        const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value) override
     {
         ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
     }

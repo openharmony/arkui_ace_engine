@@ -33,4 +33,9 @@ void PathPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const 
 {
     SkPainter::DrawPath(canvas, commands, offset);
 }
+
+SizeF PathPainter::GetPathSize(const std::string& commands)
+{
+    return SkPainter::GetPathSize(commands);
+}
 } // namespace OHOS::Ace::NG

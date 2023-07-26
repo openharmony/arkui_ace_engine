@@ -88,12 +88,12 @@ foreach(item, ace_platforms) {
       part_name = ace_engine_part
       testonly = true
       sources = [
-        "$ace_root/frameworks/base/test/mock/mock_ace_container.cpp",
         "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
         "$ace_root/frameworks/base/test/mock/mock_drag_window_old.cpp",
         "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
         "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
         "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
+        "$ace_root/test/mock/adapter/mock_ace_container.cpp",
       ]
 
       if (is_ohos_standard_system) {
@@ -118,7 +118,11 @@ foreach(item, ace_platforms) {
         "//third_party/googletest:gtest_main",
       ]
 
-      external_deps = [ "c_utils:utils" ]
+      external_deps = [
+        "ability_runtime:abilitykit_native",
+        "c_utils:utils",
+        "napi:ace_napi",
+      ]
     }
   }
 }

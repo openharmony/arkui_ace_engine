@@ -532,7 +532,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderTest009, TestSize.L
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. Invoke AdjustLayoutWrapperTree, update lazyLayoutWrapperBuilder index range and its
      * currentChildCount_.
@@ -577,7 +577,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderTest010, TestSize.L
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. Invoke AdjustLayoutWrapperTree, update lazyLayoutWrapperBuilder index range and its
      * currentChildCount_.
@@ -624,7 +624,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderOnExpandChildLayout
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     lazyLayoutWrapperBuilder->childWrappers_.push_back(
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty()));
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty()));
     lazyLayoutWrapperBuilder->OnExpandChildLayoutWrapper();
     EXPECT_TRUE(lazyLayoutWrapperBuilder->childWrappers_.empty());
 }

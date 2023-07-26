@@ -177,11 +177,9 @@ void WindowPattern::CreateSnapshotNode()
     host->AddChild(snapshotNode_);
 
     CHECK_NULL_VOID(session_);
-    auto snapshot = session_->GetSnapshot();
-    auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
-
-    CHECK_NULL_VOID(pixelMap);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    CHECK_NULL_VOID(session_->GetScenePersistence());
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo("file:/" + session_->GetScenePersistence()->GetSnapshotFilePath()));
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
 }

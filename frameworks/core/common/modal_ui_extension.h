@@ -13,23 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_UI_EXTENSION_HELPER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_UI_EXTENSION_HELPER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_MODAL_UI_EXTENSION_HELPER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_MODAL_UI_EXTENSION_HELPER_H
 
-#include <map>
-#include <string>
+#include <cstdint>
 
 #include "core/components_ng/base/frame_node.h"
 
-namespace OHOS::Ace {
+namespace OHOS::AAFwk {
+class Want;
+} // namespace OHOS::AAFwk
 
-class ACE_EXPORT UIExtensionHelper final {
+namespace OHOS::Ace {
+struct ModalUIExtensionCallbacks;
+} // namespace OHOS::Ace
+
+namespace OHOS::Ace {
+class ModalUIExtension final {
 public:
-    static RefPtr<NG::FrameNode> CreateUIExtensionNode(const std::string& bundleName,
-        const std::string& abilityName, const std::map<std::string, std::string>& params,
-        std::function<void(int32_t)>&& onRelease,
-        std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
+    static RefPtr<NG::FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
+
+    static int32_t GetSessionId(const RefPtr<NG::FrameNode>& uiExtNode);
 };
 
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_UI_EXTENSION_HELPER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_MODAL_UI_EXTENSION_HELPER_H

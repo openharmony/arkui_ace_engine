@@ -44,7 +44,6 @@ public:
         value->propIconStyle_ = CloneIconStyle();
         value->propBackgroundType_ = CloneBackgroundType();
         value->propTextIconLayoutDirection_ = CloneTextIconLayoutDirection();
-        value->propLayoutOrder_ = CloneLayoutOrder();
         return value;
     }
 
@@ -60,7 +59,6 @@ public:
         ResetIconStyle();
         ResetBackgroundType();
         ResetTextIconLayoutDirection();
-        ResetLayoutOrder();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundLeftPadding, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -73,7 +71,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundType, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextIconLayoutDirection,
         SecurityComponentLayoutDirection, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LayoutOrder, SecSecurityComponentLayoutOrder, PROPERTY_UPDATE_MEASURE);
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentLayoutProperty);
 };
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-/**
- * ObservedPropertyObjectAbstractPU
- * 
- * common bbase class of ObservedPropertyObjectPU and
- * SyncedObjectPropertyTwoWayPU
- * adds the createObjectLink to the ObservedPropertyAbstract base
- * 
- * all definitions in this file are framework internal
- */
+#include "core/common/modal_ui_extension.h"
 
-abstract class ObservedPropertyObjectAbstractPU<C extends Object>
-  extends ObservedPropertyAbstractPU<C> {
+namespace OHOS::Ace {
 
-  constructor(owningView: IPropertySubscriber, thisPropertyName: PropertyInfo) {
-    super(owningView, thisPropertyName)
-  }
+RefPtr<NG::FrameNode> ModalUIExtension::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+{
+    return nullptr;
 }
+
+int32_t ModalUIExtension::GetSessionId(const RefPtr<NG::FrameNode>& uiExtNode)
+{
+    return 0;
+}
+} // namespace OHOS::Ace

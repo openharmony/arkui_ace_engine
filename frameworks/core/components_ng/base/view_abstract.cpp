@@ -151,6 +151,19 @@ void ViewAbstract::SetMinHeight(const CalcLength& height)
     layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::ResetMinSize(bool resetWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMinSize(resetWidth);
+}
+
 void ViewAbstract::SetMaxWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -175,6 +188,19 @@ void ViewAbstract::SetMaxHeight(const CalcLength& height)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
+}
+
+void ViewAbstract::ResetMaxSize(bool resetWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMaxSize(resetWidth);
 }
 
 void ViewAbstract::SetAspectRatio(float ratio)
@@ -204,14 +230,13 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
-void ViewAbstract::SetBackgroundImage(const std::string& src)
+void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
         return;
     }
-    ImageSourceInfo imageSourceInfo(src);
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, imageSourceInfo);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
 void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
@@ -255,6 +280,20 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
         if (target->GetBackBlurRadius().has_value()) {
             target->UpdateBackBlurRadius(Dimension());
         }
+    }
+}
+
+void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateBackgroundEffect(effectOption);
     }
 }
 
@@ -1012,10 +1051,6 @@ void ViewAbstract::BindPopup(
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
-    // windowScene will not use subwindow
-    if (container->IsScenceBoardWindow()) {
-        param->SetShowInSubWindow(false);
-    }
     auto showInSubWindow = param->IsShowInSubWindow();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
@@ -1092,6 +1127,7 @@ void ViewAbstract::BindPopup(
             LOGI("Popup now show in subwindow.");
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
             if (popupPattern) {
+                popupPattern->SetContainerId(Container::CurrentId());
                 popupPattern->StartEnteringAnimation(nullptr);
             }
         } else {
@@ -1157,11 +1193,6 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     // unable to use the subWindow in the Previewer.
     isContextMenu = false;
 #endif
-    // windowScene will not use subwindow
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        isContextMenu = false;
-    }
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {

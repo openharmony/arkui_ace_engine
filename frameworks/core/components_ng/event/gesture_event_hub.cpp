@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
@@ -28,10 +29,10 @@
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
-#include "core/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -63,12 +64,13 @@ RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 }
 
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId)
+    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint)
 {
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
-        scrollableActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+        scrollableActuator_->CollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, localPoint);
     }
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
@@ -433,21 +435,19 @@ void GestureEventHub::CancelDragForWeb()
 
 void GestureEventHub::ResetDragActionForWeb()
 {
+    isReceivedDragGestureInfo_ = false;
     CHECK_NULL_VOID_NOLOG(dragEventActuator_);
     dragEventActuator_->ResetDragActionForWeb();
 }
 
 void GestureEventHub::StartDragTaskForWeb()
 {
-    auto startTime = std::chrono::high_resolution_clock::now();
-    auto timeElapsed = startTime - gestureInfoForWeb_.GetTimeStamp();
-    auto timeElapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed);
-    // 100 : 100ms
-    if (timeElapsedMs.count() > 100) {
-        LOGW("start drag task for web failed, not received this drag action gesture info");
+    if (!isReceivedDragGestureInfo_) {
+        LOGI("not received drag info, wait ark drag start");
         return;
     }
 
+    isReceivedDragGestureInfo_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
@@ -477,14 +477,58 @@ std::shared_ptr<Media::PixelMap> CreatePixelMapFromString(const std::string& fil
     std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errCode);
     return pixelMap;
 }
+
+OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale) const
+{
+    OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
+    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+        return result;
+    }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, result);
+    auto frameTag = frameNode->GetTag();
+    if (frameTag == V2::WEB_ETS_TAG) {
+        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
+        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
+    } else if (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
+               frameTag == V2::TEXTINPUT_ETS_TAG) {
+        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
+        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
+    } else {
+        auto frameNodeOffset = frameNode->GetOffsetRelativeToWindow();
+        auto coordinateX = frameNodeOffset.GetX() > SystemProperties::GetDeviceWidth()
+                               ? frameNodeOffset.GetX() - SystemProperties::GetDeviceWidth()
+                               : frameNodeOffset.GetX();
+        auto coordinateY = frameNodeOffset.GetY();
+        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
+        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
+    }
+    if (result.GetX() >= 0.0f || result.GetX() + size.Width() < 0.0f || result.GetY() >= 0.0f ||
+        result.GetY() + size.Height() < 0.0f) {
+        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
+        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
+    }
+    return result;
+}
 #endif
+
+void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        LOGI("web component receive drag start, need to let web kernel start drag action");
+        gestureInfoForWeb_ = info;
+        isReceivedDragGestureInfo_ = true;
+    }
+}
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
-        gestureInfoForWeb_ = info;
+        HandleNotallowDrag(info);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -567,20 +611,23 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     } else if (!GetTextDraggable()) {
         pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
     }
-    int32_t width = pixelMap->GetWidth();
-    int32_t height = pixelMap->GetHeight();
-    DragData dragData { { pixelMap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE }, {}, udKey,
-        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetTargetDisplayId(), true };
+    uint32_t width = pixelMap->GetWidth();
+    uint32_t height = pixelMap->GetHeight();
+    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
+    Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
+    DragData dragData { shadowInfo, {}, udKey, static_cast<int32_t>(info.GetSourceDevice()), recordsSize,
+        info.GetPointerId(), info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(),
+        info.GetTargetDisplayId(), true };
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData, GetDragCallback());
     if (ret != 0) {
         LOGE("InteractionManager: drag start error");
         return;
     }
     if (dragEventActuator_->GetIsNotInPreviewState()) {
+        LOGD("Drag window start for not in previewState");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
-    }
-    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && dragDropInfo.pixelMap) {
+    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && dragDropInfo.pixelMap) {
+        LOGD("Drag window start for Mouse with custom pixelMap");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     }
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
@@ -857,8 +904,9 @@ OnDragCallback GestureEventHub::GetDragCallback()
     CHECK_NULL_RETURN(dragDropManager, ret);
     auto eventManager = pipeline->GetEventManager();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
+    auto callback = [id = Container::CurrentId(), eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
                         const DragNotifyMsg& notifyMessage) {
+        ContainerScope scope(id);
         DragRet result = DragRet::DRAG_FAIL;
         switch (notifyMessage.result) {
             case DragResult::DRAG_SUCCESS:

@@ -728,7 +728,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest0010, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
 
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto childWrapper = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper->GetOrCreateChildByIndex(0));
     ASSERT_NE(childWrapper, nullptr);
     auto iter = layoutWrapper->childrenMap_.find(0);
     if (iter == layoutWrapper->childrenMap_.end()) {
@@ -1229,6 +1229,27 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest020, TestSize.Level1)
     radius.radiusBottomRight = BORDER_RADIUS;
     firstValidRadius = buttonLayoutAlgorithm->GetFirstValidRadius(radius);
     EXPECT_EQ(firstValidRadius, BORDER_RADIUS);
+}
+
+/**
+ * @tc.name: ButtonPatternTest021
+ * @tc.desc: Test HandleHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest021, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->SetEnabled(false);
+    buttonPattern->HandleHoverEvent(true);
+    EXPECT_EQ(buttonPattern->isHover_, true);
+    eventHub->SetEnabled(true);
+    buttonPattern->HandleHoverEvent(false);
+    EXPECT_EQ(buttonPattern->isHover_, false);
 }
 
 /**

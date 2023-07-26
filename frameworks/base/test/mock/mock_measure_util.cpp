@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-/**
- * ObservedPropertySimpleAbstractPU
- * 
- * all definitions in this file are framework internal
- */
-abstract class ObservedPropertySimpleAbstractPU<T> extends ObservedPropertyAbstractPU<T>  {
+#include "base/geometry/size.h"
+#include "base/utils/measure_util.h"
 
-  constructor(owningView: IPropertySubscriber, propertyName: PropertyInfo) {
-    super(owningView, propertyName);
-  }
+namespace OHOS::Ace {
+Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
+{
+    return Size(0.0, 0.0);
 }
+} // namespace OHOS::Ace

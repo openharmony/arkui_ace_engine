@@ -74,6 +74,9 @@ ohos_source_set("preview_entrance_source") {
         "previewer:ide_util",
         "window_manager:previewer_window",
       ]
+      if (ace_use_rosen_drawing) {
+        external_deps += [ "graphic_2d:2d_graphics" ]
+      }
     }
 
     if (!is_cross_platform_build) {

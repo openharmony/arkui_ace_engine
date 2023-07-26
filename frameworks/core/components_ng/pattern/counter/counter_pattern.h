@@ -72,6 +72,11 @@ public:
         return MakeRefPtr<CounterLayoutAlgorithm>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+    }
+
 private:
     std::optional<int32_t> subId_;
     std::optional<int32_t> contentId_;

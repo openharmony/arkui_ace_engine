@@ -24,7 +24,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void WindowSceneModel::Create(uint64_t persistentId)
+void WindowSceneModel::Create(int32_t persistentId)
 {
     auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
     if (sceneSession == nullptr) {

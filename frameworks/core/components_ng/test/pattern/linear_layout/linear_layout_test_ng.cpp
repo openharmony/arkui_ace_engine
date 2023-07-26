@@ -72,11 +72,11 @@ public:
     static void TearDownTestCase();
 
 protected:
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateRow();
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateColumn();
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateSmallChild(
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateRow();
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateColumn();
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateSmallChild(
         const LayoutConstraintF& childLayoutConstraint);
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateLargeChild(
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateLargeChild(
         const LayoutConstraintF& childLayoutConstraint);
 
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
@@ -92,7 +92,7 @@ void LinearLayoutTestNg::TearDownTestCase()
     MockPipelineBase::TearDown();
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateRow()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> LinearLayoutTestNg::CreateRow()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowFrameNode =
@@ -100,8 +100,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateRo
     EXPECT_NE(rowFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
     EXPECT_NE(rowLayoutPattern, nullptr);
@@ -122,7 +122,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateRo
     return { rowFrameNode, layoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateColumn()
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> LinearLayoutTestNg::CreateColumn()
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto columnFrameNode =
@@ -130,8 +130,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateCo
     EXPECT_NE(columnFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(columnFrameNode, geometryNode, columnFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnFrameNode, geometryNode, columnFrameNode->GetLayoutProperty());
 
     auto columnLayoutPattern = columnFrameNode->GetPattern<LinearLayoutPattern>();
     EXPECT_NE(columnLayoutPattern, nullptr);
@@ -152,15 +152,15 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateCo
     return { columnFrameNode, layoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateSmallChild(
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> LinearLayoutTestNg::CreateSmallChild(
     const LayoutConstraintF& childLayoutConstraint)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
@@ -176,15 +176,15 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateSm
     return { frameNode, layoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> LinearLayoutTestNg::CreateLargeChild(
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> LinearLayoutTestNg::CreateLargeChild(
     const LayoutConstraintF& childLayoutConstraint)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(LARGE_ITEM_WIDTH), CalcLength(LARGE_ITEM_HEIGHT)));

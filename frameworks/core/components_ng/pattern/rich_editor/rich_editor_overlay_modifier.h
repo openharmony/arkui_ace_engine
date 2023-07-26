@@ -29,6 +29,7 @@ public:
     void SetCaretColor(uint32_t caretColor);
     void SetCaretWidth(float width);
     void SetCaretVisible(bool value);
+    float GetCareHeight() const;
     void onDraw(DrawingContext& drawingContext) override;
 
 private:

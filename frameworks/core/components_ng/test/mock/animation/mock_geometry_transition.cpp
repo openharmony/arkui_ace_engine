@@ -14,9 +14,13 @@
  */
 
 #include "core/components_ng/animation/geometry_transition.h"
+#include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
-GeometryTransition::GeometryTransition(const WeakPtr<FrameNode>& frameNode) : inNode_(frameNode) {}
+GeometryTransition::GeometryTransition(const WeakPtr<FrameNode>& frameNode) : inNode_(frameNode)
+{
+    layoutProperty_ = nullptr;
+}
 
     void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
     void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}

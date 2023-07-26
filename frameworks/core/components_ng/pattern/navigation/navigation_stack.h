@@ -64,9 +64,9 @@ public:
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
-    const RefPtr<UINode>& Get();
-    const RefPtr<UINode>& Get(const std::string& name);
-    const RefPtr<UINode>& GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+    RefPtr<UINode> Get();
+    RefPtr<UINode> Get(const std::string& name);
+    RefPtr<UINode> GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     virtual bool IsEmpty();
     virtual std::vector<std::string> GetAllPathName();
     virtual void Pop();

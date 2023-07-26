@@ -285,8 +285,8 @@ HWTEST_F(DragBarPatternTestNg, DragBarPatternTest004, TestSize.Level1)
 
     auto layoutAlgorithm = AceType::DynamicCast<DragBarLayoutAlgorithm>(dragBarPattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(layoutAlgorithm == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(dragBarFrameNode, geometryNode, dragBarFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dragBarFrameNode, geometryNode, dragBarFrameNode->GetLayoutProperty());
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
 
     /**

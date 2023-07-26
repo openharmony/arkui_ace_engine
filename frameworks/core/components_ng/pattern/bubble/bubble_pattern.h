@@ -93,6 +93,17 @@ public:
     void StartExitingAnimation(std::function<void()> finish);
     bool IsOnShow();
     bool IsExiting();
+    void OnColorConfigurationUpdate() override;
+
+    void SetMessageNode(RefPtr<FrameNode> messageNode)
+    {
+        messageNode_ = messageNode;
+    }
+
+    void SetCustomPopupTag(bool isCustomPopup)
+    {
+        isCustomPopup_ = isCustomPopup;
+    }
 
 private:
     void OnModifyDone() override;
@@ -151,6 +162,8 @@ private:
     std::optional<OffsetF> targetOffset_;
     std::optional<SizeF> targetSize_;
 
+    bool isCustomPopup_ = false;
+    RefPtr<FrameNode> messageNode_;
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 };
 } // namespace OHOS::Ace::NG

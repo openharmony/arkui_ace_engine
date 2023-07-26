@@ -104,7 +104,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest001, TestSize.Level1)
      * @tc.steps: step1. Create WindowSceneModel.
      */
     auto model = WindowSceneModel();
-    uint64_t persistentId = 0;
+    int32_t persistentId = 0;
     model.Create(persistentId);
 
     auto windowSceneNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -125,7 +125,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest002, TestSize.Level1)
 
     Rosen::SessionInfo sessionInfo = { .bundleName_ = BUNDLE_NAME, .abilityName_ = ABILITY_NAME };
     auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
-    uint64_t persistentId = session->GetPersistentId();
+    auto persistentId = session->GetPersistentId();
     model.Create(persistentId);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -153,7 +153,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest003, TestSize.Level1)
 
     Rosen::SessionInfo sessionInfo = { .bundleName_ = BUNDLE_NAME, .abilityName_ = ABILITY_NAME };
     auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
-    uint64_t persistentId = session->GetPersistentId();
+    auto persistentId = session->GetPersistentId();
     model.Create(persistentId);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -185,7 +185,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest004, TestSize.Level1)
 
     Rosen::SessionInfo sessionInfo = { .bundleName_ = BUNDLE_NAME, .abilityName_ = ABILITY_NAME };
     auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
-    uint64_t persistentId = session->GetPersistentId();
+    auto persistentId = session->GetPersistentId();
 
     /**
      * @tc.steps: step2. Set session state to STATE_DISCONNECT.
@@ -236,7 +236,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest006, TestSize.Level1)
 
     Rosen::SessionInfo sessionInfo = { .bundleName_ = BUNDLE_NAME, .abilityName_ = ABILITY_NAME };
     auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
-    uint64_t persistentId = session->GetPersistentId();
+    auto persistentId = session->GetPersistentId();
     model.Create(persistentId);
 }
 
@@ -254,7 +254,7 @@ HWTEST_F(WindowPatternTest, WindowPatternTest010, TestSize.Level1)
 
     Rosen::SessionInfo sessionInfo = { .bundleName_ = BUNDLE_NAME, .abilityName_ = ABILITY_NAME, .isSystem_ = true };
     auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
-    uint64_t persistentId = session->GetPersistentId();
+    auto persistentId = session->GetPersistentId();
     model.Create(persistentId);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();

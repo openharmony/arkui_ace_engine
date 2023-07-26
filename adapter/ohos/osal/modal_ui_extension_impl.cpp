@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/common/ui_extension_helper.h"
+#include "core/common/modal_ui_extension.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace {
-
-RefPtr<NG::FrameNode> UIExtensionHelper::CreateUIExtensionNode(const std::string& bundleName,
-    const std::string& abilityName, const std::map<std::string, std::string>& params,
-    std::function<void(int32_t)>&& onRelease)
+RefPtr<NG::FrameNode> ModalUIExtension::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
 {
-    return nullptr;
+    return NG::UIExtensionModelNG::Create(want, callbacks);
 }
 
+int32_t ModalUIExtension::GetSessionId(const RefPtr<NG::FrameNode>& uiExtNode)
+{
+    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetSessionId();
 }
+} // namespace OHOS::Ace

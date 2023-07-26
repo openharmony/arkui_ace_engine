@@ -52,14 +52,22 @@ public:
         lineCap_ = dividerRenderProperty->GetLineCap().value_or(LineCap::BUTT);
         offset_ = paintWrapper->GetContentOffset();
         if (lineCap_ == LineCap::SQUARE || lineCap_ == LineCap::ROUND) {
+            float boundsRectWidth = 0.0f;
+            float boundsRectHeight = 0.0f;
             dividerLength_ += constrainStrokeWidth_;
             if (vertical_) {
                 auto offsetY = offset_.GetY();
                 offset_.SetY(offsetY - constrainStrokeWidth_ / 2);
+                boundsRectWidth = constrainStrokeWidth_;
+                boundsRectHeight = dividerLength_;
             } else {
                 auto offsetX = offset_.GetX();
                 offset_.SetX(offsetX - constrainStrokeWidth_ / 2);
+                boundsRectWidth = dividerLength_;
+                boundsRectHeight = constrainStrokeWidth_;
             }
+            RectF boundsRect(offset_.GetX(), offset_.GetY(), boundsRectWidth, boundsRectHeight);
+            dividerModifier_->SetBoundsRect(boundsRect);
         }
         dividerModifier_->SetStrokeWidth(constrainStrokeWidth_);
         dividerModifier_->SetDividerLength(dividerLength_);

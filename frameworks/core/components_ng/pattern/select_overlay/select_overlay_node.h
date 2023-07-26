@@ -55,6 +55,16 @@ public:
 
     void SetClosedByGlobalEvent(bool closedByGlobalEvent);
 
+    bool GetAnimationStatus()
+    {
+        return isDoingAnimation_;
+    }
+
+    bool GetIsExtensionMenu()
+    {
+        return isExtensionMenu_;
+    }
+
 private:
     void CreateToolBar();
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
@@ -94,7 +104,7 @@ private:
     bool isExtensionMenu_ = false;
 
     // Label whether the menu default button needs to appear within the extended menu
-    bool isShowInDefaultMenu_[7] = { true };
+    bool isShowInDefaultMenu_[7] = { false };
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

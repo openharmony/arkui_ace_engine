@@ -177,7 +177,7 @@ HWTEST_F(PluginPatternTestNg, OnDirtyLayoutWrapperSwap2, TestSize.Level1)
     geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
     geometryNode->SetContentOffset(OffsetF(0, 0));
     RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
     EXPECT_NE(layoutWrapper, nullptr);
     auto host = pattern->GetHost();
     EXPECT_NE(host, nullptr);

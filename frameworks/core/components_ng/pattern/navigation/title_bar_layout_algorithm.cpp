@@ -38,8 +38,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MAX_MENU_ITEMS_NUM = 3;
 constexpr int32_t MENU_OFFSET_RATIO = 9;
-
-} // namespace
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
+}
 
 void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
@@ -327,6 +327,12 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         titleWrapper->Layout();
         return;
     }
+    OffsetF titleOffset;
+    if (PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
+            static_cast<float>(menuHeight_.ConvertToPx()) + offsetY);
+        geometryNode->SetMarginFrameOffset(titleOffset);
+    }
     if (isInitialTitle_) {
         auto title = AceType::DynamicCast<FrameNode>(titleNode);
         CHECK_NULL_VOID(title);
@@ -346,7 +352,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
 #endif
         initialTitleOffsetY_ = static_cast<float>(menuHeight_.ConvertToPx()) + offsetY;
         isInitialTitle_ = false;
-        OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
+        titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
@@ -356,13 +362,13 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     CHECK_NULL_VOID(titlePattern);
     if (NearZero(titlePattern->GetTempTitleOffsetY())) {
         initialTitleOffsetY_ = static_cast<float>(menuHeight_.ConvertToPx()) + offsetY;
-        OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
+        titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
     }
     auto overDragOffset = titlePattern->GetOverDragOffset();
-    OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
+    titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
         titlePattern->GetTempTitleOffsetY() + overDragOffset / 6.0f);
     geometryNode->SetMarginFrameOffset(titleOffset);
     titleWrapper->Layout();

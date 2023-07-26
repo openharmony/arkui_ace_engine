@@ -44,7 +44,12 @@ void JSWindowScene::Create(const JSCallbackInfo& info)
         return;
     }
 
-    auto persistentId = static_cast<uint64_t>(info[0]->ToNumber<double>());
+    double value = info[0]->ToNumber<double>();
+    if (value < 0 || value > std::numeric_limits<int32_t>::max()) {
+        LOGE("input info[0] is beyond the int32_t limit");
+        value = 0;
+    }
+    auto persistentId = static_cast<int32_t>(value);
     NG::WindowSceneModel::Create(persistentId);
 }
 } // namespace OHOS::Ace::Framework

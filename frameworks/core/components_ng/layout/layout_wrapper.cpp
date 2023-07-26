@@ -17,10 +17,7 @@
 
 #include <algorithm>
 
-#include "base/geometry/dimension.h"
 #include "base/log/ace_checker.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
@@ -45,16 +42,12 @@ void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraint
 {
     SizeF safeSize { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
     safeSize.MinusPadding(insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
-    if (safeSize.Width() < constraint.maxSize.Width() || safeSize.Height() < constraint.maxSize.Height()) {
-        safeSize.SetWidth(std::min(safeSize.Width(), constraint.maxSize.Width()));
-        safeSize.SetHeight(std::min(safeSize.Height(), constraint.maxSize.Height()));
-        constraint.maxSize = safeSize;
-        constraint.parentIdealSize = OptionalSizeF(safeSize);
-        constraint.percentReference = safeSize;
-    }
-    if (safeSize < constraint.minSize) {
-        constraint.minSize = safeSize;
-    }
+    safeSize.SetWidth(std::min(safeSize.Width(), constraint.maxSize.Width()));
+    safeSize.SetHeight(std::min(safeSize.Height(), constraint.maxSize.Height()));
+
+    constraint.maxSize = safeSize;
+    constraint.parentIdealSize = OptionalSizeF(safeSize);
+    constraint.percentReference = safeSize;
 }
 
 void LayoutWrapper::OffsetNodeToSafeArea()
@@ -95,61 +88,35 @@ void LayoutWrapper::RestoreGeoState()
 
 void LayoutWrapper::AvoidKeyboard()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetSafeAreaManager();
+    // apply keyboard avoidance on Page
+    if (GetHostTag() == V2::PAGE_ETS_TAG) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetSafeAreaManager();
+        GetGeometryNode()->SetFrameOffset(
+            GetGeometryNode()->GetFrameOffset() + OffsetF(0, manager->GetKeyboardOffset()));
+    }
+}
 
-    for (auto&& wrapperWk : manager->GetWrappers()) {
-        auto wrapper = wrapperWk.Upgrade();
-        if (!wrapper) {
-            continue;
-        }
-        auto host = wrapper->GetHostNode();
-        // apply keyboard avoidance on Page
-        if (host && host->GetTag() == V2::PAGE_ETS_TAG) {
-            wrapper->GetGeometryNode()->SetFrameOffset(
-                wrapper->GetGeometryNode()->GetFrameOffset() + OffsetF(0, manager->GetKeyboardOffset()));
-        }
+void LayoutWrapper::SaveGeoState()
+{
+    auto&& expandOpts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if ((expandOpts && expandOpts->Expansive()) || GetHostTag() == V2::PAGE_ETS_TAG) {
+        // save geometry state before SafeArea expansion / keyboard avoidance.
+        GetGeometryNode()->Save();
+        // record nodes whose geometry states need to be restored, to speed up RestoreGeoState
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetSafeAreaManager();
+        manager->AddGeoRestoreNode(GetHostNode());
     }
 }
 
 void LayoutWrapper::ExpandSafeArea()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetSafeAreaManager();
+    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    CHECK_NULL_VOID_NOLOG(opts && opts->Expansive());
 
-    for (auto&& wrapperWk : manager->GetWrappers()) {
-        auto wrapper = wrapperWk.Upgrade();
-        if (wrapper && wrapper->GetLayoutProperty()->GetSafeAreaExpandOpts()) {
-            wrapper->ExpandSafeAreaInner();
-        }
-    }
-
-    manager->ResetWrappers();
-}
-
-void LayoutWrapper::SaveGeoState()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetSafeAreaManager();
-    // save geometry state before SafeArea expansion / keyboard avoidance.
-    for (auto&& wrapperWk : manager->GetWrappers()) {
-        auto wrapper = wrapperWk.Upgrade();
-        if (wrapper) {
-            wrapper->GetGeometryNode()->Save();
-
-            // record nodes whose geometry states need to be restored, to speed up RestoreGeoState
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            manager->AddGeoRestoreNode(wrapper->hostNode_);
-        }
-    }
-}
-
-void LayoutWrapper::ExpandSafeAreaInner()
-{
     // children of Scrollable nodes don't support expandSafeArea
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
@@ -157,9 +124,6 @@ void LayoutWrapper::ExpandSafeAreaInner()
     if (parent && parent->GetPattern<ScrollablePattern>()) {
         return;
     }
-
-    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    CHECK_NULL_VOID_NOLOG(opts->Expansive());
 
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
         ExpandIntoKeyboard();
@@ -203,7 +167,6 @@ void LayoutWrapper::ExpandSafeAreaInner()
     if (layoutProperty->HasAspectRatio()) {
         frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
     }
-
     // restore to local offset
     frame -= parentGlobalOffset;
     geometryNode->SetFrameOffset(frame.GetOffset());
@@ -212,6 +175,16 @@ void LayoutWrapper::ExpandSafeAreaInner()
 
 void LayoutWrapper::ExpandIntoKeyboard()
 {
+    // if parent already expanded into keyboard, offset shouldn't be applied again
+    auto parent = GetHostNode()->GetAncestorNodeOfFrame();
+    while (parent) {
+        auto&& opts = parent->GetLayoutProperty()->GetSafeAreaExpandOpts();
+        if (opts && (opts->edges & SAFE_AREA_EDGE_BOTTOM) && opts->type & SAFE_AREA_TYPE_KEYBOARD) {
+            return;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto geometryNode = GetGeometryNode();
@@ -221,6 +194,8 @@ void LayoutWrapper::ExpandIntoKeyboard()
 
 void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
 {
+    GetGeometryNode()->SetParentLayoutConstraint(constraint);
+
     auto layoutProperty = GetLayoutProperty();
     const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
     if (magicItemProperty && magicItemProperty->HasAspectRatio()) {
@@ -236,7 +211,6 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
         ApplySafeArea(*insets, constraint);
     }
 
-    GetGeometryNode()->SetParentLayoutConstraint(constraint);
     layoutProperty->UpdateLayoutConstraint(constraint);
 }
 

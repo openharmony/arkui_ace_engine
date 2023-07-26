@@ -75,11 +75,8 @@ public:
         return toolBarMenuItems_;
     }
 
-    int32_t GetMenuNodeId()
+    int32_t GetMenuNodeId() const
     {
-        if (!menuNodeId_.has_value()) {
-            menuNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
         return menuNodeId_.value();
     }
 
@@ -91,12 +88,22 @@ public:
         return landscapeMenuNodeId_.value();
     }
 
-    bool HasMenuNode() const
+    void SetMenuNodeId(const int32_t menuNodeId)
+    {
+        menuNodeId_ = menuNodeId;
+    }
+
+    void SetLandscapeMenuNodeId(const int32_t landscapeMenuNodeId)
+    {
+        landscapeMenuNodeId_ = landscapeMenuNodeId;
+    }
+
+    bool HasMenuNodeId() const
     {
         return menuNodeId_.has_value();
     }
 
-    bool HasLandscapeMenuNode() const
+    bool HasLandscapeMenuNodeId() const
     {
         return landscapeMenuNodeId_.has_value();
     }

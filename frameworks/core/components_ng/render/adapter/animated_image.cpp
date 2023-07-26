@@ -88,7 +88,12 @@ AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string 
         totalDuration += info[i].fDuration;
     }
     animator_->SetDuration(totalDuration);
-    animator_->SetIteration(codec->getRepetitionCount());
+    // repetition is 0 => play only once
+    auto iteration = codec->getRepetitionCount() + 1;
+    if (iteration == 0) {
+        iteration = ANIMATION_REPEAT_INFINITE;
+    }
+    animator_->SetIteration(iteration);
     if (pipelineContext->IsFormRender() && animator_->GetIteration() != 0) {
         animator_->SetIteration(FORM_REPEAT_COUNT);
     }

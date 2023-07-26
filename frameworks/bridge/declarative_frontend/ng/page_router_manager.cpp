@@ -250,7 +250,7 @@ void PageRouterManager::ReplaceNamedRoute(const RouterPageInfo& target)
 void PageRouterManager::BackWithTarget(const RouterPageInfo& target)
 {
     CHECK_RUN_ON(JS);
-    LOGD("router.Back path = %{private}s", target.url.c_str());
+    LOGI("router.Back path = %{private}s", target.url.c_str());
     if (inRouterOpt_) {
         LOGI("in router opt, post back router task");
         auto context = PipelineContext::GetCurrentContext();
@@ -351,6 +351,7 @@ void PageRouterManager::StartClean()
 bool PageRouterManager::Pop()
 {
     CHECK_RUN_ON(JS);
+    LOGI("router pop be called");
     if (inRouterOpt_) {
         LOGE("in router opt, post Pop router task failed");
         return false;
@@ -537,6 +538,13 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
 std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()
 {
     auto jsonRouterStack = JsonUtil::CreateArray(false);
+    auto restoreIter = restorePageStack_.begin();
+    while (restoreIter != restorePageStack_.end()) {
+        auto jsonItem = JsonUtil::Create(false);
+        jsonItem->Put("url", restoreIter->c_str());
+        jsonRouterStack->Put(jsonItem);
+        ++restoreIter;
+    }
     auto iter = pageRouterStack_.begin();
     while (iter != pageRouterStack_.end()) {
         auto pageNode = iter->Upgrade();
@@ -639,8 +647,8 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     CHECK_NULL_VOID(pageUrlChecker);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [pageUrlChecker, target]() { pageUrlChecker->CheckPreload(target.url); }, TaskExecutor::TaskType::BACKGROUND);
+    taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
+        TaskExecutor::TaskType::BACKGROUND);
 }
 
 void PageRouterManager::StartPush(const RouterPageInfo& target)
@@ -740,8 +748,8 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     CHECK_NULL_VOID(pageUrlChecker);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [pageUrlChecker, target]() { pageUrlChecker->CheckPreload(target.url); }, TaskExecutor::TaskType::BACKGROUND);
+    taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
+        TaskExecutor::TaskType::BACKGROUND);
 }
 
 void PageRouterManager::StartReplace(const RouterPageInfo& target)
@@ -1168,7 +1176,7 @@ void PageRouterManager::CleanPageOverlay()
         sharedManager->StopSharedTransition();
     }
 
-    if (overlayManager->RemoveOverlay(true)) {
+    if (overlayManager->RemoveOverlay(true, true)) {
         LOGI("clean page overlay.");
     }
 }

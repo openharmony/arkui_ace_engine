@@ -109,11 +109,6 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
         });
-    auto context = AceType::DynamicCast<FrameNode>(navDestinationNode)->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    if (!(context->GetBackgroundColor().has_value())) {
-        context->UpdateBackgroundColor(Color::WHITE);
-    }
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
     // titleBar node
@@ -289,10 +284,10 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
 void NavDestinationModelNG::SetTitleHeight(int32_t height)
 {
     if (height == 0) {
-        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
+        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, SINGLE_LINE_TITLEBAR_HEIGHT);
     }
     if (height == 1) {
-        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
+        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, DOUBLE_LINE_TITLEBAR_HEIGHT);
     }
 }
 

@@ -2996,10 +2996,10 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest001, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(columnNode, columnNode->GetGeometryNode(), pickerProperty);
-    RefPtr<LayoutWrapper> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
     EXPECT_NE(subLayoutWrapper, nullptr);
-    RefPtr<LayoutWrapper> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    RefPtr<LayoutWrapperNode> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
     EXPECT_NE(subTwoLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
@@ -3026,9 +3026,9 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level1)
     auto subNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
     ASSERT_NE(subNode, nullptr);
 
-    LayoutWrapper layoutWrapper = LayoutWrapper(columnNode, columnNode->GetGeometryNode(), pickerProperty);
-    RefPtr<LayoutWrapper> subLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(subNode, subNode->GetGeometryNode(), nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(subNode, subNode->GetGeometryNode(), nullptr);
     EXPECT_NE(subLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 1);
@@ -3056,10 +3056,10 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest003, TestSize.Level1)
     pickerProperty->UpdateMarginSelfIdealSize(value);
     pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
 
-    LayoutWrapper layoutWrapper = LayoutWrapper(columnNode, columnNode->GetGeometryNode(), pickerProperty);
-    RefPtr<LayoutWrapper> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
     EXPECT_NE(subLayoutWrapper, nullptr);
-    RefPtr<LayoutWrapper> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    RefPtr<LayoutWrapperNode> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
     EXPECT_NE(subTwoLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
@@ -3091,9 +3091,9 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest004, TestSize.Level1)
     auto subNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
     ASSERT_NE(subNode, nullptr);
 
-    LayoutWrapper layoutWrapper = LayoutWrapper(columnNode, columnNode->GetGeometryNode(), pickerProperty);
-    RefPtr<LayoutWrapper> subLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(subNode, subNode->GetGeometryNode(), nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(subNode, subNode->GetGeometryNode(), nullptr);
     EXPECT_NE(subLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 1);
@@ -3819,7 +3819,8 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest003, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.frameSizeChange = true;
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
@@ -3848,7 +3849,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest001, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
     auto textPickerLayoutAlgorithm = AceType::MakeRefPtr<TextPickerLayoutAlgorithm>();
     textPickerLayoutAlgorithm->halfDisplayCounts_ = 2;
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(textPickerLayoutAlgorithm);
@@ -3879,7 +3881,8 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest002, TestSize.Level1)
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.frameSizeChange = true;
     auto pickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
@@ -4715,7 +4718,7 @@ HWTEST_F(TextPickerTestNg, GetOptionsMultiStr001, TestSize.Level1)
      * @tc.step: step2. call GetOptionsMultiStr().
      * @tc.expected: the result of GetOptionsMultiStr is empty.
      */
-    std::string result = pickerPattern -> GetOptionsMultiStr();
+    std::string result = pickerPattern->GetOptionsMultiStr();
     EXPECT_EQ(result, "");
 }
 
@@ -4745,7 +4748,7 @@ HWTEST_F(TextPickerTestNg, GetOptionsMultiStr002, TestSize.Level1)
     options1.rangeResult = { "11", "12", "13" };
     options.emplace_back(options1);
     TextPickerModelNG::GetInstance()->SetColumns(options);
-    std::string result = pickerPattern -> GetOptionsMultiStr();
+    std::string result = pickerPattern->GetOptionsMultiStr();
     std::string expectResult = "[[\"11\"]]";
     EXPECT_EQ(result, expectResult);
 }
@@ -4785,7 +4788,7 @@ HWTEST_F(TextPickerTestNg, GetOptionsCascadeStr001, TestSize.Level1)
      * @tc.step: step2. call GetOptionsCascadeStr().
      * @tc.expected: the result of GetOptionsCascadeStr is "[{"text":"11"},{"text":"21"},{"text":"31"}]".
      */
-    std::string result = pickerPattern -> GetOptionsCascadeStr(options);
+    std::string result = pickerPattern->GetOptionsCascadeStr(options);
     std::string expectResult = "[{\"text\":\"11\"},{\"text\":\"21\"},{\"text\":\"31\"}]";
     EXPECT_EQ(result, expectResult);
 }

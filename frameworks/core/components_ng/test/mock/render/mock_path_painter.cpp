@@ -16,6 +16,14 @@
 #include "core/components_ng/render/path_painter.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float PATH_WIDTH = 100.0f;
+constexpr float PATH_HEIGHT = 100.0f;
+} // namespace
 void PathPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset) {}
 void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& shapePaintProperty) {}
+SizeF PathPainter::GetPathSize(const std::string& commands)
+{
+    return SizeF(PATH_WIDTH, PATH_HEIGHT);
+}
 } // namespace OHOS::Ace::NG

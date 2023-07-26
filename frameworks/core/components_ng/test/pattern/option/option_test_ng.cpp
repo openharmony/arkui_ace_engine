@@ -144,8 +144,8 @@ HWTEST_F(OptionTestNg, OptionLayoutTest001, TestSize.Level1)
     auto rosenMakeRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::LayoutProperty>();
     auto rosenRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::GeometryNode>();
     rosenRefPtr->margin_ = nullptr;
-    OHOS::Ace::NG::LayoutWrapper* rosenLayoutWrapper = new LayoutWrapper(nullptr, rosenRefPtr, rosenMakeRefPtr);
-    auto childWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, rosenRefPtr, rosenMakeRefPtr);
+    OHOS::Ace::NG::LayoutWrapperNode* rosenLayoutWrapper = new LayoutWrapperNode(nullptr, rosenRefPtr, rosenMakeRefPtr);
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, rosenRefPtr, rosenMakeRefPtr);
     rosenLayoutWrapper->AppendChild(childWrapper);
     rosenOptionLayoutAlgorithm.Layout(rosenLayoutWrapper);
 }
@@ -246,8 +246,8 @@ HWTEST_F(OptionTestNg, OptionLayoutTest002, TestSize.Level1)
     auto rosenMakeRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::LayoutProperty>();
     auto rosenRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::GeometryNode>();
     rosenRefPtr->margin_ = nullptr;
-    LayoutWrapper* rosenLayoutWrapper = new LayoutWrapper(nullptr, rosenRefPtr, rosenMakeRefPtr);
-    auto childWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, rosenRefPtr, rosenMakeRefPtr);
+    LayoutWrapperNode* rosenLayoutWrapper = new LayoutWrapperNode(nullptr, rosenRefPtr, rosenMakeRefPtr);
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, rosenRefPtr, rosenMakeRefPtr);
     rosenLayoutWrapper->AppendChild(childWrapper);
     /**
      * @tc.steps: step2. construct layoutConstraint and call Measure.

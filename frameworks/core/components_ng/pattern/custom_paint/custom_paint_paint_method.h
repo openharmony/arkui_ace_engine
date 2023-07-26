@@ -196,7 +196,7 @@ public:
         strokeState_.SetMiterLimit(limit);
     }
 
-    const LineDashParam& GetLineDash() const
+    LineDashParam GetLineDash() const
     {
         return strokeState_.GetLineDash();
     }

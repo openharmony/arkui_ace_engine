@@ -284,7 +284,8 @@ private:
     bool isHover_ = false;
     bool isSelected_ = false;
     MenuAlign menuAlign_;
-
+    std::string selectValue_;
+    bool isColorConfigurationUpdate_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
 

@@ -37,9 +37,11 @@ public:
     void SetMinHeight(const CalcDimension& minHeight) override;
     void SetMaxWidth(const CalcDimension& maxWidth) override;
     void SetMaxHeight(const CalcDimension& maxHeight) override;
+    void ResetMinSize(bool resetWidth) override {};
+    void ResetMaxSize(bool resetWidth) override {};
 
     void SetBackgroundColor(const Color& color) override;
-    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override;
+    void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
     void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;

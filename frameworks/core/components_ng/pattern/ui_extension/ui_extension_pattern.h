@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 
+#include <cstdint>
+
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -35,6 +37,7 @@ class UIExtensionPattern : public WindowPattern {
 
 public:
     explicit UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
+    explicit UIExtensionPattern(const AAFwk::Want& want);
     ~UIExtensionPattern() override;
 
     void OnWindowShow() override;
@@ -42,18 +45,21 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
     void OnVisibleChange(bool visible) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     bool HasStartingPage() override
     {
         return false;
     }
 
-    void SetOnRemoteReadyCallback(std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
-    void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
-    void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
-    void SetOnReceiveCallback(std::function<void(const AAFwk::WantParams&)>&& callback);
+    int32_t GetSessionId();
+
+    void SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnReleaseCallback(const std::function<void(int32_t)>&& callback);
+    void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
+    void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
     void SetOnErrorCallback(
-        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
+        const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
 
     void OnConnect() override;
     void OnDisconnect() override;
@@ -91,6 +97,8 @@ private:
     void OnConnectInner();
 
     void RegisterVisibleAreaChange();
+    void UpdateTextFieldManager(const Offset& offset, float height);
+    bool IsCurrentFocus() const;
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -101,6 +109,7 @@ private:
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
 
+    bool isDestruction_ = false;
     ErrorMsg lastError_;
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

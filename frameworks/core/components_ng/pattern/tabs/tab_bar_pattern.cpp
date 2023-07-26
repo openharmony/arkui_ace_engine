@@ -243,8 +243,9 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     if (mouseAction == MouseAction::WINDOW_LEAVE) {
-        HandleMoveAway(hoverIndex_.value());
-        return;
+        if (hoverIndex_.has_value()) {
+            HandleMoveAway(hoverIndex_.value());
+        }
     }
 }
 
@@ -301,7 +302,7 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetIsFocusActive()) {
-        return true;
+        return false;
     }
     isFirstFocus_ = false;
     if (event.action != KeyAction::DOWN) {

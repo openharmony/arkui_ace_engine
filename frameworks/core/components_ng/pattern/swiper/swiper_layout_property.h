@@ -62,6 +62,7 @@ public:
         value->propBackgroundColor_ = CloneBackgroundColor();
         value->propArrowSize_ = CloneArrowSize();
         value->propArrowColor_ = CloneArrowColor();
+        value->propLoop_ = CloneLoop();
         return value;
     }
 
@@ -91,6 +92,7 @@ public:
         ResetBackgroundColor();
         ResetArrowSize();
         ResetArrowColor();
+        ResetLoop();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -117,6 +119,7 @@ public:
         json->Put("arrowSize", propArrowSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("arrowBackgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
         json->Put("arrowColor", propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
+        json->Put("loop", propLoop_.value_or(true) ? "true" : "false");
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -126,6 +129,7 @@ public:
             { "SwiperDisplayMode.Stretch", SwiperDisplayMode::STRETCH },
         };
 
+        UpdateLoop(json->GetBool("loop"));
         UpdateIndex(StringUtils::StringToInt(json->GetString("index")));
         UpdateDirection(json->GetString("vertical") == "true" ? Axis::VERTICAL : Axis::HORIZONTAL);
         UpdateShowIndicator(json->GetString("indicator") == "true" ? true : false);
@@ -144,14 +148,14 @@ public:
         }
     }
 
-    void UpdatePrevMarginWithoutMeasure(Dimension value)
+    void UpdatePrevMarginWithoutMeasure(const Dimension& value)
     {
         if (propPrevMargin_ != value) {
             propPrevMargin_ = value;
         }
     }
 
-    void UpdateNextMarginWithoutMeasure(Dimension value)
+    void UpdateNextMarginWithoutMeasure(const Dimension& value)
     {
         if (propNextMargin_ != value) {
             propNextMargin_ = value;
@@ -181,6 +185,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowColor, Color, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE_SELF);
 };
 } // namespace OHOS::Ace::NG
 

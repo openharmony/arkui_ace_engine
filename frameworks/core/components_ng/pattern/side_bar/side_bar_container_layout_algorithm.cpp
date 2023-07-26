@@ -42,8 +42,7 @@ constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 static Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
-static Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
-static Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension CONTROL_BUTTON_PADDING = 12.0_vp;
 } // namespace
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -57,7 +56,10 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSize(
+    auto idealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
+    CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 
@@ -133,8 +135,6 @@ void SideBarContainerLayoutAlgorithm::UpdateDefaultValueByVersion()
         DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
         DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
         DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
-        DEFAULT_CONTROL_BUTTON_WIDTH = 24.0_vp;
-        DEFAULT_CONTROL_BUTTON_HEIGHT = 24.0_vp;
     }
 }
 
@@ -224,13 +224,7 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
     defaultMinContentWidth_ = ConvertToPx(DEFAULT_MIN_CONTENT_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
 
     MeasureTypeUpdateWidth();
-    if (minContentWidth_ < 0.0f) {
-        if (maxSideBarWidth_ >= 0.0f) {
-            minContentWidth_ = 0.0f;
-        } else {
-            minContentWidth_ = defaultMinContentWidth_;
-        }
-    }
+    minContentWidth_ = std::max(0.0f, minContentWidth_);
     InitSideBarWidth(parentWidth);
     MeasureRealSideBarWidth(parentWidth);
 
@@ -428,8 +422,11 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
         }
     }
 
-    auto sideBarIdealSize = CreateIdealSize(
-        constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
+    auto sideBarIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+        CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT():
+        CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     sideBarIdealSize.SetWidth(realSideBarWidth_);
     auto sideBarConstraint = layoutProperty->CreateChildConstraint();
     sideBarConstraint.selfIdealSize = OptionalSizeF(sideBarIdealSize);
@@ -446,7 +443,10 @@ void SideBarContainerLayoutAlgorithm::MeasureDivider(const RefPtr<SideBarContain
     auto constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
     auto scaleProperty = constraint->scaleProperty;
-    auto dividerIdealSize = CreateIdealSize(
+    auto dividerIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
+    CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
 
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
@@ -483,8 +483,12 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
                                : (parentWidth - realDividerWidth_ + currentOffset_);
         }
     }
+    contentWidth = std::max(contentWidth, minContentWidth_);
 
-    auto contentIdealSize = CreateIdealSize(
+    auto contentIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
+    CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     contentIdealSize.SetWidth(contentWidth);
     auto contentConstraint = layoutProperty->CreateChildConstraint();
@@ -498,8 +502,8 @@ void SideBarContainerLayoutAlgorithm::MeasureControlButton(const RefPtr<SideBarC
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
 
-    auto controlButtonWidth = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
-    auto controlButtonHeight = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
+    auto controlButtonWidth = controlImageWidth_ + CONTROL_BUTTON_PADDING * 2;
+    auto controlButtonHeight = controlImageHeight_ + CONTROL_BUTTON_PADDING * 2;
     auto controlButtonWidthPx = ConvertToPx(controlButtonWidth, scaleProperty, parentWidth).value_or(0);
     auto controlButtonHeightPx = ConvertToPx(controlButtonHeight, scaleProperty, parentWidth).value_or(0);
 
@@ -551,15 +555,18 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
 
-    auto controlButtonLeft = layoutProperty->GetControlButtonLeft().value_or(DEFAULT_CONTROL_BUTTON_LEFT);
-    auto controlButtonTop = layoutProperty->GetControlButtonTop().value_or(DEFAULT_CONTROL_BUTTON_TOP);
-    if (LessNotEqual(controlButtonLeft.Value(), 0.0)) {
-        controlButtonLeft = DEFAULT_CONTROL_BUTTON_LEFT;
+    auto controlImageLeft = layoutProperty->GetControlButtonLeft().value_or(DEFAULT_CONTROL_BUTTON_LEFT);
+    auto controlImageTop = layoutProperty->GetControlButtonTop().value_or(DEFAULT_CONTROL_BUTTON_TOP);
+
+    if (LessNotEqual(controlImageLeft.Value(), 0.0)) {
+        controlImageLeft = DEFAULT_CONTROL_BUTTON_LEFT;
     }
 
-    if (LessNotEqual(controlButtonTop.Value(), 0.0)) {
-        controlButtonTop = DEFAULT_CONTROL_BUTTON_TOP;
+    if (LessNotEqual(controlImageTop.Value(), 0.0)) {
+        controlImageTop = DEFAULT_CONTROL_BUTTON_TOP;
     }
+    auto controlButtonLeft = controlImageLeft - CONTROL_BUTTON_PADDING;
+    auto controlButtonTop = controlImageTop - CONTROL_BUTTON_PADDING;
 
     auto controlButtonLeftPx = ConvertToPx(controlButtonLeft, scaleProperty, parentWidth).value_or(0);
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);
@@ -574,12 +581,12 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
      *   control button offset the left, if value invalid set to default 16vp
      */
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
-    auto controlButtonWidth = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+    auto controlButtonWidth = controlImageWidth_ + CONTROL_BUTTON_PADDING * 2;
 
     if ((sideBarPosition == SideBarPosition::END) &&             // sideBarPosition is End, other pass
         (!layoutProperty->GetControlButtonLeft().has_value())) { // origin value has not set
-        auto defaultControlButtonLeftPx =
-            ConvertToPx(DEFAULT_CONTROL_BUTTON_LEFT, scaleProperty, parentWidth).value_or(0);
+        auto defaultControlButtonLeft = DEFAULT_CONTROL_BUTTON_LEFT - CONTROL_BUTTON_PADDING;
+        auto defaultControlButtonLeftPx = ConvertToPx(defaultControlButtonLeft, scaleProperty, parentWidth).value_or(0);
         auto controlButtonWidthPx = ConvertToPx(controlButtonWidth, scaleProperty, parentWidth).value_or(0);
         controlButtonLeftPx = parentWidth - defaultControlButtonLeftPx - controlButtonWidthPx;
     }
