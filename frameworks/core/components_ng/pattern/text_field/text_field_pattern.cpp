@@ -1488,7 +1488,6 @@ void TextFieldPattern::HandleOnPaste()
         std::string valueToUpdate(data);
         textfield->EditingValueFilter(valueToUpdate, result);
         LOGD("After filter paste value is %{private}s", result.c_str());
-        CHECK_NULL_VOID_NOLOG(!result.empty());
         std::wstring pasteData;
         std::wstring wData = StringUtils::ToWstring(result);
         textfield->StripNextLine(wData);
@@ -3152,7 +3151,7 @@ void TextFieldPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     if (IsDisabled()) {
-        sourceInfo.SetSrc(iconPath, theme->GetDisabledIconFillColor());
+        sourceInfo.SetSrc(iconPath, theme->GetDisableTextColor());
     } else {
         sourceInfo.SetSrc(iconPath);
     }
@@ -3390,6 +3389,10 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
             textChanged |= FilterWithRegex(URL_WHITE_LIST, valueToUpdate, result);
             break;
         }
+        case TextInputType::VISIBLE_PASSWORD: {
+            textChanged |= FilterWithAscii(valueToUpdate, result);
+            break;
+        }
         default: {
             // No need limit.
         }
@@ -3397,6 +3400,29 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
     if (!textChanged) {
         result = valueToUpdate;
     }
+}
+
+bool TextFieldPattern::FilterWithAscii(const std::string& valueToUpdate, std::string& result)
+{
+    if (valueToUpdate.empty()) {
+        LOGD("Text is empty or filter is empty");
+        return false;
+    }
+    bool textChange = true;
+    std::string errorText = "";
+    for (auto valuePtr = 0; valuePtr < valueToUpdate.size(); valuePtr++) {
+        if (isascii(valueToUpdate[valuePtr])) {
+            result += valueToUpdate[valuePtr];
+        } else {
+            errorText += valueToUpdate[valuePtr];
+        }
+    }
+    if (errorText.empty()) {
+        textChange = false;
+    } else {
+        LOGI("FilterWithAscii Error text %{private}s", errorText.c_str());
+    }
+    return textChange;
 }
 
 float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)

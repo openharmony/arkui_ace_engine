@@ -86,7 +86,7 @@ public:
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenu(int32_t targetId);
+    void HideMenu(int32_t targetId, bool isMenuOnTouch = false);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenuInSubWindow(int32_t targetId);
@@ -119,8 +119,9 @@ public:
      *
      *   @return    true if popup was removed, false if no overlay exists
      */
-    bool RemoveOverlay(bool isBackPressed);
+    bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
     bool RemoveModalInOverlay();
+    bool RemoveAllModalInOverlay();
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideMenu(std::function<void()> callback)
@@ -245,6 +246,8 @@ public:
 
     static void DestroySheetMask(const RefPtr<FrameNode>& sheetNode);
 
+    void DeleteModal(int32_t targetId);
+
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
 private:
@@ -278,6 +281,7 @@ private:
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
     void ComputeSheetOffset(NG::SheetStyle& sheetStyle);
+    bool ModalExitProcess(const RefPtr<FrameNode>& topModalNode);
 
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);

@@ -20,10 +20,6 @@ ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEv
     : gestureEventHub_(gestureEventHub)
 {}
 
-void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const PointF& localPoint,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
-{}
-
 void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect)
 {}
 

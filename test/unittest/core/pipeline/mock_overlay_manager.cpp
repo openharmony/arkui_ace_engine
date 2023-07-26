@@ -46,7 +46,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 // subwindow only contains one menu instance.
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu) {}
 
-void OverlayManager::HideMenu(int32_t targetId) {}
+void OverlayManager::HideMenu(int32_t targetId, bool isMenuOnTouch) {}
 
 void OverlayManager::HideAllMenus() {}
 
@@ -80,7 +80,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     removeOverlayFlag = (dialogNode != nullptr);
 }
 
-bool OverlayManager::RemoveOverlay(bool isBackPressed)
+bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
 {
     return removeOverlayFlag;
 }

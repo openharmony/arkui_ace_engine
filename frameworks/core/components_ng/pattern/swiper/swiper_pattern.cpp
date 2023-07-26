@@ -1158,6 +1158,11 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
         if ((iter.second.startPos + additionalOffset) < 0 && (iter.second.endPos + additionalOffset) < 0) {
             continue;
         }
+        if ((iter.second.startPos + additionalOffset) >= 0 && (iter.second.endPos + additionalOffset) > 0) {
+            currentShowIndex = iter.first;
+            turnPageRate_ = 0.0f;
+            break;
+        }
         if ((iter.second.endPos + additionalOffset) > 0) {
             currentShowIndex = iter.first;
             turnPageRate_ = (iter.second.startPos + additionalOffset) / (iter.second.endPos - iter.second.startPos);
