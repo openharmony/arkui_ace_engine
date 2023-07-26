@@ -164,82 +164,52 @@ void JSImageAnimator::SetFixedSize(bool fixedSize)
 
 void JSImageAnimator::OnStart(const JSCallbackInfo& info)
 {
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onStart = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("ImageAnimator.onStart");
-        func->Execute();
-    };
+    auto onStart = GetAnimatorEvent(info, "ImageAnimator.onStart");
     ImageAnimatorModel::GetInstance()->SetOnStart(std::move(onStart));
 }
 
 void JSImageAnimator::OnPause(const JSCallbackInfo& info)
 {
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onPause = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("ImageAnimator.onPause");
-        func->Execute();
-    };
+    auto onPause = GetAnimatorEvent(info, "ImageAnimator.onPause");
     ImageAnimatorModel::GetInstance()->SetOnPause(std::move(onPause));
 }
 
 void JSImageAnimator::OnRepeat(const JSCallbackInfo& info)
 {
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onRepeat = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("ImageAnimator.onRepeat");
-        func->Execute();
-    };
+    auto onRepeat = GetAnimatorEvent(info, "ImageAnimator.onRepeat");
     ImageAnimatorModel::GetInstance()->SetOnRepeat(std::move(onRepeat));
 }
 
 void JSImageAnimator::OnCancel(const JSCallbackInfo& info)
 {
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("ImageAnimator.onCancel");
-        func->Execute();
-    };
+    auto onCancel = GetAnimatorEvent(info, "ImageAnimator.onCancel");
     ImageAnimatorModel::GetInstance()->SetOnCancel(std::move(onCancel));
 }
 
 void JSImageAnimator::OnFinish(const JSCallbackInfo& info)
 {
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("ImageAnimator.onFinish");
-        func->Execute();
-    };
+    auto onFinish = GetAnimatorEvent(info, "ImageAnimator.onFinish");
     ImageAnimatorModel::GetInstance()->SetOnFinish(std::move(onFinish));
 }
 
-EventMarker JSImageAnimator::GetEventMarker(const JSCallbackInfo& info)
+AnimatorEvent JSImageAnimator::GetAnimatorEvent(const JSCallbackInfo& info, std::string&& eventName)
 {
-    if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
+    if (info.Length() != 1) {
+        LOGW("JSImageAnimator: The arg is wrong, it is supposed to have one function argument. event:%{public}s",
+            eventName.c_str());
         return {};
     }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("ImageAnimator.onClick");
-        func->Execute();
-    });
-    return eventMarker;
-}
-
-AnimatorEvent JSImageAnimator::GetAnimatorEvent(const JSCallbackInfo& info)
-{
     if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
+        LOGE("JSImageAnimator: info[0] is not a function. event:%{public}s", eventName.c_str());
         return {};
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto animatorEvent = [func = std::move(jsFunc)]() { func->Execute(); };
+    auto animatorEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                             event = std::move(eventName)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT(event);
+        func->Execute();
+    };
     return animatorEvent;
 }
 
