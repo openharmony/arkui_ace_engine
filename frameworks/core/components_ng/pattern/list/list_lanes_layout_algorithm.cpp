@@ -220,8 +220,8 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
     }
     float laneGutter = 0.0f;
     if (layoutProperty->GetLaneGutter().has_value()) {
-        laneGutter =
-            ConvertToPx(layoutProperty->GetLaneGutter().value(), layoutConstraint.scaleProperty, mainPercentRefer)
+        laneGutter = ConvertToPx(
+            layoutProperty->GetLaneGutter().value(), layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0))
                 .value();
         SetLaneGutter(laneGutter);
     }
