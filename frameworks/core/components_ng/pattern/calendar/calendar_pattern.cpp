@@ -350,8 +350,9 @@ void CalendarPattern::FlushDialogMonthData(ObtainedMonth& obtainedMonth)
         return;
     }
     for (auto& day : obtainedMonth.days) {
-        day.isSelected = day.month.year == selectedDay_.GetYear() && day.month.month == selectedDay_.GetMonth() &&
-                       day.day == selectedDay_.GetDay();
+        day.isSelected = day.month.year == static_cast<int32_t>(selectedDay_.GetYear()) &&
+                         day.month.month == static_cast<int32_t>(selectedDay_.GetMonth()) &&
+                         day.day == static_cast<int32_t>(selectedDay_.GetDay());
     }
 }
 
