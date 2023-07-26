@@ -156,6 +156,11 @@ void SliderPatternTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)
     EXPECT_CALL(canvas, DrawCircle(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Translate(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
 }
 
 void SliderPatternTestNg::MockTipsCanvasFunction(Testing::MockCanvas& canvas)
@@ -731,7 +736,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg011, TestSize.Level1)
     info.SetSourceDevice(SourceType::TOUCH);
     info.changedTouches_.emplace_back(LInfo);
     sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
-    sliderPattern->blockHotSize_ = MIN_LABEL;
+    sliderPattern->blockHotSize_ = SizeF(MIN_LABEL, MIN_LABEL);
     /**
      * @tc.cases: case1. touch down position is outside the blockHotSize, UpdateValueByLocalLocation
      */
@@ -1447,6 +1452,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest007, TestSize.Level1)
     sliderContentModifier.SetSliderMode(SliderModelNG::SliderMode::INSET);
     sliderContentModifier.SetBlockBorderColor(TEST_COLOR);
     sliderContentModifier.SetBlockBorderWidth(SLIDER_CONTENT_MODIFIER_BLOCK_BORDER_WIDTH);
+    sliderContentModifier.SetBlockSize(SizeF(BLOCK_SIZE_WIDTH.ConvertToPx(), BLOCK_SIZE_HEIGHT.ConvertToPx()));
     Testing::MockCanvas canvas;
     MockCanvasFunction(canvas);
     DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
@@ -2262,6 +2268,51 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest010, TestSize.Level1)
     sliderPattern->focusFlag_ = false;
     sliderPattern->HandleHoverEvent(true);
     ASSERT_TRUE(sliderPattern->bubbleFlag_);
+}
+
+/**
+ * @tc.name: SliderPatternTest011
+ * @tc.desc: Test slider_pattern AtMousePanArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. modify circleCenter and blockSize.
+     */
+    sliderPattern->blockSize_.SetWidth(SLIDER_OUTSET_BLOCK_SIZE.ConvertToPx());
+    sliderPattern->blockSize_.SetHeight(SLIDER_OUTSET_BLOCK_SIZE.ConvertToPx());
+    sliderPattern->circleCenter_.SetX(sliderPattern->blockSize_.Width() * HALF);
+    sliderPattern->circleCenter_.SetY(sliderPattern->blockSize_.Height() * HALF);
+
+    /**
+     * @tc.cases: case1. the offset(1,1) is not in circle block.
+     */
+    Offset offsetInFrame(1, 1);
+    sliderPaintProperty->UpdateBlockType(SliderModelNG::BlockStyleType::DEFAULT);
+    ASSERT_FALSE(sliderPattern->AtMousePanArea(offsetInFrame));
+
+    /**
+     * @tc.cases: case2. the offset(1,1) is in rect block.
+     */
+    sliderPaintProperty->UpdateBlockType(SliderModelNG::BlockStyleType::SHAPE);
+    ASSERT_TRUE(sliderPattern->AtMousePanArea(offsetInFrame));
 }
 
 /**

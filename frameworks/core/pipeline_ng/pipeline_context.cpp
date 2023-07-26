@@ -345,6 +345,26 @@ void PipelineContext::FlushFocus()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
+
+    auto defaultFocusNode = dirtyDefaultFocusNode_.Upgrade();
+    if (!defaultFocusNode) {
+        dirtyDefaultFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = defaultFocusNode->GetFocusHub();
+        if (focusNodeHub) {
+            auto defaultFocusNode = focusNodeHub->GetChildFocusNodeByType();
+            if (defaultFocusNode && defaultFocusNode->IsFocusableWholePath()) {
+                defaultFocusNode->RequestFocusImmediately();
+            } else {
+                focusNodeHub->RequestFocusImmediately();
+            }
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        dirtyDefaultFocusNode_.Reset();
+        return;
+    }
+
     auto focusNode = dirtyFocusNode_.Upgrade();
     if (!focusNode || focusNode->GetFocusType() != FocusType::NODE) {
         dirtyFocusNode_.Reset();
@@ -355,6 +375,7 @@ void PipelineContext::FlushFocus()
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
+        dirtyDefaultFocusNode_.Reset();
         return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
@@ -367,12 +388,18 @@ void PipelineContext::FlushFocus()
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
+        dirtyDefaultFocusNode_.Reset();
         return;
     }
-    if (!RequestDefaultFocus()) {
-        if (rootNode_ && rootNode_->GetFocusHub() && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
-            rootNode_->GetFocusHub()->RequestFocusImmediately();
+    if (isRootFocusNeedUpdate_ && rootNode_ && rootNode_->GetFocusHub()) {
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        if (!rootFocusHub->IsCurrentFocus()) {
+            rootFocusHub->RequestFocusImmediately();
+        } else if (!rootFocusHub->IsCurrentFocusWholePath()) {
+            rootFocusHub->LostFocus();
+            rootFocusHub->RequestFocusImmediately();
         }
+        isRootFocusNeedUpdate_ = false;
     }
 }
 
@@ -1316,7 +1343,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     // If return success. This tab key will just trigger onKeyEvent process.
     isTabJustTriggerOnKeyEvent_ =
         (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true));
-    auto lastPage = stageManager_->GetLastPage();
+    auto lastPage = stageManager_ ? stageManager_->GetLastPage() : nullptr;
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);
     if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
@@ -1393,6 +1420,14 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
     } else {
         dirtyFocusScope_ = WeakClaim(RawPtr(node));
     }
+    RequestFrame();
+}
+
+void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(node);
+    dirtyDefaultFocusNode_ = WeakPtr<FrameNode>(node);
     RequestFrame();
 }
 
@@ -1546,6 +1581,10 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        if (mouseStyle) {
+            mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
+        }
         LOGD("WindowFocus: onFocus_ is %{public}d. Lost all focus.", onFocus_);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
@@ -1553,6 +1592,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     }
     if (onFocus_ && onShow_) {
         LOGD("WindowFocus: onFocus_ and onShow_ are both true. Do FlushFocus().");
+        isRootFocusNeedUpdate_ = true;
         FlushFocus();
     }
     FlushWindowFocusChangedCallback(isFocus);
@@ -1673,6 +1713,7 @@ void PipelineContext::Destroy()
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
+    dirtyDefaultFocusNode_.Reset();
     PipelineBase::Destroy();
     LOGI("PipelineContext::Destroy end.");
 }

@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension DEFAULT_SIZE = 240.0_vp;
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 } // namespace
 
 std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
@@ -38,34 +39,49 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
     auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
 
-    auto topPadding = 0.0f;
-    auto bottomPadding = 0.0f;
-    auto leftPadding = 0.0f;
-    auto rightPadding = 0.0f;
-    const auto& padding = layoutProperty->GetPaddingProperty();
-    if (padding) {
-        topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        auto topPadding = 0.0f;
+        auto bottomPadding = 0.0f;
+        auto leftPadding = 0.0f;
+        auto rightPadding = 0.0f;
+        const auto& padding = layoutProperty->GetPaddingProperty();
+        if (padding) {
+            topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+            bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+            leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+            rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        }
+        auto width = DEFAULT_SIZE.ConvertToPx() - leftPadding - rightPadding;
+        if (Negative(width)) {
+            LOGD("QRCode padding is greater than QRCode size, reset QRCode size to 0.");
+            width = 0.0f;
+        }
+        if (contentConstraint.selfIdealSize.Width().has_value()) {
+            width = contentConstraint.selfIdealSize.Width().value();
+        }
+        auto height = DEFAULT_SIZE.ConvertToPx() - topPadding - bottomPadding;
+        if (Negative(height)) {
+            LOGD("QRCode padding is greater than QRCode size, reset QRCode size to 0.");
+            height = 0.0f;
+        }
+        if (contentConstraint.selfIdealSize.Height().has_value()) {
+            height = contentConstraint.selfIdealSize.Height().value();
+        }
+        auto qrCodeSize = std::min(width, height);
+        qrCodeSize_ = qrCodeSize;
+        return SizeF(qrCodeSize, qrCodeSize);
+    } else {
+        auto idealSize = CreateIdealSize(contentConstraint, Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
+        if (LessNotEqual(idealSize.Width(), idealSize.Height())) {
+            idealSize.SetHeight(idealSize.Width());
+        } else if (LessNotEqual(idealSize.Height(), idealSize.Width())) {
+            idealSize.SetWidth(idealSize.Height());
+        }
+        qrCodeSize_ = idealSize.Width();
+        return idealSize;
     }
-    auto width = DEFAULT_SIZE.ConvertToPx() - leftPadding - rightPadding;
-    if (Negative(width)) {
-        width = 0.0f;
-    }
-    if (contentConstraint.selfIdealSize.Width().has_value()) {
-        width = contentConstraint.selfIdealSize.Width().value();
-    }
-    auto height = DEFAULT_SIZE.ConvertToPx() - topPadding - bottomPadding;
-    if (Negative(height)) {
-        height = 0.0f;
-    }
-    if (contentConstraint.selfIdealSize.Height().has_value()) {
-        height = contentConstraint.selfIdealSize.Height().value();
-    }
-    auto qrCodeSize = std::min(width, height);
-    qrCodeSize_ = qrCodeSize;
-    return SizeF(qrCodeSize, qrCodeSize);
 }
 
 } // namespace OHOS::Ace::NG

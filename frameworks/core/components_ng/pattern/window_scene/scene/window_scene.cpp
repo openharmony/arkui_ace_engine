@@ -22,11 +22,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr uint32_t COLOR_BLACK = 0xff000000;
-constexpr uint32_t COLOR_WHITE = 0xffffffff;
-} // namespace
-
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 {
     session_ = session;
@@ -91,39 +86,6 @@ void WindowScene::OnForeground()
     snapshotNode_.Reset();
     host->AddChild(contentNode_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void WindowScene::OnBackground()
-{
-    auto uiTask = [weakThis = WeakClaim(this)]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-
-        self->snapshotNode_ = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        auto imageLayoutProperty = self->snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
-        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-        self->snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        host->RemoveChild(self->contentNode_);
-        host->AddChild(self->snapshotNode_);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-        CHECK_NULL_VOID(self->session_);
-        CHECK_NULL_VOID(self->session_->GetScenePersistence());
-        imageLayoutProperty->UpdateImageSourceInfo(
-            ImageSourceInfo("file:/" + self->session_->GetScenePersistence()->GetSnapshotFilePath()));
-        imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-        self->snapshotNode_->MarkModifyDone();
-    };
-
-    ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnSetDepth(const int32_t depth)

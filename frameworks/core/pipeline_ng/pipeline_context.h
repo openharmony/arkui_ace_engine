@@ -279,11 +279,17 @@ public:
         return onShow_;
     }
 
+    void MarkRootFocusNeedUpdate()
+    {
+        isRootFocusNeedUpdate_ = true;
+    }
+
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
 
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
+    void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
@@ -467,12 +473,14 @@ private:
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
+    WeakPtr<FrameNode> dirtyDefaultFocusNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
+    bool isRootFocusNeedUpdate_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;

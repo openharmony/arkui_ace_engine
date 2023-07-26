@@ -204,7 +204,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
         }
     }
 
-    CHECK_NULL_RETURN(parentFrameNode, nullptr);
+    CHECK_NULL_RETURN_NOLOG(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
         if (parentFrameNode == iter.second) {
             auto eventHub = parentFrameNode->GetEventHub<EventHub>();
@@ -271,7 +271,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     if (result) {
         return result;
     }
-    return nullptr;
+    return hitFrameNodes.rbegin()->second;
 }
 
 bool DragDropManager::CheckDragDropProxy(int64_t id) const

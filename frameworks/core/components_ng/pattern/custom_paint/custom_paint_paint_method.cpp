@@ -841,7 +841,10 @@ void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace:
 #ifndef NEW_SKIA
     skCanvas_->drawBitmap(skBitmap, imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
 #else
-    skCanvas_->drawImage(skBitmap.asImage(), imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY());
+    SkPaint paint;
+    paint.setBlendMode(SkBlendMode::kSrc);
+    skCanvas_->drawImage(skBitmap.asImage(), imageData.x + contentOffset.GetX(), imageData.y + contentOffset.GetY(),
+        SkSamplingOptions(), &paint);
 #endif
 #else
     RSBitmap bitmap;

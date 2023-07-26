@@ -24,16 +24,18 @@
 
 namespace OHOS::Rosen {
 class Session;
-}
+} // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
 class UIExtensionProxy : public AceType {
     DECLARE_ACE_TYPE(UIExtensionProxy, AceType);
+
 public:
     explicit UIExtensionProxy(const sptr<Rosen::Session>& session);
     void SendData(const RefPtr<WantParamsWrap>& params);
+
 private:
     sptr<Rosen::Session> session_;
 };
-} // // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PROXY_H

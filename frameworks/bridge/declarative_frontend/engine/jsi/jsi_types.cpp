@@ -89,6 +89,11 @@ bool JsiValue::IsArray() const
     }
 }
 
+bool JsiValue::IsUint8ClampedArray() const
+{
+    return (!GetHandle().IsEmpty()) && (GetHandle()->IsUint8ClampedArray());
+}
+
 bool JsiValue::IsUndefined() const
 {
     if (GetHandle().IsEmpty()) {
@@ -190,6 +195,44 @@ bool JsiArray::IsArray() const
     } else {
         return GetHandle()->IsArray(GetEcmaVM());
     }
+}
+
+// -----------------------
+// Implementation of JsiArrayBuffer
+// -----------------------
+JsiArrayBuffer::JsiArrayBuffer(panda::Local<panda::ArrayBufferRef> val) : JsiType(val) {}
+JsiArrayBuffer::JsiArrayBuffer(const panda::CopyableGlobal<panda::ArrayBufferRef>& val) : JsiType(val) {}
+
+int32_t JsiArrayBuffer::ByteLength() const
+{
+    return GetHandle()->ByteLength(GetEcmaVM());
+}
+
+void* JsiArrayBuffer::GetBuffer() const
+{
+    return GetHandle()->GetBuffer();
+}
+
+void JsiArrayBuffer::Detach() const
+{
+    GetHandle()->Detach(GetEcmaVM());
+}
+
+bool JsiArrayBuffer::IsDetach() const
+{
+    return GetHandle()->IsDetach();
+}
+
+// -----------------------
+// Implementation of JsiArrayBufferRef
+// -----------------------
+JsiUint8ClampedArray::JsiUint8ClampedArray(panda::Local<panda::Uint8ClampedArrayRef> val) : JsiType(val) {}
+JsiUint8ClampedArray::JsiUint8ClampedArray(const panda::CopyableGlobal<panda::Uint8ClampedArrayRef>& val) : JsiType(val)
+{}
+
+JsiRef<JsiArrayBuffer> JsiUint8ClampedArray::GetArrayBuffer() const
+{
+    return JsiRef<JsiArrayBuffer>(JsiArrayBuffer(GetHandle()->GetArrayBuffer(GetEcmaVM())));
 }
 
 // -----------------------

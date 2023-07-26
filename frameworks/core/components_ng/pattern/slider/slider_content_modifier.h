@@ -239,6 +239,8 @@ private:
     void DrawBlockShapeEllipse(DrawingContext& context, RefPtr<Ellipse>& ellipse);
     void DrawBlockShapePath(DrawingContext& context, RefPtr<Path>& path);
     void DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect);
+    void SetShapeRectRadius(RSRoundRect& roundRect, float borderWidth);
+    void SetBlockClip(DrawingContext& context);
 
 private:
     std::function<void()> updateImageFunc_;

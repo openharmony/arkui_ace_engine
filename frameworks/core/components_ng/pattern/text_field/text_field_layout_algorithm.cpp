@@ -152,7 +152,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto children = frameNode->GetChildren();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false)) {
+    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         auto childLayoutConstraint = textfieldLayoutProperty->CreateChildConstraint();
         CHECK_NULL_VOID(childWrapper);
@@ -397,7 +398,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto frameBottom = pattern->GetMarginBottom();
     MarginProperty errorMargin;
     if (layoutProperty->GetShowUnderlineValue(false) && layoutProperty->GetShowErrorTextValue(false) &&
-        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN)) {
+        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN)  &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         errorMargin.bottom = CalcLength(ERROR_TEXT_UNDERLINE_MARGIN);
         frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
     }
@@ -428,7 +430,8 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     if (isDisabled) {
         textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
-        if (layoutProperty->GetShowUnderlineValue(false)) {
+        if (layoutProperty->GetShowUnderlineValue(false) &&
+            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
             textStyle.SetTextColor(theme ? theme->GetTextColorDisable() : textStyle.GetTextColor());
         }
     } else {
@@ -479,7 +482,8 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     if (isDisabled) {
         textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
-        if (layoutProperty->GetShowUnderlineValue(false)) {
+        if (layoutProperty->GetShowUnderlineValue(false) &&
+            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
             textStyle.SetTextColor(theme ? theme->GetTextColorDisable() : textStyle.GetTextColor());
         }
     } else {
@@ -688,7 +692,8 @@ void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto layoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false)) {
+    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_VOID(childWrapper);
         auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/toast/toast_view.h"
 
 #include "base/geometry/dimension.h"
@@ -30,22 +29,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-float GetTextHeight(const RefPtr<FrameNode>& textNode)
-{
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
-    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
-
-    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
-    CHECK_NULL_RETURN(textLayoutWrapper, 0.0f);
-    textLayoutWrapper->Measure(layoutConstraint);
-    auto textGeometry = textLayoutWrapper->GetGeometryNode();
-    CHECK_NULL_RETURN(textGeometry, 0.0f);
-    auto textSize = textGeometry->GetMarginFrameSize();
-    return textSize.Height();
-}
-} // namespace
 RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft)
 {
     auto context = PipelineBase::GetCurrentContext();
@@ -60,7 +43,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(toastNode, nullptr);
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_RETURN(toastProperty, nullptr);
-
+    auto toastContext = toastNode->GetRenderContext();
+    CHECK_NULL_RETURN(toastContext, nullptr);
     auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
     toastAccessibilityProperty->SetText(message);
@@ -69,14 +53,11 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetTextNode(textNode);
     UpdateTextLayoutProperty(textNode, message, isRightToLeft);
     UpdateTextContext(textNode);
-    auto textHeight = GetTextHeight(textNode);
-    if (textHeight > toastTheme->GetMinHeight().ConvertToPx()) {
-        textLayoutProperty->UpdateTextAlign(TextAlign::START);
-        textHeight = GetTextHeight(textNode);
-    }
     textNode->MountToParent(toastNode);
 
     toastProperty->UpdateBottom(StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom()));

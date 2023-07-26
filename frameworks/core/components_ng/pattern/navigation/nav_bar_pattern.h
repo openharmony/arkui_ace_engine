@@ -80,8 +80,11 @@ public:
         return menuNodeId_.value();
     }
 
-    int32_t GetLandscapeMenuNodeId() const
+    int32_t GetLandscapeMenuNodeId()
     {
+        if (!landscapeMenuNodeId_.has_value()) {
+            landscapeMenuNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
         return landscapeMenuNodeId_.value();
     }
 
@@ -93,6 +96,16 @@ public:
     void SetLandscapeMenuNodeId(const int32_t landscapeMenuNodeId)
     {
         landscapeMenuNodeId_ = landscapeMenuNodeId;
+    }
+
+    bool HasMenuNodeId() const
+    {
+        return menuNodeId_.has_value();
+    }
+
+    bool HasLandscapeMenuNodeId() const
+    {
+        return landscapeMenuNodeId_.has_value();
     }
 
 protected:

@@ -41,7 +41,7 @@ constexpr float PERCENT_HALF = 0.5f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12f;
 constexpr float FIXED_ANGLE = 2.0f;
 constexpr float FIXED_DRAW_ANGLE = 4.0f;
-constexpr uint32_t SHADOW_ALPHA = 0.6 * 255;
+constexpr uint32_t SHADOW_ALPHA = 0.4 * 255;
 } // namespace
 
 DataPanelModifier::DataPanelModifier()

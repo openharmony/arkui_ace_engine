@@ -443,4 +443,10 @@ void UIContentImpl::NotifyMemoryLevel(int32_t level)
     pipelineContext->NotifyMemoryLevel(level);
 }
 
+int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+{
+    return 0;
+}
+
+void UIContentImpl::CloseModalUIExtension(int32_t sessionId) {}
 } // namespace OHOS::Ace

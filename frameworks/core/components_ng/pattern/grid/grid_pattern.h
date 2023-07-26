@@ -183,6 +183,7 @@ public:
     void MoveItems(int32_t itemIndex, int32_t insertIndex);
     void ClearDragState();
     float EstimateHeight() const;
+    float GetAverageHeight() const;
 
 private:
     float GetMainGap();
@@ -220,7 +221,7 @@ private:
 
     GridLayoutInfo gridLayoutInfo_;
     void ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
-                      bool prevReachEnd, bool reachStart);
+                      bool prevReachEnd, bool reachStart, bool isChangedUpToEnd);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
     void FireOnScrollStart();

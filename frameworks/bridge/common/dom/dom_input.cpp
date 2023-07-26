@@ -280,7 +280,9 @@ void DOMInput::CreateSpecializedComponent()
         inputChild_ =
             DOMTextFieldUtil::CreateComponentAndSetChildAttr(GetBoxComponent(), type_.first, inputAttrs_, *this);
     }
-    inputChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    if (inputChild_) {
+        inputChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    }
 }
 
 void DOMInput::UpdateSpecializedComponent()

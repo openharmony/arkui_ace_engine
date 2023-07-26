@@ -274,10 +274,17 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     }
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
-        textSelector_.Update(-1, -1);
+        CloseSelectOverlay();
+        ResetSelection();
     }
     SetCaretOffset(start);
     ResetSelection();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childrens = host->GetChildren();
+    if (childrens.empty() || GetTextContentLength() == 0) {
+        SetCaretPosition(0);
+    }
 }
 
 void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
@@ -546,6 +553,7 @@ bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
 
 OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
 {
+    selectLineHeight = 0.0f;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF(0, 0));
     auto pipeline = host->GetContext();
@@ -553,6 +561,35 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     auto startOffset = TextPattern::CalcCursorOffsetByPosition(position, selectLineHeight);
+    auto children = host->GetChildren();
+    if (NearZero(selectLineHeight)) {
+        if (children.empty() || GetTextContentLength() == 0) {
+            float caretHeight = richEditorOverlayModifier_->GetCareHeight();
+            return textPaintOffset - rootOffset - OffsetF(0.0f, caretHeight / 2.0f);
+        }
+        if (std::all_of(children.begin(), children.end(), [](RefPtr<UINode>& node) {
+                CHECK_NULL_RETURN(node, false);
+                return (node->GetTag() == V2::IMAGE_ETS_TAG);
+            })) {
+            bool isTail = false;
+            auto it = children.begin();
+            if (position >= static_cast<int32_t>(children.size())) {
+                std::advance(it, (position - 1));
+                isTail = true;
+            } else {
+                std::advance(it, position);
+            }
+            auto imageNode = DynamicCast<FrameNode>(*it);
+            if (imageNode) {
+                auto geometryNode = imageNode->GetGeometryNode();
+                CHECK_NULL_RETURN(geometryNode, OffsetF(0.0f, 0.0f));
+                startOffset = geometryNode->GetMarginFrameOffset();
+                selectLineHeight = geometryNode->GetMarginFrameSize().Height();
+                startOffset += isTail ? OffsetF(geometryNode->GetMarginFrameSize().Width(), 0.0f) : OffsetF(0.0f, 0.0f);
+            }
+            return startOffset;
+        }
+    }
     return startOffset + textPaintOffset - rootOffset;
 }
 
@@ -630,7 +667,6 @@ void RichEditorPattern::UpdateSpanStyle(int32_t start, int32_t end, TextStyle te
     CHECK_NULL_VOID(host);
     int32_t spanStart = 0;
     int32_t spanEnd = 0;
-
     for (auto it = host->GetChildren().begin(); it != host->GetChildren().end(); ++it) {
         auto spanNode = DynamicCast<SpanNode>(*it);
         auto imageNode = DynamicCast<FrameNode>(*it);
@@ -673,6 +709,10 @@ void RichEditorPattern::UpdateSpanStyle(int32_t start, int32_t end, TextStyle te
         if (spanStart >= end) {
             break;
         }
+    }
+    if (textSelector_.IsValid()) {
+        CloseSelectOverlay();
+        ResetSelection();
     }
 }
 
@@ -2274,5 +2314,16 @@ void RichEditorPattern::OnAreaChangedInner()
             CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
         CreateHandles();
     }
+}
+
+void RichEditorPattern::CloseSelectOverlay()
+{
+    TextPattern::CloseSelectOverlay();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto textSelectInfo = GetSpansInfo(-1, -1, GetSpansMethod::ONSELECT);
+    eventHub->FireOnSelect(&textSelectInfo);
 }
 } // namespace OHOS::Ace::NG

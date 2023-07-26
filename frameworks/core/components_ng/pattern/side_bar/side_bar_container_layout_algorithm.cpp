@@ -224,13 +224,7 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
     defaultMinContentWidth_ = ConvertToPx(DEFAULT_MIN_CONTENT_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
 
     MeasureTypeUpdateWidth();
-    if (minContentWidth_ < 0.0f) {
-        if (maxSideBarWidth_ >= 0.0f) {
-            minContentWidth_ = 0.0f;
-        } else {
-            minContentWidth_ = defaultMinContentWidth_;
-        }
-    }
+    minContentWidth_ = std::max(0.0f, minContentWidth_);
     InitSideBarWidth(parentWidth);
     MeasureRealSideBarWidth(parentWidth);
 
@@ -489,6 +483,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
                                : (parentWidth - realDividerWidth_ + currentOffset_);
         }
     }
+    contentWidth = std::max(contentWidth, minContentWidth_);
 
     auto contentIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,

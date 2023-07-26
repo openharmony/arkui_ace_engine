@@ -406,7 +406,9 @@ class ACE_EXPORT FocusHub : public virtual AceType {
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
         : eventHub_(eventHub), focusable_(focusable), focusType_(type)
-    {}
+    {
+        MarkRootFocusNeedUpdate();
+    }
     ~FocusHub() override = default;
 
     void SetFocusStyleType(FocusStyleType type)
@@ -510,6 +512,7 @@ public:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool RequestFocusImmediately();
     void RequestFocus() const;
+    void RequestFocusWithDefaultFocusFirstly() const;
     void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
@@ -570,6 +573,9 @@ public:
     {
         return currentFocus_;
     }
+    bool IsCurrentFocusWholePath();
+
+    void MarkRootFocusNeedUpdate();
 
     void ClearUserOnFocus()
     {

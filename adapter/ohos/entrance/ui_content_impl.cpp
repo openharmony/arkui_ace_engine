@@ -361,6 +361,28 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
+void UIContentImpl::Initialize(
+    OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId)
+{
+    if (window) {
+        CommonInitialize(window, url, storage);
+    }
+
+    if (focusWindowId != 0) {
+        LOGI("Initialize focusWindow id:%{public}u", focusWindowId);
+        Platform::AceContainer::GetContainer(instanceId_)->SetFocusWindowId(focusWindowId);
+    }
+
+    LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGD("Initialize UIContentImpl done.");
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+}
+
 NativeValue* UIContentImpl::GetUIContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1784,6 +1806,51 @@ void UIContentImpl::SetFocusWindowId(uint32_t focusWindowId)
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetFocusWindowId(focusWindowId);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+{
+    LOGI("create ui extension modal page start");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN_NOLOG(container, 0);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN_NOLOG(taskExecutor, 0);
+    int32_t sessionId = 0;
+    taskExecutor->PostSyncTask(
+        [container, &sessionId, want, callbacks = callbacks]() {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto overlay = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID_NOLOG(overlay);
+            sessionId = overlay->CreateModalUIExtension(want, callbacks);
+        },
+        TaskExecutor::TaskType::UI);
+    LOGI("create ui extension modal page end, sessionId=%{public}d", sessionId);
+    return sessionId;
+}
+
+void UIContentImpl::CloseModalUIExtension(int32_t sessionId)
+{
+    LOGI("close ui extension modal page, sessionId=%{public}d", sessionId);
+    if (sessionId == 0) {
+        LOGW("refuse to close ui extension modal page");
+        return;
+    }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID_NOLOG(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    taskExecutor->PostTask(
+        [container, sessionId]() {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto overlay = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID_NOLOG(overlay);
+            overlay->CloseModalUIExtension(sessionId);
         },
         TaskExecutor::TaskType::UI);
 }

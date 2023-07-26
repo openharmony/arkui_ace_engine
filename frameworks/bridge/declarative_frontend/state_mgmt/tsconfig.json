@@ -28,7 +28,6 @@
 
     // common
     "src/lib/common/state_mgmt_console_trace.ts",
-    "src/lib/common/distributed_storage.ts",
     "src/lib/common/observed_object.ts",
     "src/lib/common/observed_property_abstract.ts",
 

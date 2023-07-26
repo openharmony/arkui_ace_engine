@@ -162,6 +162,7 @@ public:
         return caretSpanIndex_;
     }
 
+    void CloseSelectOverlay() override;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif

@@ -51,6 +51,7 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     bool hasData = false;
+    CHECK_NULL_VOID_NOLOG(taskExecutor_);
     taskExecutor_->PostSyncTask(
         [&hasData]() { hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData(); },
         TaskExecutor::TaskType::PLATFORM);
@@ -118,11 +119,14 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
     LOGI("Current device doesn't support system clipboard");
     if (syncMode) {
         callback(g_clipboard);
-    } else {
-        taskExecutor_->PostTask([callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)),
-                                    textData = g_clipboard]() { callback(textData); },
-            TaskExecutor::TaskType::UI);
+        return;
     }
+    CHECK_NULL_VOID_NOLOG(taskExecutor_);
+    taskExecutor_->PostTask(
+        [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)), textData = g_clipboard]() {
+            callback(textData);
+        },
+        TaskExecutor::TaskType::UI);
 #endif
 }
 

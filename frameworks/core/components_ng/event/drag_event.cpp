@@ -23,6 +23,7 @@
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -148,6 +149,21 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             }
         }
 
+        if (info.GetSourceDevice() == SourceType::MOUSE) {
+            if (gestureHub->GetTextDraggable()) {
+                auto patten = frameNode->GetPattern<TextFieldPattern>();
+                CHECK_NULL_VOID(patten);
+                if (!patten->InSelectMode() || patten->GetMouseStatus() == MouseStatus::MOVE) {
+                    frameNode->SetDraggable(false);
+                    return;
+                }
+                if (patten->BetweenSelectedPosition(info.GetGlobalLocation())) {
+                    frameNode->SetDraggable(true);
+                    textDragCallback_(info.GetGlobalLocation());
+                }
+            }
+        }
+
 #endif // ENABLE_DRAG_FRAMEWORK
        // Trigger drag start event set by user.
         CHECK_NULL_VOID(actuator->userCallback_);
@@ -170,17 +186,28 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto&& callback = [weakPtr = gestureEventHub_, weak = WeakClaim(this)]() {
             auto gestureHub = weakPtr.Upgrade();
             CHECK_NULL_VOID(gestureHub);
-            if (gestureHub->GetTextDraggable()) {
+            if (gestureHub->GetTextDraggable() && !gestureHub->IsTextField()) {
                 auto actuator = weak.Upgrade();
                 CHECK_NULL_VOID(actuator);
                 actuator->GetTextPixelMap(true);
                 return;
             }
+            std::shared_ptr<Media::PixelMap> pixelMap;
             auto frameNode = gestureHub->GetFrameNode();
             CHECK_NULL_VOID(frameNode);
-            auto context = frameNode->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            std::shared_ptr<Media::PixelMap> pixelMap = context->GetThumbnailPixelMap()->GetPixelMapSharedPtr();
+            if (gestureHub->GetTextDraggable() && gestureHub->IsTextField()) {
+                auto pattern = frameNode->GetPattern<TextDragBase>();
+                CHECK_NULL_VOID(pattern);
+                auto dragNode = pattern->MoveDragNode();
+                CHECK_NULL_VOID(dragNode);
+                auto context = dragNode->GetRenderContext();
+                CHECK_NULL_VOID(context);
+                pixelMap = context->GetThumbnailPixelMap()->GetPixelMapSharedPtr();
+            } else {
+                auto context = frameNode->GetRenderContext();
+                CHECK_NULL_VOID(context);
+                pixelMap = context->GetThumbnailPixelMap()->GetPixelMapSharedPtr();
+            }
             CHECK_NULL_VOID(pixelMap);
             auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
             if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
@@ -280,7 +307,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     [&]() {
                         BorderRadiusProperty borderRadius;
                         borderRadius.SetRadius(Dimension(0));
-                    }, option.GetOnFinishEvent());
+                    },
+                    option.GetOnFinishEvent());
                 HideEventColumn();
                 HidePixelMap();
                 HideFilter();
@@ -313,12 +341,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (touchRestrict.sourceType == SourceType::MOUSE && !gestureHub->GetTextDraggable()) {
+    auto isText = gestureHub->GetTextDraggable() && !gestureHub->IsTextField();
+    if (touchRestrict.sourceType == SourceType::MOUSE && !isText) {
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
         if (!SequencedRecognizer_) {
             SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
-            SequencedRecognizer_->RemainChildOnResetStatus();
         }
+        SequencedRecognizer_->RemainChildOnResetStatus();
         SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         result.emplace_back(SequencedRecognizer_);
@@ -395,12 +424,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     if (!SequencedRecognizer_) {
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
-        SequencedRecognizer_->RemainChildOnResetStatus();
     }
+    SequencedRecognizer_->RemainChildOnResetStatus();
     SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(SequencedRecognizer_);
-    result.emplace_back(previewLongPressRecognizer_);
+    std::vector<RefPtr<NGGestureRecognizer>> previewRecognizers { previewLongPressRecognizer_ };
+    if (!previewSequencedRecognizer_) {
+        previewSequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(previewRecognizers);
+    }
+    previewSequencedRecognizer_->RemainChildOnResetStatus();
+    previewSequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    previewSequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(previewSequencedRecognizer_);
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -634,6 +670,7 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
 
 void DragEventActuator::SetThumbnailCallback(std::function<void(Offset)>&& callback)
 {
+    textDragCallback_ = callback;
     longPressRecognizer_->SetThumbnailCallback(std::move(callback));
 }
 

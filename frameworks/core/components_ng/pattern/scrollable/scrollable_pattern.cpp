@@ -312,9 +312,12 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
     CHECK_NULL_VOID(scrollableEvent_);
     scrollableEvent_->SetInBarRegionCallback(
-        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point) {
+        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point, SourceType source) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_RETURN_NOLOG(scrollBar, false);
+            if (source == SourceType::MOUSE) {
+                return scrollBar->InBarActiveRegion(Point(point.GetX(), point.GetY()));
+            }
             return scrollBar->InBarTouchRegion(Point(point.GetX(), point.GetY()));
         }
     );
@@ -340,6 +343,8 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         }
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
     if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
         // set the scroll bar style
@@ -347,11 +352,10 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else if (scrollBar_->GetDisplayMode() != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(renderContext);
     if (renderContext->HasBorderRadius()) {
