@@ -788,13 +788,12 @@ void OverlayManager::HideMenu(int32_t targetId, bool isMenuOnTouch)
     menuMap_[targetId]->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        RemoveEventColumn();
-        if (isMenuOnTouch) {
-            RemovePixelMap();
-        } else {
-            RemovePixelMapAnimation(false, 0, 0);
-        }
-        RemoveFilter();
+    RemoveEventColumn();
+    if (isMenuOnTouch) {
+        RemovePixelMap();
+    } else {
+        RemovePixelMapAnimation(false, 0, 0);
+    }
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
