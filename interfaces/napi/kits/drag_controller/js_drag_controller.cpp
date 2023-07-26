@@ -76,6 +76,16 @@ struct DragControllerAsyncCtx {
 };
 } // namespace
 
+napi_value CreateCallbackErrorValue(napi_env env, int32_t errCode)
+{
+    napi_value jsObject = nullptr;
+    napi_value jsValue = nullptr;
+    NAPI_CALL(env, napi_create_int32(env, errCode, &jsValue));
+    NAPI_CALL(env, napi_create_object(env, &jsObject));
+    NAPI_CALL(env, napi_set_named_property(env, jsObject, "code", jsValue));
+    return jsObject;
+}
+
 void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNotifyMsg)
 {
     if (!asyncCtx) {
@@ -103,12 +113,12 @@ void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNo
                 LOGE("DragControllerAsyncContext is null");
                 return;
             }
-            napi_value result[1] = { nullptr };
-            napi_get_undefined(asyncCtx->env, &result[0]);
+            napi_value result[2] = { nullptr };
+            napi_get_undefined(asyncCtx->env, &result[1]);
             auto resultCode = dragNotifyMsg.result;
             LOGI("resultCode = %{public}d", static_cast<int32_t>(resultCode));
             // do success thing
-            napi_create_object(asyncCtx->env, &result[0]);
+            napi_create_object(asyncCtx->env, &result[1]);
             napi_value eventNapi = nullptr;
             napi_value globalObj = nullptr;
             napi_value customDragEvent = nullptr;
@@ -148,20 +158,21 @@ void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNo
             }
             dragEvent->SetResult(static_cast<DragRet>(resultCode));
             jsDragEvent->SetDragEvent(dragEvent);
-            status = napi_set_named_property(asyncCtx->env, result[0], "event", eventNapi);
+            status = napi_set_named_property(asyncCtx->env, result[1], "event", eventNapi);
 
             napi_value extraParamsNapi = nullptr;
             napi_create_string_utf8(
                 asyncCtx->env, asyncCtx->extraParams.c_str(), asyncCtx->extraParams.length(), &extraParamsNapi);
-            napi_set_named_property(asyncCtx->env, result[0], "extraParams", extraParamsNapi);
+            napi_set_named_property(asyncCtx->env, result[1], "extraParams", extraParamsNapi);
             if (asyncCtx->callbackRef) {
                 napi_value ret = nullptr;
                 napi_value napiCallback = nullptr;
                 napi_get_reference_value(asyncCtx->env, asyncCtx->callbackRef, &napiCallback);
-                napi_call_function(asyncCtx->env, nullptr, napiCallback, 1, result, &ret);
+                result[0] = CreateCallbackErrorValue(asyncCtx->env, 0);
+                napi_call_function(asyncCtx->env, nullptr, napiCallback, argCount2, result, &ret);
                 napi_delete_reference(asyncCtx->env, asyncCtx->callbackRef);
             } else {
-                napi_resolve_deferred(asyncCtx->env, asyncCtx->deferred, result[0]);
+                napi_resolve_deferred(asyncCtx->env, asyncCtx->deferred, result[1]);
             }
         },
         TaskExecutor::TaskType::JS);
@@ -178,14 +189,14 @@ void HandleFail(DragControllerAsyncCtx* asyncCtx, int32_t errorCode)
     if (asyncCtx->flag) {
         return;
     }
-    napi_value result[1] = { nullptr };
-    napi_get_undefined(asyncCtx->env, &result[0]);
-    napi_create_int32(asyncCtx->env, static_cast<int32_t>(errorCode), &result[0]);
+    napi_value result[2] = { nullptr };
+    result[0] = CreateCallbackErrorValue(asyncCtx->env, errorCode);
     if (asyncCtx->callbackRef) {
         napi_value ret = nullptr;
         napi_value napiCallback = nullptr;
         napi_get_reference_value(asyncCtx->env, asyncCtx->callbackRef, &napiCallback);
-        napi_call_function(asyncCtx->env, nullptr, napiCallback, 1, result, &ret);
+        napi_create_object(asyncCtx->env, &result[1]);
+        napi_call_function(asyncCtx->env, nullptr, napiCallback, argCount2, result, &ret);
         napi_delete_reference(asyncCtx->env, asyncCtx->callbackRef);
     } else {
         napi_reject_deferred(asyncCtx->env, asyncCtx->deferred, result[0]);
