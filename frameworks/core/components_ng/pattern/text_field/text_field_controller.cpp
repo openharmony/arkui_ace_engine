@@ -53,7 +53,7 @@ Rect TextFieldController::GetTextContentRect()
         RectF rect = textFieldPattern->GetTextRect();
         auto y = rect.GetY();
         if (rect.GetY() == 0) {
-            y = textFieldPattern->GetPaddingTop();
+            y = textFieldPattern->GetPaddingTop() + textFieldPattern->GetBorderTop();
         }
         if (textFieldPattern->IsOperation()) {
             return Rect(rect.GetX(), y, rect.Width(), rect.Height());
