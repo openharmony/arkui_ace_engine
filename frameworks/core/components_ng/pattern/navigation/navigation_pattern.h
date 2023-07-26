@@ -157,9 +157,6 @@ public:
         navigationStack_->Remove();
     }
 
-    void DoNavigationTransitionAnimation(const RefPtr<UINode>& preTopNavDestination,
-        const RefPtr<UINode>& newTopNavDestination, int preStackSize, int newStackSize);
-
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
 
     void CleanStack()

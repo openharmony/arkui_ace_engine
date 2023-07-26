@@ -4990,12 +4990,12 @@ HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset001, TestSize.Level
     listLayoutAlgorithm->SetSpaceWidth(5);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 0);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
 
     listLayoutAlgorithm->SetTotalOffset(20.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 25);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
 
     listLayoutAlgorithm->SetTotalOffset(10.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
@@ -5038,12 +5038,12 @@ HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset002, TestSize.Level
     listLayoutAlgorithm->SetSpaceWidth(5);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 0);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
 
     listLayoutAlgorithm->SetTotalOffset(20.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 25);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
 
     listLayoutAlgorithm->SetTotalOffset(10.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
@@ -5086,12 +5086,12 @@ HWTEST_F(ListTestNg, ListLayoutAlgorithm_FixPredictSnapOffset003, TestSize.Level
     listLayoutAlgorithm->SetSpaceWidth(5);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 0);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
 
     listLayoutAlgorithm->SetTotalOffset(20.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 25);
+    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapOffset().value(), 10);
 
     listLayoutAlgorithm->SetTotalOffset(10.0f);
     listLayoutAlgorithm->SetPredictSnapOffset(10.0f);

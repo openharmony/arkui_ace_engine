@@ -76,6 +76,11 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+    void SetIsSpringEffect(bool isSpringEffect)
+    {
+        isSpringEffect_ = isSpringEffect;
+    }
+
     void SetIndex(int32_t index)
     {
         jumpIndex_ = index;
@@ -319,6 +324,7 @@ private:
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;
+    bool isSpringEffect_ = false;
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
 
