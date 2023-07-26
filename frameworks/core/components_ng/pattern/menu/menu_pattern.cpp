@@ -482,7 +482,6 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     }
     // to enable inner menu shadow effect for desktopMenu, need to remove clipping from container
     bool clip = !resetForDesktopMenu;
-    renderContext->SetClipToBounds(clip);
     scroll->GetRenderContext()->SetClipToBounds(clip);
 
     // move padding from scroll to inner menu
@@ -502,7 +501,6 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     auto bgColor = theme->GetBackgroundColor();
     renderContext->UpdateBackgroundColor(bgColor);
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
-    renderContext->SetClipToBounds(true);
     // make menu round rect
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(theme->GetMenuBorderRadius());
@@ -563,35 +561,9 @@ void MenuPattern::SetAccessibilityAction()
 
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    UpdateMenuClip(dirty);
     return false;
 }
 
-void MenuPattern::UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty)
-{
-    // context menu is necessary condition for arrow display
-    // if scroll does not display, do not clip menu and scroll
-    if (IsContextMenu()) {
-        auto scrollParentNode = dirty->GetHostNode();
-        auto scrollNode = DynamicCast<FrameNode>(scrollParentNode->GetFirstChild());
-        CHECK_NULL_VOID(scrollNode);
-        auto scrollContentNode = DynamicCast<FrameNode>(scrollNode->GetFirstChild());
-        CHECK_NULL_VOID(scrollContentNode);
-        auto scrollContentGeometryNode = scrollContentNode->GetGeometryNode();
-        CHECK_NULL_VOID(scrollContentGeometryNode);
-        auto scrollContentSize = scrollContentGeometryNode->GetFrameSize();
-        auto scrollParentGeometryNode = scrollParentNode->GetGeometryNode();
-        auto parentSize = scrollParentGeometryNode->GetFrameSize();
-
-        auto clip = GreatNotEqual(scrollContentSize.Height(), parentSize.Height());
-        auto scrollParentContext = scrollParentNode->GetRenderContext();
-        CHECK_NULL_VOID(scrollParentContext);
-        scrollParentContext->SetClipToBounds(clip);
-        auto scrollContentContext = scrollContentNode->GetRenderContext();
-        CHECK_NULL_VOID(scrollContentContext);
-        scrollContentContext->SetClipToBounds(clip);
-    }
-}
 
 RefPtr<MenuPattern> MenuPattern::GetMainMenuPattern() const
 {
