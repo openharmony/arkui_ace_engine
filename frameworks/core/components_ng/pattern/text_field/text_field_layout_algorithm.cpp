@@ -37,6 +37,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -196,7 +197,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         }
     } else {
-        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
+        UpdatePlaceholderTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme,
+            textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
@@ -417,6 +419,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
+    FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
 
     Dimension fontSize;
     if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
@@ -456,11 +459,14 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
+void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
+    bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
-    textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
+    textStyle.SetFontFamilies(layoutProperty->GetPlaceholderFontFamilyValue(defaultFontFamily));
+    FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
+
     Dimension fontSize;
     if (layoutProperty->GetPlaceholderValue("").empty()) {
         if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
@@ -535,6 +541,25 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
 
     auto paragraph = builder->Build();
     paragraph_.reset(paragraph.release());
+}
+
+void TextFieldLayoutAlgorithm::FontRegisterCallback(
+    const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies)
+{
+    auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        for (const auto& familyName : fontFamilies) {
+            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+        }
+        fontManager->AddVariationNodeNG(frameNode);
+    }
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& textStyles,
