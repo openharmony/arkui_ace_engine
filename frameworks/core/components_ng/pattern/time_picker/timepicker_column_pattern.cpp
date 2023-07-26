@@ -64,6 +64,7 @@ void TimePickerColumnPattern::OnAttachToFrameNode()
     jumpInterval_ = pickerTheme->GetJumpInterval().ConvertToPx();
     CreateAnimation();
     InitPanEvent(gestureHub);
+    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 void TimePickerColumnPattern::OnModifyDone()
