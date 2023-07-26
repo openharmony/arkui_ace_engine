@@ -1047,4 +1047,52 @@ void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ToJsonValueForSearchButtonOption(json);
 }
 
+void SearchPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetNeedCallChildrenUpdate(false);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    if (cancelButtonNode_) {
+        auto cancelButtonRenderContext = cancelButtonNode_->GetRenderContext();
+        CHECK_NULL_VOID(cancelButtonRenderContext);
+        cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(cancelButtonNode_->GetChildren().front());
+        CHECK_NULL_VOID(textFrameNode);
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        cancelButtonNode_->MarkModifyDone();
+        cancelButtonNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (buttonNode_) {
+        auto buttonRenderContext = buttonNode_->GetRenderContext();
+        CHECK_NULL_VOID(buttonRenderContext);
+        buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonNode_->GetChildren().front());
+        CHECK_NULL_VOID(textFrameNode);
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        buttonNode_->MarkModifyDone();
+        buttonNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (textField_) {
+        auto textFieldLayoutProperty = textField_->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(textFieldLayoutProperty);
+        textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
+        textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+        textField_->MarkModifyDone();
+        textField_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
 } // namespace OHOS::Ace::NG

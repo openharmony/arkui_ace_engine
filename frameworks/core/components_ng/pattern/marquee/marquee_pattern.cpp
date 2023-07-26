@@ -26,6 +26,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/marquee/marquee_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
@@ -454,5 +455,25 @@ void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     isOritationListenerRegisted_ = false;
     isRegistedAreaCallback_ = false;
+}
+
+void MarqueePattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetNeedCallChildrenUpdate(false);
+    auto textChild = host->GetChildren().front();
+    CHECK_NULL_VOID(textChild);
+    auto textChildNode = DynamicCast<FrameNode>(textChild);
+    CHECK_NULL_VOID(textChildNode);
+    auto textLayoutProperty = textChildNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<MarqueeTheme>();
+    CHECK_NULL_VOID(theme);
+    textLayoutProperty->UpdateTextColor(theme->GetTextColor());
+    textChildNode->MarkModifyDone();
+    textChildNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 } // namespace OHOS::Ace::NG
