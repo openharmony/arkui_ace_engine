@@ -144,8 +144,9 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options)
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
 
     int32_t spanIndex = 0;
+    int32_t offset = -1;
     if (options.offset.has_value()) {
-        int32_t offset = TextSpanSplit(options.offset.value());
+        offset = TextSpanSplit(options.offset.value());
         if (offset == -1) {
             spanIndex = host->GetChildren().size();
         } else {
@@ -175,12 +176,35 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options)
     imageNode->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+    auto spanItem = MakeRefPtr<ImageSpanItem>();
+
+    // The length of the imageSpan defaults to the length of a character to calculate the position
+    spanItem->content = " ";
+    AddSpanItem(spanItem, offset);
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
     }
 
     return spanIndex;
+}
+
+void RichEditorPattern::AddSpanItem(RefPtr<SpanItem> item, int32_t offset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (offset == -1) {
+        offset = host->GetChildren().size();
+    }
+    offset = std::min(offset, static_cast<int32_t>(host->GetChildren().size()));
+    auto it = spanItemChildren_.begin();
+    std::advance(it, offset);
+    spanItemChildren_.insert(it, item);
+    int32_t spanTextLength = 0;
+    for (auto child = spanItemChildren_.begin(); child != spanItemChildren_.end(); child++) {
+        (*child)->position = spanTextLength + StringUtils::ToWstring((*child)->content).length();
+        spanTextLength += StringUtils::ToWstring((*child)->content).length();
+    }
 }
 
 int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options)
@@ -193,8 +217,9 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options)
     auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
 
     int32_t spanIndex = 0;
+    int32_t offset = -1;
     if (options.offset.has_value()) {
-        int32_t offset = TextSpanSplit(options.offset.value());
+        offset = TextSpanSplit(options.offset.value());
         if (offset == -1) {
             spanIndex = host->GetChildren().size();
         } else {
@@ -223,6 +248,9 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options)
         spanNode->UpdateTextDecorationColor(options.style.value().GetTextDecorationColor());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
     }
+    auto spanItem = spanNode->GetSpanItem();
+    spanItem->content = options.value;
+    AddSpanItem(spanItem, offset);
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
