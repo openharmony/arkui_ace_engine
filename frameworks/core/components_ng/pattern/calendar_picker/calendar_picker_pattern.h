@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_property.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -50,6 +51,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<CalendarPickerLayoutAlgorithm>();
     }
 
     void SetCalendarEdgeAlign(CalendarEdgeAlign align)

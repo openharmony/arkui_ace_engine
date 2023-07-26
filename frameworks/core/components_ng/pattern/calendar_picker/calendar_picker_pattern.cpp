@@ -35,7 +35,7 @@ constexpr uint32_t MAX_YEAR = 5000;
 constexpr uint32_t DELAY_TIME = 2000;
 constexpr uint32_t MAX_MONTH = 12;
 constexpr Dimension DIALOG_HEIGHT = 348.0_vp;
-constexpr Dimension DIALOG_WIDTH = 320.0_vp;
+constexpr Dimension DIALOG_WIDTH = 336.0_vp;
 } // namespace
 void CalendarPickerPattern::OnModifyDone()
 {
@@ -104,36 +104,31 @@ void CalendarPickerPattern::InitOnHoverEvent()
 
 void CalendarPickerPattern::HandleClickEvent(const GestureEvent& info)
 {
-    auto isShow = IsDialogShow();
-    if (!isShow) {
-        ShowDialog();
-    }
-
     switch (CheckClickRegion(info)) {
         case CalendarPickerSelectedType::YEAR:
-            ResetTextState();
-            HandleTextFocusEvent(YEAR_INDEX);
-            break;
+            ShowDialog();
+            SetSelectedType(CalendarPickerSelectedType::YEAR);
+            return;
         case CalendarPickerSelectedType::MONTH:
-            ResetTextState();
-            HandleTextFocusEvent(MONTH_INDEX);
-            break;
+            ShowDialog();
+            SetSelectedType(CalendarPickerSelectedType::MONTH);
+            return;
         case CalendarPickerSelectedType::DAY:
-            ResetTextState();
-            HandleTextFocusEvent(DAY_INDEX);
-            break;
+            ShowDialog();
+            SetSelectedType(CalendarPickerSelectedType::DAY);
+            return;
         case CalendarPickerSelectedType::ADDBTN:
-            if (isShow) {
-                HandleAddButtonClick();
-            }
-            break;
+            HandleAddButtonClick();
+            return;
         case CalendarPickerSelectedType::SUBBTN:
-            if (isShow) {
-                HandleSubButtonClick();
-            }
-            break;
+            HandleSubButtonClick();
+            return;
         default:
             break;
+    }
+
+    if (!IsDialogShow()) {
+        ShowDialog();
     }
 }
 
@@ -373,6 +368,9 @@ bool CalendarPickerPattern::HandleFocusEvent(const KeyEvent& event)
         case KeyCode::KEY_SPACE:
         case KeyCode::KEY_NUMPAD_ENTER:
         case KeyCode::KEY_ENTER: {
+            if (!IsDialogShow()) {
+                ShowDialog();
+            }
             return true;
         }
         default:
@@ -660,6 +658,7 @@ void CalendarPickerPattern::HandleAddButtonClick()
         }
         case CalendarPickerSelectedType::DAY:
         default: {
+            SetSelectedType(CalendarPickerSelectedType::DAY);
             auto maxDay = PickerDate::GetMaxDay(dateObj.GetYear(), dateObj.GetMonth());
             if (maxDay > dateObj.GetDay()) {
                 dateObj.SetDay(dateObj.GetDay() + 1);
@@ -708,6 +707,7 @@ void CalendarPickerPattern::HandleSubButtonClick()
         }
         case CalendarPickerSelectedType::DAY:
         default: {
+            SetSelectedType(CalendarPickerSelectedType::DAY);
             if (dateObj.GetDay() > 1) {
                 dateObj.SetDay(dateObj.GetDay() - 1);
                 break;

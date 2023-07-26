@@ -41,7 +41,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SWIPER_MONTHS_COUNT = 3;
 constexpr int32_t CURRENT_MONTH_INDEX = 1;
-constexpr Dimension DIALOG_WIDTH = 320.0_vp;
+constexpr Dimension DIALOG_WIDTH = 336.0_vp;
+constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
 } // namespace
 RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogProperties,
     const CalendarSettingData& settingData, std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -69,7 +70,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     if (dialogProperties.customStyle) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(DIALOG_WIDTH), std::nullopt));
         BorderRadiusProperty radius;
-        radius.SetRadius(dialogTheme->GetRadius().GetX());
+        radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
     }
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
@@ -167,8 +168,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    CalcSize idealSize = { CalcLength(theme->GetCalendarImageWidthHeight()),
-        CalcLength(theme->GetCalendarImageWidthHeight()) };
+    CalcSize idealSize = { CalcLength(theme->GetEntryArrowWidth()), CalcLength(theme->GetEntryArrowWidth()) };
     MeasureProperty layoutConstraint = { .selfIdealSize = idealSize };
     BorderRadiusProperty borderRadius;
     Dimension radius =
@@ -182,6 +182,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
     buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(theme->GetCalendarImageWidthHeight()), CalcLength(theme->GetCalendarImageWidthHeight())));
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -229,13 +231,13 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     MarginProperty margin = {
-        .left = CalcLength(theme->GetDistanceBetweenContainterAndDate()),
-        .right = CalcLength(theme->GetDistanceBetweenContainterAndDate()),
+        .left = CalcLength(theme->GetDistanceBetweenContainterAndDate() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT),
+        .right = CalcLength(theme->GetDistanceBetweenContainterAndDate() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT),
         .top = CalcLength(theme->GetDistanceBetweenTitleAndDate()),
     };
     calendarLayoutProperty->UpdateMargin(margin);
-    calendarLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(theme->GetCalendarContainerHeight())));
+    calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
+        CalcLength(theme->GetCalendarContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
 
     auto swiperNode = CreateCalendarSwiperNode();
     CHECK_NULL_RETURN(swiperNode, nullptr);
@@ -310,7 +312,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNo
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     monthLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1, DimensionUnit::PERCENT), CalcLength(theme->GetCalendarContainerHeight())));
+        CalcSize(CalcLength(1, DimensionUnit::PERCENT),
+        CalcLength(theme->GetCalendarContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
     return monthFrameNode;
 }
 
@@ -357,6 +360,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm)
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    CHECK_NULL_RETURN(calendarTheme, nullptr);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(buttonNode, nullptr);
@@ -377,16 +382,9 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm)
     buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonLayoutProperty->UpdateFlexShrink(1.0);
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-
-    MarginProperty margin;
-    if (isConfirm) {
-        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-    } else {
-        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-    }
-    buttonNode->GetLayoutProperty()->UpdateMargin(margin);
+        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(calendarTheme->GetCalendarActionRowHeight())));
+    buttonNode->GetRenderContext()->UpdateBackgroundColor(SystemProperties::GetDeviceType() == DeviceType::PHONE ?
+        Color::TRANSPARENT : dialogTheme->GetCommonButtonBgColor());
 
     auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
@@ -437,13 +435,20 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
     auto dividerRenderContext = dividerNode->GetRenderContext();
     CHECK_NULL_RETURN(dividerRenderContext, nullptr);
-    dividerRenderContext->UpdateBackgroundColor(theme->GetDialogDividerColor());
+    dividerRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 
-    MarginProperty margin;
-    dividerNode->GetLayoutProperty()->UpdateMargin(margin);
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_RETURN(dividerLayoutProperty, nullptr);
+    dividerLayoutProperty->UpdateVertical(true);
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
+    dividerRenderProperty->UpdateDividerColor(SystemProperties::GetDeviceType() == DeviceType::PHONE ?
+        theme->GetDialogDividerColor() : Color::TRANSPARENT);
+
     dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
+        CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(theme->GetCalendarActionRowHeight() / 2)));
 
+    dividerNode->MarkModifyDone();
     return dividerNode;
 }
 
@@ -463,10 +468,10 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+    layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     MarginProperty margin;
-    margin.top = CalcLength(theme->GetCalendarActionRowTopPadding());
+    margin.top = CalcLength(theme->GetCalendarActionRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
     margin.left = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
     margin.right = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
     layoutProps->UpdateMargin(margin);
