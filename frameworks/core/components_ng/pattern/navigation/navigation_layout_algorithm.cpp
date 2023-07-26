@@ -222,10 +222,12 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto minNavBarWidthValue = navigationLayoutProperty->GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH);
     auto maxNavBarWidthValue = navigationLayoutProperty->GetMaxNavBarWidthValue(DEFAULT_MAX_NAV_BAR_WIDTH);
     auto minContentWidthValue = navigationLayoutProperty->GetMinContentWidthValue(DEFAULT_MIN_CONTENT_WIDTH);
-
+    auto lastNavMode = navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO);
     usrNavigationMode_ = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
     navigationMode_ = usrNavigationMode_;
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
@@ -255,6 +257,12 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
         navigationLayoutAlgorithm->SetNavigationMode(navigationMode_);
         navigationPattern->SetNavigationMode(navigationMode_);
+    }
+
+    if (lastNavMode == NavigationMode::AUTO) {
+        navigationPattern->SetNavModeChange(navigationMode_ == NavigationMode::SPLIT);
+    } else {
+        navigationPattern->SetNavModeChange(navigationMode_ != lastNavMode);
     }
     auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
