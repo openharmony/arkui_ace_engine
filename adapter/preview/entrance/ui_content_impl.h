@@ -109,6 +109,9 @@ public:
         return nullptr;
     }
 
+    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks) override;
+    void CloseModalUIExtension(int32_t sessionId) override;
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void DestroyCallback() const;

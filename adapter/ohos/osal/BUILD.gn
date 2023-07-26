@@ -63,6 +63,7 @@ template("ace_osal_ohos_source_set") {
       "frame_report.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
+      "modal_ui_extension_impl.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
       "system_properties.cpp",
@@ -140,6 +141,7 @@ template("ace_osal_ohos_source_set") {
       "hitrace:libhitracechain",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:scene_session",
     ]
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
