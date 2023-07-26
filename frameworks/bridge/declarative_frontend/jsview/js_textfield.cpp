@@ -322,11 +322,11 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         caretStyle.caretWidth = theme->GetCursorWidth();
     } else {
         CalcDimension width;
-        if (!ParseJsDimensionVp(caretWidth, width)) {
-            caretStyle.caretWidth = theme->GetCursorWidth();
+        if (!ParseJsDimensionVpNG(caretWidth, width, false)) {
+            width = theme->GetCursorWidth();
         }
         if (LessNotEqual(width.Value(), 0.0)) {
-            return;
+            width = theme->GetCursorWidth();
         }
         caretStyle.caretWidth = width;
     }
@@ -398,13 +398,7 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension fontSize;
-    if (info[0]->IsString()) {
-        auto value = info[0]->ToString();
-        if (value.back() == '%') {
-            return;
-        }
-    }
-    if (!ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP)) {
+    if (!ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP, false)) {
         LOGI("Parse to dimension FP failed!");
         return;
     }
