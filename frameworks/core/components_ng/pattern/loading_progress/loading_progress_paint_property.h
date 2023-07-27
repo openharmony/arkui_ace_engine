@@ -69,6 +69,7 @@ public:
         CHECK_NULL_VOID(progressTheme);
 
         json->Put("color", propColor_.value_or(progressTheme->GetLoadingColor()).ColorToString().c_str());
+        json->Put("enableLoading", GetEnableLoading().value_or(true) ? "true" : "false");
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_RENDER);
