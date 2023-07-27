@@ -245,7 +245,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     std::vector<RefPtr<FrameNode>> hitFrameNodes;
     for (const auto& weakNode : frameNodes) {
         auto frameNode = weakNode.Upgrade();
-        if (!frameNode) {
+        if (!frameNode || !frameNode->IsVisible()) {
             continue;
         }
         auto geometryNode = frameNode->GetGeometryNode();
