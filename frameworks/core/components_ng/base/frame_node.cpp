@@ -2475,7 +2475,7 @@ void FrameNode::SetCacheCount(int32_t cacheCount, const std::optional<LayoutCons
 
 void FrameNode::LayoutOverlay()
 {
-    auto size = geometryNode_->GetMarginFrameSize();
+    auto size = geometryNode_->GetFrameSize();
     auto align = Alignment::TOP_LEFT;
     Dimension offsetX, offsetY;
     auto childLayoutProperty = overlayNode_->GetLayoutProperty();
