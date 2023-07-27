@@ -585,7 +585,9 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-
+    if (!info[0]->IsArray()) {
+        return;
+    }
     auto rangeArray = JSRef<JSArray>::Cast(info[0]);
     JSRef<JSVal> min = rangeArray->GetValueAt(0);
     JSRef<JSVal> max = rangeArray->GetValueAt(1);
