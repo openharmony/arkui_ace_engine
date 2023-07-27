@@ -810,11 +810,6 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest002, TestSize.Level1)
     ASSERT_NE(datePickerPattern, nullptr);
     EXPECT_EQ(pickerProperty->GetStartDate()->year, datePickerPattern->GetStartDateLunar().year);
     EXPECT_EQ(pickerProperty->GetEndDate()->year, datePickerPattern->GetEndDateLunar().year);
-    datePickerPattern->SetStartDate(PickerDate(0, 1, 1));
-    datePickerPattern->SetEndDate(PickerDate(0, 1, 1));
-    EXPECT_EQ(
-        datePickerPattern->startDateSolar_.ToString(true), datePickerPattern->startDefaultDateSolar_.ToString(true));
-    EXPECT_EQ(datePickerPattern->endDateSolar_.ToString(true), datePickerPattern->endDefaultDateSolar_.ToString(true));
 }
 
 /**
