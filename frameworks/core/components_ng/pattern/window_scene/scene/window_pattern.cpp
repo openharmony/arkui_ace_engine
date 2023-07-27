@@ -427,7 +427,7 @@ bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
         (pointerAction != MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
         return true;
     }
-    return pointerEvent->GetButtonId() != MMI::PointerEvent::BUTTON_NONE &&
+    return pointerEvent->GetButtonId() == MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
 }
