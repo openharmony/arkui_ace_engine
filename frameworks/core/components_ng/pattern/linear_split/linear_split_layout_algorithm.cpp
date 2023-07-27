@@ -54,7 +54,7 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     } while (false);
 
-    if (!childrenDragPos_.empty() && childrenDragPos_.size() != layoutWrapper->GetTotalChildCount() + 1) {
+    if (!childrenDragPos_.empty() && childrenDragPos_.size() != layoutWrapper->GetTotalChildCount() + 1U) {
         childrenDragPos_.clear();
     }
 
@@ -345,7 +345,7 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
     bool isFirstSetPos = false;
-    if (!childrenDragPos_.empty() && childrenDragPos_.size() != layoutWrapper->GetTotalChildCount() + 1) {
+    if (!childrenDragPos_.empty() && childrenDragPos_.size() != layoutWrapper->GetTotalChildCount() + 1U) {
         childrenDragPos_.clear();
     }
     if (childrenDragPos_.empty()) {
@@ -395,7 +395,7 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
 void LinearSplitLayoutAlgorithm::ColumnSplitChildConstrain(LayoutWrapper* layoutWrapper,
     const RefPtr<LayoutWrapper>& item, int32_t index)
 {
-    if (index >= childrenConstrains_.size()) {
+    if (static_cast<uint32_t>(index) >= childrenConstrains_.size()) {
         return;
     }
     const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
@@ -491,7 +491,8 @@ void LinearSplitLayoutAlgorithm::LayoutBeforeAPI10(LayoutWrapper* layoutWrapper)
 }
 
 void LinearSplitLayoutAlgorithm::LayoutRowSplitBeforeAPI10(LayoutWrapper *layoutWrapper, float childOffsetMain,
-    float childOffsetCross, float childTotalOffsetMain) {
+    float childOffsetCross, float childTotalOffsetMain)
+{
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
     auto parentHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - padding.Height();
@@ -521,7 +522,8 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplitBeforeAPI10(LayoutWrapper *layout
 }
 
 void LinearSplitLayoutAlgorithm::LayoutColumnSplitBeforeAPI10(LayoutWrapper *layoutWrapper, float childOffsetMain,
-    float childOffsetCross, float childTotalOffsetCross) {
+    float childOffsetCross, float childTotalOffsetCross)
+{
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
     auto parentHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - padding.Height();
