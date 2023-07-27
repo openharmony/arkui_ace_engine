@@ -116,6 +116,7 @@ common_sources = [
   "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid/mock_grid_accessibility_property.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid/mock_grid_pattern.cpp",
+  "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_fade_painter.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",

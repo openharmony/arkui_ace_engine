@@ -46,6 +46,11 @@ public:
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
+    void SetScrollBar(WeakPtr<ScrollBar>&& scrollBar)
+    {
+        scrollBar_ = scrollBar;
+    }
+
 private:
     void UpdateTextStyleToModifier(
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, bool isDisabled);
@@ -54,6 +59,7 @@ private:
     WeakPtr<Pattern> pattern_;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
+    WeakPtr<ScrollBar> scrollBar_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPaintMethod);
 };

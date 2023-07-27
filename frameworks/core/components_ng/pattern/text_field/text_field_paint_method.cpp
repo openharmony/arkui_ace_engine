@@ -168,5 +168,19 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (textFieldPattern->GetSelectMode() != SelectionMode::NONE) {
         textFieldPattern->MarkRedrawOverlay();
     }
+    
+    auto scrollBar = scrollBar_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(scrollBar);
+    if (!scrollBar->NeedPaint()) {
+        LOGD("UpdateOverlayModifier no need paint scroll bar.");
+        return;
+    }
+    textFieldOverlayModifier_->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
+        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
+        OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
+        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()));
+    textFieldOverlayModifier_->SetFgColor(scrollBar->GetForegroundColor());
+    textFieldOverlayModifier_->SetBgColor(scrollBar->GetBackgroundColor());
+    textFieldOverlayModifier_->SetOpacity(scrollBar->GetOpacity());
 }
 } // namespace OHOS::Ace::NG

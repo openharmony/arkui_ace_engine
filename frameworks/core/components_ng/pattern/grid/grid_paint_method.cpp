@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 
 namespace OHOS::Ace::NG {
@@ -33,13 +34,26 @@ CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
         auto painter = weak.Upgrade();
         CHECK_NULL_VOID(painter);
         painter->PaintEdgeEffect(paintWrapper, canvas);
-
-        auto scrollBar = weakScrollBar.Upgrade();
-        CHECK_NULL_VOID(scrollBar);
-        if (!scrollBar->NeedPaint()) {
-            return;
-        }
-        ScrollBarPainter::PaintRectBar(canvas, scrollBar);
     };
+}
+
+void GridPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID_NOLOG(paintWrapper);
+    auto scrollBar = scrollBar_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(scrollBar);
+    if (!scrollBar->NeedPaint()) {
+        LOGD("no need paint scroll bar.");
+        return;
+    }
+    auto scrollBarOverlayModifier = scrollBar->GetScrollBarOverlayModifier();
+    CHECK_NULL_VOID_NOLOG(scrollBarOverlayModifier);
+    scrollBarOverlayModifier->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
+        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
+        OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
+        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()));
+    scrollBarOverlayModifier->SetFgColor(scrollBar->GetForegroundColor());
+    scrollBarOverlayModifier->SetBgColor(scrollBar->GetBackgroundColor());
+    scrollBarOverlayModifier->SetOpacity(scrollBar->GetOpacity());
 }
 } // namespace OHOS::Ace::NG

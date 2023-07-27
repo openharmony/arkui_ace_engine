@@ -41,6 +41,15 @@ public:
         edgeEffect_ = edgeEffect;
     }
 
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
+    {
+        auto scrollBar = scrollBar_.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(scrollBar, nullptr);
+        return scrollBar->GetScrollBarOverlayModifier();
+    }
+
 private:
     void PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
     void PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const;

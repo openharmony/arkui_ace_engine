@@ -78,7 +78,10 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         auto paint = MakeRefPtr<ScrollPaintMethod>();
-        paint->SetScrollBar(GetScrollBar());
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            paint->SetScrollBar(scrollBar);
+        }
         auto scrollEffect = GetScrollEdgeEffect();
         if (scrollEffect && scrollEffect->IsFadeEffect()) {
             paint->SetEdgeEffect(scrollEffect);
