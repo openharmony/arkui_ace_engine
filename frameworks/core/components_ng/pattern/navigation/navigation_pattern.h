@@ -157,9 +157,6 @@ public:
         navigationStack_->Remove();
     }
 
-    void DoNavigationTransitionAnimation(const RefPtr<UINode>& preTopNavDestination,
-        const RefPtr<UINode>& newTopNavDestination, int preStackSize, int newStackSize);
-
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
 
     void CleanStack()
@@ -175,31 +172,6 @@ public:
     bool GetNavigationStackProvided() const
     {
         return navigationStackProvided_;
-    }
-
-    Dimension GetMinNavBarWidthValue() const
-    {
-        return minNavBarWidthValue_;
-    }
-
-    Dimension GetMaxNavBarWidthValue() const
-    {
-        return maxNavBarWidthValue_;
-    }
-
-    Dimension GetMinContentWidthValue() const
-    {
-        return minContentWidthValue_;
-    }
-
-    bool GetUserSetNavBarRangeFlag() const
-    {
-        return userSetNavBarRangeFlag_;
-    }
-
-    bool GetUserSetMinContentFlag() const
-    {
-        return userSetMinContentFlag_;
     }
 
     void OnWindowHide() override;
@@ -236,8 +208,8 @@ private:
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void OnHover(bool isHover);
-    void UpdateResponseRegion(
-        float realDividerWidth, float realNavBarWidth, float dragRegionHeight, OffsetF dragRectOffset);
+    void UpdateResponseRegion(float realDividerWidth, float realNavBarWidth,
+    float dragRegionHeight, OffsetF dragRectOffset);
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);

@@ -89,6 +89,7 @@ public:
         navDestinationNode_.Reset();
     }
 
+
     void SetRouteInfo(const RefPtr<RouteInfo>& routeInfo)
     {
         routeInfo_ = routeInfo;
@@ -109,6 +110,11 @@ public:
         isOnShow_ = isOnShow;
     }
 
+    bool GetIsOnShow()
+    {
+        return isOnShow_;
+    }
+    
     void SetIsUnderNavRouter(bool isUnderNavRouter)
     {
         isUnderNavRouter_ = isUnderNavRouter;
@@ -117,11 +123,6 @@ public:
     bool GetIsUnderNavRouter()
     {
         return isUnderNavRouter_;
-    }
-
-    bool GetIsOnShow()
-    {
-        return isOnShow_;
     }
 
 private:

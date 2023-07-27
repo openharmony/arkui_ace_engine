@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/common/container.h"
 #include "core/components/theme/app_theme.h"
@@ -138,6 +139,7 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
             }
         }
         navigationContentNode->AddChild(navDestination);
+        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -313,6 +315,9 @@ void NavigationGroupNode::BackToNavBar(const RefPtr<UINode>& navDestinationNode)
     }
     if (backButtonNode) {
         BackButtonAnimation(backButtonNode, false);
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
     // let navBarNode request focus
     auto navBarContentNode = navBarNode->GetNavBarContentNode();
@@ -345,7 +350,6 @@ void NavigationGroupNode::BackToPreNavDestination(const RefPtr<UINode>& preNavDe
     CHECK_NULL_VOID(navigationLayoutProperty);
     if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
-        CHECK_NULL_VOID(navDestination);
         auto preDestinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
         auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
         if (preDestinationTitleBarNode || destinationTitleBarNode) {
@@ -354,6 +358,9 @@ void NavigationGroupNode::BackToPreNavDestination(const RefPtr<UINode>& preNavDe
         auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
         if (backButtonNode) {
             BackButtonAnimation(backButtonNode, false);
+            auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(backButtonLayoutProperty);
+            backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
         }
         NavTransitionBackToPreAnimation(preNavDestination, navDestination, navigationContentNode);
     }
@@ -420,6 +427,7 @@ void NavigationGroupNode::NavTransitionInAnimation(
                             RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     }
                     navigationNode->SetIsOnAnimation(false);
+                    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
                     LOGI("navigation animation end");
                 },
                 TaskExecutor::TaskType::UI);
@@ -433,6 +441,7 @@ void NavigationGroupNode::NavTransitionInAnimation(
         option,
         [transitionOutNodeContext, transitionInNodeContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             LOGI("navigation animation start");
             transitionOutNodeContext->OnTransformTranslateUpdate({ -nodeWidth * PARENT_PAGE_OFFSET, 0.0f, 0.0f });
             transitionInNodeContext->ClipWithRRect(
@@ -489,12 +498,12 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
                     navDestination->GetRenderContext()->ClipWithRRect(
                         RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     ContainerScope scope(id);
-                    navigationContentNode->Clean();
                     navigationPattern->RemoveNavDestination();
                     navigationContentNode->MarkModifyDone();
                     navigationNode->MarkModifyDone();
                     navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                     navigationNode->SetIsOnAnimation(false);
+                    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
                     LOGI("navigation animation end");
                 },
                 TaskExecutor::TaskType::UI);
@@ -507,6 +516,7 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
         option,
         [navDestinationContext, navigationContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             LOGI("navigation animation start");
             if (navDestinationContext) {
                 navDestinationContext->ClipWithRRect(
@@ -570,12 +580,11 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
                 curNavDestination->GetRenderContext()->ClipWithRRect(
                     RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                 ContainerScope scope(id);
-                navigationContentNode->Clean();
-                navigationNode->AddNavDestinationToNavigation();
                 navigationContentNode->MarkModifyDone();
                 navigationNode->MarkModifyDone();
                 navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 navigationNode->SetIsOnAnimation(false);
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
                 LOGI("navigation animation end");
             },
             TaskExecutor::TaskType::UI);
@@ -588,6 +597,7 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
         option,
         [navDestinationContext, preDestinationContext, nodeWidth, nodeHeight, navigationNode]() {
             navigationNode->SetIsOnAnimation(true);
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             LOGI("navigation animation start");
             if (navDestinationContext) {
                 navDestinationContext->ClipWithRRect(
@@ -726,8 +736,7 @@ void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButto
     } else {
         transitionOption.SetDuration(OPACITY_BACKBUTTON_OUT_DURATION);
         transitionOption.SetOnFinishEvent(
-            [backButtonNodeWK = WeakClaim(RawPtr(backButtonNode)),
-                backButtonNodeContextWK = WeakClaim(RawPtr(backButtonNodeContext)), id = Container::CurrentId()] {
+            [backButtonNodeContextWK = WeakClaim(RawPtr(backButtonNodeContext)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID_NOLOG(context);
@@ -735,15 +744,11 @@ void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButto
                 CHECK_NULL_VOID_NOLOG(taskExecutor);
                 // animation finish event should be posted to UI thread.
                 taskExecutor->PostTask(
-                    [backButtonNodeWK, backButtonNodeContextWK, id]() {
+                    [backButtonNodeContextWK, id]() {
                         auto backButtonNodeContext = backButtonNodeContextWK.Upgrade();
-                        auto backButtonNode = backButtonNodeWK.Upgrade();
                         CHECK_NULL_VOID(backButtonNodeContext);
                         ContainerScope scope(id);
                         backButtonNodeContext->UpdateOpacity(1.0);
-                        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-                        CHECK_NULL_VOID(backButtonLayoutProperty);
-                        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
                     },
                     TaskExecutor::TaskType::UI);
             });
