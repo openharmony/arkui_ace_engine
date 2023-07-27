@@ -73,14 +73,18 @@ void PageEventHub::AddCheckBoxGroupToGroup(const std::string& group, int32_t che
     auto checkBoxGroupFrameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(checkBoxId));
     CHECK_NULL_VOID(checkBoxGroupFrameNode);
     const auto& list = checkBoxGroupNotify_[group];
+    auto pattern = checkBoxGroupFrameNode->GetPattern<CheckBoxGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAddToMap(true);
     for (auto&& item : list) {
         auto node = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(item));
         if (!node) {
             continue;
         }
+        if (checkBoxId == item) {
+            continue;
+        }
         if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
-            auto pattern = checkBoxGroupFrameNode->GetPattern<CheckBoxGroupPattern>();
-            CHECK_NULL_VOID(pattern);
             pattern->SetIsAddToMap(false);
             return;
         }
