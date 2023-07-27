@@ -30,6 +30,7 @@ namespace {
 
 constexpr std::size_t DEFAULT_DRAG_INDEX = -1;
 constexpr std::size_t SPLIT_INDEX_INC_TWO = 2;
+constexpr int32_t API10 = 10;
 
 } // namespace
 
@@ -67,7 +68,7 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < 10) {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
         HandlePanStartBeforeAPI10(info);
         return;
     }
@@ -227,7 +228,7 @@ void LinearSplitPattern::GetdragedSplitIndexOrIsMoving(const Point& point)
 
 void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < 10) {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
         HandlePanUpdateBeforeAPI10(info);
         return;
     }
@@ -283,11 +284,7 @@ void LinearSplitPattern::HandlePanUpdateBeforeAPI10(const GestureEvent& info)
     }
 
     if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX || !isDragedMoving_) {
-        if (splitType_ == SplitType::ROW_SPLIT) {
-            preOffset_ = xOffset;
-        } else {
-            preOffset_ = yOffset;
-        }
+        preOffset_ = (splitType_ == SplitType::ROW_SPLIT) ? xOffset : yOffset;
         return;
     }
 
@@ -440,7 +437,7 @@ void LinearSplitPattern::HandleHoverEvent(bool isHovered)
 
 MouseFormat LinearSplitPattern::GetMouseFormat()
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < 10) {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
         return GetMouseFormatBeforeAPI10();
     }
     MouseFormat format = MouseFormat::DEFAULT;

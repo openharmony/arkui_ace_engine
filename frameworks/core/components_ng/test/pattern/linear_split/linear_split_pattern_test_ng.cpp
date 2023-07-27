@@ -131,8 +131,9 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
     EXPECT_NE(layoutWrapper, nullptr);
     layoutWrapper->skipMeasureContent_ = false;
     std::vector<float> dragSplitOffset;
-    RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
-        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::COLUMN_SPLIT, dragSplitOffset, false);
+    std::vector<float> childrenDragPos;
+    RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm = AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(
+            SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
 
     /**
      * @tc.steps: step3. call linearSplitPattern OnDirtyLayoutWrapperSwap function, compare result.
@@ -333,8 +334,9 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest006, TestSize.Level1)
         LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
         ASSERT_NE(layoutWrapper, nullptr);
         std::vector<float> dragSplitOffset = { 0.0f, 2.0f };
+        std::vector<float> childrenDragPos;
         RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
-            AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType[turn], dragSplitOffset, false);
+            AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType[turn], dragSplitOffset, childrenDragPos, false);
         RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
             AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
         layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
@@ -379,9 +381,10 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     ASSERT_NE(linearSplitLayoutProperty, nullptr);
     LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
+    std::vector<float> dragSplitOffset;
     std::vector<float> childrenDragPos;
-    RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
-        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::COLUMN_SPLIT, childrenDragPos, false);
+    RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm = AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(
+            SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
@@ -572,8 +575,9 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos;
     RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
-        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::ROW_SPLIT, dragSplitOffset, false);
+        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::ROW_SPLIT, dragSplitOffset, childrenDragPos, false);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);

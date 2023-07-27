@@ -28,11 +28,12 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr double SPLIT_HEIGHT_RATE = 2.0;
+    constexpr int32_t API10 = 10;
 } // namespace
 
 void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < 10) {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
         MeasureBeforeAPI10(layoutWrapper);
         return;
     }
@@ -104,34 +105,8 @@ void LinearSplitLayoutAlgorithm::MeasureBeforeAPI10(LayoutWrapper* layoutWrapper
         }
     } while (false);
 
-    // Get Max Size for children.
-    OptionalSizeF optionalMaxSize;
-    optionalMaxSize.UpdateIllegalSizeWithCheck(maxSize);
-    auto maxSizeT = optionalMaxSize.ConvertToSizeT();
-    MinusPaddingToSize(padding, maxSizeT);
-
-    const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
-
-    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childConstraint.maxSize = layoutConstraint->selfIdealSize.ConvertToSizeT();
-    if (childConstraint.maxSize.Height() < 0.0) {
-        childConstraint.maxSize.SetHeight(maxSize.Height());
-    }
-    if (childConstraint.maxSize.Width() < 0.0) {
-        childConstraint.maxSize.SetWidth(maxSize.Width());
-    }
-
-    float allocatedSize = 0.0f;
-    float crossSize = 0.0f;
-    // measure normal node.
-    for (const auto& child : childrenWrappers) {
-        child->Measure(childConstraint);
-        allocatedSize += child->GetGeometryNode()->GetMarginFrameSize().Width();
-        crossSize += child->GetGeometryNode()->GetMarginFrameSize().Height();
-    }
-
     // measure self size.
-    SizeF childTotalSize = { allocatedSize, crossSize };
+    SizeF childTotalSize = MeasureChildrenBeforeAPI10(layoutWrapper);
     AddPaddingToSize(padding, childTotalSize);
     if (splitType_ == SplitType::ROW_SPLIT) {
         if (!layoutConstraint->selfIdealSize.Width()) {
@@ -212,6 +187,39 @@ std::pair<SizeF, SizeF> LinearSplitLayoutAlgorithm::MeasureChildren(LayoutWrappe
     return { childTotalSize, childMaxSize };
 }
 
+SizeF LinearSplitLayoutAlgorithm::MeasureChildrenBeforeAPI10(LayoutWrapper* layoutWrapper)
+{
+    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& maxSize = layoutConstraint->maxSize;
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    // Get Max Size for children.
+    OptionalSizeF optionalMaxSize;
+    optionalMaxSize.UpdateIllegalSizeWithCheck(maxSize);
+    auto maxSizeT = optionalMaxSize.ConvertToSizeT();
+    MinusPaddingToSize(padding, maxSizeT);
+
+    const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
+
+    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childConstraint.maxSize = layoutConstraint->selfIdealSize.ConvertToSizeT();
+    if (childConstraint.maxSize.Height() < 0.0) {
+        childConstraint.maxSize.SetHeight(maxSize.Height());
+    }
+    if (childConstraint.maxSize.Width() < 0.0) {
+        childConstraint.maxSize.SetWidth(maxSize.Width());
+    }
+
+    float allocatedSize = 0.0f;
+    float crossSize = 0.0f;
+    // measure normal node.
+    for (const auto& child : childrenWrappers) {
+        child->Measure(childConstraint);
+        allocatedSize += child->GetGeometryNode()->GetMarginFrameSize().Width();
+        crossSize += child->GetGeometryNode()->GetMarginFrameSize().Height();
+    }
+    return {allocatedSize, crossSize};
+}
+
 LayoutConstraintF LinearSplitLayoutAlgorithm::GetChildConstrain(LayoutWrapper* layoutWrapper,
     LayoutConstraintF childConstrain, int32_t index)
 {
@@ -242,7 +250,7 @@ LayoutConstraintF LinearSplitLayoutAlgorithm::GetChildConstrain(LayoutWrapper* l
 
 void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < 10) {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
         LayoutBeforeAPI10(layoutWrapper);
         return;
     }
@@ -277,95 +285,6 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutRowSplit(layoutWrapper, childOffsetMain, childOffsetCross);
     } else if (splitType_ == SplitType::COLUMN_SPLIT) {
         LayoutColumnSplit(layoutWrapper, childOffsetMain, childOffsetCross);
-    }
-}
-
-void LinearSplitLayoutAlgorithm::LayoutBeforeAPI10(LayoutWrapper* layoutWrapper)
-{
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    int32_t index = 0;
-    float childOffsetMain = 0.0f;
-    float childOffsetCross = 0.0f;
-    float childTotalWidth = 0.0f;
-    float childTotalHeight = 0.0f;
-    float childTotalOffsetMain = 0.0f;
-    float childTotalOffsetCross = 0.0f;
-    if (dragSplitOffset_.empty()) {
-        dragSplitOffset_ = std::vector<float>(layoutWrapper->GetTotalChildCount() - 1, 0.0);
-    }
-    for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
-        childTotalWidth += item->GetGeometryNode()->GetFrameSize().Width();
-        childTotalHeight += item->GetGeometryNode()->GetFrameSize().Height();
-        childTotalOffsetMain += item->GetGeometryNode()->GetFrameSize().Width();
-        childTotalOffsetCross += item->GetGeometryNode()->GetFrameSize().Height();
-        if (index < layoutWrapper->GetTotalChildCount() - 1) {
-            if (splitType_ == SplitType::ROW_SPLIT) {
-                childTotalOffsetMain += dragSplitOffset_[index] + DEFAULT_SPLIT_HEIGHT;
-            } else {
-                childTotalOffsetCross += dragSplitOffset_[index] + DEFAULT_SPLIT_HEIGHT;
-            }
-        }
-        index++;
-    }
-    index = 0;
-    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
-    auto parentHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - padding.Height();
-
-    parentOffset_ = layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    auto startPointX = (parentWidth - childTotalWidth) / 2;
-    startPointX = startPointX < 0 ? 0.0f : startPointX;
-    startPointX += padding.left.value_or(0.0f);
-    auto startPointY = (parentHeight - childTotalHeight) / 2;
-    startPointY = startPointY < 0 ? 0.0f : startPointY;
-    startPointY += padding.top.value_or(0.0f);
-    childOffsetMain += startPointX;
-    childOffsetCross += startPointY;
-    childTotalOffsetMain += startPointX;
-    childTotalOffsetCross += startPointY;
-    if (splitType_ == SplitType::ROW_SPLIT) {
-        splitLength_ = parentHeight;
-        if (GreatOrEqual(childTotalOffsetMain, parentWidth)) {
-            isOverParent_ = true;
-        }
-        for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
-            if (padding.top.has_value()) {
-                childOffsetCross = padding.top.value();
-            }
-            OffsetF offset = OffsetF(childOffsetMain, childOffsetCross);
-            item->GetGeometryNode()->SetMarginFrameOffset(offset);
-            childOffsetMain += item->GetGeometryNode()->GetFrameSize().Width();
-            if (index < layoutWrapper->GetTotalChildCount() - 1) {
-                childOffsetMain += dragSplitOffset_[index];
-                childrenOffset_.emplace_back(OffsetF(childOffsetMain, childOffsetCross));
-                splitRects_.emplace_back(
-                        Rect(childOffsetMain - DEFAULT_SPLIT_HEIGHT, 0, DEFAULT_SPLIT_HEIGHT * 2, parentHeight));
-            }
-            childOffsetMain += static_cast<float>(DEFAULT_SPLIT_HEIGHT);
-            index++;
-            item->Layout();
-        }
-    } else if (splitType_ == SplitType::COLUMN_SPLIT) {
-        splitLength_ = parentWidth;
-        if (GreatOrEqual(childTotalOffsetCross, parentHeight)) {
-            isOverParent_ = true;
-        }
-        for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
-            if (padding.left.has_value()) {
-                childOffsetMain = padding.left.value();
-            }
-            OffsetF offset = OffsetF(childOffsetMain, childOffsetCross);
-            item->GetGeometryNode()->SetMarginFrameOffset(offset);
-            childOffsetCross += item->GetGeometryNode()->GetFrameSize().Height();
-            if (index < layoutWrapper->GetTotalChildCount() - 1) {
-                childOffsetCross += dragSplitOffset_[index];
-                childrenOffset_.emplace_back(OffsetF(childOffsetMain, childOffsetCross));
-                splitRects_.emplace_back(
-                        Rect(0, childOffsetCross - DEFAULT_SPLIT_HEIGHT, parentWidth, DEFAULT_SPLIT_HEIGHT * 2));
-            }
-            childOffsetCross += static_cast<float>(DEFAULT_SPLIT_HEIGHT);
-            index++;
-            item->Layout();
-        }
     }
 }
 
@@ -522,4 +441,112 @@ float LinearSplitLayoutAlgorithm::GetLinearSplitChildMinSize(LayoutWrapper* layo
     return size;
 }
 
+void LinearSplitLayoutAlgorithm::LayoutBeforeAPI10(LayoutWrapper* layoutWrapper)
+{
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    int32_t index = 0;
+    float childOffsetMain = 0.0f;
+    float childOffsetCross = 0.0f;
+    float childTotalWidth = 0.0f;
+    float childTotalHeight = 0.0f;
+    float childTotalOffsetMain = 0.0f;
+    float childTotalOffsetCross = 0.0f;
+    if (dragSplitOffset_.empty()) {
+        dragSplitOffset_ = std::vector<float>(layoutWrapper->GetTotalChildCount() - 1, 0.0);
+    }
+    for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
+        childTotalWidth += item->GetGeometryNode()->GetFrameSize().Width();
+        childTotalHeight += item->GetGeometryNode()->GetFrameSize().Height();
+        childTotalOffsetMain += item->GetGeometryNode()->GetFrameSize().Width();
+        childTotalOffsetCross += item->GetGeometryNode()->GetFrameSize().Height();
+        if (index < layoutWrapper->GetTotalChildCount() - 1) {
+            if (splitType_ == SplitType::ROW_SPLIT) {
+                childTotalOffsetMain += dragSplitOffset_[index] + DEFAULT_SPLIT_HEIGHT;
+            } else {
+                childTotalOffsetCross += dragSplitOffset_[index] + DEFAULT_SPLIT_HEIGHT;
+            }
+        }
+        index++;
+    }
+    index = 0;
+    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
+    auto parentHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - padding.Height();
+
+    parentOffset_ = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    auto startPointX = (parentWidth - childTotalWidth) / 2;
+    startPointX = startPointX < 0 ? 0.0f : startPointX;
+    startPointX += padding.left.value_or(0.0f);
+    auto startPointY = (parentHeight - childTotalHeight) / 2;
+    startPointY = startPointY < 0 ? 0.0f : startPointY;
+    startPointY += padding.top.value_or(0.0f);
+    childOffsetMain += startPointX;
+    childOffsetCross += startPointY;
+    childTotalOffsetMain += startPointX;
+    childTotalOffsetCross += startPointY;
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        LayoutRowSplitBeforeAPI10(layoutWrapper, childOffsetMain, childOffsetCross);
+    } else if (splitType_ == SplitType::COLUMN_SPLIT) {
+        LayoutColumnSplitBeforeAPI10(layoutWrapper, childOffsetMain, childOffsetCross);
+    }
+}
+
+void LinearSplitLayoutAlgorithm::LayoutRowSplitBeforeAPI10(LayoutWrapper *layoutWrapper, float childOffsetMain,
+    float childOffsetCross, float childTotalOffsetMain) {
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
+    auto parentHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - padding.Height();
+
+    splitLength_ = parentHeight;
+    if (GreatOrEqual(childTotalOffsetMain, parentWidth)) {
+        isOverParent_ = true;
+    }
+    int32_t index = 0;
+    for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (padding.top.has_value()) {
+            childOffsetCross = padding.top.value();
+        }
+        OffsetF offset = OffsetF(childOffsetMain, childOffsetCross);
+        item->GetGeometryNode()->SetMarginFrameOffset(offset);
+        childOffsetMain += item->GetGeometryNode()->GetFrameSize().Width();
+        if (index < layoutWrapper->GetTotalChildCount() - 1) {
+            childOffsetMain += dragSplitOffset_[index];
+            childrenOffset_.emplace_back(OffsetF(childOffsetMain, childOffsetCross));
+            splitRects_.emplace_back(childOffsetMain - DEFAULT_SPLIT_HEIGHT, 0,
+                                     DEFAULT_SPLIT_HEIGHT * SPLIT_HEIGHT_RATE, parentHeight);
+        }
+        childOffsetMain += static_cast<float>(DEFAULT_SPLIT_HEIGHT);
+        index++;
+        item->Layout();
+    }
+}
+
+void LinearSplitLayoutAlgorithm::LayoutColumnSplitBeforeAPI10(LayoutWrapper *layoutWrapper, float childOffsetMain,
+    float childOffsetCross, float childTotalOffsetCross) {
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
+    auto parentHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - padding.Height();
+
+    splitLength_ = parentWidth;
+    if (GreatOrEqual(childTotalOffsetCross, parentHeight)) {
+        isOverParent_ = true;
+    }
+    int32_t index = 0;
+    for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (padding.left.has_value()) {
+            childOffsetMain = padding.left.value();
+        }
+        OffsetF offset = OffsetF(childOffsetMain, childOffsetCross);
+        item->GetGeometryNode()->SetMarginFrameOffset(offset);
+        childOffsetCross += item->GetGeometryNode()->GetFrameSize().Height();
+        if (index < layoutWrapper->GetTotalChildCount() - 1) {
+            childOffsetCross += dragSplitOffset_[index];
+            childrenOffset_.emplace_back(OffsetF(childOffsetMain, childOffsetCross));
+            splitRects_.emplace_back(0, childOffsetCross - DEFAULT_SPLIT_HEIGHT, parentWidth,
+                                     DEFAULT_SPLIT_HEIGHT * SPLIT_HEIGHT_RATE);
+        }
+        childOffsetCross += static_cast<float>(DEFAULT_SPLIT_HEIGHT);
+        index++;
+        item->Layout();
+    }
+}
 } // namespace OHOS::Ace::NG
