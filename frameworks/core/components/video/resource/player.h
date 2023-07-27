@@ -121,6 +121,7 @@ private:
     void OnStarted();
     void OnPaused();
     void OnTimeGetted(const std::string& result);
+    void OnStop();
 
     void InitPlay();
     void OnPrepared(const std::string& param);
