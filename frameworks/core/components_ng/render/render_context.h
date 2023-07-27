@@ -287,6 +287,10 @@ public:
     {
         return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
     }
+    std::optional<EffectOption> GetBackgroundEffect() const
+    {
+        return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
+    }
     std::optional<BlurStyleOption> GetFrontBlurStyle() const
     {
         return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;

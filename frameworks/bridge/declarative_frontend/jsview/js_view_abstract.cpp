@@ -2022,12 +2022,12 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
-        saturation = saturation > 0.0f ? saturation : 1.0f;
+        saturation = (saturation > 0.0f || NearZero(saturation))? saturation : 1.0f;
     }
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
         brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
-        brightness = brightness > 0.0f ? brightness : 1.0f;
+        brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
     }
     Color color = Color::TRANSPARENT;
     if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
