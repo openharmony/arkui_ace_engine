@@ -679,6 +679,7 @@ public:
     {
         if (pixelMap == nullptr) {
             LOGE("%{public}s: failed to get pixelmap, return nullptr", __func__);
+            thumbnailGet.notify_all();
             return;
         }
         std::unique_lock<std::mutex> lock(g_mutex);
@@ -698,7 +699,11 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
     }
     std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
         std::make_shared<DrawDragThumbnailCallback>();
-    RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, 1, 1);
+    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, 1, 1);
+    if (!ret) {
+        LOGE("GetThumbnailPixelMap false, return nullptr");
+        return nullptr;
+    }
     std::unique_lock<std::mutex> lock(g_mutex);
     thumbnailGet.wait(lock);
     return g_pixelMap;
