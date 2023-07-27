@@ -49,7 +49,7 @@ RadioModel* RadioModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
-
+const static int32_t PLATFORM_VERSION_TEN = 10;
 void JSRadio::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -65,9 +65,13 @@ void JSRadio::Create(const JSCallbackInfo& info)
         auto groupTemp = paramObject->GetProperty("group");
         if (valueTemp->IsString()) {
             value = valueTemp->ToString();
+        } else {
+            value = "";
         }
         if (groupTemp->IsString()) {
             group = groupTemp->ToString();
+        } else {
+            group = "";
         }
     }
     RadioModel::GetInstance()->Create(value, group);
@@ -173,9 +177,16 @@ void JSRadio::JsHeight(const JSRef<JSVal>& jsValue)
     auto verticalPadding = radioTheme->GetHotZoneVerticalPadding();
     auto height = defaultHeight - verticalPadding * 2;
     CalcDimension value(height);
-    ParseJsDimensionVp(jsValue, value);
-    if (value.IsNegative()) {
-        value = height;
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            value = height;
+        }
+    } else {
+        ParseJsDimensionVp(jsValue, value);
+        if (value.IsNegative()) {
+            value = height;
+        }
     }
     RadioModel::GetInstance()->SetHeight(value);
 }

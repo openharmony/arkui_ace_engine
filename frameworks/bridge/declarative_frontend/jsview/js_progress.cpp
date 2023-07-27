@@ -52,7 +52,7 @@ ProgressModel* ProgressModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
+const static int32_t PLATFORM_VERSION_TEN = 10;
 void JSProgress::Create(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
@@ -251,9 +251,12 @@ void JSProgress::JsSetRingStyleOptions(const JSCallbackInfo& info)
 
     // Parse stroke width
     CalcDimension strokeWidthDimension;
+    auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
+                              PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
     auto strokeWidth = paramObject->GetProperty("strokeWidth");
     if (strokeWidth->IsUndefined() || strokeWidth->IsNull() ||
-        !ParseJsDimensionVp(strokeWidth, strokeWidthDimension)) {
+        (versionTenOrLarger ? !ParseJsDimensionVpNG(strokeWidth, strokeWidthDimension)
+                            : !ParseJsDimensionVp(strokeWidth, strokeWidthDimension))) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
@@ -494,9 +497,12 @@ void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
 
     // Parse stroke width
     CalcDimension strokeWidthDimension;
+    auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
+                              PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
     auto strokeWidth = paramObject->GetProperty("strokeWidth");
     if (strokeWidth->IsUndefined() || strokeWidth->IsNull() ||
-        !ParseJsDimensionVp(strokeWidth, strokeWidthDimension)) {
+        (versionTenOrLarger ? !ParseJsDimensionVpNG(strokeWidth, strokeWidthDimension)
+                            : !ParseJsDimensionVp(strokeWidth, strokeWidthDimension))) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
 

@@ -49,7 +49,7 @@ TabsModel* TabsModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-
+const static int32_t PLATFORM_VERSION_TEN = 10;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
 JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
@@ -223,7 +223,13 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
     }
 
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
-    if (!ParseJsDimensionVp(info[0], width)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(info[0], width)) {
+            TabsModel::GetInstance()->SetTabBarWidth(width);
+            return;
+        }
+    } else if (!ParseJsDimensionVp(info[0], width)) {
         LOGE("The arg is wrong, fail to parse dimension");
     }
 
@@ -237,7 +243,13 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
-    if (!ParseJsDimensionVp(info[0], height)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(info[0], height)) {
+            TabsModel::GetInstance()->SetTabBarHeight(height);
+            return;
+        }
+    } else if (!ParseJsDimensionVp(info[0], height)) {
         LOGE("The arg is wrong, fail to parse dimension");
     }
 

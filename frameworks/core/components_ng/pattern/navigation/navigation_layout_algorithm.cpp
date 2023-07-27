@@ -198,7 +198,8 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
     auto geometryNode = layoutWrapper->GetGeometryNode();
-    auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    auto size =
+         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     auto parentSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     FitScrollFullWindow(size);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
