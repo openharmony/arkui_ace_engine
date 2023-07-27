@@ -963,6 +963,9 @@ void SliderPattern::StartAnimation()
     CHECK_NULL_VOID(sliderContentModifier_);
     LOGD("Slider StartAnimation: isVisibleArea_ = %d, isVisible_ = %d, isShow_ = %d", isVisibleArea_, isVisible_,
         isShow_);
+    if (sliderContentModifier_->GetVisible()) {
+        return;
+    }
     if (IsSliderVisible()) {
         sliderContentModifier_->SetVisible(true);
         auto host = GetHost();
@@ -974,6 +977,9 @@ void SliderPattern::StartAnimation()
 void SliderPattern::StopAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);
+    if (!sliderContentModifier_->GetVisible()) {
+        return;
+    }
     LOGD("Slider StopAnimation");
     sliderContentModifier_->SetVisible(false);
     auto host = GetHost();
