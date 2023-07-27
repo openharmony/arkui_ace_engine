@@ -151,6 +151,21 @@ std::u16string TextFieldPattern::CreateObscuredText(int32_t len)
     return obscuredText;
 }
 
+std::u16string TextFieldPattern::CreateDisplayText(
+    const std::string& content, int32_t nakedCharPosition, bool needObscureText)
+{
+    if (!content.empty() && needObscureText) {
+        auto text =
+            TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length()));
+        if (nakedCharPosition >= 0 && nakedCharPosition < static_cast<int32_t>(content.length())) {
+            auto rawContent = StringUtils::Str8ToStr16(content);
+            text[nakedCharPosition] = rawContent[nakedCharPosition];
+        }
+        return text;
+    }
+    return StringUtils::Str8ToStr16(content);
+}
+
 float TextFieldPattern::GetTextOrPlaceHolderFontSize()
 {
     auto pipeline = GetHost()->GetContext();
@@ -259,6 +274,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (inlineSelectAllFlag_) {
         inlineSelectAllFlag_ = false;
         HandleOnSelectAll(true);
+    }
+    if (updateSelectionAfterObscure_) {
+        GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+        updateSelectionAfterObscure_ = false;
     }
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
@@ -1408,6 +1427,7 @@ void TextFieldPattern::HandleOnSelectAll(bool inlineStyle)
     } else {
         UpdateSelection(0, textSize);
     }
+    updateSelectionAfterObscure_ = ResetObscureTickCountDown();
     textEditingValue_.caretPosition = textSize;
     selectionMode_ = SelectionMode::SELECT_ALL;
     caretUpdateType_ = CaretUpdateType::EVENT;
@@ -1512,6 +1532,7 @@ void TextFieldPattern::HandleOnPaste()
             value.GetValueBeforePosition(start) + StringUtils::ToString(pasteData) + value.GetValueAfterPosition(end);
         auto newCaretPosition = std::clamp(std::min(start, end) + static_cast<int32_t>(pasteData.length()), 0,
             static_cast<int32_t>(StringUtils::ToWstring(value.text).length()));
+        textfield->ResetObscureTickCountDown();
         textfield->UpdateEditingValue(value.text, newCaretPosition);
         textfield->UpdateSelection(newCaretPosition);
         textfield->SetEditingValueToProperty(value.text);
@@ -2003,6 +2024,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
         return;
     }
+    ResetObscureTickCountDown();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     StartTwinkling();
 
@@ -2068,7 +2090,16 @@ void TextFieldPattern::OnCursorTwinkling()
 {
     cursorTwinklingTask_.Cancel();
     cursorVisible_ = !cursorVisible_;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto shouldMeasure = !IsTextArea() && GetTextObscured() && obscureTickCountDown_ == 1;
+    if (GetTextObscured() && obscureTickCountDown_ > 0) {
+        --obscureTickCountDown_;
+    }
+    if (shouldMeasure) {
+        caretUpdateType_ = CaretUpdateType::EVENT;
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    } else {
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
     ScheduleCursorTwinkling();
 }
 
@@ -2080,6 +2111,9 @@ void TextFieldPattern::StopTwinkling()
     if (cursorVisible_) {
         cursorVisible_ = false;
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    if (ResetObscureTickCountDown()) {
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 
@@ -2150,7 +2184,6 @@ void TextFieldPattern::OnModifyDone()
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
-    obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     ProcessInnerPadding();
     textRect_.SetLeft(textRect_.GetX() + offsetDifference_.GetX());
     textRect_.SetTop(textRect_.GetY() + offsetDifference_.GetY());
@@ -2365,6 +2398,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     selectionMode_ = SelectionMode::SELECT;
     isSingleHandle_ = false;
     isUsingMouse_ = false;
+    ResetObscureTickCountDown();
     LOGI("TextField %{public}d handle long press", GetHost()->GetId());
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     CloseSelectOverlay();
@@ -3347,6 +3381,15 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
             textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
     }
     textEditingValue_.CursorMoveToPosition(caretStart + static_cast<int32_t>(StringUtils::ToWstring(result).length()));
+    if (!IsTextArea() && GetTextObscured()) {
+        if (wideInsertValue.length() == 1) {
+            obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
+            nakedCharPosition_ = textEditingValue_.caretPosition - 1;
+        } else {
+            obscureTickCountDown_ = 0;
+            nakedCharPosition_ = -1;
+        }
+    }
     SetEditingValueToProperty(textEditingValue_.text);
     UpdateEditingValueToRecord();
     caretUpdateType_ = CaretUpdateType::INPUT;
@@ -3681,6 +3724,7 @@ bool TextFieldPattern::CharLineChanged(int32_t caretPosition)
 bool TextFieldPattern::CursorMoveLeft()
 {
     LOGI("Handle cursor move left");
+    ResetObscureTickCountDown();
     auto originCaretPosition = textEditingValue_.caretPosition;
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
         textEditingValue_.caretPosition = 0;
@@ -3718,6 +3762,7 @@ bool TextFieldPattern::CursorMoveLeftWord()
     } else {
         UpdateCaretPositionWithClamp(originCaretPosition - leftWordLength);
     }
+    ResetObscureTickCountDown();
     OnCursorMoveDone();
     return originCaretPosition != textEditingValue_.caretPosition;
 }
@@ -3742,6 +3787,7 @@ bool TextFieldPattern::CursorMoveLineBegin()
     } else {
         UpdateCaretPositionWithClamp(0);
     }
+    ResetObscureTickCountDown();
     OnCursorMoveDone();
     return originCaretPosition != textEditingValue_.caretPosition;
 }
@@ -3774,6 +3820,7 @@ bool TextFieldPattern::CursorMoveHome()
 bool TextFieldPattern::CursorMoveRight()
 {
     LOGI("Handle cursor move right");
+    ResetObscureTickCountDown();
     auto originCaretPosition = textEditingValue_.caretPosition;
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
         textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.GetWideText().length());
@@ -3810,6 +3857,7 @@ bool TextFieldPattern::CursorMoveRightWord()
     } else {
         UpdateCaretPositionWithClamp(originCaretPosition + rightWordLength);
     }
+    ResetObscureTickCountDown();
     OnCursorMoveDone();
     return originCaretPosition != textEditingValue_.caretPosition;
 }
@@ -3834,6 +3882,7 @@ bool TextFieldPattern::CursorMoveLineEnd()
     } else {
         UpdateCaretPositionWithClamp(textLength);
     }
+    ResetObscureTickCountDown();
     OnCursorMoveDone();
     return originCaretPosition != textEditingValue_.caretPosition;
 }
@@ -4194,6 +4243,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
 {
     LOGI("Handle DeleteBackward %{public}d characters", length);
     if (InSelectMode()) {
+        ResetObscureTickCountDown();
         Delete(textSelector_.GetStart(), textSelector_.GetEnd());
         return;
     }
@@ -4201,6 +4251,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         LOGW("Caret position at the beginning , cannot DeleteBackward");
         return;
     }
+    ResetObscureTickCountDown();
     auto start = std::max(textEditingValue_.caretPosition - length, 0);
     auto end =
         std::min(textEditingValue_.caretPosition, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
@@ -4227,6 +4278,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
 {
     LOGI("Handle DeleteForward %{public}d characters", length);
     if (InSelectMode()) {
+        ResetObscureTickCountDown();
         Delete(textSelector_.GetStart(), textSelector_.GetEnd());
         return;
     }
@@ -4234,6 +4286,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
         LOGW("Caret position at the end , cannot DeleteForward");
         return;
     }
+    ResetObscureTickCountDown();
     textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textEditingValue_.caretPosition) +
                              textEditingValue_.GetValueAfterPosition(textEditingValue_.caretPosition + length);
     SetEditingValueToProperty(textEditingValue_.text);
@@ -4280,6 +4333,7 @@ void TextFieldPattern::AfterSelection()
 {
     LOGI("Selection %{public}s, caret position %{public}d", textSelector_.ToString().c_str(),
         textEditingValue_.caretPosition);
+    updateSelectionAfterObscure_ = ResetObscureTickCountDown();
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     caretUpdateType_ = CaretUpdateType::EVENT;
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -4644,6 +4698,20 @@ bool TextFieldPattern::OnBackPressed()
 #else
     return true;
 #endif
+}
+
+int32_t TextFieldPattern::GetNakedCharPosition() const
+{
+    if (IsTextArea() || obscureTickCountDown_ <= 0 || !GetTextObscured()) {
+        return -1;
+    }
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, -1);
+    auto content = layoutProperty->GetValueValue("");
+    if (content.empty()) {
+        return -1;
+    }
+    return nakedCharPosition_;
 }
 
 std::string TextFieldPattern::TextInputTypeToString() const
@@ -5298,6 +5366,15 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     if (!IsTextArea()) {
         layoutProperty->ResetMaxLines();
     }
+}
+
+bool TextFieldPattern::ResetObscureTickCountDown()
+{
+    auto oldTickCountDown_ = obscureTickCountDown_;
+    if (!IsTextArea() && GetTextObscured()) {
+        obscureTickCountDown_ = 0;
+    }
+    return oldTickCountDown_ != obscureTickCountDown_;
 }
 
 void TextFieldPattern::RestorePreInlineStates()

@@ -65,8 +65,10 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         textFieldPattern->ResetContChange();
     }
     auto textEditingValue = textFieldPattern->GetTextEditingValue();
-    std::string text = textEditingValue.text;
-    textFieldContentModifier_->SetTextValue(text);
+    auto text = TextFieldPattern::CreateDisplayText(
+        textEditingValue.text, textFieldPattern->GetNakedCharPosition(), textFieldPattern->GetTextObscured());
+    auto displayText = StringUtils::Str16ToStr8(text);
+    textFieldContentModifier_->SetTextValue(displayText);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
 
     auto frameNode = textFieldPattern->GetHost();
