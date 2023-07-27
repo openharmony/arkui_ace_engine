@@ -39,6 +39,7 @@ static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
+constexpr static int32_t DEFAULT_CONTROL_BUTTON_ZINDEX = 3;
 
 ImageSourceInfo CreateSourceInfo(const std::string& src, bool isPixelMap, RefPtr<PixelMap>& pixMap)
 {
@@ -152,6 +153,7 @@ RefPtr<FrameNode> SideBarContainerModelNG::CreateControlButton(const RefPtr<Side
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
     return buttonNode;
 }
 
