@@ -36,7 +36,7 @@ public:
 
     Size GetSize() const;
 
-    const Rect& GetViewBox() const;
+    Rect GetViewBox() const;
 };
 
 } // namespace OHOS::Ace::NG

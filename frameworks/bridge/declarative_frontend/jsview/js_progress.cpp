@@ -175,6 +175,8 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         return;
     }
 
+    JsSetCommonOptions(info);
+
     switch (g_progressType) {
         case ProgressType::LINEAR:
             JsSetLinearStyleOptions(info);
@@ -361,6 +363,19 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     }
 
     JsSetFontStyle(info);
+}
+
+void JSProgress::JsSetCommonOptions(const JSCallbackInfo& info)
+{
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+
+    // Parse smooth effect
+    auto jsSmoothEffect = paramObject->GetProperty("enableSmoothEffect");
+    bool enable = true;
+    if (!ParseJsBool(jsSmoothEffect, enable)) {
+        enable = true;
+    }
+    ProgressModel::GetInstance()->SetSmoothEffect(enable);
 }
 
 void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)

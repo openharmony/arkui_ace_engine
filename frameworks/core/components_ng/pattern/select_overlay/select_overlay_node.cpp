@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 #include <optional>
+#include <securec.h>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -125,14 +126,20 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     if (callback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
             [callback, overlayId, isSelectAll](GestureEvent& /*info*/) {
-                if (callback) {
-                    callback();
-                }
-                // close text overlay.
                 auto pipeline = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetSelectOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
+                auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
+                CHECK_NULL_VOID(selectOverlay);
+                auto isDoingAnimation = selectOverlay->GetAnimationStatus();
+                CHECK_NULL_VOID(!isDoingAnimation);
+                auto isExtensionMenu = selectOverlay->GetIsExtensionMenu();
+                CHECK_NULL_VOID(!isExtensionMenu);
+                if (callback) {
+                    callback();
+                }
+                // close text overlay.
                 if (!isSelectAll) {
                     overlayManager->DestroySelectOverlay(overlayId);
                 }
@@ -691,6 +698,7 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
 bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocatedSize)
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
+    memset_s(isShowInDefaultMenu_, sizeof(isShowInDefaultMenu_), 0, sizeof(isShowInDefaultMenu_));
     if (info->menuInfo.showCut) {
         float buttonWidth = 0.0f;
         auto button = BuildButton(
@@ -796,6 +804,13 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
     if (menuItemChanged) {
         selectMenuInner_->Clean();
+        selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (isExtensionMenu_) {
+            MoreOrBackAnimation(false);
+        }
+        auto selectProperty = selectMenu_->GetLayoutProperty();
+        CHECK_NULL_VOID(selectProperty);
+        selectProperty->ClearUserDefinedIdealSize(true, false);
         bool isDefaultOverMaxWidth = false;
         float allocatedSize = 0.0f;
         float maxWidth = 0.0f;
@@ -816,6 +831,15 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
                 }
                 button->MountToParent(selectMenuInner_);
             }
+        }
+        if (backButton_) {
+            isExtensionMenu_ = false;
+            RemoveChild(backButton_);
+            backButton_.Reset();
+        }
+        if (extensionMenu_) {
+            RemoveChild(extensionMenu_);
+            extensionMenu_.Reset();
         }
         if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
             auto backButton = BuildMoreOrBackButton(GetId(), true);

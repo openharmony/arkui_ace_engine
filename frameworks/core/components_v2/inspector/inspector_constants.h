@@ -353,6 +353,10 @@ ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[];
 ACE_EXPORT extern const char SHEET_COMPONENT_TAG[];
 ACE_EXPORT extern const char SHEET_ETS_TAG[];
 ACE_EXPORT extern const char SHEET_MASK_TAG[];
+ACE_EXPORT extern const char SHEET_PAGE_TAG[];
+
+// full screen modal
+ACE_EXPORT extern const char MODAL_PAGE_TAG[];
 
 // hyperlink
 ACE_EXPORT extern const char HYPERLINK_COMPONENT_TAG[];

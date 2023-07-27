@@ -283,9 +283,14 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
 void PipelineContext::InspectDrew()
 {
-    auto needRenderNode = std::move(needRenderNode_);
-    for (auto&& node : needRenderNode) {
-        OnDrawCompleted(node->GetInspectorId()->c_str());
+    CHECK_RUN_ON(UI);
+    if (!needRenderNode_.empty()) {
+        auto needRenderNode = std::move(needRenderNode_);
+        for (auto&& node : needRenderNode) {
+            if (node) {
+                OnDrawCompleted(node->GetInspectorId()->c_str());
+            }
+        }
     }
 }
 
@@ -343,6 +348,26 @@ void PipelineContext::FlushFocus()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
+
+    auto defaultFocusNode = dirtyDefaultFocusNode_.Upgrade();
+    if (!defaultFocusNode) {
+        dirtyDefaultFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = defaultFocusNode->GetFocusHub();
+        if (focusNodeHub) {
+            auto defaultFocusNode = focusNodeHub->GetChildFocusNodeByType();
+            if (defaultFocusNode && defaultFocusNode->IsFocusableWholePath()) {
+                defaultFocusNode->RequestFocusImmediately();
+            } else {
+                focusNodeHub->RequestFocusImmediately();
+            }
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        dirtyDefaultFocusNode_.Reset();
+        return;
+    }
+
     auto focusNode = dirtyFocusNode_.Upgrade();
     if (!focusNode || focusNode->GetFocusType() != FocusType::NODE) {
         dirtyFocusNode_.Reset();
@@ -353,6 +378,7 @@ void PipelineContext::FlushFocus()
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
+        dirtyDefaultFocusNode_.Reset();
         return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
@@ -365,12 +391,11 @@ void PipelineContext::FlushFocus()
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
+        dirtyDefaultFocusNode_.Reset();
         return;
     }
-    if (!RequestDefaultFocus()) {
-        if (rootNode_ && rootNode_->GetFocusHub() && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
-            rootNode_->GetFocusHub()->RequestFocusImmediately();
-        }
+    if (rootNode_ && rootNode_->GetFocusHub() && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
+        rootNode_->GetFocusHub()->RequestFocusImmediately();
     }
 }
 
@@ -1303,7 +1328,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     // If return success. This tab key will just trigger onKeyEvent process.
     isTabJustTriggerOnKeyEvent_ =
         (event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB }) && SetIsFocusActive(true));
-    auto lastPage = stageManager_->GetLastPage();
+    auto lastPage = stageManager_ ? stageManager_->GetLastPage() : nullptr;
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);
     if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
@@ -1380,6 +1405,14 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
     } else {
         dirtyFocusScope_ = WeakClaim(RawPtr(node));
     }
+    RequestFrame();
+}
+
+void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(node);
+    dirtyDefaultFocusNode_ = WeakPtr<FrameNode>(node);
     RequestFrame();
 }
 
@@ -1644,6 +1677,7 @@ void PipelineContext::Destroy()
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
+    dirtyDefaultFocusNode_.Reset();
     PipelineBase::Destroy();
     LOGI("PipelineContext::Destroy end.");
 }

@@ -351,6 +351,7 @@ bool TextFieldPattern::UpdateCaretPosition()
         LOGW("Not on focus, cannot update caret");
         return true;
     }
+    UpdateCaretRectByPosition(textEditingValue_.caretPosition);
     // text input has higher priority than events such as mouse press
     if (caretUpdateType_ == CaretUpdateType::INPUT) {
         UpdateCaretPositionByTextEdit();
@@ -849,7 +850,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
         auto secondHandleHeight = 0.0f;
         auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
         auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
-        if (GreatNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
+        if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
             firstHandleHeight = firstHandle->Height();
         }
         if (LessNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY() + firstHandle->Height(),
@@ -857,7 +858,7 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
             firstHandleHeight = firstHandle->Height();
         }
         if (!isSingleHandle_) {
-            if (GreatNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
+            if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
                 secondHandleHeight = secondHandle->Height();
             }
             if (LessNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY() + secondHandle->Height(),
@@ -1119,8 +1120,7 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
-        !textEditingValue_.GetWideText().empty()) {
+    if (IsNormalInlineState() && !textEditingValue_.GetWideText().empty()) {
         ApplyInlineStates(true);
         inlineSelectAllFlag_ = true;
         inlineFocusState_ = true;
@@ -1148,7 +1148,7 @@ void TextFieldPattern::HandleFocusEvent()
                                                                                       : PROPERTY_UPDATE_MEASURE);
 }
 
-void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
+void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
 {
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
     CloseSelectOverlay();
@@ -1159,10 +1159,12 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     AdjustTextSelectionRectOffsetX();
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
-    if (start == end) {
-        CreateSingleHandle();
-    } else {
-        CreateHandles();
+    if (showHandle) {
+        if (start == end) {
+            CreateSingleHandle();
+        } else {
+            CreateHandles();
+        }
     }
     UpdateCaretInfoToController();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1303,8 +1305,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
-        !textEditingValue_.GetWideText().empty()) {
+    if (IsNormalInlineState() && !textEditingValue_.GetWideText().empty()) {
         if (IsTextArea() && isTextInput_) {
             layoutProperty->UpdateMaxLines(1);
         }
@@ -1316,13 +1317,9 @@ void TextFieldPattern::HandleBlurEvent()
     caretRect_.Reset();
     StopTwinkling();
     CloseKeyboard(true);
-    auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     MarkRedrawOverlay();
-    UpdateCaretPositionWithClamp(pos);
-    textEditingValue_.CursorMoveToPosition(pos);
     textSelector_.Update(-1);
     selectionMode_ = SelectionMode::NONE;
-    caretUpdateType_ = CaretUpdateType::EVENT;
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     ResetBackgroundColor();
@@ -1354,6 +1351,7 @@ void TextFieldPattern::HandleOnUndoAction()
     redoOperationRecords_.push_back(value);
     if (operationRecords_.empty()) {
         LOGW("No record left, clear");
+        FireEventHubOnChange("");
         ClearEditingValue();
         return;
     }
@@ -1488,7 +1486,6 @@ void TextFieldPattern::HandleOnPaste()
         std::string valueToUpdate(data);
         textfield->EditingValueFilter(valueToUpdate, result);
         LOGD("After filter paste value is %{private}s", result.c_str());
-        CHECK_NULL_VOID_NOLOG(!result.empty());
         std::wstring pasteData;
         std::wstring wData = StringUtils::ToWstring(result);
         textfield->StripNextLine(wData);
@@ -1802,7 +1799,7 @@ void TextFieldPattern::InitDragDropEvent()
         pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
         itemInfo.extraInfo = selectedStr;
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-        UdmfClient::GetInstance()->AddTextRecord(unifiedData, selectedStr);
+        UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
         event->SetData(unifiedData);
         host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                      : PROPERTY_UPDATE_MEASURE);
@@ -1891,7 +1888,7 @@ void TextFieldPattern::InitDragDropEvent()
         }
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
-        std::string str = UdmfClient::GetInstance()->GetSingleTextRecord(data);
+        std::string str = UdmfClient::GetInstance()->GetSinglePlainTextRecord(data);
         pattern->needToRequestKeyboardInner_ = true;
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (pattern->dragStatus_ == DragStatus::NONE) {
@@ -2165,7 +2162,7 @@ void TextFieldPattern::OnModifyDone()
     }
 #endif
     FireOnChangeIfNeeded();
-    if (IsTextArea() || paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+    if (IsTextArea() || IsNormalInlineState()) {
         SetAxis(Axis::VERTICAL);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
@@ -2177,10 +2174,16 @@ void TextFieldPattern::OnModifyDone()
             scrollBar->SetStartReservedHeight(0.0_px);
             scrollBar->SetEndReservedHeight(0.0_px);
         }
+        if (textFieldOverlayModifier_) {
+            textFieldOverlayModifier_->SetScrollBar(scrollBar);
+            UpdateScrollBarOffset();
+            MarkRedrawOverlay();
+        }
     } else {
         SetAxis(Axis::HORIZONTAL);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
+            SetScrollEnable(false);
         }
     }
 
@@ -2198,13 +2201,23 @@ void TextFieldPattern::OnModifyDone()
         }
         HandleCounterBorder();
     }
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE && !inlineFocusState_) {
+    if (!IsTextArea()) {
+        isTextInput_ = true;
+    }
+    auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
+    if ((!IsSelected() && IsNormalInlineState()) || ((inputStyle == InputStyle::DEFAULT) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED &&
+        preInputStyle_ != InputStyle::INLINE)) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
     }
-    if (IsSelected() && paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
-        ApplyInlineStates(false);
+    if (IsSelected() && IsNormalInlineState()) {
+        preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
+    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
+        RestorePreInlineStates();
+    }
+    preInputStyle_ = inputStyle;
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -3142,7 +3155,7 @@ void TextFieldPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     if (IsDisabled()) {
-        sourceInfo.SetSrc(iconPath, theme->GetDisabledIconFillColor());
+        sourceInfo.SetSrc(iconPath, theme->GetDisableTextColor());
     } else {
         sourceInfo.SetSrc(iconPath);
     }
@@ -3380,6 +3393,10 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
             textChanged |= FilterWithRegex(URL_WHITE_LIST, valueToUpdate, result);
             break;
         }
+        case TextInputType::VISIBLE_PASSWORD: {
+            textChanged |= FilterWithAscii(valueToUpdate, result);
+            break;
+        }
         default: {
             // No need limit.
         }
@@ -3387,6 +3404,29 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
     if (!textChanged) {
         result = valueToUpdate;
     }
+}
+
+bool TextFieldPattern::FilterWithAscii(const std::string& valueToUpdate, std::string& result)
+{
+    if (valueToUpdate.empty()) {
+        LOGD("Text is empty or filter is empty");
+        return false;
+    }
+    bool textChange = true;
+    std::string errorText = "";
+    for (auto valuePtr = 0; valuePtr < valueToUpdate.size(); valuePtr++) {
+        if (isascii(valueToUpdate[valuePtr])) {
+            result += valueToUpdate[valuePtr];
+        } else {
+            errorText += valueToUpdate[valuePtr];
+        }
+    }
+    if (errorText.empty()) {
+        textChange = false;
+    } else {
+        LOGI("FilterWithAscii Error text %{private}s", errorText.c_str());
+    }
+    return textChange;
 }
 
 float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
@@ -3919,7 +3959,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+    if (IsNormalInlineState()) {
         HandleBlurEvent();
         eventHub->FireOnSubmit(static_cast<int32_t>(action));
         return;
@@ -4743,7 +4783,7 @@ uint32_t TextFieldPattern::GetMaxLines() const
     CHECK_NULL_RETURN(layoutProperty, Infinity<uint32_t>());
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, Infinity<uint32_t>());
-    if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+    if (IsNormalInlineState()) {
         return layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
     }
     return layoutProperty->HasMaxLines() ? layoutProperty->GetMaxLinesValue(Infinity<uint32_t>())
@@ -4847,7 +4887,14 @@ void TextFieldPattern::UpdateScrollBarOffset()
         return;
     }
     auto paddingHeight = GetPaddingTop() + GetPaddingBottom();
-    Size size(contentRect_.Width() + GetPaddingRight(), contentRect_.Height() + paddingHeight);
+    auto paddingRight = GetPaddingRight();
+    auto contentHeight = contentRect_.Height();
+    if (inlineFocusState_) {
+        paddingHeight = 0.0f;
+        paddingRight = 0.0f;
+        contentHeight = GetSingleLineHeight() * GetMaxLines();
+    }
+    Size size(contentRect_.Width() + paddingRight, contentHeight + paddingHeight);
     UpdateScrollBarRegion(
         contentRect_.GetY() - textRect_.GetY(), textRect_.Height() + paddingHeight, size, Offset(0.0, 0.0));
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -5183,6 +5230,16 @@ void TextFieldPattern::RestorePreInlineStates()
         idealSize.SetHeight(height);
     }
     layoutProperty->UpdateUserDefinedIdealSize(idealSize);
+}
+
+bool TextFieldPattern::IsNormalInlineState() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

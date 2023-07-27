@@ -166,6 +166,8 @@ public:
         return EstimateHeight();
     }
 
+    float GetTotalHeight() const override;
+
     void OnAnimateStop() override;
 
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
@@ -181,6 +183,7 @@ public:
     void MoveItems(int32_t itemIndex, int32_t insertIndex);
     void ClearDragState();
     float EstimateHeight() const;
+    float GetAverageHeight() const;
 
 private:
     float GetMainGap();
@@ -229,6 +232,8 @@ private:
     bool scrollStop_ = false;
     bool initialIndex_ = false;
     int32_t offsetCount_ = 0;
+    float prevHeight_ = 0;
+    float currentHeight_ = 0;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;

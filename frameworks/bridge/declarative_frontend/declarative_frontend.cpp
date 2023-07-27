@@ -182,6 +182,7 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
 {
     LOGD("DeclarativeFrontend initialize begin.");
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeFrontendDelegate(taskExecutor);
 

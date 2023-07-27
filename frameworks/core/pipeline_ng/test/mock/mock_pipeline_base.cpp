@@ -212,6 +212,8 @@ bool PipelineContext::OnBackPressed()
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
+void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
@@ -407,6 +409,10 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 }
 
 void PipelineBase::Destroy() {}
+bool PipelineBase::MaybeRelease()
+{
+    return AceType::MaybeRelease();
+}
 
 void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 

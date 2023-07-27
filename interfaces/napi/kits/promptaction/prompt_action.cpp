@@ -15,17 +15,14 @@
 
 #include "prompt_action.h"
 
+#include <memory>
 #include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
-#include "napi/native_node_api.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/js_frontend/engine/common/js_engine.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::Napi {
@@ -224,17 +221,17 @@ struct PromptAsyncContext {
     int32_t instanceId = -1;
 };
 
-void DeleteContextAndThrowError(napi_env env, PromptAsyncContext* context, const std::string& errorMessage)
+void DeleteContextAndThrowError(
+    napi_env env, std::shared_ptr<PromptAsyncContext>& context, const std::string& errorMessage)
 {
     if (!context) {
         // context is null, no need to delete
         return;
     }
-    delete context;
     NapiThrow(env, errorMessage, Framework::ERROR_CODE_PARAM_INVALID);
 }
 
-bool ParseButtons(napi_env env, PromptAsyncContext* context, uint32_t maxButtonNum)
+bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, uint32_t maxButtonNum)
 {
     uint32_t buttonsLen = 0;
     napi_value buttonArray = nullptr;
@@ -308,7 +305,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto asyncContext = new PromptAsyncContext();
+    auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = Container::CurrentId();
     for (size_t i = 0; i < argc; i++) {
@@ -380,8 +377,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
                 if (!asyncContext->valid) {
                     LOGE("%{public}s, module exported object is invalid.", __func__);
-                    delete asyncContext;
-                    asyncContext = nullptr;
                     return;
                 }
 
@@ -389,8 +384,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_open_handle_scope(asyncContext->env, &scope);
                 if (scope == nullptr) {
                     LOGE("%{public}s, open handle scope failed.", __func__);
-                    delete asyncContext;
-                    asyncContext = nullptr;
                     return;
                 }
 
@@ -430,22 +423,10 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
-                delete asyncContext;
-                asyncContext = nullptr;
             },
             TaskExecutor::TaskType::JS);
     };
 
-    napi_wrap(
-        env, thisVar, (void*)asyncContext,
-        [](napi_env env, void* data, void* hint) {
-            PromptAsyncContext* cbInfo = (PromptAsyncContext*)data;
-            if (cbInfo != nullptr) {
-                LOGE("%{public}s, thisVar JavaScript object is ready for garbage-collection.", __func__);
-                cbInfo->valid = false;
-            }
-        },
-        nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -534,7 +515,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto* asyncContext = new PromptAsyncContext();
+    auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = Container::CurrentId();
     for (size_t i = 0; i < argc; i++) {
@@ -604,8 +585,6 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
                 if (!asyncContext->valid) {
                     LOGE("%{public}s, module exported object is invalid.", __func__);
-                    delete asyncContext;
-                    asyncContext = nullptr;
                     return;
                 }
 
@@ -613,8 +592,6 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_open_handle_scope(asyncContext->env, &scope);
                 if (scope == nullptr) {
                     LOGE("%{public}s, open handle scope failed.", __func__);
-                    delete asyncContext;
-                    asyncContext = nullptr;
                     return;
                 }
 
@@ -654,22 +631,10 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
-                delete asyncContext;
-                asyncContext = nullptr;
             },
             TaskExecutor::TaskType::JS);
     };
 
-    napi_wrap(
-        env, thisVar, (void*)asyncContext,
-        [](napi_env env, void* data, void* hint) {
-            auto* cbInfo = static_cast<PromptAsyncContext*>(data);
-            if (cbInfo != nullptr) {
-                LOGE("%{public}s, thisVar JavaScript object is ready for garbage-collection.", __func__);
-                cbInfo->valid = false;
-            }
-        },
-        nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegate();

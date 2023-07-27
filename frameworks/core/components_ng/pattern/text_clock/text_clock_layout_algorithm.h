@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TIMER_TEXT_TIMER_LAYOUT_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TIMER_TEXT_TIMER_LAYOUT_ALGORITHM_H
-
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_CLOCK_TEXT_CLOCK_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_CLOCK_TEXT_CLOCK_LAYOUT_ALGORITHM_H
+#include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT TextTimerLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(TextTimerLayoutAlgorithm, BoxLayoutAlgorithm);
+class ACE_EXPORT TextClockLayoutAlgorithm : public BoxLayoutAlgorithm {
+    DECLARE_ACE_TYPE(TextClockLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    TextTimerLayoutAlgorithm() = default;
-    ~TextTimerLayoutAlgorithm() override = default;
+    TextClockLayoutAlgorithm() = default;
+
+    ~TextClockLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
-    ACE_DISALLOW_COPY_AND_MOVE(TextTimerLayoutAlgorithm);
+    ACE_DISALLOW_COPY_AND_MOVE(TextClockLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TIMER_TEXT_TIMER_LAYOUT_ALGORITHM_H
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_CLOCK_TEXT_CLOCK_LAYOUT_ALGORITHM_H

@@ -83,11 +83,6 @@ public:
 
     void SheetTransition(bool isTransitionIn);
 
-    void SetIsAnimating(bool isOnAnmation)
-    {
-        isAnimating_ = isOnAnmation;
-    }
-
     void SetCurrentOffset(float currentOffset)
     {
         currentOffset_ = currentOffset;
@@ -111,7 +106,6 @@ private:
     float currentOffset_ = 0.0f;
     float height_ = 0.0f;
     float heightBoundary_ = 0.0f;
-    bool isAnimating_ = false;
     float pageHeight_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);

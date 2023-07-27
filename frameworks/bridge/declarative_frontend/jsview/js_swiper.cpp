@@ -427,7 +427,7 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     bool parseOk = false;
     SwiperParameters swiperParameters;
     CalcDimension dimPosition;
-    parseOk = ParseJsDimensionPx(leftValue, dimPosition);
+    parseOk = ParseJsDimensionVp(leftValue, dimPosition);
     if (parseOk) {
         if (dimPosition.ConvertToPx() < 0.0f) {
             dimPosition = 0.0_vp;
@@ -436,21 +436,26 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
         dimPosition = 0.0_vp;
     }
     swiperParameters.dimLeft = dimPosition;
-    parseOk = ParseJsDimensionPx(topValue, dimPosition);
+    parseOk = ParseJsDimensionVp(topValue, dimPosition);
     swiperParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionPx(rightValue, dimPosition);
+    parseOk = ParseJsDimensionVp(rightValue, dimPosition);
     swiperParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
+    parseOk = ParseJsDimensionVp(bottomValue, dimPosition);
     swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionPx(itemWidthValue, dimPosition);
+    parseOk = ParseJsDimensionVp(itemWidthValue, dimPosition);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionPx(itemHeightValue, dimPosition);
+    parseOk = ParseJsDimensionVp(itemHeightValue, dimPosition);
     swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionPx(selectedItemWidthValue, dimPosition);
-    swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionPx(selectedItemHeightValue, dimPosition);
-    swiperParameters.selectedItemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    bool parseSeleItemWOk = ParseJsDimensionVp(selectedItemWidthValue, dimPosition);
+    swiperParameters.selectedItemWidth = parseSeleItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    bool parseSeleItemHOk = ParseJsDimensionVp(selectedItemHeightValue, dimPosition);
+    swiperParameters.selectedItemHeight = parseSeleItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseSeleItemWOk == false && parseSeleItemHOk == false) {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
+    } else {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
+    }
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
@@ -460,7 +465,6 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = ParseJsColor(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
-    SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
     return swiperParameters;
 }
 
@@ -684,15 +688,15 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_VOID(swiperIndicatorTheme);
         CalcDimension dimPosition;
-        bool parseOk = ParseJsDimensionPx(leftValue, dimPosition);
+        bool parseOk = ParseJsDimensionVp(leftValue, dimPosition);
         swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
-        parseOk = ParseJsDimensionPx(topValue, dimPosition);
+        parseOk = ParseJsDimensionVp(topValue, dimPosition);
         swiperParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
-        parseOk = ParseJsDimensionPx(rightValue, dimPosition);
+        parseOk = ParseJsDimensionVp(rightValue, dimPosition);
         swiperParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
-        parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
+        parseOk = ParseJsDimensionVp(bottomValue, dimPosition);
         swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
-        parseOk = ParseJsDimensionPx(sizeValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
+        parseOk = ParseJsDimensionVp(sizeValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
         SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
         swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();

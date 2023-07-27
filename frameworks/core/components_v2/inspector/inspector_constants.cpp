@@ -344,6 +344,10 @@ const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 const char SHEET_COMPONENT_TAG[] = "SheetComponent";
 const char SHEET_ETS_TAG[] = "Sheet";
 const char SHEET_MASK_TAG[] = "SheetMask";
+const char SHEET_PAGE_TAG[] = "SheetPage";
+
+// full screen modal
+const char MODAL_PAGE_TAG[] = "ModalPage";
 
 // hyperlink
 const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";

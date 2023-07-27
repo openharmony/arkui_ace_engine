@@ -90,6 +90,8 @@ public:
         return arrowPlacement_;
     }
 
+    OffsetT<Dimension> GetChildOffsetAfterLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
+
 protected:
     OffsetF positionOffset_;
 
@@ -100,7 +102,7 @@ private:
         BOTTOM_RIGHT_ERROR,
     };
 
-    void InitTargetSizeAndPosition(const RefPtr<BubbleLayoutProperty>& layoutProp);
+    void InitTargetSizeAndPosition(bool showInSubWindow);
     void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition, OffsetF& topPosition,

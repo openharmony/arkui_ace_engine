@@ -95,6 +95,11 @@ float GridPattern::EstimateHeight() const
     return 0.0f;
 }
 
+float GridPattern::GetTotalHeight() const
+{
+    return 0.0f;
+}
+
 void GridPattern::OnAnimateStop() {}
 
 void GridPattern::ScrollTo(float position) {}

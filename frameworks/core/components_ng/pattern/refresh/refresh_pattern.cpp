@@ -82,7 +82,6 @@ void RefreshPattern::OnModifyDone()
         CustomBuilderReset();
     } else if (!progressChild_) {
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
-        LoadingProgressReset();
     }
     if (layoutProperty->GetIsCustomBuilderExistValue() || isRefreshing_ != refreshingProp) {
         if (refreshingProp) {
@@ -240,8 +239,8 @@ void RefreshPattern::ReplaceLoadingProgressNode()
     CHECK_NULL_VOID(loadingProgressChild);
     host->AddChild(loadingProgressChild);
     progressChild_ = loadingProgressChild;
-    host->RebuildRenderContextTree();
     LoadingProgressReset();
+    host->RebuildRenderContextTree();
 }
 
 void RefreshPattern::LoadingProgressReset()
@@ -573,13 +572,23 @@ void RefreshPattern::FireChangeEvent(const std::string& value)
 
 float RefreshPattern::GetScrollOffset(float delta)
 {
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, 0.0f);
-    auto frictionRatio = static_cast<float>(layoutProperty->GetFriction().value_or(DEFAULT_FRICTION)) * PERCENT;
-    auto scrollY = delta * frictionRatio;
+    auto scrollY = delta * GetFrictionRatio();
     auto scrollOffset = std::clamp(scrollOffset_.GetY() + scrollY, static_cast<float>(0.0f),
         static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
     return scrollOffset;
+}
+
+float RefreshPattern::GetFrictionRatio()
+{
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto frictionRatio = static_cast<float>(layoutProperty->GetFriction().value_or(DEFAULT_FRICTION)) * PERCENT;
+    auto percentage = std::abs(scrollOffset_.GetY() / static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
+    if (NearEqual(percentage, 1.0)) {
+        return 0.0;
+    } else {
+        return frictionRatio * std::pow(1.0 - percentage, SQUARE);
+    }
 }
 
 void RefreshPattern::ResetLoadingProgressColor()
@@ -594,7 +603,6 @@ void RefreshPattern::ResetLoadingProgressColor()
     auto paintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateColor(theme->GetProgressColor());
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder) const

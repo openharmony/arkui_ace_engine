@@ -13,17 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/texttimer/text_timer_layout_algorithm.h"
+#include "core/components_ng/pattern/text_clock/text_clock_layout_algorithm.h"
 
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
-
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
-void TextTimerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -34,19 +28,19 @@ void TextTimerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     textWrapper->Measure(childConstraint);
 
     auto textSize = textWrapper->GetGeometryNode()->GetFrameSize();
-    OptionalSizeF textTimerFrameSize = { textSize.Width(), textSize.Height() };
+    OptionalSizeF textClockFrameSize = { textSize.Width(), textSize.Height() };
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    AddPaddingToSize(padding, textTimerFrameSize);
+    AddPaddingToSize(padding, textClockFrameSize);
     auto constraint = layoutProperty->GetLayoutConstraint();
     const auto& minSize = constraint->minSize;
     const auto& maxSize = constraint->maxSize;
     if (constraint->selfIdealSize.Width()) {
-        textTimerFrameSize.SetWidth(constraint->selfIdealSize.Width().value());
+        textClockFrameSize.SetWidth(constraint->selfIdealSize.Width().value());
     }
     if (constraint->selfIdealSize.Height()) {
-        textTimerFrameSize.SetHeight(constraint->selfIdealSize.Height().value());
+        textClockFrameSize.SetHeight(constraint->selfIdealSize.Height().value());
     }
-    textTimerFrameSize.Constrain(minSize, maxSize);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(textTimerFrameSize.ConvertToSizeT());
+    textClockFrameSize.Constrain(minSize, maxSize);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(textClockFrameSize.ConvertToSizeT());
 }
 } // namespace OHOS::Ace::NG
