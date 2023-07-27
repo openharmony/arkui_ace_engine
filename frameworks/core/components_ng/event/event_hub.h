@@ -261,6 +261,16 @@ public:
         return static_cast<bool>(onDragEnd_);
     }
 
+    virtual bool HasOnItemDragMove()
+    {
+        return false;
+    }
+
+    virtual bool HasOnItemDrop()
+    {
+        return false;
+    }
+    
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
         if (onDrop_) {
