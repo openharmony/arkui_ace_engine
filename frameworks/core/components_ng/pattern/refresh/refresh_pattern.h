@@ -119,7 +119,6 @@ private:
     float GetFadeAwayRatio();
     float GetCustomBuilderOpacityRatio();
     float GetScrollOffset(float delta);
-    float GetFrictionRatio();
     bool ScrollComponentReactInMove();
     void CustomBuilderAppear();
     void CustomBuilderExit();
