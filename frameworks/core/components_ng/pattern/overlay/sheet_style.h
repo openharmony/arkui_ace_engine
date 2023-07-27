@@ -31,6 +31,7 @@ const double SHEET_VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 enum SheetMode {
     MEDIUM,
     LARGE,
+    AUTO,
 };
 
 struct SheetStyle {
