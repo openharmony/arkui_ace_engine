@@ -67,6 +67,10 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
 {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < 10) {
+        HandlePanStartBeforeAPI10(info);
+        return;
+    }
     auto xOffset = static_cast<float>(info.GetOffsetX());
     auto yOffset = static_cast<float>(info.GetOffsetY());
     auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
@@ -98,6 +102,60 @@ void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
     }
 
     ConstrainDragRange();
+}
+
+void LinearSplitPattern::HandlePanStartBeforeAPI10(const GestureEvent& info)
+{
+    auto xOffset = static_cast<float>(info.GetOffsetX());
+    auto yOffset = static_cast<float>(info.GetOffsetY());
+    auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    if (!resizeable_) {
+        return;
+    }
+    isDraged_ = true;
+
+    for (std::size_t i = 0; i < splitRects_.size(); i++) {
+        if (splitRects_[i].IsInRegion(Point(gestureOffsetX, gestureOffsetY))) {
+            dragedSplitIndex_ = i;
+            break;
+        }
+    }
+
+    if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
+        return;
+    }
+
+    isDragedMoving_ = true;
+
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        preOffset_ = xOffset;
+        if (isOverParent_) {
+            if (xOffset > 0.0 || (xOffset < 0.0 && dragSplitOffset_[dragedSplitIndex_] <= 0.0)) {
+                return;
+            } else {
+                isOverParent_ = false;
+            }
+        }
+        dragSplitOffset_[dragedSplitIndex_] += xOffset;
+    } else {
+        preOffset_ = yOffset;
+        if (isOverParent_) {
+            if (yOffset > 0.0 || (yOffset < 0.0 && dragSplitOffset_[dragedSplitIndex_] <= 0.0)) {
+                return;
+            } else {
+                isOverParent_ = false;
+            }
+        }
+        dragSplitOffset_[dragedSplitIndex_] += yOffset;
+    }
+
+    if (dragSplitOffset_[dragedSplitIndex_] < 0.0) {
+        isDragedMoving_ = false;
+        dragSplitOffset_[dragedSplitIndex_] = dragSplitOffset_[dragedSplitIndex_] = 0.0;
+    } else {
+        dragSplitOffset_[dragedSplitIndex_] = dragSplitOffset_[dragedSplitIndex_];
+    }
 }
 
 float LinearSplitPattern::GetMinPosFromIndex(std::size_t index)
@@ -169,6 +227,10 @@ void LinearSplitPattern::GetdragedSplitIndexOrIsMoving(const Point& point)
 
 void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
 {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < 10) {
+        HandlePanUpdateBeforeAPI10(info);
+        return;
+    }
     if (!resizeable_) {
         return;
     }
@@ -198,6 +260,65 @@ void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
     }
 
     ConstrainDragRange();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void LinearSplitPattern::HandlePanUpdateBeforeAPI10(const GestureEvent& info)
+{
+    if (!resizeable_) {
+        return;
+    }
+    auto xOffset = info.GetOffsetX();
+    auto yOffset = info.GetOffsetY();
+    if (isOverParent_) {
+        isDragedMoving_ = false;
+    }
+    auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX || !isDragedMoving_) {
+        GetdragedSplitIndexOrIsMoving(Point(gestureOffsetX, gestureOffsetY));
+    }
+
+    if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX || !isDragedMoving_) {
+        if (splitType_ == SplitType::ROW_SPLIT) {
+            preOffset_ = xOffset;
+        } else {
+            preOffset_ = yOffset;
+        }
+        return;
+    }
+
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        if (isOverParent_) {
+            if (dragSplitOffset_[dragedSplitIndex_] <= 0.0 || xOffset - preOffset_ >= 0.0) {
+                preOffset_ = xOffset;
+                return;
+            }
+            isOverParent_ = false;
+        }
+        dragSplitOffset_[dragedSplitIndex_] += xOffset - preOffset_;
+        preOffset_ = xOffset;
+    } else {
+        if (isOverParent_) {
+            if (dragSplitOffset_[dragedSplitIndex_] <= 0.0 || yOffset - preOffset_ >= 0.0) {
+                preOffset_ = yOffset;
+                return;
+            }
+            isOverParent_ = false;
+        }
+        dragSplitOffset_[dragedSplitIndex_] += yOffset - preOffset_;
+        preOffset_ = yOffset;
+    }
+
+    if (dragSplitOffset_[dragedSplitIndex_] < 0.0) {
+        isDragedMoving_ = false;
+        dragSplitOffset_[dragedSplitIndex_] = dragSplitOffset_[dragedSplitIndex_] = 0.0;
+    } else {
+        dragSplitOffset_[dragedSplitIndex_] = dragSplitOffset_[dragedSplitIndex_];
+    }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -319,6 +440,9 @@ void LinearSplitPattern::HandleHoverEvent(bool isHovered)
 
 MouseFormat LinearSplitPattern::GetMouseFormat()
 {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < 10) {
+        return GetMouseFormatBeforeAPI10();
+    }
     MouseFormat format = MouseFormat::DEFAULT;
     if (splitType_ == SplitType::ROW_SPLIT) {
         if (IsStuck()) {
@@ -337,6 +461,33 @@ MouseFormat LinearSplitPattern::GetMouseFormat()
             format = MouseFormat::SOUTH;
         } else if (ReachEnd()) {
             format = MouseFormat::NORTH;
+        } else {
+            format = MouseFormat::NORTH_SOUTH;
+        }
+    }
+    return format;
+}
+
+MouseFormat LinearSplitPattern::GetMouseFormatBeforeAPI10()
+{
+    MouseFormat format = MouseFormat::DEFAULT;
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        if (isOverParent_ && NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::DEFAULT;
+        } else if (isOverParent_) {
+            format = MouseFormat::WEST;
+        } else if (NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::EAST;
+        } else {
+            format = MouseFormat::WEST_EAST;
+        }
+    } else {
+        if (isOverParent_ && NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::DEFAULT;
+        } else if (isOverParent_) {
+            format = MouseFormat::NORTH;
+        } else if (NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::SOUTH;
         } else {
             format = MouseFormat::NORTH_SOUTH;
         }
@@ -380,6 +531,10 @@ bool LinearSplitPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     childrenOffset_ = linearSplitLayoutAlgorithm->GetChildrenOffset();
     splitLength_ = linearSplitLayoutAlgorithm->GetSplitLength();
     splitRects_ = linearSplitLayoutAlgorithm->GetSplitRects();
+    parentOffset_ = linearSplitLayoutAlgorithm->GetParentOffset();
+    if (dragSplitOffset_.empty()) {
+        dragSplitOffset_ = std::vector<float>(splitRects_.size(), 0.0);
+    }
     childrenDragPos_ = linearSplitLayoutAlgorithm->GetChildrenDragPos();
     childrenConstrains_ = linearSplitLayoutAlgorithm->GetChildrenConstrains();
     isOverParent_ = linearSplitLayoutAlgorithm->GetIsOverParent();

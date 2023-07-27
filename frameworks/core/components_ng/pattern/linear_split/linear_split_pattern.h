@@ -45,7 +45,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType_, childrenDragPos_, isOverParent_);
+        return MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType_, dragSplitOffset_, childrenDragPos_, isOverParent_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -58,6 +58,11 @@ public:
         return MakeRefPtr<LinearSplitPaintMethod>(childrenOffset_, splitLength_, splitType_);
     }
 
+    OffsetF GetParentOffset() const
+    {
+        return parentOffset_;
+    }
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -66,10 +71,13 @@ private:
     void HandlePanStart(const GestureEvent& info);
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
+    void HandlePanStartBeforeAPI10(const GestureEvent& info);
+    void HandlePanUpdateBeforeAPI10(const GestureEvent& info);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleMouseEvent(MouseInfo& info);
     void HandleHoverEvent(bool isHovered);
     MouseFormat GetMouseFormat();
+    MouseFormat GetMouseFormatBeforeAPI10();
     void GetdragedSplitIndexOrIsMoving(const Point& point);
     void ConstrainDragRange();
     bool IsStuck();
@@ -90,6 +98,8 @@ private:
     std::size_t dragedSplitIndex_ = -1;
     std::size_t mouseDragedSplitIndex_ = -1;
     std::vector<Rect> splitRects_;
+    std::vector<float> dragSplitOffset_;
+    OffsetF parentOffset_;
     std::vector<float> childrenDragPos_;
     std::vector<float> childrenConstrains_;
     bool isDragedMoving_ = false;
