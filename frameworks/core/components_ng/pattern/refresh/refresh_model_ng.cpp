@@ -21,7 +21,6 @@
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/i18n/localization.h"
 #include "frameworks/base/utils/time_util.h"
-#include "frameworks/core/components/refresh/refresh_theme.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
@@ -37,7 +36,7 @@ constexpr int32_t CHILD_COUNT = 2;
 constexpr double DEFAULT_INDICATOR_OFFSET = 16.0;
 constexpr int32_t DEFAULT_FRICTION_RATIO = 42;
 constexpr char REFRESH_LAST_UPDATED[] = "refresh.last_updated"; // I18n for last updated
-constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
+
 } // namespace
 
 void RefreshModelNG::Create()
@@ -102,22 +101,9 @@ void RefreshModelNG::Pop()
         auto loadingProgressChild = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
         CHECK_NULL_VOID(loadingProgressChild);
-        auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
-        progressLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto theme = themeManager->GetTheme<RefreshTheme>();
-        CHECK_NULL_VOID(theme);
-        auto paintProperty = loadingProgressChild->GetPaintProperty<LoadingProgressPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        paintProperty->UpdateColor(theme->GetProgressColor());
-        auto progressContext = loadingProgressChild->GetRenderContext();
-        CHECK_NULL_VOID_NOLOG(progressContext);
-        progressContext->UpdateOpacity(0.0);
         refreshNode->AddChild(loadingProgressChild);
+        auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
+        CHECK_NULL_VOID(progressLayoutProperty);
     }
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
