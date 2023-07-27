@@ -54,7 +54,7 @@ ToggleModel* ToggleModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
+const static int32_t PLATFORM_VERSION_TEN = 10;
 void JSToggle::JSBind(BindingTarget globalObj)
 {
     JSClass<JSToggle>::Declare("Toggle");
@@ -173,9 +173,16 @@ void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
     auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
     auto height = defaultHeight - verticalPadding * 2;
     CalcDimension value(height);
-    ParseJsDimensionVp(jsValue, value);
-    if (value.IsNegative()) {
-        value = height;
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            value = height;
+        }
+    } else {
+        ParseJsDimensionVp(jsValue, value);
+        if (value.IsNegative()) {
+            value = height;
+        }
     }
     ToggleModel::GetInstance()->SetHeight(value);
 }

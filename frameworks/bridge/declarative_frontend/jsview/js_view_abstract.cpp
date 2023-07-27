@@ -249,7 +249,13 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     rotate.zDirection = static_cast<float>(dzVal);
     // if specify centerX
     CalcDimension length;
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length, true)) {
+            LOGW("centerX is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
+    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
         if (length.Unit() == DimensionUnit::INVALID) {
             LOGW("centerX is invalid");
             length = Dimension(0.5f, DimensionUnit::PERCENT);
@@ -257,7 +263,13 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
         rotate.centerX = length;
     }
     // if specify centerY
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length, true)) {
+            LOGW("centerY is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
+    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
         if (length.Unit() == DimensionUnit::INVALID) {
             LOGW("centerY is invalid");
             length = Dimension(0.5f, DimensionUnit::PERCENT);
@@ -265,7 +277,13 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
         rotate.centerY = length;
     }
     // if specify centerZ
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length, true)) {
+            LOGW("centerZ is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
+    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
         if (length.Unit() == DimensionUnit::INVALID) {
             LOGW("centerZ is invalid");
         }
@@ -1303,7 +1321,13 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return true;
     }
-    if (!ParseJsDimensionVp(jsValue, value)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            return false;
+        }
+    } else if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
 
@@ -1327,7 +1351,13 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return true;
     }
-    if (!ParseJsDimensionVp(jsValue, value)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+            return false;
+        }
+    } else if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
 
@@ -5724,7 +5754,7 @@ void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
 }
 
 bool JSViewAbstract::ParseJsonDimension(
-    const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, DimensionUnit defaultUnit)
+    const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, DimensionUnit defaultUnit, bool checkIllegal)
 {
     if (!jsonValue || jsonValue->IsNull()) {
         LOGD("invalid json value");
@@ -5739,6 +5769,9 @@ bool JSViewAbstract::ParseJsonDimension(
         return true;
     }
     if (jsonValue->IsString()) {
+        if (checkIllegal) {
+            return StringUtils::StringToDimensionWithUnitNG(jsonValue->GetString(), result, defaultUnit);
+        }
         result = StringUtils::StringToCalcDimension(jsonValue->GetString(), false, defaultUnit);
         return true;
     }
@@ -5757,9 +5790,10 @@ bool JSViewAbstract::ParseJsonDimension(
     return true;
 }
 
-bool JSViewAbstract::ParseJsonDimensionVp(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result)
+bool JSViewAbstract::ParseJsonDimensionVp(
+    const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, bool checkIllegal)
 {
-    return ParseJsonDimension(jsonValue, result, DimensionUnit::VP);
+    return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, checkIllegal);
 }
 
 bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue, double& result)
@@ -6276,6 +6310,10 @@ bool JSViewAbstract::CheckLength(
     // input type is not in [number, string, Resource]
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
         return false;
+    }
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        return ParseJsDimensionVpNG(jsValue, result);
     }
     // Correct type, incorrect value parsing
     if (!ParseJsDimensionVp(jsValue, result)) {
