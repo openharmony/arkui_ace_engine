@@ -213,6 +213,11 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
 
 void AppBarView::BindContentCover(int32_t targetId)
 {
+    if (OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName().empty()) {
+        LOGE("UIExtension BundleName is empty.");
+        return;
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -243,12 +248,17 @@ void AppBarView::BindContentCover(int32_t targetId)
         if (missionId != -1) {
             params.try_emplace("missionId", std::to_string(missionId));
         }
+        LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
+            AceApplicationInfo::GetInstance().GetProcessName().c_str(),
+            AceApplicationInfo::GetInstance().GetAbilityName().c_str(),
+            Container::Current()->GetModuleName().c_str());
         
         // Create UIExtension node.
         auto appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
         auto uiExtNode = OHOS::Ace::AppBarHelper::CreateUIExtensionNode(appGalleryBundleName, stageAbilityName,
             params, std::move(onRelease), std::move(onError));
-        LOGI("BundleName: %{public}s, abilityName: %{public}s", appGalleryBundleName.c_str(), stageAbilityName.c_str());
+        LOGI("UIExtension BundleName: %{public}s, AbilityName: %{public}s",
+            appGalleryBundleName.c_str(), stageAbilityName.c_str());
 
         // Update ideal size of UIExtension.
         auto layoutProperty = uiExtNode->GetLayoutProperty();
