@@ -493,8 +493,7 @@ void RosenRenderImage::ProcessPixmapForPaint()
     // Step2: Create RSImage and draw it, using gpu or cpu
     auto rsImage = std::make_shared<RSImage>();
     rsImage->BuildFromBitmap(*rsBitmap);
-    auto skImage = rsImage->GetImpl<Rosen::Drawing::SkiaImage>()->GetImage();
-    image_ = NG::CanvasImage::Create(&skImage);
+    image_ = NG::CanvasImage::Create(&rsImage);
     if (!VerifyRSImageDataFromPixmap(pixmap)) {
         LOGE("pixmap paint failed due to RSImage data verification fail. rawImageSize: %{public}s",
             rawImageSize_.ToString().c_str());
@@ -745,7 +744,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
     auto colorSpace = RSColorSpace::CreateSRGB();
     auto rsImage = AceType::DynamicCast<NG::DrawingImage>(image_);
     if (rsImage && rsImage->GetImage()) {
-        colorSpace = RSColorSpace::CreateRefImage(*rsImage->GetImage());
+        colorSpace = RSRecordingColorSpace::CreateRefImage(*rsImage->GetImage());
     }
     brush.SetColor(brush.GetColor4f(), colorSpace);
 #endif
@@ -856,7 +855,7 @@ void RosenRenderImage::ApplyColorFilter(RSBrush& brush)
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(matrixArray);
         auto filter = brush.GetFilter();
-        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
         brush.SetFilter(filter);
         return;
     }
@@ -864,7 +863,7 @@ void RosenRenderImage::ApplyColorFilter(RSBrush& brush)
         auto filter = brush.GetFilter();
         RSColorMatrix m;
         m.SetArray(GRAY_COLOR_MATRIX);
-        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(m));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(m));
         brush.SetFilter(filter);
         return;
     }
@@ -873,7 +872,7 @@ void RosenRenderImage::ApplyColorFilter(RSBrush& brush)
     }
     Color color = color_.value();
     auto filter = brush.GetFilter();
-    filter.SetColorFilter(RSColorFilter::CreateBlendModeColorFilter(
+    filter.SetColorFilter(RSRecordingColorFilter::CreateBlendModeColorFilter(
         RSColor::ColorQuadSetARGB(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha()),
         RSBlendMode::PLUS));
     brush.SetFilter(filter);
@@ -985,12 +984,14 @@ void RosenRenderImage::CanvasDrawImageRect(
     auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->Translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
-        Rosen::RsImageInfo rsImageInfo(
-            fitNum, repeatNum, radii_.data(), scale_, 0, rsImage->GetCompressWidth(), rsImage->GetCompressHeight());
+        Rosen::Drawing::AdaptiveImageInfo rsImageInfo = {
+            fitNum, repeatNum, {radii_[0], radii_[1], radii_[2], radii_[3]},
+            scale_, 0, rsImage->GetCompressWidth(), rsImage->GetCompressHeight()};
         recordingCanvas->AttachBrush(brush);
-        LOGE("Drawing is not supported");
+        recordingCanvas->DrawImage(rsImage->GetImage(), rsImage->GetCompressData(), rsImageInfo, RSSamplingOptions());
         recordingCanvas->DetachBrush();
         rsImage->SetCompressData(nullptr, 0, 0);
+        return;
 #endif
     }
     bool isLoading =
