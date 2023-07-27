@@ -120,6 +120,11 @@ void ButtonPattern::InitButtonLabel()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
+    auto buttonRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(buttonRenderContext);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }
