@@ -202,11 +202,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 CHECK_NULL_VOID(dragNode);
                 auto context = dragNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
-                pixelMap = context->GetThumbnailPixelMap()->GetPixelMapSharedPtr();
+                auto thumbnailPixelMap = context->GetThumbnailPixelMap();
+                CHECK_NULL_VOID(thumbnailPixelMap);
+                pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
             } else {
                 auto context = frameNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
-                pixelMap = context->GetThumbnailPixelMap()->GetPixelMapSharedPtr();
+                auto thumbnailPixelMap = context->GetThumbnailPixelMap();
+                CHECK_NULL_VOID(thumbnailPixelMap);
+                pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
             }
             CHECK_NULL_VOID(pixelMap);
             auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
@@ -746,6 +750,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     auto dragNode = pattern->MoveDragNode();
     CHECK_NULL_VOID(dragNode);
     auto pixelMap = dragNode->GetRenderContext()->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
     gestureHub->SetPixelMap(pixelMap);
     // create columnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
