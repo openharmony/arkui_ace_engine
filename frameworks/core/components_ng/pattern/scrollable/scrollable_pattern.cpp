@@ -506,7 +506,12 @@ void ScrollablePattern::ScrollTo(float position)
 void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
     LOGI("AnimateTo:%f, duration:%f", position, duration);
+    float currVelocity = 0.0f;
     if (!IsScrollableStopped()) {
+        CHECK_NULL_VOID(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        currVelocity = -scrollable->GetCurrentVelocity();
         scrollAbort_ = true;
         StopScrollable();
     }
@@ -518,6 +523,9 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
             pattern->OnAnimateStop();
         });
     } else if (!animator_->IsStopped()) {
+        if (springMotion_) {
+            currVelocity = springMotion_->GetCurrentVelocity();
+        }
         scrollAbort_ = true;
         animator_->Stop();
     }
@@ -533,6 +541,13 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         float stiffness = springCurve->GetStiffness();
         float damping = springCurve->GetDamping();
         PlaySpringAnimation(position, velocity, mass, stiffness, damping);
+    } else if (AceType::InstanceOf<ResponsiveSpringMotion>(curve)) {
+        auto springCurve = AceType::DynamicCast<ResponsiveSpringMotion>(curve);
+        constexpr float PI = 3.1415926f;
+        float tmpStiffness = (2 * PI / springCurve->GetResponse());
+        float stiffness = tmpStiffness * tmpStiffness;
+        float damping = 4 * PI * springCurve->GetDampingRatio() / springCurve->GetResponse();
+        PlaySpringAnimation(position, currVelocity, 1.0f, stiffness, damping);
     } else {
         auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
         animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
