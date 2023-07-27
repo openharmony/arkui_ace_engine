@@ -152,6 +152,11 @@ public:
 
     void SetWindowId(uint32_t windowId) override {}
 
+    bool WindowIsShow() const override
+    {
+        return true;
+    }
+
     AceViewPreview* GetAceView() const
     {
         return aceView_;

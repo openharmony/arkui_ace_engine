@@ -260,6 +260,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     AceContainer::CreateContainer(instanceId_, FrontendType::DECLARATIVE_JS, useNewPipeline_);
     auto container = AceContainer::GetContainerInstance(instanceId_);
     CHECK_NULL_VOID(container);
+    container->SetIsFRSCardContainer(false);
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);
