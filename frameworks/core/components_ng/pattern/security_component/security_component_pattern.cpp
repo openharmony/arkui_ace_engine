@@ -57,6 +57,7 @@ void SecurityComponentPattern::InitSecurityComponentOnClick(RefPtr<FrameNode>& s
             frameNode, info);
         if (res != 0) {
             LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
+            res = 1;
         }
 #ifdef SECURITY_COMPONENT_ENABLE
         auto jsonNode = JsonUtil::Create(true);
