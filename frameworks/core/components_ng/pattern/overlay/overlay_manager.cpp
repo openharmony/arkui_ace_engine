@@ -1515,13 +1515,13 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         modalStack_.push(WeakClaim(RawPtr(sheetNode)));
         SaveLastModalNode();
         // create maskColor node
-        auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_MASK_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-        maskNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
         if (sheetStyle.maskColor.has_value()) {
+            auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_MASK_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+            maskNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
             maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.maskColor.value());
+            maskNode->MountToParent(rootNode);
         }
-        maskNode->MountToParent(rootNode);
         sheetNode->MountToParent(rootNode);
         modalList_.emplace_back(WeakClaim(RawPtr(sheetNode)));
         FireModalPageShow();
