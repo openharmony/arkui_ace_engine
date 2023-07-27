@@ -833,7 +833,7 @@ void NavigationGroupNode::SetOnStateChangeFalse(
 
     auto navDestinationPattern = preNavDestination->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
-    if (isBackButton && preNavDestination) {
+    if (isBackButton && preNavDestination != navDestination) {
         auto eventHub = preNavDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireChangeEvent(true);
