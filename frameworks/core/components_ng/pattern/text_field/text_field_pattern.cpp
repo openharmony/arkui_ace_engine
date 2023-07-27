@@ -1928,7 +1928,11 @@ void TextFieldPattern::InitDragDropEvent()
         }
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
-        std::string str = UdmfClient::GetInstance()->GetSinglePlainTextRecord(data);
+        auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
+        std::string str = "";
+        for (const auto& record : records) {
+            str += record;
+        }
         pattern->needToRequestKeyboardInner_ = true;
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
