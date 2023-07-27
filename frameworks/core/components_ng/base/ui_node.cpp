@@ -171,7 +171,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     }
 
     auto iter = RemoveChild(oldNode);
-    DoAddChild(iter, newNode);
+    DoAddChild(iter, newNode, false, false);
 }
 
 void UINode::Clean(bool cleanDirectly, bool allowTransition)
@@ -245,14 +245,15 @@ void UINode::ResetParent()
     depth_ = -1;
 }
 
-void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
+void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently,
+    bool allowTransition)
 {
     children_.insert(it, child);
 
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
     if (!silently && onMainTree_) {
-        child->AttachToMainTree();
+        child->AttachToMainTree(!allowTransition);
     }
     MarkNeedSyncRenderTree(true);
 }
@@ -330,6 +331,7 @@ void UINode::DetachFromMainTree(bool recursive)
         return;
     }
     onMainTree_ = false;
+    isRemoving_ = true;
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);

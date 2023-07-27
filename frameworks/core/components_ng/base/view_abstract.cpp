@@ -942,9 +942,14 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
 }
 
-void ViewAbstract::SetGeometryTransition(const std::string& id)
+void ViewAbstract::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, GeometryTransition, id);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+    }
 }
 
 void ViewAbstract::SetOpacity(double opacity)

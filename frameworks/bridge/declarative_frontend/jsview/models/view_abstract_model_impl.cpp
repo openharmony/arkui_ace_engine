@@ -799,7 +799,7 @@ void ViewAbstractModelImpl::SetSharedTransition(
     }
 }
 
-void ViewAbstractModelImpl::SetGeometryTransition(const std::string& id)
+void ViewAbstractModelImpl::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
 {
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     boxComponent->SetGeometryTransitionId(id);

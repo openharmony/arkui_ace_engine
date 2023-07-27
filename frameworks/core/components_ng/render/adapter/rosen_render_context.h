@@ -406,6 +406,7 @@ private:
     bool hasDefaultTransition_ = false;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
+    int sandBoxCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 

@@ -1905,7 +1905,12 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     }
     // id
     auto id = info[0]->ToString();
-    ViewAbstractModel::GetInstance()->SetGeometryTransition(id);
+    // follow flag
+    bool followWithOutTransition = false;
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsBoolean()) {
+        followWithOutTransition = info[1]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetGeometryTransition(id, followWithOutTransition);
 }
 
 void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)

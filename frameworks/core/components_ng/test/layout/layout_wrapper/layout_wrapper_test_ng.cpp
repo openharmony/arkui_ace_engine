@@ -786,7 +786,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest019, TestSize.Level1)
      * @tc.steps: step4. call Measure and set layoutProperty_->geometryTransition_ is not null.
      * @tc.expected: FRAME_SIZE.width_ is RK356_WIDTH and FRAME_SIZE.height_ is ROW_HEIGHT.
      */
-    layoutWrapper->GetLayoutProperty()->geometryTransition_ = AceType::MakeRefPtr<GeometryTransition>(rowFrameNode);
+    layoutWrapper->GetLayoutProperty()->geometryTransition_ =
+        AceType::MakeRefPtr<GeometryTransition>("test", rowFrameNode);
     layoutWrapper->Measure(parentLayoutConstraint);
     FRAME_SIZE = layoutWrapper->geometryNode_->GetFrameSize();
     EXPECT_EQ(FRAME_SIZE.width_, RK356_WIDTH);

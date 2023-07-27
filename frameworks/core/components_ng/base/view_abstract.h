@@ -247,7 +247,7 @@ public:
     // sharedTransition
     static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     // geometryTransition
-    static void SetGeometryTransition(const std::string& id);
+    static void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false);
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape>& basicShape);
     static void SetClipEdge(bool isClip);

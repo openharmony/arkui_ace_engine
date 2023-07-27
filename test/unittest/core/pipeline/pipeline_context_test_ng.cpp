@@ -2143,7 +2143,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg004, TestSize.Level1)
      * @tc.expected: NeedAdditionalLayout return true.
      */
     auto frameNode3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 3, nullptr);
-    auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode3);
+    auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>("test", frameNode3);
     geometryTransition->hasOutAnim_ = true;
     geometryTransition->inNode_ = frameNode2;
     geometryTransition->outNode_ = frameNode3;
