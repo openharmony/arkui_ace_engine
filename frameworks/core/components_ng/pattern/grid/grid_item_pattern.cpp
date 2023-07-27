@@ -100,10 +100,5 @@ void GridItemPattern::BeforeCreateLayoutWrapper()
         shallowBuilder_->ExecuteDeepRender();
         shallowBuilder_.Reset();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!host->IsActive()) {
-        host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-    }
 }
 } // namespace OHOS::Ace::NG
