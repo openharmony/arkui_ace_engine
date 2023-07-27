@@ -113,8 +113,10 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
     auto navigationStack = pattern->GetNavigationStack();
     auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(navigationLayoutProperty);
-    for (auto iter = navDestinationNodes.begin(); iter != navDestinationNodes.end(); ++iter) {
-        const auto& childNode = *iter;
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
+    for (auto i = 0; i != navDestinationNodes.size(); ++i) {
+        const auto& childNode = navDestinationNodes[i];
         auto uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
         CHECK_NULL_VOID(navDestination);
@@ -128,19 +130,32 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
             auto pipelineContext = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<AppTheme>();
-            navDestinationContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+            if (theme) {
+                navDestinationContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+            }
         }
         if (!(navigationContentNode->GetChildren().empty() &&
-                navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT)) {
+                navigationPattern->GetNavigationMode() == NavigationMode::SPLIT)) {
             // add backButton except for the first level page in SPLIT mode
             SetBackButtonVisible(navDestination);
             if (!(navDestination->GetNavDestinationBackButtonEvent())) {
                 SetBackButtonEvent(navDestination);
             }
+        } else {
+            SetBackButtonVisible(navDestination, false);
+        }
+        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        if (i == navDestinationNodes.size() - 1) {
+            // for the navDestination at the top, FireChangeEvent
+            eventHub->FireChangeEvent(true);
+        } else {
+            eventHub->FireChangeEvent(false);
         }
         navigationContentNode->AddChild(navDestination);
-        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+
+    navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -201,7 +216,7 @@ void NavigationGroupNode::AddBackButtonIconToNavDestination(const RefPtr<UINode>
     }
 }
 
-void NavigationGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestinationNode)
+void NavigationGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestinationNode, bool isVisible)
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
     CHECK_NULL_VOID(navDestination);
@@ -213,7 +228,11 @@ void NavigationGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestinat
     CHECK_NULL_VOID(backButtonNode);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
-    backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    if (isVisible) {
+        backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    }
     backButtonNode->MarkModifyDone();
 }
 
@@ -499,6 +518,7 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
                         RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     ContainerScope scope(id);
                     navigationPattern->RemoveNavDestination();
+                    navigationContentNode->Clean();
                     navigationContentNode->MarkModifyDone();
                     navigationNode->MarkModifyDone();
                     navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -753,6 +773,7 @@ void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButto
                     TaskExecutor::TaskType::UI);
             });
         backButtonNodeContext->OpacityAnimation(transitionOption, 1.0, 0.0);
+        backButtonNodeContext->UpdateOpacity(0.0);
     }
 }
 
@@ -810,6 +831,7 @@ void NavigationGroupNode::TitleOpacityAnimation(const RefPtr<RenderContext>& tra
                 TaskExecutor::TaskType::UI);
         });
     transitionOutNodeContext->OpacityAnimation(opacityOption, 1.0, 0.0);
+    transitionOutNodeContext->UpdateOpacity(0.0);
 }
 
 void NavigationGroupNode::SetOnStateChangeFalse(
