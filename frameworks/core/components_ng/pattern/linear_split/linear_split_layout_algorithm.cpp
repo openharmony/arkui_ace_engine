@@ -484,9 +484,9 @@ void LinearSplitLayoutAlgorithm::LayoutBeforeAPI10(LayoutWrapper* layoutWrapper)
     childTotalOffsetMain += startPointX;
     childTotalOffsetCross += startPointY;
     if (splitType_ == SplitType::ROW_SPLIT) {
-        LayoutRowSplitBeforeAPI10(layoutWrapper, childOffsetMain, childOffsetCross);
+        LayoutRowSplitBeforeAPI10(layoutWrapper, childOffsetMain, childOffsetCross, childTotalOffsetMain);
     } else if (splitType_ == SplitType::COLUMN_SPLIT) {
-        LayoutColumnSplitBeforeAPI10(layoutWrapper, childOffsetMain, childOffsetCross);
+        LayoutColumnSplitBeforeAPI10(layoutWrapper, childOffsetMain, childOffsetCross, childTotalOffsetCross);
     }
 }
 
