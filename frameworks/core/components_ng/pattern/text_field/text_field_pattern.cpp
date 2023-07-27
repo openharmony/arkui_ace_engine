@@ -2215,6 +2215,9 @@ void TextFieldPattern::OnModifyDone()
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
         UpdateCaretPositionWithClamp(textEditingValue_.caretPosition);
         SetEditingValueToProperty(textEditingValue_.text);
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
     }
 #endif
     FireOnChangeIfNeeded();
