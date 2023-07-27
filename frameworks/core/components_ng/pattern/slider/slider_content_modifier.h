@@ -228,6 +228,11 @@ public:
         LOGD("SliderContentModifier SetVisible %d", isVisible_);
     }
 
+    bool GetVisible() const
+    {
+        return isVisible_;
+    }
+
     void UpdateContentDirtyRect(const SizeF& frameSize);
 private:
     void InitializeShapeProperty();
