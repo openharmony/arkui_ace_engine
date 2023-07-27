@@ -331,7 +331,6 @@ void ScrollBar::SetGestureEvent()
                 if (inRegion && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarGrowAnimation();
                 }
-                scrollBar->MarkNeedRender();
             }
             if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
                 info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
@@ -339,10 +338,6 @@ void ScrollBar::SetGestureEvent()
                     scrollBar->PlayScrollBarShrinkAnimation();
                 }
                 scrollBar->SetPressed(false);
-                if (scrollBar->GetOpacity() == UINT8_MAX) {
-                    scrollBar->PlayScrollBarEndAnimation();
-                }
-                scrollBar->MarkNeedRender();
             }
         });
     }
@@ -366,7 +361,6 @@ void ScrollBar::SetMouseEvent()
                 scrollBar->PlayScrollBarGrowAnimation();
             }
             scrollBar->SetHover(true);
-            scrollBar->MarkNeedRender();
         }
         if (scrollBar->IsHover() && !inRegion) {
             scrollBar->SetHover(false);
@@ -376,7 +370,6 @@ void ScrollBar::SetMouseEvent()
                     scrollBar->PlayScrollBarEndAnimation();
                 }
             }
-            scrollBar->MarkNeedRender();
         }
     });
 }

@@ -352,6 +352,7 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
+        scrollBar_->PlayScrollBarEndAnimation();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else if (scrollBar_->GetDisplayMode() != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);

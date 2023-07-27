@@ -1299,12 +1299,12 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
 
     Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
 
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH);
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedShrinkAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
@@ -1312,12 +1312,12 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
      * @tc.expected: touchAnimator_ is take effect
      */
     Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upOutBar, SourceType::TOUCH);
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedShrinkAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
@@ -1325,61 +1325,58 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
      * @tc.expected: touchAnimator_ is take effect
      */
     Touch(TouchType::DOWN, downInBar, SourceType::MOUSE);
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::MOUSE);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::MOUSE);
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedShrinkAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
      * @tc.steps: step4. Touch in bar with SourceType::TOUCH_PAD
      * @tc.expected: touchAnimator_ is not take effect
      */
-    scrollBar->scrollBarOverlayModifier_->SetNeedGrowAnimation(false);
-    scrollBar->scrollBarOverlayModifier_->SetNeedShrinkAnimation(false);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     Touch(TouchType::DOWN, downInBar, SourceType::TOUCH_PAD);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH_PAD);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH_PAD);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
      * @tc.steps: step5. Touch out of bar
      * @tc.expected: touchAnimator_ is not take effect
      */
-    scrollBar->scrollBarOverlayModifier_->SetNeedGrowAnimation(false);
-    scrollBar->scrollBarOverlayModifier_->SetNeedShrinkAnimation(false);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     Touch(TouchType::DOWN, Offset::Zero(), SourceType::TOUCH);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
      * @tc.steps: step6. Touch in bar and scrollBar->IsHover() is true
      * @tc.expected: touchAnimator_ is not take effect
      */
-    scrollBar->scrollBarOverlayModifier_->SetNeedGrowAnimation(false);
-    scrollBar->scrollBarOverlayModifier_->SetNeedShrinkAnimation(false);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBar->SetHover(true);
     Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
@@ -1389,42 +1386,37 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
     CreateScroll(Dimension(barWidth));
     scrollBar = pattern_->GetScrollBar();
     const Offset moveOutBar = Offset(DEVICE_WIDTH - barWidth - 1.f, 0.f);
-    scrollBar->scrollBarOverlayModifier_->SetNeedGrowAnimation(false);
-    scrollBar->scrollBarOverlayModifier_->SetNeedShrinkAnimation(false);
-
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     Mouse(moveOutBar);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsHover());
     Mouse(moveInBar);
-
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
     EXPECT_TRUE(scrollBar->IsHover());
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     Mouse(moveInBar);
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     EXPECT_TRUE(scrollBar->IsHover());
     Mouse(moveOutBar);
-    EXPECT_TRUE(scrollBar->scrollBarOverlayModifier_->GetNeedShrinkAnimation());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     EXPECT_FALSE(scrollBar->IsHover());
 
     /**
      * @tc.steps: step8. (out->in->in->out) and scrollBar->IsPressed() is true
      * @tc.expected: touchAnimator_ is not take effect
      */
-    scrollBar->scrollBarOverlayModifier_->SetNeedGrowAnimation(false);
-    scrollBar->scrollBarOverlayModifier_->SetNeedShrinkAnimation(false);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBar->SetPressed(true);
     Mouse(moveOutBar);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsHover());
     Mouse(moveInBar);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     EXPECT_TRUE(scrollBar->IsHover());
     Mouse(moveInBar);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     EXPECT_TRUE(scrollBar->IsHover());
     Mouse(moveOutBar);
-    EXPECT_FALSE(scrollBar->scrollBarOverlayModifier_->GetNeedGrowAnimation());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsHover());
 }
 

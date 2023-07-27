@@ -21,6 +21,35 @@
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
+enum class OpacityAnimationType {
+    /*
+     * do not run opacity animation.
+     */
+    NONE = 0,
+    /*
+     *  run disappear animation.
+     */
+    DISAPPEAR,
+    /*
+     * run appear animation.
+     */
+    APPEAR,
+};
+
+enum class HoverAnimationType {
+    /*
+     * do not run hover animation.
+     */
+    NONE = 0,
+    /*
+     *  run grow animation.
+     */
+    GROW,
+    /*
+     *  run shrink animation.
+     */
+    SHRINK,
+};
 class ScrollBarOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(ScrollBarOverlayModifier, OverlayModifier)
 
@@ -31,9 +60,10 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void SetOpacity(uint8_t opacity);
+    void StartOpacityAnimation(OpacityAnimationType opacityAnimationType);
 
-    void SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset, const OffsetF& bgOffset);
+    void SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset, const OffsetF& bgOffset,
+        HoverAnimationType hoverAnimationType);
 
     void SetOffset(OffsetF fgOffset, OffsetF bgOffset);
 
@@ -41,92 +71,28 @@ public:
 
     void SetBgColor(Color bgColor);
 
-    void StartBarEndAnimation();
-
-    void StartBarAppearAnimation();
-
     void StopBarOpacityAnimation();
 
     void StopBarHoverAnimation();
 
-    void SetNeedGrowAnimation(bool needGrowAnimation)
+    HoverAnimationType GetHoverAnimatingType() const
     {
-        needGrowAnimation_ = needGrowAnimation;
+        return hoverAnimatingType_;
     }
 
-    bool GetNeedGrowAnimation() const
+    void SetHoverAnimatingType(HoverAnimationType hoverAnimatingType)
     {
-        return needGrowAnimation_;
+        hoverAnimatingType_ = hoverAnimatingType;
     }
 
-    void SetNeedShrinkAnimation(bool needShrinkAnimation)
+    OpacityAnimationType GetOpacityAnimatingType() const
     {
-        needShrinkAnimation_ = needShrinkAnimation;
+        return opacityAnimatingType_;
     }
 
-    bool GetNeedShrinkAnimation() const
+    void SetOpacityAnimatingType(OpacityAnimationType opacityAnimatingType)
     {
-        return needShrinkAnimation_;
-    }
-
-    void SetNeedEndAnimation(bool needEndAnimation)
-    {
-        needEndAnimation_ = needEndAnimation;
-    }
-
-    bool GetNeedEndAnimation() const
-    {
-        return needEndAnimation_;
-    }
-
-    void SetNeedAppearAnimation(bool needAppearAnimation)
-    {
-        needAppearAnimation_ = needAppearAnimation;
-    }
-
-    bool GetNeedAppearAnimation() const
-    {
-        return needAppearAnimation_;
-    }
-
-    bool GetIsEnding() const
-    {
-        return isEnding_;
-    }
-
-    void SetIsEnding(bool isEnding)
-    {
-        isEnding_ = isEnding;
-    }
-
-    bool GetIsAppearing() const
-    {
-        return isAppearing_;
-    }
-
-    void SetIsAppearing(bool isAppearing)
-    {
-        isAppearing_ = isAppearing;
-    }
-
-    bool GetIsGrowing() const
-    {
-        return isGrowing_;
-    }
-
-    void SetIsGrowing(bool isGrowing)
-    {
-        isGrowing_ = isGrowing;
-    }
-
-    bool GetIsShrinking() const
-    {
-        return isShrinking_;
-    }
-
-    void SetIsShrinking(bool isShrinking)
-    {
-        isShrinking_ = isShrinking;
+        opacityAnimatingType_ = opacityAnimatingType;
     }
 
 private:
@@ -144,14 +110,8 @@ private:
 
     std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
     std::shared_ptr<AnimationUtils::Animation> opacityAnimation_;
-    bool isGrowing_ = false;
-    bool isShrinking_ = false;
-    bool needGrowAnimation_ = false;
-    bool needShrinkAnimation_ = false;
-    bool needEndAnimation_ = false;
-    bool needAppearAnimation_ = false;
-    bool isEnding_ = false;
-    bool isAppearing_ = false;
+    HoverAnimationType hoverAnimatingType_ = HoverAnimationType::NONE;
+    OpacityAnimationType opacityAnimatingType_ = OpacityAnimationType::NONE;
 };
 } // namespace OHOS::Ace::NG
 

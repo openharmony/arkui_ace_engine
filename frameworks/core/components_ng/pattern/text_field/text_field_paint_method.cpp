@@ -178,9 +178,11 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
         SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
         OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
-        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()));
+        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()), scrollBar->GetHoverAnimationType());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     textFieldOverlayModifier_->SetFgColor(scrollBar->GetForegroundColor());
     textFieldOverlayModifier_->SetBgColor(scrollBar->GetBackgroundColor());
-    textFieldOverlayModifier_->SetOpacity(scrollBar->GetOpacity());
+    textFieldOverlayModifier_->StartOpacityAnimation(scrollBar->GetOpacityAnimationType());
+    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

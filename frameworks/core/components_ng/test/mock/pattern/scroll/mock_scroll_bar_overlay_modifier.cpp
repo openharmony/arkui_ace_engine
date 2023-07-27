@@ -20,10 +20,10 @@ ScrollBarOverlayModifier::ScrollBarOverlayModifier() {}
 
 void ScrollBarOverlayModifier::onDraw(DrawingContext& context) {}
 
-void ScrollBarOverlayModifier::SetOpacity(uint8_t opacity) {}
+void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacityAnimationType) {}
 
-void ScrollBarOverlayModifier::SetRect(
-    const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset, const OffsetF& bgOffset)
+void ScrollBarOverlayModifier::SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset,
+    const OffsetF& bgOffset, HoverAnimationType hoverAnimationType)
 {}
 
 void ScrollBarOverlayModifier::SetOffset(OffsetF fgOffset, OffsetF bgOffset) {}
