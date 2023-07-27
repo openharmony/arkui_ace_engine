@@ -5236,10 +5236,9 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     }
     // parse maskColor
     Color parseMaskColor;
-    if (maskColor->IsNull() || maskColor->IsUndefined() || !JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
-        parseMaskColor.SetValue(0x00000000);
+    if (!maskColor->IsNull() && !maskColor->IsUndefined() && JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
+        sheetStyle.maskColor = std::move(parseMaskColor);
     }
-    sheetStyle.maskColor = std::move(parseMaskColor);
 }
 
 void JSViewAbstract::ParseOverlayCallback(
