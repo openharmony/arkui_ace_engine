@@ -572,23 +572,13 @@ void RefreshPattern::FireChangeEvent(const std::string& value)
 
 float RefreshPattern::GetScrollOffset(float delta)
 {
-    auto scrollY = delta * GetFrictionRatio();
-    auto scrollOffset = std::clamp(scrollOffset_.GetY() + scrollY, static_cast<float>(0.0f),
-        static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
-    return scrollOffset;
-}
-
-float RefreshPattern::GetFrictionRatio()
-{
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
     auto frictionRatio = static_cast<float>(layoutProperty->GetFriction().value_or(DEFAULT_FRICTION)) * PERCENT;
-    auto percentage = std::abs(scrollOffset_.GetY() / static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
-    if (NearEqual(percentage, 1.0)) {
-        return 0.0;
-    } else {
-        return frictionRatio * std::pow(1.0 - percentage, SQUARE);
-    }
+    auto scrollY = delta * frictionRatio;
+    auto scrollOffset = std::clamp(scrollOffset_.GetY() + scrollY, static_cast<float>(0.0f),
+        static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
+    return scrollOffset;
 }
 
 void RefreshPattern::ResetLoadingProgressColor()
