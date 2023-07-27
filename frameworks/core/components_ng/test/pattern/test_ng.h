@@ -42,6 +42,8 @@ public:
     static void SetHeight(const Dimension& height);
     RefPtr<LayoutWrapperNode> RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
         float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
+    void ListRunMeasureAndLayout(const RefPtr<FrameNode>& frameNode,
+        float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
 
     testing::AssertionResult IsEqualOffset(Offset offset, Offset expectOffset);

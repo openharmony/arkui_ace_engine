@@ -165,7 +165,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
-    itemGroupList_.swap(listLayoutAlgorithm->GetItemGroupList());
     auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
@@ -693,16 +692,6 @@ void ListPattern::MarkDirtyNodeSelf()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    }
-    for (const auto& weak : itemGroupList_) {
-        auto itemGroup = weak.Upgrade();
-        if (!itemGroup) {
-            continue;
-        }
-        auto layoutProperty = itemGroup->GetLayoutProperty();
-        if (layoutProperty) {
-            layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
-        }
     }
 }
 
