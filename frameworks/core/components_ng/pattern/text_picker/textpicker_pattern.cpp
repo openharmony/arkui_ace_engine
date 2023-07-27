@@ -98,7 +98,6 @@ void TextPickerPattern::SetButtonIdeaSize()
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
-        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -173,7 +172,6 @@ void TextPickerPattern::InitDisabled()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 RefPtr<FrameNode> TextPickerPattern::GetColumnNode()
@@ -348,7 +346,6 @@ double TextPickerPattern::CalculateHeight()
         CHECK_NULL_RETURN(textPickerColumnPattern, height);
         textPickerColumnPattern->SetDefaultPickerItemHeight(height);
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return height;
 }
 
