@@ -4077,12 +4077,12 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPaintNormalIndicator001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call PaintNormalIndicator.
-     * @tc.expected: paintMethod->normalMargin_.X is 336.0
-     *               paintMethod->normalMargin_.Y is 547.5
+     * @tc.expected: paintMethod->normalMargin_.X is 347.0
+     *               paintMethod->normalMargin_.Y is 548.5
      */
     paintMethod->PaintNormalIndicator(&paintWrapper);
-    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 346.0);
-    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 547.5);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 347.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 548.5);
 }
 
 /**
@@ -4132,12 +4132,12 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPaintNormalIndicator002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call PaintNormalIndicator.
-     * @tc.expected: paintMethod->normalMargin_.X is 196.0
-     *               paintMethod->normalMargin_.Y is 547.5
+     * @tc.expected: paintMethod->normalMargin_.X is 207.0
+     *               paintMethod->normalMargin_.Y is 548.5
      */
     paintMethod->PaintNormalIndicator(&paintWrapper);
-    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 206.0);
-    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 547.5);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 207.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 548.5);
 }
 
 /**
