@@ -73,6 +73,7 @@ const char THEME_PATTERN_ADVANCED_PATTERN[] = "advanced_pattern";
 const char THEME_PATTERN_SECURITY_COMPONENT[] = "security_component_pattern";
 const char THEME_PATTERN_FORM[] = "form_pattern";
 const char THEME_PATTERN_SIDE_BAR[] = "side_bar_pattern";
+const char THEME_PATTERN_PATTERN_LOCK[] = "pattern_lock_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";

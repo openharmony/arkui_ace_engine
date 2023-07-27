@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/patternlock/patternlock_challenge.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -65,36 +66,98 @@ public:
 
     void SetSideLength(float sideLength);
     void SetCircleRadius(float circleRadius);
-    void SetRegularColor(const LinearColor& regularColor);
-    void SetSelectColor(const LinearColor& selectedColor);
-    void SetActiveColor(const LinearColor& activeColor);
-    void SetPathColor(const LinearColor& pathColor);
+    void SetRegularColor(const Color& regularColor);
+    void SetSelectColor(const Color& selectedColor);
+    void SetActiveColor(const Color& activeColor);
+    void SetPathColor(const Color& pathColor);
+    void SetHoverColor(const Color& hoverColor);
+    void SetWrongColor(const Color& wrongColor);
+    void SetCorrectColor(const Color& correctColor);
+    void SetPressColor(const Color& pressColor);
     void SetPathStrokeWidth(float pathStrokeWidth);
     void SetIsMoveEventValid(bool isMoveEventValid);
+    void SetIsHover(bool isHover);
+    void SetHoverIndex(int32_t hoverIndex);
+    void SetChallengeResult(std::optional<NG::PatternLockChallengeResult>& challengeResult);
     void SetCellCenterOffset(const OffsetF& cellCenter);
     void SetContentOffset(const OffsetF& offset);
     void SetChoosePoint(const std::vector<PatternLockCell>& choosePoint);
+    void SetActiveCircleRadiusScale(float scale);
+    void SetBackgroundCircleRadiusScale(float scale);
+    void SetLightRingRadiusStartScale(float scale);
+    void SetLightRingRadiusEndScale(float scale);
+    void SetPressRadiusScale(float scale);
+    void SetHoverRadiusScale(float scale);
+    void StartConnectedCircleAnimate(int32_t x, int32_t y);
+    void StartConnectedLineAnimate(int32_t x, int32_t y);
+    void StartCanceledAnimate();
+    void Reset();
+    void SetIsTouchDown(bool isTouchDown);
 
 private:
     void PaintLockLine(RSCanvas& canvas, const OffsetF& offset);
     void PaintLockCircle(RSCanvas& canvas, const OffsetF& offset, int32_t x, int32_t y);
+    void CheckIsHoverAndPaint(RSCanvas& canvas, float offsetX, float offsetY, float radius, int32_t index);
+    void PaintCircle(RSCanvas& canvas, float offsetX, float offsetY, float radius, const RSColor& circleColor);
+    void PaintLightRing(RSCanvas& canvas, float offsetX, float offsetY, float radius, float alphaF);
+    void PaintConnectedLineTail(RSCanvas& canvas, const OffsetF& offset);
+    void PaintCanceledLineTail(RSCanvas& canvas, const OffsetF& offset);
+    void SetConnectedLineTailPoint(int32_t x, int32_t y);
+    void SetCanceledLineTailPoint();
+    OffsetF GetConnectedLineTailPoint() const;
+    OffsetF GetCanceledLineTailPoint() const;
+    OffsetF GetPointEndByCellCenter() const;
 
     bool CheckChoosePoint(int32_t x, int32_t y) const;
     bool CheckChoosePointIsLastIndex(int32_t x, int32_t y, int32_t index) const;
-    OffsetF GetCircleCenterByXY(const OffsetF& offset, int32_t x, int32_t y);
+    void SetBackgroundCircleRadius(int32_t index);
+    void SetActiveCircleRadius(int32_t index);
+    void SetLightRingCircleRadius(int32_t index);
+    void SetLightRingAlphaF(int32_t index);
+    float GetLightRingAlphaF(int32_t index) const;
+    float GetBackgroundCircleRadius(int32_t index) const;
+    float GetActiveCircleRadius(int32_t index) const;
+    float GetLightRingCircleRadius(int32_t index) const;
 
-    RefPtr<AnimatablePropertyColor> regularColor_;
-    RefPtr<AnimatablePropertyColor> selectedColor_;
-    RefPtr<AnimatablePropertyColor> activeColor_;
-    RefPtr<AnimatablePropertyColor> pathColor_;
+    OffsetF GetCircleCenterByXY(const OffsetF& offset, int32_t x, int32_t y);
+    void CreateProperties();
+    void AttachProperties();
+    void StartChallengeResultAnimate();
+
+    RefPtr<PropertyColor> regularColor_;
+    RefPtr<PropertyColor> selectedColor_;
+    RefPtr<PropertyColor> activeColor_;
+    RefPtr<PropertyColor> hoverColor_;
+    RefPtr<PropertyColor> wrongColor_;
+    RefPtr<PropertyColor> correctColor_;
+    RefPtr<PropertyColor> pathColor_;
+    RefPtr<PropertyColor> pressColor_;
+    RefPtr<AnimatablePropertyOffsetF> connectedLineTailPoint_;
+    RefPtr<AnimatablePropertyOffsetF> canceledLineTailPoint_;
+    RefPtr<AnimatablePropertyColor> pointAnimateColor_;
     RefPtr<PropertyOffsetF> offset_;
     RefPtr<PropertyFloat> sideLength_;
     RefPtr<PropertyFloat> circleRadius_;
     RefPtr<PropertyFloat> pathStrokeWidth_;
     RefPtr<PropertyBool> isMoveEventValid_;
+    RefPtr<PropertyBool> isHover_;
+    RefPtr<PropertyInt> hoverIndex_;
+    std::optional<NG::PatternLockChallengeResult> challengeResult_;
     RefPtr<PropertyOffsetF> cellCenter_;
-
+    std::vector<RefPtr<AnimatablePropertyFloat>> backgroundCircleRadius_;
+    std::vector<RefPtr<AnimatablePropertyFloat>> activeCircleRadius_;
+    std::vector<RefPtr<AnimatablePropertyFloat>> lightRingRadius_;
+    std::vector<RefPtr<AnimatablePropertyFloat>> lightRingAlphaF_;
     std::vector<PatternLockCell> choosePoint_;
+
+    float scaleActiveCircleRadius_ = 1.0f;
+    float scaleBackgroundCircleRadius_ = 1.0f;
+    float scaleLightRingRadiusStart_ = 1.0f;
+    float scaleLightRingRadiusEnd_ = 1.0f;
+    float pressRadiusScale_ = 1.0f;
+    float hoverRadiusScale_ = 1.0f;
+    bool isTouchDown_ = false;
+    bool needCanceledLine_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PatternLockModifier);
 };
