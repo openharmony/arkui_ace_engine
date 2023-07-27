@@ -136,8 +136,6 @@ public:
 
     virtual void OnSetDepth(const int32_t depth) {}
 
-    virtual void OnSetDepth(const int32_t depth) {}
-
     // DFX info.
     void DumpTree(int32_t depth);
 
