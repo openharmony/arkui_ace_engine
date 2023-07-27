@@ -165,6 +165,7 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     SetDefaultFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
+    SetDefaultFontStyle(textStyle);
 }
 
 void TextFieldContentModifier::SetDefaultPropertyValue()
@@ -242,6 +243,12 @@ void TextFieldContentModifier::SetDefaultTextColor(const TextStyle& textStyle)
     AttachProperty(animatableTextColor_);
 }
 
+void TextFieldContentModifier::SetDefaultFontStyle(const TextStyle& textStyle)
+{
+    fontStyle_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(textStyle.GetFontStyle()));
+    AttachProperty(fontStyle_);
+}
+
 void TextFieldContentModifier::ModifyTextStyle(TextStyle& textStyle)
 {
     if (fontSize_.has_value() && fontSizeFloat_) {
@@ -275,6 +282,13 @@ void TextFieldContentModifier::SetTextColor(const Color& value)
     textColor_ = value;
     CHECK_NULL_VOID(animatableTextColor_);
     animatableTextColor_->Set(LinearColor(value));
+}
+
+void TextFieldContentModifier::SetFontStyle(const OHOS::Ace::FontStyle& value)
+{
+    if (fontStyle_->Get() != static_cast<int32_t>(value)) {
+        fontStyle_->Set(static_cast<int32_t>(value));
+    }
 }
 
 void TextFieldContentModifier::SetContentOffset(OffsetF& value)
