@@ -22,6 +22,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
+#include "core/common/font_manager.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
@@ -32,7 +33,6 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
-#include "core/common/font_manager.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
@@ -347,30 +347,12 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         selectInfo.menuOptionItems = GetMenuOptionItems();
     }
     selectMenuInfo_ = selectInfo.menuInfo;
-    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        SelectHandleInfo firstHandleInfo;
-        SelectHandleInfo secondHandleInfo;
-        firstHandleInfo.paintRect = textSelector_.firstHandle;
-        secondHandleInfo.paintRect = textSelector_.secondHandle;
-        auto start = textSelector_.GetTextStart();
-        auto end = textSelector_.GetTextEnd();
-        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
-        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
-    } else {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        selectOverlayProxy_ =
-            pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
-        CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
-        auto start = textSelector_.GetTextStart();
-        auto end = textSelector_.GetTextEnd();
-        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
-    }
+    UpdateSelectOverlayOrCreate(selectInfo);
 }
 
 void TextPattern::HandleOnSelectAll()
 {
-    auto textSize = GetWideText().length();
+    auto textSize = GetWideText().length() + imageCount_;
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
@@ -827,6 +809,30 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo)
+{
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        SelectHandleInfo firstHandleInfo;
+        SelectHandleInfo secondHandleInfo;
+        firstHandleInfo.paintRect = textSelector_.firstHandle;
+        secondHandleInfo.paintRect = textSelector_.secondHandle;
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+    } else {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        selectInfo.callerFrameNode = GetHost();
+        selectOverlayProxy_ =
+            pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
+        CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+    }
+}
+
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (showSelectOverlay_) {
@@ -889,6 +895,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (!nodes.empty()) {
         textCache = textForDisplay_;
         textForDisplay_.clear();
+        imageCount_ = 0;
     }
 
     bool isSpanHasClick = false;
@@ -925,6 +932,7 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             // Register callback for fonts.
             FontRegisterCallback(spanNode);
         } else if (current->GetTag() == V2::IMAGE_ETS_TAG) {
+            imageCount_++;
             AddChildSpanItem(current);
         }
         const auto& nextChildren = current->GetChildren();

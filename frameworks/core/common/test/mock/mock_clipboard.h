@@ -33,6 +33,15 @@ public:
     void SetData(const std::string& data, CopyOptions copyOption, bool isDragData) override;
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode) override;
 
+    void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override;
+    void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) override;
+    void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) override;
+    void SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption = CopyOptions::Distributed) override;
+    void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+        const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+        const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) override;
+    RefPtr<PasteDataMix> CreatePasteDataMix() override;
+
     MOCK_METHOD2(SetPixelMapData, void(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption));
     MOCK_METHOD2(GetPixelMapData, void(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode));
     MOCK_METHOD0(Clear, void());

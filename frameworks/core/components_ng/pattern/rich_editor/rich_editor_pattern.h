@@ -101,6 +101,8 @@ public:
         return timestamp_;
     }
 
+    void ResetAfterPaste();
+
     void OnVisibleChange(bool isVisible) override;
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
@@ -110,9 +112,12 @@ public:
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     int32_t GetInstanceId() const;
     void InsertValue(const std::string& insertValue);
+    void InsertValueByPaste(const std::string& insertValue);
+    void InsertValueToSpanNode(
+        RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
     void CreateTextSpanNode(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
-    void DeleteBackward(int32_t length);
+    void DeleteBackward(int32_t length = 0);
     void DeleteForward(int32_t length);
     void SetInputMethodStatus(bool keyboardShown);
     bool CursorMoveLeft();
@@ -135,8 +140,8 @@ public:
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
-    int32_t AddImageSpan(const ImageSpanOptions& options);
-    int32_t AddTextSpan(const TextSpanOptions& options);
+    int32_t AddImageSpan(const ImageSpanOptions& options, int32_t index = -1);
+    int32_t AddTextSpan(const TextSpanOptions& options, int32_t index = -1);
     void AddSpanItem(RefPtr<SpanItem> item, int32_t offset);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
@@ -147,6 +152,17 @@ public:
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
+
+    bool IsUsingMouse() const
+    {
+        return false;
+    }
+
+    int32_t GetCaretSpanIndex()
+    {
+        return caretSpanIndex_;
+    }
+
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -154,6 +170,17 @@ public:
 #endif
 
 private:
+    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
+    {
+        selectInfo.menuInfo.showCopy = true;
+        selectInfo.menuInfo.showCut = true;
+        selectInfo.menuInfo.showCopyAll = true;
+        selectInfo.menuInfo.showPaste = hasData;
+        selectInfo.menuInfo.menuIsShow = true;
+    }
+    void HandleOnCopy();
+    void HandleOnPaste();
+    void HandleOnCut();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
@@ -214,6 +241,7 @@ private:
     bool BeforeIMEInsertValue(const std::string& insertValue);
     void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength);
     void InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
+    void SetCaretSpanIndex(int32_t index);
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -228,6 +256,7 @@ private:
     int32_t moveLength_ = 0;
     int32_t instanceId_ = -1;
     int32_t caretPosition_ = 0;
+    int32_t caretSpanIndex_ = -1;
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool isRichEditorInit_ = false;
