@@ -123,6 +123,9 @@ void JSCalendarPicker::SetOnChange(const JSCallbackInfo& info)
 void JSCalendarPicker::ParseSelectedDateObject(const JSCallbackInfo& info, const JSRef<JSObject>& selectedObject)
 {
     JSRef<JSVal> changeEventVal = selectedObject->GetProperty("changeEvent");
+    if (!changeEventVal->IsFunction()) {
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -227,21 +230,22 @@ PickerDate JSCalendarPicker::ParseDate(const JSRef<JSVal>& dateVal)
         return pickerDate;
     }
     auto dateObj = JSRef<JSObject>::Cast(dateVal);
-    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
-    auto year = yearFunc->Call(dateObj);
-    if (year->IsNumber()) {
+    auto yearFuncJsVal = dateObj->GetProperty("getFullYear");
+    auto monthFuncJsVal = dateObj->GetProperty("getMonth");
+    auto dateFuncJsVal = dateObj->GetProperty("getDate");
+    if (!(yearFuncJsVal->IsFunction() && monthFuncJsVal->IsFunction() && dateFuncJsVal->IsFunction())) {
+        return pickerDate;
+    }
+    auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
+    auto monthFunc = JSRef<JSFunc>::Cast(monthFuncJsVal);
+    auto dateFunc = JSRef<JSFunc>::Cast(dateFuncJsVal);
+    JSRef<JSVal> year = yearFunc->Call(dateObj);
+    JSRef<JSVal> month = monthFunc->Call(dateObj);
+    JSRef<JSVal> date = dateFunc->Call(dateObj);
+
+    if (year->IsNumber() && month->IsNumber() && date->IsNumber()) {
         pickerDate.SetYear(year->ToNumber<int32_t>());
-    }
-
-    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
-    auto month = monthFunc->Call(dateObj);
-    if (month->IsNumber()) {
         pickerDate.SetMonth(month->ToNumber<int32_t>() + 1); // 0-11 means 1 to 12 months
-    }
-
-    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
-    auto date = dateFunc->Call(dateObj);
-    if (date->IsNumber()) {
         pickerDate.SetDay(date->ToNumber<int32_t>());
     }
     return pickerDate;
@@ -330,9 +334,16 @@ PickerDate JSCalendarPickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
         return pickerDate;
     }
     auto dateObj = JSRef<JSObject>::Cast(dateVal);
-    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
-    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
-    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
+
+    auto yearFuncJsVal = dateObj->GetProperty("getFullYear");
+    auto monthFuncJsVal = dateObj->GetProperty("getMonth");
+    auto dateFuncJsVal = dateObj->GetProperty("getDate");
+    if (!(yearFuncJsVal->IsFunction() && monthFuncJsVal->IsFunction() && dateFuncJsVal->IsFunction())) {
+        return pickerDate;
+    }
+    auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
+    auto monthFunc = JSRef<JSFunc>::Cast(monthFuncJsVal);
+    auto dateFunc = JSRef<JSFunc>::Cast(dateFuncJsVal);
     JSRef<JSVal> year = yearFunc->Call(dateObj);
     JSRef<JSVal> month = monthFunc->Call(dateObj);
     JSRef<JSVal> date = dateFunc->Call(dateObj);
