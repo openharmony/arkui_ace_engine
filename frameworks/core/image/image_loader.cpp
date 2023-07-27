@@ -185,7 +185,7 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(imageCache, nullptr);
-    auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetSrc());
+    auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetKey());
     CHECK_NULL_RETURN_NOLOG(cacheData, nullptr);
     // TODO: add adapter layer and use [SkiaCachedImageData] there
 #ifndef USE_ROSEN_DRAWING
@@ -232,37 +232,36 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 
 // NG ImageLoader entrance
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
 {
     ACE_FUNCTION_TRACE();
-    if (imageSourceInfo.IsPixmap()) {
-        return LoadDecodedImageData(imageSourceInfo, context);
+    if (src.IsPixmap()) {
+        return LoadDecodedImageData(src, context);
     }
 #ifndef USE_ROSEN_DRAWING
     sk_sp<SkData> skData;
     do {
-        skData = ImageLoader::QueryImageDataFromImageCache(imageSourceInfo);
+        skData = ImageLoader::QueryImageDataFromImageCache(src);
         if (skData) {
             break;
         }
-        skData = LoadImageData(imageSourceInfo, context);
+        skData = LoadImageData(src, context);
         CHECK_NULL_RETURN(skData, nullptr);
-        // TODO: add adapter layer and use [SkiaCachedImageData] there
         ImageLoader::CacheImageDataToImageCache(
-            imageSourceInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(skData));
+            src.GetKey(), AceType::MakeRefPtr<SkiaCachedImageData>(skData));
     } while (0);
     return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skData));
 #else
     std::shared_ptr<RSData> rsData = nullptr;
     do {
-        rsData = ImageLoader::QueryImageDataFromImageCache(imageSourceInfo);
+        rsData = ImageLoader::QueryImageDataFromImageCache(src);
         if (rsData) {
             break;
         }
-        rsData = LoadImageData(imageSourceInfo, context);
+        rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
         ImageLoader::CacheImageDataToImageCache(
-            imageSourceInfo.GetSrc(), AceType::MakeRefPtr<RosenCachedImageData>(rsData));
+            src.GetKey(), AceType::MakeRefPtr<RosenCachedImageData>(rsData));
     } while (0);
     return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsData));
 #endif
