@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,12 +55,24 @@ private:
     void GetThemeProp();
 
     float sideLength_ = 0.0f;
-    Dimension circleRadius_ = 14.0_vp;
+    float scaleActiveCircleRadius_ = 1.0f;
+    float scaleBackRoundCircleRadius_ = 1.0f;
+    float scaleWaveCircleRadiusStart_ = 1.0f;
+    float scaleWaveCircleRadiusEnd_ = 1.0f;
+    float pressRadiusScale_ = 1.0f;
+    float hoverRadiusScale_ = 1.0f;
+
+    Dimension circleRadius_;
     Color regularColor_;
     Color selectedColor_;
     Color activeColor_;
     Color pathColor_;
-    Dimension pathStrokeWidth_ = 34.0_vp;
+    Color wrongColor_;
+    Color correctColor_;
+    Color hoverColor_;
+    Color pressColor_;
+    Dimension pathStrokeWidth_;
+    Dimension activeCircleRadius_;
 
     OffsetF cellCenter_;
     bool isMoveEventValid_;
