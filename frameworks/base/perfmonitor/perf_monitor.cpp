@@ -28,6 +28,15 @@ using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
 
+static int64_t GetCurrentRealTimeNs()
+{
+    struct timespec ts = { 0, 0 };
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+        return 0;
+    }
+    return (ts.tv_sec * NS_TO_S + ts.tv_nsec);
+}
+
 static int64_t GetCurrentSystimeMs()
 {
     auto timeNow = std::chrono::system_clock::now();
@@ -36,16 +45,38 @@ static int64_t GetCurrentSystimeMs()
     return curSystime;
 }
 
-void ConvertUptimeToSystime(int64_t uptime, int64_t& systime)
+void ConvertRealtimeToSystime(int64_t realTime, int64_t& sysTime)
 {
-    struct timespec ts = { 0, 0 };
-    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-        systime = 0;
+    int64_t curRealTime = GetCurrentRealTimeNs();
+    if (curRealTime == 0) {
+        sysTime = 0;
         return;
     }
-    int64_t nowUptime = ts.tv_sec * NS_TO_S + ts.tv_nsec;
-    int64_t curSystime = GetCurrentSystimeMs();
-    systime = curSystime - (nowUptime - uptime) / NS_TO_MS;
+    int64_t curSysTime = GetCurrentSystimeMs();
+    sysTime = curSysTime - (curRealTime - realTime) / NS_TO_MS;
+}
+
+std::string GetSourceTypeName(PerfSourceType sourceType)
+{
+    std::string type = "";
+    switch (sourceType) {
+        case PERF_TOUCH_EVENT:
+            type = "TOUCHSCREEN";
+            break;
+        case PERF_MOUSE_EVENT:
+            type = "MOUSE";
+            break;
+        case PERF_TOUCH_PAD:
+            type = "TOUCHPAD";
+            break;
+        case PERF_JOY_STICK:
+            type = "JOYSTICK";
+            break;
+        default :
+            type = "UNKNOWN";
+            break;
+    }
+    return type;
 }
 
 void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
@@ -57,7 +88,7 @@ void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
     dataRs.inputTime = data.inputTime;
     dataRs.beginVsyncTime = data.beginVsyncTime;
     dataRs.endVsyncTime = data.endVsyncTime;
-    dataRs.versionCode = data.baseInfo.versionCode;
+    dataRs.versionCode = std::to_string(data.baseInfo.versionCode);
     dataRs.versionName = data.baseInfo.versionName;
     dataRs.bundleName = data.baseInfo.bundleName;
     dataRs.processName = data.baseInfo.processName;
@@ -65,14 +96,18 @@ void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
     dataRs.pageUrl = data.baseInfo.pageUrl;
 }
 
-void ReportPerfEventToRS(OHOS::Rosen::DataBaseRs& dataRs)
+void ReportPerfEventToRS(DataBase& data)
 {
+    OHOS::Rosen::DataBaseRs dataRs;
+    ConvertToRsData(dataRs, data);
     switch (dataRs.eventType) {
         case EVENT_RESPONSE:
             Rosen::RSInterfaces::GetInstance().ReportEventResponse(dataRs);
             break;
         case EVENT_COMPLETE:
-            Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
+            if (data.needReportToRS) {
+                Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
+            }
             break;
         case EVENT_JANK_FRAME:
             Rosen::RSInterfaces::GetInstance().ReportEventJankFrame(dataRs);
@@ -86,12 +121,11 @@ void ReportPerfEventToUI(DataBase data)
 {
     switch (data.eventType) {
         case EVENT_COMPLETE:
-            EventReport::ReportEventComplete(data);
+            if (!data.needReportToRS) {
+                EventReport::ReportEventComplete(data);
+            }
             break;
         case EVENT_JANK_FRAME:
-            if (data.totalMissed <= 0) {
-                return;
-            }
             EventReport::ReportEventJankFrame(data);
             break;
         default :
@@ -104,6 +138,7 @@ void SceneRecord::InitRecord(const std::string& sId, PerfActionType type, const 
     sceneId = sId;
     actionType = type;
     note = nt;
+    beginVsyncTime = GetCurrentRealTimeNs();
 }
 
 bool SceneRecord::IsTimeOut(int64_t nowTime)
@@ -116,42 +151,61 @@ bool SceneRecord::IsTimeOut(int64_t nowTime)
 
 void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t durition, int32_t skippedFrames)
 {
-    if (IsFirstFrame()) {
-        beginVsyncTime = vsyncTime;
+    if (totalFrames == 0) {
+        beginVsyncTime = GetCurrentRealTimeNs();
+        isFirstFrame = true;
+    } else {
+        isFirstFrame = false;
     }
-    if (skippedFrames >= 1) {
+    if (!isFirstFrame && skippedFrames >= 1) {
         if (durition > maxFrameTime) {
             maxFrameTime = durition;
-            maxSuccessiveFrames = skippedFrames;
+        }
+        if (isSuccessive) {
+            seqMissFrames = seqMissFrames + skippedFrames;
+        } else {
+            seqMissFrames = skippedFrames;
+            isSuccessive = true;
+        }
+        if (maxSuccessiveFrames < seqMissFrames) {
+            maxSuccessiveFrames = seqMissFrames;
         }
         totalMissed += (skippedFrames - 1);
+    } else {
+        isSuccessive = false;
+        seqMissFrames = 0;
     }
     totalFrames++;
 }
 
 void SceneRecord::Report(const std::string& sceneId, int64_t vsyncTime)
 {
-    endVsyncTime = vsyncTime;
+    if (vsyncTime <= beginVsyncTime) {
+        endVsyncTime = GetCurrentRealTimeNs();
+    } else {
+        endVsyncTime = vsyncTime;
+    }
 }
 
 bool SceneRecord::IsFirstFrame()
 {
-    if (totalFrames == 0) {
-        return true;
-    }
-    return false;
+    return isFirstFrame;
 }
 
 void SceneRecord::Reset()
 {
-    sceneId = "";
     beginVsyncTime = 0;
     endVsyncTime = 0;
     maxFrameTime = 0;
     maxSuccessiveFrames = 0;
+    seqMissFrames = 0;
     totalMissed = 0;
     totalFrames = 0;
+    isSuccessive = false;
+    isFirstFrame = false;
+    sceneId = "";
     actionType = ERROR_TYPE;
+    note = "";
 }
 
 PerfMonitor* PerfMonitor::GetPerfMonitor()
@@ -175,7 +229,6 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
         record->InitRecord(sceneId, type, note);
         mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
     }
-    ReportAnimateStart(sceneId, record);
 }
 
 void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
@@ -193,6 +246,7 @@ void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
 
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time)
 {
+    mSourceType = sourceType;
     switch (type) {
         case LAST_DOWN:
             lastInputDownTime = time;
@@ -220,6 +274,9 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank)
                 delete it->second;
                 mRecords.erase(it++);
                 continue;
+            }
+            if ((it->second)->IsFirstFrame()) {
+                ReportAnimateStart(it->first, it->second);
             }
         }
         it++;
@@ -314,12 +371,20 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needCo
     data.sceneId = record->sceneId;
     data.inputTime = GetInputTime(record->actionType);
     data.beginVsyncTime = record->beginVsyncTime;
+    if (data.beginVsyncTime < data.inputTime) {
+        data.beginVsyncTime = data.inputTime;
+    }
     data.endVsyncTime = record->endVsyncTime;
+    if (data.beginVsyncTime > data.endVsyncTime) {
+        data.endVsyncTime = data.beginVsyncTime;
+    }
     data.maxFrameTime = record->maxFrameTime;
     data.maxSuccessiveFrames = record->maxSuccessiveFrames;
     data.totalMissed = record->totalMissed;
     data.totalFrames = record->totalFrames;
     data.needReportToRS = needCompleteTime;
+    data.sourceType = mSourceType;
+    data.actionType = record->actionType;
     data.baseInfo = baseInfo;
 }
 
@@ -338,11 +403,7 @@ void PerfMonitor::ReportPerfEvent(PerfEventType type, DataBase& data)
         default :
             break;
     }
-    if (data.needReportToRS) {
-        OHOS::Rosen::DataBaseRs dataRs;
-        ConvertToRsData(dataRs, data);
-        ReportPerfEventToRS(dataRs);
-    }
+    ReportPerfEventToRS(data);
     ReportPerfEventToUI(data);
 }
 } // namespace OHOS::Ace

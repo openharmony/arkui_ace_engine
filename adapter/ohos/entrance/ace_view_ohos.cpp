@@ -138,7 +138,10 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     if (pMonitor == nullptr) {
         return;
     }
-    int64_t inputTime = pointerEvent->GetSensorInputTime() * 1000;
+    int64_t inputTime = pointerEvent->GetSensorInputTime() * US_TO_MS;
+    if (inputTime <= 0) {
+        inputTime = pointerEvent->GetActionTime() * US_TO_MS;
+    }
     if (inputTime <= 0) {
         return;
     }
@@ -146,8 +149,12 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     PerfSourceType sourceType = UNKNOWN_TYPE;
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         sourceType = PERF_MOUSE_EVENT;
-    } else {
+    } else if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
         sourceType = PERF_TOUCH_EVENT;
+    } else if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD) {
+        sourceType = PERF_TOUCH_PAD;
+    } else if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_JOYSTICK) {
+        sourceType = PERF_JOY_STICK;
     }
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) {
