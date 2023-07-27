@@ -48,7 +48,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     const RefPtr<PixelMap>& pixelMap, const GestureEvent& info)
 {
     CHECK_NULL_RETURN(pixelMap, nullptr);
-    isDragged_ = true;
+    SetIsDragged(true);
     isDragCancel_ = false;
 #if !defined(PREVIEW)
     if (dragWindow_) {
@@ -71,7 +71,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 {
     dragWindowRootNode_ = CreateDragRootNode(customNode);
     CHECK_NULL_RETURN(dragWindowRootNode_, nullptr);
-    isDragged_ = true;
+    SetIsDragged(true);
     isDragCancel_ = false;
 #if !defined(PREVIEW)
     if (dragWindow_) {
@@ -95,7 +95,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 
 RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
 {
-    isDragged_ = true;
+    SetIsDragged(true);
     isDragCancel_ = false;
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
@@ -439,7 +439,7 @@ void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::str
         }
     }
     LOGI("OnTextDragEnd");
-    isDragged_ = false;
+    SetIsDragged(false);
     currentId_ = -1;
 }
 
@@ -777,7 +777,7 @@ void DragDropManager::DestroyDragWindow()
         dragWindowRootNode_ = nullptr;
     }
     LOGI("DestroyDragWindow");
-    isDragged_ = false;
+    SetIsDragged(false);
     isMouseDragged_ = false;
     currentId_ = -1;
 }
@@ -785,7 +785,7 @@ void DragDropManager::DestroyDragWindow()
 #ifdef ENABLE_DRAG_FRAMEWORK
 RefPtr<DragDropProxy> DragDropManager::CreateFrameworkDragDropProxy()
 {
-    isDragged_ = true;
+    SetIsDragged(true);
     isDragCancel_ = false;
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
