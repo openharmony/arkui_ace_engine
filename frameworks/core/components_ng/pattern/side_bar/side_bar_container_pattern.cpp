@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -581,7 +582,10 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     adjustMinSideBarWidth_ = layoutAlgorithm->GetAdjustMinSideBarWidth();
     type_ = layoutAlgorithm->GetSideBarContainerType();
 
-    return false;
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    return paddingProperty != nullptr;
 }
 
 void SideBarContainerPattern::UpdateResponseRegion(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm)
@@ -801,5 +805,16 @@ SideBarPosition SideBarContainerPattern::GetSideBarPositionWithRtl(
         sideBarPosition = (sideBarPosition == SideBarPosition::START) ? SideBarPosition::END : SideBarPosition::START;
     }
     return sideBarPosition;
+}
+
+RefPtr<NodePaintMethod> SideBarContainerPattern::CreateNodePaintMethod()
+{
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    bool needClipPadding = paddingProperty != nullptr;
+    auto paintMethod = MakeRefPtr<SideBarContainerPaintMethod>();
+    paintMethod->SetNeedClipPadding(needClipPadding);
+    return paintMethod;
 }
 } // namespace OHOS::Ace::NG
