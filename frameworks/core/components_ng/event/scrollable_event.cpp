@@ -64,4 +64,13 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
     return false;
 }
 
+bool ScrollableActuator::IsHitTestBlock() const
+{
+    for (const auto& [axis, event] : scrollableEvents_) {
+        if (event && event->IsHitTestBlock()) {
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG
