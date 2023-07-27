@@ -231,7 +231,6 @@ private:
     float animatorOffset_ = 0.0f;
     bool scrollStop_ = false;
     bool initialIndex_ = false;
-    int32_t offsetCount_ = 0;
     float prevHeight_ = 0;
     float currentHeight_ = 0;
 
