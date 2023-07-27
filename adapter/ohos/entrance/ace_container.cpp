@@ -1642,24 +1642,65 @@ bool AceContainer::IsScenceBoardWindow()
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
 }
+// ArkTsCard end
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     currentPointerEvent_ = currentEvent;
+    auto callbacksIter = stopDragCallbackMap_.begin();
+    while (callbacksIter != stopDragCallbackMap_.end()) {
+        auto pointerId = callbacksIter->first;
+        MMI::PointerEvent::PointerItem pointerItem;
+        if (!currentEvent->GetPointerItem(pointerId, pointerItem)) {
+            for (const auto& callback : callbacksIter->second) {
+                if (callback) {
+                    callback();
+                }
+            }
+            callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
+        } else {
+            if (!pointerItem.IsPressed()) {
+                for (const auto& callback : callbacksIter->second) {
+                    if (callback) {
+                        callback();
+                    }
+                }
+                callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
+            } else {
+                ++callbacksIter;
+            }
+        }
+    }
 }
 
-void AceContainer::GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType)
+bool AceContainer::GetCurPointerEventInfo(
+    int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    CHECK_NULL_RETURN(currentPointerEvent_, false);
     MMI::PointerEvent::PointerItem pointerItem;
-    currentPointerEvent_->GetPointerItem(pointerId, pointerItem);
+    if (!currentPointerEvent_->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed()) {
+        return false;
+    }
     sourceType = currentPointerEvent_->GetSourceType();
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
+    RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
+    return true;
 }
 
-// ArkTsCard end
+void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback)
+{
+    auto iter = stopDragCallbackMap_.find(pointerId);
+    if (iter != stopDragCallbackMap_.end()) {
+        iter->second.emplace_back(std::move(stopDragCallback));
+    } else {
+        std::list<StopDragCallback> list;
+        list.emplace_back(std::move(stopDragCallback));
+        stopDragCallbackMap_.emplace(pointerId, list);
+    }
+}
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
