@@ -26,6 +26,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/base/frame_node.h"
@@ -224,6 +225,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     imageSize = showPasswordIcon ? pattern->GetIconSize() : 0.0f;
     auto imageHotZoneWidth = showPasswordIcon ? imageSize + pattern->GetIconRightOffset() : 0.0;
+    auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_RETURN(scrollBarTheme, std::nullopt);
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder && !isInlineStyle) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
@@ -235,7 +238,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         } else if (showPlaceHolder && isPasswordType) {
             paragraph_->Layout(idealWidth - imageHotZoneWidth);
         } else {
-            paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+            paragraph_->Layout(
+                idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
         }
     }
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength()) {
@@ -243,7 +247,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         auto maxLength = layoutProperty->GetMaxLength().value();
         CreateCounterParagraph(textLength, maxLength, textFieldTheme);
         if (counterParagraph_) {
-            counterParagraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+            counterParagraph_->Layout(
+                idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
         }
     }
     if (layoutProperty->GetShowErrorTextValue(false)) {
@@ -277,7 +282,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
                 layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
             idealWidth = paragraph_->GetLongestLine();
         }
-        textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
+        textRect_.SetSize(SizeF(
+            idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
             paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
