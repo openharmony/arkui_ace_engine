@@ -41,11 +41,6 @@ constexpr double CAP_FIXED_VALUE = 16.0;
 constexpr uint32_t DRAG_INTERVAL_TIME = 900;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
-constexpr float SNAP_SCROLL_MASS = 1.0f;
-constexpr float SNAP_SCROLL_STIFFNESS = 288.0f;
-constexpr float SNAP_SCROLL_DAMPING = 30.0f;
-const RefPtr<SpringProperty> SNAP_SCROLL_PROPERTY =
-    AceType::MakeRefPtr<SpringProperty>(SNAP_SCROLL_MASS, SNAP_SCROLL_STIFFNESS, SNAP_SCROLL_DAMPING);
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double VELOCITY_SCALE = 1.0;
@@ -882,7 +877,7 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
     }
     if (!snapMotion_) {
         snapMotion_ = AceType::MakeRefPtr<SpringMotion>(
-            currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, SNAP_SCROLL_PROPERTY);
+            currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
         snapMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](float position) {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
@@ -890,7 +885,7 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             }
         });
     } else {
-        snapMotion_->Reset(currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, SNAP_SCROLL_PROPERTY);
+        snapMotion_->Reset(currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
     }
     snapController_->PlayMotion(snapMotion_);
 }
