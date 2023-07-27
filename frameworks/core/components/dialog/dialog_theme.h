@@ -144,8 +144,6 @@ public:
 
             auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 24.0_vp);
             theme->contentAdjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
-            theme->defaultPaddingBottomFixed_ =
-                dialogPattern->GetAttr<Dimension>("default_padding_bottom_fixed", 24.0_vp);
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
@@ -427,11 +425,6 @@ public:
         return buttonMinTextSize_;
     }
 
-    const Dimension& GetDefaultPaddingBottomFixed()
-    {
-        return defaultPaddingBottomFixed_;
-    }
-
 protected:
     DialogTheme() = default;
 
@@ -487,7 +480,6 @@ private:
     Dimension buttonMinTextSize_;
     Dimension minButtonWidth_;
     Dimension maxButtonWidth_;
-    Dimension defaultPaddingBottomFixed_;
 };
 
 } // namespace OHOS::Ace

@@ -61,8 +61,6 @@ private:
 
     void UpdateTouchRegion();
 
-    double GetPaddingBottom() const;
-
     RectF touchRegion_;
     OffsetF topLeftPoint_;
 
