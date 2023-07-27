@@ -74,6 +74,7 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
     jumpInterval_ = pickerTheme->GetJumpInterval().ConvertToPx();
     CreateAnimation();
     InitPanEvent(gestureHub);
+    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 void DatePickerColumnPattern::OnModifyDone()
