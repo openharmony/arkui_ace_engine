@@ -309,21 +309,15 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         JSRef<JSVal> height = jsObj->GetProperty("height");
         if (height->IsNumber()) {
             if (height->ToNumber<int32_t>() == 0) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+                NavigationModel::GetInstance()->SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
                 return;
             }
             if (height->ToNumber<int32_t>() == 1) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+                NavigationModel::GetInstance()->SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
                 return;
             }
             CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
-                return;
-            }
-            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
-        } else {
-            CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
                 return;
             }
             NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
