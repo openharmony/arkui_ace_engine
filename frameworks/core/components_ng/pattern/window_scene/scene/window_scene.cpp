@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
