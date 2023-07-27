@@ -540,6 +540,7 @@ private:
     bool isMemoryLevelEnable_ = true;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
+    std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
