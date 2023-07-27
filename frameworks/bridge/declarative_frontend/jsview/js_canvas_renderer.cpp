@@ -861,23 +861,15 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(heightValue, height);
     }
 
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return;
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(width * height * 4);
+    // return the black image
+    auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
+    for (uint32_t idx = 0; idx < width * height; ++idx) {
+        buffer[idx] = 0xffffffff;
     }
 
-    JSRef<JSArray> colorArray = JSRef<JSArray>::New();
-    uint32_t count = 0;
-    for (auto i = 0; i < width; i++) {
-        for (auto j = 0; j < height; j++) {
-            colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(255)));
-            colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(255)));
-            colorArray->SetValueAt(count + 2, JSRef<JSVal>::Make(ToJSValue(255)));
-            colorArray->SetValueAt(count + 3, JSRef<JSVal>::Make(ToJSValue(255)));
-            count += 4;
-        }
-    }
+    JSRef<JSUint8ClampedArray> colorArray =
+        JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
 
     auto retObj = JSRef<JSObject>::New();
     retObj->SetProperty("width", width);
