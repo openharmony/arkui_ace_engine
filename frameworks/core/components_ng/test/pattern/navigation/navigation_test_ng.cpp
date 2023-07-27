@@ -1205,7 +1205,6 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     config.skipMeasure = false;
     config.frameSizeChange = true;
 
-    layout->propUsrNavigationMode_ = NavigationMode::AUTO;
     pattern->navigationMode_ = NavigationMode::SPLIT;
     layout->propVisibility_ = VisibleType::INVISIBLE;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -1333,27 +1332,22 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
 
-    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::SPLIT;
     algorithm->navigationMode_ = NavigationMode::SPLIT;
-    algorithm->usrNavigationMode_ = NavigationMode::SPLIT;
     auto tempAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tempAlgorithm);
     layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_NE(layoutWrapper->layoutAlgorithm_, nullptr);
     ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
-    ASSERT_EQ(algorithm->usrNavigationMode_, NavigationMode::SPLIT);
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
     ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
 
     navigation->contentNode_ =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 66, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
     navigationLayoutProperty->propDestinationChange_ = false;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_EQ(navigationLayoutProperty->propDestinationChange_.value(), false);
     ASSERT_EQ(algorithm->navigationMode_, NavigationMode::STACK);
-    ASSERT_EQ(algorithm->usrNavigationMode_, NavigationMode::STACK);
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::STACK);
 }
 

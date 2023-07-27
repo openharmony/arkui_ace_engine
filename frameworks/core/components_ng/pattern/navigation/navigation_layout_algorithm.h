@@ -77,7 +77,6 @@ public:
     }
 
 private:
-    NavigationMode usrNavigationMode_ = NavigationMode::AUTO;
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
     void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
