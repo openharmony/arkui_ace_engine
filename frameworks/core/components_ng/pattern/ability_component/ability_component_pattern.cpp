@@ -88,6 +88,9 @@ void AbilityComponentPattern::FireConnect()
 {
     hasConnectionToAbility_ = true;
     UpdateWindowRect();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    TransferFocusWindowId(pipeline->GetFocusWindowId());
+    TransferFocusState(IsCurrentFocus());
 
     auto abilityComponentEventHub = GetEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(abilityComponentEventHub);
@@ -193,6 +196,9 @@ void AbilityComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto scale = host->GetTransformScale();
     Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
     WindowPattern::DispatchPointerEvent(pointerEvent);
+    auto hub = host->GetFocusHub();
+    CHECK_NULL_VOID(hub);
+    hub->RequestFocusImmediately();
 }
 
 void AbilityComponentPattern::HandleMouseEvent(const MouseInfo& info)
@@ -201,12 +207,17 @@ void AbilityComponentPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID(pointerEvent);
+    CHECK_NULL_VOID_NOLOG(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID_NOLOG(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
+    if (info.GetAction() == MouseAction::PRESS) {
+        auto hub = host->GetFocusHub();
+        CHECK_NULL_VOID(hub);
+        hub->RequestFocusImmediately();
+    }
     WindowPattern::DispatchPointerEvent(pointerEvent);
 }
 
@@ -256,11 +267,13 @@ void AbilityComponentPattern::HandleFocusEvent()
     if (pipeline->GetIsFocusActive()) {
         WindowPattern::DisPatchFocusActiveEvent(true);
     }
+    TransferFocusState(true);
 }
 
 void AbilityComponentPattern::HandleBlurEvent()
 {
     WindowPattern::DisPatchFocusActiveEvent(false);
+    TransferFocusState(false);
 }
 
 bool AbilityComponentPattern::KeyEventConsumed(const KeyEvent& event)
@@ -280,5 +293,14 @@ bool AbilityComponentPattern::OnKeyEvent(const KeyEvent& event)
     } else {
         return KeyEventConsumed(event);
     }
+}
+
+bool AbilityComponentPattern::IsCurrentFocus() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN_NOLOG(host, false);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN_NOLOG(focusHub, false);
+    return focusHub->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG

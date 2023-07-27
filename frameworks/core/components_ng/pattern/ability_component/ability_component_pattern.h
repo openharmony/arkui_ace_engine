@@ -122,6 +122,7 @@ private:
     }
 
     void UpdateWindowRect();
+    bool IsCurrentFocus() const;
 
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;
