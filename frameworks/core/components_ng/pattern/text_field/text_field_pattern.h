@@ -1034,6 +1034,7 @@ private:
     void SaveInlineStates();
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
+    bool CheckHandleVisible(const RectF& paintRect);
 
     RectF frameRect_;
     RectF contentRect_;
