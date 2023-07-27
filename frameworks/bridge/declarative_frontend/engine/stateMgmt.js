@@ -1782,6 +1782,30 @@ class stateMgmtTrace {
         return result;
     }
 }
+class errorReport {
+    static varValueCheckFailed(params) {
+        let msg = `@Component '${params.customComponent}': Illegal variable value error with decorated variable ${params.variableDeco} '${params.variableName}': `;
+        msg += `failed validation: '${params.expectedType}`;
+        try {
+            msg += `, attempt to assign value type: '${typeof params.value}'`;
+            msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
+        }
+        catch (e) { }
+        msg += "!";
+        throw new TypeError(msg);
+    }
+    static varObservationFailed(params) {
+        let msg = `@Component '${params.customComponent}': decorated variable ${params.variableDeco} '${params.variableName}': `;
+        msg += `its class is neither decorated with '@Observed' nor it is an instance of 'SubscribableAbstract'`;
+        try {
+            msg += `, attempt to assign value type: '${typeof params.value}'`;
+            msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
+        }
+        catch (e) { }
+        msg += "!";
+        throw new TypeError(msg);
+    }
+}
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3472,6 +3496,50 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     numberOfSubscrbers() {
         return this.subscriberRefs_.size + (this.owningView_ ? 1 : 0);
     }
+    /*
+     type checking for any supported type, as required for union type support
+      see 1st parameter for explanation what is allowed
+  
+      FIXME this expects the Map, Set patch to go in
+    */
+    checkIsSupportedValue(value) {
+        return this.checkNewValue(`undefined, null, number, boolean, string, or Object but not function`, value, () => ((typeof value == "object" && typeof value != "function")
+            || typeof value == "number" || typeof value == "string" || typeof value == "boolean")
+            || (value == undefined || value == null));
+    }
+    /*
+      type checking for allowed Object type value
+      see 1st parameter for explanation what is allowed
+  
+        FIXME this expects the Map, Set patch to go in
+      */
+    checkIsObject(value) {
+        return this.checkNewValue(`undefined, null, Object including Array and instance of SubscribableAbstract and excluding function, Set, and Map`, value, () => (value == undefined || value == null || (typeof value == "object")));
+    }
+    /*
+      type checking for allowed simple types value
+      see 1st parameter for explanation what is allowed
+   */
+    checkIsSimple(value) {
+        return this.checkNewValue(`undefined, number, boolean, string`, value, () => (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean"));
+    }
+    checkNewValue(isAllowedComment, newValue, validator) {
+        if (validator(newValue)) {
+            return true;
+        }
+        // report error
+        // current implementation throws an Exception
+        errorReport.varValueCheckFailed({
+            customComponent: this.owningView_ ? this.owningView_.constructor.name : "unknown owningView / internal error",
+            variableDeco: ObservedPropertyAbstractPU.mapDeco.get(this.constructor.name),
+            variableName: this.info(),
+            expectedType: isAllowedComment,
+            value: newValue
+        });
+        // never gets here if errorReport.varValueCheckFailed throws an exception
+        // but should nto depend on its implementation
+        return false;
+    }
     /**
      * factory function for concrete 'object' or 'simple' ObservedProperty object
      * depending if value is Class object
@@ -3536,64 +3604,22 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // need to overwrite impl of base class with empty function.
     }
 }
-/*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * ObservedPropertyObjectAbstractPU
- *
- * common bbase class of ObservedPropertyObjectPU and
- * SyncedObjectPropertyTwoWayPU
- * adds the createObjectLink to the ObservedPropertyAbstract base
- *
- * all definitions in this file are framework internal
- */
-class ObservedPropertyObjectAbstractPU extends ObservedPropertyAbstractPU {
-    constructor(owningView, thisPropertyName) {
-        super(owningView, thisPropertyName);
-    }
-}
-/*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * ObservedPropertySimpleAbstractPU
- *
- * all definitions in this file are framework internal
- */
-class ObservedPropertySimpleAbstractPU extends ObservedPropertyAbstractPU {
-    constructor(owningView, propertyName) {
-        super(owningView, propertyName);
-    }
-}
 ObservedPropertyAbstractPU.DelayedNotifyChangesEnum = (_a = class {
     },
     _a.do_not_delay = 0,
     _a.delay_none_pending = 1,
     _a.delay_notification_pending = 2,
     _a);
+ObservedPropertyAbstractPU.mapDeco = new Map([
+    ["ObservedPropertyObjectPU", "@State/@Provide"],
+    ["ObservedPropertySimplePU", "@State/@Provide (error, should not be used)"],
+    ["SynchedPropertyObjectOneWayPU", "@Prop"],
+    ["SynchedPropertySimpleOneWayPU", "@Prop  (error, should not be used)"],
+    ["SynchedPropertyObjectTwoWayPU", "@Link/@Consume"],
+    ["SynchedPropertySimpleTwoWayPU", "@Link/@Consume (error, should not be used)"],
+    ["SynchedPropertyNestedObjectPU", "@ObjectLink (only class-objects supported"],
+    ["SynchedPropertyNesedObjectPU", "@ObjectLink (only class-objects supported"]
+]);
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3618,7 +3644,7 @@ ObservedPropertyAbstractPU.DelayedNotifyChangesEnum = (_a = class {
  * uses its base class to manage subscribers to this
  * property.
 */
-class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
+class ObservedPropertyPU extends ObservedPropertyAbstractPU {
     constructor(localInitValue, owningView, propertyName) {
         super(owningView, propertyName);
         this.setValueInternal(localInitValue);
@@ -3665,21 +3691,20 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
-        if (newValue == undefined || newValue == null) {
-            stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide value must not be undefined or null. Application error!`);
-            // TODO enable support for undefined and null
-            // unsubscribe old value, set wrappedValue_ to null/undefined
-        }
-        if (typeof newValue !== 'object') {
-            
-            return false;
-        }
         if (newValue == this.wrappedValue_) {
             
             return false;
         }
+        if (!this.checkIsSupportedValue(newValue)) {
+            return false;
+        }
         this.unsubscribeWrappedObject();
-        if (newValue instanceof SubscribableAbstract) {
+        if (!newValue || typeof newValue !== 'object') {
+            // undefined, null, simple type: 
+            // nothing to subscribe to in case of new value undefined || null || simple type 
+            this.wrappedValue_ = newValue;
+        }
+        else if (newValue instanceof SubscribableAbstract) {
             
             this.wrappedValue_ = newValue;
             this.wrappedValue_.addOwningProperty(this);
@@ -3716,84 +3741,10 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
         }
     }
 }
-/*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * ObservedPropertySimplePU
- * implementation of @State and @Provide decorated variables of types (T=) boolean | number | string | enum
- *
- * Holds an actual property value of type T
- * uses its base class to manage subscribers to this
- * property.
- *
- * all definitions in this file are framework internal
-*/
-class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
-    constructor(localInitValue, owningView, propertyName) {
-        super(owningView, propertyName);
-        // TODO undefined and null support remove this if statement
-        if (typeof localInitValue === "object") {
-            throw new SyntaxError("ObservedPropertySimple constructor: @State/@Provide value must not be an object");
-        }
-        this.setValueInternal(localInitValue);
-    }
-    aboutToBeDeleted(unsubscribeMe) {
-        this.removeSubscriber(unsubscribeMe);
-        super.aboutToBeDeleted();
-    }
-    /**
-   * Called by a @Link - SynchedPropertySimpleTwoWay that uses this as sync peer when it has changed
-   * @param eventSource
-   */
-    syncPeerHasChanged(eventSource) {
-        
-        this.notifyPropertyHasChangedPU();
-    }
-    /*
-      actually update this.wrappedValue_
-      called needs to do value change check
-      and also notify with this.aboutToChange();
-    */
-    setValueInternal(newValue) {
-        
-        if (this.wrappedValue_ != newValue) {
-            this.wrappedValue_ = newValue;
-            return true;
-        }
-        return false;
-    }
-    getUnmonitored() {
-        
-        // unmonitored get access , no call to notifyPropertyRead !
-        return this.wrappedValue_;
-    }
-    get() {
-        
-        this.notifyPropertyHasBeenReadPU();
-        return this.wrappedValue_;
-    }
-    set(newValue) {
-        if (this.wrappedValue_ == newValue) {
-            
-            return;
-        }
-        
-        if (this.setValueInternal(newValue)) {
-            this.notifyPropertyHasChangedPU();
-        }
-    }
+// class definitions for backward compatibility
+class ObservedPropertyObjectPU extends ObservedPropertyPU {
+}
+class ObservedPropertySimplePU extends ObservedPropertyPU {
 }
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
@@ -3840,22 +3791,22 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
  *
  * 1- assignment of a new Object value: this.aProp = new ClassA()
  *    rhs can be ObservedObject because of @Observed decoration or now
- *    notifyPropertryHasChangedPU
+ *    notifyPropertyHasChangedPU
  *
  * 2- local ObservedObject member property change
  *    objectPropertyHasChangedPU called, eventSource is the ObservedObject stored in localCopyObservedObject_
- *    no need to copy, notifyPropertryHasChangedPU
+ *    no need to copy, notifyPropertyHasChangedPU
  *
  * 3- Rerender of the custom component triggered from the parent
  *    reset() is called (code generated by the transpiler), set the value of source_ ,  if that causes a change will call syncPeerHasChanged
  *    syncPeerHasChanged need to deep copy the ObservedObject from source to localCopyObservedObject_
- *    notifyPropertryHasChangedPU
+ *    notifyPropertyHasChangedPU
  *
  * 4- source_ ObservedObject member property change
  *     objectPropertyHasChangedPU called, eventSource is the ObservedObject stored source_.getUnmonitored
- *     notifyPropertryHasChangedPU
+ *     notifyPropertyHasChangedPU
  */
-class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
+class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
     constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
         if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
@@ -3866,16 +3817,19 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             this.source_.addSubscriber(this);
         }
         else {
-            // code path for 
-            // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
-            // 2- nested Object/Array inside observed another object/array in parent, source is its value
-            if (!((source instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(source))) {
-                stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class 
-           lacks @Observed class decorator. Object property changes will not be observed.`);
+            const sourceValue = source;
+            if (this.checkIsSupportedValue(sourceValue)) {
+                // code path for 
+                // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
+                // 2- nested Object/Array inside observed another object/array in parent, source is its value
+                if (!((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
+                    stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class is not instance of SubscribableAbstract, 
+            it also lacks @Observed class decorator. Object property changes will not be observed.`);
+                }
+                
+                this.source_ = new ObservedPropertyObjectPU(sourceValue, this, this.getSourceObservedPropertyFakeName());
+                this.sourceIsOwnObject = true;
             }
-            
-            this.source_ = new ObservedPropertyObjectPU(source, this, this.getSourceObservedPropertyFakeName());
-            this.sourceIsOwnObject = true;
         }
         if (this.source_ != undefined) {
             this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
@@ -3901,11 +3855,16 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         return `${this.info()}_source`;
     }
     syncPeerHasChanged(eventSource) {
+        if (this.source_ == undefined) {
+            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+       @Prop syncPeerHasChanged peer '${eventSource ? eventSource.info() : "no eventSource info"}' but source_ undefned. Internal error.`);
+            return;
+        }
         if (eventSource && this.source_ == eventSource) {
             // defensive programming: should always be the case!
             
             const newValue = this.source_.getUnmonitored();
-            if (typeof newValue == "object") {
+            if (this.checkIsSupportedValue(newValue)) {
                 
                 if (this.resetLocalValue(newValue, /* needCopyObject */ true)) {
                     this.notifyPropertyHasChangedPU();
@@ -3913,7 +3872,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             }
         }
         else {
-            stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. Ignoring event.`);
+            stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. syncPeerHasChanged from different sender than source_. Ignoring event.`);
         }
     }
     /**
@@ -3947,10 +3906,6 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             return;
         }
         
-        if (!ObservedObject.IsObservedObject(newValue)) {
-            stateMgmtConsole.warn(`@Prop ${this.info()} Set: Provided new object's class 
-         lacks '@Observed' class decorator. Object property changes will not be observed.`);
-        }
         if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
             this.notifyPropertyHasChangedPU();
         }
@@ -3958,12 +3913,9 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     // called when updated from parent
     reset(sourceChangedValue) {
         
-        if (this.source_ !== undefined) {
+        if (this.source_ !== undefined && this.checkIsSupportedValue(sourceChangedValue)) {
             // if this.source_.set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged method
             this.source_.set(sourceChangedValue);
-        }
-        else {
-            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset @Prop --- No source_. Internal error!`);
         }
     }
     /*
@@ -3976,9 +3928,8 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     resetLocalValue(newObservedObjectValue, needCopyObject) {
         // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
         // here because the object might still be the same, but some property of it has changed
-        if (typeof newObservedObjectValue !== "object") {
-            // if not undefined or null, then the provided newObservedObjectValue must be an Object 
-            stateMgmtConsole.error(`SynchedPropertyOneWayObjectPU[${this.id__()}]: setLocalValue new value must be an Object.`);
+        if (!this.checkIsSupportedValue(newObservedObjectValue)) {
+            return;
         }
         // unsubscribe from old local copy 
         if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
@@ -3990,24 +3941,24 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         // shallow/deep copy value 
         // needed whenever newObservedObjectValue comes from source
         // not needed on a local set (aka when called from set() method)
-        let copy = needCopyObject ? this.copyObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
-        if (copy instanceof SubscribableAbstract) {
-            this.localCopyObservedObject_ = copy;
-            // deep copy will copy Set of subscribers as well. But local copy only has its own subscribers 
-            // not those of its parent value.
-            this.localCopyObservedObject_.clearOwningProperties();
-            this.localCopyObservedObject_.addOwningProperty(this);
-        }
-        else if (ObservedObject.IsObservedObject(copy)) {
-            // case: new ObservedObject
-            this.localCopyObservedObject_ = copy;
-            ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
-        }
-        else {
-            // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
-            stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class \
+        this.localCopyObservedObject_ = needCopyObject ? this.copyObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
+        if (typeof this.localCopyObservedObject_ == "object") {
+            if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
+                // deep copy will copy Set of subscribers as well. But local copy only has its own subscribers 
+                // not those of its parent value.
+                this.localCopyObservedObject_.clearOwningProperties();
+                this.localCopyObservedObject_.addOwningProperty(this);
+            }
+            else if (ObservedObject.IsObservedObject(this.localCopyObservedObject_)) {
+                // case: new ObservedObject
+                ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
+            }
+            else {
+                // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
+                stateMgmtConsole.error(`@Prop ${this.info()}  Provided source object's class \
             lacks @Observed class decorator. Object property changes will not be observed.`);
-            this.localCopyObservedObject_ = ObservedObject.createNew(copy, this);
+                this.localCopyObservedObject_ = ObservedObject.createNew(this.localCopyObservedObject_, this);
+            }
         }
         return true;
     }
@@ -4025,11 +3976,11 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     shallowCopyObject(value, propName) {
         let rawValue = ObservedObject.GetRawObject(value);
         let copy;
-        if (rawValue == undefined || rawValue == null) {
+        if (!rawValue || typeof rawValue !== 'object') {
             copy = rawValue;
         }
         else if (typeof rawValue != "object") {
-            // TODO would it be better to crash the app here?
+            // FIXME would it be better to throw Exception here?
             stateMgmtConsole.error(`@Prop ${this.info()} shallowCopyObject: request to copy non-object but defined value of type '${typeof rawValue}'. Internal error! Setting copy=original value.`);
             copy = rawValue;
         }
@@ -4137,6 +4088,11 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         }
     }
 }
+// class definitions for backward compatibility
+class SynchedPropertySimpleOneWayPU extends SynchedPropertyOneWayPU {
+}
+class SynchedPropertyObjectOneWayPU extends SynchedPropertyOneWayPU {
+}
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4156,8 +4112,8 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
  * implementation of @Link and @Consume decorated variables of type class object
  *
  * all definitions in this file are framework internal
- */
-class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
+*/
+class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
     constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
@@ -4169,7 +4125,7 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
             ObservedObject.addOwningProperty(this.source_.get(), this);
         }
         else {
-            stateMgmtConsole.error(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
+            throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source variable in parent/ancestor @ Component must be defined. Application error!`);
         }
     }
     /*
@@ -4190,20 +4146,23 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     }
     setObject(newValue) {
         if (!this.source_) {
-            stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), @Link/@Consume: no linked parent property. Likely a consequence of earlier application error.`);
+            throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), \
+            @Link/@Consume: no source variable in parent/ancestor @Component. Application error.`);
+        }
+        if (this.getUnmonitored() == newValue) {
+            
             return;
         }
-        let oldValueObject = this.getUnmonitored();
-        if (oldValueObject != undefined && oldValueObject != null) {
-            ObservedObject.removeOwningProperty(oldValueObject, this);
+        
+        if (this.checkIsSupportedValue(newValue)) {
+            // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
+            this.source_.set(newValue);
         }
-        this.source_.set(newValue);
-        ObservedObject.addOwningProperty(this.getUnmonitored(), this);
     }
     /**
-     * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has chnaged value
+     * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has changed value
      * that peer can be in either parent or child component if 'this' is used for a @Link
-     * that peer can be in either acestor or descendant component if 'this' is used for a @Consume
+     * that peer can be in either ancestor or descendant component if 'this' is used for a @Consume
      * @param eventSource
      */
     syncPeerHasChanged(eventSource) {
@@ -4217,11 +4176,11 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
      * @param souceObject
      * @param changedPropertyName
      */
-    objectPropertyHasChangedPU(souceObject, changedPropertyName) {
+    objectPropertyHasChangedPU(sourceObject, changedPropertyName) {
         
         this.notifyPropertyHasChangedPU();
     }
-    objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
+    objectPropertyHasBeenReadPU(sourceObject, changedPropertyName) {
         
         this.notifyPropertyHasBeenReadPU();
     }
@@ -4250,185 +4209,10 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
         this.changeNotificationIsOngoing_ = false;
     }
 }
-/*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * SynchedPropertySimpleOneWayPU
- * implementation of @Prop decorated variable of types boolean | number | string | enum
- *
- * all definitions in this file are framework internal
- */
-class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
-    constructor(source, subscribeMe, thisPropertyName) {
-        super(subscribeMe, thisPropertyName);
-        // Check that source is ObservedPropertyAbstruct
-        if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
-            // code path for @(Local)StorageProp
-            this.source_ = source;
-            this.sourceIsOwnObject = false;
-            this.source_.addSubscriber(this);
-            // subscribe to receive value change updates from LocalStorage source property
-        }
-        else {
-            // code path for @Prop
-            this.source_ = new ObservedPropertySimplePU(source, this, thisPropertyName);
-            this.sourceIsOwnObject = true;
-        }
-        // use own backing store for value to avoid
-        // value changes to be propagated back to source
-        this.wrappedValue_ = this.source_.getUnmonitored();
-    }
-    /*
-      like a destructor, need to call this before deleting
-      the property.
-    */
-    aboutToBeDeleted() {
-        if (this.source_) {
-            this.source_.removeSubscriber(this);
-            if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
-                
-                this.source_.aboutToBeDeleted();
-            }
-            this.source_ = undefined;
-            this.sourceIsOwnObject = false;
-        }
-        super.aboutToBeDeleted();
-    }
-    syncPeerHasChanged(eventSource) {
-        if (eventSource && (eventSource == this.source_)) {
-            // defensive, should always be the case
-            
-            this.setWrappedValue(eventSource.getUnmonitored());
-            this.notifyPropertyHasChangedPU();
-        }
-    }
-    getUnmonitored() {
-        
-        // unmonitored get access, no call to notifyPropertyRead !
-        return this.wrappedValue_;
-    }
-    // get 'read through` from the ObservedProperty
-    get() {
-        
-        this.notifyPropertyHasBeenReadPU();
-        return this.wrappedValue_;
-    }
-    set(newValue) {
-        if (this.wrappedValue_ == newValue) {
-            
-            return;
-        }
-        
-        this.setWrappedValue(newValue);
-        this.notifyPropertyHasChangedPU();
-    }
-    reset(sourceChangedValue) {
-        
-        // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
-        if (this.source_ !== undefined) {
-            // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
-            this.source_.set(sourceChangedValue);
-        }
-    }
-    setWrappedValue(newValue) {
-        this.wrappedValue_ = newValue;
-    }
+// class definitions for backward compatibility
+class SynchedPropertyObjectTwoWayPU extends SynchedPropertyTwoWayPU {
 }
-/*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * SynchedPropertySimpleTwoWayPU
- * implementation of @Link and @Consume decorated variables of types boolean | number | string | enum
- *
- * all definitions in this file are framework internal
- */
-class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
-    constructor(source, owningView, owningViewPropNme) {
-        super(owningView, owningViewPropNme);
-        this.changeNotificationIsOngoing_ = false;
-        this.source_ = source;
-        if (this.source_) {
-            this.source_.addSubscriber(this);
-        }
-        else {
-            stateMgmtConsole.error(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
-        }
-    }
-    /*
-    like a destructor, need to call this before deleting
-    the property.
-  */
-    aboutToBeDeleted() {
-        if (this.source_) {
-            this.source_.removeSubscriber(this);
-            this.source_ = undefined;
-        }
-        super.aboutToBeDeleted();
-    }
-    /**
-     * Called when sync peer ObservedPropertySimple or SynchedPropertySimpletTwoWay has chnaged value
-     * that peer can be in either parent or child component if 'this' is used for a @Link
-     * that peer can be in either acestor or descendant component if 'this' is used for a @Consume
-     * @param eventSource
-     */
-    syncPeerHasChanged(eventSource) {
-        if (!this.changeNotificationIsOngoing_) {
-            
-            this.notifyPropertyHasChangedPU();
-        }
-    }
-    getUnmonitored() {
-        
-        return (this.source_ ? this.source_.getUnmonitored() : undefined);
-    }
-    // get 'read through` from the ObservedProperty
-    get() {
-        
-        this.notifyPropertyHasBeenReadPU();
-        return this.getUnmonitored();
-    }
-    // set 'writes through` to the ObservedProperty
-    set(newValue) {
-        if (!this.source_) {
-            
-            return;
-        }
-        if (this.source_.get() == newValue) {
-            
-            return;
-        }
-        
-        // avoid circular notifications @Link -> source @State -> other but also to same @Link
-        this.changeNotificationIsOngoing_ = true;
-        // the source_ ObservedProeprty will call: this.hasChanged(newValue);
-        this.source_.set(newValue);
-        this.notifyPropertyHasChangedPU();
-        this.changeNotificationIsOngoing_ = false;
-    }
+class SynchedPropertySimpleTwoWayPU extends SynchedPropertyTwoWayPU {
 }
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
@@ -4451,7 +4235,7 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
  * all definitions in this file are framework internal
  *
  */
-class SynchedPropertyNestedObjectPU extends ObservedPropertyObjectAbstractPU {
+class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
     /**
      * Construct a Property of a su component that links to a variable of parent view that holds an ObservedObject
      * example
@@ -4501,11 +4285,15 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyObjectAbstractPU {
             return;
         }
         
-        this.setValueInternal(newValue);
-        // notify value change to subscribing View
-        this.notifyPropertyHasChangedPU();
+        if (this.setValueInternal(newValue)) {
+            // notify value change to subscribing View
+            this.notifyPropertyHasChangedPU();
+        }
     }
     setValueInternal(newValue) {
+        if (!this.checkIsObject(newValue)) {
+            return false;
+        }
         if (this.obsObject_ != undefined) {
             if (this.obsObject_ instanceof SubscribableAbstract) {
                 // unregister from SubscribableAbstract object
@@ -4531,6 +4319,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyObjectAbstractPU {
       value changes will bot be observed and UI will not update. forgot @Observed class decorator? Application error.`);
             }
         }
+        return true;
     }
 }
 /** backward compatibility after typo in classname fix */
@@ -4932,26 +4721,31 @@ class ViewPU extends NativeViewPartialUpdate {
     /**
      * Method for the sub-class to call from its constructor for resolving
      *       a @Consume variable and initializing its backing store
-     *       with the yncedPropertyTwoWay<T> object created from the
+     *       with the SyncedPropertyTwoWay<T> object created from the
      *       @Provide variable's backing store.
      * @param providedPropName the name of the @Provide'd variable.
-     *     This is either the @Consume decortor parameter, or variable name.
+     *     This is either the @Consume decorator parameter, or variable name.
      * @param consumeVarName the @Consume variable name (not the
-     *            @Consume decortor parameter)
-     * @returns initiaizing value of the @Consume backing store
+     *            @Consume decorator parameter)
+     * @returns initializing value of the @Consume backing store
      */
     initializeConsume(providedPropName, consumeVarName) {
         let providedVarStore = this.providedVars_.get(providedPropName);
         if (providedVarStore === undefined) {
             throw new ReferenceError(`${this.constructor.name}: missing @Provide property with name ${providedPropName}.
-     Fail to resolve @Consume(${providedPropName}).`);
+          Fail to resolve @Consume(${providedPropName}).`);
         }
-        return providedVarStore.createSync((source) => (source instanceof ObservedPropertySimple)
-            ? new SynchedPropertySimpleTwoWayPU(source, this, consumeVarName)
-            : new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName));
+        const factory = (source) => {
+            const result = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
+                ? new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName)
+                : new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName);
+            stateMgmtConsole.error(`The @Consume is instance of ${result.constructor.name}`);
+            return result;
+        };
+        return providedVarStore.createSync(factory);
     }
     /**
-     * given the elmtid of a child or child of child within this custom component
+     * given the elmtId of a child or child of child within this custom component
      * remember this component needs a partial update
      * @param elmtId
      */
@@ -5180,7 +4974,7 @@ class ViewPU extends NativeViewPartialUpdate {
         const appStorageLink = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleTwoWayPU(source, this, viewVariableName)
+                ? new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
         this.ownStorageLinksProps_.add(appStorageLink);
         return appStorageLink;
@@ -5189,7 +4983,7 @@ class ViewPU extends NativeViewPartialUpdate {
         const appStorageProp = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleOneWayPU(source, this, viewVariableName)
+                ? new SynchedPropertyObjectOneWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
         this.ownStorageLinksProps_.add(appStorageProp);
         return appStorageProp;
@@ -5198,7 +4992,7 @@ class ViewPU extends NativeViewPartialUpdate {
         const localStorageLink = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleTwoWayPU(source, this, viewVariableName)
+                ? new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
         this.ownStorageLinksProps_.add(localStorageLink);
         return localStorageLink;
@@ -5207,7 +5001,7 @@ class ViewPU extends NativeViewPartialUpdate {
         const localStorageProp = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
             : (source instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleOneWayPU(source, this, viewVariableName)
+                ? new SynchedPropertyObjectOneWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
         this.ownStorageLinksProps_.add(localStorageProp);
         return localStorageProp;
