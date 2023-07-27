@@ -200,7 +200,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     }
 
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
-    CHECK_NULL_RETURN(parentFrameNode, nullptr);
+    CHECK_NULL_RETURN_NOLOG(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
         if (parentFrameNode == iter) {
             auto eventHub = parentFrameNode->GetEventHub<EventHub>();
