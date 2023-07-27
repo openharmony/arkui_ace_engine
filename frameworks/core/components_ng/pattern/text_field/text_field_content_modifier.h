@@ -40,6 +40,7 @@ public:
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
+    void SetFontStyle(const OHOS::Ace::FontStyle& value);
     void SetContentOffset(OffsetF& value);
     float GetContentOffsetY();
     void SetContentSize(SizeF& value);
@@ -64,6 +65,7 @@ private:
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
+    void SetDefaultFontStyle(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
     void UpdatePaintConfig(RefPtr<CanvasImage>& passwordIconCanvasImage, DrawingContext context, RectF iconRect) const;
 
@@ -92,6 +94,7 @@ private:
     RefPtr<PropertyBool> showUnderline_;
     RefPtr<PropertyString> showPasswordIconSrc_;
     RefPtr<PropertyString> hidePasswordIconSrc_;
+    RefPtr<PropertyInt> fontStyle_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

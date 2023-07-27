@@ -677,6 +677,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetFontSize(textStyle.GetFontSize());
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());
+    modifier->SetFontStyle(textStyle.GetFontStyle());
 }
 
 void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
