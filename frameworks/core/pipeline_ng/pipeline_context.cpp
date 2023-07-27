@@ -283,9 +283,14 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
 void PipelineContext::InspectDrew()
 {
-    auto needRenderNode = std::move(needRenderNode_);
-    for (auto&& node : needRenderNode) {
-        OnDrawCompleted(node->GetInspectorId()->c_str());
+    CHECK_RUN_ON(UI);
+    if (!needRenderNode_.empty()) {
+        auto needRenderNode = std::move(needRenderNode_);
+        for (auto&& node : needRenderNode) {
+            if (node) {
+                OnDrawCompleted(node->GetInspectorId()->c_str());
+            }
+        }
     }
 }
 
