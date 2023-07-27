@@ -2270,7 +2270,7 @@ void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
     SkParsePath::FromSVGString(commands.c_str(), &skPath);
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 #else
-    RSPath rsPath;
+    RSRecordingPath rsPath;
     rsPath.BuildFromSVGString(commands);
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
 #endif
@@ -2284,7 +2284,7 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
     skPath.addRect(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 #else
-    RSPath rsPath;
+    RSRecordingPath rsPath;
     rsPath.AddRect({ rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
 #endif

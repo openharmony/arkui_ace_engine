@@ -313,16 +313,9 @@ void RosenRenderButton::DrawShape(RSCanvas* canvas, const Offset& offset, bool i
         }
         rRect.Offset(offset.GetX(), offset.GetY());
 
-#ifdef OHOS_PLATFORM
-        auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
-        recordingCanvas->AttachPen(pen);
-        LOGE("Drawing is not supported");
-        recordingCanvas->DetachPen();
-#else
         canvas->AttachPen(pen);
         canvas->DrawRoundRect(rRect);
         canvas->DetachPen();
-#endif
     } else {
         RSBrush brush;
         brush.SetColor(GetStateColor());
@@ -339,16 +332,9 @@ void RosenRenderButton::DrawShape(RSCanvas* canvas, const Offset& offset, bool i
         }
         rRect.Offset(offset.GetX(), offset.GetY());
 
-#ifdef OHOS_PLATFORM
-        auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
-        recordingCanvas->AttachBrush(brush);
-        LOGE("Drawing is not supported");
-        recordingCanvas->DetachBrush();
-#else
         canvas->AttachBrush(brush);
         canvas->DrawRoundRect(rRect);
         canvas->DetachBrush();
-#endif
     }
 }
 #endif

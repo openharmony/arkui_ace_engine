@@ -722,10 +722,10 @@ float DrawingDecorationPainter::DrawingGetFloatRadiusValue(
     return DrawingDimensionToPx(src, size, type);
 }
 
-RSPath DrawingDecorationPainter::DrawingCreatePath(const RefPtr<BasicShape>& basicShape, const SizeF& size)
+RSRecordingPath DrawingDecorationPainter::DrawingCreatePath(const RefPtr<BasicShape>& basicShape, const SizeF& size)
 {
     OffsetF position;
-    RSPath rsPath;
+    RSRecordingPath rsPath;
     if (basicShape == nullptr) {
         rsPath.AddRect(RSRect(0.0, 0.0, size.Width(), size.Height()));
         return rsPath;
@@ -861,7 +861,7 @@ void DrawingDecorationPainter::DrawingCreatePath(
         LOGW("path value is null");
         return;
     }
-    RSPath tmpPath;
+    RSRecordingPath tmpPath;
     if (!tmpPath.BuildFromSVGString(path->GetValue().c_str())) {
         LOGW("path value is invalid");
         return;
