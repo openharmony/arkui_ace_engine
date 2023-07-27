@@ -19,12 +19,12 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <shared_mutex>
 #include <stack>
 #include <string>
 #include <unordered_map>
 #include <utility>
-#include <optional>
 
 #include "base/geometry/dimension.h"
 #include "base/resource/asset_manager.h"
@@ -855,15 +855,8 @@ public:
 
     void RemoveSubWindowVsyncCallback(int32_t subWindowId);
 
-    void SetIsLayoutFullScreen(bool isLayoutFullScreen)
-    {
-        isLayoutFullScreen_ = isLayoutFullScreen;
-    }
-
-    bool GetIsLayoutFullScreen() const
-    {
-        return isLayoutFullScreen_;
-    }
+    virtual void SetIsLayoutFullScreen(bool isLayoutFullScreen) {}
+    virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
 
     void SetIsAppWindow(bool isAppWindow)
     {
@@ -873,16 +866,6 @@ public:
     bool GetIsAppWindow() const
     {
         return isAppWindow_;
-    }
-
-    void SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
-    {
-        ignoreViewSafeArea_ = ignoreViewSafeArea;
-    }
-
-    bool GetIgnoreViewSafeArea() const
-    {
-        return ignoreViewSafeArea_;
     }
 
     void SetEnableImplicitAnimation(bool enableImplicitAnimation)
@@ -939,7 +922,8 @@ protected:
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
-    void SetIsReloading(bool isReloading) {
+    void SetIsReloading(bool isReloading)
+    {
         isReloading_ = isReloading;
     }
 
@@ -951,9 +935,7 @@ protected:
     bool isFormRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
-    bool isLayoutFullScreen_ = false;
     bool isAppWindow_ = true;
-    bool ignoreViewSafeArea_ = false;
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
 

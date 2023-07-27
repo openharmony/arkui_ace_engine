@@ -263,6 +263,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
     void CloseModalUIExtension(int32_t sessionId);
 
+    void MarkDirty(PropertyChangeFlag flag);
+
 private:
     void PopToast(int32_t targetId);
 

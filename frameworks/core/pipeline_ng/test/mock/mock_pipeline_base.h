@@ -100,10 +100,7 @@ public:
     MOCK_METHOD1(RestoreNodeInfo, void(std::unique_ptr<JsonValue> nodeInfo));
     MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
     MOCK_METHOD1(UpdateSystemSafeArea, void(const SafeAreaInsets& systemSafeArea));
-    MOCK_CONST_METHOD0(GetSystemSafeArea, SafeAreaInsets());
     MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
-    MOCK_CONST_METHOD0(GetCutoutSafeArea, SafeAreaInsets());
-    MOCK_CONST_METHOD0(GetViewSafeArea, SafeAreaInsets());
     static RefPtr<MockPipelineBase> pipeline_;
 
 protected:

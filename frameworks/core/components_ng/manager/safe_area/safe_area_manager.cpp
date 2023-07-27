@@ -14,6 +14,7 @@
  */
 #include "safe_area_manager.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -23,7 +24,7 @@ bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
         return false;
     }
     cutoutSafeArea_ = safeArea;
-    return true;
+    return !ignoreSafeArea_ && isFullScreen_;
 }
 
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
@@ -32,7 +33,7 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
         return false;
     }
     systemSafeArea_ = safeArea;
-    return true;
+    return !ignoreSafeArea_ && isFullScreen_;
 }
 
 bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
@@ -61,5 +62,47 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
         res = res.Combine(systemSafeArea_);
     }
     return res;
+}
+
+bool SafeAreaManager::SetIsFullScreen(bool value)
+{
+    if (isFullScreen_ == value) {
+        return false;
+    }
+    isFullScreen_ = value;
+    return systemSafeArea_.IsValid() || cutoutSafeArea_.IsValid();
+}
+
+bool SafeAreaManager::SetIgnoreSafeArea(bool value)
+{
+    if (ignoreSafeArea_ == value) {
+        return false;
+    }
+    ignoreSafeArea_ = value;
+    return systemSafeArea_.IsValid() || cutoutSafeArea_.IsValid();
+}
+
+SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
+{
+    if (ignoreSafeArea_ || !isFullScreen_) {
+        return {};
+    }
+    return systemSafeArea_;
+}
+
+SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
+{
+    if (ignoreSafeArea_ || !isFullScreen_) {
+        return {};
+    }
+    return cutoutSafeArea_;
+}
+
+SafeAreaInsets SafeAreaManager::GetSafeArea() const
+{
+    if (ignoreSafeArea_ || !isFullScreen_) {
+        return {};
+    }
+    return systemSafeArea_.Combine(cutoutSafeArea_);
 }
 } // namespace OHOS::Ace::NG

@@ -1250,7 +1250,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             auto topModalNode = modalStack_.top().Upgrade();
             CHECK_NULL_VOID(topModalNode);
             if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
-                if (topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() == targetId) { 
+                if (topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() == targetId) {
                     if (modalStyle.backgroundColor.has_value()) {
                         topModalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
                     }
@@ -1404,12 +1404,12 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
                 CHECK_NULL_VOID_NOLOG(taskExecutor);
                 // animation finish event should be posted to UI thread.
                 taskExecutor->PostTask([rootWeak, modalWK, id]() {
-                    auto modal = modalWK.Upgrade();
-                    auto root = rootWeak.Upgrade();
-                    CHECK_NULL_VOID_NOLOG(modal && root);
-                    ContainerScope scope(id);
-                    root->RemoveChild(modal);
-                    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                        auto modal = modalWK.Upgrade();
+                        auto root = rootWeak.Upgrade();
+                        CHECK_NULL_VOID_NOLOG(modal && root);
+                        ContainerScope scope(id);
+                        root->RemoveChild(modal);
+                        root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     }, TaskExecutor::TaskType::UI);
             });
         context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
@@ -1457,12 +1457,12 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
                 CHECK_NULL_VOID_NOLOG(taskExecutor);
                 // animation finish event should be posted to UI thread.
                 taskExecutor->PostTask([rootWeak, modalWK, id]() {
-                    auto modal = modalWK.Upgrade();
-                    auto root = rootWeak.Upgrade();
-                    CHECK_NULL_VOID_NOLOG(modal && root);
-                    ContainerScope scope(id);
-                    root->RemoveChild(modal);
-                    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                        auto modal = modalWK.Upgrade();
+                        auto root = rootWeak.Upgrade();
+                        CHECK_NULL_VOID_NOLOG(modal && root);
+                        ContainerScope scope(id);
+                        root->RemoveChild(modal);
+                        root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     }, TaskExecutor::TaskType::UI);
             });
         context->OpacityAnimation(option, 1, 0);
@@ -1585,28 +1585,28 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
         AnimationUtils::Animate(
             option,
             [context, offset]() {
-                if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
-                }
-            });
+            if (context) {
+                context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
+            }
+        });
     } else {
         option.SetOnFinishEvent([rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)),
             id = Container::CurrentId()] {
-            ContainerScope scope(id);
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(context);
-            auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
-            // animation finish event should be posted to UI thread.
-            taskExecutor->PostTask([rootWeak, sheetWK, id]() {
-                auto sheet = sheetWK.Upgrade();
-                auto root = rootWeak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(sheet && root);
                 ContainerScope scope(id);
-                OverlayManager::DestroySheetMask(sheet);
-                root->RemoveChild(sheet);
-                root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                }, TaskExecutor::TaskType::UI);
+                auto context = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID_NOLOG(context);
+                auto taskExecutor = context->GetTaskExecutor();
+                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                // animation finish event should be posted to UI thread.
+                taskExecutor->PostTask([rootWeak, sheetWK, id]() {
+                        auto sheet = sheetWK.Upgrade();
+                        auto root = rootWeak.Upgrade();
+                        CHECK_NULL_VOID_NOLOG(sheet && root);
+                        ContainerScope scope(id);
+                        OverlayManager::DestroySheetMask(sheet);
+                        root->RemoveChild(sheet);
+                        root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                    }, TaskExecutor::TaskType::UI);
             });
         AnimationUtils::Animate(
             option,
@@ -1708,7 +1708,7 @@ void OverlayManager::DeleteModal(int32_t targetId)
     }
     if (isDelete) {
         while (!modalStack_.empty()) {
-        modalStack_.pop();
+            modalStack_.pop();
         }
         for (auto modal = modalList_.begin(); modal != modalList_.end(); modal++) {
             modalStack_.push(*modal);
@@ -1959,5 +1959,17 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
     ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
     BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, -(sessionId));
+}
+
+void OverlayManager::MarkDirty(PropertyChangeFlag flag)
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(root);
+    for (auto&& child : root->GetChildren()) {
+        // first child is Stage node
+        if (child != root->GetFirstChild()) {
+            child->MarkDirtyNode(flag);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -31,18 +31,11 @@ public:
     ~SafeAreaManager() override = default;
 
     bool UpdateSystemSafeArea(const SafeAreaInsets& safeArea);
-
-    SafeAreaInsets GetSystemSafeArea() const
-    {
-        return systemSafeArea_;
-    }
-
+    SafeAreaInsets GetSystemSafeArea() const;
     bool UpdateCutoutSafeArea(const SafeAreaInsets& safeArea);
+    SafeAreaInsets GetCutoutSafeArea() const;
 
-    SafeAreaInsets GetCutoutSafeArea() const
-    {
-        return cutoutSafeArea_;
-    }
+    SafeAreaInsets GetSafeArea() const;
 
     bool UpdateKeyboardSafeArea(float keyboardHeight);
 
@@ -55,7 +48,6 @@ public:
     {
         keyboardOffset_ = offset;
     }
-
     float GetKeyboardOffset() const
     {
         return keyboardOffset_;
@@ -83,7 +75,14 @@ public:
         return safeAreaCurve_;
     }
 
+    bool SetIsFullScreen(bool value);
+    bool SetIgnoreSafeArea(bool value);
+
 private:
+    // app window is full screen 
+    bool isFullScreen_ = false;
+    bool ignoreSafeArea_ = false;
+
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
     // bottom direction only
