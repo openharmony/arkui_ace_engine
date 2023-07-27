@@ -63,6 +63,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float GROUP_WIDTH = 400.f;
+constexpr float GROUP_HEIGHT = 600.f;
 constexpr float GROUP_ITEM_WIDTH = 300.f;
 constexpr int32_t TOTAL_NUMBER = 10;
 constexpr int32_t VIEWPORT_NUMBER = 8;
@@ -83,6 +84,7 @@ constexpr int32_t DEFAULT_INTERVAL = 0;
 constexpr int32_t DEFAULT_STARTINDEX = 0;
 constexpr float SPACE = 10.f;
 constexpr float STROKE_WIDTH = 2.f;
+constexpr int32_t NULL_INDEX = -1;
 } // namespace
 
 class ListTestNg : public testing::Test, public TestNG {
@@ -92,15 +94,17 @@ protected:
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
-    void UpdateCurrentOffset(float offset);
+    void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void CreateList(int32_t number = TOTAL_NUMBER, Axis axis = Axis::VERTICAL);
     void CreateSwipeList(bool isStartNode, V2::SwipeEdgeEffect swipeEdgeEffect, int32_t itemNumber = TOTAL_NUMBER);
     void CreateSelectableList();
-    void CreateFocusableList(int32_t number, Axis axis);
+    void CreateFocusableList(int32_t itemNumber, Axis axis);
+    void CreateGroupItemFocusableList(int32_t groupItem, Axis axis);
     void CreateChainList(const ChainAnimationOptions& options);
-    void CreateListItemGroup(int32_t groupNumber);
+    void CreateSnapAlignList(V2::ScrollSnapAlign scrollSnapAlign);
     void CreateListItemGroup();
-    void CreateListItem(int32_t itemCount, Axis Direction = Axis::VERTICAL, bool focusable = false);
+    void CreateListItemGroup(int32_t groupNumber, Axis axis = Axis::VERTICAL, bool focusable = false);
+    void CreateListItem(int32_t itemNumber, Axis axis = Axis::VERTICAL, bool focusable = false);
     void CreateListItemWithSwiper(
         std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect);
     void CreateListItemWithSwipeActionItem(std::function<void()> builderAction, bool useDefaultDeleteAnimation,
@@ -114,7 +118,8 @@ protected:
         RefPtr<FrameNode> groupNode, int32_t expectNumber, int32_t lanes = DEFAULT_LANES,
         float interval = DEFAULT_INTERVAL, float startOffset = 0);
     testing::AssertionResult IsEqualCurrentOffset(Offset expectOffset);
-    testing::AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t nextIndex = -1);
+    testing::AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t nextIndex);
+    testing::AssertionResult IsEqualNextGroupItemFocusNode(FocusStep step, int32_t currentIndex, int32_t nextIndex);
     testing::AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, Offset expectOffset);
     testing::AssertionResult ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align, Offset expectOffset);
     void MouseSelect(Offset start, Offset end);
@@ -211,12 +216,22 @@ void ListTestNg::CreateSelectableList()
     RunMeasureAndLayout(frameNode_);
 }
 
-void ListTestNg::CreateFocusableList(int32_t number, Axis axis)
+void ListTestNg::CreateFocusableList(int32_t itemNumber, Axis axis)
 {
     ListModelNG listModelNG;
     listModelNG.Create();
     listModelNG.SetListDirection(axis);
-    CreateListItem(number, axis, true); // Create focusable ListItem.
+    CreateListItem(itemNumber, axis, true); // Create focusable ListItem.
+    GetInstance();
+    RunMeasureAndLayout(frameNode_);
+}
+
+void ListTestNg::CreateGroupItemFocusableList(int32_t groupNumber, Axis axis)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetListDirection(axis);
+    CreateListItemGroup(groupNumber, axis, true); // Create focusable ListItem.
     GetInstance();
     RunMeasureAndLayout(frameNode_);
 }
@@ -233,15 +248,14 @@ void ListTestNg::CreateChainList(const ChainAnimationOptions& options)
     RunMeasureAndLayout(frameNode_);
 }
 
-void ListTestNg::CreateListItemGroup(int32_t groupNumber)
+void ListTestNg::CreateSnapAlignList(V2::ScrollSnapAlign scrollSnapAlign)
 {
-    for (int32_t index = 0; index < groupNumber; index++) {
-        ListItemGroupModelNG listItemGroupModel;
-        listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
-        SetWidth(Dimension(GROUP_WIDTH));
-        CreateListItem(GROUP_ITEM_NUMBER);
-        ViewStackProcessor::GetInstance()->Pop();
-    }
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetScrollSnapAlign(scrollSnapAlign);
+    CreateListItem(TOTAL_NUMBER);
+    GetInstance();
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::CreateListItemGroup()
@@ -308,12 +322,28 @@ void ListTestNg::CreateListItemGroup()
     ViewStackProcessor::GetInstance()->Pop();
 }
 
-void ListTestNg::CreateListItem(int32_t itemCount, Axis Direction, bool focusable)
+void ListTestNg::CreateListItemGroup(int32_t groupNumber, Axis axis, bool focusable)
 {
-    for (int32_t index = 0; index < itemCount; index++) {
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG listItemGroupModel;
+        listItemGroupModel.Create(V2::ListItemGroupStyle::NONE);
+        // do not fill List
+        if (axis == Axis::VERTICAL) {
+            SetWidth(Dimension(GROUP_WIDTH));
+        } else {
+            SetHeight(Dimension(GROUP_HEIGHT));
+        }
+        CreateListItem(GROUP_ITEM_NUMBER, axis, focusable);
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+}
+
+void ListTestNg::CreateListItem(int32_t itemNumber, Axis axis, bool focusable)
+{
+    for (int32_t index = 0; index < itemNumber; index++) {
         ListItemModelNG listItemModel;
         listItemModel.Create();
-        if (Direction == Axis::VERTICAL) {
+        if (axis == Axis::VERTICAL) {
             SetHeight(Dimension(ITEM_HEIGHT));
             SetWidth(FILL_LENGTH);
         } else {
@@ -449,11 +479,37 @@ testing::AssertionResult ListTestNg::IsEqualNextFocusNode(
     RefPtr<FocusHub> currentFocusNode = GetChildFocusHub(frameNode_, currentIndex);
     currentFocusNode->RequestFocusImmediately();
     RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
-    if (nextIndex == -1 && nextFocusNode != nullptr) {
+    if (nextIndex == NULL_INDEX && nextFocusNode != nullptr) {
         return testing::AssertionFailure() << "Next FocusNode is not null.";
     }
-    if (nextIndex != -1 && nextFocusNode != GetChildFocusHub(frameNode_, nextIndex)) {
+    if (nextIndex != NULL_INDEX && nextFocusNode == nullptr) {
+        return testing::AssertionFailure() << "Next FocusNode is null.";
+    }
+    if (nextIndex != NULL_INDEX && nextFocusNode != GetChildFocusHub(frameNode_, nextIndex)) {
         return testing::AssertionFailure() << "Get wrong next FocusNode.";
+    }
+    return testing::AssertionSuccess();
+}
+
+testing::AssertionResult ListTestNg::IsEqualNextGroupItemFocusNode(
+    FocusStep step, int32_t currentIndex, int32_t nextIndex)
+{
+    auto groupNode = GetChildFrameNode(frameNode_, std::floor(currentIndex / GROUP_ITEM_NUMBER));
+    RefPtr<FocusHub> currentFocusNode = GetChildFocusHub(groupNode, currentIndex % GROUP_ITEM_NUMBER);
+    currentFocusNode->RequestFocusImmediately();
+    RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
+    if (nextIndex == NULL_INDEX && nextFocusNode != nullptr) {
+        return testing::AssertionFailure() << "Next FocusNode is not null.";
+    }
+    if (nextIndex != NULL_INDEX && nextFocusNode == nullptr) {
+        return testing::AssertionFailure() << "Next FocusNode is null.";
+    }
+    if (nextIndex != NULL_INDEX) {
+        auto groupNode = GetChildFrameNode(frameNode_, std::floor(nextIndex / GROUP_ITEM_NUMBER));
+        RefPtr<FocusHub> expectNextFocusNode = GetChildFocusHub(groupNode, nextIndex % GROUP_ITEM_NUMBER);
+        if (nextFocusNode != expectNextFocusNode) {
+            return testing::AssertionFailure() << "Get wrong next FocusNode.";
+        }
     }
     return testing::AssertionSuccess();
 }
@@ -516,9 +572,9 @@ void ListTestNg::MouseSelect(Offset start, Offset end)
     pattern_->HandleMouseEventWithoutKeyboard(info);
 }
 
-void ListTestNg::UpdateCurrentOffset(float offset)
+void ListTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
-    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(offset, source);
     RunMeasureAndLayout(frameNode_);
 }
 
@@ -1170,6 +1226,55 @@ HWTEST_F(ListTestNg, AttrAlignListItem003, TestSize.Level1)
         float expectOffsetX = DEVICE_WIDTH - itemWidth;
         EXPECT_EQ(offsetX, expectOffsetX);
     }
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign001
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign,
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, AttrScrollSnapAlign001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. scroll half of ITEM_HEIGHT
+     * @tc.expected: viewport first item align top
+     */
+    CreateSnapAlignList(V2::ScrollSnapAlign::START);
+    UpdateCurrentOffset(-ITEM_HEIGHT / 2);
+    Offset expectOffset = Offset(0, ITEM_HEIGHT / 2);
+    EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
+
+    /**
+     * @tc.steps: step1. scroll to bottom
+     * @tc.expected: viewport first item not align top
+     */
+    CreateSnapAlignList(V2::ScrollSnapAlign::START);
+    UpdateCurrentOffset(-ITEM_HEIGHT * 2);
+    expectOffset = Offset(0, ITEM_HEIGHT * 2);
+    EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
+
+    CreateSnapAlignList(V2::ScrollSnapAlign::END);
+    UpdateCurrentOffset(-ITEM_HEIGHT / 2);
+    expectOffset = Offset(0, ITEM_HEIGHT / 2);
+    EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
+
+    CreateSnapAlignList(V2::ScrollSnapAlign::END);
+    UpdateCurrentOffset(-ITEM_HEIGHT / 2);
+    UpdateCurrentOffset(ITEM_HEIGHT / 2);
+    expectOffset = Offset::Zero();
+    EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
+
+    CreateSnapAlignList(V2::ScrollSnapAlign::CENTER);
+    expectOffset = Offset(0, -ITEM_HEIGHT * 3.5);
+    EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
+    UpdateCurrentOffset(-ITEM_HEIGHT / 2);
+    expectOffset = Offset(0, -ITEM_HEIGHT * 3);
+    EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
+
+    CreateSnapAlignList(V2::ScrollSnapAlign::CENTER);
+    UpdateCurrentOffset(-ITEM_HEIGHT * TOTAL_NUMBER);
+    expectOffset = Offset(0, ITEM_HEIGHT * 6.5);
+    EXPECT_TRUE(IsEqualCurrentOffset(expectOffset));
 }
 
 /**
@@ -1903,6 +2008,118 @@ HWTEST_F(ListTestNg, SwiperItem012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperItem013
+ * @tc.desc: Test callback with no start node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, SwiperItem013, TestSize.Level1)
+{
+    bool isDelete = false;
+    bool isEntry = false;
+    bool isExit = false;
+    auto deleteEvent = [&isDelete]() { isDelete = true; };
+    auto enterEvent = [&isEntry]() { isEntry = true; };
+    auto exitEvent = [&isExit]() { isExit = true; };
+    CreateListItemWithSwipeActionItem(nullptr, true, deleteEvent, enterEvent, exitEvent,
+        Dimension(DELETE_AREA_DISTANCE), true, V2::SwipeEdgeEffect::Spring);
+    const int32_t listItemIndex = 0;
+
+    /**
+     * @tc.steps: step1. Repeat entry and exit
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE);
+    HandleDragUpdate(listItemIndex, 1.f);
+    EXPECT_TRUE(isEntry);
+    HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE);
+    EXPECT_TRUE(isExit);
+    isEntry = false;
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE);
+    EXPECT_TRUE(isEntry);
+    isExit = false;
+    HandleDragUpdate(listItemIndex, -DELETE_AREA_DISTANCE);
+    EXPECT_TRUE(isExit);
+    HandleDragEnd(listItemIndex);
+    EXPECT_FALSE(isDelete);
+
+    /**
+     * @tc.steps: step2. move middle of DELETE_AREA_DISTANCE and release
+     */
+    isDelete = false;
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE / 2);
+    HandleDragEnd(listItemIndex);
+    EXPECT_FALSE(isDelete);
+
+    /**
+     * @tc.steps: step3. move exceed DELETE_AREA_DISTANCE and release
+     */
+    isDelete = false;
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, DELETE_AREA_DISTANCE);
+    HandleDragUpdate(listItemIndex, 1.f);
+    HandleDragEnd(listItemIndex);
+    EXPECT_TRUE(isDelete);
+}
+
+/**
+ * @tc.name: SwiperItem014
+ * @tc.desc: Test callback with no end node
+ * callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, SwiperItem014, TestSize.Level1)
+{
+    bool isDelete = false;
+    bool isEntry = false;
+    bool isExit = false;
+    auto deleteEvent = [&isDelete]() { isDelete = true; };
+    auto enterEvent = [&isEntry]() { isEntry = true; };
+    auto exitEvent = [&isExit]() { isExit = true; };
+    CreateListItemWithSwipeActionItem(nullptr, true, deleteEvent, enterEvent, exitEvent,
+        Dimension(DELETE_AREA_DISTANCE), false, V2::SwipeEdgeEffect::Spring);
+    const int32_t listItemIndex = 0;
+    const float exceedArea = DELETE_AREA_DISTANCE + 1;
+
+    /**
+     * @tc.steps: step1. Repeat entry and exit
+     */
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, -exceedArea);
+    HandleDragUpdate(listItemIndex, -1.f);
+    EXPECT_TRUE(isEntry);
+    HandleDragUpdate(listItemIndex, exceedArea);
+    EXPECT_TRUE(isExit);
+    isEntry = false;
+    HandleDragUpdate(listItemIndex, -exceedArea);
+    EXPECT_TRUE(isEntry);
+    isExit = false;
+    HandleDragUpdate(listItemIndex, exceedArea);
+    EXPECT_TRUE(isExit);
+    HandleDragEnd(listItemIndex);
+    EXPECT_FALSE(isDelete);
+
+    /**
+     * @tc.steps: step2. move middle of exceedArea and release
+     */
+    isDelete = false;
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, -exceedArea / 2);
+    HandleDragEnd(listItemIndex);
+    EXPECT_FALSE(isDelete);
+
+    /**
+     * @tc.steps: step3. move exceed exceedArea and release
+     */
+    isDelete = false;
+    HandleDragStart(listItemIndex);
+    HandleDragUpdate(listItemIndex, -exceedArea);
+    HandleDragUpdate(listItemIndex, -1.f);
+    HandleDragEnd(listItemIndex);
+    EXPECT_TRUE(isDelete);
+}
+
+/**
  * @tc.name: ListItemGroup001
  * @tc.desc: check ListItem position
  * @tc.type: FUNC
@@ -2155,6 +2372,55 @@ HWTEST_F(ListTestNg, ListItemGroup005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetOverScrollOffset001
+ * @tc.desc: Test GetOverScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, GetOverScrollOffset001, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    CreateListItemGroup(1);
+    CreateListItem(TOTAL_NUMBER);
+    CreateListItemGroup(1);
+    GetInstance();
+    RunMeasureAndLayout(frameNode_);
+
+    OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
+    OverScrollOffset expectOffset = { ITEM_HEIGHT, 0 };
+    EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0.f);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
+
+    UpdateCurrentOffset(-ITEM_HEIGHT);
+    offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
+    expectOffset = { ITEM_HEIGHT, 0 };
+    EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0.f);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
+
+    UpdateCurrentOffset(-ITEM_HEIGHT * (GROUP_ITEM_NUMBER * 2 + TOTAL_NUMBER));
+    offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
+    expectOffset = { 0, -400 };
+    EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0.f);
+    expectOffset = { 0, -500 };
+    EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_HEIGHT);
+    expectOffset = { 0, -600 };
+    EXPECT_TRUE(IsEqualOverScrollOffset(offset, expectOffset));
+}
+
+/**
  * @tc.name: Event001
  * @tc.desc: Test scroll callback
  * @tc.type: FUNC
@@ -2174,22 +2440,42 @@ HWTEST_F(ListTestNg, Event001, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout(frameNode_);
 
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    RunMeasureAndLayout(frameNode_);
+    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
     EXPECT_EQ(offsetY.ConvertToPx(), ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::SCROLL);
 
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
-    RunMeasureAndLayout(frameNode_);
+    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
     EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::FLING);
 
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
-    RunMeasureAndLayout(frameNode_);
+    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
     EXPECT_EQ(offsetY.ConvertToPx(), ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::FLING);
 
+    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_HEIGHT);
+    EXPECT_EQ(scrollState, ScrollState::IDLE);
+
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollEndCallback();
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_EQ(offsetY.ConvertToPx(), 0);
+    EXPECT_EQ(scrollState, ScrollState::IDLE);
+
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    pattern_->OnScrollEndCallback();
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_EQ(offsetY.ConvertToPx(), 0);
+    EXPECT_EQ(scrollState, ScrollState::IDLE);
+
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    pattern_->OnScrollEndCallback();
+    RunMeasureAndLayout(frameNode_);
+    EXPECT_EQ(offsetY.ConvertToPx(), 0);
+    EXPECT_EQ(scrollState, ScrollState::IDLE);
+
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    pattern_->OnScrollEndCallback();
     RunMeasureAndLayout(frameNode_);
     EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
@@ -2738,29 +3024,38 @@ HWTEST_F(ListTestNg, FocusStep001, TestSize.Level1)
     /**
      * @tc.steps: step1. GetNextFocusNode from top.
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, 0, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 0, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 0, 1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, 0, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, 0, 7));
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_INDEX));
 
     /**
      * @tc.steps: step2. GetNextFocusNode from middle.
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, 4, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 4, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 4, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, 4, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, 4, 7));
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 3));
 
     /**
      * @tc.steps: step3. GetNextFocusNode from bottom.
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, 7, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 7, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 7, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, 7, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, 7, -1));
+    currentIndex = 7;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 6));
 }
 
 /**
@@ -2773,39 +3068,166 @@ HWTEST_F(ListTestNg, FocusStep002, TestSize.Level1)
     CreateFocusableList(VIEWPORT_NUMBER, Axis::HORIZONTAL);
 
     /**
-     * @tc.steps: step1. GetNextFocusNode from top.
+     * @tc.steps: step1. GetNextFocusNode from left.
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, 0, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 0, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 0, 1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, 0, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, 0, 7));
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_INDEX));
 
     /**
      * @tc.steps: step2. GetNextFocusNode from middle.
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, 4, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 4, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 4, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, 4, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, 4, 7));
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 3));
 
     /**
-     * @tc.steps: step3. GetNextFocusNode from bottom.
+     * @tc.steps: step3. GetNextFocusNode from right.
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, 7, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 7, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 7, -1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, 7, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, 7, -1));
+    currentIndex = 7;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 6));
 }
 
 /**
  * @tc.name: FocusStep003
- * @tc.desc: Test GetNextFocusNode other condition
+ * @tc.desc: Test GetNextFocusNode when List has ListItemGroup with VERTICAL
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, FocusStep003, TestSize.Level1)
+{
+    const int32_t groupNumber = 2;
+    CreateGroupItemFocusableList(groupNumber, Axis::VERTICAL);
+
+    /**
+     * @tc.steps: step1. GetNextFocusNode from top.
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::UP, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::DOWN, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::DOWN_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::TAB, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_INDEX));
+
+    /**
+     * @tc.steps: step2. GetNextFocusNode from bottom of first ListItemGroup.
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::UP, currentIndex, 2));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::DOWN, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::DOWN_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode from top of second ListItemGroup.
+     */
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::UP, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::DOWN, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::DOWN_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::TAB, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::SHIFT_TAB, currentIndex, 3));
+
+    /**
+     * @tc.steps: step4. GetNextFocusNode from bottom.
+     */
+    currentIndex = 7;
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::UP, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::DOWN, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::DOWN_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::TAB, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::SHIFT_TAB, currentIndex, 6));
+}
+
+/**
+ * @tc.name: FocusStep004
+ * @tc.desc: Test GetNextFocusNode when List has ListItemGroup with HORIZONTAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, FocusStep004, TestSize.Level1)
+{
+    const int32_t groupNumber = 2;
+    CreateGroupItemFocusableList(groupNumber, Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step1. GetNextFocusNode from left.
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::LEFT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::RIGHT, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::TAB, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_INDEX));
+
+    /**
+     * @tc.steps: step2. GetNextFocusNode from right of first ListItemGroup.
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::LEFT, currentIndex, 2));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::RIGHT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode from left of second ListItemGroup.
+     */
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::LEFT, currentIndex, 3));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::RIGHT, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::TAB, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::SHIFT_TAB, currentIndex, 3));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode from right.
+     */
+    currentIndex = 7;
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::LEFT, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::RIGHT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::TAB, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::SHIFT_TAB, currentIndex, 6));
+}
+
+/**
+ * @tc.name: FocusStep005
+ * @tc.desc: Test GetNextFocusNode other condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, FocusStep005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. when List has unfocuseable item
@@ -2826,62 +3248,235 @@ HWTEST_F(ListTestNg, FocusStep003, TestSize.Level1)
     EXPECT_TRUE(IsEqualCurrentOffset(Offset::Zero()));
 
     /**
-     * @tc.steps: step1. GetNextFocusNode func from bottom boundary item
+     * @tc.steps: step3. GetNextFocusNode func from bottom boundary item
      * @tc.expected: Scroll to next item
      */
     CreateFocusableList(TOTAL_NUMBER, Axis::VERTICAL);
     UpdateCurrentOffset(-ITEM_HEIGHT);
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, ITEM_HEIGHT)));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 8, -1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 8, NULL_INDEX));
     EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, ITEM_HEIGHT * 2)));
+
+    /**
+     * @tc.steps: step4. GetNextFocusNode func from bottom boundary item
+     * @tc.expected: Scroll to next item
+     */
+    const float groupHeight = ITEM_HEIGHT * GROUP_ITEM_NUMBER;
+    int32_t groupNumber = 3; // create scrollable List
+    CreateGroupItemFocusableList(groupNumber, Axis::VERTICAL);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset::Zero()));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::DOWN, 7, NULL_INDEX));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, groupHeight)));
+
+    /**
+     * @tc.steps: step6. GetNextFocusNode func from top boundary item
+     * @tc.expected: Scroll to next item
+     */
+    groupNumber = 3; // create scrollable List
+    CreateGroupItemFocusableList(groupNumber, Axis::VERTICAL);
+    UpdateCurrentOffset(-groupHeight);
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset(0, groupHeight)));
+    EXPECT_TRUE(IsEqualNextGroupItemFocusNode(FocusStep::UP, 3, 2));
+    EXPECT_TRUE(IsEqualCurrentOffset(Offset::Zero()));
 }
 
 /**
  * @tc.name: FocusStep006
- * @tc.desc: Test List focusing ability with lanes mode.
+ * @tc.desc: Test List focusing ability with lanes mode and VERTICAL.
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, FocusStep006, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create list and focusable ListItem.
-     */
     ListModelNG listModelNG;
     listModelNG.Create();
+    listModelNG.SetLanes(4);
     CreateListItem(10, Axis::VERTICAL, true);
-    listModelNG.SetLanes(3);
     GetInstance();
-    auto layoutWrapper = RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
-     * @tc.steps: step2. Obtain nodes for items in the list and set focusable itme parameter.
+     * @tc.steps: step1. GetNextFocusNode from left_top.
      */
-    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>();
-    auto ListItem = frameNode_->GetChildAtIndex(4);
-    auto ListItemNode = AceType::DynamicCast<FrameNode>(ListItem);
-    auto Item = ListItemNode->GetFocusHub();
-    auto childPattern = AceType::DynamicCast<ListItemPattern>(ListItemNode->GetPattern());
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_INDEX));
 
     /**
-     * @tc.steps: step3. Call GetNextFocusNodeForLanes func.
-     * @tc.expected Call success and not return nullptr
+     * @tc.steps: step2. GetNextFocusNode from right_top.
      */
-    auto FocusNode = pattern_->GetNextFocusNode(FocusStep::DOWN, Item);
-    ASSERT_NE(FocusNode.Upgrade(), nullptr);
-    FocusNode = pattern_->GetNextFocusNode(FocusStep::UP, Item);
-    ASSERT_NE(FocusNode.Upgrade(), nullptr);
-    FocusNode = pattern_->GetNextFocusNode(FocusStep::RIGHT, Item);
-    ASSERT_NE(FocusNode.Upgrade(), nullptr);
-    FocusNode = pattern_->GetNextFocusNode(FocusStep::LEFT, Item);
-    ASSERT_NE(FocusNode.Upgrade(), nullptr);
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 2));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode from left_bottom.
+     */
+    currentIndex = 8;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
+
+    /**
+     * @tc.steps: step4. GetNextFocusNode from right_bottom.
+     */
+    currentIndex = 9;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 8));
+
+    /**
+     * @tc.steps: step5. GetNextFocusNode from middle.
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
 }
 
 /**
  * @tc.name: FocusStep007
- * @tc.desc: Test GetListItemGroupParameter function with focus.
+ * @tc.desc: Test List focusing ability with lanes mode and HORIZONTAL.
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, FocusStep007, TestSize.Level1)
+{
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetListDirection(Axis::HORIZONTAL);
+    listModelNG.SetLanes(4);
+    CreateListItem(10, Axis::HORIZONTAL, true);
+    GetInstance();
+    RunMeasureAndLayout(frameNode_);
+
+    /**
+     * @tc.steps: step1. GetNextFocusNode from left_top.
+     */
+    int32_t currentIndex = 0;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_INDEX));
+
+    /**
+     * @tc.steps: step2. GetNextFocusNode from right_top.
+     */
+    currentIndex = 8;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode from left_bottom.
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 2));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 7));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
+
+    /**
+     * @tc.steps: step4. GetNextFocusNode from right_bottom.
+     */
+    currentIndex = 9;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 5));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 8));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 8));
+
+    /**
+     * @tc.steps: step5. GetNextFocusNode from middle.
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_INDEX));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 1));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
+}
+
+/**
+ * @tc.name: FocusStep008
+ * @tc.desc: Test GetListItemGroupParameter function with focus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, FocusStep008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create list and card style ListItemGroup.
@@ -3202,7 +3797,12 @@ HWTEST_F(ListTestNg, ChainAnimation003, TestSize.Level1)
      * @tc.steps: step1. When conductivity == 0, intensity == 0
      * @tc.expected: conductivity/intensity would be itself.
      */
-    const auto chainAnimation = pattern_->chainAnimation_;
+    auto chainAnimation = pattern_->chainAnimation_;
+    EXPECT_FLOAT_EQ(chainAnimation->conductivity_, conductivity);
+    EXPECT_FLOAT_EQ(chainAnimation->intensity_, intensity);
+
+    chainAnimation = pattern_->chainAnimation_;
+    pattern_->SetChainAnimationOptions(options);
     EXPECT_FLOAT_EQ(chainAnimation->conductivity_, conductivity);
     EXPECT_FLOAT_EQ(chainAnimation->intensity_, intensity);
 }
@@ -3774,11 +4374,12 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
 {
     auto startFunc = GetDefaultSwiperBuilder(80.f);
     ListModelNG listModelNG;
-    listModelNG.SetChainAnimation(true);
     listModelNG.Create();
     RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
     RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
     listModelNG.SetScroller(scrollController, proxy);
+    listModelNG.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    listModelNG.SetChainAnimation(true);
     CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
