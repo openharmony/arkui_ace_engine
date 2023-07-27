@@ -269,6 +269,25 @@ void NavigationPattern::OnModifyDone()
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
     }
+    // if current title is custom node, return
+    if (navBarNode->GetPrevTitleIsCustomValue(false)) {
+        return;
+    }
+    auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
+    CHECK_NULL_VOID(titleNode);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
+    } else {
+        textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
+        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
+    }
 }
 
 void NavigationPattern::OnNavBarStateChange()
