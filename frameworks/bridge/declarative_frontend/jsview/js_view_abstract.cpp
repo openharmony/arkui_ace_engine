@@ -41,7 +41,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"  
 #include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -3099,6 +3099,37 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     SetLinearGradientBlur(blurPara);
 }
 
+// PPDOING
+void JSViewAbstract::JsDynamicLightUp(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not a object.");
+        return;
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        return;
+    }
+
+    double rate = 0.0;
+    double lightUpDegree = 0.0;
+    if (!ParseJsDouble(argsPtrItem->GetValue("rate"), rate)) {
+        LOGE("Js Parse double failed. rate is not double.");
+        return;
+    }
+    if (!ParseJsDouble(argsPtrItem->GetValue("lightUpDegree"), lightUpDegree)) {
+        LOGE("Js Parse double failed. lightUpDegree is not double.");
+        return;
+    }
+    LOGE("[PPTS] rate=%f, degree=%f", rate, lightUpDegree);
+    SetDynamicLightUp(rate, lightUpDegree);
+}
+
 void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -5426,6 +5457,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
     JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);
+    JSClass<JSViewAbstract>::StaticMethod("dynamicLightUp", &JSViewAbstract::JsDynamicLightUp);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
     JSClass<JSViewAbstract>::StaticMethod("flexBasis", &JSViewAbstract::JsFlexBasis);
@@ -5696,6 +5728,12 @@ void JSViewAbstract::SetBackdropBlur(float radius)
 void JSViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
 {
     ViewAbstractModel::GetInstance()->SetLinearGradientBlur(blurPara);
+}
+
+//PPDOING
+void JSViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
+{
+    ViewAbstractModel::GetInstance()->SetDynamicLightUp(rate, lightUpDegree);
 }
 
 void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)

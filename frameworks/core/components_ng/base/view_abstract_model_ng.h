@@ -596,6 +596,11 @@ public:
         ViewAbstract::SetLinearGradientBlur(blurPara);
     }
 
+    void SetDynamicLightUp(float rate, float lightUpDegree) override
+    {
+        ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
+    }
+
     void SetFrontBlur(const Dimension& radius) override
     {
         ViewAbstract::SetFrontBlur(radius);

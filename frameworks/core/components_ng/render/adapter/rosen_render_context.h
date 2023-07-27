@@ -300,6 +300,8 @@ private:
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
     void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) override;
+    void OnDynamicLightUpRateUpdate(const float rate) override;
+    void OnDynamicLightUpDegreeUpdate(const float degree) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;

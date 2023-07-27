@@ -118,6 +118,7 @@ public:
 
     void SetBackdropBlur(const Dimension& radius) override;
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
+    void SetDynamicLightUp(float rate, float lightUpDegree) override {};
     void SetFrontBlur(const Dimension& radius) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetColorBlend(const Color& value) override;

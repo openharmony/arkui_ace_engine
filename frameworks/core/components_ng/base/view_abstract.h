@@ -130,6 +130,7 @@ public:
     // decoration
     static void SetBackdropBlur(const Dimension& radius);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
+    static void SetDynamicLightUp(float rate, float lightUpDegree);
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
 
