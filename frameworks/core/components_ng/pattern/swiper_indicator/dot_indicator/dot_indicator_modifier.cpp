@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
+constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr int32_t POINT_HOVER_ANIMATION_DURATION = 100;
@@ -104,17 +104,6 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     float rectRight = rectLeft + (axis_ == Axis::HORIZONTAL ? rectWidth : rectHeight);
     float rectBottom = rectTop + (axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth);
 
-    auto boundsRectWidthValue =
-        (TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE - TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE * vectorBlackPointCenterX_) *
-            rectWidth - rectWidth;
-    boundsRectWidthValue *= INDICATOR_ZOOM_IN_SCALE;
-    auto boundsRectHeightValue = 0.0f;
-    if (axis_ == Axis::VERTICAL) {
-        std::swap(boundsRectWidthValue, boundsRectHeightValue);
-    }
-    RectF boundsRect(rectLeft - boundsRectWidthValue, rectTop - boundsRectHeightValue,
-        rectLeft + rectRight + boundsRectWidthValue * 2.0f, rectBottom + rectTop + boundsRectHeightValue * 2.0f);
-    SetBoundsRect(boundsRect);
     if (axis_ == Axis::HORIZONTAL) {
         if (touchBottomType_ == TouchBottomType::START) {
             rectLeft -= widthChangeValue;

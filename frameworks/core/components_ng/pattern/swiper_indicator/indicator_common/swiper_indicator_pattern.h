@@ -90,6 +90,22 @@ public:
             paintMethod->SetIsTouchBottom(touchBottomType_);
             paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
             mouseClickIndex_ = std::nullopt;
+
+            auto geometryNode = swiperNode->GetGeometryNode();
+            CHECK_NULL_RETURN(geometryNode, nullptr);
+            auto frameOffset = geometryNode->GetFrameOffset();
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, nullptr);
+            auto indicatorGeometryNode = host->GetGeometryNode();
+            CHECK_NULL_RETURN(indicatorGeometryNode, nullptr);
+            auto indicatorFrameOffset = indicatorGeometryNode->GetFrameOffset();
+            float boundsRectOriginX = frameOffset.GetX();
+            float boundsRectOriginY = indicatorFrameOffset.GetY();
+            float boundsRectWidth = geometryNode->GetFrameSize().Width();
+            float boundsRectHeight = indicatorGeometryNode->GetFrameSize().Height();
+            RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+            dotIndicatorModifier_->SetBoundsRect(boundsRect);
+
             return paintMethod;
         } else {
             return nullptr;
@@ -145,10 +161,15 @@ private:
         const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
     bool CheckIsTouchBottom(const GestureEvent& info);
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleLongPress(GestureEvent& info);
+    void HandleLongDragUpdate(const TouchLocationInfo& info);
+    bool CheckIsTouchBottom(const TouchLocationInfo& info);
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<PanEvent> panEvent_;
+    RefPtr<LongPressEvent> longPressEvent_;
     bool isHover_ = false;
     bool isPressed_ = false;
     PointF hoverPoint_;
@@ -159,6 +180,7 @@ private:
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
     Axis axis_ = Axis::NONE;
+    bool isLongPress_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
 } // namespace OHOS::Ace::NG

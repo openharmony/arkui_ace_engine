@@ -114,6 +114,10 @@ private:
     };
     void CalculatePointCenterX(const StarAndEndPointCenter& starAndEndPointCenter,
         const LinearVector<float>& startVectorBlackPointCenterX, const LinearVector<float>& endVectorBlackPointCenterX);
+    void ForwardCalculation(
+        const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
+    void BackwardCalculation(
+        const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
         auto pipelineContext = PipelineBase::GetCurrentContext();

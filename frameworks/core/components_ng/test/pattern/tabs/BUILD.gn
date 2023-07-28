@@ -122,6 +122,7 @@ ohos_unittest("tabs_test_ng") {
     "$ace_root/frameworks/core/components_ng/event/gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/event/input_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/input_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/long_press_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/pan_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/state_style_manager.cpp",
     "$ace_root/frameworks/core/components_ng/event/touch_event.cpp",
