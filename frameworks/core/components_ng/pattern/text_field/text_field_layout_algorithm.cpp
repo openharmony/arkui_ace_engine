@@ -81,6 +81,9 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetWidth(layoutConstraint->minSize.Width());
             }
         }
+        if (pattern->IsNormalInlineState() && pattern->GetTextInputFlag()) {
+            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
+        }
         if (!frameSize.Height().has_value()) {
             // Like width
             if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
