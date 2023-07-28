@@ -46,7 +46,7 @@ void BuildTitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const
         return;
     }
     if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        navDestinationNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
     }
     titleBarNode->SetTitle(navDestinationNode->GetTitle());
     titleBarNode->AddChild(titleBarNode->GetTitle());
@@ -66,7 +66,7 @@ void BuildSubtitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, co
         return;
     }
     if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        navDestinationNode->RemoveChild(titleBarNode->GetSubtitle());
+        titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
     }
     titleBarNode->SetSubtitle(navDestinationNode->GetSubtitle());
     titleBarNode->AddChild(titleBarNode->GetSubtitle());
