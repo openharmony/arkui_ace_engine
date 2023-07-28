@@ -53,6 +53,7 @@ protected:
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
+    virtual void OnExtensionDied() {}
 
     int32_t instanceId_ = -1;
 

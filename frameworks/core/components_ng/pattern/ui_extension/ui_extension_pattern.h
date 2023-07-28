@@ -58,6 +58,7 @@ public:
 
     void OnConnect() override;
     void OnDisconnect() override;
+    void OnExtensionDied() override;
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();

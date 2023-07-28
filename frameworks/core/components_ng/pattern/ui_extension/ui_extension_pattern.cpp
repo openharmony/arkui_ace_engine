@@ -128,6 +128,25 @@ void UIExtensionPattern::OnDisconnect()
         TaskExecutor::TaskType::UI);
 }
 
+void UIExtensionPattern::OnExtensionDied()
+{
+    LOGI("UIExtensionPattern OnExtensionDied called");
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto extensionPattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(extensionPattern);
+            if (extensionPattern->onReleaseCallback_) {
+                extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
+            }
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(dirty, false);
