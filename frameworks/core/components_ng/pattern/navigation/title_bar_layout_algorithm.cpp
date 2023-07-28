@@ -135,7 +135,11 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(titleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
-    constraint.maxSize.SetHeight(titleBarSize.Height());
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        constraint.maxSize.SetHeight(titleBarSize.Height());
+    } else {
+        constraint.maxSize.SetHeight(titleBarSize.Height() - static_cast<float>(menuHeight_.ConvertToPx()));
+    }
 
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
@@ -158,6 +162,8 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     CHECK_NULL_VOID(navBarNode);
     if (navBarNode->GetPrevTitleIsCustomValue(false)) {
         auto occupiedWidth = Dimension(0.0, DimensionUnit::VP);
+        auto occupiedHeight = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) ==
+            NavigationTitleMode::MINI ? Dimension(0.0, DimensionUnit::VP) : menuHeight_;
         if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI ||
             titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
             occupiedWidth = maxPaddingStart_ + defaultPaddingStart_ + NAV_HORIZONTAL_MARGIN_L;
@@ -166,6 +172,7 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
                 defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L * 2 + defaultPaddingStart_;
         }
         constraint.parentIdealSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()));
+        constraint.parentIdealSize.SetHeight(titleBarSize.Height() - static_cast<float>(occupiedHeight.ConvertToPx()));
         titleWrapper->Measure(constraint);
         return;
     }
