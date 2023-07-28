@@ -306,6 +306,17 @@ bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOp
             double to = 1.0;
             JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("from"), from);
             JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("to"), to);
+            if (GreatNotEqual(from, 1.0) || LessNotEqual(from, 0.0)) {
+                LOGW("ParseMotionPath, from value %{public}f is illegal, use default 0.0", from);
+                from = 0.0;
+            }
+            if (GreatNotEqual(to, 1.0) || LessNotEqual(to, 0.0)) {
+                LOGW("ParseMotionPath, to value %{public}f is illegal, use default 1.0", to);
+                to = 1.0;
+            } else if (to < from) {
+                LOGW("ParseMotionPath, to value %{public}f less than from value %{public}f", to, from);
+                to = from;
+            }
             option.SetBegin(static_cast<float>(from));
             option.SetEnd(static_cast<float>(to));
             option.SetRotate(argsPtrItem->GetBool("rotatable", false));
