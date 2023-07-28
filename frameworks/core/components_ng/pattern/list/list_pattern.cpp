@@ -509,7 +509,7 @@ bool ListPattern::NeedScrollSnapAlignEffect() const
 
 bool ListPattern::IsAtTop() const
 {
-    if (IsScrollSnapAlignCenter()) {
+    if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
         float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
         return (startIndex_ == 0) && GreatOrEqual(startMainPos_ - currentDelta_ + GetChainDelta(0),
             contentMainSize_ / 2.0f - startItemHeight / 2.0f);
@@ -520,7 +520,7 @@ bool ListPattern::IsAtTop() const
 
 bool ListPattern::IsAtBottom() const
 {
-    if (IsScrollSnapAlignCenter()) {
+    if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
         float endItemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
         return (endIndex_ == maxListItemIndex_) && LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_),
             contentMainSize_ / 2.0f + endItemHeight / 2.0f);
@@ -591,7 +591,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
         if (startPos <= 0 && newStartPos > 0) {
             offset.start = newStartPos;
         }
-        if (IsScrollSnapAlignCenter()) {
+        if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
             float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
             if (newStartPos > (contentMainSize_ / 2.0f - startItemHeight / 2.0f - spaceWidth_ / 2.0f)) {
                 offset.start = newStartPos - (contentMainSize_ / 2.0f - startItemHeight / 2.0f - spaceWidth_ / 2.0f);
@@ -612,7 +612,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
         if (endPos >= contentMainSize_ && newEndPos < contentMainSize_) {
             offset.end = newEndPos - contentMainSize_;
         }
-        if (IsScrollSnapAlignCenter()) {
+        if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
             float endItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
             if (newEndPos < (contentMainSize_ / 2.0f + endItemHeight / 2.0f + spaceWidth_ / 2.0f)) {
                 offset.end = newEndPos - (contentMainSize_ / 2.0f + endItemHeight / 2.0f + spaceWidth_ / 2.0f);
@@ -626,6 +626,9 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
+    if (itemPosition_.empty()) {
+        return false;
+    }
     // check edgeEffect is not springEffect
     if (!jumpIndex_.has_value() && !targetIndex_.has_value() && !HandleEdgeEffect(offset, source, GetContentSize())) {
         if (IsOutOfBoundary(false)) {
@@ -796,7 +799,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         auto list = weak.Upgrade();
         auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
         auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
-        if (list->IsScrollSnapAlignCenter()) {
+        if (list->IsScrollSnapAlignCenter() && !list->itemPosition_.empty()) {
             float endItemHeight =
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
             return list->contentMainSize_ / 2.0f + endItemHeight / 2.0f - (endPos - startPos);
@@ -806,7 +809,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
         CHECK_NULL_RETURN_NOLOG(list, 0.0);
-        if (list->IsScrollSnapAlignCenter()) {
+        if (list->IsScrollSnapAlignCenter() && !list->itemPosition_.empty()) {
             float startItemHeight =
                 list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
             return list->contentMainSize_ / 2.0f - startItemHeight / 2.0f - list->spaceWidth_ / 2.0f;
@@ -818,7 +821,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         auto list = weak.Upgrade();
         auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
         auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
-        if (list->IsScrollSnapAlignCenter()) {
+        if (list->IsScrollSnapAlignCenter() && !list->itemPosition_.empty()) {
             float endItemHeight =
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
             return list->contentMainSize_ / 2.0f + endItemHeight / 2.0f - (endPos - startPos);
@@ -828,7 +831,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
         CHECK_NULL_RETURN_NOLOG(list, 0.0);
-        if (list->IsScrollSnapAlignCenter()) {
+        if (list->IsScrollSnapAlignCenter() && !list->itemPosition_.empty()) {
             float startItemHeight =
                 list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
             return list->contentMainSize_ / 2.0f - startItemHeight / 2.0f - list->spaceWidth_ / 2.0f;
