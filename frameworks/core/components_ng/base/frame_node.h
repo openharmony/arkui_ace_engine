@@ -537,8 +537,10 @@ private:
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
 
     struct ZIndexComparator {
-        bool operator()(const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) const
+        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
         {
+            auto left = weakLeft.Upgrade();
+            auto right = weakRight.Upgrade();
             if (left && right) {
                 return left->GetRenderContext()->GetZIndexValue(1) < right->GetRenderContext()->GetZIndexValue(1);
             }
@@ -546,7 +548,7 @@ private:
         }
     };
     // sort in ZIndex.
-    std::multiset<RefPtr<FrameNode>, ZIndexComparator> frameChildren_;
+    std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
