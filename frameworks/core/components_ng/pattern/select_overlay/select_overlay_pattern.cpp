@@ -102,11 +102,8 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    // convert handle paintRect to local coordinate
-    auto safeArea = pipeline->GetSystemSafeArea();
-    OffsetF offset {safeArea.left_.Length(), safeArea.top_.Length()};
-    auto firstHandle = info_->firstHandle.paintRect - offset;
-    auto secondHandle = info_->secondHandle.paintRect - offset;
+    auto firstHandle = info_->firstHandle.paintRect;
+    auto secondHandle = info_->secondHandle.paintRect;
 
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
