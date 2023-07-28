@@ -67,9 +67,8 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isDefaultPickerItemHeight_) {
         pickerHeight = static_cast<float>(defaultPickerItemHeight_ * showCount_);
     } else {
-        pickerHeight =
-            static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - 1) +
-                               pickerTheme->GetDividerSpacing().ConvertToPx());
+        pickerHeight = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - 1) +
+                                          pickerTheme->GetDividerSpacing().ConvertToPx());
     }
 
     auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
@@ -91,8 +90,10 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto textPickerPattern = pickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     if (textPickerPattern->GetIsShowInDialog() && isDefaultPickerItemHeight_) {
-        float dialogButtonHeight = static_cast<float>((pickerTheme->GetButtonHeight() + dialogTheme->GetDividerHeight()
-            + dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2).ConvertToPx());
+        float dialogButtonHeight =
+            static_cast<float>((pickerTheme->GetButtonHeight() + dialogTheme->GetDividerHeight() +
+                                dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2)
+                                .ConvertToPx());
         pickerHeight = std::min(pickerHeight, layoutConstraint->maxSize.Height() - dialogButtonHeight);
         if (!NearZero(showCount_)) {
             defaultPickerItemHeight_ = pickerHeight / showCount_;
@@ -180,11 +181,16 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                                            pickerTheme->GetGradientHeight().ConvertToPx())),
             0, MAX_HALF_DISPLAY_COUNT);
     }
-
+    int32_t i = 0;
+    int32_t showCount = pickerTheme->GetShowOptionCount();
     for (const auto& child : children) {
+        if (i >= showCount) {
+            break;
+        }
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();
-        auto childOffset = OffsetF(0.0f, childStartCoordinate + currentOffset_ + padding.Offset().GetY());
+        auto childOffset =
+            OffsetF(0.0, childStartCoordinate + static_cast<float>(currentOffset_[i++]) + padding.Offset().GetY());
         childGeometryNode->SetMarginFrameOffset(childOffset);
         child->Layout();
         childStartCoordinate += childSize.Height();

@@ -37,12 +37,12 @@ public:
     void ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper);
 
-    float GetCurrentOffset() const
+    std::vector<int32_t> GetCurrentOffset() const
     {
         return currentOffset_;
     }
 
-    void SetCurrentOffset(float currentOffset)
+    void SetCurrentOffset(const std::vector<int32_t>& currentOffset)
     {
         currentOffset_ = currentOffset;
     }
@@ -64,7 +64,7 @@ public:
 
 private:
     float pickerItemHeight_ = 0.0f;
-    float currentOffset_ = 0.0f;
+    std::vector<int32_t> currentOffset_;
     double defaultPickerItemHeight_ = 0.0;
     bool isDefaultPickerItemHeight_ = false;
     int32_t halfDisplayCounts_ = 0;
