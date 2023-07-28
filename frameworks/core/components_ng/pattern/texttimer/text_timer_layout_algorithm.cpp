@@ -40,13 +40,13 @@ void TextTimerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     const auto& minSize = constraint->minSize;
     const auto& maxSize = constraint->maxSize;
+    textTimerFrameSize.Constrain(minSize, maxSize);
     if (constraint->selfIdealSize.Width()) {
         textTimerFrameSize.SetWidth(constraint->selfIdealSize.Width().value());
     }
     if (constraint->selfIdealSize.Height()) {
         textTimerFrameSize.SetHeight(constraint->selfIdealSize.Height().value());
     }
-    textTimerFrameSize.Constrain(minSize, maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(textTimerFrameSize.ConvertToSizeT());
 }
 } // namespace OHOS::Ace::NG
