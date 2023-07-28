@@ -24,6 +24,9 @@ void CanvasRendererModelNG::SetFillText(const BaseInfo& baseInfo, const FillText
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->FillText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y,
             fillTextInfo.maxWidth, baseInfo.paintState);
         return;
@@ -41,6 +44,9 @@ void CanvasRendererModelNG::SetStrokeText(const BaseInfo& baseInfo, const FillTe
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->StrokeText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y,
             fillTextInfo.maxWidth, baseInfo.paintState);
         return;
@@ -58,6 +64,9 @@ void CanvasRendererModelNG::SetAntiAlias(const BaseInfo& baseInfo)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetAntiAlias(baseInfo.anti);
         return;
     }
@@ -74,6 +83,9 @@ void CanvasRendererModelNG::SetFontWeight(const BaseInfo& baseInfo, const FontWe
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFontWeight(weight);
         return;
     }
@@ -90,6 +102,9 @@ void CanvasRendererModelNG::SetFontStyle(const BaseInfo& baseInfo, const FontSty
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFontStyle(fontStyle);
         return;
     }
@@ -106,6 +121,9 @@ void CanvasRendererModelNG::SetFontFamilies(const BaseInfo& baseInfo, const std:
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFontFamilies(families);
         return;
     }
@@ -122,6 +140,9 @@ void CanvasRendererModelNG::SetFontSize(const BaseInfo& baseInfo, const Dimensio
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFontSize(size);
         return;
     }
@@ -139,6 +160,9 @@ std::vector<double> CanvasRendererModelNG::GetLineDash(const BaseInfo& baseInfo)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_RETURN(offscreenPattern, lineDash);
+        if (!offscreenPattern->IsSucceed()) {
+            return lineDash;
+        }
         lineDash = offscreenPattern->GetLineDash().lineDash;
     } else if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
         auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(baseInfo.canvasPattern);
@@ -154,6 +178,9 @@ void CanvasRendererModelNG::SetFillGradient(const BaseInfo& baseInfo, const Ace:
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFillGradient(gradient);
         return;
     }
@@ -171,6 +198,9 @@ void CanvasRendererModelNG::SetFillPattern(const BaseInfo& baseInfo, const std::
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFillPattern(patternWeakptr);
         return;
     }
@@ -187,6 +217,9 @@ void CanvasRendererModelNG::SetFillColor(const BaseInfo& baseInfo, const Color& 
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFillColor(color);
         return;
     }
@@ -203,6 +236,9 @@ void CanvasRendererModelNG::SetStrokeGradient(const BaseInfo& baseInfo, const Ac
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetStrokeGradient(gradient);
         return;
     }
@@ -219,6 +255,9 @@ void CanvasRendererModelNG::SetStrokePattern(const BaseInfo& baseInfo, const std
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetStrokePattern(pattern);
         return;
     }
@@ -235,6 +274,9 @@ void CanvasRendererModelNG::SetStrokeColor(const BaseInfo& baseInfo, const Color
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetStrokeColor(color);
         return;
     }
@@ -251,6 +293,9 @@ void CanvasRendererModelNG::DrawImage(const BaseInfo& baseInfo, const ImageInfo&
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         if (imageInfo.isImage) {
             offscreenPattern->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
             return;
@@ -275,6 +320,9 @@ void CanvasRendererModelNG::PutImageData(const BaseInfo& baseInfo, const ImageDa
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->PutImageData(imageData);
         return;
     }
@@ -301,6 +349,9 @@ std::unique_ptr<ImageData> CanvasRendererModelNG::GetImageData(const BaseInfo& b
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_RETURN(offscreenPattern, data);
+        if (!offscreenPattern->IsSucceed()) {
+            return data;
+        }
         data = offscreenPattern->GetImageData(imageSize.left, imageSize.top, imageSize.width, imageSize.height);
     } else if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
         auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(baseInfo.canvasPattern);
@@ -315,6 +366,9 @@ void CanvasRendererModelNG::DrawPixelMap(const BaseInfo& baseInfo, const ImageIn
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->DrawPixelMap(imageInfo.pixelMap, imageInfo.image);
         return;
     }
@@ -331,6 +385,9 @@ void CanvasRendererModelNG::SetFilterParam(const BaseInfo& baseInfo, const std::
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFilterParam(src);
         return;
     }
@@ -347,6 +404,9 @@ void CanvasRendererModelNG::SetTextDirection(const BaseInfo& baseInfo, const Tex
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetTextDirection(direction);
         return;
     }
@@ -375,6 +435,9 @@ std::string CanvasRendererModelNG::ToDataURL(const BaseInfo& baseInfo, const std
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_RETURN(offscreenPattern, result);
+        if (!offscreenPattern->IsSucceed()) {
+            return result;
+        }
         result = offscreenPattern->ToDataURL(dataUrl, quality);
     } else if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
         auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(baseInfo.canvasPattern);
@@ -389,6 +452,9 @@ void CanvasRendererModelNG::SetLineCap(const BaseInfo& baseInfo, const LineCapSt
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetLineCap(lineCap);
         return;
     }
@@ -405,6 +471,9 @@ void CanvasRendererModelNG::SetLineJoin(const BaseInfo& baseInfo, const LineJoin
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetLineJoin(lineJoin);
         return;
     }
@@ -421,6 +490,9 @@ void CanvasRendererModelNG::SetMiterLimit(const BaseInfo& baseInfo, double limit
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetMiterLimit(limit);
         return;
     }
@@ -437,6 +509,9 @@ void CanvasRendererModelNG::SetLineWidth(const BaseInfo& baseInfo, double lineWi
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetLineWidth(lineWidth);
         return;
     }
@@ -453,6 +528,9 @@ void CanvasRendererModelNG::SetGlobalAlpha(const BaseInfo& baseInfo, double alph
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetAlpha(alpha);
         return;
     }
@@ -469,6 +547,9 @@ void CanvasRendererModelNG::SetCompositeType(const BaseInfo& baseInfo, const Com
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetCompositeType(type);
         return;
     }
@@ -485,6 +566,9 @@ void CanvasRendererModelNG::SetLineDashOffset(const BaseInfo& baseInfo, double l
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetLineDashOffset(lineDashOffset);
         return;
     }
@@ -501,6 +585,9 @@ void CanvasRendererModelNG::SetShadowBlur(const BaseInfo& baseInfo, double blur)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetShadowBlur(blur);
         return;
     }
@@ -517,6 +604,9 @@ void CanvasRendererModelNG::SetShadowColor(const BaseInfo& baseInfo, const Color
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetShadowColor(color);
         return;
     }
@@ -533,6 +623,9 @@ void CanvasRendererModelNG::SetShadowOffsetX(const BaseInfo& baseInfo, double of
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetShadowOffsetX(offsetX);
         return;
     }
@@ -549,6 +642,9 @@ void CanvasRendererModelNG::SetShadowOffsetY(const BaseInfo& baseInfo, double of
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetShadowOffsetY(offsetY);
         return;
     }
@@ -565,6 +661,9 @@ void CanvasRendererModelNG::SetSmoothingEnabled(const BaseInfo& baseInfo, bool e
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetSmoothingEnabled(enabled);
         return;
     }
@@ -581,6 +680,9 @@ void CanvasRendererModelNG::SetSmoothingQuality(const BaseInfo& baseInfo, const 
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetSmoothingQuality(quality);
         return;
     }
@@ -597,6 +699,9 @@ void CanvasRendererModelNG::MoveTo(const BaseInfo& baseInfo, double x, double y)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->MoveTo(x, y);
         return;
     }
@@ -613,6 +718,9 @@ void CanvasRendererModelNG::LineTo(const BaseInfo& baseInfo, double x, double y)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->LineTo(x, y);
         return;
     }
@@ -629,6 +737,9 @@ void CanvasRendererModelNG::BezierCurveTo(const BaseInfo& baseInfo, const Bezier
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->BezierCurveTo(param);
         return;
     }
@@ -645,6 +756,9 @@ void CanvasRendererModelNG::QuadraticCurveTo(const BaseInfo& baseInfo, const Qua
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->QuadraticCurveTo(param);
         return;
     }
@@ -661,6 +775,9 @@ void CanvasRendererModelNG::ArcTo(const BaseInfo& baseInfo, const ArcToParam& pa
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->ArcTo(param);
         return;
     }
@@ -677,6 +794,9 @@ void CanvasRendererModelNG::Arc(const BaseInfo& baseInfo, const ArcParam& param)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->Arc(param);
         return;
     }
@@ -693,6 +813,9 @@ void CanvasRendererModelNG::Ellipse(const BaseInfo& baseInfo, const EllipseParam
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->Ellipse(param);
         return;
     }
@@ -709,6 +832,12 @@ void CanvasRendererModelNG::SetFillRuleForPath(const BaseInfo& baseInfo, const C
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFillRuleForPath(fillRule);
         offscreenPattern->Fill();
         return;
@@ -728,6 +857,9 @@ void CanvasRendererModelNG::SetFillRuleForPath2D(const BaseInfo& baseInfo, const
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFillRuleForPath2D(fillRule);
         offscreenPattern->Fill(path);
         return;
@@ -747,6 +879,9 @@ void CanvasRendererModelNG::SetStrokeRuleForPath2D(const BaseInfo& baseInfo, con
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFillRuleForPath(fillRule);
         offscreenPattern->Stroke(path);
         return;
@@ -765,6 +900,9 @@ void CanvasRendererModelNG::SetStrokeRuleForPath(const BaseInfo& baseInfo, const
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFillRuleForPath(fillRule);
         offscreenPattern->Stroke();
         return;
@@ -783,6 +921,9 @@ void CanvasRendererModelNG::SetClipRuleForPath(const BaseInfo& baseInfo, const C
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFillRuleForPath(fillRule);
         offscreenPattern->Clip();
         return;
@@ -802,6 +943,9 @@ void CanvasRendererModelNG::SetClipRuleForPath2D(const BaseInfo& baseInfo, const
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetFillRuleForPath2D(fillRule);
         offscreenPattern->Clip(path);
         return;
@@ -820,6 +964,9 @@ void CanvasRendererModelNG::AddRect(const BaseInfo& baseInfo, const Rect& rect)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->AddRect(rect);
         return;
     }
@@ -836,6 +983,9 @@ void CanvasRendererModelNG::BeginPath(const BaseInfo& baseInfo)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->BeginPath();
         return;
     }
@@ -852,6 +1002,9 @@ void CanvasRendererModelNG::ClosePath(const BaseInfo& baseInfo)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->ClosePath();
         return;
     }
@@ -868,6 +1021,9 @@ void CanvasRendererModelNG::Restore(const BaseInfo& baseInfo)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->Restore();
         return;
     }
@@ -884,6 +1040,9 @@ void CanvasRendererModelNG::CanvasRendererSave(const BaseInfo& baseInfo)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->Save();
         return;
     }
@@ -900,6 +1059,9 @@ void CanvasRendererModelNG::CanvasRendererRotate(const BaseInfo& baseInfo, doubl
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->Rotate(angle);
         return;
     }
@@ -916,6 +1078,9 @@ void CanvasRendererModelNG::CanvasRendererScale(const BaseInfo& baseInfo, double
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->Scale(x, y);
         return;
     }
@@ -932,6 +1097,9 @@ void CanvasRendererModelNG::SetTransform(const BaseInfo& baseInfo, TransformPara
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetTransform(param);
         return;
     }
@@ -948,6 +1116,9 @@ void CanvasRendererModelNG::ResetTransform(const BaseInfo& baseInfo)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->ResetTransform();
         return;
     }
@@ -964,6 +1135,9 @@ void CanvasRendererModelNG::Transform(const BaseInfo& baseInfo, const TransformP
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->Transform(param);
         return;
     }
@@ -980,6 +1154,9 @@ void CanvasRendererModelNG::Translate(const BaseInfo& baseInfo, double x, double
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->Translate(x, y);
         return;
     }
@@ -996,6 +1173,9 @@ void CanvasRendererModelNG::SetLineDash(const BaseInfo& baseInfo, const std::vec
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetLineDash(lineDash);
         return;
     }
@@ -1012,6 +1192,9 @@ void CanvasRendererModelNG::SetTextAlign(const BaseInfo& baseInfo, const TextAli
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetTextAlign(align);
         return;
     }
@@ -1028,6 +1211,9 @@ void CanvasRendererModelNG::SetTextBaseline(const BaseInfo& baseInfo, const Text
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->SetTextBaseline(baseline);
         return;
     }
@@ -1045,6 +1231,9 @@ double CanvasRendererModelNG::GetMeasureTextWidth(const BaseInfo& baseInfo, cons
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_RETURN(offscreenPattern, width);
+        if (!offscreenPattern->IsSucceed()) {
+            return width;
+        }
         width = offscreenPattern->MeasureText(text, baseInfo.paintState);
         return width;
     }
@@ -1063,6 +1252,9 @@ double CanvasRendererModelNG::GetMeasureTextHeight(const BaseInfo& baseInfo, con
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_RETURN(offscreenPattern, height);
+        if (!offscreenPattern->IsSucceed()) {
+            return height;
+        }
         height = offscreenPattern->MeasureTextHeight(text, baseInfo.paintState);
         return height;
     }
@@ -1080,6 +1272,9 @@ void CanvasRendererModelNG::FillRect(const BaseInfo& baseInfo, const Rect& rect)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->FillRect(rect);
         return;
     }
@@ -1096,6 +1291,9 @@ void CanvasRendererModelNG::StrokeRect(const BaseInfo& baseInfo, const Rect& rec
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->StrokeRect(rect);
         return;
     }
@@ -1112,6 +1310,9 @@ void CanvasRendererModelNG::ClearRect(const BaseInfo& baseInfo, const Rect& rect
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
         offscreenPattern->ClearRect(rect);
         return;
     }
@@ -1129,6 +1330,9 @@ TransformParam CanvasRendererModelNG::GetTransform(const BaseInfo& baseInfo)
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_RETURN(offscreenPattern, param);
+        if (!offscreenPattern->IsSucceed()) {
+            return param;
+        }
         param = offscreenPattern->GetTransform();
     } else if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
         auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(baseInfo.canvasPattern);
