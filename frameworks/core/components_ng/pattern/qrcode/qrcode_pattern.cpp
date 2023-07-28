@@ -60,15 +60,4 @@ void QRCodePattern::OnModifyDone()
     }
 }
 
-FocusPattern QRCodePattern::GetFocusPattern() const
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, FocusPattern());
-    auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
-    CHECK_NULL_RETURN(qrCodeTheme, FocusPattern());
-    auto focusedColor = qrCodeTheme->GetFocusedColor();
-    FocusPaintParam focusPaintParam;
-    focusPaintParam.SetPaintColor(focusedColor);
-    return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
-}
 } // namespace OHOS::Ace::NG

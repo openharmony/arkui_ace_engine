@@ -24,7 +24,6 @@ public:
     void Create(const std::string& value) override;
     void SetQRCodeColor(Color color) override;
     void SetQRBackgroundColor(Color color) override;
-    void SetContentOpacity(double opacity) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_QRCODE_MODEL_IMPL_H

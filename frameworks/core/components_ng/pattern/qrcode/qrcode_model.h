@@ -29,7 +29,6 @@ public:
     virtual void Create(const std::string& value) = 0;
     virtual void SetQRCodeColor(Color color) = 0;
     virtual void SetQRBackgroundColor(Color color) = 0;
-    virtual void SetContentOpacity(double opacity) = 0;
 
 private:
     static std::unique_ptr<QRCodeModel> instance_;
