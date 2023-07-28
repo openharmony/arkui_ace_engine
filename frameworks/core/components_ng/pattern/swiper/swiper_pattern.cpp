@@ -509,6 +509,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         SetLazyLoadFeature(true);
     } else {
         OnIndexChange();
+        oldIndex_ = currentIndex_;
     }
 
     auto curChild = dirty->GetOrCreateChildByIndex(GetLoopIndex(currentIndex_));
