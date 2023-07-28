@@ -191,7 +191,8 @@ void ContainerModalPattern::InitContainerEvent()
                                      MouseInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
-        if (info.GetAction() != MouseAction::MOVE || !container->hasDeco_) {
+        auto action = info.GetAction();
+        if ((action != MouseAction::MOVE && action != MouseAction::WINDOW_LEAVE) || !container->hasDeco_) {
             return;
         }
         if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && container->CanShowFloatingTitle()) {
@@ -200,7 +201,7 @@ void ContainerModalPattern::InitContainerEvent()
             AnimationUtils::Animate(option, [context]() { context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f }); });
         }
 
-        if (info.GetLocalLocation().GetY() >= titlePopupDistance &&
+        if ((info.GetLocalLocation().GetY() >= titlePopupDistance || action == MouseAction::WINDOW_LEAVE) &&
             floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
             AnimationUtils::Animate(
                 option,
