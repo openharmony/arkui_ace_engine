@@ -82,7 +82,7 @@ public:
     void RestoreClipboardData();
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const RefPtr<OHOS::Ace::DragEvent>& event);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
@@ -129,6 +129,16 @@ public:
     void SetIsMouseDrag(bool isMouseDragged)
     {
         isMouseDragged_ = isMouseDragged;
+    }
+
+    void SetIsDragWindowShow(bool isDragWindowShow)
+    {
+        isDragWindowShow_ = isDragWindowShow;
+    }
+
+    bool IsDragWindowShow()
+    {
+        return isDragWindowShow_;
     }
 
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
@@ -179,6 +189,7 @@ private:
     bool isDragged_ = false;
     bool isMouseDragged_ = false;
     bool isWindowConsumed_ = false;
+    bool isDragWindowShow_ = false;
     VelocityTracker velocityTracker_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);

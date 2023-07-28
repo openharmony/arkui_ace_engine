@@ -689,7 +689,7 @@ void GestureEventHub::OnDragStart(
         LOGE("InteractionManager: drag start error");
         return;
     }
-    if (dragEventActuator_->GetIsNotInPreviewState()) {
+    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("Drag window start for not in previewState, set DragWindowVisible true.");
         }
@@ -699,6 +699,7 @@ void GestureEventHub::OnDragStart(
             LOGI("Drag window start for Mouse with custom pixelMap, set DragWindowVisible true.");
         }
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        dragDropManager->SetIsDragWindowShow(true);
     }
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
     if (!dragDropProxy_) {
