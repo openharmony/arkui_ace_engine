@@ -102,6 +102,8 @@ public:
 
     void OnModifyDone() override;
 
+    void OnColorConfigurationUpdate() override;
+
 private:
     void OnAttachToFrameNode() override;
     int32_t TotalCount() const;
@@ -129,6 +131,7 @@ private:
     void ButtonTouchDownAnimation(RefPtr<FrameNode> buttonNode);
     void ButtonTouchUpAnimation(RefPtr<FrameNode> buttonNode);
     void SetAccessibilityAction();
+    void ButtonSkipColorConfigurationUpdate(RefPtr<FrameNode> buttonNode);
     WeakPtr<FocusHub> GetFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
     int32_t index_ = 0;

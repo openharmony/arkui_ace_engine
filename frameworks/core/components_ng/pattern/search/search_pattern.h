@@ -113,6 +113,23 @@ public:
 
     void UpdateChangeEvent(const std::string& value);
 
+    void SetCancelButtonNode(const RefPtr<FrameNode>& cancelButtonNode)
+    {
+        cancelButtonNode_ = cancelButtonNode;
+    }
+
+    void SetButtonNode(const RefPtr<FrameNode>& buttonNode)
+    {
+        buttonNode_ = buttonNode;
+    }
+
+    void SetTextFieldNode(const RefPtr<FrameNode>& textField)
+    {
+        textField_ = textField;
+    }
+
+    void OnColorConfigurationUpdate() override;
+
 private:
     void OnModifyDone() override;
     void InitButtonAndImageClickEvent();
@@ -188,6 +205,10 @@ private:
     bool isCancelButtonHover_ = false;
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
+
+    RefPtr<FrameNode> cancelButtonNode_;
+    RefPtr<FrameNode> buttonNode_;
+    RefPtr<FrameNode> textField_;
 };
 
 } // namespace OHOS::Ace::NG
