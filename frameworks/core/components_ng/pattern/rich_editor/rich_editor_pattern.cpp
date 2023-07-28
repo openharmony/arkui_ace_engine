@@ -870,7 +870,12 @@ void RichEditorPattern::HandleBlurEvent()
     }
 }
 
-void RichEditorPattern::HandleFocusEvent() {}
+void RichEditorPattern::HandleFocusEvent()
+{
+    SetCaretOffset(GetTextContentLength());
+    StartTwinkling();
+    RequestKeyboard(false, true, true);
+}
 
 void RichEditorPattern::OnVisibleChange(bool isVisible)
 {

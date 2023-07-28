@@ -381,6 +381,16 @@ void JSRichEditor::CreateImageStyleObj(
     }
 }
 
+void JSRichEditor::JsFocusable(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsBoolean()) {
+        LOGW("The info is wrong, it is supposed to be an boolean");
+        return;
+    }
+    JSInteractableView::SetFocusable(info[0]->ToBoolean());
+    JSInteractableView::SetFocusNode(false);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -397,6 +407,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRichEditor>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRichEditor>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSRichEditor>::StaticMethod("focusable", &JSRichEditor::JsFocusable);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
