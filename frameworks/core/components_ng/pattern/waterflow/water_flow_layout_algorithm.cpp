@@ -76,13 +76,18 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
 
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;
+    std::pair<std::vector<double>, bool> cross;
     if (axis_ == Axis::VERTICAL) {
-        crossLens = ParseTemplateArgs(PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
+        cross = ParseTemplateArgs(PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
     } else {
-        crossLens = ParseTemplateArgs(PreParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
+        cross = ParseTemplateArgs(PreParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
     }
+    crossLens = cross.first;
     if (crossLens.empty()) {
         crossLens.push_back(crossSize);
+    }
+    if (cross.second) {
+        crossGap_ = 0;
     }
 
     // cross count changed by auto-fill and cross size change
