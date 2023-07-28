@@ -40,14 +40,8 @@ bool LayoutWrapper::SkipMeasureContent() const
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
-    SizeF safeSize { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
-    safeSize.MinusPadding(insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
-    safeSize.SetWidth(std::min(safeSize.Width(), constraint.maxSize.Width()));
-    safeSize.SetHeight(std::min(safeSize.Height(), constraint.maxSize.Height()));
-
-    constraint.maxSize = safeSize;
-    constraint.parentIdealSize = OptionalSizeF(safeSize);
-    constraint.percentReference = safeSize;
+    constraint.MinusPadding(
+        insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
 }
 
 void LayoutWrapper::OffsetNodeToSafeArea()
