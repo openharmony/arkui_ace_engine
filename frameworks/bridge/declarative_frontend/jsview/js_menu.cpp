@@ -95,6 +95,13 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 MenuModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
             }
         }
+
+        auto jsFamily = obj->GetProperty("family");
+        if (!jsFamily->IsNull() && jsFamily->IsString()) {
+            auto familyVal = jsFamily->ToString();
+            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+            MenuModel::GetInstance()->SetFontFamily(fontFamilies);
+        }
     }
     MenuModel::GetInstance()->SetFontSize(fontSize);
     MenuModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
