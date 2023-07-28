@@ -286,14 +286,40 @@ void NavigationGroupNode::SetBackButtonEvent(
             AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(preNavDestinationNode));
         if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
             if (preNavDestination) {
-                navigation->BackToPreNavDestination(preNavDestinationNode, navDestination, navRouterPattern);
+                auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigation->GetContentNode());
+                CHECK_NULL_VOID(navigationContentNode);
+                navigationContentNode->AddChild(preNavDestination);
+                auto navDestinationPattern = preNavDestination->GetPattern<NavDestinationPattern>();
+                auto navRouteMode = NavRouteMode::REPLACE;
+                RefPtr<RouteInfo> routeInfo;
+                if (navRouterPattern) {
+                    routeInfo = navDestinationPattern->GetRouteInfo();
+                }
+                auto name = navDestinationPattern->GetName();
+                if (routeInfo) {
+                    navigationPattern->AddNavDestinationNode(name, preNavDestinationNode, navRouteMode, routeInfo);
+                } else {
+                    navigationPattern->AddNavDestinationNode(name, preNavDestinationNode, navRouteMode);
+                }
                 navigation->SetOnStateChangeFalse(preNavDestination, navDestination, true);
                 layoutProperty->UpdateDestinationChange(true);
+                navigation->MarkModifyDone();
                 return;
             }
-            navigation->BackToNavBar(navDestination);
+            // let navBarNode request focus
+            auto navBarNode = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
+            CHECK_NULL_VOID(navBarNode);
+            auto navBarContentNode = navBarNode->GetNavBarContentNode();
+            CHECK_NULL_VOID(navBarContentNode);
+            auto focusHub = AceType::DynamicCast<FrameNode>(navBarContentNode)->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(true);
+            focusHub->RequestFocus();
+
+            navigationPattern->RemoveNavDestination();
             navigation->SetOnStateChangeFalse(navDestination, navDestination, true);
             layoutProperty->UpdateDestinationChange(false);
+            navigation->MarkModifyDone();
             return;
         }
 
@@ -316,78 +342,20 @@ void NavigationGroupNode::SetBackButtonEvent(
     backButtonEventHub->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent);
 }
 
-void NavigationGroupNode::BackToNavBar(const RefPtr<UINode>& navDestinationNode)
-{
-    auto navigationNode = AceType::WeakClaim(this).Upgrade();
-    if (navigationNode->GetIsOnAnimation()) {
-        LOGI("navigation is on animation");
-        return;
-    }
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
-    auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-    if (titleBarNode || destinationTitleBarNode) {
-        TitleTransitionOutAnimation(titleBarNode, destinationTitleBarNode);
-    }
-    if (backButtonNode) {
-        BackButtonAnimation(backButtonNode, false);
-        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(backButtonLayoutProperty);
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    }
-    // let navBarNode request focus
-    auto navBarContentNode = navBarNode->GetNavBarContentNode();
-    CHECK_NULL_VOID(navBarContentNode);
-    auto focusHub = AceType::DynamicCast<FrameNode>(navBarContentNode)->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetParentFocusable(true);
-    focusHub->RequestFocus();
-
-    auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
-    CHECK_NULL_VOID(navigationContentNode);
-    NavTransitionOutAnimation(navBarNode, navDestination, navigationContentNode);
-}
-
 void NavigationGroupNode::BackToPreNavDestination(const RefPtr<UINode>& preNavDestinationNode,
     const RefPtr<UINode>& navDestinationNode, const RefPtr<NavRouterPattern>& navRouterPattern)
 {
     auto navigationNode = AceType::WeakClaim(this).Upgrade();
-    if (navigationNode->GetIsOnAnimation()) {
-        LOGI("navigation is on animation");
-        return;
-    }
+    CHECK_NULL_VOID(navigationNode);
     auto preNavDestination =
         AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(preNavDestinationNode));
     CHECK_NULL_VOID(preNavDestination);
     auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
     CHECK_NULL_VOID(navigationContentNode);
-
-    auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
-    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
-        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
-        auto preDestinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
-        auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
-        if (preDestinationTitleBarNode || destinationTitleBarNode) {
-            TitleTransitionOutAnimation(preDestinationTitleBarNode, destinationTitleBarNode);
-        }
-        auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-        if (backButtonNode) {
-            BackButtonAnimation(backButtonNode, false);
-            auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-            CHECK_NULL_VOID(backButtonLayoutProperty);
-            backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        }
-        NavTransitionBackToPreAnimation(preNavDestination, navDestination, navigationContentNode);
-    }
     navigationContentNode->AddChild(preNavDestination);
-    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
-        navigationContentNode->MarkModifyDone();
-        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    navigationContentNode->MarkModifyDone();
+    navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     auto navDestinationPattern = preNavDestination->GetPattern<NavDestinationPattern>();
@@ -408,10 +376,6 @@ void NavigationGroupNode::NavTransitionInAnimation(
     const RefPtr<FrameNode>& transitionOutNode, const RefPtr<FrameNode>& navDestination)
 {
     auto navigationNode = AceType::WeakClaim(this).Upgrade();
-    if (navigationNode->GetIsOnAnimation()) {
-        LOGI("navigation is on animation");
-        return;
-    }
     AnimationOption option;
     option.SetCurve(interpolatingSpringCurve);
     option.SetFillMode(FillMode::FORWARDS);
@@ -440,10 +404,6 @@ void NavigationGroupNode::NavTransitionInAnimation(
                     ContainerScope scope(id);
                     if (transitionOutNodeContext) {
                         transitionOutNodeContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-                    }
-                    if (navDestination) {
-                        navDestination->GetRenderContext()->ClipWithRRect(
-                            RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     }
                     navigationNode->SetIsOnAnimation(false);
                     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
@@ -475,10 +435,6 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
     const RefPtr<FrameNode>& navDestination, const RefPtr<FrameNode>& navigationContentNode)
 {
     auto navigationNode = AceType::WeakClaim(this).Upgrade();
-    if (navigationNode->GetIsOnAnimation()) {
-        LOGI("navigation is on animation");
-        return;
-    }
     AnimationOption option;
     option.SetCurve(interpolatingSpringCurve);
     option.SetFillMode(FillMode::FORWARDS);
@@ -517,10 +473,8 @@ void NavigationGroupNode::NavTransitionOutAnimation(const RefPtr<FrameNode>& nav
                     navDestination->GetRenderContext()->ClipWithRRect(
                         RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                     ContainerScope scope(id);
-                    navigationPattern->RemoveNavDestination();
                     navigationContentNode->Clean();
-                    navigationContentNode->MarkModifyDone();
-                    navigationNode->MarkModifyDone();
+                    navigationPattern->RemoveNavDestination();
                     navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                     navigationNode->SetIsOnAnimation(false);
                     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
@@ -563,10 +517,6 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
 {
     auto navigationNode = AceType::WeakClaim(this).Upgrade();
     CHECK_NULL_VOID(navigationNode);
-    if (navigationNode->GetIsOnAnimation()) {
-        LOGI("navigation is on animation");
-        return;
-    }
     AnimationOption option;
     option.SetCurve(interpolatingSpringCurve);
     option.SetFillMode(FillMode::FORWARDS);
@@ -600,8 +550,9 @@ void NavigationGroupNode::NavTransitionBackToPreAnimation(const RefPtr<FrameNode
                 curNavDestination->GetRenderContext()->ClipWithRRect(
                     RectF(0.0f, 0.0f, Infinity<float>(), nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
                 ContainerScope scope(id);
+                navigationContentNode->Clean();
+                navigationNode->AddNavDestinationToNavigation();
                 navigationContentNode->MarkModifyDone();
-                navigationNode->MarkModifyDone();
                 navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 navigationNode->SetIsOnAnimation(false);
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
