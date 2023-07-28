@@ -243,11 +243,17 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
 
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;
+    std::pair<std::vector<double>, bool> cross;
     if (!rowsTemplate.empty()) {
-        crossLens = ParseTemplateArgs(GridUtils::ParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
+        cross = ParseTemplateArgs(GridUtils::ParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
     } else {
-        crossLens = ParseTemplateArgs(GridUtils::ParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
+        cross = ParseTemplateArgs(GridUtils::ParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
     }
+    crossLens = cross.first;
+    if (cross.second) {
+        crossGap_ = 0.0f;
+    }
+
     if (crossLens.empty()) {
         crossLens.push_back(crossSize);
     }
