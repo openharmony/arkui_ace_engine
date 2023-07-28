@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "core/common/container.h"
@@ -69,7 +70,8 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     auto theme = pipelineContext->GetTheme<ProgressTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
     if (paintProperty->GetStrokeWidth().has_value() && paintProperty->GetStrokeWidth()->Value() > 0) {
-        data.thickness = paintProperty->GetStrokeWidth()->ConvertToPx();
+        data.thickness =
+            std::min(static_cast<float>(paintProperty->GetStrokeWidth()->ConvertToPx()), contentSize.Width() / 2);
     }
     std::vector<float> weights;
     if (paintProperty->GetValues().has_value()) {
