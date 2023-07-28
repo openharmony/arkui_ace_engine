@@ -1231,7 +1231,8 @@ void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(DynamicLightUp, para);
+    ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpRate, rate);
+    ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius)

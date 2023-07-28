@@ -3118,11 +3118,11 @@ void JSViewAbstract::JsDynamicLightUp(const JSCallbackInfo& info)
 
     double rate = 0.0;
     double lightUpDegree = 0.0;
-    if (!ParseJsDouble(argsPtrItem->GetValue("rate"), rate)) {
+    if (!ParseJsonDouble(argsPtrItem->GetValue("rate"), rate)) {
         LOGE("Js Parse double failed. rate is not double.");
         return;
     }
-    if (!ParseJsDouble(argsPtrItem->GetValue("lightUpDegree"), lightUpDegree)) {
+    if (!ParseJsonDouble(argsPtrItem->GetValue("lightUpDegree"), lightUpDegree)) {
         LOGE("Js Parse double failed. lightUpDegree is not double.");
         return;
     }
