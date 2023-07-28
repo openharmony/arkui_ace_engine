@@ -149,6 +149,7 @@ public:
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void ResetSelection();
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -187,10 +188,11 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
 
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
+    RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(RefPtr<SpanNode> node);
-    ResultObject GetTextResultObject(RefPtr<SpanItem> item, int32_t index, int32_t start, int32_t end);
-    ResultObject GetImageResultObject(RefPtr<SpanItem> item, int32_t index, int32_t start, int32_t end);
+    ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
+    ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     void OnHover(bool isHover);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
 #if defined(ENABLE_STANDARD_INPUT)
