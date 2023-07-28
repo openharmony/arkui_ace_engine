@@ -209,7 +209,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         LOGI("waiting for window size");
         return true;
     }
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return true;
 }
 

@@ -16,10 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_QRCODE_QRCODE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_QRCODE_QRCODE_PAINT_METHOD_H
 
-#include "qrcodegen.hpp"
-
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/qrcode/qrcode_modifier.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 
@@ -28,29 +27,21 @@ namespace OHOS::Ace::NG {
 class QRCodePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(QRCodePaintMethod, NodePaintMethod)
 
-    union BGRA {
-        struct {
-            uint8_t red;
-            uint8_t green;
-            uint8_t blue;
-            uint8_t alpha;
-        } argb;
-
-        uint32_t value;
-    };
-
 public:
-    QRCodePaintMethod(float qrCodeSize) : qrCodeSize_(qrCodeSize) {}
+    QRCodePaintMethod(float qrCodeSize, const RefPtr<QRCodeModifier>& qrCodeModifier)
+        : qrCodeSize_(qrCodeSize), qrCodeModifier_(qrCodeModifier)
+    {}
     ~QRCodePaintMethod() override = default;
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(qrCodeModifier_, nullptr);
+        return qrCodeModifier_;
+    }
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    void Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    RSBitmap CreateBitMap(
-        int32_t width, const qrcodegen::QrCode& qrCode, const Color& color, const Color& backgroundColor) const;
-    uint32_t ConvertColorFromHighToLow(const Color& color) const;
-
     float qrCodeSize_ = 0.0f;
+    RefPtr<QRCodeModifier> qrCodeModifier_;
 };
 
 } // namespace OHOS::Ace::NG

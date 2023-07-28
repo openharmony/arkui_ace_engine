@@ -126,7 +126,6 @@ void ForEachNode::CompareAndUpdateChildren()
     }
 
     tempChildren_.clear();
-    tempIds_.clear();
 
     auto parent = GetParent();
     if (parent) {
@@ -136,6 +135,11 @@ void ForEachNode::CompareAndUpdateChildren()
 
 void ForEachNode::FlushUpdateAndMarkDirty()
 {
+    if (ids_ == tempIds_) {
+        tempIds_.clear();
+        return;
+    }
+    tempIds_.clear();
     // mark parent dirty to flush measure.
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);

@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -28,6 +29,17 @@ void PopupBasePattern::BeforeCreateLayoutWrapper()
 
     auto manager = pipeline->GetSafeAreaManager();
     inset.bottom_ = inset.bottom_.Combine(manager->GetKeyboardInset());
+
+    // not full-screen in floating window mode, calculate real inset
+    if (inset.bottom_.IsValid() && pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+        pipeline->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto titleHeight = CONTAINER_TITLE_HEIGHT.ConvertToPx();
+        auto borderWidth = CONTAINER_BORDER_WIDTH.ConvertToPx();
+        auto botPadding = CONTENT_PADDING.ConvertToPx();
+        inset.bottom_.start -= std::round(titleHeight + borderWidth);
+        inset.bottom_.end -= std::round(titleHeight + 2 * borderWidth + botPadding);
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto props = host->GetLayoutProperty();

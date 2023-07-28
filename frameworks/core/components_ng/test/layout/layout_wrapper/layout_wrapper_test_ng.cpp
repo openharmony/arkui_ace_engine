@@ -895,8 +895,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest021, TestSize.Level1)
      */
     layoutWrapper->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     layoutWrapper->Measure(parentLayoutConstraint);
-    IDEAL_SIZE.width_ = layoutWrapper->geometryNode_->parentLayoutConstraint_->selfIdealSize.Width();
-    IDEAL_SIZE.height_ = layoutWrapper->geometryNode_->parentLayoutConstraint_->selfIdealSize.Height();
+    IDEAL_SIZE.width_ = layoutWrapper->layoutProperty_->layoutConstraint_->selfIdealSize.Width();
+    IDEAL_SIZE.height_ = layoutWrapper->layoutProperty_->layoutConstraint_->selfIdealSize.Height();
     EXPECT_EQ(IDEAL_SIZE.width_, RK356_WIDTH);
     EXPECT_EQ(IDEAL_SIZE.height_, RK356_WIDTH * 2);
 }
@@ -1494,10 +1494,11 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest039, TestSize.Level1)
     stage->ApplyConstraint(constraint);
     popup->ApplyConstraint(constraint);
 
-    EXPECT_EQ(stage->geometryNode_->parentLayoutConstraint_, constraint);
+    EXPECT_EQ(stage->layoutProperty_->layoutConstraint_, constraint);
     // popup is restricted by safeArea
-    EXPECT_TRUE(popup->geometryNode_->parentLayoutConstraint_);
-    EXPECT_NE(popup->geometryNode_->parentLayoutConstraint_, constraint);
+    EXPECT_EQ(popup->geometryNode_->parentLayoutConstraint_, constraint);
+    EXPECT_TRUE(popup->layoutProperty_->layoutConstraint_);
+    EXPECT_NE(popup->layoutProperty_->layoutConstraint_, constraint);
 }
 
 /**

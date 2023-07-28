@@ -574,6 +574,11 @@ void JSCanvasRenderer::ParseFillGradient(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ParseFillPattern(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
+            "and the first argument must be a object.");
+        return;
+    }
     auto* jSCanvasPattern = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasPattern>();
     CHECK_NULL_VOID(jSCanvasPattern);
     int32_t id = jSCanvasPattern->GetId();
@@ -607,6 +612,10 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         CanvasRendererModel::GetInstance()->SetFillColor(baseInfo, color, true);
         return;
     }
+    if (!info[0]->IsObject()) {
+        LOGE("The arg is not Object.");
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeValue = obj->GetProperty("__type");
     std::string type = "";
@@ -626,6 +635,11 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ParseStorkeGradient(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
+            "and the first argument must be a object.");
+        return;
+    }
     auto* jSCanvasGradient = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasGradient>();
     if (!jSCanvasGradient) {
         return;
@@ -645,6 +659,11 @@ void JSCanvasRenderer::ParseStorkeGradient(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ParseStrokePattern(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
+            "and the first argument must be a object.");
+        return;
+    }
     auto* jSCanvasPattern = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasPattern>();
     CHECK_NULL_VOID(jSCanvasPattern);
     int32_t id = jSCanvasPattern->GetId();
@@ -675,6 +694,10 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
             return;
         }
         CanvasRendererModel::GetInstance()->SetStrokeColor(baseInfo, color, true);
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("The arg is not Object.");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -861,23 +884,15 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(heightValue, height);
     }
 
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return;
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(width * height * 4);
+    // return the black image
+    auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
+    for (uint32_t idx = 0; idx < width * height; ++idx) {
+        buffer[idx] = 0xffffffff;
     }
 
-    JSRef<JSArray> colorArray = JSRef<JSArray>::New();
-    uint32_t count = 0;
-    for (auto i = 0; i < width; i++) {
-        for (auto j = 0; j < height; j++) {
-            colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(255)));
-            colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(255)));
-            colorArray->SetValueAt(count + 2, JSRef<JSVal>::Make(ToJSValue(255)));
-            colorArray->SetValueAt(count + 3, JSRef<JSVal>::Make(ToJSValue(255)));
-            count += 4;
-        }
-    }
+    JSRef<JSUint8ClampedArray> colorArray =
+        JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
 
     auto retObj = JSRef<JSObject>::New();
     retObj->SetProperty("width", width);

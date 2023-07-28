@@ -707,6 +707,7 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
 {
     auto menu = FrameNode::CreateFrameNode(
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
+    menuNode_ = menu;
     // column -> button
     for (size_t i = 0; i < buttons.size(); ++i) {
         RefPtr<FrameNode> button;
@@ -774,6 +775,17 @@ void DialogPattern::OnColorConfigurationUpdate()
     auto colRenderContext = col->GetRenderContext();
     CHECK_NULL_VOID(colRenderContext);
     colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    CHECK_NULL_VOID(menuNode_);
+    for (const auto buttonNode : menuNode_->GetChildren()) {
+        if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
+            continue;
+        }
+        auto buttonFrameNode = DynamicCast<FrameNode>(buttonNode);
+        CHECK_NULL_VOID(buttonFrameNode);
+        auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetSkipColorConfigurationUpdate();
+    }
     OnModifyDone();
     host->MarkDirtyNode();
 }

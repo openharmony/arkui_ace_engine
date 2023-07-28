@@ -420,6 +420,7 @@ void PageRouterManager::StartRestore(const RouterPageInfo& target)
     }
 
     restorePageStack_ = tempStack;
+    StartClean();
     PopPage("", false, false);
     StartPush(info);
 }

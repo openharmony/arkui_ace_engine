@@ -145,6 +145,10 @@ void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<
 
 void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal)
 {
+    if (!jsVal->IsArray()) {
+        LOGE("The arg is not array.");
+        return;
+    }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsVal);
     int32_t length = static_cast<int32_t>(array->Length());
     if (length <= 0) {

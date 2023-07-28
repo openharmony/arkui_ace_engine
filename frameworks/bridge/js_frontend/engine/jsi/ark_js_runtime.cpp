@@ -281,8 +281,7 @@ void ArkJSRuntime::HandleUncaughtException(
 
     Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
     if (!exception.IsEmpty() && !exception->IsHole() && errorCallback != nullptr) {
-        errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
-        return;
+        errorCallback("loading js file has crash or the uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
     }
 
     if (!exception.IsEmpty() && !exception->IsHole()) {
