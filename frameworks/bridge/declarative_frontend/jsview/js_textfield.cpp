@@ -35,7 +35,6 @@
 #include "core/common/container.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
@@ -407,9 +406,7 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
     }
     if (!ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP)) {
         LOGI("Parse to dimension FP failed!");
-        auto theme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        fontSize = theme->GetFontSize();
+        return;
     }
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
 }
