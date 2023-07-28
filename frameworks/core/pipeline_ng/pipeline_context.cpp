@@ -394,8 +394,15 @@ void PipelineContext::FlushFocus()
         dirtyDefaultFocusNode_.Reset();
         return;
     }
-    if (rootNode_ && rootNode_->GetFocusHub() && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
-        rootNode_->GetFocusHub()->RequestFocusImmediately();
+    if (isRootFocusNeedUpdate_ && rootNode_ && rootNode_->GetFocusHub()) {
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        if (!rootFocusHub->IsCurrentFocus()) {
+            rootFocusHub->RequestFocusImmediately();
+        } else if (!rootFocusHub->IsCurrentFocusWholePath()) {
+            rootFocusHub->LostFocus();
+            rootFocusHub->RequestFocusImmediately();
+        }
+        isRootFocusNeedUpdate_ = false;
     }
 }
 
@@ -1550,6 +1557,10 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        if (mouseStyle) {
+            mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
+        }
         LOGD("WindowFocus: onFocus_ is %{public}d. Lost all focus.", onFocus_);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
@@ -1557,6 +1568,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     }
     if (onFocus_ && onShow_) {
         LOGD("WindowFocus: onFocus_ and onShow_ are both true. Do FlushFocus().");
+        isRootFocusNeedUpdate_ = true;
         FlushFocus();
     }
     FlushWindowFocusChangedCallback(isFocus);
