@@ -58,6 +58,16 @@ void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLa
             labelChanged = true;
         }
     }
+    if (menuProperty->GetFontFamily().has_value()) {
+        if (!itemProperty->GetFontFamily().has_value()) {
+            textLayoutProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
+            contentChanged = true;
+        }
+        if (labelProperty && !itemProperty->GetLabelFontFamily().has_value()) {
+            labelProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
+            labelChanged = true;
+        }
+    }
 }
 
 void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,

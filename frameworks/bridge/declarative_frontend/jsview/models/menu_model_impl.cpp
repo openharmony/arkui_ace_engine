@@ -21,4 +21,5 @@ void MenuModelImpl::SetFontSize(const Dimension& fontSize) {}
 void MenuModelImpl::SetFontWeight(FontWeight weight) {}
 void MenuModelImpl::SetFontStyle(Ace::FontStyle style) {}
 void MenuModelImpl::SetFontColor(const std::optional<Color>& color) {}
+void MenuModelImpl::SetFontFamily(const std::vector<std::string> &families) {}
 } // namespace OHOS::Ace::Framework

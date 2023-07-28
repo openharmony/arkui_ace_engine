@@ -83,6 +83,19 @@ void UpdateFontColor(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayout
     }
 }
 
+void UpdateFontFamily(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+    const std::optional<std::vector<std::string>>& fontFamilies)
+{
+    std::vector<std::string> emptyFontfamily;
+    if (fontFamilies.has_value()) {
+        textProperty->UpdateFontFamily(fontFamilies.value());
+    } else if (menuProperty && menuProperty->GetFontFamily().has_value()) {
+        textProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
+    } else {
+        textProperty->UpdateFontFamily(emptyFontfamily);
+    }
+}
+
 void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& horizontalSize,
     const Dimension& verticalSize, const Color& color)
 {
@@ -607,6 +620,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
     UpdateFontColor(
         textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+    auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
+    UpdateFontFamily(textProperty, menuProperty, fontFamily);
     textProperty->UpdateContent(content);
     textProperty->UpdateMaxLines(1);
     textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
