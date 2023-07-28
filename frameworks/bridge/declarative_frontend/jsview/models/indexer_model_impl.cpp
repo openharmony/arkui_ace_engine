@@ -21,6 +21,9 @@
 namespace OHOS::Ace::Framework {
 void IndexerModelImpl::Create(std::vector<std::string>& indexerArray, int32_t selectedVal)
 {
+    if (static_cast<int32_t>(indexerArray.size()) <= 0) {
+        return;
+    }
     auto indexerComponent = AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
     ViewStackProcessor::GetInstance()->ClaimElementId(indexerComponent);
     ViewStackProcessor::GetInstance()->Push(indexerComponent);
