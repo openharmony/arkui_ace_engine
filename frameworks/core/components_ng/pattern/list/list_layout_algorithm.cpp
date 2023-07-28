@@ -700,6 +700,9 @@ bool ListLayoutAlgorithm::IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper)
 
 void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
 {
+    if (itemPosition_.empty()) {
+        return;
+    }
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
 
@@ -733,6 +736,9 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
 
 void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
 {
+    if (itemPosition_.empty()) {
+        return;
+    }
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
 
@@ -770,6 +776,9 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
 
 void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
 {
+    if (itemPosition_.empty()) {
+        return;
+    }
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
 
