@@ -348,23 +348,25 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    LOGD("point source: %{public}d", pointerEvent->GetSourceType());
-    auto actionId = pointerEvent->GetPointerId();
-    MMI::PointerEvent::PointerItem item;
-    if (pointerEvent->GetPointerItem(actionId, item)) {
-        LOGD("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d, pressure: "
-             "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
-            actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(), item.GetPressure(),
-            item.GetTiltX(), item.GetTiltY());
-    }
-    auto ids = pointerEvent->GetPointerIds();
-    for (auto&& id : ids) {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("point source: %{public}d", pointerEvent->GetSourceType());
+        auto actionId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem item;
-        if (pointerEvent->GetPointerItem(id, item)) {
-            LOGD("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
-                 "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
-                actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(), item.GetTiltX(),
-                item.GetTiltY());
+        if (pointerEvent->GetPointerItem(actionId, item)) {
+            LOGI("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d, pressure: "
+                "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(), item.GetPressure(),
+                item.GetTiltX(), item.GetTiltY());
+        }
+        auto ids = pointerEvent->GetPointerIds();
+        for (auto&& id : ids) {
+            MMI::PointerEvent::PointerItem item;
+            if (pointerEvent->GetPointerItem(id, item)) {
+                LOGI("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
+                     "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                    actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(),
+                    item.GetTiltX(), item.GetTiltY());
+            }
         }
     }
 }

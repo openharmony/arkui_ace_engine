@@ -1433,19 +1433,25 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t s
     auto clip = renderContext->GetClipEdge().value_or(false);
     if (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) {
         if (clip) {
-            LOGD("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
+            if (SystemProperties::GetDebugEnabled()) {
+                LOGI("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
+            }
             return true;
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = *iter;
             if (!child->IsOutOfTouchTestRegion(localPoint, sourceType)) {
-                LOGD("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
+                if (SystemProperties::GetDebugEnabled()) {
+                    LOGI("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
+                }
                 isInChildRegion = true;
                 break;
             }
         }
         if (!isInChildRegion) {
-            LOGD("TouchTest: point is out of region in %{public}s", GetTag().c_str());
+            if (SystemProperties::GetDebugEnabled()) {
+                LOGI("TouchTest: point is out of region in %{public}s", GetTag().c_str());
+            }
             return true;
         }
     }
@@ -1456,20 +1462,20 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
-        LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("%{public}s is inActive, need't do touch test", GetTag().c_str());
+        }
         return HitTestResult::OUT_OF_REGION;
     }
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
-        LOGD("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
+        LOGI("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
             GetTag().c_str(), GetDepth());
-#ifdef ACE_DEBUG_LOG
         for (const auto& rect : responseRegionList) {
-            LOGD("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
+            LOGI("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
                 parentLocalPoint.ToString().c_str());
         }
-#endif
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
