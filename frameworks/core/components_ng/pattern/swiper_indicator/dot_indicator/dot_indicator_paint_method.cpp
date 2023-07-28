@@ -291,7 +291,7 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
             } else {
                 endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 endLongPointLeftCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                endLongPointRightCenterX = endCenterX + selectedItemWidth;
+                endLongPointRightCenterX = endLongPointLeftCenterX + selectedItemWidth;
                 endCenterX += selectedItemWidth * TWOFOLD;
             }
         }
