@@ -348,194 +348,6 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: QRCodePatternTest007
- * @tc.desc: Test qrcode PaintMethod GetContentDrawFunction.
- * @tc.type: FUNC
- */
-HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest007, TestSize.Level1)
-{
-    MockPipelineContextGetTheme();
-    /**
-     * @tc.steps: step1. create qrcode and get frameNode.
-     */
-    QRCodeModelNG qrCodeModelNG;
-    qrCodeModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
-    // create qrcodePaintMethod
-    QRCodePaintMethod qrcodePaintMethod = QRCodePaintMethod(QR_CODE_WIDTH);
-
-    /**
-     * @tc.steps: step2. get paintWrapper
-     * @tc.expected: paintWrapper is not null
-     */
-    RefPtr<RenderContext> rendercontext;
-    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintWrapper = new PaintWrapper(rendercontext, geometryNode, qrcodePaintProperty);
-    EXPECT_NE(paintWrapper, nullptr);
-    qrcodePaintMethod.GetContentDrawFunction(paintWrapper);
-}
-
-/**
- * @tc.name: QRCodePatternTest008
- * @tc.desc: Test qrcode PaintMethod Paint.
- * @tc.type: FUNC
- */
-HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest008, TestSize.Level1)
-{
-    MockPipelineContextGetTheme();
-    /**
-     * @tc.steps: step1. create qrcode and get frameNode.
-     */
-    QRCodeModelNG qrCodeModelNG;
-    qrCodeModelNG.Create(CREATE_VALUE);
-    qrCodeModelNG.SetQRCodeColor(QR_CODE_COLOR_VALUE);
-    qrCodeModelNG.SetQRBackgroundColor(QR_CODE_BACKGROUND_COLOR_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
-    // create qrcodePaintMethod
-    QRCodePaintMethod qrcodePaintMethod = QRCodePaintMethod(QR_CODE_WIDTH);
-
-    /**
-     * @tc.steps: step2. get paintWrapper and execute paint method
-     * @tc.expected: paintWrapper is not null
-     */
-    RefPtr<MockRenderContext> renderContext = AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_);
-    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
-    EXPECT_NE(paintWrapper, nullptr);
-    qrcodePaintMethod.GetContentDrawFunction(paintWrapper);
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, DrawBitmap(_, _, _)).Times(1);
-    qrcodePaintMethod.Paint(rsCanvas, paintWrapper);
-}
-
-/**
- * @tc.name: QRCodePaintMethodTest009
- * @tc.desc: Test qrcode PaintMethod Paint while QRCode value is empty.
- * @tc.type: FUNC
- */
-HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest009, TestSize.Level1)
-{
-    MockPipelineContextGetTheme();
-    /**
-     * @tc.steps: step1. create qrcode paintMethod.
-     */
-    RefPtr<RenderContext> renderContext;
-    auto qrcodePaintProperty = AceType::MakeRefPtr<QRCodePaintProperty>();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    QRCodePaintMethod qrcodePaintMethod(QR_CODE_WIDTH);
-
-    /**
-     * @tc.steps: step2. Call paint method
-     * @tc.expected: QRCode value is empty, can't paint
-     */
-    Testing::MockCanvas rsCanvas;
-    qrcodePaintMethod.Paint(rsCanvas, paintWrapper);
-    EXPECT_FALSE(qrcodePaintProperty->GetValue().has_value());
-}
-
-/**
- * @tc.name: QRCodePaintMethodTest010
- * @tc.desc: Test qrcode PaintMethod Paint ForegroundColor change.
- * @tc.type: FUNC
- */
-HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest010, TestSize.Level1)
-{
-    MockPipelineContextGetTheme();
-    /**
-     * @tc.steps: step1. Initialize renderContext and qrcodePaintProperty.
-     */
-    QRCodeModelNG qrCodeModelNG;
-    qrCodeModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    renderContext->propForegroundColor_ = Color::BLACK;
-    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
-    qrcodePaintProperty->UpdateColor(Color::BLUE);
-    std::string value = CREATE_VALUE;
-    for (uint32_t i = 0; i <= QR_CODE_VALUE_MAX_LENGTH; i++) {
-        value.push_back('a');
-    }
-    qrcodePaintProperty->UpdateValue(value);
-
-    /**
-     * @tc.steps: step2. create qrcode paintMethod.
-     */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
-    EXPECT_NE(paintWrapper, nullptr);
-    QRCodePaintMethod qrcodePaintMethod = QRCodePaintMethod(QR_CODE_WIDTH);
-
-    /**
-     * @tc.steps: step3. Call paint method
-     * @tc.expected: QrcodePaintProperty's color property set correctly.
-     */
-    qrcodePaintMethod.qrCodeSize_ = -1;
-    Testing::MockCanvas rsCanvas;
-    qrcodePaintMethod.Paint(rsCanvas, paintWrapper);
-    EXPECT_EQ(qrcodePaintProperty->GetColorValue(), Color::FOREGROUND);
-
-    std::optional<Color> nullColor;
-    renderContext->propForegroundColor_ = nullColor;
-    renderContext->propForegroundColorStrategy_ =
-        std::make_optional<ForegroundColorStrategy>(ForegroundColorStrategy::INVERT);
-    paintWrapper->renderContext_ = renderContext;
-    qrcodePaintMethod.Paint(rsCanvas, paintWrapper);
-    EXPECT_EQ(qrcodePaintProperty->GetColorValue(), Color::FOREGROUND);
-}
-
-/**
- * @tc.name: QRCodePaintMethodTest011
- * @tc.desc: Test qrcode PaintMethod Paint ForegroundColor change.
- * @tc.type: FUNC
- */
-HWTEST_F(QRCodePropertyTestNg, QRCodePaintMethodTest011, TestSize.Level1)
-{
-    MockPipelineContextGetTheme();
-    /**
-     * @tc.steps: step1. create qrcode paintMethod.
-     */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_9);
-    QRCodeModelNG qrCodeModelNG;
-    qrCodeModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
-    qrcodePaintProperty->UpdateColor(Color::BLUE);
-    qrcodePaintProperty->UpdateValue("");
-    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    renderContext->propForegroundColor_ = Color::BLACK;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    QRCodePaintMethod qrcodePaintMethod(QR_CODE_WIDTH);
-
-    /**
-     * @tc.steps: step2. Call paint method
-     * @tc.expected: RsCanvas method is called.
-     */
-    Testing::MockCanvas rsCanvas;
-    paintWrapper->paintProperty_ = qrcodePaintProperty;
-    qrcodePaintMethod.qrCodeSize_ = -1;
-    qrcodePaintMethod.Paint(rsCanvas, paintWrapper);
-    qrcodePaintMethod.qrCodeSize_ = 2;
-    qrcodePaintMethod.Paint(rsCanvas, paintWrapper);
-    EXPECT_CALL(rsCanvas, Save()).Times(1).WillOnce(Return());
-    EXPECT_CALL(rsCanvas, DrawBitmap(_, _, _)).Times(1).WillOnce(Return());
-    EXPECT_CALL(rsCanvas, Restore()).Times(1).WillOnce(Return());
-    qrcodePaintMethod.qrCodeSize_ = 50;
-    qrcodePaintMethod.Paint(rsCanvas, paintWrapper);
-}
-
-/**
  * @tc.name: QRCodeModelSetContentOpacity001
  * @tc.desc: test SetContentOpacity
  * @tc.type: FUNC
@@ -567,7 +379,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
     auto qrcodePaintProperty1 = frameNode1->GetPaintProperty<QRCodePaintProperty>();
     ASSERT_NE(qrcodePaintProperty1, nullptr);
     EXPECT_EQ(
-        qrcodePaintProperty1->GetColorValue().GetValue(), qrCodeTheme->GetQrcodeColor().BlendOpacity(0.1).GetValue());
+        qrcodePaintProperty1->GetOpacityValue(), 0.1);
 
     qrCodeModelNG.Create(CREATE_VALUE);
     qrCodeModelNG.SetQRCodeColor(qrCodeTheme->GetQrcodeColor());
@@ -670,5 +482,106 @@ HWTEST_F(QRCodePropertyTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.
     auto size2 = qrCodeLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_NE(size2, std::nullopt);
     EXPECT_EQ(size2->Height(), 200.0f);
+}
+
+/**
+ * @tc.name: QRCodeModifierOnDraw001
+ * @tc.desc: test onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodePropertyTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto qrCodePaintMethod = AceType::DynamicCast<QRCodePaintMethod>(qrCodePattern->CreateNodePaintMethod());
+    ASSERT_NE(qrCodePaintMethod, nullptr);
+    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    qrcodePaintProperty->UpdateColor(Color::BLUE);
+    qrcodePaintProperty->UpdateValue(CREATE_VALUE);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    renderContext->propForegroundColor_ = Color::BLUE;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, DrawBitmap(_, _, _)).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Restore()).Times(1).WillOnce(Return());
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    qrCodePaintMethod->qrCodeSize_ = 100.0f;
+
+    /**
+     * @tc.steps: steps2. onDraw
+     * @tc.expected: steps2. Check the result of onDraw
+     */
+    qrCodePaintMethod->UpdateContentModifier(paintWrapper);
+    auto qrCodeModifier = AceType::DynamicCast<QRCodeModifier>(qrCodePaintMethod->GetContentModifier(paintWrapper));
+    qrCodeModifier->onDraw(context);
+    EXPECT_EQ(qrCodeModifier->color_->Get(), Color::BLUE);
+}
+
+/**
+ * @tc.name: QRCodeModifierOnDraw002
+ * @tc.desc: test onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodePropertyTestNg, QRCodeModifierOnDraw002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto qrCodePaintMethod = AceType::DynamicCast<QRCodePaintMethod>(qrCodePattern->CreateNodePaintMethod());
+    ASSERT_NE(qrCodePaintMethod, nullptr);
+    std::string value = CREATE_VALUE;
+    for (uint32_t i = 0; i <= QR_CODE_VALUE_MAX_LENGTH; i++) {
+        value.push_back('a');
+    }
+    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    qrcodePaintProperty->UpdateColor(Color::BLUE);
+    qrcodePaintProperty->UpdateValue(value);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    renderContext->propForegroundColor_ = Color::RED;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+
+    /**
+     * @tc.steps: steps2. onDraw
+     * @tc.expected: steps2. Check the result of onDraw
+     */
+    qrCodePaintMethod->UpdateContentModifier(paintWrapper);
+    auto qrCodeModifier = AceType::DynamicCast<QRCodeModifier>(qrCodePaintMethod->GetContentModifier(paintWrapper));
+    qrCodeModifier->onDraw(context);
+    EXPECT_EQ(qrCodeModifier->color_->Get(), Color::FOREGROUND);
 }
 } // namespace OHOS::Ace::NG

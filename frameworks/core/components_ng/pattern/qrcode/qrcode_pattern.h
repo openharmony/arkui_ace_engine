@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_PATTERN_H
 
 #include <optional>
+#include "core/components_ng/pattern/qrcode/qrcode_modifier.h"
 
 #include "base/geometry/axis.h"
 #include "core/components/qrcode/qrcode_theme.h"
@@ -46,7 +47,10 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<QRCodePaintMethod>(qrCodeSize_);
+        if (!qrCodeModifier_) {
+            qrCodeModifier_ = AceType::MakeRefPtr<QRCodeModifier>();
+        }
+        return MakeRefPtr<QRCodePaintMethod>(qrCodeSize_, qrCodeModifier_);
     }
     void OnModifyDone() override;
     FocusPattern GetFocusPattern() const override;
@@ -56,6 +60,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     float qrCodeSize_ = 0.0f;
+    RefPtr<QRCodeModifier> qrCodeModifier_;
 };
 
 } // namespace OHOS::Ace::NG

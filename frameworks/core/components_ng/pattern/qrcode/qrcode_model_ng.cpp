@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double DEFAULT_OPACITY = 1.0f;
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 } // namespace
 
@@ -43,10 +44,12 @@ void QRCodeModelNG::Create(const std::string& value)
         ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, qrCodeTheme->GetQrcodeColor());
         ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, qrCodeTheme->GetBackgroundColor());
         ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrCodeTheme->GetBackgroundColor());
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, DEFAULT_OPACITY);
     } else {
         ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, Color::BLACK);
         ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, Color::WHITE);
         ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::WHITE);
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, DEFAULT_OPACITY);
     }
 }
 
@@ -66,18 +69,5 @@ void QRCodeModelNG::SetQRBackgroundColor(Color color)
 void QRCodeModelNG::SetContentOpacity(double opacity)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, opacity);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
-    CHECK_NULL_VOID(qrCodeTheme);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto qrCodePaintProperty = frameNode->GetPaintProperty<NG::QRCodePaintProperty>();
-    CHECK_NULL_VOID(qrCodePaintProperty);
-    auto qrCodeColor = qrCodePaintProperty->GetColor().value_or(qrCodeTheme->GetQrcodeColor());
-    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, qrCodeColor.BlendOpacity(opacity));
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, qrCodeColor.BlendOpacity(opacity));
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 } // namespace OHOS::Ace::NG
