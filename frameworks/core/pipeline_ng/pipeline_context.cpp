@@ -742,29 +742,6 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 #endif
 }
 
-SafeAreaInsets PipelineContext::GetSystemSafeArea() const
-{
-    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
-    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
-    return safeAreaManager_->GetSystemSafeArea();
-}
-
-SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
-{
-    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
-    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
-    return safeAreaManager_->GetCutoutSafeArea();
-}
-
-SafeAreaInsets PipelineContext::GetSafeArea() const
-{
-    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
-    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
-    auto systemAvoidArea = safeAreaManager_->GetSystemSafeArea();
-    auto cutoutAvoidArea = safeAreaManager_->GetCutoutSafeArea();
-    return systemAvoidArea.Combine(cutoutAvoidArea);
-}
-
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
@@ -801,15 +778,36 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     });
 }
 
+void PipelineContext::SetIgnoreViewSafeArea(bool value)
+{
+    if (safeAreaManager_->SetIgnoreSafeArea(value)) {
+        SyncSafeArea();
+    }
+}
+
+void PipelineContext::SetIsLayoutFullScreen(bool value)
+{
+    if (safeAreaManager_->SetIsFullScreen(value)) {
+        SyncSafeArea();
+    }
+}
+
+PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
+{
+    return safeAreaManager_->GetSafeArea();
+}
+
 void PipelineContext::SyncSafeArea()
 {
     CHECK_NULL_VOID_NOLOG(rootNode_);
-    CHECK_NULL_VOID_NOLOG(!ignoreViewSafeArea_);
-    CHECK_NULL_VOID_NOLOG(isLayoutFullScreen_);
     rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    CHECK_NULL_VOID_NOLOG(stageManager_);
     auto page = stageManager_->GetLastPage();
     if (page) {
         page->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (overlayManager_) {
+        overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -865,6 +863,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         auto page = stageManager_->GetLastPage();
         if (page) {
             page->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+        if (overlayManager_) {
+            overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
         }
         // layout immediately
         FlushUITasks();

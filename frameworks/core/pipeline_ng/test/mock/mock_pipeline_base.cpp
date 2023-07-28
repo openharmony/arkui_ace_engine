@@ -305,18 +305,9 @@ void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
-
-SafeAreaInsets PipelineContext::GetSystemSafeArea() const
-{
-    return {};
-}
-
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
-
-SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
-{
-    return {};
-}
+void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
+void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
