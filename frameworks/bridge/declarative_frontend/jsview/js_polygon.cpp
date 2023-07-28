@@ -84,34 +84,33 @@ void JSPolygon::JsPoints(const JSCallbackInfo& info)
     if (pointsArray->Length() < 2) {
         LOGE("Less than two parameters");
         return;
-    } else {
-        for (size_t i = 0; i < pointsArray->Length(); i++) {
-            JSRef<JSVal> val = pointsArray->GetValueAt(i);
-            if (!val->IsArray()) {
-                LOGE("point is not array.");
-                continue;
-            }
-            JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(val);
-            if (pointArray->GetValueAt(0)->IsNumber()) {
-                shapePoint.first = Dimension(pointArray->GetValueAt(0)->ToNumber<double>(), DimensionUnit::VP);
-            } else if (pointArray->GetValueAt(0)->IsString()) {
-                shapePoint.first = StringUtils::StringToDimension(pointArray->GetValueAt(0)->ToString(), true);
-            } else {
-                LOGE("Polygon point should be Number or String");
-                return;
-            }
-            if (pointArray->GetValueAt(1)->IsNumber()) {
-                shapePoint.second = Dimension(pointArray->GetValueAt(1)->ToNumber<double>(), DimensionUnit::VP);
-            } else if (pointArray->GetValueAt(1)->IsString()) {
-                shapePoint.second = StringUtils::StringToDimension(pointArray->GetValueAt(1)->ToString(), true);
-            } else {
-                LOGE("Polygon point should be Number or String");
-                return;
-            }
-            shapePoints.push_back(shapePoint);
-        }
-        PolygonModel::GetInstance()->SetPoints(shapePoints);
     }
+    for (size_t i = 0; i < pointsArray->Length(); i++) {
+        JSRef<JSVal> val = pointsArray->GetValueAt(i);
+        if (!val->IsArray()) {
+            LOGE("point is not array.");
+            continue;
+        }
+        JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(val);
+        if (pointArray->GetValueAt(0)->IsNumber()) {
+            shapePoint.first = Dimension(pointArray->GetValueAt(0)->ToNumber<double>(), DimensionUnit::VP);
+        } else if (pointArray->GetValueAt(0)->IsString()) {
+            shapePoint.first = StringUtils::StringToDimension(pointArray->GetValueAt(0)->ToString(), true);
+        } else {
+            LOGE("Polygon point should be Number or String");
+            return;
+        }
+        if (pointArray->GetValueAt(1)->IsNumber()) {
+            shapePoint.second = Dimension(pointArray->GetValueAt(1)->ToNumber<double>(), DimensionUnit::VP);
+        } else if (pointArray->GetValueAt(1)->IsString()) {
+            shapePoint.second = StringUtils::StringToDimension(pointArray->GetValueAt(1)->ToString(), true);
+        } else {
+            LOGE("Polygon point should be Number or String");
+            return;
+        }
+        shapePoints.push_back(shapePoint);
+    }
+    PolygonModel::GetInstance()->SetPoints(shapePoints);
 }
 
 } // namespace OHOS::Ace::Framework
