@@ -313,10 +313,7 @@ public:
     void PlayScrollBarEndAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
-            opacity_ = 0;
-            if (scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetNeedEndAnimation(true);
-            }
+            opacityAnimationType_ = OpacityAnimationType::DISAPPEAR;
             MarkNeedRender();
         }
     }
@@ -324,22 +321,38 @@ public:
     void PlayScrollBarStartAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
-            opacity_ = UINT8_MAX;
-            if (scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetNeedAppearAnimation(true);
-            }
+            opacityAnimationType_ = OpacityAnimationType::APPEAR;
             MarkNeedRender();
         }
     }
+
+    OpacityAnimationType GetOpacityAnimationType() const
+    {
+        return opacityAnimationType_;
+    }
+
+    void SetOpacityAnimationType(OpacityAnimationType opacityAnimationType)
+    {
+        opacityAnimationType_ = opacityAnimationType;
+    }
+
+    HoverAnimationType GetHoverAnimationType() const
+    {
+        return hoverAnimationType_;
+    }
+
+    void SetHoverAnimationType(HoverAnimationType hoverAnimationType)
+    {
+        hoverAnimationType_ = hoverAnimationType;
+    }
+    
 
     void PlayScrollBarGrowAnimation()
     {
         PlayScrollBarStartAnimation();
         normalWidth_ = activeWidth_;
         FlushBarWidth();
-        if (scrollBarOverlayModifier_) {
-            scrollBarOverlayModifier_->SetNeedGrowAnimation(true);
-        }
+        hoverAnimationType_ = HoverAnimationType::GROW;
         MarkNeedRender();
     }
 
@@ -347,9 +360,7 @@ public:
     {
         normalWidth_ = inactiveWidth_;
         FlushBarWidth();
-        if (scrollBarOverlayModifier_) {
-            scrollBarOverlayModifier_->SetNeedShrinkAnimation(true);
-        }
+        hoverAnimationType_ = HoverAnimationType::SHRINK;
         PlayScrollBarEndAnimation();
         MarkNeedRender();
     }
@@ -543,6 +554,8 @@ private:
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
     RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
+    OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
+    HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
 };
 
 } // namespace OHOS::Ace::NG

@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
@@ -71,7 +70,6 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
         RSBrush brush;
         brush.SetBlendMode(RSBlendMode::SRC_OVER);
         brush.SetAntiAlias(true);
-
         RSRect bgRect(
             bgOffset.GetX(), bgOffset.GetY(), bgOffset.GetX() + bgSize.Width(), bgOffset.GetY() + bgSize.Height());
         RSColor bgColor = ToRSColor(bgColor_->Get());
@@ -90,52 +88,46 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
     }
 }
 
-void ScrollBarOverlayModifier::SetOpacity(uint8_t opacity)
+void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacityAnimationType)
 {
     CHECK_NULL_VOID_NOLOG(opacity_);
-    if (!needEndAnimation_ && !needAppearAnimation_) {
+    if (opacityAnimationType == OpacityAnimationType::NONE) {
         return;
     }
-    StopBarOpacityAnimation();
+    if (opacityAnimationType != opacityAnimatingType_) {
+        StopBarOpacityAnimation();
+    } else {
+        return;
+    }
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
-    if (needEndAnimation_) {
+    if (opacityAnimationType == OpacityAnimationType::DISAPPEAR) {
         option.SetDuration(BAR_END_DURATION);
         option.SetDelay(BAR_END_DELAY_DURATION);
-
-    } else if (needAppearAnimation_) {
+    } else if (opacityAnimationType == OpacityAnimationType::APPEAR) {
         option.SetDuration(BAR_APPEAR_DURATION);
-        isAppearing_ = true;
     }
+    opacityAnimatingType_ = opacityAnimationType;
     opacityAnimation_ = AnimationUtils::StartAnimation(
         option,
         [&]() {
-            if (needEndAnimation_) {
-                isEnding_ = true;
+            if (opacityAnimatingType_ == OpacityAnimationType::DISAPPEAR) {
                 opacity_->Set(0);
-            } else if (needAppearAnimation_) {
-                isAppearing_ = true;
+            } else if (opacityAnimatingType_ == OpacityAnimationType::APPEAR) {
                 opacity_->Set(UINT8_MAX);
             }
         },
         [weak = WeakClaim(this)]() {
             auto modifier = weak.Upgrade();
-            if (modifier->GetIsEnding()) {
-                modifier->SetIsEnding(false);
-                modifier->SetNeedEndAnimation(false);
-            } else if (modifier->GetIsAppearing()) {
-                modifier->SetIsAppearing(false);
-                modifier->SetNeedAppearAnimation(false);
-            }
+            CHECK_NULL_VOID_NOLOG(modifier);
+            modifier->SetOpacityAnimatingType(OpacityAnimationType::NONE);
         });
 }
 
 void ScrollBarOverlayModifier::StopBarOpacityAnimation()
 {
-    if (opacityAnimation_ && (isEnding_ || isAppearing_)) {
-        if ((isEnding_ && needAppearAnimation_) || (isAppearing_ && needEndAnimation_)) {
-            AnimationUtils::StopAnimation(opacityAnimation_);
-        }
+    if (opacityAnimation_) {
+        AnimationUtils::StopAnimation(opacityAnimation_);
     }
 }
 
@@ -147,40 +139,37 @@ void ScrollBarOverlayModifier::SetOffset(OffsetF fgOffset, OffsetF bgOffset)
     bgOffset_->Set(bgOffset);
 }
 
-void ScrollBarOverlayModifier::SetRect(
-    const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset, const OffsetF& bgOffset)
+void ScrollBarOverlayModifier::SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset,
+    const OffsetF& bgOffset, HoverAnimationType hoverAnimationType)
 {
     CHECK_NULL_VOID_NOLOG(fgSize_);
     CHECK_NULL_VOID_NOLOG(bgSize_);
     CHECK_NULL_VOID_NOLOG(fgOffset_);
     CHECK_NULL_VOID_NOLOG(bgOffset_);
-    if (!needGrowAnimation_ && !needShrinkAnimation_) {
-        StopBarHoverAnimation();
-        fgSize_->Set(fgSize);
-        bgSize_->Set(bgSize);
-        fgOffset_->Set(fgOffset);
-        bgOffset_->Set(bgOffset);
+    if (hoverAnimationType == HoverAnimationType::NONE) {
+        if (hoverAnimatingType_ == HoverAnimationType::NONE) {
+            fgSize_->Set(fgSize);
+            bgSize_->Set(bgSize);
+            fgOffset_->Set(fgOffset);
+            bgOffset_->Set(bgOffset);
+        }
         return;
     }
-
-    AnimationOption option = AnimationOption();
+    if (hoverAnimationType != hoverAnimatingType_) {
+        StopBarHoverAnimation();
+    }
+    AnimationOption option;
     option.SetCurve(Curves::SHARP);
-    if (needGrowAnimation_) {
-        CHECK_NULL_VOID_NOLOG(!isGrowing_);
+    hoverAnimatingType_ = hoverAnimationType;
+    if (hoverAnimatingType_ == HoverAnimationType::GROW) {
         option.SetDuration(BAR_GROW_DURATION);
-    } else if (needShrinkAnimation_) {
-        CHECK_NULL_VOID_NOLOG(!isShrinking_);
+    } else if (hoverAnimatingType_ == HoverAnimationType::SHRINK) {
         option.SetDuration(BAR_SHRINK_DURATION);
     }
-    StopBarHoverAnimation();
+
     hoverAnimation_ = AnimationUtils::StartAnimation(
         option,
         [&]() {
-            if (needGrowAnimation_) {
-                isGrowing_ = true;
-            } else if (needShrinkAnimation_) {
-                isShrinking_ = true;
-            }
             fgSize_->Set(fgSize);
             bgSize_->Set(bgSize);
             fgOffset_->Set(fgOffset);
@@ -188,18 +177,14 @@ void ScrollBarOverlayModifier::SetRect(
         },
         [weak = WeakClaim(this)]() {
             auto modifier = weak.Upgrade();
-            if (modifier->GetNeedGrowAnimation()) {
-                modifier->SetIsGrowing(false);
-                modifier->SetNeedGrowAnimation(false);
-            } else if (modifier->GetNeedShrinkAnimation()) {
-                modifier->SetIsShrinking(false);
-                modifier->SetNeedShrinkAnimation(false);
-            }
+            CHECK_NULL_VOID_NOLOG(modifier);
+            modifier->SetHoverAnimatingType(HoverAnimationType::NONE);
         });
 }
+
 void ScrollBarOverlayModifier::StopBarHoverAnimation()
 {
-    if (hoverAnimation_ && ((isGrowing_ && needShrinkAnimation_) || (isShrinking_ && needGrowAnimation_))) {
+    if (hoverAnimation_) {
         AnimationUtils::StopAnimation(hoverAnimation_);
     }
 }

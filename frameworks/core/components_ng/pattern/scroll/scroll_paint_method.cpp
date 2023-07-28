@@ -69,9 +69,11 @@ void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     scrollBarOverlayModifier->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
         SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
         OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
-        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()));
+        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()), scrollBar->GetHoverAnimationType());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetFgColor(scrollBar->GetForegroundColor());
     scrollBarOverlayModifier->SetBgColor(scrollBar->GetBackgroundColor());
-    scrollBarOverlayModifier->SetOpacity(scrollBar->GetOpacity());
+    scrollBarOverlayModifier->StartOpacityAnimation(scrollBar->GetOpacityAnimationType());
+    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG
