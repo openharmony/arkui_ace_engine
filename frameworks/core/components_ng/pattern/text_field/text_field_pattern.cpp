@@ -2225,14 +2225,14 @@ void TextFieldPattern::OnModifyDone()
     }
 #endif
     FireOnChangeIfNeeded();
+    if (!GetScrollBarOverlayModifier()) {
+        SetScrollBarOverlayModifier(
+            AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect()));
+    }
     if (IsTextArea() || IsNormalInlineState()) {
         SetAxis(Axis::VERTICAL);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
-        }
-        if (!GetScrollBarOverlayModifier()) {
-            SetScrollBarOverlayModifier(
-                AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect()));
         }
         SetScrollBar(layoutProperty->GetDisplayModeValue(DisplayMode::AUTO));
         auto scrollBar = GetScrollBar();
