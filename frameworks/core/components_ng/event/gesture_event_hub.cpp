@@ -659,7 +659,12 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
     gestureInfoForWeb_ = info;
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnDragMove(info);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    if (dragDropManager->IsDragged()) {
+        dragDropProxy_->OnDragMove(info);
+    }
 }
 
 void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
