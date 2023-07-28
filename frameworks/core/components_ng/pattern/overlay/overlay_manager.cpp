@@ -601,9 +601,11 @@ void OverlayManager::HideCustomPopups()
             CHECK_NULL_VOID(popupNode);
             auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
             CHECK_NULL_VOID(layoutProp);
-            auto useCustom = layoutProp->GetUseCustom().value_or(false);
+            auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
             // if use popup with option, skip
-            if (!useCustom) {
+            if (isTypeWithOption) {
                 continue;
             }
             popupInfo.markNeedUpdate = true;
