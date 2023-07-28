@@ -590,7 +590,7 @@ public:
         OHOS::NWeb::ImageAlphaType alphaType);
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
     void OnAudioStateChanged(bool audible);
-    void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs);
+    void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs);
     void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
     void OnOverScroll(float xOffset, float yOffset);
 

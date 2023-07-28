@@ -799,7 +799,7 @@ void WebClientImpl::OnAudioStateChanged(bool playing)
     delegate->OnAudioStateChanged(playing);
 }
 
-void WebClientImpl::OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs)
+void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs)
 {
     LOGI("OnFirstContentfulPaint");
     ContainerScope scope(instanceId_);

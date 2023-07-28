@@ -177,7 +177,7 @@ public:
     void OnSelectPopupMenu(std::shared_ptr<NWeb::NWebSelectPopupMenuParam> params,
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
     void OnAudioStateChanged(bool playing) override;
-    void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs) override;
+    void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs) override;
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;
     void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
