@@ -894,7 +894,6 @@ void JsiDeclarativeEngine::Destroy()
 #if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
-        nativeEngine_->DeleteEngine();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
     }
