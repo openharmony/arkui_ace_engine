@@ -20,6 +20,7 @@
 #include "pointer_event.h"
 #include "session/host/include/session.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -27,10 +28,12 @@ class WindowPattern : public Pattern {
     DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
 public:
-    WindowPattern();
+    WindowPattern() = default;
     ~WindowPattern() override = default;
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+protected:
+    void OnModifyDone() override;
+    void OnAttachToFrameNode() override;
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -39,36 +42,30 @@ public:
     void TransferFocusWindowId(uint32_t focusWindowId);
     void TransferFocusState(bool focusState);
 
-protected:
-    void OnAttachToFrameNode() override;
-
-    void InitContent();
-
     virtual bool HasStartingPage() = 0;
+    bool IsMainWindow() const;
 
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
 
-    virtual void OnConnect();
+    void InitContent();
+    void CreateStartingNode();
+    void CreateSnapshotNode();
+
+    virtual void OnConnect() {}
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
-
-    int32_t instanceId_ = -1;
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<FrameNode> snapshotNode_;
 
     sptr<Rosen::Session> session_;
+    int32_t instanceId_ = Container::CurrentId();
+    std::function<void()> callback_;
 
 private:
-    void OnModifyDone() override;
-    void CreateStartingNode();
-    void CreateSnapshotNode();
-    bool CreatePersistentNode();
-
-    void BufferAvailableCallback();
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);
@@ -81,6 +78,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
 
     friend class LifecycleListener;
+    friend class WindowEventProcess;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowPattern);
 };
