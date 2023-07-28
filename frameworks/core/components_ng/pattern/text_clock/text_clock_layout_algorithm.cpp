@@ -34,13 +34,13 @@ void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     const auto& minSize = constraint->minSize;
     const auto& maxSize = constraint->maxSize;
+    textClockFrameSize.Constrain(minSize, maxSize);
     if (constraint->selfIdealSize.Width()) {
         textClockFrameSize.SetWidth(constraint->selfIdealSize.Width().value());
     }
     if (constraint->selfIdealSize.Height()) {
         textClockFrameSize.SetHeight(constraint->selfIdealSize.Height().value());
     }
-    textClockFrameSize.Constrain(minSize, maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(textClockFrameSize.ConvertToSizeT());
 }
 } // namespace OHOS::Ace::NG
