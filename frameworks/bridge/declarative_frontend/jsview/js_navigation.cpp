@@ -314,7 +314,13 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
                 return;
             }
             CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
+                return;
+            }
+            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
+        } else {
+            CalcDimension titleHeight;
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
                 return;
             }
             NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
