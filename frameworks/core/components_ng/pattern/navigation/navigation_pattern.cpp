@@ -218,7 +218,7 @@ void NavigationPattern::OnModifyDone()
         }
         auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
         CHECK_NULL_VOID(navigationLayoutProperty);
-        if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
+        if (GetNavigationMode() == NavigationMode::STACK) {
             DoNavigationTransitionAnimation(
                 preTopNavPath.second, newTopNavPath.second, prePathListSize, pathNames.size());
         } else {
