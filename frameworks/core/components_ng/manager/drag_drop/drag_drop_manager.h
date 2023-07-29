@@ -105,6 +105,9 @@ public:
 
     void SetIsDragged(bool isDragged)
     {
+        if (isDragged && isDragged_ != isDragged && notifyInDraggedCallback_) {
+            notifyInDraggedCallback_();
+        }
         isDragged_ = isDragged;
     }
 
@@ -120,6 +123,11 @@ public:
 
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
+
+    void SetNotifyInDraggedCallback(const std::function<void(void)>& callback)
+    {
+        notifyInDraggedCallback_ = callback;
+    }
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
@@ -157,6 +165,7 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
     int64_t currentId_ = -1;
 
+    std::function<void(void)> notifyInDraggedCallback_ = nullptr;
     bool isDragged_ = false;
     bool isMouseDragged_ = false;
     VelocityTracker velocityTracker_;

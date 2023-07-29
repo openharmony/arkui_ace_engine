@@ -608,6 +608,16 @@ void ScrollablePattern::InitMouseEvent()
     }
     mouseEventHub->AddOnMouseEvent(mouseEvent_);
     isMouseEventInit_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetNotifyInDraggedCallback([wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        if (pattern && pattern->mousePressed_) {
+            pattern->OnMouseRelease();
+        }
+    });
 }
 
 void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
