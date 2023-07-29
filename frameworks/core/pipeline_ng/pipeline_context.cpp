@@ -812,6 +812,13 @@ void PipelineContext::SyncSafeArea(bool onKeyboard)
     if (selectOverlayManager_) {
         selectOverlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
     }
+    auto&& restoreNodes = safeAreaManager_->GetGeoRestoreNodes();
+    for (auto&& wk : restoreNodes) {
+        auto node = wk.Upgrade();
+        if (node) {
+            node->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    }
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
