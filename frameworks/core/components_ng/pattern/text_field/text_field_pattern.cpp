@@ -2071,8 +2071,8 @@ void TextFieldPattern::OnCursorTwinkling()
 {
     cursorTwinklingTask_.Cancel();
     cursorVisible_ = !cursorVisible_;
-    auto shouldMeasure = !IsTextArea() && GetTextObscured() && obscureTickCountDown_ == 1;
-    if (GetTextObscured() && obscureTickCountDown_ > 0) {
+    auto shouldMeasure = !IsTextArea() && IsInPasswordMode() && GetTextObscured() && obscureTickCountDown_ == 1;
+    if (IsInPasswordMode() && GetTextObscured() && obscureTickCountDown_ > 0) {
         --obscureTickCountDown_;
     }
     if (shouldMeasure) {
@@ -3320,7 +3320,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
             textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
     }
     textEditingValue_.CursorMoveToPosition(caretStart + static_cast<int32_t>(StringUtils::ToWstring(result).length()));
-    if (!IsTextArea() && GetTextObscured()) {
+    if (!IsTextArea() && IsInPasswordMode() && GetTextObscured()) {
         if (wideInsertValue.length() == 1) {
             obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
             nakedCharPosition_ = textEditingValue_.caretPosition - 1;
@@ -4642,7 +4642,7 @@ bool TextFieldPattern::OnBackPressed()
 
 int32_t TextFieldPattern::GetNakedCharPosition() const
 {
-    if (IsTextArea() || obscureTickCountDown_ <= 0 || !GetTextObscured()) {
+    if (IsTextArea() || !IsInPasswordMode() || obscureTickCountDown_ <= 0 || !GetTextObscured()) {
         return -1;
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -5278,10 +5278,17 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
 bool TextFieldPattern::ResetObscureTickCountDown()
 {
     auto oldTickCountDown_ = obscureTickCountDown_;
-    if (!IsTextArea() && GetTextObscured()) {
+    if (!IsTextArea() && GetTextObscured() && IsInPasswordMode()) {
         obscureTickCountDown_ = 0;
     }
     return oldTickCountDown_ != obscureTickCountDown_;
+}
+
+bool TextFieldPattern::IsInPasswordMode() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
 }
 
 void TextFieldPattern::RestorePreInlineStates()
