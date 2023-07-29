@@ -415,7 +415,7 @@ private:
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
-    void SyncSafeArea();
+    void SyncSafeArea(bool onKeyboard = false);
 
     // only used for static form.
     void UpdateFormLinkInfos();
