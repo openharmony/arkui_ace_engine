@@ -26,7 +26,7 @@ RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, Re
     float baselineOffset, RefPtr<RichEditorContentModifier> richEditorContentModifier,
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier)
     : TextPaintMethod(pattern, paragraph, baselineOffset, richEditorContentModifier, richEditorOverlayModifier),
-      pattern_(pattern), richEditorOverlayModifier_(richEditorOverlayModifier)
+      pattern_(pattern), paragraph_(std::move(paragraph)), richEditorOverlayModifier_(richEditorOverlayModifier)
 {}
 RichEditorPaintMethod::~RichEditorPaintMethod() = default;
 
@@ -50,5 +50,13 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         richEditorOverlayModifier_->SetCaretOffsetAndHeight(
             OffsetF(rect.GetX(), rect.GetY()), Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx());
     }
+    std::vector<Rect> selectedRects;
+    const auto& selection = richEditorPattern->GetTextSelector();
+    if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
+        paragraph_->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
+    }
+    auto contentRect = richEditorPattern->GetTextContentRect();
+    richEditorOverlayModifier_->SetContentRect(contentRect);
+    richEditorOverlayModifier_->SetSelectedRects(selectedRects);
 }
 } // namespace OHOS::Ace::NG

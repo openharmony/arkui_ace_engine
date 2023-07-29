@@ -616,21 +616,31 @@ void LayoutProperty::UpdateAspectRatio(float ratio)
     }
 }
 
-void LayoutProperty::UpdateGeometryTransition(const std::string& id)
+void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition)
 {
-    propGeometryTransitionId_ = id;
-    if (geometryTransition_ != nullptr) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto geometryTransitionOld = GetGeometryTransition();
+    auto geometryTransitionNew =
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_, followWithoutTransition);
+    CHECK_NULL_VOID_NOLOG(geometryTransitionOld != geometryTransitionNew);
+    if (geometryTransitionOld) {
+        geometryTransitionOld->OnFollowWithoutTransition();
         // unregister node from old geometry transition
-        geometryTransition_->Update(host_, nullptr);
+        geometryTransitionOld->Update(host_, nullptr);
         // register node into new geometry transition
-        geometryTransition_ = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
-        CHECK_NULL_VOID(geometryTransition_);
-        geometryTransition_->Update(nullptr, host_);
-    } else {
-        geometryTransition_ = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
-        CHECK_NULL_VOID(geometryTransition_);
-        geometryTransition_->Build(host_, true);
+        if (geometryTransitionNew) {
+            geometryTransitionNew->Update(nullptr, host_);
+        }
+    } else if (geometryTransitionNew) {
+        geometryTransitionNew->Build(host_, true);
     }
+    geometryTransition_ = geometryTransitionNew;
+
+    LOGD("GeometryTransition: node: %{public}d update id, old id: %{public}s, new id: %{public}s", host->GetId(),
+        geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
+        geometryTransitionNew ? id.c_str() : "empty");
     ElementRegister::GetInstance()->DumpGeometryTransition();
 }
 
@@ -752,6 +762,51 @@ void LayoutProperty::ResetCalcMinSize()
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
     calcLayoutConstraint_->minSize.reset();
+}
+
+void LayoutProperty::ResetCalcMaxSize()
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    if (calcLayoutConstraint_->maxSize.has_value()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    calcLayoutConstraint_->maxSize.reset();
+}
+
+void LayoutProperty::ResetCalcMinSize(bool resetWidth)
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    CHECK_NULL_VOID(calcLayoutConstraint_->minSize.has_value());
+    bool resetSizeHasValue = resetWidth ? calcLayoutConstraint_->minSize.value().Width().has_value()
+                                        : calcLayoutConstraint_->minSize.value().Height().has_value();
+    CHECK_NULL_VOID(resetSizeHasValue);
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    if (resetWidth) {
+        calcLayoutConstraint_->minSize.value().SetWidth(std::nullopt);
+    } else {
+        calcLayoutConstraint_->minSize.value().SetHeight(std::nullopt);
+    }
+}
+
+void LayoutProperty::ResetCalcMaxSize(bool resetWidth)
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    CHECK_NULL_VOID(calcLayoutConstraint_->maxSize.has_value());
+    bool resetSizeHasValue = resetWidth ? calcLayoutConstraint_->maxSize.value().Width().has_value()
+                                        : calcLayoutConstraint_->maxSize.value().Height().has_value();
+    CHECK_NULL_VOID(resetSizeHasValue);
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    if (resetWidth) {
+        calcLayoutConstraint_->maxSize.value().SetWidth(std::nullopt);
+    } else {
+        calcLayoutConstraint_->maxSize.value().SetHeight(std::nullopt);
+    }
 }
 
 void LayoutProperty::UpdateFlexGrow(float flexGrow)
@@ -921,10 +976,13 @@ void LayoutProperty::UpdateAllGeometryTransition(const RefPtr<UINode>& parent)
         auto node = q.front();
         q.pop();
         auto frameNode = AceType::DynamicCast<FrameNode>(node);
-        if (frameNode && frameNode->GetLayoutProperty()->HasGeometryTransitionId()) {
-            auto geometryTransitionId = frameNode->GetLayoutProperty()->GetGeometryTransitionIdValue();
-            frameNode->GetLayoutProperty()->UpdateGeometryTransition("");
-            frameNode->GetLayoutProperty()->UpdateGeometryTransition(geometryTransitionId);
+        if (frameNode) {
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            if (layoutProperty && layoutProperty->GetGeometryTransition()) {
+                auto geometryTransitionId = layoutProperty->GetGeometryTransition()->GetId();
+                layoutProperty->UpdateGeometryTransition("");
+                layoutProperty->UpdateGeometryTransition(geometryTransitionId);
+            }
         }
         const auto& children = node->GetChildren();
         for (const auto& child : children) {

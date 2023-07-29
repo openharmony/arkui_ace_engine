@@ -67,6 +67,14 @@ public:
     {
         ViewAbstract::ClearWidthOrHeight(isWidth);
     }
+    void ResetMinSize(bool resetWidth) override
+    {
+        ViewAbstract::ResetMinSize(resetWidth);
+    }
+    void ResetMaxSize(bool resetWidth) override
+    {
+        ViewAbstract::ResetMaxSize(resetWidth);
+    }
 
     void SetMinWidth(const CalcDimension& minWidth) override
     {
@@ -501,9 +509,9 @@ public:
         ViewAbstract::SetSharedTransition(shareId, option);
     }
 
-    void SetGeometryTransition(const std::string& id) override
+    void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) override
     {
-        ViewAbstract::SetGeometryTransition(id);
+        ViewAbstract::SetGeometryTransition(id, followWithoutTransition);
     }
 
     void SetMotionPath(const MotionPathOption& option) override
@@ -886,8 +894,7 @@ public:
         std::function<void()>&& onDisappear) override;
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
-        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) override;
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear) override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -963,8 +970,8 @@ private:
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 
-    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent) override
+    void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) override
     {
         ViewAbstract::CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
     }
@@ -980,8 +987,8 @@ private:
         ViewAbstract::CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
     }
 
-    void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-        RefPtr<CustomAnimatableArithmetic>& value) override
+    void UpdateAnimatableArithmeticProperty(
+        const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value) override
     {
         ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
     }

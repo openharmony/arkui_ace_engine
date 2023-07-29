@@ -50,6 +50,7 @@ public:
     MOCK_METHOD(
         void, AddPlainTextRecord, (const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr), (override));
     MOCK_METHOD(std::string, GetSinglePlainTextRecord, (const RefPtr<UnifiedData>& unifiedData), (override));
+    MOCK_METHOD(std::vector<std::string>, GetPlainTextRecords, (const RefPtr<UnifiedData>& unifiedData), (override));
     MOCK_METHOD(int32_t, GetVideoRecordUri, (const RefPtr<UnifiedData>& unifiedData, std::string& uri), (override));
 };
 class MockUnifiedData : public UnifiedData {

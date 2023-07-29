@@ -518,7 +518,7 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
 
 bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters)
 {
-    auto isShowBackgroundValue = obj->GetProperty("isShowBackground");
+    auto isShowBackgroundValue = obj->GetProperty("showBackground");
     auto isSidebarMiddleValue = obj->GetProperty("isSidebarMiddle");
     auto backgroundSizeValue = obj->GetProperty("backgroundSize");
     auto backgroundColorValue = obj->GetProperty("backgroundColor");
@@ -696,7 +696,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         swiperParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
         parseOk = ParseJsDimensionVp(bottomValue, dimPosition);
         swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
-        parseOk = ParseJsDimensionVp(sizeValue, dimPosition);
+        parseOk = ParseJsDimensionVp(sizeValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
         SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
         swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();

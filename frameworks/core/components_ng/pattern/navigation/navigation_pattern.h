@@ -157,9 +157,6 @@ public:
         navigationStack_->Remove();
     }
 
-    void DoNavigationTransitionAnimation(const RefPtr<UINode>& preTopNavDestination,
-        const RefPtr<UINode>& newTopNavDestination, int preStackSize, int newStackSize);
-
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
 
     void CleanStack()
@@ -202,7 +199,7 @@ public:
 
 private:
     RefPtr<RenderContext> GetTitleBarRenderContext();
-    void DoAnimation(NavigationMode currentMode);
+    void DoAnimation(NavigationMode usrNavigationMode);
     bool CheckExistPreStack(const std::string& name);
     RefPtr<UINode> GetNodeAndRemoveByName(const std::string& name);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
@@ -211,8 +208,8 @@ private:
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void OnHover(bool isHover);
-    void UpdateResponseRegion(float realDividerWidth, float realNavBarWidth,
-    float dragRegionHeight, OffsetF dragRectOffset);
+    void UpdateResponseRegion(
+        float realDividerWidth, float realNavBarWidth, float dragRegionHeight, OffsetF dragRectOffset);
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);

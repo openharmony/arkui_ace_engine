@@ -175,7 +175,7 @@ void StepperPattern::CreateLeftButtonNode()
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
-    imageSourceInfo.SetFillColor(stepperTheme->GetArrowColor().BlendOpacity(stepperTheme->GetDefaultAlpha()));
+    imageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
     SizeF sourceSize(static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx()),
         static_cast<float>(stepperTheme->GetArrowHeight().ConvertToPx()));
@@ -187,7 +187,7 @@ void StepperPattern::CreateLeftButtonNode()
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto textColor = stepperTheme->GetTextStyle().GetTextColor().BlendOpacity(stepperTheme->GetDefaultAlpha());
+    auto textColor = stepperTheme->GetTextStyle().GetTextColor();
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(textColor);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
@@ -313,8 +313,9 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(rightLabel);
     auto textColor = stepperTheme->GetTextStyle().GetTextColor();
-    textColor = isDisabled ? textColor.BlendOpacity(stepperTheme->GetDisabledAlpha())
-                           : textColor.BlendOpacity(stepperTheme->GetDefaultAlpha());
+    if (isDisabled) {
+        textColor = textColor.BlendOpacity(stepperTheme->GetDisabledAlpha());
+    }
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(textColor);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
@@ -336,8 +337,9 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
     auto imageColor = stepperTheme->GetArrowColor();
-    imageColor = isDisabled ? imageColor.BlendOpacity(stepperTheme->GetDisabledAlpha())
-                            : imageColor.BlendOpacity(stepperTheme->GetDefaultAlpha());
+    if (isDisabled) {
+        imageColor = imageColor.BlendOpacity(stepperTheme->GetDisabledAlpha());
+    }
     imageSourceInfo.SetFillColor(imageColor);
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
     SizeF sourceSize(static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx()),
@@ -385,7 +387,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(rightLabel);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
-    auto textColor = stepperTheme->GetTextStyle().GetTextColor().BlendOpacity(stepperTheme->GetDefaultAlpha());
+    auto textColor = stepperTheme->GetTextStyle().GetTextColor();
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(textColor);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
@@ -708,5 +710,64 @@ WeakPtr<FocusHub> StepperPattern::GetFocusNode(FocusStep step, const WeakPtr<Foc
         return curFocusNode == leftFocusHub_ ? buttonFocusHub : leftFocusHub_;
     }
     return nullptr;
+}
+
+void StepperPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = DynamicCast<StepperNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto stepperTheme = GetTheme();
+    CHECK_NULL_VOID(stepperTheme);
+    auto textColor = stepperTheme->GetTextStyle().GetTextColor();
+    auto leftButtonNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetLeftButtonId()));
+    if (leftButtonNode) {
+        auto leftButtonFrameNode = DynamicCast<FrameNode>(leftButtonNode);
+        CHECK_NULL_VOID(leftButtonFrameNode);
+        ButtonSkipColorConfigurationUpdate(leftButtonFrameNode);
+        auto renderContext = leftButtonFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(stepperTheme->GetMouseHoverColor().ChangeOpacity(0));
+        auto rowNode = leftButtonFrameNode->GetChildAtIndex(0);
+        CHECK_NULL_VOID(rowNode);
+        auto textFrameNode = DynamicCast<FrameNode>(rowNode->GetChildAtIndex(1));
+        CHECK_NULL_VOID(textFrameNode);
+        auto layoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateTextColor(textColor);
+    }
+    auto rightButtonNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetRightButtonId()));
+    if (rightButtonNode) {
+        auto rightButtonFrameNode = DynamicCast<FrameNode>(rightButtonNode);
+        CHECK_NULL_VOID(rightButtonFrameNode);
+        ButtonSkipColorConfigurationUpdate(rightButtonFrameNode);
+        auto renderContext = rightButtonFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(stepperTheme->GetMouseHoverColor().ChangeOpacity(0));
+        auto firstChild = rightButtonFrameNode->GetFirstChild();
+        CHECK_NULL_VOID(firstChild);
+        if (firstChild->GetTag() == V2::ROW_ETS_TAG) {
+            auto textFrameNode = DynamicCast<FrameNode>(firstChild->GetChildAtIndex(0));
+            CHECK_NULL_VOID(textFrameNode);
+            auto layoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateTextColor(textColor);
+        }
+        if (firstChild->GetTag() == V2::TEXT_ETS_TAG) {
+            auto textFrameNode = DynamicCast<FrameNode>(firstChild);
+            CHECK_NULL_VOID(textFrameNode);
+            auto layoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateTextColor(textColor);
+        }
+    }
+}
+
+void StepperPattern::ButtonSkipColorConfigurationUpdate(RefPtr<FrameNode> buttonNode)
+{
+    auto pattern = buttonNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSkipColorConfigurationUpdate();
 }
 } // namespace OHOS::Ace::NG

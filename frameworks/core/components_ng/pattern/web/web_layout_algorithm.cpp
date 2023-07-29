@@ -26,15 +26,6 @@ WebLayoutAlgorithm::WebLayoutAlgorithm() = default;
 std::optional<SizeF> WebLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, std::nullopt);
-    auto pattern = DynamicCast<WebPattern>(host->GetPattern());
-    CHECK_NULL_RETURN(pattern, std::nullopt);
-    if (pattern->IsFullScreen()) {
-        SizeF fullSize = { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
-        return fullSize;
-    }
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                 : contentConstraint.maxSize;
     return layoutSize;

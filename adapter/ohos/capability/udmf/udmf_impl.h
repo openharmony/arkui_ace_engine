@@ -50,6 +50,7 @@ public:
     void AddImageRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& uri) override;
     void AddPlainTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) override;
     std::string GetSinglePlainTextRecord(const RefPtr<UnifiedData>& unifiedData) override;
+    std::vector<std::string> GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData) override;
     int32_t GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData, std::string& uri) override;
 };
 

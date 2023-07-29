@@ -15,10 +15,25 @@
 
 #include "adapter/preview/entrance/clipboard/clipboard_impl.h"
 
-#include "frameworks/base/utils/utils.h"
 #include "util/ClipboardHelper.h"
 
+#include "frameworks/base/utils/utils.h"
+
 namespace OHOS::Ace::Platform {
+
+void ClipboardImpl::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) {}
+void ClipboardImpl::AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) {}
+void ClipboardImpl::AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) {}
+void ClipboardImpl::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption) {}
+void ClipboardImpl::GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+    const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+    const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode)
+{}
+
+RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()
+{
+    return AceType::MakeRefPtr<PasteDataMix>();
+}
 
 void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {

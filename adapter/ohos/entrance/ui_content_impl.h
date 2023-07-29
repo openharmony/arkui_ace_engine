@@ -153,6 +153,9 @@ public:
     void SetIsFocusActive(bool isFocusActive) override;
     void SetFocusWindowId(uint32_t focusWindowId) override;
 
+    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks) override;
+    void CloseModalUIExtension(int32_t sessionId) override;
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

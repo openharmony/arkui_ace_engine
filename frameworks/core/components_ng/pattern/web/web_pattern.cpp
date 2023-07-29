@@ -912,6 +912,10 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
     if (quickMenuCallback_) {
         quickMenuCallback_->Cancel();
     }
+    for (auto keyCode : KeyCodeSet_) {
+        delegate_->OnKeyEvent(static_cast<int32_t>(keyCode), static_cast<int32_t>(OHOS::Ace::KeyAction::UP));
+    }
+    KeyCodeSet_.clear();
 }
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
@@ -945,6 +949,11 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
 {
     CHECK_NULL_RETURN(delegate_, false);
+    if (keyEvent.action == OHOS::Ace::KeyAction::DOWN) {
+        KeyCodeSet_.insert(keyEvent.code);
+    } else if (keyEvent.action == OHOS::Ace::KeyAction::UP) {
+        KeyCodeSet_.erase(keyEvent.code);
+    }
     return delegate_->OnKeyEvent(static_cast<int32_t>(keyEvent.code), static_cast<int32_t>(keyEvent.action));
 }
 
@@ -980,7 +989,6 @@ void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
 
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    UpdateContentOffset(dirty);
     if (!config.contentSizeChange || isInWindowDrag_) {
         return false;
     }

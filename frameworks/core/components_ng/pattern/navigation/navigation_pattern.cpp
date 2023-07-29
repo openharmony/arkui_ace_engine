@@ -75,18 +75,16 @@ RefPtr<RenderContext> NavigationPattern::GetTitleBarRenderContext()
     }
 }
 
-void NavigationPattern::DoAnimation(NavigationMode currentMode)
+void NavigationPattern::DoAnimation(NavigationMode usrNavigationMode)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto usrNavigationMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
 
-    auto lastMode = navigationMode_;
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    layoutProperty->UpdateUsrNavigationMode(lastMode);
+    layoutProperty->UpdateNavigationMode(navigationMode_);
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     AnimationOption option = AnimationOption();
     option.SetDuration(NAVIMODE_CHANGE_ANIMATION_DURATION);
@@ -100,24 +98,22 @@ void NavigationPattern::DoAnimation(NavigationMode currentMode)
 
     std::function<void()> finishCallback = [optionAlpha, renderContext, hostNode]() {
         renderContext->OpacityAnimation(optionAlpha, 0, 1);
-        hostNode->SetIsModeChange(false);
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
     context->OpenImplicitAnimation(option, option.GetCurve(), finishCallback);
-    layoutProperty->UpdateUsrNavigationMode(currentMode);
+    layoutProperty->UpdateNavigationMode(usrNavigationMode);
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
-    if (currentMode == NavigationMode::STACK || lastMode == NavigationMode::SPLIT) {
+    if (usrNavigationMode == NavigationMode::STACK || navigationMode_ == NavigationMode::SPLIT) {
         optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_DISAPPEAR);
         renderContext->OpacityAnimation(optionAlpha, 1, 0);
-    } else if (currentMode == NavigationMode::SPLIT || lastMode == NavigationMode::STACK) {
+    } else if (usrNavigationMode == NavigationMode::SPLIT || navigationMode_ == NavigationMode::STACK) {
         optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_APPEAR);
         renderContext->OpacityAnimation(optionAlpha, 0, 1);
     }
     context->CloseImplicitAnimation();
-    layoutProperty->UpdateUsrNavigationMode(usrNavigationMode);
-    layoutProperty->UpdateNavigationMode(usrNavigationMode);
+    navigationMode_ = usrNavigationMode;
 }
 
 void NavigationPattern::OnAttachToFrameNode()
@@ -146,14 +142,12 @@ void NavigationPattern::OnModifyDone()
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
-    auto contentNode = hostNode->GetContentNode();
     auto preTopNavPath = GetTopNavPath();
-    auto prePathListSize = navPathList_.size();
-    auto pathNames = navigationStack_->GetAllPathName();
-
     if (!navPathList_.empty()) {
         navPathList_.clear();
     }
+
+    auto pathNames = navigationStack_->GetAllPathName();
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
@@ -172,6 +166,7 @@ void NavigationPattern::OnModifyDone()
     }
 
     navigationStack_->SetNavPathList(navPathList_);
+
     auto newTopNavPath = GetTopNavPath();
     if (preTopNavPath != newTopNavPath) {
         // fire onHidden and lostFocus event
@@ -188,10 +183,14 @@ void NavigationPattern::OnModifyDone()
                 eventHub->FireOnHiddenEvent();
                 navDestinationPattern->SetIsOnShow(false);
             }
+
             auto focusHub = AceType::DynamicCast<FrameNode>(preTopNavDestination)->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(false);
             focusHub->LostFocus();
+            if (!navDestinationPattern->GetIsUnderNavRouter()) {
+                navDestinationPattern->ResetNavDestinationNode();
+            }
         }
 
         // fire onShown and requestFocus event
@@ -215,23 +214,29 @@ void NavigationPattern::OnModifyDone()
         }
         auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
         CHECK_NULL_VOID(navigationLayoutProperty);
-        if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
-            DoNavigationTransitionAnimation(
-                preTopNavPath.second, newTopNavPath.second, prePathListSize, pathNames.size());
-        } else {
-            contentNode->Clean();
-            hostNode->AddNavDestinationToNavigation();
+        if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK &&
+            newTopNavPath.second != nullptr) {
+            auto preTopNavDestination = navBarNode;
+            if (preTopNavPath.second != nullptr) {
+                auto preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+                    NavigationGroupNode::GetNavDestinationNode(preTopNavPath.second));
+            }
+            auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+                NavigationGroupNode::GetNavDestinationNode(newTopNavPath.second));
+            auto curNavTitleBarNode = AceType::DynamicCast<TitleBarNode>(preTopNavDestination->GetTitleBarNode());
+            auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(newTopNavDestination->GetTitleBarNode());
+            auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
+            if (curNavTitleBarNode || destinationTitleBarNode) {
+                hostNode->TitleTransitionInAnimation(curNavTitleBarNode, destinationTitleBarNode);
+            }
+            if (backButtonNode) {
+                hostNode->BackButtonAnimation(backButtonNode, true);
+            }
+            hostNode->NavTransitionInAnimation(preTopNavDestination, newTopNavDestination);
         }
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
-    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto currentMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
-    if (navigationMode_ != currentMode) {
-        hostNode->SetIsModeChange(true);
-        DoAnimation(currentMode);
-    }
     preNavPathList_ = navPathList_;
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -249,6 +254,25 @@ void NavigationPattern::OnModifyDone()
         auto inputHub = hub->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
+    }
+    // if current title is custom node, return
+    if (navBarNode->GetPrevTitleIsCustomValue(false)) {
+        return;
+    }
+    auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
+    CHECK_NULL_VOID(titleNode);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
+    } else {
+        textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
+        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
     }
 }
 
@@ -288,60 +312,6 @@ void NavigationPattern::OnNavBarStateChange()
     }
 }
 
-void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<UINode>& preTopNavDestination,
-    const RefPtr<UINode>& newTopNavDestination, int preStackSize, int newStackSize)
-{
-    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    CHECK_NULL_VOID(navigationNode);
-    auto contentNode = navigationNode->GetContentNode();
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    if (newTopNavDestination != nullptr && preTopNavDestination != nullptr && preStackSize != 0 &&
-        newStackSize > preStackSize) {
-        contentNode->Clean();
-        navigationNode->AddNavDestinationToNavigation();
-        auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(preTopNavDestination));
-        auto newNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(newTopNavDestination));
-        auto curNavTitleBarNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
-        auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(newNavDestination->GetTitleBarNode());
-        auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-        if (curNavTitleBarNode || destinationTitleBarNode) {
-            navigationNode->TitleTransitionInAnimation(curNavTitleBarNode, destinationTitleBarNode);
-        }
-        if (backButtonNode) {
-            navigationNode->BackButtonAnimation(backButtonNode, true);
-        }
-        navigationNode->NavTransitionInAnimation(preNavDestination, newNavDestination);
-    } else if (newTopNavDestination != nullptr && preStackSize == 0 && newStackSize > preStackSize) {
-        contentNode->Clean();
-        navigationNode->AddNavDestinationToNavigation();
-        auto newNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(newTopNavDestination));
-        auto curNavTitleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-        auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(newNavDestination->GetTitleBarNode());
-        auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-        if (curNavTitleBarNode || destinationTitleBarNode) {
-            navigationNode->TitleTransitionInAnimation(curNavTitleBarNode, destinationTitleBarNode);
-        }
-        if (backButtonNode) {
-            navigationNode->BackButtonAnimation(backButtonNode, true);
-        }
-        navigationNode->NavTransitionInAnimation(navBarNode, newNavDestination);
-    } else if (newTopNavDestination != nullptr && newStackSize <= preStackSize && newStackSize != 0) {
-        auto newNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(newTopNavDestination));
-        auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(preTopNavDestination));
-        navigationNode->BackToPreNavDestination(newNavDestination, preNavDestination);
-    } else if (newTopNavDestination == nullptr && newStackSize < preStackSize && newStackSize == 0) {
-        auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(preTopNavDestination));
-        navigationNode->BackToNavBar(preNavDestination);
-    }
-}
-
 bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -354,18 +324,10 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(navigationLayoutAlgorithm, false);
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
-    auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
-    CHECK_NULL_RETURN(navigationLayoutProperty, false);
-    if (config.frameSizeChange) {
-        if (navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
-            auto currentMode = navigationLayoutAlgorithm->GetNavigationMode();
-            if (navigationMode_ != NavigationMode::AUTO && navigationMode_ != currentMode) {
-                hostNode->SetIsModeChange(true);
-                DoAnimation(currentMode);
-            }
-            navigationMode_ = currentMode;
-        }
-    }
+    navigationMode_ = navigationLayoutAlgorithm->GetNavigationMode();
+    auto contentNode = hostNode->GetContentNode();
+    contentNode->Clean();
+    hostNode->AddNavDestinationToNavigation();
     OnNavBarStateChange();
     UpdateTitleModeChangeEventHub(hostNode);
     UpdateResponseRegion(navigationLayoutAlgorithm->GetRealDividerWidth(),
@@ -549,8 +511,8 @@ void NavigationPattern::OnHover(bool isHover)
     }
 }
 
-void NavigationPattern::UpdateResponseRegion(float realDividerWidth, float realNavBarWidth,
-    float dragRegionHeight, OffsetF dragRectOffset)
+void NavigationPattern::UpdateResponseRegion(
+    float realDividerWidth, float realNavBarWidth, float dragRegionHeight, OffsetF dragRectOffset)
 {
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -597,12 +559,12 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
         return;
     }
     OffsetF hotZoneOffset;
-    hotZoneOffset.SetX(layoutAlgorithm->GetRealNavBarWidth() -
-        DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
+    hotZoneOffset.SetX(
+        layoutAlgorithm->GetRealNavBarWidth() - DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneOffset.SetY(DEFAULT_DIVIDER_START_MARGIN.ConvertToPx());
     SizeF hotZoneSize;
-    hotZoneSize.SetWidth(realDividerWidth_ +
-        DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM * DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
+    hotZoneSize.SetWidth(realDividerWidth_ + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
+                                                 DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneSize.SetHeight(layoutAlgorithm->GetRealNavBarHeight());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));

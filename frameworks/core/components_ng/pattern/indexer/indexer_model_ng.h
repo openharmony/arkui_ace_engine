@@ -38,8 +38,8 @@ public:
     void SetPopupHorizontalSpace(const Dimension& value) override;
     void SetAlignStyle(int32_t value) override;
     void SetSelected(int32_t selected) override;
-    void SetPopupPositionX(const Dimension& positionX) override;
-    void SetPopupPositionY(const Dimension& positionY) override;
+    void SetPopupPositionX(const std::optional<Dimension>& popupPositionXOpt) override;
+    void SetPopupPositionY(const std::optional<Dimension>& popupPositionYOpt) override;
     void SetPopupItemBackground(const std::optional<Color>& color) override;
     void SetPopupSelectedColor(const std::optional<Color>& color) override;
     void SetPopupUnselectedColor(const std::optional<Color>& color) override;

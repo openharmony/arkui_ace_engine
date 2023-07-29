@@ -65,6 +65,7 @@ public:
             auto geometryNode = host->GetGeometryNode();
             auto frameOffset = geometryNode->GetFrameOffset();
             auto frameSize = geometryNode->GetFrameSize();
+            CHECK_NULL_RETURN(paragraph_, paintMethod);
             auto height = static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
             if (context->GetClipEdge().value() == false && LessNotEqual(frameSize.Height(), height)) {
                 RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
@@ -207,7 +208,7 @@ public:
     {
         return true;
     }
-    void CloseSelectOverlay() override;
+    virtual void CloseSelectOverlay() override;
     void CreateHandles() override;
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -260,6 +261,9 @@ public:
         return imageOffset_;
     }
 
+    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo);
+    void CheckHandles(SelectHandleInfo& handleInfo);
+
 protected:
     void HandleOnCopy();
     void InitMouseEvent();
@@ -286,8 +290,9 @@ protected:
     RefPtr<Paragraph> paragraph_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
+    RefPtr<Clipboard> clipboard_;
     CopyOptions copyOption_ = CopyOptions::None;
-    
+
     OffsetF imageOffset_;
     std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
@@ -300,6 +305,7 @@ protected:
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     std::vector<Rect> rectsForPlaceholders_;
+    int32_t imageCount_ = 0;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -317,12 +323,13 @@ private:
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
     void FontRegisterCallback(RefPtr<SpanNode> spanNode);
+    bool IsSelectAll();
     // to check if drag is in progress
 
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
+    SelectMenuInfo selectMenuInfo_;
     bool panEventInitialized_ = false;
-    RefPtr<Clipboard> clipboard_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     RefPtr<TextContentModifier> textContentModifier_;

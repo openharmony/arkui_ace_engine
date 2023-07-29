@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_property.h"
 #include "core/pipeline/base/constants.h"
@@ -28,7 +29,6 @@ CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(scroll);
-        scroll->PaintScrollBar(canvas, paintWrapper);
         scroll->PaintScrollEffect(canvas, paintWrapper);
     };
 
@@ -38,7 +38,7 @@ CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID(scrollBar);
+    CHECK_NULL_VOID_NOLOG(scrollBar);
     if (!scrollBar->NeedPaint()) {
         LOGD("no need paint scroll bar.");
         return;
@@ -55,4 +55,25 @@ void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintW
     scrollEdgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
 }
 
+void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID_NOLOG(paintWrapper);
+    auto scrollBar = scrollBar_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(scrollBar);
+    if (!scrollBar->NeedPaint()) {
+        LOGD("no need paint scroll bar.");
+        return;
+    }
+    auto scrollBarOverlayModifier = scrollBar->GetScrollBarOverlayModifier();
+    CHECK_NULL_VOID_NOLOG(scrollBarOverlayModifier);
+    scrollBarOverlayModifier->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
+        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
+        OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
+        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()), scrollBar->GetHoverAnimationType());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    scrollBarOverlayModifier->SetFgColor(scrollBar->GetForegroundColor());
+    scrollBarOverlayModifier->SetBgColor(scrollBar->GetBackgroundColor());
+    scrollBarOverlayModifier->StartOpacityAnimation(scrollBar->GetOpacityAnimationType());
+    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+}
 } // namespace OHOS::Ace::NG

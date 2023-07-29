@@ -52,7 +52,7 @@ void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
     pickerNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
     pickerNode->GetRenderContext()->SetClipToFrame(true);
     CHECK_NULL_VOID(pickerNode->GetLayoutProperty<LinearLayoutProperty>());
-    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
+    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateCrossAxisAlign(FlexAlign::CENTER);
     pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     LayoutPicker(pickerPattern, pickerNode, settingData, theme);
@@ -101,7 +101,8 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(int32_t id, bool isAd
     CHECK_NULL_RETURN(buttonPattern, nullptr);
 
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(theme->GetEntryButtonWidth()), CalcLength(theme->GetEntryHeight() / 2)));
+        CalcSize(CalcLength(theme->GetEntryButtonWidth()), std::nullopt));
+    buttonNode->GetLayoutProperty()->UpdateLayoutWeight(1);
     BorderRadiusProperty borderRadius;
     BorderWidthProperty borderWidth;
     if (isAdd) {
@@ -178,22 +179,21 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(
     CHECK_NULL_RETURN(linearLayoutProperty, nullptr);
 
     linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
+    linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     contentNode->GetRenderContext()->SetClipToFrame(true);
-    contentNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(theme->GetEntryHeight())));
-    linearLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    linearLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = theme->GetEntryBorderRadius();
     borderRadius.radiusBottomLeft = theme->GetEntryBorderRadius();
     borderRadius.radiusTopRight = theme->GetEntryBorderRadius();
     borderRadius.radiusBottomLeft = theme->GetEntryBorderRadius();
     contentNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
-    MarginProperty margin;
-    margin.top = CalcLength(theme->GetEntryDateTopBottomMargin());
-    margin.left = CalcLength(theme->GetEntryDateLeftRightMargin());
-    margin.right = CalcLength(theme->GetEntryDateLeftRightMargin());
-    margin.bottom = CalcLength(theme->GetEntryDateTopBottomMargin());
-    linearLayoutProperty->UpdateMargin(margin);
+    PaddingProperty padding;
+    padding.top = CalcLength(theme->GetEntryDateTopBottomMargin());
+    padding.left = CalcLength(theme->GetEntryDateLeftRightMargin());
+    padding.right = CalcLength(theme->GetEntryDateLeftRightMargin());
+    padding.bottom = CalcLength(theme->GetEntryDateTopBottomMargin());
+    linearLayoutProperty->UpdatePadding(padding);
 
     auto yearNode = CreateDateTextNode(std::to_string(date.GetYear()));
     CHECK_NULL_RETURN(yearNode, nullptr);
@@ -233,6 +233,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateDateTextNode(const std::string& t
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(textContent);
+    textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextColor(calendarTheme->GetEntryFontColor());
     textLayoutProperty->UpdateFontSize(calendarTheme->GetEntryFontSize());
     textNode->MarkModifyDone();

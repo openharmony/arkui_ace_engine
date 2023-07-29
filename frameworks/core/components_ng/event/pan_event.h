@@ -65,7 +65,7 @@ private:
     GestureEventNoParameter actionCancel_;
 };
 
-class ACE_EXPORT PanEventActuator : public GestureEventActuator {
+class ACE_FORCE_EXPORT PanEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(PanEventActuator, GestureEventActuator)
 public:
     PanEventActuator(

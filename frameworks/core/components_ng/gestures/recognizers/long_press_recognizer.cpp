@@ -16,6 +16,7 @@
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
 #include "base/perf/socperf_client.h"
+#include "base/thread/frame_trace_adapter.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -33,8 +34,10 @@ constexpr int32_t MAX_FINGERS = 10;
 
 void LongPressRecognizer::OnAccepted()
 {
-    constexpr int32_t ACTION_LONG_PRESS_BOOST_CMDID = 10051;
-    SocPerfClient::GetInstance().PerfRequest(ACTION_LONG_PRESS_BOOST_CMDID, "");
+    FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
+    if (ft != nullptr) {
+        ft->SetFrameTraceLimit();
+    }
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }

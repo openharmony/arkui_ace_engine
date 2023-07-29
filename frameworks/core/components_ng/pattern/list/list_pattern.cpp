@@ -193,6 +193,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();
+    if (config.frameSizeChange) {
+        if (GetScrollBar() != nullptr) {
+            GetScrollBar()->PlayScrollBarEndAnimation();
+        }
+    }
     CheckRestartSpring();
 
     DrivenRender(dirty);
@@ -340,9 +345,15 @@ void ListPattern::ProcessEvent(
 
     if (scrollStop_) {
         auto onScrollStop = listEventHub->GetOnScrollStop();
-        if (!GetScrollAbort() && onScrollStop) {
-            SetScrollState(SCROLL_FROM_NONE);
-            onScrollStop();
+        if (!GetScrollAbort()) {
+            auto scrollBar = GetScrollBar();
+            if (scrollBar) {
+                scrollBar->PlayScrollBarEndAnimation();
+            }
+            if (onScrollStop) {
+                scrollState_ = SCROLL_FROM_NONE;
+                onScrollStop();
+            }
         }
         if (!GetScrollAbort()) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
@@ -454,6 +465,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (IsOutOfBoundary(false) && scrollState_ != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
+    listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
     listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(scrollState_));
     if (chainAnimation_) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
@@ -654,6 +666,16 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     } else {
         overScroll = contentMainSize_ - (endMainPos_ - currentDelta_);
     }
+    if (IsScrollSnapAlignCenter()) {
+        auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        auto endPos = endMainPos_ - currentDelta_;
+        if (startIndex_ == 0 && Positive(startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
+            overScroll = startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f;
+        } else if ((endIndex_ == maxListItemIndex_) &&
+            LessNotEqual(endPos - itemHeight / 2.0f, contentMainSize_ / 2.0f)) {
+            overScroll = endPos - itemHeight / 2.0f - contentMainSize_ / 2.0f;
+        }
+    }
 
     if (scrollState_ == SCROLL_FROM_UPDATE) {
         // adjust offset.
@@ -728,6 +750,10 @@ void ListPattern::FireOnScrollStart()
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
+    }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarStartAnimation();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -815,7 +841,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         if (list->IsScrollSnapAlignCenter()) {
             float startItemHeight =
                 list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
-            return list->contentMainSize_ / 2.0f - startItemHeight / 2.0f - list->spaceWidth_ / 2.0f;
+            return list->contentMainSize_ / 2.0f - startItemHeight / 2.0f;
         }
 
         return 0.0;
@@ -837,7 +863,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         if (list->IsScrollSnapAlignCenter()) {
             float startItemHeight =
                 list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
-            return list->contentMainSize_ / 2.0f - startItemHeight / 2.0f - list->spaceWidth_ / 2.0f;
+            return list->contentMainSize_ / 2.0f - startItemHeight / 2.0f;
         }
 
         return 0.0;

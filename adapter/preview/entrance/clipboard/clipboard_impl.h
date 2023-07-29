@@ -16,12 +16,12 @@
 #ifndef FOUNDATION_ACE_ACE_ENGINE_ADAPTER_PREVIEW_ENTRANCE_CLIPBOARD_CLIPBOARD_IMPL_H
 #define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_PREVIEW_ENTRANCE_CLIPBOARD_CLIPBOARD_IMPL_H
 
-#include <string>
 #include <functional>
+#include <string>
 
-#include "base/utils/macros.h"
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/macros.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/clipboard/clipboard_interface.h"
 
@@ -44,6 +44,14 @@ public:
     void HasData(const std::function<void(bool hasData)>& callback) override;
     void RegisterCallbackSetClipboardPixmapData(CallbackSetClipboardPixmapData callback);
     void RegisterCallbackGetClipboardPixmapData(CallbackGetClipboardPixmapData callback);
+    void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override;
+    void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) override;
+    void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) override;
+    void SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption) override;
+    void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+        const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+        const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) override;
+    RefPtr<PasteDataMix> CreatePasteDataMix() override;
 
 private:
     CallbackSetClipboardPixmapData callbackSetClipboardPixmapData_;

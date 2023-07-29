@@ -46,6 +46,7 @@ using AxisEventCallback = std::function<void(const AxisEvent&, const std::functi
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
 using DragEventCallBack = std::function<void(int32_t x, int32_t y, const DragEventAction& action)>;
+using StopDragCallback = std::function<void()>;
 
 constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t INSTANCE_ID_PLATFORM = -2;
@@ -338,7 +339,11 @@ public:
         return false;
     }
 
-    virtual void GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType) {}
+    virtual bool GetCurPointerEventInfo(
+        int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
+    {
+        return false;
+    }
 
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;

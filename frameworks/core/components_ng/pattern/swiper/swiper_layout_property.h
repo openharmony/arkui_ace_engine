@@ -62,6 +62,7 @@ public:
         value->propBackgroundColor_ = CloneBackgroundColor();
         value->propArrowSize_ = CloneArrowSize();
         value->propArrowColor_ = CloneArrowColor();
+        value->propLoop_ = CloneLoop();
         return value;
     }
 
@@ -91,6 +92,7 @@ public:
         ResetBackgroundColor();
         ResetArrowSize();
         ResetArrowColor();
+        ResetLoop();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -110,13 +112,14 @@ public:
         json->Put("nextMargin", propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false");
         json->Put("hoverShow", propHoverShow_.value_or(false) ? "true" : "false");
-        json->Put("isShowBackground", propIsShowBackground_.value_or(false) ? "true" : "false");
+        json->Put("showBackground", propIsShowBackground_.value_or(false) ? "true" : "false");
         json->Put("isSidebarMiddle", propIsSidebarMiddle_.value_or(false) ? "true" : "false");
         json->Put(
             "arrowBackgroundSize", propBackgroundSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("arrowSize", propArrowSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("arrowBackgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
         json->Put("arrowColor", propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
+        json->Put("loop", propLoop_.value_or(true) ? "true" : "false");
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -126,6 +129,7 @@ public:
             { "SwiperDisplayMode.Stretch", SwiperDisplayMode::STRETCH },
         };
 
+        UpdateLoop(json->GetBool("loop"));
         UpdateIndex(StringUtils::StringToInt(json->GetString("index")));
         UpdateDirection(json->GetString("vertical") == "true" ? Axis::VERTICAL : Axis::HORIZONTAL);
         UpdateShowIndicator(json->GetString("indicator") == "true" ? true : false);
@@ -181,6 +185,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowColor, Color, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE_SELF);
 };
 } // namespace OHOS::Ace::NG
 

@@ -260,6 +260,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     AceContainer::CreateContainer(instanceId_, FrontendType::DECLARATIVE_JS, useNewPipeline_);
     auto container = AceContainer::GetContainerInstance(instanceId_);
     CHECK_NULL_VOID(container);
+    container->SetIsFRSCardContainer(false);
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);
@@ -443,4 +444,10 @@ void UIContentImpl::NotifyMemoryLevel(int32_t level)
     pipelineContext->NotifyMemoryLevel(level);
 }
 
+int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+{
+    return 0;
+}
+
+void UIContentImpl::CloseModalUIExtension(int32_t sessionId) {}
 } // namespace OHOS::Ace

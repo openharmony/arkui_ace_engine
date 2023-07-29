@@ -31,9 +31,9 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr double SPRING_SCROLL_MASS = 0.5;
-constexpr double SPRING_SCROLL_STIFFNESS = 100.0;
-constexpr double SPRING_SCROLL_DAMPING = 15.55635;
+constexpr float SPRING_SCROLL_MASS = 1.0f;
+constexpr float SPRING_SCROLL_STIFFNESS = 288.0f;
+constexpr float SPRING_SCROLL_DAMPING = 30.0f;
 constexpr double CAP_COEFFICIENT = 0.45;
 constexpr int32_t FIRST_THRESHOLD = 5;
 constexpr int32_t SECOND_THRESHOLD = 10;
@@ -41,11 +41,6 @@ constexpr double CAP_FIXED_VALUE = 16.0;
 constexpr uint32_t DRAG_INTERVAL_TIME = 900;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
-constexpr float SNAP_SCROLL_MASS = 1.0f;
-constexpr float SNAP_SCROLL_STIFFNESS = 288.0f;
-constexpr float SNAP_SCROLL_DAMPING = 30.0f;
-const RefPtr<SpringProperty> SNAP_SCROLL_PROPERTY =
-    AceType::MakeRefPtr<SpringProperty>(SNAP_SCROLL_MASS, SNAP_SCROLL_STIFFNESS, SNAP_SCROLL_DAMPING);
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double VELOCITY_SCALE = 1.0;
@@ -178,8 +173,13 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     };
 
     if (Container::IsCurrentUseNewPipeline()) {
-        panRecognizerNG_ =
-            AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+        const static int32_t PLATFORM_VERSION_TEN = 10;
+        float distance = DEFAULT_PAN_DISTANCE;
+        auto context = context_.Upgrade();
+        if (context && (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN)) {
+            distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
+        }
+        panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distance);
 
         panRecognizerNG_->SetOnActionStart(actionStart);
         panRecognizerNG_->SetOnActionUpdate(actionUpdate);
@@ -661,8 +661,10 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         }
 #endif
     } else if (!overScrollOffsetCallback_ && outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
+        ResetContinueDragCount();
         ProcessScrollOverCallback(correctVelocity);
     } else if (canOverScroll_) {
+        ResetContinueDragCount();
         HandleOverScroll(correctVelocity);
     } else {
         if (springController_ && !springController_->IsStopped()) {
@@ -849,7 +851,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     scrollSnapController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
-        scroll->OnAnimateStop();
+        scroll->ProcessScrollSnapStop();
     });
     scrollSnapController_->PlayMotion(scrollSnapMotion_);
 }
@@ -875,7 +877,7 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
     }
     if (!snapMotion_) {
         snapMotion_ = AceType::MakeRefPtr<SpringMotion>(
-            currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, SNAP_SCROLL_PROPERTY);
+            currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
         snapMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](float position) {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
@@ -883,7 +885,7 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             }
         });
     } else {
-        snapMotion_->Reset(currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, SNAP_SCROLL_PROPERTY);
+        snapMotion_->Reset(currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
     }
     snapController_->PlayMotion(snapMotion_);
 }
@@ -901,7 +903,7 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
         scrollSnapController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
-            scroll->OnAnimateStop();
+            scroll->ProcessScrollSnapStop();
         });
     }
 }
@@ -913,7 +915,8 @@ void Scrollable::ProcessScrollSnapMotion(double position)
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
-        moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
+        auto mainDelta = position - currentPos_;
+        HandleScroll(mainDelta, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
         if (!moved_) {
             scrollSnapController_->Stop();
         } else if (!touchUp_) {
@@ -924,6 +927,21 @@ void Scrollable::ProcessScrollSnapMotion(double position)
         }
     }
     currentPos_ = scrollSnapMotion_->GetCurrentPosition();
+    if (canOverScroll_ || needScrollSnapChange_ ||
+        (!overScrollOffsetCallback_ && (outBoundaryCallback_ && outBoundaryCallback_()))) {
+        scrollPause_ = true;
+        scrollSnapController_->Stop();
+    }
+}
+
+void Scrollable::ProcessScrollSnapStop()
+{
+    if (scrollPause_) {
+        scrollPause_ = false;
+        HandleOverScroll(currentVelocity_);
+    } else {
+        OnAnimateStop();
+    }
 }
 
 void Scrollable::OnAnimateStop()

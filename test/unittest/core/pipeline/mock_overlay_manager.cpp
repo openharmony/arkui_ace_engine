@@ -61,8 +61,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {}
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
@@ -80,7 +79,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     removeOverlayFlag = (dialogNode != nullptr);
 }
 
-bool OverlayManager::RemoveOverlay(bool isBackPressed)
+bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
 {
     return removeOverlayFlag;
 }
@@ -98,8 +97,10 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
 void OverlayManager::RemoveIndexerPopupById(int32_t targetId) {}
 
 void OverlayManager::BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
-    std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle,
-    std::function<void()>&& onAppear, std::function<void()>&& onDisappear, int32_t targetId)
+    std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+    std::function<void()>&& onDisappear, int32_t targetId)
 {}
+
+void OverlayManager::MarkDirty(PropertyChangeFlag flag) {}
 
 } // namespace OHOS::Ace::NG

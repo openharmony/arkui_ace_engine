@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "core/components/common/properties/color.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -28,7 +29,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
-#include "core/components/picker/picker_theme.h"
 
 namespace OHOS::Ace::NG {
 using EventCallback = std::function<void(bool)>;
@@ -42,7 +42,14 @@ struct TextProperties {
     Color currentColor;
     Color downColor;
 };
-    
+
+struct TextPickerOptionProperty {
+    float height = 0.0f;
+    float fontheight = 0.0f;
+    float prevDistance = 0.0f; // between the prev item and itself when scroll up
+    float nextDistance = 0.0f; // between the next item and itself when scroll down
+};
+
 class EventParam : public virtual AceType {
     DECLARE_ACE_TYPE(EventParam, AceType)
 
@@ -51,6 +58,13 @@ public:
     int32_t itemIndex;
     int32_t itemTotalCounts;
 };
+
+enum class ScrollDirection {
+    UP = 0,
+    DOWN,
+};
+
+enum class OptionIndex { COLUMN_INDEX_0 = 0, COLUMN_INDEX_1, COLUMN_INDEX_2, COLUMN_INDEX_3, COLUMN_INDEX_4 };
 
 class TextPickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);
@@ -68,7 +82,10 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<TextPickerLayoutAlgorithm>();
-        layoutAlgorithm->SetCurrentOffset(GetCurrentOffset());
+        if (algorithmOffset_.size() == 0) {
+            ResetAlgorithmOffset();
+        }
+        layoutAlgorithm->SetCurrentOffset(algorithmOffset_);
         layoutAlgorithm->SetDefaultPickerItemHeight(defaultPickerItemHeight_);
         return layoutAlgorithm;
     }
@@ -78,8 +95,7 @@ public:
         return MakeRefPtr<LinearLayoutProperty>(true);
     }
 
-    void FlushCurrentOptions(bool isDown = false,
-        bool isUpateTextContentOnly = false, bool isDirectlyClear = false);
+    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false, bool isDirectlyClear = false);
 
     void InitilaScorllEvent();
 
@@ -207,7 +223,7 @@ public:
     {
         EventCallback_ = value;
     }
-  
+
     void SetLocalDownDistance(float value)
     {
         localDownDistance_ = value;
@@ -263,7 +279,14 @@ private:
     void CreateAnimation();
     RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
     void HandleCurveStopped();
-    void ScrollOption(double delta, bool isJump = false);
+    void ScrollOption(double delta);
+    std::vector<TextPickerOptionProperty> optionProperties_;
+    std::vector<int32_t> algorithmOffset_;
+    void ResetAlgorithmOffset();
+    void CalcAlgorithmOffset(ScrollDirection dir, double distancePercent);
+    void SetOptionShiftDistance();
+    double GetShiftDistanceForLandscape(int32_t index, ScrollDirection dir);
+    double GetShiftDistance(int32_t index, ScrollDirection dir);
     void OnTouchDown();
     void OnTouchUp();
     void InitMouseAndPressEvent();
@@ -273,11 +296,11 @@ private:
     void FlushCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
         bool isUpateTextContentOnly, bool isDirectlyClear);
     void FlushCurrentImageOptions();
-    void FlushCurrentMixtureOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
-        bool isUpateTextContentOnly);
+    void FlushCurrentMixtureOptions(
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, bool isUpateTextContentOnly);
     void UpdatePickerTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
-        uint32_t currentIndex, uint32_t middleIndex, uint32_t showCount);
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, uint32_t currentIndex, uint32_t middleIndex,
+        uint32_t showCount);
     void UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
         const RefPtr<TextLayoutProperty>& textLayoutProperty,
         const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
@@ -289,8 +312,8 @@ private:
         const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
     void AddAnimationTextProperties(uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty);
     void UpdateTextPropertiesLinear(bool isDown, double scale);
-    void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        uint32_t index, uint32_t showCount, bool isDown, double scale);
+    void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index,
+        uint32_t showCount, bool isDown, double scale);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
@@ -347,7 +370,9 @@ private:
     RefPtr<TextPickerTossAnimationController> tossAnimationController_ =
         AceType::MakeRefPtr<TextPickerTossAnimationController>();
     std::vector<TextProperties> animationProperties_;
-    bool isJump_ = false;
+    float dividerSpacing_ = 0.0f;
+    float gradientHeight_ = 0.0f;
+    bool isDragMoving_ = false;
 
     ColumnChangeCallback changeCallback_;
 

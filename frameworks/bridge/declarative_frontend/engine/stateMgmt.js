@@ -81,6 +81,15 @@
  * @since 9
  */
 class LocalStorage extends NativeLocalStorage {
+    /*
+      get access to provded LocalStorage instance thru Stake model
+      @StageModelOnly
+      @form
+      @since 10
+    */
+    static getShared() {
+        return LocalStorage.GetShared();
+    }
     /**
      * Construct new instance of LocalStorage
      * initialzie with all properties and their values that Object.keys(params) returns
@@ -96,15 +105,6 @@ class LocalStorage extends NativeLocalStorage {
         if (Object.keys(initializingProperties).length) {
             this.initializeProps(initializingProperties);
         }
-    }
-    /*
-      get access to provded LocalStorage instance thru Stake model
-      @StageModelOnly
-      @form
-      @since 10
-    */
-    static getShared() {
-        return LocalStorage.GetShared();
     }
     /**
      * clear storage and init with given properties
@@ -494,13 +494,6 @@ class LocalStorage extends NativeLocalStorage {
  * @since 7
  */
 class AppStorage extends LocalStorage {
-    /** singleton class, app can not create instances
-    *
-    * not a public / sdk function
-    */
-    constructor(initializingProperties) {
-        super(initializingProperties);
-    }
     /**
     * create and initialize singleton
     * initialzie with all properties and their values that Object.keys(params) returns
@@ -911,6 +904,13 @@ class AppStorage extends LocalStorage {
         }
         return AppStorage.instance_;
     }
+    /** singleton class, app can not create instances
+    *
+    * not a public / sdk function
+    */
+    constructor(initializingProperties) {
+        super(initializingProperties);
+    }
 }
 // instance functions below:
 // Should all be protected, but TS lang does not allow access from static member to protected member
@@ -934,16 +934,6 @@ AppStorage.instance_ = undefined;
  * public API to manage IPropertySubscriber
  */
 class SubscriberManager {
-    /**
-     * SubscriberManager is a singleton created by the framework
-     * do not use
-     *
-     * internal method
-     */
-    constructor() {
-        this.subscriberById_ = new Map();
-        
-    }
     /**
       * check subscriber is known
       * same as ES6 Map.prototype.has()
@@ -1120,6 +1110,16 @@ class SubscriberManager {
      */
     makeId() {
         return ViewStackProcessor.MakeUniqueId();
+    }
+    /**
+     * SubscriberManager is a singleton created by the framework
+     * do not use
+     *
+     * internal method
+     */
+    constructor() {
+        this.subscriberById_ = new Map();
+        
     }
 }
 /*
@@ -1348,14 +1348,6 @@ class SubscribaleAbstract extends SubscribableAbstract {
  */
 class PersistentStorage {
     /**
-     * all following methods are framework internal
-     */
-    constructor() {
-        this.links_ = new Map();
-        this.id_ = SubscriberManager.MakeId();
-        SubscriberManager.Add(this);
-    }
-    /**
      *
      * @param storage method to be used by the framework to set the backend
      * this is to be done during startup
@@ -1494,6 +1486,14 @@ class PersistentStorage {
         
         PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
+    /**
+     * all following methods are framework internal
+     */
+    constructor() {
+        this.links_ = new Map();
+        this.id_ = SubscriberManager.MakeId();
+        SubscriberManager.Add(this);
+    }
     keys() {
         return this.links_.keys();
     }
@@ -1604,10 +1604,6 @@ PersistentStorage.instance_ = undefined;
  *
  */
 class Environment {
-    constructor() {
-        this.props_ = new Map();
-        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
-    }
     static getOrCreate() {
         if (Environment.instance_) {
             // already initialized
@@ -1669,6 +1665,10 @@ class Environment {
      */
     static Keys() {
         return Environment.getOrCreate().keys();
+    }
+    constructor() {
+        this.props_ = new Map();
+        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
     }
     envProp(key, value) {
         let prop = AppStorage.prop(key);
@@ -1804,170 +1804,6 @@ class errorReport {
         catch (e) { }
         msg += "!";
         throw new TypeError(msg);
-    }
-}
-/*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-class DistributedStorage {
-    constructor(sessionId, notifier) {
-        this.links_ = new Map();
-        this.id_ = SubscriberManager.MakeId();
-        SubscriberManager.Add(this);
-        this.aviliable_ = false;
-        this.notifier_ = notifier;
-    }
-    keys() {
-        let result = [];
-        const it = this.links_.keys();
-        let val = it.next();
-        while (!val.done) {
-            result.push(val.value);
-            val = it.next();
-        }
-        return result;
-    }
-    distributeProp(propName, defaultValue) {
-        if (this.link(propName, defaultValue)) {
-            
-        }
-    }
-    distributeProps(properties) {
-        properties.forEach(property => this.link(property.key, property.defaultValue));
-    }
-    link(propName, defaultValue) {
-        if (defaultValue == null || defaultValue == undefined) {
-            stateMgmtConsole.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
-            return false;
-        }
-        if (this.links_.get(propName)) {
-            stateMgmtConsole.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
-            return false;
-        }
-        let link = AppStorage.link(propName, this);
-        if (link) {
-            
-            this.links_.set(propName, link);
-            this.setDistributedProp(propName, defaultValue);
-        }
-        else {
-            let returnValue = defaultValue;
-            if (this.aviliable_) {
-                let newValue = this.getDistributedProp(propName);
-                if (newValue == null) {
-                    
-                    this.setDistributedProp(propName, defaultValue);
-                }
-                else {
-                    returnValue = newValue;
-                }
-            }
-            link = AppStorage.setAndLink(propName, returnValue, this);
-            this.links_.set(propName, link);
-            
-        }
-        return true;
-    }
-    deleteProp(propName) {
-        let link = this.links_.get(propName);
-        if (link) {
-            link.aboutToBeDeleted();
-            this.links_.delete(propName);
-            if (this.aviliable_) {
-                this.storage_.delete(propName);
-            }
-        }
-        else {
-            stateMgmtConsole.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
-        }
-    }
-    write(key) {
-        let link = this.links_.get(key);
-        if (link) {
-            this.setDistributedProp(key, link.get());
-        }
-    }
-    // public required by the interface, use the static method instead!
-    aboutToBeDeleted() {
-        
-        this.links_.forEach((val, key, map) => {
-            
-            val.aboutToBeDeleted();
-        });
-        this.links_.clear();
-        SubscriberManager.Delete(this.id__());
-    }
-    id__() {
-        return this.id_;
-    }
-    propertyHasChanged(info) {
-        
-        this.write(info);
-    }
-    onDataOnChange(propName) {
-        let link = this.links_.get(propName);
-        let newValue = this.getDistributedProp(propName);
-        if (link && newValue != null) {
-            
-            link.set(newValue);
-        }
-    }
-    onConnected(status) {
-        
-        if (!this.aviliable_) {
-            this.syncProp();
-            this.aviliable_ = true;
-        }
-        if (this.notifier_ != null) {
-            this.notifier_(status);
-        }
-    }
-    syncProp() {
-        this.links_.forEach((val, key) => {
-            let newValue = this.getDistributedProp(key);
-            if (newValue == null) {
-                this.setDistributedProp(key, val.get());
-            }
-            else {
-                val.set(newValue);
-            }
-        });
-    }
-    setDistributedProp(key, value) {
-        if (!this.aviliable_) {
-            stateMgmtConsole.warn(`DistributedStorage is not aviliable`);
-            return;
-        }
-        stateMgmtConsole.error(`DistributedStorage value is object ${key}-${JSON.stringify(value)}`);
-        if (typeof value == 'object') {
-            this.storage_.set(key, JSON.stringify(value));
-            return;
-        }
-        this.storage_.set(key, value);
-    }
-    getDistributedProp(key) {
-        let value = this.storage_.get(key);
-        if (typeof value == 'string') {
-            try {
-                let returnValue = JSON.parse(value);
-                return returnValue;
-            }
-            finally {
-                return value;
-            }
-        }
-        return value;
     }
 }
 ;
@@ -2210,23 +2046,6 @@ class ExtendableProxy {
 }
 class ObservedObject extends ExtendableProxy {
     /**
-     * To create a new ObservableObject use CreateNew function
-     *
-     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
-     * notifications
-     * @param obj  raw Object, if obj is a ObservableOject throws an error
-     * @param objectOwner
-     */
-    constructor(obj, handler, objectOwningProperty) {
-        super(obj, handler);
-        if (ObservedObject.IsObservedObject(obj)) {
-            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
-        }
-        if (objectOwningProperty != undefined) {
-            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
-        }
-    } // end of constructor
-    /**
      * Factory function for ObservedObjects /
      *  wrapping of objects for proxying
      *
@@ -2391,6 +2210,23 @@ class ObservedObject extends ExtendableProxy {
             ? Object.getPrototypeOf(proto.constructor.prototype)
             : proto;
     }
+    /**
+     * To create a new ObservableObject use CreateNew function
+     *
+     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
+     * notifications
+     * @param obj  raw Object, if obj is a ObservableOject throws an error
+     * @param objectOwner
+     */
+    constructor(obj, handler, objectOwningProperty) {
+        super(obj, handler);
+        if (ObservedObject.IsObservedObject(obj)) {
+            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+        }
+        if (objectOwningProperty != undefined) {
+            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
+        }
+    } // end of constructor
 }
 ObservedObject.__IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT = Symbol("_____raw_object__");
@@ -3178,6 +3014,23 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class View extends NativeViewFullUpdate {
+    get localStorage_() {
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+        }
+        this.localStoragebackStore_ = instance;
+    }
     /**
      * Create a View
      *
@@ -3220,23 +3073,6 @@ class View extends NativeViewFullUpdate {
         }
         SubscriberManager.Add(this);
         
-    }
-    get localStorage_() {
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
-        }
-        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -4349,6 +4185,27 @@ const UndefinedElmtId = -1;
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class ViewPU extends NativeViewPartialUpdate {
+    get localStorage_() {
+        if (!this.localStoragebackStore_ && this.parent_) {
+            
+            this.localStoragebackStore_ = this.parent_.localStorage_;
+        }
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+        }
+        this.localStoragebackStore_ = instance;
+    }
     /**
      * Create a View
      *
@@ -4407,27 +4264,6 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         SubscriberManager.Add(this);
         
-    }
-    get localStorage_() {
-        if (!this.localStoragebackStore_ && this.parent_) {
-            
-            this.localStoragebackStore_ = this.parent_.localStorage_;
-        }
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
-        }
-        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -4810,13 +4646,37 @@ class ViewPU extends NativeViewPartialUpdate {
         
         
     }
-    // the current executed update function
+    // executed on first render only
+    // kept for backward compatibility with old ace-ets2bundle
     observeComponentCreation(compilerAssignedUpdateFunc) {
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         
-        compilerAssignedUpdateFunc(elmtId, /* is first rneder */ true);
+        compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
         this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
         
+    }
+    // executed on first render only
+    // added July 2023, replaces observeComponentCreation
+    // classObject is the ES6 class object , mandatory to specify even the class lacks the pop function.
+    // - prototype : Object is present for every ES6 class
+    // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
+    observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
+        const _componentName = (classObject && "name" in classObject) ? classObject.name : "unspecified UINode";
+        const _popFunc = (classObject && "pop" in classObject) ? classObject.pop : () => { };
+        const updateFunc = (elmtId, isFirstRender) => {
+            
+            ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+            compilerAssignedUpdateFunc(elmtId, isFirstRender);
+            if (!isFirstRender) {
+                _popFunc();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+            
+        };
+        const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        
+        updateFunc(elmtId, /* is first render */ true);
+        this.updateFuncByElmtId.set(elmtId, updateFunc);
     }
     getOrCreateRecycleManager() {
         if (!this.recycleManager) {

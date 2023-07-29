@@ -1743,3 +1743,9 @@ var DragBehavior;
   DragBehavior[DragBehavior["COPY"] = 0] = "COPY";
   DragBehavior[DragBehavior["MOVE"] = 1] = "MOVE";
 })(DragBehavior || (DragBehavior = {}));
+
+var PatternLockChallengeResult;
+(function (PatternLockChallengeResult) {
+  PatternLockChallengeResult[PatternLockChallengeResult["CORRECT"] = 1] = "CORRECT";
+  PatternLockChallengeResult[PatternLockChallengeResult["WRONG"] = 2] = "WRONG";
+})(PatternLockChallengeResult || (PatternLockChallengeResult = {}));

@@ -304,6 +304,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
     if ((!SubwindowManager::GetInstance()->GetCurrentWindow()
         || !SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown())) {
         MenuParam menu {};
+        menu.isAboveApps = true;
         ViewAbstract::BindMenuWithCustomNode(menuList, targetNode, true, menuPosition, menu);
     }
     ResetHoverTimer();

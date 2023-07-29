@@ -138,6 +138,23 @@ void SwiperPattern::StopAndResetSpringAnimation()
     }
 }
 
+void SwiperPattern::OnLoopChange()
+{
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    if (!preLoop_.has_value()) {
+        preLoop_ = layoutProperty->GetLoop().value_or(true);
+        return;
+    }
+
+    if (preLoop_.value() != layoutProperty->GetLoop().value_or(true) &&
+        (layoutProperty->GetPrevMargin().has_value() || layoutProperty->GetNextMargin().has_value())) {
+        jumpIndex_ = GetLoopIndex(currentIndex_);
+        preLoop_ = layoutProperty->GetLoop().value_or(true);
+    }
+}
+
 void SwiperPattern::OnModifyDone()
 {
     currentOffset_ = 0.0f;
@@ -158,6 +175,7 @@ void SwiperPattern::OnModifyDone()
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
     StopAndResetSpringAnimation();
+    OnLoopChange();
     if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
         StopPropertyTranslateAnimation();
         StopTranslateAnimation();
@@ -250,6 +268,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         turnPageRate_ = 0.0f;
     }
     if (jumpIndex_) {
+        if ((jumpIndex_.value() < 0 || jumpIndex_.value() >= TotalCount()) && !IsLoop()) {
+            jumpIndex_ = 0;
+        }
         targetIndex_.reset();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation();
@@ -494,7 +515,9 @@ int32_t SwiperPattern::GetLoopIndex(int32_t originalIndex) const
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    auto isNotInit = true;
     if (isInit_) {
+        isNotInit = false;
         isInit_ = false;
         // first load Swiper to preload page.
         SetLazyLoadFeature(true);
@@ -502,7 +525,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         OnIndexChange();
     }
 
-    if (config.skipMeasure && config.skipLayout) {
+    if (!IsAutoPlay() && config.skipMeasure && config.skipLayout) {
         return false;
     }
 
@@ -535,6 +558,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             FlushFocus(curChildFrame);
         }
         currentIndexOffset_ = 0.0f;
+        if (isNotInit) {
+            OnIndexChange();
+        }
         jumpIndex_.reset();
     } else if (targetIndex_) {
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
@@ -1101,7 +1127,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             AnimationCallbackInfo callbackInfo;
             callbackInfo.currentOffset =
                 GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-            FireGestureSwipeEvent(gestureSwipeIndex_, callbackInfo);
+            FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     } else if (!IsLoop() && IsOutOfBoundary(offset) &&
                (edgeEffect == EdgeEffect::FADE || edgeEffect == EdgeEffect::NONE)) {
@@ -1117,12 +1143,12 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         }
     } else {
         currentDelta_ = currentDelta_ - offset;
+        currentIndexOffset_ += offset;
         if (isDragging_) {
-            currentIndexOffset_ += offset;
             AnimationCallbackInfo callbackInfo;
             callbackInfo.currentOffset =
                 GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-            FireGestureSwipeEvent(gestureSwipeIndex_, callbackInfo);
+            FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
     auto host = GetHost();
@@ -1147,6 +1173,11 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
     for (const auto& iter : itemPosition_) {
         if ((iter.second.startPos + additionalOffset) < 0 && (iter.second.endPos + additionalOffset) < 0) {
             continue;
+        }
+        if ((iter.second.startPos + additionalOffset) >= 0 && (iter.second.endPos + additionalOffset) > 0) {
+            currentShowIndex = iter.first;
+            turnPageRate_ = 0.0f;
+            break;
         }
         if ((iter.second.endPos + additionalOffset) > 0) {
             currentShowIndex = iter.first;
@@ -2058,9 +2089,9 @@ bool SwiperPattern::IsLoop() const
     if (TotalDisPlayCount() >= TotalCount()) {
         return false;
     }
-    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, true);
-    return swiperPaintProperty->GetLoop().value_or(true);
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, true);
+    return swiperLayoutProperty->GetLoop().value_or(true);
 }
 
 bool SwiperPattern::IsEnabled() const
@@ -2672,7 +2703,7 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     CHECK_NULL_VOID(arrowLayoutProperty);
     arrowLayoutProperty->UpdateDirection(layoutProperty->GetDirection().value_or(Axis::HORIZONTAL));
     arrowLayoutProperty->UpdateIndex(layoutProperty->GetIndex().value_or(0));
-    arrowLayoutProperty->UpdateLoop(swiperPaintProperty->GetLoop().value_or(true));
+    arrowLayoutProperty->UpdateLoop(layoutProperty->GetLoop().value_or(true));
     arrowLayoutProperty->UpdateEnabled(swiperPaintProperty->GetEnabled().value_or(true));
     arrowLayoutProperty->UpdateDisplayArrow(layoutProperty->GetDisplayArrowValue());
     arrowLayoutProperty->UpdateHoverShow(layoutProperty->GetHoverShowValue());
@@ -2836,10 +2867,15 @@ float SwiperPattern::GetCustomPropertyOffset() const
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0);
     auto paddingAndBorder = layoutProperty->CreatePaddingAndBorder();
-    auto preMargin = layoutProperty->GetPrevMargin().value_or(0.0_vp);
     auto paddingAndBorderValue =
         GetDirection() == Axis::HORIZONTAL ? paddingAndBorder.left.value_or(0.0) : paddingAndBorder.top.value_or(0.0);
-    return Dimension(paddingAndBorderValue, DimensionUnit::PX).ConvertToVp() + preMargin.Value();
+
+    auto preMarginPX = GetPrevMargin();
+    if (layoutProperty->GetPrevMargin().has_value() && preMarginPX > 0.0) {
+        preMarginPX += GetItemSpace();
+    }
+
+    return Dimension(paddingAndBorderValue + preMarginPX, DimensionUnit::PX).ConvertToVp();
 }
 
 float SwiperPattern::GetCurrentFirstIndexStartPos() const

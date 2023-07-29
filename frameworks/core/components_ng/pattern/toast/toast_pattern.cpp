@@ -12,18 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_VERSION_9 = 9;
+
+float GetTextHeight(const RefPtr<FrameNode>& textNode)
+{
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
+    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
+
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
+    CHECK_NULL_RETURN(textLayoutWrapper, 0.0f);
+    textLayoutWrapper->Measure(layoutConstraint);
+    auto textGeometry = textLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(textGeometry, 0.0f);
+    auto textSize = textGeometry->GetMarginFrameSize();
+    return textSize.Height();
+}
 } // namespace
 
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
@@ -77,6 +92,8 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void ToastPattern::BeforeCreateLayoutWrapper()
 {
+    PopupBasePattern::BeforeCreateLayoutWrapper();
+
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
     UpdateToastSize(toastNode);
@@ -84,6 +101,15 @@ void ToastPattern::BeforeCreateLayoutWrapper()
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     UpdateTextSizeConstraint(textNode);
+
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto toastTheme = context->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+    auto textHeight = GetTextHeight(textNode);
+    if (textHeight > toastTheme->GetMinHeight().ConvertToPx()) {
+        textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::START);
+    }
 }
 
 void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
@@ -117,5 +143,22 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
     auto minWidth = Dimension(toastTheme->GetMinWidth().ConvertToPx());
     auto minHeight = Dimension(toastTheme->GetMinHeight().ConvertToPx());
     textLayoutProperty->UpdateCalcMinSize(CalcSize(NG::CalcLength(minWidth), NG::CalcLength(minHeight)));
+}
+
+void ToastPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textContext = host->GetRenderContext();
+    CHECK_NULL_VOID(textContext);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+    auto textColor = toastTheme->GetTextStyle().GetTextColor();
+    auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(textColor);
+    host->SetNeedCallChildrenUpdate(false);
 }
 } // namespace OHOS::Ace::NG

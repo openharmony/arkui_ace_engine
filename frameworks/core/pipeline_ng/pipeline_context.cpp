@@ -282,9 +282,14 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
 void PipelineContext::InspectDrew()
 {
-    auto needRenderNode = std::move(needRenderNode_);
-    for (auto&& node : needRenderNode) {
-        OnDrawCompleted(node->GetInspectorId()->c_str());
+    CHECK_RUN_ON(UI);
+    if (!needRenderNode_.empty()) {
+        auto needRenderNode = std::move(needRenderNode_);
+        for (auto&& node : needRenderNode) {
+            if (node) {
+                OnDrawCompleted(node->GetInspectorId()->c_str());
+            }
+        }
     }
 }
 
@@ -391,8 +396,15 @@ void PipelineContext::FlushFocus()
         dirtyDefaultFocusNode_.Reset();
         return;
     }
-    if (rootNode_ && rootNode_->GetFocusHub() && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
-        rootNode_->GetFocusHub()->RequestFocusImmediately();
+    if (isRootFocusNeedUpdate_ && rootNode_ && rootNode_->GetFocusHub()) {
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        if (!rootFocusHub->IsCurrentFocus()) {
+            rootFocusHub->RequestFocusImmediately();
+        } else if (!rootFocusHub->IsCurrentFocusWholePath()) {
+            rootFocusHub->LostFocus();
+            rootFocusHub->RequestFocusImmediately();
+        }
+        isRootFocusNeedUpdate_ = false;
     }
 }
 
@@ -730,29 +742,6 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 #endif
 }
 
-SafeAreaInsets PipelineContext::GetSystemSafeArea() const
-{
-    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
-    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
-    return safeAreaManager_->GetSystemSafeArea();
-}
-
-SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
-{
-    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
-    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
-    return safeAreaManager_->GetCutoutSafeArea();
-}
-
-SafeAreaInsets PipelineContext::GetSafeArea() const
-{
-    CHECK_NULL_RETURN_NOLOG(!ignoreViewSafeArea_, {});
-    CHECK_NULL_RETURN_NOLOG(isLayoutFullScreen_, {});
-    auto systemAvoidArea = safeAreaManager_->GetSystemSafeArea();
-    auto cutoutAvoidArea = safeAreaManager_->GetCutoutSafeArea();
-    return systemAvoidArea.Combine(cutoutAvoidArea);
-}
-
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
@@ -789,15 +778,36 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     });
 }
 
+void PipelineContext::SetIgnoreViewSafeArea(bool value)
+{
+    if (safeAreaManager_->SetIgnoreSafeArea(value)) {
+        SyncSafeArea();
+    }
+}
+
+void PipelineContext::SetIsLayoutFullScreen(bool value)
+{
+    if (safeAreaManager_->SetIsFullScreen(value)) {
+        SyncSafeArea();
+    }
+}
+
+PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
+{
+    return safeAreaManager_->GetSafeArea();
+}
+
 void PipelineContext::SyncSafeArea()
 {
     CHECK_NULL_VOID_NOLOG(rootNode_);
-    CHECK_NULL_VOID_NOLOG(!ignoreViewSafeArea_);
-    CHECK_NULL_VOID_NOLOG(isLayoutFullScreen_);
     rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    CHECK_NULL_VOID_NOLOG(stageManager_);
     auto page = stageManager_->GetLastPage();
     if (page) {
         page->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (overlayManager_) {
+        overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -853,6 +863,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         auto page = stageManager_->GetLastPage();
         if (page) {
             page->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+        if (overlayManager_) {
+            overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
         }
         // layout immediately
         FlushUITasks();
@@ -1574,6 +1587,10 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        if (mouseStyle) {
+            mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
+        }
         LOGD("WindowFocus: onFocus_ is %{public}d. Lost all focus.", onFocus_);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
@@ -1581,6 +1598,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     }
     if (onFocus_ && onShow_) {
         LOGD("WindowFocus: onFocus_ and onShow_ are both true. Do FlushFocus().");
+        isRootFocusNeedUpdate_ = true;
         FlushFocus();
     }
     FlushWindowFocusChangedCallback(isFocus);
@@ -1853,8 +1871,8 @@ void PipelineContext::NotifyMemoryLevel(int32_t level)
             iter = nodesToNotifyMemoryLevel_.erase(iter);
         } else {
             node->OnNotifyMemoryLevel(level);
+            ++iter;
         }
-        ++iter;
     }
 }
 void PipelineContext::AddPredictTask(PredictTask&& task)

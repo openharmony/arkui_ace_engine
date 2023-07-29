@@ -664,7 +664,7 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    static RenderContext::ContextParam param = { RenderContext::ContextType::SURFACE, "MediaPlayerSurface" };
+    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface" };
     renderContextForMediaPlayer_->InitContext(false, param);
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);

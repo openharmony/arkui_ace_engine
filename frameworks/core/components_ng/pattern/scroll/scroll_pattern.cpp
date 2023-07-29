@@ -127,7 +127,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
-            GetScrollBar()->OnScrollEnd();
+            GetScrollBar()->PlayScrollBarEndAnimation();
         }
     }
     if (scrollStop_) {
@@ -164,6 +164,10 @@ void ScrollPattern::FireOnScrollStart()
     if (GetScrollAbort()) {
         return;
     }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarStartAnimation();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollEventHub>();
@@ -178,6 +182,10 @@ void ScrollPattern::FireOnScrollStop()
     if (GetScrollAbort()) {
         SetScrollAbort(false);
         return;
+    }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarEndAnimation();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

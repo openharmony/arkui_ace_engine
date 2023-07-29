@@ -35,30 +35,11 @@ constexpr int32_t TOUCH_DURATION = 250;
 
 void ButtonPattern::OnAttachToFrameNode()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    SetDefaultAttributes(host, pipeline);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
-}
-
-void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline)
-{
-    auto renderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-
-    // Init button default style
-    buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
-    renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
 }
 
 void ButtonPattern::UpdateTextLayoutProperty(
@@ -120,6 +101,11 @@ void ButtonPattern::InitButtonLabel()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
+    auto buttonRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(buttonRenderContext);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }
@@ -133,6 +119,15 @@ void ButtonPattern::OnModifyDone()
     HandleEnabled();
     InitHoverEvent();
     InitTouchEvent();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasBackgroundColor()) {
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
+    }
 }
 
 void ButtonPattern::InitTouchEvent()

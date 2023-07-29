@@ -58,8 +58,6 @@ constexpr float CONTENT_CHILD_WIDTH = DEVICE_WIDTH / VIEWPORT_CHILD_NUMBER;
 constexpr float CONTENT_CHILD_HEIGHT = DEVICE_HEIGHT / VIEWPORT_CHILD_NUMBER;
 constexpr float CONTENT_WIDTH = CONTENT_CHILD_WIDTH * CHILD_NUMBER;
 constexpr float CONTENT_HEIGHT = CONTENT_CHILD_HEIGHT * CHILD_NUMBER;
-constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
-constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
 constexpr double DEFAULT_FRICTION = 0.6;
 } // namespace
 
@@ -1300,12 +1298,13 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
     const Offset upOutBar = Offset(DEVICE_WIDTH - barWidth - 1.f, 10.f);
 
     Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
+
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_SHRINK_DURATION);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
@@ -1313,12 +1312,12 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
      * @tc.expected: touchAnimator_ is take effect
      */
     Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upOutBar, SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_SHRINK_DURATION);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
@@ -1326,58 +1325,58 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
      * @tc.expected: touchAnimator_ is take effect
      */
     Touch(TouchType::DOWN, downInBar, SourceType::MOUSE);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::MOUSE);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::MOUSE);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_SHRINK_DURATION);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
      * @tc.steps: step4. Touch in bar with SourceType::TOUCH_PAD
      * @tc.expected: touchAnimator_ is not take effect
      */
-    scrollBar->touchAnimator_->SetDuration(0);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     Touch(TouchType::DOWN, downInBar, SourceType::TOUCH_PAD);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH_PAD);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH_PAD);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
      * @tc.steps: step5. Touch out of bar
      * @tc.expected: touchAnimator_ is not take effect
      */
-    scrollBar->touchAnimator_->SetDuration(0);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     Touch(TouchType::DOWN, Offset::Zero(), SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
      * @tc.steps: step6. Touch in bar and scrollBar->IsHover() is true
      * @tc.expected: touchAnimator_ is not take effect
      */
-    scrollBar->touchAnimator_->SetDuration(0);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBar->SetHover(true);
     Touch(TouchType::DOWN, downInBar, SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::MOVE, moveInBar, SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsPressed());
 
     /**
@@ -1387,37 +1386,37 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
     CreateScroll(Dimension(barWidth));
     scrollBar = pattern_->GetScrollBar();
     const Offset moveOutBar = Offset(DEVICE_WIDTH - barWidth - 1.f, 0.f);
-
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     Mouse(moveOutBar);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsHover());
     Mouse(moveInBar);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
     EXPECT_TRUE(scrollBar->IsHover());
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     Mouse(moveInBar);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_EXPAND_DURATION);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     EXPECT_TRUE(scrollBar->IsHover());
     Mouse(moveOutBar);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), BAR_SHRINK_DURATION);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     EXPECT_FALSE(scrollBar->IsHover());
 
     /**
      * @tc.steps: step8. (out->in->in->out) and scrollBar->IsPressed() is true
      * @tc.expected: touchAnimator_ is not take effect
      */
-    scrollBar->touchAnimator_->SetDuration(0);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBar->SetPressed(true);
     Mouse(moveOutBar);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsHover());
     Mouse(moveInBar);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     EXPECT_TRUE(scrollBar->IsHover());
     Mouse(moveInBar);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     EXPECT_TRUE(scrollBar->IsHover());
     Mouse(moveOutBar);
-    EXPECT_EQ(scrollBar->touchAnimator_->GetDuration(), 0);
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsHover());
 }
 

@@ -65,8 +65,10 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         textFieldPattern->ResetContChange();
     }
     auto textEditingValue = textFieldPattern->GetTextEditingValue();
-    std::string text = textEditingValue.text;
-    textFieldContentModifier_->SetTextValue(text);
+    auto text = TextFieldPattern::CreateDisplayText(
+        textEditingValue.text, textFieldPattern->GetNakedCharPosition(), textFieldPattern->GetTextObscured());
+    auto displayText = StringUtils::Str16ToStr8(text);
+    textFieldContentModifier_->SetTextValue(displayText);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
 
     auto frameNode = textFieldPattern->GetHost();
@@ -165,5 +167,24 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(layoutProperty);
     textFieldOverlayModifier_->SetShowCounter(
         layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
+    if (textFieldPattern->GetSelectMode() != SelectionMode::NONE) {
+        textFieldPattern->MarkRedrawOverlay();
+    }
+    
+    auto scrollBar = scrollBar_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(scrollBar);
+    if (!scrollBar->NeedPaint()) {
+        LOGD("UpdateOverlayModifier no need paint scroll bar.");
+        return;
+    }
+    textFieldOverlayModifier_->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
+        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
+        OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
+        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()), scrollBar->GetHoverAnimationType());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    textFieldOverlayModifier_->SetFgColor(scrollBar->GetForegroundColor());
+    textFieldOverlayModifier_->SetBgColor(scrollBar->GetBackgroundColor());
+    textFieldOverlayModifier_->StartOpacityAnimation(scrollBar->GetOpacityAnimationType());
+    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

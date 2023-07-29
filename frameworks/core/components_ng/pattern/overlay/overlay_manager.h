@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
+#include <cstdint>
 #include <functional>
 #include <unordered_map>
 #include <utility>
@@ -34,6 +35,14 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+
+namespace OHOS::Ace {
+struct ModalUIExtensionCallbacks;
+} // namespace OHOS::Ace
+
+namespace OHOS::AAFwk {
+class Want;
+} // namespace OHOS::AAFwk
 
 namespace OHOS::Ace::NG {
 
@@ -119,8 +128,9 @@ public:
      *
      *   @return    true if popup was removed, false if no overlay exists
      */
-    bool RemoveOverlay(bool isBackPressed);
+    bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
     bool RemoveModalInOverlay();
+    bool RemoveAllModalInOverlay();
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideMenu(std::function<void()> callback)
@@ -245,7 +255,15 @@ public:
 
     static void DestroySheetMask(const RefPtr<FrameNode>& sheetNode);
 
+    void DeleteModal(int32_t targetId);
+
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
+
+    // ui extension
+    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
+    void CloseModalUIExtension(int32_t sessionId);
+
+    void MarkDirty(PropertyChangeFlag flag);
 
 private:
     void PopToast(int32_t targetId);
@@ -275,9 +293,11 @@ private:
     void FireModalPageShow();
     void FireModalPageHide();
 
-    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
+    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
+        bool isModeChangeToAuto = false);
 
-    void ComputeSheetOffset(NG::SheetStyle& sheetStyle);
+    void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    bool ModalExitProcess(const RefPtr<FrameNode>& topModalNode);
 
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);

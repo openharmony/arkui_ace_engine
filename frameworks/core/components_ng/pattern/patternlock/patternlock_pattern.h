@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/patternlock/patternlock_challenge.h"
 #include "core/components_ng/pattern/patternlock/patternlock_event_hub.h"
 #include "core/components_ng/pattern/patternlock/patternlock_layout_algorithm.h"
 #include "core/components_ng/pattern/patternlock/patternlock_layout_property.h"
@@ -56,7 +57,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto layoutAlgorithm = MakeRefPtr<PatternLockLayoutAlgorithm>(sideLength_);
+        auto layoutAlgorithm = MakeRefPtr<PatternLockLayoutAlgorithm>();
         return layoutAlgorithm;
     }
 
@@ -90,6 +91,20 @@ public:
         patternLockController_ = patternLockController;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        FocusPaintParam focusPaintParams;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
+        auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_RETURN(patternLockTheme, FocusPattern());
+        auto focusColor = patternLockTheme->GetFocusColor();
+        auto focusPaintWidth = patternLockTheme->GetFocusPaintWidth();
+        focusPaintParams.SetPaintWidth(Dimension(focusPaintWidth));
+        focusPaintParams.SetPaintColor(focusColor);
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -98,19 +113,42 @@ private:
     void InitPatternLockController();
     void HandleTouchEvent(const TouchEventInfo& info);
     void OnTouchDown(const TouchEventInfo& info);
-    void OnTouchMove(const TouchEventInfo& info);
+    void AddPointEnd();
     void OnTouchUp();
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleGestureUpdate(const GestureEvent& info);
 
     bool CheckChoosePoint(int32_t x, int32_t y) const;
+    bool CheckInHotSpot(const OffsetF& offset, int32_t x, int32_t y);
     bool AddChoosePoint(const OffsetF& offset, int32_t x, int32_t y);
     void AddPassPoint(int32_t x, int32_t y);
     void HandleReset();
+    void SetChallengeResult(V2::PatternLockChallengeResult challengeResult);
     bool CheckAutoReset() const;
+
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void OnFocusClick();
+    void PaintFocusState();
+    void OnKeyDrapUp();
+    void OnKeyDrapDown();
+    void OnKeyDrapLeft();
+    void OnKeyDrapRight();
+    bool OnKeyEvent(const KeyEvent& event);
+    void InitMouseEvent();
+    void HandleHoverEvent(bool isHover);
+    void HandleMouseEvent(const MouseInfo& info);
+    void StartModifierConnectedAnimate(int32_t x, int32_t y);
+    void StartModifierAddPassPointAnimate(int32_t x, int32_t y);
+    void StartModifierCanceledAnimate();
 
     RefPtr<V2::PatternLockController> patternLockController_;
     RefPtr<TouchEventImpl> touchDownListener_;
     RefPtr<TouchEventImpl> touchUpListener_;
     RefPtr<TouchEventImpl> touchMoveListener_;
+    RefPtr<PanEvent> panEvent_;
 
     bool isMoveEventValid_ = false;
     std::vector<PatternLockCell> choosePoint_;
@@ -118,10 +156,10 @@ private:
     OffsetF cellCenter_;
 
     mutable bool autoReset_ = true;
-    Dimension sideLength_ = 300.0_vp;
-    Dimension circleRadius_ = 14.0_vp;
+    Dimension circleRadius_;
 
     RefPtr<PatternLockModifier> patternLockModifier_;
+    std::pair<int32_t, int32_t> currentPoint_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PatternLockPattern);
 };

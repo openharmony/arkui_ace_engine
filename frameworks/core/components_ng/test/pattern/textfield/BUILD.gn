@@ -104,6 +104,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/mock_scrollable_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/rosen/testing_typography_style.cpp",
@@ -212,6 +213,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/syntax/mock_for_each_node.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
   ]
 
   deps = [
@@ -224,6 +226,7 @@ ohos_unittest("textfield_test_ng") {
 
   deps += [
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/icu/icu4c:shared_icui18n",
     "//third_party/icu/icu4c:shared_icuuc",
   ]

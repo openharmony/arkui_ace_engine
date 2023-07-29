@@ -196,6 +196,10 @@ void SheetPresentationPattern::InitialLayoutProps()
             height_ = pageHeight_ / half;
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
             height_ = largeHeight;
+        } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
+            auto geometryNode = GetHost()->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            height_ = geometryNode->GetFrameSize().Height();
         }
     } else {
         double sheetHeight = 0.0;

@@ -120,6 +120,9 @@ constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::string SHEET_HEIGHT_MEDIUM = "medium";
+const std::string SHEET_HEIGHT_LARGE = "large";
+const std::string SHEET_HEIGHT_AUTO = "auto";
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -246,7 +249,13 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     rotate.zDirection = static_cast<float>(dzVal);
     // if specify centerX
     CalcDimension length;
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length, true)) {
+            LOGW("centerX is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
+    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
         if (length.Unit() == DimensionUnit::INVALID) {
             LOGW("centerX is invalid");
             length = Dimension(0.5f, DimensionUnit::PERCENT);
@@ -254,7 +263,13 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
         rotate.centerX = length;
     }
     // if specify centerY
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length, true)) {
+            LOGW("centerY is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
+    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
         if (length.Unit() == DimensionUnit::INVALID) {
             LOGW("centerY is invalid");
             length = Dimension(0.5f, DimensionUnit::PERCENT);
@@ -262,7 +277,13 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
         rotate.centerY = length;
     }
     // if specify centerZ
-    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length, true)) {
+            LOGW("centerZ is invalid");
+            length = Dimension(0.5f, DimensionUnit::PERCENT);
+        }
+    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
         if (length.Unit() == DimensionUnit::INVALID) {
             LOGW("centerZ is invalid");
         }
@@ -1300,7 +1321,13 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return true;
     }
-    if (!ParseJsDimensionVp(jsValue, value)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            return false;
+        }
+    } else if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
 
@@ -1324,7 +1351,13 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return true;
     }
-    if (!ParseJsDimensionVp(jsValue, value)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+            return false;
+        }
+    } else if (!ParseJsDimensionVp(jsValue, value)) {
         return false;
     }
 
@@ -1483,21 +1516,29 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
     CalcDimension minHeight;
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
     CalcDimension maxHeight;
-
+    bool version10OrLarger = PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         ViewAbstractModel::GetInstance()->SetMinWidth(minWidth);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMinSize(true);
     }
 
     if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
         ViewAbstractModel::GetInstance()->SetMaxWidth(maxWidth);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMaxSize(true);
     }
 
     if (ParseJsDimensionVp(minHeightValue, minHeight)) {
         ViewAbstractModel::GetInstance()->SetMinHeight(minHeight);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMinSize(false);
     }
 
     if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
         ViewAbstractModel::GetInstance()->SetMaxHeight(maxHeight);
+    } else if (version10OrLarger) {
+        ViewAbstractModel::GetInstance()->ResetMaxSize(false);
     }
 }
 
@@ -1894,7 +1935,12 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     }
     // id
     auto id = info[0]->ToString();
-    ViewAbstractModel::GetInstance()->SetGeometryTransition(id);
+    // follow flag
+    bool followWithOutTransition = false;
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsBoolean()) {
+        followWithOutTransition = info[1]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetGeometryTransition(id, followWithOutTransition);
 }
 
 void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
@@ -2011,18 +2057,18 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
-        saturation = saturation > 0.0f ? saturation : 1.0f;
+        saturation = (saturation > 0.0f || NearZero(saturation))? saturation : 1.0f;
     }
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
         brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
-        brightness = brightness > 0.0f ? brightness : 1.0f;
+        brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
     }
     Color color = Color::TRANSPARENT;
     if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
-    EffectOption option = {radius, saturation, brightness, color};
+    EffectOption option = { radius, saturation, brightness, color };
     ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
 }
 
@@ -2512,23 +2558,38 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
         if (borderWidth.IsNegative()) {
             borderWidth.Reset();
         }
+        if (borderWidth.Unit() == DimensionUnit::PERCENT) {
+            borderWidth.Reset();
+        }
         ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension left;
         if (ParseJsDimensionVp(object->GetProperty("left"), left) && left.IsNonNegative()) {
+            if (left.Unit() == DimensionUnit::PERCENT) {
+                left.Reset();
+            }
             leftDimen = left;
         }
         CalcDimension right;
         if (ParseJsDimensionVp(object->GetProperty("right"), right) && right.IsNonNegative()) {
+            if (right.Unit() == DimensionUnit::PERCENT) {
+                right.Reset();
+            }
             rightDimen = right;
         }
         CalcDimension top;
         if (ParseJsDimensionVp(object->GetProperty("top"), top) && top.IsNonNegative()) {
+            if (top.Unit() == DimensionUnit::PERCENT) {
+                top.Reset();
+            }
             topDimen = top;
         }
         CalcDimension bottom;
         if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom) && bottom.IsNonNegative()) {
+            if (bottom.Unit() == DimensionUnit::PERCENT) {
+                bottom.Reset();
+            }
             bottomDimen = bottom;
         }
         ViewAbstractModel::GetInstance()->SetBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
@@ -3154,7 +3215,8 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
-bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
+bool JSViewAbstract::ParseJsDimensionNG(
+    const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
         return false;
@@ -3165,6 +3227,10 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
         return true;
     }
     if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        if (value.back() == '%' && !isSupportPercent) {
+            return false;
+        }
         return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
@@ -3271,10 +3337,10 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     return true;
 }
 
-bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result)
+bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent)
 {
     // 'vp' -> the value varies with pixel density of device.
-    return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP);
+    return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
 }
 
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result)
@@ -5214,13 +5280,18 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         // Remove all " ".
         heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
         std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
-        if (heightStr == "medium") {
+        if (heightStr == SHEET_HEIGHT_MEDIUM) {
             sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
             sheetStyle.height.reset();
             return;
         }
-        if (heightStr == "large") {
+        if (heightStr == SHEET_HEIGHT_LARGE) {
             sheetStyle.sheetMode = NG::SheetMode::LARGE;
+            sheetStyle.height.reset();
+            return;
+        }
+        if (heightStr == SHEET_HEIGHT_AUTO) {
+            sheetStyle.sheetMode = NG::SheetMode::AUTO;
             sheetStyle.height.reset();
             return;
         }
@@ -5246,11 +5317,9 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     }
     // parse maskColor
     Color parseMaskColor;
-    if (maskColor->IsNull() || maskColor->IsUndefined() ||
-        !JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
-        parseMaskColor.SetValue(0x00000000);
+    if (!maskColor->IsNull() && !maskColor->IsUndefined() && JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
+        sheetStyle.maskColor = std::move(parseMaskColor);
     }
-    sheetStyle.maskColor = std::move(parseMaskColor);
 }
 
 void JSViewAbstract::ParseOverlayCallback(
@@ -5742,7 +5811,7 @@ void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
 }
 
 bool JSViewAbstract::ParseJsonDimension(
-    const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, DimensionUnit defaultUnit)
+    const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, DimensionUnit defaultUnit, bool checkIllegal)
 {
     if (!jsonValue || jsonValue->IsNull()) {
         LOGD("invalid json value");
@@ -5757,6 +5826,9 @@ bool JSViewAbstract::ParseJsonDimension(
         return true;
     }
     if (jsonValue->IsString()) {
+        if (checkIllegal) {
+            return StringUtils::StringToDimensionWithUnitNG(jsonValue->GetString(), result, defaultUnit);
+        }
         result = StringUtils::StringToCalcDimension(jsonValue->GetString(), false, defaultUnit);
         return true;
     }
@@ -5775,9 +5847,10 @@ bool JSViewAbstract::ParseJsonDimension(
     return true;
 }
 
-bool JSViewAbstract::ParseJsonDimensionVp(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result)
+bool JSViewAbstract::ParseJsonDimensionVp(
+    const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, bool checkIllegal)
 {
-    return ParseJsonDimension(jsonValue, result, DimensionUnit::VP);
+    return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, checkIllegal);
 }
 
 bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue, double& result)
@@ -6294,6 +6367,10 @@ bool JSViewAbstract::CheckLength(
     // input type is not in [number, string, Resource]
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
         return false;
+    }
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        return ParseJsDimensionVpNG(jsValue, result);
     }
     // Correct type, incorrect value parsing
     if (!ParseJsDimensionVp(jsValue, result)) {

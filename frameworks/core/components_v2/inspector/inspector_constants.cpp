@@ -346,6 +346,9 @@ const char SHEET_ETS_TAG[] = "Sheet";
 const char SHEET_MASK_TAG[] = "SheetMask";
 const char SHEET_PAGE_TAG[] = "SheetPage";
 
+// full screen modal
+const char MODAL_PAGE_TAG[] = "ModalPage";
+
 // hyperlink
 const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";
 const char HYPERLINK_ETS_TAG[] = "Hyperlink";

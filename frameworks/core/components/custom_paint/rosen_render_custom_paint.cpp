@@ -34,9 +34,8 @@
 #include "include/core/SkSurface.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
-#else
-#include "include/core/SkVertices.h"
 #endif
+#include "include/core/SkVertices.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"

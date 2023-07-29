@@ -302,8 +302,6 @@ frameworks/core/components_ng/components_plugin.gni  @sunfei2021
 frameworks/core/components_ng/components.gni  @sunfei2021
 
 [Test source]
-frameworks/core/components_ng/test/  @liyujie43
-frameworks/core/components/test/  @liyujie43
 frameworks/bridge/test/  @liyujie43
 test/mock/  @liyujie43
 test/unittest/  @liyujie43

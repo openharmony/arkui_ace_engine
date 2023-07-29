@@ -4545,7 +4545,7 @@ void WebDelegate::OnPageVisible(const std::string& url)
     }
 }
 
-void WebDelegate::OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs)
+void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs)
 {
     if (onFirstContentfulPaintV2_) {
         onFirstContentfulPaintV2_(std::make_shared<FirstContentfulPaintEvent>(navigationStartTick,

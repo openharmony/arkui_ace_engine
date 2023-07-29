@@ -77,7 +77,7 @@ void GeometryTransitionTestNg::TearDown() {}
  */
 HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest001, TestSize.Level1)
 {
-    GeometryTransition GT(inNode);
+    GeometryTransition GT("test", inNode);
     GT.inNode_ = inNode;
     GT.outNode_ = outNode;
     GT.WillLayout(outNodeLayoutWrapper);
@@ -124,7 +124,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with inNode.
      */
-    GeometryTransition GT(inNode);
+    GeometryTransition GT("test", inNode);
     /**
      * @tc.steps: step2. try build with some condition.
      * @tc.expected: inNode in the GeometryTransition swap to outNode.
@@ -166,7 +166,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with inNode.
      */
-    GeometryTransition GT(inNode);
+    GeometryTransition GT("test", inNode);
     GT.inNode_ = inNode;
     GT.outNode_ = outNode;
     /**

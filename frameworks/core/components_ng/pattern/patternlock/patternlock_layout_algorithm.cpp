@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,11 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> PatternLockLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_RETURN(patternLockTheme, std::nullopt);
+    sideLength_ = patternLockTheme->GetSideLength();
     auto patternLockLayoutProperty = DynamicCast<PatternLockLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(patternLockLayoutProperty, std::nullopt);
     sideLength_ = patternLockLayoutProperty->GetSideLength().value_or(sideLength_);
@@ -31,5 +36,4 @@ std::optional<SizeF> PatternLockLayoutAlgorithm::MeasureContent(
     length = std::min(maxLength, length);
     return SizeF(length, length);
 }
-
 } // namespace OHOS::Ace::NG

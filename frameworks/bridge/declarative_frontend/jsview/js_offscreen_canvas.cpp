@@ -250,6 +250,10 @@ void JSOffscreenCanvas::JsGetContext(const JSCallbackInfo& info)
             if (contextObj->IsEmpty()) {
                 return;
             }
+            JSRef<JSVal> isSucceed = contextObj->GetProperty("__isSucceed");
+            if (isSucceed->IsBoolean() && !isSucceed->ToBoolean()) {
+                return;
+            }
             if (info[1]->IsObject()) {
                 offscreenCanvasSettings_ = JSRef<JSObject>::Cast(info[1])->Unwrap<JSRenderingContextSettings>();
                 CHECK_NULL_VOID(offscreenCanvasSettings_);
@@ -272,6 +276,12 @@ JSRef<JSObject> JSOffscreenCanvas::CreateContext2d(double width, double height)
     offscreenCanvasContext_ = Referenced::Claim(contextObj->Unwrap<JSOffscreenRenderingContext>());
     offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
         static_cast<int32_t>(width), static_cast<int32_t>(height));
+    CHECK_NULL_RETURN(offscreenCanvasPattern_, contextObj);
+    if (!offscreenCanvasPattern_->IsSucceed()) {
+        contextObj->SetProperty("__isSucceed", false);
+        return contextObj;
+    }
+    contextObj->SetProperty("__isSucceed", true);
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
     CHECK_NULL_RETURN(offscreenCanvasSettings_, contextObj);

@@ -151,6 +151,19 @@ void ViewAbstract::SetMinHeight(const CalcLength& height)
     layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::ResetMinSize(bool resetWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMinSize(resetWidth);
+}
+
 void ViewAbstract::SetMaxWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -175,6 +188,19 @@ void ViewAbstract::SetMaxHeight(const CalcLength& height)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
+}
+
+void ViewAbstract::ResetMaxSize(bool resetWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMaxSize(resetWidth);
 }
 
 void ViewAbstract::SetAspectRatio(float ratio)
@@ -250,6 +276,9 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
         target->UpdateBackBlurStyle(bgBlurStyle);
         if (target->GetBackBlurRadius().has_value()) {
             target->UpdateBackBlurRadius(Dimension());
@@ -267,6 +296,12 @@ void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
         target->UpdateBackgroundEffect(effectOption);
     }
 }
@@ -907,9 +942,14 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
 }
 
-void ViewAbstract::SetGeometryTransition(const std::string& id)
+void ViewAbstract::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, GeometryTransition, id);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+    }
 }
 
 void ViewAbstract::SetOpacity(double opacity)
@@ -1025,10 +1065,6 @@ void ViewAbstract::BindPopup(
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
-    // windowScene will not use subwindow
-    if (container->IsScenceBoardWindow()) {
-        param->SetShowInSubWindow(false);
-    }
     auto showInSubWindow = param->IsShowInSubWindow();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
@@ -1174,7 +1210,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
-        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
     BindMenu(menuNode, targetNode->GetId(), offset);
@@ -1209,6 +1245,9 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
         target->UpdateBackBlurRadius(radius);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);

@@ -26,6 +26,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/base/frame_node.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -152,7 +154,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto children = frameNode->GetChildren();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false)) {
+    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         auto childLayoutConstraint = textfieldLayoutProperty->CreateChildConstraint();
         CHECK_NULL_VOID(childWrapper);
@@ -187,15 +190,16 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
-    auto isInlineStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE;
+    auto isInlineStyle = pattern->IsNormalInlineState();
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
-        if (!pattern->IsTextArea()) {
+        if (!pattern->IsTextArea() && isInlineStyle) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         }
     } else {
-        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
+        UpdatePlaceholderTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme,
+            textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
@@ -214,13 +218,15 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         CreateParagraph(textStyles, pattern->GetDragContents(), textContent,
             isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
     } else {
-        CreateParagraph(textStyle, textContent,
-            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
+        CreateParagraph(textStyle, textContent, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder,
+            pattern->GetNakedCharPosition(), disableTextAlign);
     }
     float imageSize = 0.0f;
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     imageSize = showPasswordIcon ? pattern->GetIconSize() : 0.0f;
     auto imageHotZoneWidth = showPasswordIcon ? imageSize + pattern->GetIconRightOffset() : 0.0;
+    auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_RETURN(scrollBarTheme, std::nullopt);
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder && !isInlineStyle) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
@@ -232,7 +238,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         } else if (showPlaceHolder && isPasswordType) {
             paragraph_->Layout(idealWidth - imageHotZoneWidth);
         } else {
-            paragraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+            paragraph_->Layout(
+                idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
         }
     }
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength()) {
@@ -240,7 +247,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         auto maxLength = layoutProperty->GetMaxLength().value();
         CreateCounterParagraph(textLength, maxLength, textFieldTheme);
         if (counterParagraph_) {
-            counterParagraph_->Layout(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+            counterParagraph_->Layout(
+                idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
         }
     }
     if (layoutProperty->GetShowErrorTextValue(false)) {
@@ -274,7 +282,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
                 layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
             idealWidth = paragraph_->GetLongestLine();
         }
-        textRect_.SetSize(SizeF(idealWidth - pattern->GetScrollBarWidth() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
+        textRect_.SetSize(SizeF(
+            idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
             paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
@@ -365,7 +374,11 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (needToKeepTextRect) {
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
     }
-    if (!pattern->IsTextArea() && !needToKeepTextRect) {
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!pattern->IsTextArea() && !needToKeepTextRect && !(paintProperty->GetInputStyleValue(InputStyle::DEFAULT) ==
+        InputStyle::INLINE && layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
+        TextInputType::UNSPECIFIED)) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft();
@@ -397,7 +410,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto frameBottom = pattern->GetMarginBottom();
     MarginProperty errorMargin;
     if (layoutProperty->GetShowUnderlineValue(false) && layoutProperty->GetShowErrorTextValue(false) &&
-        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN)) {
+        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN)  &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         errorMargin.bottom = CalcLength(ERROR_TEXT_UNDERLINE_MARGIN);
         frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
     }
@@ -415,6 +429,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
+    FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
 
     Dimension fontSize;
     if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
@@ -428,7 +443,8 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     if (isDisabled) {
         textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
-        if (layoutProperty->GetShowUnderlineValue(false)) {
+        if (layoutProperty->GetShowUnderlineValue(false) &&
+            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
             textStyle.SetTextColor(theme ? theme->GetTextColorDisable() : textStyle.GetTextColor());
         }
     } else {
@@ -453,11 +469,14 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
+void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
+    bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
-    textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
+    textStyle.SetFontFamilies(layoutProperty->GetPlaceholderFontFamilyValue(defaultFontFamily));
+    FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
+
     Dimension fontSize;
     if (layoutProperty->GetPlaceholderValue("").empty()) {
         if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
@@ -479,7 +498,8 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     if (isDisabled) {
         textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
-        if (layoutProperty->GetShowUnderlineValue(false)) {
+        if (layoutProperty->GetShowUnderlineValue(false) &&
+            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
             textStyle.SetTextColor(theme ? theme->GetTextColorDisable() : textStyle.GetTextColor());
         }
     } else {
@@ -500,7 +520,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content,
-    bool needObscureText, bool disableTextAlign)
+    bool needObscureText, int32_t nakedCharPosition, bool disableTextAlign)
 {
     RSParagraphStyle paraStyle;
     paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
@@ -521,16 +541,31 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    if (!content.empty() && needObscureText) {
-        builder->AddText(
-            TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length())));
-    } else {
-        builder->AddText(StringUtils::Str8ToStr16(content));
-    }
+    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition, needObscureText);
+    builder->AddText(displayText);
     builder->Pop();
 
     auto paragraph = builder->Build();
     paragraph_.reset(paragraph.release());
+}
+
+void TextFieldLayoutAlgorithm::FontRegisterCallback(
+    const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies)
+{
+    auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        for (const auto& familyName : fontFamilies) {
+            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+        }
+        fontManager->AddVariationNodeNG(frameNode);
+    }
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& textStyles,
@@ -673,6 +708,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetFontSize(textStyle.GetFontSize());
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());
+    modifier->SetFontStyle(textStyle.GetFontStyle());
 }
 
 void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
@@ -688,7 +724,8 @@ void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto layoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false)) {
+    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_VOID(childWrapper);
         auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());

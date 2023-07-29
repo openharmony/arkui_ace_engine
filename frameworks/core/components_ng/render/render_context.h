@@ -104,7 +104,7 @@ public:
 
     virtual void OnModifyDone() {}
 
-    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS };
+    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS, HARDWARE_SURFACE };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -286,6 +286,10 @@ public:
     std::optional<Dimension> GetBackBlurRadius() const
     {
         return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
+    }
+    std::optional<EffectOption> GetBackgroundEffect() const
+    {
+        return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
     }
     std::optional<BlurStyleOption> GetFrontBlurStyle() const
     {

@@ -24,12 +24,13 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
+constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
+constexpr int32_t LONG_PRESS_DELAY = 300;
 } // namespace
 
 void SwiperIndicatorPattern::OnAttachToFrameNode() {}
@@ -94,7 +95,7 @@ void SwiperIndicatorPattern::OnModifyDone()
         InitClickEvent(gestureHub);
         InitHoverMouseEvent();
         InitTouchEvent(gestureHub);
-        InitPanEvent(gestureHub);
+        InitLongPressEvent(gestureHub);
     }
 }
 
@@ -260,12 +261,17 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
 void SwiperIndicatorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     auto touchType = info.GetTouches().front().GetTouchType();
-    if (touchType == TouchType::DOWN) {
-        HandleTouchDown();
-    } else if (touchType == TouchType::UP) {
+    if (touchType == TouchType::UP) {
         HandleTouchUp();
+        HandleDragEnd(0);
+        isPressed_ = false;
     } else if (touchType == TouchType::CANCEL) {
         HandleTouchUp();
+        HandleDragEnd(0);
+        isPressed_ = false;
+    }
+    if (isPressed_) {
+        HandleLongDragUpdate(info.GetTouches().front());
     }
 }
 
@@ -495,10 +501,11 @@ void SwiperIndicatorPattern::HandleDragUpdate(const GestureEvent& info)
 
     auto turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
     swiperPattern->SetTurnPageRate(turnPageRate);
-    if (std::abs(turnPageRate) >= 1) {
-        if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+    if (GreatOrEqual(std::abs(turnPageRate), 1)) {
+        if (Positive(info.GetMainDelta())) {
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + 1);
-        } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+        }
+        if (NonPositive(info.GetMainDelta())) {
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() - 1);
         }
         dragStartPoint_ = dragPoint;
@@ -530,10 +537,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
-
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, false);
-    auto isLoop = swiperPaintProperty->GetLoop().value_or(true);
+    auto isLoop = swiperLayoutProperty->GetLoop().value_or(true);
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
     auto offset = dragPoint - dragStartPoint_;
@@ -564,5 +568,106 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     return touchBottomType == TouchBottomType::NONE ? false : true;
+}
+
+bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, false);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, false);
+    auto currentIndex = swiperPattern->GetCurrentIndex();
+    auto childrenSize = swiperPattern->TotalCount();
+
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, false);
+    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
+
+    auto isLoop = swiperLayoutProperty->GetLoop().value_or(true);
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    auto offset = dragPoint - dragStartPoint_;
+    auto touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    auto touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
+                               ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx()
+                               : 1;
+
+    swiperPattern->SetTurnPageRate(0);
+    swiperPattern->SetTouchBottomRate(std::abs(touchBottomRate));
+    TouchBottomType touchBottomType = TouchBottomType::NONE;
+
+    if ((currentIndex <= 0) && !isLoop) {
+        if (Negative(touchOffset) || NonPositive(touchOffset)) {
+            touchBottomType = TouchBottomType::START;
+        }
+    }
+
+    if ((currentIndex >= childrenSize - displayCount) && !isLoop) {
+        if (Positive(touchOffset) || NonNegative(touchOffset)) {
+            touchBottomType = TouchBottomType::END;
+        }
+    }
+    touchBottomType_ = touchBottomType;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+    return touchBottomType == TouchBottomType::NONE ? false : true;
+}
+
+void SwiperIndicatorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID_NOLOG(!longPressEvent_);
+    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleLongPress(info);
+    };
+    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+
+    gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
+}
+
+void SwiperIndicatorPattern::HandleLongPress(GestureEvent& info)
+{
+    isLongPress_ = true;
+    HandleTouchDown();
+    HandleDragStart(info);
+}
+
+void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
+    if (swiperPattern->TotalCount() == displayCount) {
+        return;
+    }
+    if (CheckIsTouchBottom(info)) {
+        return;
+    }
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    auto offset = dragPoint - dragStartPoint_;
+    auto turnPageRateOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
+        return;
+    }
+
+    auto turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
+    swiperPattern->SetTurnPageRate(turnPageRate);
+    if (std::abs(turnPageRate) >= 1) {
+        if (Positive(turnPageRateOffset)) {
+            swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + 1);
+        }
+        if (NonPositive(turnPageRateOffset)) {
+            swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() - 1);
+        }
+        dragStartPoint_ = dragPoint;
+    }
 }
 } // namespace OHOS::Ace::NG

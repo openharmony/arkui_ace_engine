@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ class ACE_EXPORT PatternLockModelImpl : public OHOS::Ace::PatternLockModel {
 public:
     RefPtr<V2::PatternLockController> Create() override;
     void SetPatternComplete(std::function<void(const BaseEventInfo* info)>&& onComplete) override;
+    void SetDotConnected(std::function<void(int32_t)>&& onConnected) override {};
     void SetSelectedColor(const Color& selectedColor) override;
     void SetAutoReset(bool isAutoReset) override;
     void SetPathColor(const Color& pathColor) override;

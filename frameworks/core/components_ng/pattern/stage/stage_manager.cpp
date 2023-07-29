@@ -58,7 +58,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(context);
                 auto taskExecutor = context->GetTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
+                taskExecutor->PostSyncTask(
                     [weak, weakContext = WeakPtr<PipelineContext>(context), transitionType]() {
                         auto page = weak.Upgrade();
                         CHECK_NULL_VOID(page);
@@ -209,7 +209,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         LOGI("waiting for window size");
         return true;
     }
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return true;
 }
 

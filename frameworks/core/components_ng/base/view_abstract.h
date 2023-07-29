@@ -43,8 +43,8 @@
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
-#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
 struct OptionParam {
@@ -53,15 +53,12 @@ struct OptionParam {
     std::function<void()> action;
 
     OptionParam() = default;
-    OptionParam(
-        const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(iconParam),
-          action(actionParam) {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+        : value(valueParam), icon(iconParam), action(actionParam)
+    {}
     OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(""),
-          action(actionParam) {}
+        : value(valueParam), icon(""), action(actionParam)
+    {}
 
     ~OptionParam() = default;
 };
@@ -74,6 +71,7 @@ struct MenuParam {
     std::function<void()> onDisappear;
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
+    bool isAboveApps = false;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -85,6 +83,8 @@ public:
     static void SetMinHeight(const CalcLength& minHeight);
     static void SetMaxWidth(const CalcLength& maxWidth);
     static void SetMaxHeight(const CalcLength& maxHeight);
+    static void ResetMinSize(bool resetWidth);
+    static void ResetMaxSize(bool resetWidth);
 
     static void SetAspectRatio(float ratio);
     static void SetLayoutWeight(int32_t value);
@@ -248,7 +248,7 @@ public:
     // sharedTransition
     static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     // geometryTransition
-    static void SetGeometryTransition(const std::string& id);
+    static void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false);
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape>& basicShape);
     static void SetClipEdge(bool isClip);
@@ -285,15 +285,16 @@ public:
     static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
 
     // custom animatable property
-    static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent);
+    static void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
     static void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     static void CreateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<CustomAnimatableArithmetic>& value,
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
-    static void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-        RefPtr<CustomAnimatableArithmetic>& value);
+    static void UpdateAnimatableArithmeticProperty(
+        const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
+
 private:
     static void AddDragFrameNodeToManager();
 };

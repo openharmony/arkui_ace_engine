@@ -167,7 +167,7 @@ private:
     std::string title_;
 
     DialogProperties dialogProperties_;
-
+    RefPtr<FrameNode> menuNode_;
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };
 } // namespace OHOS::Ace::NG

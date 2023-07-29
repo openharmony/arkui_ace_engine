@@ -1620,4 +1620,22 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
     pattern->OnVisibleChange(false);
     EXPECT_FALSE(pattern->selectOverlay_);
 }
+
+/**
+ * @tc.name: Resource001
+ * @tc.desc: Test image reload Resource url when language changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, Resource001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->loadingCtx_);
+
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_FALSE(pattern->loadingCtx_);
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->loadingCtx_);
+}
 } // namespace OHOS::Ace::NG

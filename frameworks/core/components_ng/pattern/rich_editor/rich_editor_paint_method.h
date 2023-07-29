@@ -34,6 +34,7 @@ public:
 
 private:
     WeakPtr<Pattern> pattern_;
+    RefPtr<Paragraph> paragraph_;
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPaintMethod);
 };

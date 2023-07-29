@@ -24,6 +24,8 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/render/drawing.h"
+#include "rosen_text/properties/font_collection_txt.h"
 
 namespace OHOS::Ace {
 
@@ -32,10 +34,15 @@ RosenFontCollection RosenFontCollection::instance;
 std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
 {
     std::call_once(fontFlag_, [this]() {
-        fontCollection_ = std::make_shared<txt::FontCollection>();
-        fontCollection_->SetupDefaultFontManager();
-        dynamicFontManager_ = sk_make_sp<txt::DynamicFontManager>();
-        fontCollection_->SetDynamicFontManager(dynamicFontManager_);
+        auto rosenCollection = RSFontCollection::GetInstance(false);
+        auto collectionTxtBase = rosenCollection->GetFontCollection();
+        auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
+        if (collectionTxt) {
+            fontCollection_ = collectionTxt->GetFontCollection();
+            dynamicFontManager_ = collectionTxt->GetDynamicFontManager();
+        } else {
+            LOGE("Fail to get FontFollectionTxt!");
+        }
     });
     return fontCollection_;
 }
@@ -48,12 +55,15 @@ sk_sp<txt::DynamicFontManager> RosenFontCollection::GetDynamicFontManager()
 void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName)
 {
     std::call_once(fontFlag_, [this]() {
-        fontCollection_ = std::make_shared<txt::FontCollection>();
-        fontCollection_->SetupDefaultFontManager();
-        dynamicFontManager_ = sk_make_sp<txt::DynamicFontManager>();
-        fontCollection_->SetDynamicFontManager(dynamicFontManager_);
+        auto rosenCollection = RSFontCollection::GetInstance(false);
+        auto collectionTxtBase = rosenCollection->GetFontCollection();
+        auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
+        if (collectionTxt) {
+            fontCollection_ = collectionTxt->GetFontCollection();
+            dynamicFontManager_ = collectionTxt->GetDynamicFontManager();
+        }
     });
-    
+
     auto it = std::find(families_.begin(), families_.end(), familyName);
     if (it != families_.end()) {
         return;

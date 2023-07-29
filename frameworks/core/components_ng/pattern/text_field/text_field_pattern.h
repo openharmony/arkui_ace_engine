@@ -148,14 +148,17 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (!textFieldOverlayModifier_) {
-            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(
-                WeakClaim(this), AceType::WeakClaim(AceType::RawPtr(GetScrollBar())), GetScrollEdgeEffect());
-        }
         if (!textFieldContentModifier_) {
             textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
         }
-        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier_, textFieldContentModifier_);
+        auto textFieldOverlayModifier = AceType::DynamicCast<TextFieldOverlayModifier>(GetScrollBarOverlayModifier());
+        auto paint =
+            MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier, textFieldContentModifier_);
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            paint->SetScrollBar(scrollBar);
+        }
+        return paint;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -472,7 +475,7 @@ public:
     bool CursorMoveDown();
     void SetCaretPosition(int32_t position);
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
-    void HandleSetSelection(int32_t start, int32_t end);
+    void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
@@ -548,6 +551,8 @@ public:
     }
 
     static std::u16string CreateObscuredText(int32_t len);
+    static std::u16string CreateDisplayText(
+        const std::string& content, int32_t nakedCharPosition, bool needObscureText);
     bool IsTextArea() const override;
     const RectF& GetImageRect() const
     {
@@ -773,6 +778,7 @@ public:
     std::string GetBarStateString() const;
     bool GetErrorTextState() const;
     std::string GetShowPasswordIconString() const;
+    int32_t GetNakedCharPosition() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     void HandleBlurEvent();
     void HandleFocusEvent();
@@ -917,6 +923,8 @@ public:
         return inlinePadding_;
     }
 
+    bool IsNormalInlineState() const;
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -998,6 +1006,7 @@ private:
 
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
+    bool FilterWithAscii(const std::string& valueToUpdate, std::string& result);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
@@ -1021,6 +1030,7 @@ private:
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
     void SaveUnderlineStates();
+    void ApplyUnderlineStates();
     void SavePasswordModeStates();
     void SetAccessibilityAction();
     void SetAccessibilityMoveTextAction();
@@ -1030,6 +1040,9 @@ private:
     void SaveInlineStates();
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
+    bool CheckHandleVisible(const RectF& paintRect);
+
+    bool ResetObscureTickCountDown();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1122,6 +1135,8 @@ private:
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
+    int32_t nakedCharPosition_ = -1;
+    bool updateSelectionAfterObscure_ = false;
     float currentOffset_ = 0.0f;
     float unitWidth_ = 0.0f;
     float countHeight_ = 0.0f;

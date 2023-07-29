@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/offscreen_context_model_impl.h"
 #include "core/components_ng/pattern/canvas_context/offscreen_context_model_ng.h"
+#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<OffscreenContextModel> OffscreenContextModel::instance_ = nullptr;
@@ -177,6 +178,11 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         jsRenderContext->SetOffscreenPattern(offscreenPattern);
         std::lock_guard<std::mutex> lock(mutex_);
         offscreenPatternMap_[offscreenPatternCount_++] = offscreenPattern;
+
+        auto tempPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(offscreenPattern);
+        if (!tempPattern->IsSucceed()) {
+            return;
+        }
     }
     if (args[2]->IsObject()) {
         JSRenderingContextSettings* jsContextSetting

@@ -26,7 +26,10 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
     auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width());
     // constraint max size minus padding
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, childConstraint.maxSize);
@@ -51,6 +54,11 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
 
+    if (layoutConstraint->selfIdealSize.Width().has_value() &&
+        layoutConstraint->selfIdealSize.Width().value() >= layoutConstraint->maxSize.Width()) {
+        layoutConstraint->selfIdealSize.SetWidth(layoutConstraint->maxSize.Width());
+        layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
+    }
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 }
 

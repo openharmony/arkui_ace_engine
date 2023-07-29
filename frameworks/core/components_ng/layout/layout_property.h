@@ -115,7 +115,7 @@ public:
 
     RefPtr<GeometryTransition> GetGeometryTransition() const
     {
-        return geometryTransition_;
+        return geometryTransition_.Upgrade();
     }
 
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
@@ -135,7 +135,7 @@ public:
 
     void UpdateLayoutDirection(TextDirection value);
 
-    void UpdateGeometryTransition(const std::string& id);
+    void UpdateGeometryTransition(const std::string& id, bool followWithoutTransition = false);
 
     void UpdateAspectRatio(float ratio);
 
@@ -170,6 +170,12 @@ public:
     void UpdateMarginSelfIdealSize(const SizeF& value);
 
     void ResetCalcMinSize();
+
+    void ResetCalcMaxSize();
+
+    void ResetCalcMinSize(bool resetWidth);
+
+    void ResetCalcMaxSize(bool resetWidth);
 
     void UpdateFlexGrow(float flexGrow);
 
@@ -215,7 +221,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsBindOverlay, bool, PROPERTY_UPDATE_MEASURE);
 #endif // ENABLE_DRAG_FRAMEWORK
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(GeometryTransitionId, std::string);
 
 public:
     void UpdateVisibility(const VisibleType& value, bool allowTransition = false);
@@ -296,7 +301,7 @@ private:
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
 
-    RefPtr<GeometryTransition> geometryTransition_;
+    WeakPtr<GeometryTransition> geometryTransition_;
 
     WeakPtr<FrameNode> host_;
 

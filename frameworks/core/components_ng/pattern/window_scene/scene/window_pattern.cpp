@@ -121,14 +121,15 @@ void WindowPattern::InitContent()
             CreateStartingNode();
             break;
         }
-        case Rosen::SessionState::STATE_BACKGROUND: {
-            CreateSnapshotNode();
-            break;
-        }
         default: {
             auto host = GetHost();
             CHECK_NULL_VOID(host);
             host->AddChild(contentNode_);
+
+            if (session_->GetWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+                !session_->GetBufferAvailable()) {
+                CreateStartingNode();
+            }
             break;
         }
     }
@@ -204,8 +205,11 @@ void WindowPattern::OnConnect()
     if (!HasStartingPage()) {
         return;
     }
-    surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this)]() {
+    surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this), weakSession = wptr(session_)]() {
         LOGI("RSSurfaceNode buffer available callback");
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        session->SetBufferAvailable(true);
         auto windowPattern = weak.Upgrade();
         CHECK_NULL_VOID(windowPattern);
         windowPattern->BufferAvailableCallback();
@@ -295,12 +299,15 @@ bool WindowPattern::CreatePersistentNode()
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->AddChild(startingNode_);
+
     imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo(std::string("file:/").append(session_->GetScenePersistence()->GetSnapshotFilePath())));
+        ImageSourceInfo("file:/" + session_->GetScenePersistence()->GetSnapshotFilePath()));
     imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
     startingNode_->MarkModifyDone();
     return true;
@@ -420,7 +427,7 @@ bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
         (pointerAction != MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
         return true;
     }
-    return pointerEvent->GetButtonId() != MMI::PointerEvent::BUTTON_NONE &&
+    return pointerEvent->GetButtonId() == MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
 }

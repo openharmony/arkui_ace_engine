@@ -581,6 +581,9 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     pattern->SetEnableTouchAndHoverEffect(false);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     if (!hasTextFieldNode) {
+        auto pattern = parentNode->GetPattern<SearchPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
     }
     frameNode->MarkModifyDone();
@@ -699,6 +702,9 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     auto searchButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(searchButtonEvent);
     searchButtonEvent->SetEnabled(false);
+    auto pattern = parentNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
 }
@@ -731,6 +737,9 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     cancelButtonEvent->SetEnabled(false);
+    auto pattern = parentNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
 }

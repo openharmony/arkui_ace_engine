@@ -385,9 +385,10 @@ NG::PaddingProperty JSCheckboxGroup::GetNewPadding(const JSCallbackInfo& info)
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
             bottom = bottomDimen;
         }
-
-        padding = GetPadding(top, bottom, left, right);
-        return padding;
+        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
+            padding = GetPadding(top, bottom, left, right);
+            return padding;
+        }
     }
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {

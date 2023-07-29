@@ -205,13 +205,11 @@ public:
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
-    SafeAreaInsets GetSystemSafeArea() const;
-    SafeAreaInsets GetCutoutSafeArea() const;
-    SafeAreaInsets GetSafeArea() const;
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
     {
         return safeAreaManager_;
     }
+    SafeAreaInsets GetSafeArea() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -277,6 +275,11 @@ public:
     bool GetOnShow() const
     {
         return onShow_;
+    }
+
+    void MarkRootFocusNeedUpdate()
+    {
+        isRootFocusNeedUpdate_ = true;
     }
 
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
@@ -372,6 +375,10 @@ public:
         storeNode_.erase(restoreId);
     }
     void SetNeedRenderNode(const RefPtr<FrameNode>& node);
+
+
+    void SetIgnoreViewSafeArea(bool value) override;
+    void SetIsLayoutFullScreen(bool value) override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -475,6 +482,7 @@ private:
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
+    bool isRootFocusNeedUpdate_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;

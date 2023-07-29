@@ -420,6 +420,7 @@ void PageRouterManager::StartRestore(const RouterPageInfo& target)
     }
 
     restorePageStack_ = tempStack;
+    StartClean();
     PopPage("", false, false);
     StartPush(info);
 }
@@ -1176,7 +1177,7 @@ void PageRouterManager::CleanPageOverlay()
         sharedManager->StopSharedTransition();
     }
 
-    if (overlayManager->RemoveOverlay(true)) {
+    if (overlayManager->RemoveOverlay(true, true)) {
         LOGI("clean page overlay.");
     }
 }

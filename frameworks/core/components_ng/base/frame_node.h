@@ -424,7 +424,7 @@ public:
     void OnSetDepth(const int32_t depth) override;
 
     OffsetF GetParentGlobalOffsetDuringLayout() const;
-    void OnSetCacheCount(int32_t cacheCount) override {};
+    void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
 
     // layoutwrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
@@ -537,8 +537,10 @@ private:
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
 
     struct ZIndexComparator {
-        bool operator()(const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) const
+        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
         {
+            auto left = weakLeft.Upgrade();
+            auto right = weakRight.Upgrade();
             if (left && right) {
                 return left->GetRenderContext()->GetZIndexValue(1) < right->GetRenderContext()->GetZIndexValue(1);
             }
@@ -546,7 +548,7 @@ private:
         }
     };
     // sort in ZIndex.
-    std::multiset<RefPtr<FrameNode>, ZIndexComparator> frameChildren_;
+    std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;

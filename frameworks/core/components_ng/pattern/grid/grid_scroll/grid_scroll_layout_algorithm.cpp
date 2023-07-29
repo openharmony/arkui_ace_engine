@@ -269,8 +269,11 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
 {
     itemsCrossPosition_.clear();
     UpdateGridLayoutInfo(layoutWrapper, mainSize);
-    SkipForwardLines(mainSize, layoutWrapper);
-    SkipBackwardLines(mainSize, layoutWrapper);
+    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(gridLayoutProperty);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    SkipForwardLines(cacheCount * mainSize, layoutWrapper);
+    SkipBackwardLines(cacheCount * mainSize, layoutWrapper);
 
     if (!gridLayoutInfo_.lastCrossCount_) {
         gridLayoutInfo_.lastCrossCount_ = crossCount_;
@@ -848,10 +851,16 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         if (LessOrEqual(estimatedHeight, 0)) {
             return;
         }
-        auto averageHeight = estimatedHeight / gridLayoutInfo_.childrenCount_;
+        auto averageHeight = pattern->GetAverageHeight();
+        if (LessOrEqual(averageHeight, 0.0)) {
+            return;
+        }
         int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
-        gridLayoutInfo_.startIndex_ = std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0);
-        gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_;
+        gridLayoutInfo_.startIndex_ = gridLayoutInfo_.startIndex_ > estimatedIndex
+                                          ? std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0)
+                                          : 0;
+        gridLayoutInfo_.currentOffset_ =
+            gridLayoutInfo_.startIndex_ > estimatedIndex ? gridLayoutInfo_.prevOffset_ : 0.0f;
         LOGI("estimatedIndex:%{public}d", gridLayoutInfo_.startIndex_);
         grid->ChildrenUpdatedFrom(0);
     }
@@ -893,7 +902,10 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         if (LessOrEqual(estimatedHeight, 0)) {
             return;
         }
-        auto averageHeight = estimatedHeight / gridLayoutInfo_.childrenCount_;
+        auto averageHeight = pattern->GetAverageHeight();
+        if (LessOrEqual(averageHeight, 0.0)) {
+            return;
+        }
         int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
         gridLayoutInfo_.startIndex_ =
             std::min(gridLayoutInfo_.startIndex_ - estimatedIndex, gridLayoutInfo_.childrenCount_);
@@ -1305,7 +1317,21 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
     auto gridLayoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto mainSize = GetMainAxisSize(frameSize, gridLayoutInfo_.axis_);
     auto crossSize = GetCrossAxisSize(frameSize, gridLayoutInfo_.axis_);
-    childLayoutWrapper->Measure(CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossStart, crossSpan));
+    auto childConstraint = CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossStart, crossSpan);
+    auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
+    auto oldConstraint = childLayoutProperty->GetLayoutConstraint();
+    if (oldConstraint.has_value() && !NearEqual(GetCrossAxisSize(oldConstraint.value().maxSize, axis_),
+                                                GetCrossAxisSize(childConstraint.maxSize, axis_))) {
+        auto layoutAlgorithmWrapper = childLayoutWrapper->GetLayoutAlgorithm();
+        if (layoutAlgorithmWrapper->SkipMeasure()) {
+            layoutAlgorithmWrapper->SetNeedMeasure();
+            if (layoutAlgorithmWrapper->GetLayoutAlgorithm() == nullptr) {
+                layoutAlgorithmWrapper->SetLayoutAlgorithm(
+                    childLayoutWrapper->GetHostNode()->GetPattern()->CreateLayoutAlgorithm());
+            }
+        }
+    }
+    childLayoutWrapper->Measure(childConstraint);
 }
 
 bool GridScrollLayoutAlgorithm::CheckGridPlaced(

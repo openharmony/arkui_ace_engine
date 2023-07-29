@@ -30,6 +30,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -90,9 +91,9 @@ class ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
 
 public:
-    ScrollBar();
-    explicit ScrollBar(DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT,
-        PositionMode positionMode = PositionMode::RIGHT);
+    ScrollBar(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier = nullptr);
+    ScrollBar(DisplayMode displayMode, RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier = nullptr,
+        ShapeMode shapeMode = ShapeMode::RECT, PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
     bool InBarTouchRegion(const Point& point) const;
@@ -262,12 +263,9 @@ public:
     {
         displayMode_ = displayMode;
         if (displayMode_ == DisplayMode::AUTO) {
-            OnScrollEnd();
+            PlayScrollBarEndAnimation();
         } else if (displayMode_ == DisplayMode::ON) {
-            if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
-                scrollEndAnimator_->Stop();
-            }
-            opacity_ = UINT8_MAX;
+            PlayScrollBarStartAnimation();
         }
     }
 
@@ -312,11 +310,59 @@ public:
         return opacity_;
     }
 
-    void OnScrollEnd()
+    void PlayScrollBarEndAnimation()
+    {
+        if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
+            opacityAnimationType_ = OpacityAnimationType::DISAPPEAR;
+            MarkNeedRender();
+        }
+    }
+
+    void PlayScrollBarStartAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
-            PlayBarEndAnimation();
+            opacityAnimationType_ = OpacityAnimationType::APPEAR;
+            MarkNeedRender();
         }
+    }
+
+    OpacityAnimationType GetOpacityAnimationType() const
+    {
+        return opacityAnimationType_;
+    }
+
+    void SetOpacityAnimationType(OpacityAnimationType opacityAnimationType)
+    {
+        opacityAnimationType_ = opacityAnimationType;
+    }
+
+    HoverAnimationType GetHoverAnimationType() const
+    {
+        return hoverAnimationType_;
+    }
+
+    void SetHoverAnimationType(HoverAnimationType hoverAnimationType)
+    {
+        hoverAnimationType_ = hoverAnimationType;
+    }
+    
+
+    void PlayScrollBarGrowAnimation()
+    {
+        PlayScrollBarStartAnimation();
+        normalWidth_ = activeWidth_;
+        FlushBarWidth();
+        hoverAnimationType_ = HoverAnimationType::GROW;
+        MarkNeedRender();
+    }
+
+    void PlayScrollBarShrinkAnimation()
+    {
+        normalWidth_ = inactiveWidth_;
+        FlushBarWidth();
+        hoverAnimationType_ = HoverAnimationType::SHRINK;
+        PlayScrollBarEndAnimation();
+        MarkNeedRender();
     }
 
     void MarkNeedRender()
@@ -411,6 +457,16 @@ public:
         return scrollEndCallback_;
     }
 
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
+    {
+        return scrollBarOverlayModifier_;
+    }
+
+    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier)
+    {
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
+    }
+
     void SetGestureEvent();
     void SetMouseEvent();
     void FlushBarWidth();
@@ -491,14 +547,15 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<PanRecognizer> panRecognizer_;
-    RefPtr<Animator> touchAnimator_;
-    RefPtr<Animator> scrollEndAnimator_;
     RefPtr<Animator> adaptAnimator_;
     RefPtr<Animator> frictionController_;
     RefPtr<FrictionMotion> frictionMotion_;
     std::function<void()> markNeedRenderFunc_;
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
+    RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
+    OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
+    HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
 };
 
 } // namespace OHOS::Ace::NG

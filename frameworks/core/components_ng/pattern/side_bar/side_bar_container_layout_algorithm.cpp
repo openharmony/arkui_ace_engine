@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
@@ -224,13 +225,7 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
     defaultMinContentWidth_ = ConvertToPx(DEFAULT_MIN_CONTENT_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
 
     MeasureTypeUpdateWidth();
-    if (minContentWidth_ < 0.0f) {
-        if (maxSideBarWidth_ >= 0.0f) {
-            minContentWidth_ = 0.0f;
-        } else {
-            minContentWidth_ = defaultMinContentWidth_;
-        }
-    }
+    minContentWidth_ = std::max(0.0f, minContentWidth_);
     InitSideBarWidth(parentWidth);
     MeasureRealSideBarWidth(parentWidth);
 
@@ -433,11 +428,16 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT():
         CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
     sideBarIdealSize.SetWidth(realSideBarWidth_);
+    realSideBarHeight_ = sideBarIdealSize.Height() - padding.top.value_or(0) - padding.bottom.value_or(0);
+    if (LessNotEqual(realSideBarHeight_, 0.0f)) {
+        realSideBarHeight_ = 0.0f;
+    }
+    sideBarIdealSize.SetHeight(realSideBarHeight_);
     auto sideBarConstraint = layoutProperty->CreateChildConstraint();
     sideBarConstraint.selfIdealSize = OptionalSizeF(sideBarIdealSize);
 
-    realSideBarHeight_ = sideBarIdealSize.Height();
     sideBarLayoutWrapper->Measure(sideBarConstraint);
 }
 
@@ -478,17 +478,19 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
 {
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto contentWidth = parentWidth;
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    auto contentWidth = parentWidth - padding.left.value_or(0) - padding.right.value_or(0);
 
     if (type_ == SideBarContainerType::EMBED) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
             contentWidth -= (realSideBarWidth_ + realDividerWidth_);
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
             contentWidth = (sideBarPosition == SideBarPosition::START)
-                               ? (parentWidth - realSideBarWidth_ - realDividerWidth_ - currentOffset_)
-                               : (parentWidth - realDividerWidth_ + currentOffset_);
+                               ? (contentWidth - realSideBarWidth_ - realDividerWidth_ - currentOffset_)
+                               : (contentWidth - realDividerWidth_ + currentOffset_);
         }
     }
+    contentWidth = std::max(contentWidth, minContentWidth_);
 
     auto contentIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
@@ -496,6 +498,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
     CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     contentIdealSize.SetWidth(contentWidth);
+    contentIdealSize.SetHeight(realSideBarHeight_);
     auto contentConstraint = layoutProperty->CreateChildConstraint();
     contentConstraint.selfIdealSize = OptionalSizeF(contentIdealSize);
     contentLayoutWrapper->Measure(contentConstraint);
@@ -559,15 +562,15 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
-
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto controlImageLeft = layoutProperty->GetControlButtonLeft().value_or(DEFAULT_CONTROL_BUTTON_LEFT);
     auto controlImageTop = layoutProperty->GetControlButtonTop().value_or(DEFAULT_CONTROL_BUTTON_TOP);
 
-    if (LessNotEqual(controlImageLeft.Value(), 0.0)) {
+    if (LessNotEqual(controlImageLeft.Value(), padding.left.value_or(0))) {
         controlImageLeft = DEFAULT_CONTROL_BUTTON_LEFT;
     }
 
-    if (LessNotEqual(controlImageTop.Value(), 0.0)) {
+    if (LessNotEqual(controlImageTop.Value(), padding.top.value_or(0))) {
         controlImageTop = DEFAULT_CONTROL_BUTTON_TOP;
     }
     auto controlButtonLeft = controlImageLeft - CONTROL_BUTTON_PADDING;
@@ -575,7 +578,8 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
 
     auto controlButtonLeftPx = ConvertToPx(controlButtonLeft, scaleProperty, parentWidth).value_or(0);
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);
-
+    controlButtonLeftPx += padding.left.value_or(0);
+    controlButtonTopPx += padding.top.value_or(0);
     /*
      * Control buttion left position need to special handle:
      *   1. when sideBarPosition set to END and controlButtonLeft do not set in ButtonStyle
@@ -591,7 +595,8 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     if ((sideBarPosition == SideBarPosition::END) &&             // sideBarPosition is End, other pass
         (!layoutProperty->GetControlButtonLeft().has_value())) { // origin value has not set
         auto defaultControlButtonLeft = DEFAULT_CONTROL_BUTTON_LEFT - CONTROL_BUTTON_PADDING;
-        auto defaultControlButtonLeftPx = ConvertToPx(defaultControlButtonLeft, scaleProperty, parentWidth).value_or(0);
+        auto defaultControlButtonLeftPx = ConvertToPx(defaultControlButtonLeft, scaleProperty, parentWidth).value_or(0)
+            + padding.right.value_or(0);
         auto controlButtonWidthPx = ConvertToPx(controlButtonWidth, scaleProperty, parentWidth).value_or(0);
         controlButtonLeftPx = parentWidth - defaultControlButtonLeftPx - controlButtonWidthPx;
     }
@@ -610,33 +615,35 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
     CHECK_NULL_VOID(layoutWrapper->GetGeometryNode());
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
-    float sideBarOffsetX = 0.0f;
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    float sideBarOffsetX = padding.left.value_or(0);
+    float sideBarOffsetY = padding.top.value_or(0);
 
     switch (sideBarStatus_) {
         case SideBarStatus::SHOW:
             if (sideBarPosition == SideBarPosition::END) {
-                sideBarOffsetX = parentWidth - realSideBarWidth_;
+                sideBarOffsetX = parentWidth - realSideBarWidth_ - padding.right.value_or(0);
             }
             break;
         case SideBarStatus::HIDDEN:
             if (sideBarPosition == SideBarPosition::START) {
-                sideBarOffsetX = -(realSideBarWidth_ + realDividerWidth_);
+                sideBarOffsetX = -(realSideBarWidth_ + realDividerWidth_ - padding.left.value_or(0));
             } else {
-                sideBarOffsetX = parentWidth;
+                sideBarOffsetX = parentWidth + realDividerWidth_ - padding.right.value_or(0);
             }
             break;
         case SideBarStatus::CHANGING:
             if (sideBarPosition == SideBarPosition::START) {
-                sideBarOffsetX = currentOffset_;
+                sideBarOffsetX = currentOffset_ + padding.left.value_or(0);
             } else {
-                sideBarOffsetX = parentWidth + currentOffset_;
+                sideBarOffsetX = parentWidth - padding.right.value_or(0) + currentOffset_;
             }
             break;
         default:
             break;
     }
 
-    sideBarOffset_ = OffsetF(sideBarOffsetX, 0.0f);
+    sideBarOffset_ = OffsetF(sideBarOffsetX, sideBarOffsetY);
     sideBarLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset_);
     sideBarLayoutWrapper->Layout();
 }
@@ -648,17 +655,19 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     CHECK_NULL_VOID(layoutProperty);
 
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    float contentOffsetX = padding.left.value_or(0);
+    float contentOffsetY = padding.top.value_or(0);
 
-    float contentOffsetX = 0.0f;
     if (type_ == SideBarContainerType::EMBED && sideBarPosition == SideBarPosition::START) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
-            contentOffsetX = realSideBarWidth_ + realDividerWidth_;
+            contentOffsetX = realSideBarWidth_ + realDividerWidth_ + padding.left.value_or(0);
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
-            contentOffsetX = realSideBarWidth_ + realDividerWidth_ + currentOffset_;
+            contentOffsetX = realSideBarWidth_ + realDividerWidth_ + currentOffset_ + padding.left.value_or(0);
         }
     }
 
-    auto contentOffset = OffsetF(contentOffsetX, 0.0f);
+    auto contentOffset = OffsetF(contentOffsetX, contentOffsetY);
     contentLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(contentOffset);
     contentLayoutWrapper->Layout();
 }
@@ -681,35 +690,37 @@ void SideBarContainerLayoutAlgorithm::LayoutDivider(
 
     auto dividerStartMargin = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN);
     auto dividerStartMarginPx = ConvertToPx(dividerStartMargin, scaleProperty, parentWidth).value_or(0);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    float dividerOffsetX = padding.left.value_or(0);
+    float dividerOffsetY = padding.top.value_or(0);
 
-    float dividerOffsetX = 0.0f;
     switch (sideBarStatus_) {
         case SideBarStatus::SHOW:
             if (sideBarPosition == SideBarPosition::START) {
-                dividerOffsetX = realSideBarWidth_;
+                dividerOffsetX = realSideBarWidth_ + padding.left.value_or(0);
             } else {
-                dividerOffsetX = parentWidth - realSideBarWidth_ - realDividerWidth_;
+                dividerOffsetX = parentWidth - realSideBarWidth_ - realDividerWidth_ - padding.right.value_or(0);
             }
             break;
         case SideBarStatus::HIDDEN:
             if (sideBarPosition == SideBarPosition::START) {
-                dividerOffsetX = -realDividerWidth_;
+                dividerOffsetX = -realDividerWidth_ + padding.left.value_or(0);
             } else {
-                dividerOffsetX = parentWidth;
+                dividerOffsetX = parentWidth - padding.right.value_or(0);
             }
             break;
         case SideBarStatus::CHANGING:
             if (sideBarPosition == SideBarPosition::START) {
-                dividerOffsetX = realSideBarWidth_ + currentOffset_;
+                dividerOffsetX = realSideBarWidth_ + currentOffset_ + padding.left.value_or(0);
             } else {
-                dividerOffsetX = parentWidth - realDividerWidth_ + currentOffset_;
+                dividerOffsetX = parentWidth - realDividerWidth_ + currentOffset_ - padding.right.value_or(0);
             }
             break;
         default:
             break;
     }
 
-    auto dividerOffset = OffsetF(dividerOffsetX, dividerStartMarginPx);
+    auto dividerOffset = OffsetF(dividerOffsetX, dividerStartMarginPx + dividerOffsetY);
     CHECK_NULL_VOID(dividerLayoutWrapper->GetGeometryNode());
     dividerLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);
     dividerLayoutWrapper->Layout();

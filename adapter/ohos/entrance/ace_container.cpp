@@ -161,36 +161,14 @@ void AceContainer::Initialize()
 
 void AceContainer::Destroy()
 {
+    LOGI("AceContainer::Destroy begin");
     ContainerScope scope(instanceId_);
-    if (pipelineContext_ && taskExecutor_) {
-        // 1. Destroy Pipeline on UI thread.
-        RefPtr<PipelineBase> context;
-        context.Swap(pipelineContext_);
-        if (GetSettings().usePlatformAsUIThread) {
-            context->Destroy();
-        } else {
-            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
-        }
-
-        if (isSubContainer_) {
-            // SubAceContainer just return.
-            return;
-        }
-
-        // 2. Destroy Frontend on JS thread.
-        RefPtr<Frontend> frontend;
-        LOGI("Frontend Swap");
-        frontend_.Swap(frontend);
-        if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
-            frontend->UpdateState(Frontend::State::ON_DESTROY);
-            frontend->Destroy();
-        } else {
-            frontend->UpdateState(Frontend::State::ON_DESTROY);
-            taskExecutor_->PostTask([frontend]() { frontend->Destroy(); }, TaskExecutor::TaskType::JS);
-        }
+    if (frontend_) {
+        frontend_->UpdateState(Frontend::State::ON_DESTROY);
     }
     resRegister_.Reset();
     assetManager_.Reset();
+    LOGI("AceContainer::Destroy end");
 }
 
 void AceContainer::DestroyView()
@@ -634,13 +612,14 @@ void AceContainer::InitializeCallback()
             }
         };
         auto container = Container::Current();
-        if (!container) {
-            return;
-        }
-        if (container->IsUseStageModel() && type == WindowSizeChangeReason::ROTATION) {
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if ((container->IsUseStageModel() && type == WindowSizeChangeReason::ROTATION) ||
+            taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
         } else {
-            context->GetTaskExecutor()->PostTask(callback, TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI);
         }
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
@@ -1663,24 +1642,65 @@ bool AceContainer::IsScenceBoardWindow()
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
 }
+// ArkTsCard end
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     currentPointerEvent_ = currentEvent;
+    auto callbacksIter = stopDragCallbackMap_.begin();
+    while (callbacksIter != stopDragCallbackMap_.end()) {
+        auto pointerId = callbacksIter->first;
+        MMI::PointerEvent::PointerItem pointerItem;
+        if (!currentEvent->GetPointerItem(pointerId, pointerItem)) {
+            for (const auto& callback : callbacksIter->second) {
+                if (callback) {
+                    callback();
+                }
+            }
+            callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
+        } else {
+            if (!pointerItem.IsPressed()) {
+                for (const auto& callback : callbacksIter->second) {
+                    if (callback) {
+                        callback();
+                    }
+                }
+                callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
+            } else {
+                ++callbacksIter;
+            }
+        }
+    }
 }
 
-void AceContainer::GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType)
+bool AceContainer::GetCurPointerEventInfo(
+    int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    CHECK_NULL_RETURN(currentPointerEvent_, false);
     MMI::PointerEvent::PointerItem pointerItem;
-    currentPointerEvent_->GetPointerItem(pointerId, pointerItem);
+    if (!currentPointerEvent_->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed()) {
+        return false;
+    }
     sourceType = currentPointerEvent_->GetSourceType();
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
+    RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
+    return true;
 }
 
-// ArkTsCard end
+void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback)
+{
+    auto iter = stopDragCallbackMap_.find(pointerId);
+    if (iter != stopDragCallbackMap_.end()) {
+        iter->second.emplace_back(std::move(stopDragCallback));
+    } else {
+        std::list<StopDragCallback> list;
+        list.emplace_back(std::move(stopDragCallback));
+        stopDragCallbackMap_.emplace(pointerId, list);
+    }
+}
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {

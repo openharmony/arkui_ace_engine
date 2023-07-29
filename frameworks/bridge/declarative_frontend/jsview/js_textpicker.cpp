@@ -513,7 +513,9 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
     if (getValue->IsObject()) {
         JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
         param.valueChangeEventVal = valueObj->GetProperty("changeEvent");
-        getValue = valueObj->GetProperty("value");
+        if (param.valueChangeEventVal->IsFunction()) {
+            getValue = valueObj->GetProperty("value");
+        }
     }
     if (!ParseMultiTextArrayValue(getValue, param)) {
         return false;
@@ -521,7 +523,9 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
     if (getSelected->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(getSelected);
         param.selectedChangeEventVal = selectedObj->GetProperty("changeEvent");
-        getSelected = selectedObj->GetProperty("value");
+        if (param.selectedChangeEventVal->IsFunction()) {
+            getSelected = selectedObj->GetProperty("value");
+        }
     }
     if (!ParseMultiTextArraySelect(getSelected, param)) {
         return false;

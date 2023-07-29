@@ -168,12 +168,14 @@ public:
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
-    static bool ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
-    static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsDimensionNG(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
+    static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
 
-    static bool ParseJsonDimension(
-        const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, DimensionUnit defaultUnit);
-    static bool ParseJsonDimensionVp(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result);
+    static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result,
+        DimensionUnit defaultUnit, bool checkIllegal = false);
+    static bool ParseJsonDimensionVp(
+        const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, bool checkIllegal = false);
     static bool ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue, double& result);
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result);

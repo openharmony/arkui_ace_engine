@@ -100,6 +100,7 @@ constexpr float ANIMATION_CURVE_DAMPING_HEAVY = 28.0f;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr int32_t DEFAULT_OPTION_DURATION = 100;
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
     static const LinearEnumMapNode<RenderFit, Rosen::Gravity> gravityMap[] = {
@@ -255,6 +256,15 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
             break;
         }
+        case ContextType::HARDWARE_SURFACE: {
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
+            auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+            if (surfaceNode) {
+                surfaceNode->SetHardwareEnabled(true);
+            }
+            rsNode_ = surfaceNode;
+            break;
+        }
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create();
             break;
@@ -272,12 +282,18 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (parentPosition == std::nullopt) {
+    if (parentPosition.has_value()) {
+        sandBoxCount_++;
+        Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
+        rsNode_->SetSandBox(value);
+    } else {
+        sandBoxCount_--;
+        if (sandBoxCount_ > 0) {
+            return;
+        }
+        sandBoxCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
-        return;
     }
-    Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
-    rsNode_->SetSandBox(value);
 }
 
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
@@ -678,6 +694,7 @@ public:
     {
         if (pixelMap == nullptr) {
             LOGE("%{public}s: failed to get pixelmap, return nullptr", __func__);
+            thumbnailGet.notify_all();
             return;
         }
         std::unique_lock<std::mutex> lock(g_mutex);
@@ -697,7 +714,11 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
     }
     std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
         std::make_shared<DrawDragThumbnailCallback>();
-    RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, 1, 1);
+    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, 1, 1);
+    if (!ret) {
+        LOGE("GetThumbnailPixelMap false, return nullptr");
+        return nullptr;
+    }
     std::unique_lock<std::mutex> lock(g_mutex);
     thumbnailGet.wait(lock);
     return g_pixelMap;
@@ -1358,7 +1379,11 @@ RectF RosenRenderContext::AdjustPaintRect()
         return rect;
     }
     if (HasOffset()) {
-        auto offset = GetOffsetValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
+        auto offset = GetOffsetValue({});
+        if (PipelineBase::GetCurrentContext() &&
+            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+            offset += OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
+        }
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
         rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
@@ -2274,7 +2299,7 @@ void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
     SkParsePath::FromSVGString(commands.c_str(), &skPath);
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 #else
-    RSPath rsPath;
+    RSRecordingPath rsPath;
     rsPath.BuildFromSVGString(commands);
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
 #endif
@@ -2288,7 +2313,7 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
     skPath.addRect(rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height());
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 #else
-    RSPath rsPath;
+    RSRecordingPath rsPath;
     rsPath.AddRect({ rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
 #endif
@@ -2501,12 +2526,12 @@ void RosenRenderContext::PaintOverlayText()
             rsNode_->SetDrawRegion(overlayRect);
         } else {
             modifier_ = std::make_shared<OverlayTextModifier>();
+            rsNode_->AddModifier(modifier_);
             modifier_->SetCustomData(NG::OverlayTextData(overlayText));
             auto overlayOffset = modifier_->GetOverlayOffset();
             overlayRect = std::make_shared<Rosen::RectF>(paintRect.GetX(), paintRect.GetY(),
                 paintRect.Width() + overlayOffset.GetX(), paintRect.Height() + overlayOffset.GetY());
             rsNode_->SetDrawRegion(overlayRect);
-            rsNode_->AddModifier(modifier_);
         }
     }
 }

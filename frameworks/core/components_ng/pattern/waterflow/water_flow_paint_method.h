@@ -56,6 +56,15 @@ public:
         contentModifier_ = modify;
     }
 
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
+    {
+        auto scrollBar = scrollBar_.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(scrollBar, nullptr);
+        return scrollBar->GetScrollBarOverlayModifier();
+    }
+
 private:
     RefPtr<WaterFlowContentModifier> contentModifier_;
     WeakPtr<ScrollBar> scrollBar_;

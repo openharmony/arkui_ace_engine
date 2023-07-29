@@ -37,7 +37,7 @@ public:
     }
 
     static std::shared_ptr<RSShaderEffect> CreateGradientShader(const NG::Gradient& gradient, const SizeF& size);
-    static RSPath DrawingCreatePath(const RefPtr<BasicShape>& basicShape, const SizeF& size);
+    static RSRecordingPath DrawingCreatePath(const RefPtr<BasicShape>& basicShape, const SizeF& size);
     static void DrawingCreateInset(
         const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, RSPath& rsPath);
     static void DrawingCreateCircle(

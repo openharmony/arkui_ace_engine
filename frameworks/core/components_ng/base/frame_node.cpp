@@ -241,10 +241,10 @@ public:
         return info;
     }
 
-    void SetCacheCount(int32_t cacheCount)
+    void SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
     {
         for (const auto& child : children_) {
-            child.node->OnSetCacheCount(cacheCount);
+            child.node->OnSetCacheCount(cacheCount, itemConstraint);
         }
     }
 
@@ -1181,7 +1181,9 @@ void FrameNode::RebuildRenderContextTree()
     if (overlayNode_) {
         children.push_back(overlayNode_);
     }
-    frameChildren_ = { children.begin(), children.end() };
+    for (const auto& child : children) {
+        frameChildren_.emplace(child);
+    }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
     needSyncRenderTree_ = false;
@@ -1429,22 +1431,29 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t s
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    renderContext->GetPointWithTransform(localPoint);
     auto clip = renderContext->GetClipEdge().value_or(false);
     if (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) {
         if (clip) {
-            LOGD("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
+            if (SystemProperties::GetDebugEnabled()) {
+                LOGI("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
+            }
             return true;
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-            const auto& child = *iter;
-            if (!child->IsOutOfTouchTestRegion(localPoint, sourceType)) {
-                LOGD("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
+            const auto& child = iter->Upgrade();
+            if (child && !child->IsOutOfTouchTestRegion(localPoint, sourceType)) {
+                if (SystemProperties::GetDebugEnabled()) {
+                    LOGI("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
+                }
                 isInChildRegion = true;
                 break;
             }
         }
         if (!isInChildRegion) {
-            LOGD("TouchTest: point is out of region in %{public}s", GetTag().c_str());
+            if (SystemProperties::GetDebugEnabled()) {
+                LOGI("TouchTest: point is out of region in %{public}s", GetTag().c_str());
+            }
             return true;
         }
     }
@@ -1455,20 +1464,20 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
-        LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("%{public}s is inActive, need't do touch test", GetTag().c_str());
+        }
         return HitTestResult::OUT_OF_REGION;
     }
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
-        LOGD("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
+        LOGI("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
             GetTag().c_str(), GetDepth());
-#ifdef ACE_DEBUG_LOG
         for (const auto& rect : responseRegionList) {
-            LOGD("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
+            LOGI("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
                 parentLocalPoint.ToString().c_str());
         }
-#endif
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
@@ -1494,7 +1503,10 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             break;
         }
 
-        const auto& child = *iter;
+        const auto& child = iter->Upgrade();
+        if (!child) {
+            continue;
+        }
         auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets, touchId);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
@@ -2109,8 +2121,10 @@ void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)
         bypass_ = CheckRectIntersect(paintRect, rect);
     }
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        const auto& child = *iter;
-        child->CheckSecurityComponentStatus(rect);
+        const auto& child = iter->Upgrade();
+        if (child) {
+            child->CheckSecurityComponentStatus(rect);
+        }
     }
     rect.push_back(paintRect);
 }
@@ -2131,8 +2145,8 @@ bool FrameNode::HaveSecurityComponent()
         return true;
     }
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        const auto& child = *iter;
-        if (child->HaveSecurityComponent()) {
+        const auto& child = iter->Upgrade();
+        if (child && child->HaveSecurityComponent()) {
             return true;
         }
     }
@@ -2469,12 +2483,12 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 
 void FrameNode::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
 {
-    frameProxy_->SetCacheCount(cacheCount);
+    frameProxy_->SetCacheCount(cacheCount, itemConstraint);
 }
 
 void FrameNode::LayoutOverlay()
 {
-    auto size = geometryNode_->GetMarginFrameSize();
+    auto size = geometryNode_->GetFrameSize();
     auto align = Alignment::TOP_LEFT;
     Dimension offsetX, offsetY;
     auto childLayoutProperty = overlayNode_->GetLayoutProperty();

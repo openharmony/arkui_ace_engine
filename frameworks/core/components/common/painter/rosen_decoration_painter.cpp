@@ -306,7 +306,7 @@ public:
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        return RSShaderEffect::CreateLinearGradient(firstPoint_, secondPoint_, colors, pos, tileMode);
+        return RSRecordingShaderEffect::CreateLinearGradient(firstPoint_, secondPoint_, colors, pos, tileMode);
     }
 #endif
 
@@ -637,8 +637,8 @@ public:
         ToDrawingColors(pos, colors);
         radius0_ = std::max(radius0_, 0.0f);
         radius1_ = std::max(radius1_, 0.0f);
-        LOGE("Drawing is not supported");
-        return nullptr;
+        return RSRecordingShaderEffect::CreateTwoPointConical(
+            center_, radius0_, center_, radius1_, colors, pos, tileMode);
     }
 #endif
 
@@ -1049,8 +1049,7 @@ public:
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        LOGE("Drawing is not supported");
-        return nullptr;
+        return RSRecordingShaderEffect::CreateSweepGradient(center_, colors, pos, tileMode, startAngle_, endAngle_);
     }
 #endif
 
