@@ -279,6 +279,7 @@ protected:
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelected() const;
+    bool IsSelectAll();
     virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     virtual void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     std::wstring GetWideText() const;
@@ -306,6 +307,7 @@ protected:
     bool mouseEventInitialized_ = false;
     std::vector<Rect> rectsForPlaceholders_;
     int32_t imageCount_ = 0;
+    SelectMenuInfo selectMenuInfo_;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -323,12 +325,10 @@ private:
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
     void FontRegisterCallback(RefPtr<SpanNode> spanNode);
-    bool IsSelectAll();
     // to check if drag is in progress
 
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
-    SelectMenuInfo selectMenuInfo_;
     bool panEventInitialized_ = false;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
