@@ -64,9 +64,16 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         textFieldContentModifier_->ChangeDragStatus();
         textFieldPattern->ResetContChange();
     }
+
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textEditingValue = textFieldPattern->GetTextEditingValue();
+    auto isPasswordType =
+        textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    auto showPlaceHolder = textFieldLayoutProperty->GetValueValue("").empty();
+    auto needObscureText = isPasswordType && textFieldPattern->GetTextObscured() && !showPlaceHolder;
     auto text = TextFieldPattern::CreateDisplayText(
-        textEditingValue.text, textFieldPattern->GetNakedCharPosition(), textFieldPattern->GetTextObscured());
+        textEditingValue.text, textFieldPattern->GetNakedCharPosition(), needObscureText);
     auto displayText = StringUtils::Str16ToStr8(text);
     textFieldContentModifier_->SetTextValue(displayText);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());

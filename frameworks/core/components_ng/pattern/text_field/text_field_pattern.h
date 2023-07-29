@@ -1064,6 +1064,7 @@ private:
     bool CheckHandleVisible(const RectF& paintRect);
 
     bool ResetObscureTickCountDown();
+    bool IsInPasswordMode() const;
 
     RectF frameRect_;
     RectF contentRect_;
