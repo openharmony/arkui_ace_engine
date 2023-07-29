@@ -381,7 +381,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         TextInputType::UNSPECIFIED)) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
-        auto textRectOffsetX = pattern->GetPaddingLeft();
+        auto textRectOffsetX = pattern->GetPaddingLeft() + pattern->GetBorderLeft();
         auto isEmptyTextEditValue = pattern->GetTextEditingValue().text.empty();
         if (!isEmptyTextEditValue) {
             switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
