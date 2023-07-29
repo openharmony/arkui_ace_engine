@@ -157,9 +157,20 @@ public:
         rect_ = rect;
     }
 
+    void SetIsCustomFont(bool isCustomFont)
+    {
+        isCustomFont_ = isCustomFont;
+    }
+
+    bool GetIsCustomFont()
+    {
+        return isCustomFont_;
+    }
+
 private:
     std::vector<RefPtr<PropertyBase>> attachedProperties_;
     std::optional<RectF> rect_;
+    bool isCustomFont_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
 

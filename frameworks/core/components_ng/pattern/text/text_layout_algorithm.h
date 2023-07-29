@@ -111,6 +111,7 @@ private:
     RefPtr<Paragraph> paragraph_;
     float baselineOffset_ = 0.0f;
     std::optional<TextStyle> textStyle_;
+    bool isCustomFont_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
