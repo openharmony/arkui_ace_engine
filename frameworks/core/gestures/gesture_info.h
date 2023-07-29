@@ -52,6 +52,24 @@ constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 100;
 class GestureRecognizer;
 class PipelineBase;
 
+struct TransformConfig {
+	int scalex = 1;
+	int scaley = 1;
+	double centerx = 0;
+	double centery = 0;
+	double offsetx = 0;
+	double offsety = 0;
+	double translatex = 0;
+	double translatey = 0;
+    double degree = 0;
+	//std::string tag;
+	bool operator==(TransformConfig tc) {
+        return scalex = tc.scalex && scaley == tc.scaley && centerx == tc.centerx &&
+            offsetx == tc.offsetx && offsety == tc.offsety && translatex == tc.translatex && translatey == tc.translatey && degree == tc.degree;
+	}
+};
+
+
 enum class GesturePriority {
     Begin = -1,
     Low = 0,

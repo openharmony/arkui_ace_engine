@@ -445,7 +445,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
     virtual void SetUsingContentRectForRenderFrame(bool value) {}
-
+    virtual std::vector<double> GetTrans(){return std::vector<double();}
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

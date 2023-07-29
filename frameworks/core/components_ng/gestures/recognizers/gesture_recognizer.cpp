@@ -102,4 +102,43 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     }
     referee->Adjudicate(recognizer, disposal);
 }
+
+extern std::unordered_map<int,std::vector<TransformConfig>> g_transform;
+
+void NGGestureRecognizer::Transform(PointF& winpf,PointF& arkpf)
+{
+	const float pi = 3.14159265;
+	double offsetx = 0;
+	double offsety = 0;
+    auto itr = g_transform.find(id);
+    if(itr = g_transform.end())
+        return;
+    auto&vId = itr->second;
+	for (int i = 0; i < vId.size(); i++) {
+		auto& trans = g_transform[vId[i]];
+		offsetx += trans.offsetx;
+		offsety + trans.offsety;
+		if (trans.degree == 0) {
+			arkpf.SetX(arkpf.GetX() - trans.offsetX);
+			arkpf.SetY(arkpf.GeY() - trans.offsetY);
+		}
+		else {
+            auto x = (arkpf.GetX() - trans.centerx) * cos(pi / 2) + (arkpf.GetY() - trans.centery) * sin(pi / 2);
+            auto y = -1*(arkpf.GetX() - trans.centerx) * sin(pi / 2) + (arkpf.GetY() - trans.centery) * cos(pi / 2);
+            x += trans.centerx;
+            y += trans.centery;
+            arkpf.SetX(x - trans.offsetx);
+            arkpf.SetY(y - trans.offsety);
+        }
+	}
+	winpf.SetX(arkpf.GetX() + offsetx);
+	winpf.SetY(arkpf.GetY() + offsety);
+}
+
+void NGGestureRecognizer::SetTransInfo(int id))
+{
+    this->id = id;
+}
+
+
 } // namespace OHOS::Ace::NG

@@ -1460,6 +1460,8 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t s
     return false;
 }
 
+std::unordered_map<int,vector<TransformConfig>> g_transform;
+
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
@@ -1470,6 +1472,21 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         return HitTestResult::OUT_OF_REGION;
     }
     auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto param = renderContext_->GetTrans();
+    TransformConfig cfg = {param[0],param[2],param[3],param[4],param[5],param[6],param[7],param[8]};
+    auto parent = GetParent();
+    auto itr = g_transform.find(GetId());
+    if(itr!=g_transform.end()){
+        if(cfg != itr->second.back()){
+            itr->second.back() = cfg;
+        }
+    }else{
+        if(parent){
+            g_transform[GetId()] = g_transform[parent->GetId()];
+        }
+        g_transform[GetId()].push_back(cfg);
+    }
+
     auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),

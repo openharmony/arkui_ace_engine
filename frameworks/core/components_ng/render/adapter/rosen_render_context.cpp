@@ -833,7 +833,7 @@ const int degree90 = 90;
 const int degree180 = 180;
 const int degree135 = 135;
 const int degree45 = 45;
-
+RectF grect;
 RectF RosenRenderContext::GetPaintRectWithTransform()
 {
     RectF rect;
@@ -844,6 +844,7 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
+    int degree = rsNode_->GetStagingProperties().GetRotation();
     // calculate new pos.
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
@@ -854,28 +855,33 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto oldSize = rect.GetSize();
     auto newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
     rect.SetSize(newSize);
+    transinfo = {scale[0],scale[1],centerPos.GetX(),centerPos.GetY(),rect.GetX(),rect.GetY(),translate[0],translate[1],degree};
     // calculate rotate
-    int degree = rsNode_->GetStagingProperties().GetRotation();
 
     if ((abs(degree) % degree180 > degree45) && (abs(degree) % degree180 < degree135)) {
         degree = degree90;
-        OffsetF leftCornerRotate(0, 0);
-        OffsetF leftCorner(-1 * oldSize.Width() * scale[0] / 2, -1 * oldSize.Height() * scale[1] / 2);
-        leftCornerRotate.SetX(leftCorner.GetX() * cos(degree * pi / degree180) * -1 -
-                              leftCorner.GetY() * sin(degree * pi / degree180) * -1);
-        leftCornerRotate.SetY(leftCorner.GetX() * sin(degree * pi / degree180) * -1 +
-                              leftCorner.GetY() * cos(degree * pi / degree180) * -1);
-        OffsetF screenRotate(rect.GetX() + leftCornerRotate.GetX() - leftCorner.GetX(),
-            rect.GetY() + oldSize.Height() * scale[1] - leftCornerRotate.GetY() + leftCorner.GetY());
-        rect.SetOffset(screenRotate);
-        if (abs(degree) % degree180 != 0) {
-            newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
-            rect.SetSize(newSize);
-        }
+        auto rectnew =  GetPaintRectWithoutTransform();
+        double lx = 0;
+        double ly = oldSize.Height();
+        double centx = oldSize.Width()/2;
+        double centy = oldSize.Height()/2;
+        auto tmp  = lx;
+        auto tmp2 = ly;
+        lx = (lx-centx)*cos(-1*pi/2)+(ly-centy)*sin(-1*pi/2);
+        ly = -1*(tmp-centy)*sin(-1*pi/2)+(ly-centy)*cos(-1*pi/2);
+        auto lxcalc1 = lx+centx;
+        auto lycalc1 = ly+centy;
+        lx = rectnew.GetOffset().GetX()+lxcalc1;
+        ly = rectnew.GetOffset().GetY()+lycalc1;
+        auto offset = OffsetF(lx,ly);
+        rect.SetOffset(offset);
+        newSize = SizeF(oldSize.Height()*scale[1],oldSize.Width()*scale[0]);
+        rect.SetSize(newSize);
     }
+    grect = rect;
     return rect;
 }
-
+std::vector<double> RosenRenderContext::GetTrans(){return transinfo;}
 RectF RosenRenderContext::GetPaintRectWithTranslate()
 {
     RectF rect;
@@ -892,6 +898,28 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
+    const float pi = 3.14159265;
+    CHECK_NULL_RETURN(rsNode_, rect);
+    RectF = GetPaintRectWithoutTransform();
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+    int degree = rsNode_->GetStagingProperties().GetRotation();
+    if(degree!=0){
+        point  = point+grect.GetOffset();
+        auto centoffset = OffsetF(center[0]*rect.Width(),center[1]*rect.Height());
+        auto centerPos = rect.GetOffset + centOffset;
+        auto centx = cneterPos.GetX();
+        auto centy = cneterPos.GetY();
+        
+        double x = point.GetX() = (point.GetX()-centx)*cos(-1*pi/2)+(point.GetY()-centy)*sin(-1*pi/2);;
+        double y = point.GetY() = -1*(point.GetX()-centy)*sin(-1*pi/2)+(point.GetY()-centy)*cos(-1*pi/2);
+        x = x + centx;
+        y = y + centy;
+        point.SetX(x - rect.Left());
+        point.SetY(y - rect.Top());
+    }
+
 }
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()

@@ -199,6 +199,8 @@ public:
         recognizerTarget_ = recognizerTarget;
     }
 
+    void SetTransInfo(int id);
+    void Transform(PointF& winpf,PointF& arkpf);
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -241,7 +243,7 @@ protected:
     SourceType deviceType_ = SourceType::NONE;
     // size of recognizer target.
     std::optional<EventTarget> recognizerTarget_ = std::nullopt;
-
+    int id;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
 };
