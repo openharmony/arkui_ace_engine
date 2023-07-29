@@ -188,7 +188,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             CHECK_NULL_VOID(frameNode);
             auto context = frameNode->GetRenderContext();
             CHECK_NULL_VOID(context);
-            std::shared_ptr<Media::PixelMap> pixelMap = context->GetThumbnailPixelMap()->GetPixelMapSharedPtr();
+            auto thumbnailPixelMap = context->GetThumbnailPixelMap();
+            CHECK_NULL_VOID(thumbnailPixelMap);
+            std::shared_ptr<Media::PixelMap> pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
             CHECK_NULL_VOID(pixelMap);
             auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
             if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
@@ -322,9 +324,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (touchRestrict.sourceType == SourceType::MOUSE && !gestureHub->GetTextDraggable()) {
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
-        if (!SequencedRecognizer_) {
-            SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
-        }
+        SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
         SequencedRecognizer_->RemainChildOnResetStatus();
         SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
@@ -400,21 +400,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         longPressRecognizer_->SetThumbnailCallback(std::move(callback));
     }
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
-    if (!SequencedRecognizer_) {
-        SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
-    }
+    SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
     SequencedRecognizer_->RemainChildOnResetStatus();
     SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(SequencedRecognizer_);
-    std::vector<RefPtr<NGGestureRecognizer>> previewRecognizers { previewLongPressRecognizer_ };
-    if (!previewSequencedRecognizer_) {
-        previewSequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(previewRecognizers);
-    }
-    previewSequencedRecognizer_->RemainChildOnResetStatus();
-    previewSequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-    previewSequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-    result.emplace_back(previewSequencedRecognizer_);
+    result.emplace_back(previewLongPressRecognizer_);
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -722,6 +713,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     auto dragNode = pattern->MoveDragNode();
     CHECK_NULL_VOID(dragNode);
     auto pixelMap = dragNode->GetRenderContext()->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
     gestureHub->SetPixelMap(pixelMap);
     // create columnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
