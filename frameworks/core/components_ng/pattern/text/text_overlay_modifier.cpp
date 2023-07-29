@@ -27,6 +27,8 @@ TextOverlayModifier::TextOverlayModifier()
     AttachProperty(selectedColor_);
     changeSelectedRects_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(changeSelectedRects_);
+    isClip_ = AceType::MakeRefPtr<PropertyBool>(true);
+    AttachProperty(isClip_);
 }
 
 void TextOverlayModifier::onDraw(DrawingContext& drawingContext)
