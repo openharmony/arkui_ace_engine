@@ -994,54 +994,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0018, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0019
- * @tc.desc: Test NavRouterGroupNode::BackToNavBar.
- * @tc.type: FUNC
- */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0019, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navRouterGroupNode.
-     */
-    NavRouterModelNG model;
-    model.Create();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
-    ASSERT_NE(navRouterGroupNode, nullptr);
-    auto parent = NavigationGroupNode::GetOrCreateGroupNode(
-        "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto navBar =
-        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto contentNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
-    parent->contentNode_ = contentNode;
-    parent->navBarNode_ = navBar;
-    navRouterGroupNode->navDestinationNode_ = navDestination;
-
-    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "titleBarNode", 55, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto backButton = FrameNode::CreateFrameNode("BackButton", 77, AceType::MakeRefPtr<ButtonPattern>());
-
-    navDestination->titleBarNode_ = destinationTitleBarNode;
-    navBar->titleBarNode_ = titleBarNode;
-
-    EXPECT_FALSE(parent->GetIsOnAnimation());
-    parent->BackToNavBar(navDestination);
-    EXPECT_FALSE(parent->GetIsOnAnimation());
-
-    destinationTitleBarNode->backButton_ = backButton;
-    parent->BackToNavBar(navDestination);
-    EXPECT_FALSE(parent->GetIsOnAnimation());
-    parent->isOnAnimation_ = true;
-    parent->BackToNavBar(navDestination);
-    EXPECT_TRUE(parent->GetIsOnAnimation());
-}
-
-/**
  * @tc.name: NavrouterTestNg0020
  * @tc.desc: Test NavRouterGroupNode::BackToPreNavDestination.
  * @tc.type: FUNC

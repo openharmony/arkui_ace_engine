@@ -100,7 +100,6 @@ public:
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
     void SetBackButtonEvent(
         const RefPtr<UINode>& navDestinationNode, const RefPtr<NavRouterPattern>& navRouterPattern = nullptr);
-    void BackToNavBar(const RefPtr<UINode>& navDestinationNode);
     void BackToPreNavDestination(const RefPtr<UINode>& preNavDestinationNode, const RefPtr<UINode>& navDestinationNode,
         const RefPtr<NavRouterPattern>& navRouterPattern = nullptr);
     void AddBackButtonIconToNavDestination(const RefPtr<UINode>& navDestinationNode);
