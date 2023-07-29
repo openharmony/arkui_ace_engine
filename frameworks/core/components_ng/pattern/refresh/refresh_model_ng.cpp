@@ -118,6 +118,7 @@ void RefreshModelNG::Pop()
         CHECK_NULL_VOID_NOLOG(progressContext);
         progressContext->UpdateOpacity(0.0);
         refreshNode->AddChild(loadingProgressChild);
+        loadingProgressChild->MarkDirtyNode();
     }
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
