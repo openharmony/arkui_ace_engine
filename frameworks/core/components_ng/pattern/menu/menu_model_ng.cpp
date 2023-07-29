@@ -57,4 +57,9 @@ void MenuModelNG::SetFontColor(const std::optional<Color>& color)
         ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
     }
 }
+
+void MenuModelNG::SetFontFamily(const std::vector<std::string> &families)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families);
+}
 } // namespace OHOS::Ace::NG
