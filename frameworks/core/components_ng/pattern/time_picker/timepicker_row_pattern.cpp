@@ -81,7 +81,6 @@ void TimePickerRowPattern::SetButtonIdeaSize()
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
-        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
