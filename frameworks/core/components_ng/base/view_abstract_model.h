@@ -167,6 +167,7 @@ public:
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
     virtual void SetBackdropBlur(const Dimension& radius) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
+    
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius) = 0;
