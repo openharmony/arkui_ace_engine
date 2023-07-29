@@ -20,6 +20,7 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -280,6 +281,7 @@ void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent
 {
     CHECK_NULL_VOID(session_);
     CHECK_NULL_VOID(pointerEvent);
+    pointerEvent->SetActionTime(GetMicroTickCount());
     session_->TransferPointerEvent(pointerEvent);
 }
 
