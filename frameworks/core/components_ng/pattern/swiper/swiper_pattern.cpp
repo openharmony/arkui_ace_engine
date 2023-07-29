@@ -98,6 +98,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     swiperLayoutAlgorithm->SetContentMainSize(contentMainSize_);
     swiperLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     swiperLayoutAlgorithm->SetItemsPosition(itemPosition_);
+    swiperLayoutAlgorithm->SetIsNeedResetPrevMarginAndNextMargin();
     if (IsOutOfBoundary() && !IsLoop()) {
         swiperLayoutAlgorithm->SetOverScrollFeature();
     }
@@ -278,6 +279,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
                 indicatorController_->Stop();
             }
         }
+    }
+    if (mainSizeIsMeasured_ && isNeedResetPrevMarginAndNextMargin_) {
+        layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
+        layoutProperty->UpdateNextMarginWithoutMeasure(0.0_px);
     }
 }
 
@@ -587,6 +592,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         pauseTargetIndex_ = targetIndex_;
     }
     mainSizeIsMeasured_ = swiperLayoutAlgorithm->GetMainSizeIsMeasured();
+    isNeedResetPrevMarginAndNextMargin_ = swiperLayoutAlgorithm->GetIsNeedResetPrevMarginAndNextMargin();
     contentCrossSize_ = swiperLayoutAlgorithm->GetContentCrossSize();
     currentDelta_ = 0.0f;
     contentMainSize_ = swiperLayoutAlgorithm->GetContentMainSize();
@@ -637,7 +643,7 @@ void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationC
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 {
     LOGD("Swipe to index: %{public}d without animation", index);
-    if (IsChildrenSizeLessThanSwiper()) {
+    if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
     auto host = GetHost();
@@ -649,7 +655,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 void SwiperPattern::SwipeTo(int32_t index)
 {
     LOGD("Swipe to index: %{public}d with animation, duration: %{public}d", index, GetDuration());
-    if (IsChildrenSizeLessThanSwiper()) {
+    if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
     auto host = GetHost();
@@ -684,7 +690,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 void SwiperPattern::ShowNext()
 {
     LOGI("SwiperPattern::ShowNext");
-    if (IsChildrenSizeLessThanSwiper()) {
+    if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
     indicatorDoingAnimation_ = false;
@@ -735,7 +741,7 @@ void SwiperPattern::ShowNext()
 
 void SwiperPattern::ShowPrevious()
 {
-    if (IsChildrenSizeLessThanSwiper()) {
+    if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
     indicatorDoingAnimation_ = false;
@@ -1102,7 +1108,7 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
-    if (IsChildrenSizeLessThanSwiper() && !IsAutoFill()) {
+    if (IsVisibleChildrenSizeLessThanSwiper() && !IsAutoFill()) {
         return;
     }
     if (itemPosition_.empty()) {
@@ -1261,7 +1267,8 @@ void SwiperPattern::HandleTouchDown()
 void SwiperPattern::HandleTouchUp()
 {
     isTouchDown_ = false;
-    if (!isDragging_ && !NearZero(GetCurrentFirstIndexStartPos())) {
+    auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
+    if (!isDragging_ && !NearZero(firstItemInfoInVisibleArea.second.startPos)) {
         UpdateAnimationProperty(0.0);
     }
 
@@ -1317,7 +1324,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
-    if (IsChildrenSizeLessThanSwiper()) {
+    if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
@@ -1973,19 +1980,19 @@ float SwiperPattern::GetItemSpace() const
 float SwiperPattern::GetPrevMargin() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
-    return ConvertToPx(swiperLayoutProperty->GetPrevMargin().value_or(0.0_vp),
-        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0)
-        .value_or(0);
+    CHECK_NULL_RETURN(swiperLayoutProperty, 0.0f);
+    return SwiperUtils::IsStretch(swiperLayoutProperty) ?
+        ConvertToPx(swiperLayoutProperty->GetPrevMargin().value_or(0.0_vp),
+        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0).value_or(0) : 0.0f;
 }
 
 float SwiperPattern::GetNextMargin() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
-    return ConvertToPx(swiperLayoutProperty->GetNextMargin().value_or(0.0_vp),
-        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0)
-        .value_or(0);
+    CHECK_NULL_RETURN(swiperLayoutProperty, 0.0f);
+    return SwiperUtils::IsStretch(swiperLayoutProperty) ?
+        ConvertToPx(swiperLayoutProperty->GetNextMargin().value_or(0.0_vp),
+        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0).value_or(0) : 0.0f;
 }
 
 Axis SwiperPattern::GetDirection() const
@@ -2232,6 +2239,23 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea(
     }
     return std::make_pair(itemPosition_.begin()->first,
         SwiperItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
+}
+
+std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetLastItemInfoInVisibleArea() const
+{
+    if (itemPosition_.empty()) {
+        return std::make_pair(0, SwiperItemInfo {});
+    }
+    auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
+    auto targetVisableIndex = firstItemInfoInVisibleArea.first;
+    targetVisableIndex += GetDisplayCount() - 1;
+    auto iter = itemPosition_.find(targetVisableIndex);
+    if (iter != itemPosition_.end()) {
+        return std::make_pair(iter->first,
+            SwiperItemInfo { iter->second.startPos, iter->second.endPos });
+    }
+    return std::make_pair(itemPosition_.rbegin()->first,
+        SwiperItemInfo { itemPosition_.rbegin()->second.startPos, itemPosition_.rbegin()->second.endPos });
 }
 
 std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetSecondItemInfoInVisibleArea() const
@@ -2592,35 +2616,38 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     }
 }
 
-bool SwiperPattern::IsChildrenSizeLessThanSwiper()
+bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper()
 {
-    if (static_cast<int32_t>(itemPosition_.size()) == TotalCount() && !itemPosition_.empty()) {
-        auto totalChildrenSize = 0.0f;
-        totalChildrenSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos;
+    if (itemPosition_.empty()) {
+        return true;
+    }
+    auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
+    auto lastItemInfoInVisibleArea = GetLastItemInfoInVisibleArea();
+    auto calcDisPlayCount = lastItemInfoInVisibleArea.first - firstItemInfoInVisibleArea.first + 1;
+    if (Positive(TotalCount() - calcDisPlayCount)) {
+        return false;
+    }
+    if (static_cast<int32_t>(itemPosition_.size()) == TotalCount()) {
+        auto visibleLength = lastItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
+        auto totalChildrenSize = visibleLength;
+        if (NonPositive(totalChildrenSize)) {
+            return true;
+        }
         auto prevMargin = GetPrevMargin();
         auto nextMargin = GetNextMargin();
         auto itemSpace = GetItemSpace();
         auto host = GetHost();
-        CHECK_NULL_RETURN(host, 0.0f);
+        CHECK_NULL_RETURN(host, true);
         auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_RETURN(geometryNode, 0.0);
+        CHECK_NULL_RETURN(geometryNode, true);
         auto mainSize = geometryNode->GetFrameSize().MainSize(GetDirection());
         if (itemSpace > mainSize) {
             itemSpace = 0.0f;
         }
-        if (prevMargin != 0.0f) {
-            if (nextMargin != 0.0f) {
-                totalChildrenSize += prevMargin + nextMargin + 2 * itemSpace;
-            } else {
-                totalChildrenSize += prevMargin + itemSpace;
-            }
-        } else {
-            if (nextMargin != 0.0f) {
-                totalChildrenSize += nextMargin + itemSpace;
-            }
-        }
+        auto prevMarginMontage = Positive(prevMargin) ? prevMargin + itemSpace : 0.0f;
+        auto nextMarginMontage = Positive(nextMargin) ? nextMargin + itemSpace : 0.0f;
 
-        if (totalChildrenSize <= contentMainSize_) {
+        if (totalChildrenSize <= (contentMainSize_ - prevMarginMontage - nextMarginMontage)) {
             return true;
         }
     }

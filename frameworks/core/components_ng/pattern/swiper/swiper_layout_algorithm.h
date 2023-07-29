@@ -186,6 +186,16 @@ public:
         return currentIndex_;
     }
 
+    void SetIsNeedResetPrevMarginAndNextMargin()
+    {
+        isNeedResetPrevMarginAndNextMargin_ = false;
+    }
+
+    bool GetIsNeedResetPrevMarginAndNextMargin() const
+    {
+        return isNeedResetPrevMarginAndNextMargin_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void SetInactive(
@@ -226,6 +236,7 @@ private:
     std::optional<int32_t> currentTargetIndex_;
     int32_t currentIndex_ = 0;
     bool targetIsSameWithStartFlag_ = false;
+    bool isNeedResetPrevMarginAndNextMargin_ = false;
 };
 
 } // namespace OHOS::Ace::NG

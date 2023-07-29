@@ -4586,11 +4586,11 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorHandleClick003, TestSize.Level1)
     swiperPattern->indicatorDoingAnimation_ = true;
 
     /**
-     * @tc.steps: step3. call HandleClick.
-     * @tc.expected: swiperPattern->indicatorDoingAnimation_ is false.
+     * @tc.steps: step3. call HandleClick, Swiper itemPosition is empty.
+     * @tc.expected: swiperPattern->indicatorDoingAnimation_ is true.
      */
     indicatorPattern->HandleClick(info);
-    EXPECT_FALSE(swiperPattern->indicatorDoingAnimation_);
+    EXPECT_TRUE(swiperPattern->indicatorDoingAnimation_);
 }
 
 /**
