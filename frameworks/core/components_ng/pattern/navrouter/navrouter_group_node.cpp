@@ -201,11 +201,9 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     auto navBarNode = AceType::DynamicCast<NavBarNode>(parentNode);
     auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
     CHECK_NULL_VOID(navigationContentNode);
-    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
     auto navRouteMode = navRouterPattern->GetNavRouteMode();
     // deal with split mode without user provided navigation stack
-    if (navBarNode && navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT &&
+    if (navBarNode && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT &&
         !navigationPattern->GetNavigationStackProvided()) {
         navigationContentNode->Clean();
         navigationPattern->CleanStack();
