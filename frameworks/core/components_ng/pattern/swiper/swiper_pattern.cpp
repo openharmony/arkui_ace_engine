@@ -523,6 +523,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         SetLazyLoadFeature(true);
     } else {
         OnIndexChange();
+        oldIndex_ = currentIndex_;
     }
 
     if (!IsAutoPlay() && config.skipMeasure && config.skipLayout) {
