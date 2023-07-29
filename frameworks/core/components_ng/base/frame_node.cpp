@@ -1735,6 +1735,21 @@ void FrameNode::OnWindowUnfocused()
     pattern_->OnWindowUnfocused();
 }
 
+std::pair<float, float> FrameNode::ContextPositionConvertToPX(
+    const RefPtr<RenderContext>& context, const SizeF& percentReference) const
+{
+    std::pair<float, float> position;
+    CHECK_NULL_RETURN_NOLOG(context, position);
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    position.first =
+        ConvertToPx(context->GetPositionProperty()->GetPosition()->GetX(), scaleProperty, percentReference.Width())
+            .value_or(0.0);
+    position.second =
+        ConvertToPx(context->GetPositionProperty()->GetPosition()->GetY(), scaleProperty, percentReference.Height())
+            .value_or(0.0);
+    return position;
+}
+
 void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     pattern_->OnWindowSizeChanged(width, height, type);
@@ -1746,18 +1761,22 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     auto parent = GetAncestorNodeOfFrame();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
-            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
-            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
+            auto renderPosition =
+                ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            offset.SetX(static_cast<float>(renderPosition.first));
+            offset.SetY(static_cast<float>(renderPosition.second));
         }
     }
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         if (parentRenderContext && parentRenderContext->GetPositionProperty()) {
             if (parentRenderContext->GetPositionProperty()->HasPosition()) {
-                offset.AddX(static_cast<float>(
-                    parentRenderContext->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
-                offset.AddY(static_cast<float>(
-                    parentRenderContext->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
+                auto parentLayoutProperty = parent->GetLayoutProperty();
+                CHECK_NULL_RETURN_NOLOG(parentLayoutProperty, offset);
+                auto parentRenderContextPosition = ContextPositionConvertToPX(
+                    parentRenderContext, parentLayoutProperty->GetLayoutConstraint()->percentReference);
+                offset.AddX(static_cast<float>(parentRenderContextPosition.first));
+                offset.AddY(static_cast<float>(parentRenderContextPosition.second));
                 parent = parent->GetAncestorNodeOfFrame();
                 continue;
             }
