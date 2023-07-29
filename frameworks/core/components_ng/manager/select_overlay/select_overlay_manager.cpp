@@ -110,7 +110,10 @@ bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
     if (selectOverlayNode) {
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
     }
-    auto menuRect = current->GetGeometryNode()->GetFrameRect();
+    // get the menu rect not the out wrapper
+    auto menu = DynamicCast<FrameNode>(current->GetFirstChild());
+    CHECK_NULL_RETURN_NOLOG(menu, false);
+    auto menuRect = menu->GetGeometryNode()->GetFrameRect();
     return menuRect.IsInRegion(point);
 }
 

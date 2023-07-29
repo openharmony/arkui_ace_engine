@@ -894,8 +894,6 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     auto menuWrapper = MenuView::Create(std::move(params), -1);
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
-    menuWrapper->RemoveChild(menu);
-    menuWrapper.Reset();
     // set click position to menu
     CHECK_NULL_RETURN(menu, nullptr);
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
@@ -910,7 +908,11 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ElementRegister::GetInstance()->AddUINode(menu);
 
-    return menu;
+    auto gestureEventHub = menuWrapper->GetOrCreateGestureEventHub();
+    if (gestureEventHub) {
+        gestureEventHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+    }
+    return menuWrapper;
 }
 
 bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
