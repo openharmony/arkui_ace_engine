@@ -3160,7 +3160,6 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     SetLinearGradientBlur(blurPara);
 }
 
-// PPDOING
 void JSViewAbstract::JsDynamicLightUp(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
@@ -5799,7 +5798,6 @@ void JSViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
     ViewAbstractModel::GetInstance()->SetLinearGradientBlur(blurPara);
 }
 
-//PPDOING
 void JSViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
 {
     ViewAbstractModel::GetInstance()->SetDynamicLightUp(rate, lightUpDegree);

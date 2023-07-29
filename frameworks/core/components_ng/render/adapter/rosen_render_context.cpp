@@ -2130,7 +2130,6 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
     RequestNextFrame();
 }
 
-//PPDOING
 void RosenRenderContext::OnDynamicLightUpRateUpdate(const float rate)
 {
     CHECK_NULL_VOID(rsNode_);
