@@ -628,9 +628,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
         }
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
-        if (!overScrollFeature_ || wrapper->CheckNeedForceMeasureAndLayout()) {
-            wrapper->Layout();
-        }
+        wrapper->Layout();
     }
     // Layout swiper indicator
     if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
