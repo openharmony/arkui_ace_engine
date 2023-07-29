@@ -1181,7 +1181,9 @@ void FrameNode::RebuildRenderContextTree()
     if (overlayNode_) {
         children.push_back(overlayNode_);
     }
-    frameChildren_ = { children.begin(), children.end() };
+    for (const auto& child : children) {
+        frameChildren_.emplace(child);
+    }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
     needSyncRenderTree_ = false;
@@ -1439,8 +1441,8 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t s
             return true;
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-            const auto& child = *iter;
-            if (!child->IsOutOfTouchTestRegion(localPoint, sourceType)) {
+            const auto& child = iter->Upgrade();
+            if (child && !child->IsOutOfTouchTestRegion(localPoint, sourceType)) {
                 if (SystemProperties::GetDebugEnabled()) {
                     LOGI("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
                 }
@@ -1501,7 +1503,10 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             break;
         }
 
-        const auto& child = *iter;
+        const auto& child = iter->Upgrade();
+        if (!child) {
+            continue;
+        }
         auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets, touchId);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
@@ -2116,8 +2121,10 @@ void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)
         bypass_ = CheckRectIntersect(paintRect, rect);
     }
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        const auto& child = *iter;
-        child->CheckSecurityComponentStatus(rect);
+        const auto& child = iter->Upgrade();
+        if (child) {
+            child->CheckSecurityComponentStatus(rect);
+        }
     }
     rect.push_back(paintRect);
 }
@@ -2138,8 +2145,8 @@ bool FrameNode::HaveSecurityComponent()
         return true;
     }
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        const auto& child = *iter;
-        if (child->HaveSecurityComponent()) {
+        const auto& child = iter->Upgrade();
+        if (child && child->HaveSecurityComponent()) {
             return true;
         }
     }

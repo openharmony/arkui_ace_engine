@@ -40,14 +40,8 @@ bool LayoutWrapper::SkipMeasureContent() const
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
-    SizeF safeSize { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
-    safeSize.MinusPadding(insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
-    safeSize.SetWidth(std::min(safeSize.Width(), constraint.maxSize.Width()));
-    safeSize.SetHeight(std::min(safeSize.Height(), constraint.maxSize.Height()));
-
-    constraint.maxSize = safeSize;
-    constraint.parentIdealSize = OptionalSizeF(safeSize);
-    constraint.percentReference = safeSize;
+    constraint.MinusPadding(
+        insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
 }
 
 void LayoutWrapper::OffsetNodeToSafeArea()
@@ -64,12 +58,14 @@ void LayoutWrapper::OffsetNodeToSafeArea()
     }
 
     auto right = offset.GetX() + geometryNode->GetMarginFrameSize().Width();
-    if (insets->right_.IsValid() && right > insets->right_.start) {
-        offset.SetX(insets->right_.start - geometryNode->GetMarginFrameSize().Width());
+    auto rightBound = insets->right_.IsValid() ? insets->right_.start : PipelineContext::GetCurrentRootWidth();
+    if (right > rightBound) {
+        offset.SetX(rightBound - geometryNode->GetMarginFrameSize().Width());
     }
+    auto bottomBound = insets->bottom_.IsValid() ? insets->bottom_.start : PipelineContext::GetCurrentRootHeight();
     auto bottom = offset.GetY() + geometryNode->GetMarginFrameSize().Height();
-    if (insets->bottom_.IsValid() && bottom > insets->bottom_.start) {
-        offset.SetY(insets->bottom_.start - geometryNode->GetMarginFrameSize().Height());
+    if (bottom > bottomBound) {
+        offset.SetY(bottomBound - geometryNode->GetMarginFrameSize().Height());
     }
     geometryNode->SetMarginFrameOffset(offset);
 }

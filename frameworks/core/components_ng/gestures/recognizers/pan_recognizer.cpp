@@ -344,18 +344,22 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
             totalDistance -= each_point_move;
         }
     }
-    if (GreatNotEqual(totalDistance, distance_) && totalFingers >= fingers_) {
-        return true;
-    } else {
-        return false;
+    auto judgeDistance = distance_;
+    if (deviceType_ == SourceType::MOUSE && isForDrag_) {
+        judgeDistance = DRAG_PAN_DISTANCE_MOUSE;
     }
+    return GreatNotEqual(totalDistance, judgeDistance) && totalFingers >= fingers_;
 }
 
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
 {
+    auto judgeDistance = distance_;
+    if (deviceType_ == SourceType::MOUSE && isForDrag_) {
+        judgeDistance = DRAG_PAN_DISTANCE_MOUSE;
+    }
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
         double offset = averageDistance_.GetDistance();
-        if (fabs(offset) < distance_) {
+        if (fabs(offset) < judgeDistance) {
             return GestureAcceptResult::DETECTING;
         }
         return GestureAcceptResult::ACCEPT;
@@ -364,7 +368,7 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
         if ((direction_.type & PanDirection::HORIZONTAL) != 0) {
             double offset = averageDistance_.GetX();
-            if (fabs(offset) < distance_) {
+            if (fabs(offset) < judgeDistance) {
                 return GestureAcceptResult::DETECTING;
             }
             if ((direction_.type & PanDirection::LEFT) == 0 && offset < 0) {
@@ -379,7 +383,7 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     }
     if ((direction_.type & PanDirection::VERTICAL) != 0) {
         double offset = averageDistance_.GetY();
-        if (fabs(offset) < distance_) {
+        if (fabs(offset) < judgeDistance) {
             return GestureAcceptResult::DETECTING;
         }
         if ((direction_.type & PanDirection::UP) == 0) {

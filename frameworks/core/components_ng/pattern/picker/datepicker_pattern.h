@@ -351,10 +351,6 @@ public:
     void SetStartDate(const PickerDate& value)
     {
         startDateSolar_ = value;
-        if (startDateSolar_.GetYear() <= 0) {
-            LOGW("startDate error");
-            startDateSolar_ = startDefaultDateSolar_;
-        }
         AdjustSolarDate(startDateSolar_, limitStartDate_, limitEndDate_);
         startDateLunar_ = SolarToLunar(startDateSolar_);
     }
@@ -367,10 +363,6 @@ public:
     void SetEndDate(const PickerDate& value)
     {
         endDateSolar_ = value;
-        if (endDateSolar_.GetYear() <= 0) {
-            LOGW("endDate error");
-            endDateSolar_ = endDefaultDateSolar_;
-        }
         AdjustSolarDate(endDateSolar_, limitStartDate_, limitEndDate_);
         endDateLunar_ = SolarToLunar(endDateSolar_);
     }

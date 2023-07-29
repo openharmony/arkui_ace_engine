@@ -120,7 +120,10 @@ void GridModelNG::SetEditable(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, value);
 }
 
-void GridModelNG::SetIsRTL(bool rightToLeft) {}
+void GridModelNG::SetIsRTL(TextDirection direction)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutDirection, direction);
+}
 
 void GridModelNG::SetLayoutDirection(FlexDirection value)
 {

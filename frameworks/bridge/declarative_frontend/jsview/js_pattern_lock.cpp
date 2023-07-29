@@ -127,7 +127,9 @@ void JSPatternLock::SetSelectedColor(const JSCallbackInfo& info)
     }
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        return;
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_VOID(patternLockTheme);
+        selectedColor = patternLockTheme->GetSelectedColor();
     }
 
     PatternLockModel::GetInstance()->SetSelectedColor(selectedColor);
@@ -154,7 +156,9 @@ void JSPatternLock::SetPathColor(const JSCallbackInfo& info)
     }
     Color pathColor;
     if (!ParseJsColor(info[0], pathColor)) {
-        return;
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_VOID(patternLockTheme);
+        pathColor = patternLockTheme->GetPathColor();
     }
 
     PatternLockModel::GetInstance()->SetPathColor(pathColor);
@@ -167,7 +171,9 @@ void JSPatternLock::SetActiveColor(const JSCallbackInfo& info)
     }
     Color activeColor;
     if (!ParseJsColor(info[0], activeColor)) {
-        return;
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_VOID(patternLockTheme);
+        activeColor = patternLockTheme->GetActiveColor();
     }
 
     PatternLockModel::GetInstance()->SetActiveColor(activeColor);
@@ -180,7 +186,9 @@ void JSPatternLock::SetRegularColor(const JSCallbackInfo& info)
     }
     Color regularColor;
     if (!ParseJsColor(info[0], regularColor)) {
-        return;
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_VOID(patternLockTheme);
+        regularColor = patternLockTheme->GetRegularColor();
     }
 
     PatternLockModel::GetInstance()->SetRegularColor(regularColor);
@@ -192,12 +200,13 @@ void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
         return;
     }
     CalcDimension radius;
-    if (!ParseJsDimensionVp(info[0], radius)) {
-        return;
+    if (!ParseJsDimensionVp(info[0], radius) || radius.IsNonPositive()) {
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_VOID(patternLockTheme);
+        radius = patternLockTheme->GetCircleRadius();
     }
-    if (radius.IsNonNegative()) {
-        PatternLockModel::GetInstance()->SetCircleRadius(radius);
-    }
+    
+    PatternLockModel::GetInstance()->SetCircleRadius(radius);
 }
 void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
 {
@@ -207,7 +216,9 @@ void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
     }
     CalcDimension sideLength;
     if (!ParseJsDimensionVp(info[0], sideLength)) {
-        return;
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_VOID(patternLockTheme);
+        sideLength = patternLockTheme->GetSideLength();
     }
 
     PatternLockModel::GetInstance()->SetSideLength(sideLength);
@@ -220,7 +231,9 @@ void JSPatternLock::SetPathStrokeWidth(const JSCallbackInfo& info)
     }
     CalcDimension lineWidth;
     if (!ParseJsDimensionVp(info[0], lineWidth)) {
-        return;
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_VOID(patternLockTheme);
+        lineWidth = patternLockTheme->GetPathStrokeWidth();
     }
 
     PatternLockModel::GetInstance()->SetStrokeWidth(lineWidth);

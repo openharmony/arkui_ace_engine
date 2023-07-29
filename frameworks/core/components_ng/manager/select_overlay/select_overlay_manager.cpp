@@ -221,4 +221,12 @@ void SelectOverlayManager::NotifyOverlayClosed(bool closedByGlobalEvent)
         selectOverlayNode->SetClosedByGlobalEvent(closedByGlobalEvent);
     }
 }
+
+void SelectOverlayManager::MarkDirty(PropertyChangeFlag flag)
+{
+    auto selectOverlayItem = selectOverlayItem_.Upgrade();
+    if (selectOverlayItem) {
+        selectOverlayItem->MarkDirtyNode(flag);
+    }
+}
 } // namespace OHOS::Ace::NG

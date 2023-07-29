@@ -546,6 +546,8 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
 
 void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
     JSRef<JSVal> startDate;
     JSRef<JSVal> endDate;
     JSRef<JSVal> selectedDate;
@@ -556,17 +558,17 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
     }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
+    if (parseStartDate.GetYear() <= 0) {
+        parseStartDate = theme->GetDefaultStartDate();
+    }
+    if (parseEndDate.GetYear() <= 0) {
+        parseEndDate = theme->GetDefaultEndDate();
+    }
     auto startDays = parseStartDate.ToDays();
     auto endDays = parseEndDate.ToDays();
     if (startDays > endDays) {
-        LOGW("startDate and endDate error");
-        parseStartDate.SetYear(0);
-        parseEndDate.SetYear(0);
-    }
-    auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("datePicker Theme is null");
-        return;
+        parseStartDate = theme->GetDefaultStartDate();
+        parseEndDate = theme->GetDefaultEndDate();
     }
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     if (startDate->IsObject()) {
@@ -584,10 +586,6 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
             parseSelectedDate = ParseDate(selectedDateObj->GetProperty("value"));
         } else {
             parseSelectedDate = ParseDate(selectedDate);
-        }
-        auto selectedDays = parseSelectedDate.ToDays();
-        if (selectedDays < startDays || selectedDays > endDays) {
-            LOGW("selectedDate error");
         }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
@@ -663,7 +661,9 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         LOGE("DatePicker Show dialog error, info is non-valid");
         return;
     }
-
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     DatePickerType pickerType = DatePickerType::DATE;
     auto type = paramObject->GetProperty("type");
@@ -804,8 +804,22 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     settingData.lunarswitch = lunarSwitch->ToBoolean();
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
-    pickerDialog.parseStartDate = ParseDate(startDate);
-    pickerDialog.parseEndDate = ParseDate(endDate);
+    auto parseStartDate = ParseDate(startDate);
+    auto parseEndDate = ParseDate(endDate);
+    if (parseStartDate.GetYear() <= 0) {
+        parseStartDate = theme->GetDefaultStartDate();
+    }
+    if (parseEndDate.GetYear() <= 0) {
+        parseEndDate = theme->GetDefaultEndDate();
+    }
+    auto startDays = parseStartDate.ToDays();
+    auto endDays = parseEndDate.ToDays();
+    if (startDays > endDays) {
+        parseStartDate = theme->GetDefaultStartDate();
+        parseEndDate = theme->GetDefaultEndDate();
+    }
+    pickerDialog.parseStartDate = parseStartDate;
+    pickerDialog.parseEndDate = parseEndDate;
     pickerDialog.parseSelectedDate = ParseDate(selectedDate);
     pickerDialog.pickerTime = ParseTime(selectedDate);
     JSDatePicker::ParseTextProperties(paramObject, settingData.properties);

@@ -24,7 +24,7 @@ bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
         return false;
     }
     cutoutSafeArea_ = safeArea;
-    return !ignoreSafeArea_ && isFullScreen_;
+    return true;
 }
 
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
@@ -33,7 +33,7 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
         return false;
     }
     systemSafeArea_ = safeArea;
-    return !ignoreSafeArea_ && isFullScreen_;
+    return true;
 }
 
 bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
@@ -70,7 +70,7 @@ bool SafeAreaManager::SetIsFullScreen(bool value)
         return false;
     }
     isFullScreen_ = value;
-    return systemSafeArea_.IsValid() || cutoutSafeArea_.IsValid();
+    return true;
 }
 
 bool SafeAreaManager::SetIgnoreSafeArea(bool value)
@@ -79,7 +79,7 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
         return false;
     }
     ignoreSafeArea_ = value;
-    return systemSafeArea_.IsValid() || cutoutSafeArea_.IsValid();
+    return true;
 }
 
 SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const

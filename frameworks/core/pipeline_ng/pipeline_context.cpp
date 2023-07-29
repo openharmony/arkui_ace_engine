@@ -797,17 +797,20 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
     return safeAreaManager_->GetSafeArea();
 }
 
-void PipelineContext::SyncSafeArea()
+void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
     CHECK_NULL_VOID_NOLOG(rootNode_);
     rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     CHECK_NULL_VOID_NOLOG(stageManager_);
     auto page = stageManager_->GetLastPage();
     if (page) {
-        page->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        page->MarkDirtyNode(onKeyboard ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
     }
     if (overlayManager_) {
         overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    }
+    if (selectOverlayManager_) {
+        selectOverlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -859,14 +862,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
                    NearZero(rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
             safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
         }
-        rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        auto page = stageManager_->GetLastPage();
-        if (page) {
-            page->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        }
-        if (overlayManager_) {
-            overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
-        }
+        SyncSafeArea(true);
         // layout immediately
         FlushUITasks();
 

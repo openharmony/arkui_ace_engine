@@ -660,25 +660,21 @@ JSRef<JSVal> JSRichEditorController::CreateCreateJSSpansInfo(const RichEditorSel
 
 void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsObject()) {
-        LOGI("info[0] not is Object");
-        return;
-    }
-
     int32_t end = -1;
     int32_t start = -1;
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    JSRef<JSVal> startVal = obj->GetProperty("start");
-    JSRef<JSVal> endVal = obj->GetProperty("end");
+    if (args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        JSRef<JSVal> startVal = obj->GetProperty("start");
+        JSRef<JSVal> endVal = obj->GetProperty("end");
 
-    if (!startVal->IsNull() && startVal->IsNumber()) {
-        start = startVal->ToNumber<int32_t>();
+        if (!startVal->IsNull() && startVal->IsNumber()) {
+            start = startVal->ToNumber<int32_t>();
+        }
+
+        if (!endVal->IsNull() && endVal->IsNumber()) {
+            end = endVal->ToNumber<int32_t>();
+        }
     }
-
-    if (!endVal->IsNull() && endVal->IsNumber()) {
-        end = endVal->ToNumber<int32_t>();
-    }
-
     if (controllerWeak_.Upgrade()) {
         RichEditorSelection value = controllerWeak_.Upgrade()->GetSpansInfo(start, end);
         args.SetReturnValue(CreateCreateJSSpansInfo(value));

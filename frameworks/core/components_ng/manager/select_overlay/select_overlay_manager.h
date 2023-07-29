@@ -28,6 +28,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -62,6 +63,8 @@ public:
     }
 
     void HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset);
+
+    void MarkDirty(PropertyChangeFlag flag);
 
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay);

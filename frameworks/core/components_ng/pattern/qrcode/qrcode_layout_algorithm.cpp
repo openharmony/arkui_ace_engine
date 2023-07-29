@@ -83,5 +83,4 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
         return idealSize;
     }
 }
-
 } // namespace OHOS::Ace::NG

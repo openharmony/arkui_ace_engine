@@ -36,14 +36,6 @@ constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 300;
 int32_t MULTI_TAP_SLOP = 100;
 constexpr int32_t MULTI_TAP_SLOP_TOUCH = 30;
 constexpr int32_t MULTI_TAP_SLOP_MOUSE = 15;
-#ifndef WEARABLE_PRODUCT
-double MAX_THRESHOLD = 20.0;
-constexpr double MAX_THRESHOLD_TOUCH = 20.0;
-#else
-constexpr double MAX_THRESHOLD = 12.0;
-constexpr double MAX_THRESHOLD_TOUCH = 12.0;
-#endif
-constexpr int32_t MAX_THRESHOLD_MOUSE = 15;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 
 } // namespace
@@ -55,14 +47,12 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_TOUCH;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_TOUCH;
             MULTI_TAP_SLOP = MULTI_TAP_SLOP_TOUCH;
-            MAX_THRESHOLD = MAX_THRESHOLD_TOUCH;
             break;
         case SourceType::MOUSE:
         case SourceType::TOUCH_PAD:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_MOUSE;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_MOUSE;
             MULTI_TAP_SLOP = MULTI_TAP_SLOP_MOUSE;
-            MAX_THRESHOLD = MAX_THRESHOLD_MOUSE;
             break;
         default:
             LOGI("Unrecognized input source type: %{public}d", sourceType);
@@ -212,11 +202,6 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
     InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch move event");
-    Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
-    if (offset.GetDistance() > MAX_THRESHOLD) {
-        LOGI("this gesture is out of offset, try to reject it");
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-    }
 }
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)

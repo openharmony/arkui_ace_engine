@@ -294,6 +294,9 @@ Rect SearchPattern::HandleTextContentRect()
     RectF rect = textFieldPattern->GetTextRect();
     RectF frameRect = textFieldPattern->GetFrameRect();
     auto y = rect.GetY() + frameRect.GetY();
+    if (NearEqual(rect.GetY(), 0)) {
+        y = textFieldPattern->GetPaddingTop() + textFieldPattern->GetBorderTop() + frameRect.GetY();
+    }
     if (!textFieldPattern->IsOperation()) {
         return Rect(rect.GetX() + frameRect.GetX(), y, 0, 0);
     }

@@ -467,8 +467,8 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
     auto onReachStart = gridEventHub->GetOnReachStart();
     if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
         if ((scrollState_ == SCROLL_FROM_UPDATE || scrollState_ == SCROLL_FROM_ANIMATION_SPRING ||
-                scrollState_ == SCROLL_FROM_ANIMATION) &&
-            gridLayoutInfo_.reachStart_ && !reachStart && !NearZero(gridLayoutInfo_.currentOffset_)) {
+             scrollState_ == SCROLL_FROM_ANIMATION) && gridLayoutInfo_.reachStart_ && !reachStart &&
+            (!NearZero(gridLayoutInfo_.currentOffset_) || Negative(finalOffset))) {
             onReachStart();
             initialIndex_ = true;
         }
@@ -476,19 +476,15 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
             onReachStart();
             initialIndex_ = true;
         }
-        if (scrollState_ == SCROLL_FROM_JUMP && NearZero(gridLayoutInfo_.prevOffset_) &&
-            gridLayoutInfo_.reachStart_) {
+        if (scrollState_ == SCROLL_FROM_JUMP && Negative(finalOffset) && NearZero(gridLayoutInfo_.currentOffset_) &&
+            (NearZero(gridLayoutInfo_.prevOffset_) || Negative(gridLayoutInfo_.prevOffset_))) {
             onReachStart();
             initialIndex_ = true;
         }
-        if (!NearZero(gridLayoutInfo_.currentOffset_)) {
-            offsetCount_++;
-        }
-        if (scrollState_ == SCROLL_FROM_NONE && reachStart && NearZero(gridLayoutInfo_.currentOffset_) &&
-            offsetCount_ > 1) {
+        if (scrollState_ == SCROLL_FROM_ANIMATION_CONTROLLER && NearZero(gridLayoutInfo_.currentOffset_) &&
+            ((!gridLayoutInfo_.reachStart_ && !NearZero(finalOffset)) || gridLayoutInfo_.reachStart_)) {
             onReachStart();
             initialIndex_ = true;
-            offsetCount_ = 0;
         }
     }
     if (onReachStart && !initialIndex_ && gridLayoutInfo_.startIndex_ == 0) {
@@ -498,8 +494,11 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
 
     auto onReachEnd = gridEventHub->GetOnReachEnd();
     if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
-        if ((scrollState_ == SCROLL_FROM_UPDATE || scrollState_ == SCROLL_FROM_ANIMATION) &&
-            gridLayoutInfo_.reachEnd_ && !reachEnd) {
+        if (scrollState_ == SCROLL_FROM_UPDATE &&
+            gridLayoutInfo_.offsetEnd_ && !offsetEnd && Positive(finalOffset)) {
+            onReachEnd();
+        }
+        if (scrollState_ == SCROLL_FROM_ANIMATION && gridLayoutInfo_.reachEnd_ && !reachEnd) {
             onReachEnd();
         }
         if (scrollState_ == SCROLL_FROM_ANIMATION_SPRING && !gridLayoutInfo_.reachEnd_ &&
@@ -507,6 +506,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
             onReachEnd();
         }
         if (scrollState_ == SCROLL_FROM_JUMP && gridLayoutInfo_.offsetEnd_ && gridLayoutInfo_.reachEnd_) {
+            onReachEnd();
+        }
+        if (scrollState_ == SCROLL_FROM_ANIMATION_CONTROLLER && gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
             onReachEnd();
         }
         if (scrollState_ == SCROLL_FROM_NONE && reachEnd && gridLayoutInfo_.reachEnd_ &&

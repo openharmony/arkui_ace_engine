@@ -112,7 +112,7 @@ public:
         json->Put("nextMargin", propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false");
         json->Put("hoverShow", propHoverShow_.value_or(false) ? "true" : "false");
-        json->Put("isShowBackground", propIsShowBackground_.value_or(false) ? "true" : "false");
+        json->Put("showBackground", propIsShowBackground_.value_or(false) ? "true" : "false");
         json->Put("isSidebarMiddle", propIsSidebarMiddle_.value_or(false) ? "true" : "false");
         json->Put(
             "arrowBackgroundSize", propBackgroundSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
