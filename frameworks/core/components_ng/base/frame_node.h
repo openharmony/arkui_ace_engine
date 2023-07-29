@@ -507,7 +507,8 @@ private:
         bool operator()(const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) const
         {
             if (left && right) {
-                return left->GetRenderContext()->GetZIndexValue(1) < right->GetRenderContext()->GetZIndexValue(1);
+                return left->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE) <
+                    right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
             }
             return false;
         }
