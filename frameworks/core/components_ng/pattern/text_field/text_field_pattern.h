@@ -922,6 +922,8 @@ public:
 
     bool IsNormalInlineState() const;
 
+    void EditingValueFilterChange();
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);

@@ -5585,4 +5585,14 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
     return !(!contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) ||
         !contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON }));
 }
+
+void TextFieldPattern::EditingValueFilterChange()
+{
+    if (!textEditingValue_.text.empty()) {
+        std::string result = "";
+        EditingValueFilter(textEditingValue_.text, result);
+        textEditingValue_.text = std::move(result);
+        textEditingValue_.caretPosition = textEditingValue_.GetWideText().length();
+    }
+}
 } // namespace OHOS::Ace::NG

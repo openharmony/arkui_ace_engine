@@ -42,7 +42,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
-};
+// uncertainty range when comparing selectedTextBox to contentRect
+constexpr float BOX_EPSILON = 0.5f;
+}; // namespace
 
 TextPattern::~TextPattern()
 {
@@ -310,6 +312,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     SelectOverlayInfo selectInfo;
     selectInfo.firstHandle.paintRect = firstHandle;
     selectInfo.secondHandle.paintRect = secondHandle;
+    CheckHandles(selectInfo.secondHandle);
     selectInfo.onHandleMove = [weak = WeakClaim(this)](const RectF& handleRect, bool isFirst) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -377,6 +380,14 @@ void TextPattern::HandleOnSelectAll()
 
 void TextPattern::CheckHandles(SelectHandleInfo& handleInfo)
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetClipEdge().value_or(true) == false) {
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
@@ -384,7 +395,7 @@ void TextPattern::CheckHandles(SelectHandleInfo& handleInfo)
     auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
     RectF contentGlobalRect(offset, contentRect_.GetSize());
     auto handleOffset = handleInfo.paintRect.GetOffset();
-    if (!contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY()))) {
+    if (!contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY() + BOX_EPSILON))) {
         handleInfo.isShow = false;
     }
 }
@@ -928,7 +939,7 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
-            
+
             // Register callback for fonts.
             FontRegisterCallback(spanNode);
         } else if (current->GetTag() == V2::IMAGE_ETS_TAG) {
