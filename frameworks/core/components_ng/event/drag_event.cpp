@@ -300,17 +300,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 auto frameNode = gestureHub->GetFrameNode();
                 CHECK_NULL_VOID(frameNode);
                 auto renderContext = frameNode->GetRenderContext();
-                BorderRadiusProperty borderRadius;
+                BorderRadiusProperty borderRadius(renderContext->GetBorderRadius().value());
                 borderRadius.multiValued = false;
-                renderContext->UpdateBorderRadius(borderRadius);
                 AnimationOption option;
                 option.SetDuration(PIXELMAP_ANIMATION_DURATION);
                 option.SetCurve(Curves::FRICTION);
                 AnimationUtils::Animate(
                     option,
-                    [&]() {
-                        BorderRadiusProperty borderRadius;
-                        borderRadius.SetRadius(Dimension(0));
+                    [renderContext_ = renderContext, borderRadius_ = borderRadius]() {
+                        renderContext_->UpdateBorderRadius(borderRadius_);
                     },
                     option.GetOnFinishEvent());
                 HideEventColumn();
