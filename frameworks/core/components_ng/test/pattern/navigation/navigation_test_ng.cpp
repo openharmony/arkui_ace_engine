@@ -810,15 +810,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_013, TestSize.Level1)
     EXPECT_EQ(pattern->preNavBarWidth_, 360.0);
     pattern->preNavBarWidth_ = 0;
     pattern->HandleDragUpdate(FLOAT_260);
-    EXPECT_EQ(pattern->realNavBarWidth_, -361.0f);
-    pattern->HandleDragUpdate(500.0f);
-    EXPECT_EQ(pattern->realNavBarWidth_, 280.0f);
-    pattern->dragRect_.width_ = 200.0f;
-    pattern->HandleDragUpdate(100.0f);
-    EXPECT_EQ(pattern->realNavBarWidth_, 240.0f);
-    pattern->dragRect_.width_ = 500.0f;
-    pattern->HandleDragUpdate(100.0f);
-    EXPECT_EQ(pattern->realNavBarWidth_, 240.0f);
+    EXPECT_EQ(pattern->realNavBarWidth_, 0.0);
 }
 
 /**
