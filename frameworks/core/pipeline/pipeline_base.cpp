@@ -632,7 +632,7 @@ double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
 {
     auto windowRect = GetCurrentWindowRect();
     auto deviceHeight = SystemProperties::GetDeviceHeight();
-    return keyboardHeight - (deviceHeight - windowRect.Bottom()) > 0.0
+    return keyboardHeight > 0.0 && keyboardHeight - (deviceHeight - windowRect.Bottom()) > 0.0
                ? keyboardHeight - (deviceHeight - windowRect.Bottom())
                : 0.0;
 }
