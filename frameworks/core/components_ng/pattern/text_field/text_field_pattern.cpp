@@ -3492,9 +3492,9 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
     }
     if (textChanged) {
         valueToUpdate = result;
-        result = "";
         textChanged = false;
     }
+    result = "";
     switch (textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
         case TextInputType::NUMBER: {
             textChanged |= FilterWithRegex(DIGIT_WHITE_LIST, valueToUpdate, result);
