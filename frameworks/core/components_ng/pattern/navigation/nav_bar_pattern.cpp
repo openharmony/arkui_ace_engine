@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -144,8 +145,8 @@ void UpdateBarItemNodeWithItem(
     const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, const bool isButtonEnabled)
 {
     if (PipelineContext::GetCurrentContext()->GetMinPlatformVersion() <
-        static_cast<int32_t>(PlatformVersion::VERSION_TEN)
-        && barItem.text.has_value() && !barItem.text.value().empty()) {
+            static_cast<int32_t>(PlatformVersion::VERSION_TEN) &&
+        barItem.text.has_value() && !barItem.text.value().empty()) {
         auto textNode = CreateBarItemTextNode(barItem.text.value());
         barItemNode->SetTextNode(textNode);
         barItemNode->AddChild(textNode);
@@ -442,12 +443,13 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
 
         auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(navBarNode->GetParent());
         CHECK_NULL_VOID(navigationGroupNode);
-        auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+        auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(navigationPattern);
         auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
         CHECK_NULL_VOID(navBarLayoutProperty);
         bool isToolbarHide = navBarLayoutProperty->GetHideToolBar().value_or(false);
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT || isToolbarHide ||
-            navigationLayoutProperty->GetNavigationModeValue() == NavigationMode::SPLIT) {
+            navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
             titleBarNode->SetMenu(navBarNode->GetMenu());
         } else {
             titleBarNode->SetMenu(navBarNode->GetLandscapeMenu());

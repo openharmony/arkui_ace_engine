@@ -124,7 +124,9 @@ void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
         CHECK_NULL_VOID(navRouter);
         auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
+        auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(navigationPattern);
+        if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
             layoutProperty->UpdateDestinationChange(true);
         }
         navRouter->AddNavDestinationToNavigation(navigation);
