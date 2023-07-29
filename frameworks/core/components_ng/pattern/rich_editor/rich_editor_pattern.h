@@ -169,6 +169,7 @@ public:
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif
     void ResetSelection();
+    bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
