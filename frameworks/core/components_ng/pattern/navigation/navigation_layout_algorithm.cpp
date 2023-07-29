@@ -74,10 +74,6 @@ void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGr
 float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const NavBarPosition& position)
 {
-    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-        return 0.0f;
-    }
-
     auto contentNode = hostNode->GetContentNode();
     CHECK_NULL_RETURN(contentNode, 0.0f);
     auto navBarNode = hostNode->GetNavBarNode();
@@ -85,6 +81,10 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto index = hostNode->GetChildIndexById(navBarNode->GetId());
     auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(navBarWrapper, 0.0f);
+    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
+        navBarWrapper->Layout();
+        return 0.0f;
+    }
     auto geometryNode = navBarWrapper->GetGeometryNode();
     auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
     if (position == NavBarPosition::END) {
