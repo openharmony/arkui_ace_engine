@@ -316,11 +316,6 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
 
 void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
-    UpdatePixelMapPosition(static_cast<int32_t>(point.GetX()), static_cast<int32_t>(point.GetY()));
-#else
-    UpdateDragWindowPosition(static_cast<int32_t>(point.GetX()), static_cast<int32_t>(point.GetY()));
-#endif // ENABLE_DRAG_FRAMEWORK
     UpdateVelocityTrackerPoint(point, false);
 
     auto dragFrameNode = FindDragFrameNodeByPosition(
