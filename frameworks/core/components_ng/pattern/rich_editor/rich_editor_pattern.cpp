@@ -2437,4 +2437,27 @@ RefPtr<SpanItem> RichEditorPattern::GetSpanItemByIndex(int32_t index) const
     std::advance(pos, index);
     return *pos;
 }
+
+bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto offset = host->GetPaintRectOffset();
+    auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
+    auto eventHub = host->GetEventHub<EventHub>();
+    bool draggable = eventHub->HasOnDragStart();
+    if (draggable && GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
+        // Determine if the pan location is in the selected area
+        std::vector<Rect> selectedRects;
+        paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
+        auto panOffset = OffsetF(localOffset.GetX(), localOffset.GetY()) - contentRect_.GetOffset() +
+                         OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+        for (const auto& selectedRect : selectedRects) {
+            if (selectedRect.IsInRegion(Point(panOffset.GetX(), panOffset.GetY()))) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

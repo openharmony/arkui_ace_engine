@@ -2216,7 +2216,7 @@ void TextFieldPattern::OnModifyDone()
     }
 #if defined(ENABLE_STANDARD_INPUT)
     auto maxLength = GetMaxLength();
-    if (GreatOrEqual(textWidth, maxLength)) {
+    if (GreatNotEqual(textWidth, maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
         UpdateCaretPositionWithClamp(textEditingValue_.caretPosition);
         SetEditingValueToProperty(textEditingValue_.text);
