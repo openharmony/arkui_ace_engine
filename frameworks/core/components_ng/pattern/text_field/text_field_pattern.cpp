@@ -798,6 +798,9 @@ bool TextFieldPattern::CursorInContentRegion()
 
 float TextFieldPattern::FitCursorInSafeArea()
 {
+    if (caretUpdateType_ != CaretUpdateType::INPUT) {
+        return 0.0f;
+    }
     // check if caret is below safeArea
     auto pipeline = PipelineContext::GetCurrentContext();
     auto safeAreaBottom = pipeline->GetSafeArea().bottom_;
