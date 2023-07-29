@@ -514,7 +514,7 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
     if (selectChanged || NeedShowPopupView()) {
         ShowBubble();
     }
-    host->MarkDirtyNode();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void IndexerPattern::ShowBubble()

@@ -60,6 +60,8 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
         childRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         Dimension radiusZeroSize;
         childRenderContext->UpdateBorderRadius({ radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
+        indexerChildNode->MarkModifyDone();
+        indexerChildNode->MarkDirtyNode();
         frameNode->AddChild(indexerChildNode);
     }
     stack->Push(frameNode);
@@ -204,14 +206,22 @@ void IndexerModelNG::SetSelected(int32_t selected)
     }
 }
 
-void IndexerModelNG::SetPopupPositionX(const Dimension& popupPositionX)
+void IndexerModelNG::SetPopupPositionX(const std::optional<Dimension>& popupPositionXOpt)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionX);
+    if (popupPositionXOpt.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionXOpt.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionX, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void IndexerModelNG::SetPopupPositionY(const Dimension& popupPositionY)
+void IndexerModelNG::SetPopupPositionY(const std::optional<Dimension>& popupPositionYOpt)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionY);
+    if (popupPositionYOpt.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionYOpt.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionY, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void IndexerModelNG::SetPopupItemBackground(const std::optional<Color>& popupItemBackground)
