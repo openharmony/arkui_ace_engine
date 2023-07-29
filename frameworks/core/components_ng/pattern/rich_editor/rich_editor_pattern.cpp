@@ -1853,6 +1853,14 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
             handleInfo.paintRect = textSelector_.secondHandle;
             selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
         }
+
+        if (IsSelectAll() && selectMenuInfo_.showCopyAll == true) {
+            selectMenuInfo_.showCopyAll = false;
+            selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+        } else if (!IsSelectAll() && selectMenuInfo_.showCopyAll == false) {
+            selectMenuInfo_.showCopyAll = true;
+            selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+        }
         return;
     }
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -2124,11 +2132,13 @@ void RichEditorPattern::HandleOnCopy()
         resultProcesser(*resultObj);
     }
     clipboard_->SetData(pasteData, copyOption_);
+    StartTwinkling();
 }
 
 void RichEditorPattern::ResetAfterPaste()
 {
     SetCaretSpanIndex(-1);
+    StartTwinkling();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         auto length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();

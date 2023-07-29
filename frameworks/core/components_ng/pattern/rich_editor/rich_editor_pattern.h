@@ -178,6 +178,7 @@ private:
         selectInfo.menuInfo.showCopyAll = true;
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = true;
+        selectMenuInfo_ = selectInfo.menuInfo;
     }
     void HandleOnCopy();
     void HandleOnPaste();
