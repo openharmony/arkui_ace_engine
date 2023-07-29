@@ -3186,7 +3186,6 @@ void JSViewAbstract::JsDynamicLightUp(const JSCallbackInfo& info)
         LOGE("Js Parse double failed. lightUpDegree is not double.");
         return;
     }
-    LOGE("[PPTS] rate=%f, degree=%f", rate, lightUpDegree);
     SetDynamicLightUp(rate, lightUpDegree);
 }
 
