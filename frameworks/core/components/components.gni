@@ -53,6 +53,10 @@ template("build_component") {
         configs += invoker.configs
       }
 
+      include_dirs = []
+      if (defined(invoker.include_dirs)) {
+        include_dirs += invoker.include_dirs
+      }
       deps = []
       deps += extra_deps
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
