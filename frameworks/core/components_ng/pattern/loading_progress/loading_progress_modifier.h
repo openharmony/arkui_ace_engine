@@ -66,6 +66,11 @@ public:
         isLoading_ = false;
     }
 
+    bool GetVisible() const
+    {
+        return isVisible_;
+    }
+
     void SetEnableLoading(bool enable)
     {
         CHECK_NULL_VOID(enableLoading_);

@@ -149,10 +149,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     }
     auto navRouterPattern = GetPattern<NavRouterPattern>();
     CHECK_NULL_VOID(navRouterPattern);
-    if (navigationNode->GetIsOnAnimation()) {
-        LOGI("navigation is on animation");
-        return;
-    }
     auto navigationStack = navigationPattern->GetNavigationStack();
     auto routeInfo = navRouterPattern->GetRouteInfo();
     std::string name;
@@ -210,37 +206,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         navigationContentNode->Clean();
         navigationPattern->CleanStack();
     }
-    if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
-        if (navBarNode) {
-            // jump to the first level NavDestination page
-            auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-            auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
-            auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-            if (titleBarNode || destinationTitleBarNode) {
-                navigationNode->TitleTransitionInAnimation(titleBarNode, destinationTitleBarNode);
-            }
-            if (backButtonNode) {
-                navigationNode->BackButtonAnimation(backButtonNode, true);
-            }
-            navigationNode->NavTransitionInAnimation(navBarNode, navDestination);
-        } else {
-            // stack. More than one destination
-            currentNavDestination =
-                AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
-            CHECK_NULL_VOID(currentNavDestination);
-            auto curNavTitleBarNode = AceType::DynamicCast<TitleBarNode>(currentNavDestination->GetTitleBarNode());
-            auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
-            auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-            if (curNavTitleBarNode || destinationTitleBarNode) {
-                navigationNode->TitleTransitionInAnimation(curNavTitleBarNode, destinationTitleBarNode);
-            }
-            if (backButtonNode) {
-                navigationNode->BackButtonAnimation(backButtonNode, true);
-            }
-            navigationNode->NavTransitionInAnimation(currentNavDestination, navDestination);
-        }
-    }
-
     // remove if this navDestinationNode is already in the NavigationStack and not at the top, as the latter will
     // later be modified by NavRouteMode
     navigationPattern->RemoveIfNeeded(name, navDestination);
@@ -262,10 +227,7 @@ bool NavRouterGroupNode::CleanNodeInNavigation(const RefPtr<UINode>& parent)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
     CHECK_NULL_RETURN(navigationNode, false);
-    if (navigationNode->GetIsOnAnimation()) {
-        LOGI("navigation is on animation");
-        return false;
-    }
+
     auto navRouterPattern = GetPattern<NavRouterPattern>();
     CHECK_NULL_RETURN(navRouterPattern, false);
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();

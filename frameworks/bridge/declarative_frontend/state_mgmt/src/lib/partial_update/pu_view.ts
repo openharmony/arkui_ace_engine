@@ -511,7 +511,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     const factory = <T>(source: ObservedPropertyAbstract<T>) => {
       const result : ObservedPropertyAbstractPU<T> = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
-          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName) 
+          ? new SynchedPropertySimpleTwoWayPU<T>(source, this, consumeVarName) 
           : new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName);
       stateMgmtConsole.error(`The @Consume is instance of ${result.constructor.name}`);
       return result;

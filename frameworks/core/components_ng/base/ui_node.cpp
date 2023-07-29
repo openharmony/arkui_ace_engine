@@ -453,7 +453,9 @@ void UINode::DumpTree(int32_t depth)
 void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     for (const auto& child : children_) {
-        child->AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+        if (!child->IsInDestroying()) {
+            child->AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+        }
     }
 }
 

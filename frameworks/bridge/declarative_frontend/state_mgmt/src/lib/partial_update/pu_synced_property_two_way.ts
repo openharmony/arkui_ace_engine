@@ -35,7 +35,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
       // register to the parent property
       this.source_.addSubscriber(this);
       // register to the ObservedObject
-      ObservedObject.addOwningProperty(this.source_.get(), this);
+      ObservedObject.addOwningProperty(this.source_.getUnmonitored(), this);
     } else {
       throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source variable in parent/ancestor @ Component must be defined. Application error!`);
     }
