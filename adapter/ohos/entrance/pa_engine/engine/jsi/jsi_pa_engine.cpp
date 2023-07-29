@@ -1343,7 +1343,7 @@ void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
     auto func = GetPaFunc("onCreate");
     auto result = CallFuncWithDefaultThis(func, argv);
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    if (arkJSRuntime->HasPendingException()) {
+    if (arkJSRuntime->HasPendingException() || result->IsUndefined(runtime)) {
         LOGE("JsiPaEngine CallFunc FAILED!");
         return;
     }
