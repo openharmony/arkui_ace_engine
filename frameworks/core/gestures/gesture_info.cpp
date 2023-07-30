@@ -86,5 +86,25 @@ bool DragEvent::IsCopy()
 {
     return copy_;
 }
+
+void DragEvent::SetUdKey(const std::string udKey)
+{
+    udKey_ = udKey;
+}
+
+std::string DragEvent::GetUdKey()
+{
+    return udKey_;
+}
+
+void DragEvent::SetIsGetDataSuccess(bool isGetDataSuccess)
+{
+    isGetDataSuccess_ = isGetDataSuccess;
+}
+
+bool DragEvent::IsGetDataSuccess()
+{
+    return isGetDataSuccess_;
+}
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace
