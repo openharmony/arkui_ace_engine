@@ -116,18 +116,10 @@ void ButtonPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitButtonLabel();
+    HandleBackgroundColor();
     HandleEnabled();
     InitHoverEvent();
     InitTouchEvent();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (!renderContext->HasBackgroundColor()) {
-        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
-    }
 }
 
 void ButtonPattern::InitTouchEvent()
@@ -224,6 +216,21 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->AnimateHoverEffectBoard(isHover);
+    }
+}
+
+void ButtonPattern::HandleBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasBackgroundColor()) {
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
     }
 }
 
