@@ -74,6 +74,14 @@ void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGr
 float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const NavBarPosition& position)
 {
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0.0f);
+    auto navigationLayoutAlgorithm =
+        AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    if (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
+        navigationLayoutAlgorithm->GetNavigationMode() == NavigationMode::SPLIT) {
+        return 0.0f;
+    }
     auto contentNode = hostNode->GetContentNode();
     CHECK_NULL_RETURN(contentNode, 0.0f);
     auto navBarNode = hostNode->GetNavBarNode();
@@ -81,10 +89,6 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto index = hostNode->GetChildIndexById(navBarNode->GetId());
     auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(navBarWrapper, 0.0f);
-    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-        navBarWrapper->Layout();
-        return 0.0f;
-    }
     auto geometryNode = navBarWrapper->GetGeometryNode();
     auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
     if (position == NavBarPosition::END) {
@@ -143,7 +147,8 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto contentChildSize = contentNode->GetChildren().size();
 
     if ((contentChildSize != 0 && navigationLayoutAlgorithm->GetNavigationMode() == NavigationMode::STACK) ||
-        position == NavBarPosition::END || navigationLayoutProperty->GetHideNavBar().value_or(false)) {
+        position == NavBarPosition::END || (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
+        navigationLayoutAlgorithm->GetNavigationMode() == NavigationMode::SPLIT)) {
         auto contentOffset = OffsetT<float>(0.0f, 0.0f);
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
