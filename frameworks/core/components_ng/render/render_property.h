@@ -163,6 +163,8 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradientBlur, NG::LinearGradientBlurPara);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicLightUpRate, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };

@@ -1264,6 +1264,16 @@ void ViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
     ACE_UPDATE_RENDER_CONTEXT(LinearGradientBlur, blurPara);
 }
 
+void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpRate, rate);
+    ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree);
+}
+
 void ViewAbstract::SetFrontBlur(const Dimension& radius)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

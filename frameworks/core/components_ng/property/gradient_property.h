@@ -537,7 +537,6 @@ public:
     ~LinearGradientBlurPara() = default;
 };
 
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GRADIENT_PROPERTY_H
