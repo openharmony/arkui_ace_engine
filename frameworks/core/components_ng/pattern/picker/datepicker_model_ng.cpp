@@ -281,12 +281,6 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     if (!executor) {
         return;
     }
-    auto startDays = pickerDialog.parseStartDate.ToDays();
-    auto endDays = pickerDialog.parseEndDate.ToDays();
-    if (startDays > endDays) {
-        pickerDialog.parseStartDate.SetYear(0);
-        pickerDialog.parseEndDate.SetYear(0);
-    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
