@@ -290,7 +290,6 @@ private:
     bool scrollStop_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
-    std::list<WeakPtr<FrameNode>> itemGroupList_;
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;

@@ -47,6 +47,25 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
     }
 }
 
+float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, Axis axis, int32_t childIndex)
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
+    CHECK_NULL_RETURN(wrapper, 0.0f);
+    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (isGroup) {
+        auto listLayoutProperty =
+            AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        // true: layout forward, true: layout all group items.
+        SetListItemGroupParam(wrapper, 0.0f, true, listLayoutProperty, true);
+        wrapper->Measure(groupLayoutConstraint_);
+    } else {
+        wrapper->Measure(layoutConstraint);
+    }
+    float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
+    return mainLen;
+}
+
 int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, Axis axis, int32_t& currentIndex, float startPos, float& endPos)
 {
@@ -70,7 +89,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         if (isGroup) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, startPos, true, listLayoutProperty, false);
+            SetListItemGroupParam(wrapper, startPos, true, listLayoutProperty, GroupNeedAllLayout());
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -118,7 +137,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         if (isGroup) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, endPos, false, listLayoutProperty, false);
+            SetListItemGroupParam(wrapper, endPos, false, listLayoutProperty, GroupNeedAllLayout());
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);

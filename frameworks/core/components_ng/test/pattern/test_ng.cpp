@@ -48,6 +48,21 @@ RefPtr<LayoutWrapperNode> TestNG::RunMeasureAndLayout(const RefPtr<FrameNode>& f
     return layoutWrapper;
 }
 
+void TestNG::ListRunMeasureAndLayout(const RefPtr<FrameNode>& frameNode, float width, float height)
+{
+    frameNode->SetActive();
+    frameNode->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    if (NonNegative(width) && NonNegative(height)) {
+        LayoutConstraint.selfIdealSize = { width, height };
+    }
+    LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    frameNode->Measure(LayoutConstraint);
+    frameNode->Layout();
+}
+
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)
 {
     std::unordered_set<AceAction> supportAceActions = accessibilityProperty->GetSupportAction();

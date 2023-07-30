@@ -37,6 +37,9 @@ public:
         return lanes_;
     }
 
+    float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int32_t childIndex) override;
+
     static int32_t CalculateLanesParam(std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength,
         int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter = 0.0f);
 
