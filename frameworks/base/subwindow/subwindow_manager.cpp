@@ -171,16 +171,18 @@ Rect SubwindowManager::GetParentWindowRect()
     return currentSubwindow_->GetParentWindowRect();
 }
 
-void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId,
+void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
     const NG::OffsetF& offset, bool isAboveApps)
 {
     auto containerId = Container::CurrentId();
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [containerId, menuNode, targetId, offset, isAboveApps] {
+        [containerId, weakMenu = AceType::WeakClaim(AceType::RawPtr(menuNode)), targetId, offset, isAboveApps] {
             auto manager = SubwindowManager::GetInstance();
             CHECK_NULL_VOID(manager);
+            auto menu = weakMenu.Upgrade();
+            CHECK_NULL_VOID(menu);
             auto subwindow = manager->GetSubwindow(containerId);
             if (!subwindow) {
                 LOGI("Subwindow is null, add a new one.");
@@ -189,7 +191,7 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t 
                 subwindow->InitContainer();
                 manager->AddSubwindow(containerId, subwindow);
             }
-            subwindow->ShowMenuNG(menuNode, targetId, offset);
+            subwindow->ShowMenuNG(menu, targetId, offset);
         },
         TaskExecutor::TaskType::PLATFORM);
 }

@@ -65,7 +65,7 @@ public:
     Rect GetParentWindowRect();
 
     void ShowMenu(const RefPtr<Component>& newComponent);
-    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId,
+    void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
         const NG::OffsetF& offset, bool isAboveApps = false);
     void HideMenuNG(int32_t targetId);
     void HideMenuNG();
