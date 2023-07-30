@@ -1374,7 +1374,7 @@ bool GridPattern::IsOutOfBoundary()
     float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
     bool outOfEnd = (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) &&
         LessNotEqual(endPos, gridLayoutInfo_.lastMainSize_);
-    bool scrollable = (gridLayoutInfo_.endIndex_ > 0) ||
+    bool scrollable = (gridLayoutInfo_.startIndex_ > 0) ||
         (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
         GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
     return (outOfStart || outOfEnd) && scrollable;
