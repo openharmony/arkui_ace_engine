@@ -228,6 +228,7 @@ protected:
     void OnTouchDown();
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
+    void HandleBackgroundColor();
     void HandleEnabled();
     void InitButtonLabel();
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
@@ -235,7 +236,6 @@ protected:
     Color clickedColor_;
 
 private:
-    static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
     static void UpdateTextLayoutProperty(
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     Color backgroundColor_;
