@@ -88,7 +88,7 @@ public:
             "NavigationMode.AUTO",
         };
         json->Put("mode",
-            NAVIGATION_MODE_TO_STRING.at(static_cast<int32_t>(GetNavigationMode().value_or(NavigationMode::AUTO)))
+            NAVIGATION_MODE_TO_STRING.at(static_cast<int32_t>(GetUsrNavigationMode().value_or(NavigationMode::AUTO)))
                 .c_str());
         json->Put("hideNavBar", GetHideNavBarValue(false));
         if (HasImageSource()) {
