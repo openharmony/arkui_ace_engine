@@ -299,7 +299,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 auto frameNode = gestureHub->GetFrameNode();
                 CHECK_NULL_VOID(frameNode);
                 auto renderContext = frameNode->GetRenderContext();
-                BorderRadiusProperty borderRadius(renderContext->GetBorderRadius().value());
+                BorderRadiusProperty borderRadius;
+                if (renderContext->GetBorderRadius().has_value()) {
+                    borderRadius.UpdateWithCheck(renderContext->GetBorderRadius().value());
+                }
                 borderRadius.multiValued = false;
                 AnimationOption option;
                 option.SetDuration(PIXELMAP_ANIMATION_DURATION);
