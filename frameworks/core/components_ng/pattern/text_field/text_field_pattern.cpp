@@ -5243,6 +5243,82 @@ void TextFieldPattern::TextRectSetOffset(RefPtr<TextFieldLayoutProperty> layoutP
                                 GetPaddingTop() + (float)(currentBorderWidth.topDimen->ConvertToPx())));
 }
 
+void TextFieldPattern::TextIsEmptyRect(RectF &rect)
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (GetEditingValue().text.empty()) {
+        switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+            case TextAlign::START:
+                break;
+            case TextAlign::CENTER:
+                rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() / 2.0f);
+                break;
+            case TextAlign::END:
+                rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() -
+                                static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
+                break;
+            default:
+                break;
+        }
+        return;
+    }
+}
+
+void TextFieldPattern::TextAreaInputRectUpdate(RectF &rect)
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (IsTextArea() && !GetEditingValue().text.empty()) {
+        auto inputContentWidth = GetParagraph()->GetMaxIntrinsicWidth();
+        switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+            case TextAlign::START:
+                if (inputContentWidth < contentRect_.Width()) {
+                    rect.SetWidth(inputContentWidth);
+                }
+                break;
+            case TextAlign::CENTER:
+                if (inputContentWidth < contentRect_.Width()) {
+                    rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() / 2.0f -
+                                 inputContentWidth / 2.0f);
+                    rect.SetWidth(inputContentWidth);
+                }
+                break;
+            case TextAlign::END:
+                if (inputContentWidth < contentRect_.Width()) {
+                    rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() -
+                                static_cast<float>(CURSOR_WIDTH.ConvertToPx()) - inputContentWidth);
+                    rect.SetWidth(inputContentWidth);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+void TextFieldPattern::UpdateRectByAlignment(RectF &rect)
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto alignment = layoutProperty->GetPositionProperty()
+                         ? layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER)
+                         : Alignment::CENTER;
+    if (alignment == Alignment::CENTER_LEFT || alignment == Alignment::CENTER || alignment == Alignment::CENTER_RIGHT) {
+        rect.SetTop(frameRect_.Height() / 2.0f - rect.Height() / 2.0f);
+    } else if (alignment == Alignment::BOTTOM_LEFT || alignment == Alignment::BOTTOM_CENTER ||
+               alignment == Alignment::BOTTOM_RIGHT) {
+        rect.SetTop(frameRect_.Height() - rect.Height());
+    } else if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER ||
+               alignment == Alignment::TOP_RIGHT) {
+        rect.SetTop(0);
+    } else {
+    }
+    if (rect.Height() > contentRect_.Height()) {
+        rect.SetTop(textRect_.GetY());
+    }
+}
+
 void TextFieldPattern::ApplyInlineStates(bool focusStatus)
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
