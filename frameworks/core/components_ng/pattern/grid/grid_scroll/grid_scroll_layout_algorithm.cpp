@@ -272,6 +272,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    cacheCount = std::max(cacheCount, 1);
     SkipForwardLines(cacheCount * mainSize, layoutWrapper);
     SkipBackwardLines(cacheCount * mainSize, layoutWrapper);
 
