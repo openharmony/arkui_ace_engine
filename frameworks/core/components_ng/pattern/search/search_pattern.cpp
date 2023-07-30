@@ -293,6 +293,8 @@ Rect SearchPattern::HandleTextContentRect()
     CHECK_NULL_RETURN(textFieldPattern, Rect(0, 0, 0, 0));
     RectF rect = textFieldPattern->GetTextRect();
     RectF frameRect = textFieldPattern->GetFrameRect();
+    textFieldPattern->TextIsEmptyRect(rect);
+    textFieldPattern->UpdateRectByAlignment(rect);
     auto y = rect.GetY() + frameRect.GetY();
     if (NearEqual(rect.GetY(), 0)) {
         y = textFieldPattern->GetPaddingTop() + textFieldPattern->GetBorderTop() + frameRect.GetY();
