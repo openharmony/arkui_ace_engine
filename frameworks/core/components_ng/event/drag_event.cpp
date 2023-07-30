@@ -150,14 +150,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
 
         if (info.GetSourceDevice() == SourceType::MOUSE) {
-            if (gestureHub->GetTextDraggable()) {
-                auto patten = frameNode->GetPattern<TextFieldPattern>();
-                CHECK_NULL_VOID(patten);
-                if (!patten->InSelectMode() || patten->GetMouseStatus() == MouseStatus::MOVE) {
+            auto pattern = frameNode->GetPattern<TextFieldPattern>();
+            if (gestureHub->GetTextDraggable() && pattern) {
+                if (!pattern->InSelectMode() || pattern->GetMouseStatus() == MouseStatus::MOVE) {
                     frameNode->SetDraggable(false);
                     return;
                 }
-                if (patten->BetweenSelectedPosition(info.GetGlobalLocation())) {
+                if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
                     frameNode->SetDraggable(true);
                     textDragCallback_(info.GetGlobalLocation());
                 }
