@@ -918,7 +918,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (isMousePressed_) {
         return;
     }
-    if (IsDraggable(info.GetLocalLocation())) {
+    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         // prevent long press event from being triggered when dragging
         return;
     }
