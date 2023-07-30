@@ -400,7 +400,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     eventHub->FireOnDrop(event, extraParams);
     ClearVelocityInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    isDragged_ = false;
+    SetIsDragged(false);
     InteractionManager::GetInstance()->SetDragWindowVisible(
         isMouseDragged_ ? !isMouseDragged_ : !event->IsUseCustomAnimation());
     InteractionManager::GetInstance()->StopDrag(
