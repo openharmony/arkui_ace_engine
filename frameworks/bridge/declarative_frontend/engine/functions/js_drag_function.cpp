@@ -186,6 +186,23 @@ void JsDragEvent::SetData(const JSCallbackInfo& args)
 void JsDragEvent::GetData(const JSCallbackInfo& args)
 {
     auto dragData = dragEvent_->GetData();
+    if (!dragEvent_->IsGetDataSuccess()) {
+        LOGE("UDMF GetData failed in first attempt");
+        std::string udKey = dragEvent_->GetUdKey();
+        if (udKey.empty()) {
+            args.SetReturnValue(JSVal::Undefined());
+            return;
+        }
+        int ret = UdmfClient::GetInstance()->GetData(dragData, udKey);
+        if (ret != 0) {
+            LOGW("UDMF GetData failed: %{public}d", ret);
+            args.SetReturnValue(JSVal::Undefined());
+            return;
+        } else {
+            dragEvent_->SetData(dragData);
+            dragEvent_->SetIsGetDataSuccess(true);
+        }
+    }
     CHECK_NULL_VOID(dragData);
     NativeValue* nativeValue = UdmfClient::GetInstance()->TransformUdmfUnifiedData(dragData);
     CHECK_NULL_VOID(nativeValue);
