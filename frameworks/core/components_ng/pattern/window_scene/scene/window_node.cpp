@@ -49,6 +49,19 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(
 
 bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType)
 {
+    auto pattern = GetPattern<WindowPattern>();
+    if (pattern != nullptr) {
+        auto hotAreas = pattern->GetHotAreas();
+        if (!hotAreas.empty()) {
+            auto hotRects = ConvertHotRects(hotAreas);
+            for (auto& hotRect : hotRects) {
+                if (hotRect.IsInRegion(parentLocalPoint)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
     const auto& rect = GetPaintRectWithTransform();
     const auto& hotRect = ConvertHotRect(rect, sourceType);
     if (!hotRect.IsInRegion(parentLocalPoint)) {
@@ -61,8 +74,29 @@ bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t 
 
 std::vector<RectF> WindowNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
 {
+    auto pattern = GetPattern<WindowPattern>();
+    if (pattern != nullptr) {
+        auto hotAreas = pattern->GetHotAreas();
+        if (!hotAreas.empty()) {
+            return ConvertHotRects(hotAreas);
+        }
+    }
     std::vector<RectF> responseRegionList;
     responseRegionList.emplace_back(ConvertHotRect(rect, sourceType));
+    return responseRegionList;
+}
+
+std::vector<RectF> WindowNode::ConvertHotRects(const std::vector<Rosen::Rect>& hotAreas)
+{
+    std::vector<RectF> responseRegionList;
+    for (size_t i = 0; i < hotAreas.size(); i++) {
+        float hotX = static_cast<float>(hotAreas[i].posX_);
+        float hotY = static_cast<float>(hotAreas[i].posY_);
+        float hotWidth = static_cast<float>(hotAreas[i].width_);
+        float hotHeight = static_cast<float>(hotAreas[i].height_);
+        RectF rectHot(hotX, hotY, hotWidth, hotHeight);
+        responseRegionList.emplace_back(rectHot);
+    }
     return responseRegionList;
 }
 
