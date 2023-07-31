@@ -28,6 +28,7 @@
 #include "locale_config.h"
 #include "native_reference.h"
 #include "service_extension_context.h"
+#include "wm_common.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -1483,7 +1484,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             if (rsWindow) {
-                pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
+                pipelineContext->SetIsLayoutFullScreen(
+                    rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
             }
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
                 pipelineContext->FlushBuild();
