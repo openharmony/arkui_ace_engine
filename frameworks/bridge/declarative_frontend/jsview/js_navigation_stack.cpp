@@ -69,7 +69,11 @@ void JSNavigationStack::Pop()
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
-    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("pop"));
+    auto popFunc = dataSourceObj_->GetProperty("pop");
+    if (!popFunc->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(popFunc);
     JSRef<JSVal>::Cast(func->Call(dataSourceObj_));
 }
 
