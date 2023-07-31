@@ -300,12 +300,6 @@ public:
         return false;
     }
 
-    static bool IsForeground()
-    {
-        auto container = Current();
-        return container ? container->state_ == Frontend::State::ON_SHOW : false;
-    }
-
     virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = {false, false}) {}
     virtual void HotReload() {}
 
