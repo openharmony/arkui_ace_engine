@@ -1088,31 +1088,34 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if (isSubPipe) {
         return;
     }
+    auto container = Container::Current();
+    if (container && !container->IsScenceBoardWindow()) {
+            if (scalePoint.type == TouchType::MOVE) {
+            touchEvents_.emplace_back(point);
+            hasIdleTasks_ = true;
+            RequestFrame();
+            return;
+        }
 
-    if (scalePoint.type == TouchType::MOVE) {
-        touchEvents_.emplace_back(point);
-        hasIdleTasks_ = true;
-        RequestFrame();
-        return;
-    }
+        if (scalePoint.type == TouchType::UP) {
+            lastTouchTime_ = GetTimeFromExternalTimer();
+        }
 
-    if (scalePoint.type == TouchType::UP) {
-        lastTouchTime_ = GetTimeFromExternalTimer();
-    }
-
-    std::optional<TouchEvent> lastMoveEvent;
-    if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
-        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
-            auto movePoint = (*iter).CreateScalePoint(GetViewScale());
-            if (scalePoint.id == movePoint.id) {
-                lastMoveEvent = movePoint;
-                touchEvents_.erase(iter++);
+        std::optional<TouchEvent> lastMoveEvent;
+        if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
+            for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
+                auto movePoint = (*iter).CreateScalePoint(GetViewScale());
+                if (scalePoint.id == movePoint.id) {
+                    lastMoveEvent = movePoint;
+                    touchEvents_.erase(iter++);
+                }
+            }
+            if (lastMoveEvent.has_value()) {
+                eventManager_->DispatchTouchEvent(lastMoveEvent.value());
             }
         }
-        if (lastMoveEvent.has_value()) {
-            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
-        }
     }
+    
 
     eventManager_->DispatchTouchEvent(scalePoint);
 

@@ -20,7 +20,6 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -190,7 +189,6 @@ void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent
 {
     CHECK_NULL_VOID(session_);
     CHECK_NULL_VOID(pointerEvent);
-    pointerEvent->SetActionTime(GetMicroTickCount());
     session_->TransferPointerEvent(pointerEvent);
 }
 
