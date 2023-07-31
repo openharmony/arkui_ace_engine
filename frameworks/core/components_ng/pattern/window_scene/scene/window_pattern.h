@@ -56,6 +56,7 @@ protected:
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
+    virtual void OnExtensionDied() {}
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;

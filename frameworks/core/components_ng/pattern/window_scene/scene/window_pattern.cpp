@@ -65,6 +65,13 @@ public:
         windowPattern->OnDisconnect();
     }
 
+    void OnExtensionDied() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnExtensionDied();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
