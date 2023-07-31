@@ -1442,10 +1442,6 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity) const
 
 void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity)
 {
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
-
     AnimationOption option;
     option.SetDuration(GetDuration());
     option.SetCurve(GetCurveIncludeMotion(velocity / translate));
@@ -1680,10 +1676,6 @@ void SwiperPattern::PlayTranslateAnimation(
     StopAutoPlay();
 
     SetLazyLoadFeature(false);
-
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
 
     if (!controller_) {
         controller_ = CREATE_ANIMATOR(host->GetContext());
@@ -2690,10 +2682,6 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
         PostTranslateTask(delayTime);
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-#endif
 }
 
 void SwiperPattern::OnWindowShow()
