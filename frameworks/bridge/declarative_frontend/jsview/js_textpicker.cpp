@@ -309,7 +309,13 @@ bool JSTextPickerParser::GenerateCascadeOptionsInternal(
 {
     NG::TextCascadePickerOptions option;
     auto text = jsObj->GetProperty("text");
-    option.rangeResult.emplace_back(text->ToString());
+    std::string textStr = "";
+    if (ParseJsString(text, textStr)) {
+        option.rangeResult.emplace_back(textStr);
+    } else {
+        return false;
+    }
+
     auto children = jsObj->GetProperty("children");
     if (children->IsArray()) {
         JSRef<JSArray> arrayChildren = JSRef<JSArray>::Cast(children);
