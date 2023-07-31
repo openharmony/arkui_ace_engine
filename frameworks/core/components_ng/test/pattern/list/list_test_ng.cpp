@@ -3824,7 +3824,7 @@ HWTEST_F(ListTestNg, ScrollToIndex005, TestSize.Level1)
     indexInGroup = 3;
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::START, Offset(0, 600.f + 100.f / 3)));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::CENTER, Offset(0, 700.f)));
-    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::END, Offset(0, 1600.f)));
+    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::END, Offset(0, 1200.f)));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::AUTO, Offset(0, 1200.f)));
 
     /**
@@ -3856,7 +3856,7 @@ HWTEST_F(ListTestNg, ScrollToIndex005, TestSize.Level1)
     indexInGroup = 3;
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::START, Offset(0, 600.f + 100.f / 3)));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::CENTER, Offset(0, 700.f)));
-    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::END, Offset(0, 1600.f)));
+    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::END, Offset(0, 1200.f)));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::AUTO, Offset(0, 1200.f)));
 }
 

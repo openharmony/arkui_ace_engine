@@ -134,12 +134,12 @@ public:
 
     int32_t GetStartIndex() const
     {
-        return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
+        return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
     }
 
     int32_t GetEndIndex() const
     {
-        return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
+        return itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
     }
 
     int32_t GetMidIndex();
@@ -226,10 +226,18 @@ public:
     void HandleJumpAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
         int32_t& startIndex, int32_t& endIndex, float& startPos, float& endPos);
 
+    void HandleJumpEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+
     bool NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
         int32_t startIndex, int32_t endIndex);
 
-    float GetCenterItemHeight(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    virtual float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int32_t childIndex);
+
+    bool GroupNeedAllLayout()
+    {
+        return targetIndex_.has_value() && scrollAlign_ == ScrollAlign::CENTER;
+    }
 
     virtual int32_t GetLanes() const
     {

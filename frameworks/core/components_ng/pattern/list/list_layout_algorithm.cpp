@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components_ng/base/frame_node.h"
@@ -294,10 +295,27 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper, const Lay
     }
 }
 
+void ListLayoutAlgorithm::HandleJumpEnd(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, Axis axis)
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex_.value());
+    CHECK_NULL_VOID(wrapper);
+    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (!isGroup) {
+        jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value()) + GetLanes() - 1;
+    }
+    BeginLayoutBackward(contentMainSize_, layoutWrapper, layoutConstraint, axis);
+}
+
 bool ListLayoutAlgorithm::NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
     int32_t startIndex, int32_t endIndex)
 {
-    int32_t jumpIndex = jumpIndex_.value();
+    int32_t jumpIndex = 0;
+    if (jumpIndex_.has_value()) {
+        jumpIndex = jumpIndex_.value();
+    } else {
+        jumpIndex = targetIndex_.value();
+    }
     int32_t tempStartIndex = startIndex;
     int32_t tempEndIndex = endIndex;
     if (GreatNotEqual(GetLanes(), 1)) {
@@ -321,10 +339,10 @@ bool ListLayoutAlgorithm::NoNeedJump(LayoutWrapper* layoutWrapper, float startPo
     return false;
 }
 
-float ListLayoutAlgorithm::GetCenterItemHeight(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-    Axis axis)
+float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, Axis axis, int32_t childIndex)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex_.value());
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
     CHECK_NULL_RETURN(wrapper, 0.0f);
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
@@ -364,9 +382,10 @@ void ListLayoutAlgorithm::MeasureList(
             jumpIndex_.reset();
         }
     }
-    if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO &&
+    if ((jumpIndex_ || targetIndex_) && scrollAlign_ == ScrollAlign::AUTO &&
         NoNeedJump(layoutWrapper, startPos, endPos, startIndex, endIndex)) {
         jumpIndex_.reset();
+        targetIndex_.reset();
     }
     if (jumpIndex_) {
         LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
@@ -379,15 +398,14 @@ void ListLayoutAlgorithm::MeasureList(
                 if (scrollAlign_ == ScrollAlign::START) {
                     startPos = 0.0f;
                 } else {
-                    float mainLen = GetCenterItemHeight(layoutWrapper, layoutConstraint, axis);
+                    float mainLen =
+                        MeasureAndGetChildHeight(layoutWrapper, layoutConstraint, axis, jumpIndex_.value());
                     startPos = (contentMainSize_ - mainLen) / 2.0f;
                 }
                 BeginLayoutForward(startPos, layoutWrapper, layoutConstraint, axis);
                 break;
             case ScrollAlign::END:
-                jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value()) + GetLanes() - 1;
-                startPos = contentMainSize_;
-                BeginLayoutBackward(startPos, layoutWrapper, layoutConstraint, axis);
+                HandleJumpEnd(layoutWrapper, layoutConstraint, axis);
                 break;
             case ScrollAlign::AUTO:
                 HandleJumpAuto(layoutWrapper, layoutConstraint, axis, startIndex, endIndex, startPos, endPos);
