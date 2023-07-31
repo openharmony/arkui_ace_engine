@@ -53,7 +53,7 @@ public:
         onFocusTextField_ = onFocusTextField;
     }
 
-    void ScrollTextFieldToSafeArea(const SafeAreaInsets::Inset& bottomInset);
+    void ScrollTextFieldToSafeArea();
 
     void ClearOnFocusTextField();
 
@@ -75,6 +75,7 @@ public:
     const RefPtr<KeyEventHandler>& GetKeyEventHandler();
 
 private:
+    void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
 
     bool hasMove_ = false;

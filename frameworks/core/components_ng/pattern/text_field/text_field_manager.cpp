@@ -45,8 +45,7 @@ bool TextFieldManagerNG::OnBackPressed()
     return textfieldPattern->OnBackPressed();
 }
 
-RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(
-    const RefPtr<FrameNode>& textField)
+RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
 {
     CHECK_NULL_RETURN(textField, {});
     auto parent = textField->GetAncestorNodeOfFrame();
@@ -60,7 +59,7 @@ RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(
     return {};
 }
 
-void TextFieldManagerNG::ScrollTextFieldToSafeArea(const SafeAreaInsets::Inset& bottomInset)
+void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset)
 {
     auto textField = DynamicCast<TextFieldPattern>(onFocusTextField_.Upgrade());
     CHECK_NULL_VOID(textField);
@@ -87,5 +86,17 @@ void TextFieldManagerNG::ScrollTextFieldToSafeArea(const SafeAreaInsets::Inset& 
     auto diffBot = bottomInset.start - (caretRect.Bottom() + caretRect.Height() * 2);
     CHECK_NULL_VOID_NOLOG(diffBot < 0);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
+}
+
+void TextFieldManagerNG::ScrollTextFieldToSafeArea()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
+    // only scroll when keyboard shows
+    CHECK_NULL_VOID_NOLOG(keyboardInset.IsValid());
+    auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
+    CHECK_NULL_VOID_NOLOG(bottomInset.IsValid());
+    ScrollToSafeAreaHelper(bottomInset);
 }
 } // namespace OHOS::Ace::NG
