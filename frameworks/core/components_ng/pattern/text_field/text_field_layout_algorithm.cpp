@@ -541,7 +541,6 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
                 textFieldLayoutAlgorithm->isCustomFont_ = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
     }
 }
 
