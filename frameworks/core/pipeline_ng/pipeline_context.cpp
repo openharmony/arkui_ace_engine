@@ -1847,9 +1847,7 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
         manager->RestoreClipboardData();
         return;
     }
-    if (manager->IsDragged()) {
-        manager->OnDragMove(Point(x, y, x, y), extraInfo);
-    }
+    manager->OnDragMove(Point(x, y, x, y), extraInfo);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)
