@@ -508,6 +508,10 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
     }
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("Get pixelMap offset is %{public}f and %{public}f.",
+            result.GetX(), result.GetY());
+    }
     return result;
 }
 #endif
@@ -525,9 +529,15 @@ void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("Start handle onDragStart.");
+    }
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (!IsAllowedDrag(eventHub)) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGW("FrameNode is not allow drag.");
+        }
         HandleNotallowDrag(info);
         return;
     }
@@ -564,6 +574,13 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     std::string udKey;
     int32_t recordsSize = 1;
     auto unifiedData = event->GetData();
+    if (SystemProperties::GetDebugEnabled()) {
+        if (unifiedData) {
+            LOGI("HandleOnDragStart: event getData success, unifiedData size is %{public}lld.", unifiedData->GetSize());
+        } else {
+            LOGW("HandleOnDragStart: event get empty data.");
+        }
+    }
 
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -574,6 +591,10 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         recordsSize = recordSize > 1 ? recordSize : 1;
     }
     SetDragData(unifiedData, udKey);
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("HandleOnDragStart: setDragData finish, udKey is %{public}s", udKey.c_str());
+    }
+
     std::map<std::string, int64_t> summary;
     int32_t ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
     if (ret != 0) {
@@ -624,10 +645,14 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     if (dragEventActuator_->GetIsNotInPreviewState()) {
-        LOGD("Drag window start for not in previewState");
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("Drag window start for not in previewState, set DragWindowVisible true.");
+        }
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && dragDropInfo.pixelMap) {
-        LOGD("Drag window start for Mouse with custom pixelMap");
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("Drag window start for Mouse with custom pixelMap, set DragWindowVisible true.");
+        }
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     }
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
@@ -657,6 +682,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("Start handle onDragUpdate.");
+    }
     gestureInfoForWeb_ = info;
     CHECK_NULL_VOID(dragDropProxy_);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -669,6 +697,9 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 
 void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("Start handle onDragEnd.");
+    }
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
 
