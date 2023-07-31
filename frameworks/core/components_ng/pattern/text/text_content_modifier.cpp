@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -70,6 +71,10 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle> textStyl
     AttachProperty(racePercentFloat_);
     clip_ = AceType::MakeRefPtr<PropertyBool>(true);
     AttachProperty(clip_);
+    fontFamilyString_ = AceType::MakeRefPtr<PropertyString>("");
+    AttachProperty(fontFamilyString_);
+    fontReady_ = AceType::MakeRefPtr<PropertyBool>(false);
+    AttachProperty(fontReady_);
 }
 
 void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle)
@@ -146,6 +151,13 @@ void TextContentModifier::SetClip(bool clip)
 {
     if (clip_) {
         clip_->Set(clip);
+    }
+}
+
+void TextContentModifier::SetFontReady(bool value)
+{
+    if (fontReady_) {
+        fontReady_->Set(value);
     }
 }
 
@@ -380,6 +392,12 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     UpdateBaselineOffsetMeasureFlag(flag);
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return flag;
+}
+
+void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
+{
+    CHECK_NULL_VOID(fontFamilyString_);
+    fontFamilyString_->Set(V2::ConvertFontFamily(value));
 }
 
 void TextContentModifier::SetFontSize(const Dimension& value)
