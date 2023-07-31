@@ -288,8 +288,9 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
     int32_t action = pointerEvent->GetPointerAction();
-    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
-        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) {
+    if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) ||
+        (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW)) {
         DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
             AceType::DynamicCast<WindowNode>(host), pointerEvent);
     }
