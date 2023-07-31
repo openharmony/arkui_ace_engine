@@ -2235,7 +2235,11 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
         auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
         JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].value);
         LOGD("option #%{public}d is %{public}s", static_cast<int>(i), params[i].value.c_str());
-        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(indexObject->GetProperty("action")));
+        auto actionFunc = indexObject->GetProperty("action");
+        if (!actionFunc->IsFunction()) {
+            LOGE("ParseBindOptionParam: can not get property 'action'!");
+        }
+        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(actionFunc));
         // set onClick function
         params[i].action = [func = std::move(action), context = info.GetExecutionContext()]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
