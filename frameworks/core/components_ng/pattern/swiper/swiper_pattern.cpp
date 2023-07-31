@@ -1848,8 +1848,8 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     float friction = currentOffset_ > 0
                          ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
                          : CalculateFriction((mainSize - itemPosition_.rbegin()->second.endPos) / mainSize);
-    auto springMotion = AceType::MakeRefPtr<SpringMotion>(
-        currentOffset_, extentPair.Trailing(), dragVelocity * friction, springProperty);
+    auto springMotion = AceType::MakeRefPtr<SpringMotion>(currentOffset_,
+        currentOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing(), dragVelocity * friction, springProperty);
     springMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
         auto swiper = weak.Upgrade();
         if (swiper) {
