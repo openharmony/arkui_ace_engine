@@ -45,18 +45,16 @@ bool TextFieldManagerNG::OnBackPressed()
     return textfieldPattern->OnBackPressed();
 }
 
-std::pair<RefPtr<FrameNode>, OffsetF> TextFieldManagerNG::FindScrollableOfFocusedTextField(
+RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(
     const RefPtr<FrameNode>& textField)
 {
     CHECK_NULL_RETURN(textField, {});
     auto parent = textField->GetAncestorNodeOfFrame();
-    auto offset = textField->GetGeometryNode()->GetFrameOffset();
     while (parent) {
         auto pattern = parent->GetPattern<ScrollablePattern>();
         if (pattern) {
-            return { parent, offset };
+            return parent;
         }
-        offset += parent->GetGeometryNode()->GetFrameOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
     return {};
@@ -66,18 +64,18 @@ void TextFieldManagerNG::ScrollTextFieldToSafeArea(const SafeAreaInsets::Inset& 
 {
     auto textField = DynamicCast<TextFieldPattern>(onFocusTextField_.Upgrade());
     CHECK_NULL_VOID(textField);
+    auto textFieldNode = textField->GetHost();
+    CHECK_NULL_VOID(textFieldNode);
 
-    auto [scrollable, textFieldOffsetToScrollable] = FindScrollableOfFocusedTextField(textField->GetHost());
-    CHECK_NULL_VOID_NOLOG(scrollable);
-    auto scrollPattern = scrollable->GetPattern<ScrollablePattern>();
+    auto scrollableNode = FindScrollableOfFocusedTextField(textFieldNode);
+    CHECK_NULL_VOID_NOLOG(scrollableNode);
+    auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
 
-    // global rects
-    auto scrollableRect = scrollable->GetPaintRectWithTransform();
+    auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     CHECK_NULL_VOID_NOLOG(scrollableRect.Top() < bottomInset.start);
 
-    auto caretRect = textField->GetCaretRect() + (scrollableRect.GetOffset() + textFieldOffsetToScrollable);
-
+    auto caretRect = textField->GetCaretRect() + textFieldNode->GetOffsetRelativeToWindow();
     // caret above scroll's content region
     auto diffTop = (caretRect.Top() - caretRect.Height() * 2) - scrollableRect.Top();
     if (diffTop < 0) {

@@ -75,7 +75,7 @@ public:
     const RefPtr<KeyEventHandler>& GetKeyEventHandler();
 
 private:
-    std::pair<RefPtr<FrameNode>, OffsetF> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
+    RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
 
     bool hasMove_ = false;
     Offset position_;
