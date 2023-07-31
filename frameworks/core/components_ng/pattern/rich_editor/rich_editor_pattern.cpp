@@ -1655,6 +1655,9 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
 bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if (keyEvent.action == KeyAction::DOWN) {
+        if (keyEvent.code == KeyCode::KEY_TAB) {
+            return false;
+        }
         if (keyEvent.code == KeyCode::KEY_DPAD_LEFT) {
             return CursorMoveLeft();
         }
