@@ -19,6 +19,7 @@
 
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -40,10 +41,50 @@ constexpr Dimension DIALOG_WIDTH = 336.0_vp;
 void CalendarPickerPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     InitClickEvent();
     InitOnKeyEvent();
     InitOnHoverEvent();
     FlushTextStyle();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+    UpdateEntryButtonColor();
+}
+
+void CalendarPickerPattern::UpdateEntryButtonColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFlexNode = host->GetLastChild();
+    CHECK_NULL_VOID(buttonFlexNode);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+
+    for (const auto& child : buttonFlexNode->GetChildren()) {
+        CHECK_NULL_VOID(child);
+        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+            auto buttonNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(buttonNode);
+            buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            buttonNode->MarkModifyDone();
+
+            auto image = buttonNode->GetChildren().front();
+            CHECK_NULL_VOID(image);
+            auto imageNode = AceType::DynamicCast<FrameNode>(image);
+            auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(imageLayoutProperty);
+            auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+            imageInfo->SetFillColor(theme->GetEntryArrowColor());
+            imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
+            imageNode->MarkModifyDone();
+        }
+    }
 }
 
 bool CalendarPickerPattern::OnDirtyLayoutWrapperSwap(
@@ -71,10 +112,60 @@ void CalendarPickerPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleClickEvent(info);
+        pattern->HandleClickEvent(info.GetGlobalLocation());
     };
     clickListener_ = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
+}
+
+void CalendarPickerPattern::HandleHoverEvent(bool state, const Offset& globalLocation)
+{
+    bool yearState = false, monthState = false, dayState = false, addState = false, subState = false;
+    if (state) {
+        switch (CheckRegion(globalLocation)) {
+            case CalendarPickerSelectedType::YEAR:
+                yearState = true;
+                break;
+            case CalendarPickerSelectedType::MONTH:
+                monthState = true;
+                break;
+            case CalendarPickerSelectedType::DAY:
+                dayState = true;
+                break;
+            case CalendarPickerSelectedType::ADDBTN:
+                addState = true;
+                break;
+            case CalendarPickerSelectedType::SUBBTN:
+                subState = true;
+                break;
+            default:
+                break;
+        }
+    }
+    HandleTextHoverEvent(yearState, YEAR_INDEX);
+    HandleTextHoverEvent(monthState, MONTH_INDEX);
+    HandleTextHoverEvent(dayState, DAY_INDEX);
+    HandleButtonHoverEvent(addState, ADD_BUTTON_INDEX);
+    HandleButtonHoverEvent(subState, SUB_BUTTON_INDEX);
+}
+
+void CalendarPickerPattern::HandleTouchEvent(bool isPressed, const Offset& globalLocation)
+{
+    bool addState = false, subState = false;
+    if (isPressed) {
+        switch (CheckRegion(globalLocation)) {
+            case CalendarPickerSelectedType::ADDBTN:
+                addState = true;
+                break;
+            case CalendarPickerSelectedType::SUBBTN:
+                subState = true;
+                break;
+            default:
+                break;
+        }
+    }
+    HandleButtonTouchEvent(addState, ADD_BUTTON_INDEX);
+    HandleButtonTouchEvent(subState, SUB_BUTTON_INDEX);
 }
 
 void CalendarPickerPattern::InitOnHoverEvent()
@@ -102,9 +193,9 @@ void CalendarPickerPattern::InitOnHoverEvent()
     }
 }
 
-void CalendarPickerPattern::HandleClickEvent(const GestureEvent& info)
+void CalendarPickerPattern::HandleClickEvent(const Offset& globalLocation)
 {
-    switch (CheckClickRegion(info)) {
+    switch (CheckRegion(globalLocation)) {
         case CalendarPickerSelectedType::YEAR:
             ShowDialog();
             SetSelectedType(CalendarPickerSelectedType::YEAR);
@@ -124,6 +215,7 @@ void CalendarPickerPattern::HandleClickEvent(const GestureEvent& info)
             HandleSubButtonClick();
             return;
         default:
+            SetSelectedType(CalendarPickerSelectedType::OTHER);
             break;
     }
 
@@ -164,41 +256,33 @@ void CalendarPickerPattern::ResetTextStateByNode(const RefPtr<FrameNode>& textFr
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-CalendarPickerSelectedType CalendarPickerPattern::CheckClickRegion(const GestureEvent& info)
+CalendarPickerSelectedType CalendarPickerPattern::CheckRegion(const Offset& globalLocation)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, CalendarPickerSelectedType::OTHER);
     auto contentNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_RETURN(contentNode, CalendarPickerSelectedType::OTHER);
 
-    auto clickPoint = PointF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(YEAR_INDEX)), clickPoint)) {
-        selected_ = CalendarPickerSelectedType::YEAR;
-        return selected_;
+    auto location = PointF(globalLocation.GetX(), globalLocation.GetY());
+    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(YEAR_INDEX)), location)) {
+        return CalendarPickerSelectedType::YEAR;
     }
-
-    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(MONTH_INDEX)), clickPoint)) {
-        selected_ = CalendarPickerSelectedType::MONTH;
-        return selected_;
+    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(MONTH_INDEX)), location)) {
+        return CalendarPickerSelectedType::MONTH;
     }
-
-    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(DAY_INDEX)), clickPoint)) {
-        selected_ = CalendarPickerSelectedType::DAY;
-        return selected_;
+    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(DAY_INDEX)), location)) {
+        return CalendarPickerSelectedType::DAY;
     }
 
     auto buttonFlexNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
     CHECK_NULL_RETURN(buttonFlexNode, CalendarPickerSelectedType::OTHER);
-    if (IsInNodeRegion(DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(ADD_BUTTON_INDEX)), clickPoint)) {
+    if (IsInNodeRegion(DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(ADD_BUTTON_INDEX)), location)) {
         return CalendarPickerSelectedType::ADDBTN;
     }
-
-    if (IsInNodeRegion(DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(SUB_BUTTON_INDEX)), clickPoint)) {
+    if (IsInNodeRegion(DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(SUB_BUTTON_INDEX)), location)) {
         return CalendarPickerSelectedType::SUBBTN;
     }
-
-    selected_ = CalendarPickerSelectedType::OTHER;
-    return selected_;
+    return CalendarPickerSelectedType::OTHER;
 }
 
 bool CalendarPickerPattern::IsInNodeRegion(const RefPtr<FrameNode>& node, const PointF& point)
@@ -306,20 +390,21 @@ bool CalendarPickerPattern::HandleFocusEvent(const KeyEvent& event)
     switch (event.code) {
         case KeyCode::KEY_TAB: {
             ResetTextState();
+            if (isFirtFocus_) {
+                selected_ = CalendarPickerSelectedType::YEAR;
+                HandleTextFocusEvent(YEAR_INDEX);
+                if (!IsDialogShow()) {
+                    ShowDialog();
+                }
+                isFirtFocus_ = false;
+                return true;
+            }
             if (selected_ != CalendarPickerSelectedType::OTHER) {
                 selected_ = CalendarPickerSelectedType::OTHER;
                 isFirtFocus_ = true;
                 return HandleBlurEvent(event);
             }
-            selected_ = CalendarPickerSelectedType::YEAR;
-            HandleTextFocusEvent(YEAR_INDEX);
-            if (isFirtFocus_) {
-                if (!IsDialogShow()) {
-                    ShowDialog();
-                }
-                isFirtFocus_ = false;
-            }
-            return true;
+            return false;
         }
         case KeyCode::KEY_DPAD_LEFT: {
             if (selected_ == CalendarPickerSelectedType::DAY) {
@@ -346,11 +431,15 @@ bool CalendarPickerPattern::HandleFocusEvent(const KeyEvent& event)
             return true;
         }
         case KeyCode::KEY_DPAD_UP: {
-            HandleAddButtonClick();
+            if (!isFirtFocus_ || selected_ != CalendarPickerSelectedType::OTHER) {
+                HandleAddButtonClick();
+            }
             return true;
         }
         case KeyCode::KEY_DPAD_DOWN: {
-            HandleSubButtonClick();
+            if (!isFirtFocus_ || selected_ != CalendarPickerSelectedType::OTHER) {
+                HandleSubButtonClick();
+            }
             return true;
         }
         case KeyCode::KEY_MOVE_HOME: {
@@ -627,9 +716,39 @@ void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
     if (state) {
         textFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetBackgroundHoverColor());
     } else {
-        textFrameNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+        ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index)));
     }
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CalendarPickerPattern::HandleButtonHoverEvent(bool state, int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFlexNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
+    CHECK_NULL_VOID(buttonFlexNode);
+    auto buttonFrameNode = DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(index));
+    CHECK_NULL_VOID(buttonFrameNode);
+    buttonFrameNode->GetRenderContext()->AnimateHoverEffectBoard(state);
+}
+
+void CalendarPickerPattern::HandleButtonTouchEvent(bool isPressed, int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFlexNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
+    CHECK_NULL_VOID(buttonFlexNode);
+    auto buttonFrameNode = DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(index));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    if (isPressed) {
+        buttonFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetBackgroundPressColor());
+    } else {
+        buttonFrameNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
 }
 
 void CalendarPickerPattern::HandleAddButtonClick()
@@ -780,6 +899,17 @@ void CalendarPickerPattern::InitDialogProperties(DialogProperties& properties)
         pattern->SetDialogShow(false);
     };
     properties.onCancel = cancelId;
+}
+
+void CalendarPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    if (type != WindowSizeChangeReason::ROTATION) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 std::string CalendarPickerPattern::GetEntryDateInfo()

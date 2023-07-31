@@ -360,6 +360,8 @@ public:
                 "calendar_picker_background_key_focused_color", Color());
             Color backgroundSelectedTodayColor = pattern->GetAttr<Color>(
                 "calendar_picker_background_selected_focused_color", Color());
+            theme->dialogButtonBackgroundColor_ = pattern->GetAttr<Color>(
+                "calendar_picker_dialog_button_bg_color", Color());
             theme->backgroundSelectedTodayColor_ = backgroundSelectedTodayColor;
             theme->backgroundSelectedNotTodayColor_ = backgroundSelectedTodayColor.BlendOpacity(
                 pattern->GetAttr<double>("calendar_picker_attribute_alpha_highlight_bg", 0.0));
@@ -646,6 +648,11 @@ public:
     {
         return dialogDividerColor_;
     }
+
+    const Color& GetDialogButtonBackgroundColor() const
+    {
+        return dialogButtonBackgroundColor_;
+    }
 protected:
     CalendarTheme() = default;
 
@@ -668,6 +675,7 @@ private:
     Color backgroundPressColor_;
     Color entryFontColor_;
     Color dialogDividerColor_;
+    Color dialogButtonBackgroundColor_;
     Dimension entryHeight_;
     Dimension entryBorderWidth_;
     Dimension entryBorderRadius_;
