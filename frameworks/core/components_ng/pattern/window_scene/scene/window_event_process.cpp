@@ -30,7 +30,22 @@ void WindowEventProcess::ProcessWindowMouseEvent(const RefPtr<WindowNode>& windo
     CHECK_NULL_VOID(pointerEvent);
     std::shared_ptr<MMI::PointerEvent> enterEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
     auto lastWindowNode = lastWindowNode_.Upgrade();
-    if ((lastWindowNode != nullptr) && (windowNode->GetId() != lastWindowNode->GetId())) {
+
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
+        lastWindowNode_ = windowNode;
+        lastPointEvent_ = enterEvent;
+        return;
+    }
+    if (lastWindowNode == nullptr) {
+        enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+        DispatchPointerEvent(windowNode, enterEvent);
+        lastWindowNode_ = windowNode;
+        lastPointEvent_ = enterEvent;
+        return;
+    }
+
+    if (windowNode->GetId() != lastWindowNode->GetId()) {
         LOGD("Window switching, enter window:%{public}d, leave window:%{public}d",
             windowNode->GetId(), lastWindowNode->GetId());
         if (lastPointEvent_ != nullptr) {
