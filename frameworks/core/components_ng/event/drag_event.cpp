@@ -117,6 +117,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 {
     CHECK_NULL_VOID_NOLOG(userCallback_);
     auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragEvent panRecognizer onActionStart.");
+        }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -238,7 +241,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 LOGE("InteractionManager: UpdateShadowPic error");
                 return;
             }
-            LOGD("Drag window start for Mouse with default pixelMap");
+            if (SystemProperties::GetDebugEnabled()) {
+                LOGI("In setThumbnailPixelMap callback, set DragWindowVisible true.");
+            }
             Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
         };
         auto gestureHub = gestureEventHub_.Upgrade();
@@ -250,6 +255,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 #endif // ENABLE_DRAG_FRAMEWORK
 
     auto actionUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragEvent panRecognizer onActionUpdate.");
+        }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         CHECK_NULL_VOID(actuator->userCallback_);
@@ -266,6 +274,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     panRecognizer_->SetOnActionUpdate(actionUpdate);
 
     auto actionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragEvent panRecognizer onActionEnd.");
+        }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         CHECK_NULL_VOID(actuator->userCallback_);
@@ -286,6 +297,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 #else
     auto actionCancel = [weak = WeakClaim(this)]() {
 #endif // ENABLE_DRAG_FRAMEWORK
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragEvent panRecognizer onActionCancel.");
+        }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -356,12 +370,18 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         return;
     }
     auto longPressUpdateValue = [weak = WeakClaim(this)](GestureEvent& info) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragEvent longPressRecognizer onActionUpdate.");
+        }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
     };
     longPressRecognizer_->SetOnActionUpdate(longPressUpdateValue);
     auto longPressUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragEvent previewLongPressRecognizer onActionUpdate.");
+        }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         bool isAllowedDrag = actuator->IsAllowedDrag();
@@ -435,6 +455,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 #ifdef ENABLE_DRAG_FRAMEWORK
 void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent start setFilter.");
+    }
     auto gestureHub = actuator->gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
@@ -487,6 +510,9 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
                 columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_RADIUS);
             }, option.GetOnFinishEvent());
     }
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent set filter success.");
+    }
 }
 
 OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
@@ -508,11 +534,17 @@ OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNod
 
 void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent start set pixelMap");
+    }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     if (manager->GetHasPixelMap()) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGW("DragDropManager don't have pixelMap, set pixelMap fail.");
+        }
         return;
     }
     auto gestureHub = actuator->gestureEventHub_.Upgrade();
@@ -556,15 +588,24 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     }
     imageNode->MarkModifyDone();
     ShowPixelMapAnimation(imageNode);
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent set pixelMap success.");
+    }
 }
 
 void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent start set eventColumn.");
+    }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     if (manager->GetHasEvent()) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGW("DragDropManager don't have event, set event column fail.");
+        }
         return;
     }
     auto rootNode = pipelineContext->GetRootElement();
@@ -591,6 +632,9 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
         manager->MountEventToWindowScene(columnNode, windowScene);
     } else {
         manager->MountEventToRootNode(columnNode);
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent set eventColumn success.");
     }
 }
 
@@ -669,10 +713,16 @@ void DragEventActuator::SetThumbnailCallback(std::function<void(Offset)>&& callb
 
 void DragEventActuator::GetTextPixelMap(bool startDrag)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent start getTextPixelMap.");
+    }
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     bool isAllowedDrag = IsAllowedDrag();
     if (!gestureHub->GetTextDraggable() || !isAllowedDrag) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGW("Text is not draggable, stop get text pixelMap.");
+        }
         return;
     }
     auto frameNode = gestureHub->GetFrameNode();
@@ -693,6 +743,9 @@ void DragEventActuator::GetTextPixelMap(bool startDrag)
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     if (!dragDropManager->IsDragged()) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGW("DragDropManger is not dragged, stop get text pixelMap.");
+        }
         return;
     }
     std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
@@ -714,13 +767,18 @@ void DragEventActuator::GetTextPixelMap(bool startDrag)
         LOGE("InteractionManager: UpdateShadowPic error");
         return;
     }
-    LOGD("Drag window start for Mouse with Text");
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("In function getTextPixelMap, set DragWindowVisible true.");
+    }
     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     gestureHub->SetPixelMap(nullptr);
 }
 
 void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent start set textAnimation.");
+    }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
@@ -732,6 +790,9 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     auto pattern = frameNode->GetPattern<TextDragBase>();
     CHECK_NULL_VOID(pattern);
     if (!pattern->BetweenSelectedPosition(globalLocation)) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGW("Position is between selected position, stop set text animation.");
+        }
         return;
     }
     pattern->CloseSelectOverlay();
@@ -749,14 +810,23 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     manager->MountPixelMapToRootNode(columnNode);
     auto modifier = dragNode->GetPattern<TextDragPattern>()->GetOverlayModifier();
     modifier->StartAnimate();
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent set text animation success.");
+    }
 }
 
 void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double globalY)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent start hide text animation.");
+    }
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     bool isAllowedDrag = IsAllowedDrag();
     if (!gestureHub->GetTextDraggable() || !isAllowedDrag) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGW("Text is not draggable, stop set hide text animation.");
+        }
         return;
     }
     auto frameNode = gestureHub->GetFrameNode();
@@ -778,7 +848,9 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
             CHECK_NULL_VOID(pattern);
             pattern->CreateHandles();
         }
-        LOGD("Drag window start for Text");
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("In removeColumnNode callback, set DragWindowVisible true.");
+        }
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -814,6 +886,9 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
             }
         },
         option.GetOnFinishEvent());
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("DragEvent set hide text animation success.");
+    }
 }
 bool DragEventActuator::GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator)
 {

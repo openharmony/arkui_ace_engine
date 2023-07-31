@@ -207,6 +207,9 @@ public:
 
     void FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDragEnter");
+        }
         if (onDragEnter_) {
             onDragEnter_(info, extraParams);
         }
@@ -219,6 +222,9 @@ public:
 
     void FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDragLeave");
+        }
         if (onDragLeave_) {
             onDragLeave_(info, extraParams);
         }
@@ -231,6 +237,9 @@ public:
 
     void FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDragMove");
+        }
         if (onDragMove_) {
             onDragMove_(info, extraParams);
         }
@@ -273,6 +282,9 @@ public:
     
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDrop");
+        }
         if (onDrop_) {
             onDrop_(info, extraParams);
         }
