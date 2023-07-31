@@ -69,8 +69,8 @@ private:
     static void CreateLunarswitchNode(
         const RefPtr<FrameNode>& contentColumn, std::function<void(const bool)>&& changeEvent, bool isLunar);
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);
-    static void HandleMouseEvent(const RefPtr<FrameNode>& titleRow, bool isHover);
-    static void PlayHoverAnimation(const RefPtr<FrameNode>& titleRow, const Color& color);
+    static void HandleMouseEvent(const RefPtr<FrameNode>& titleButton, bool isHover);
+    static void PlayHoverAnimation(const RefPtr<FrameNode>& titleButton, const Color& color);
 };
 } // namespace OHOS::Ace::NG
 
