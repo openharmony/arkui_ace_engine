@@ -59,8 +59,8 @@ CheckBoxModel* CheckBoxModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSCheckbox::Create(const JSCallbackInfo& info)
 {
-    auto checkboxName = std::optional<std::string>();
-    auto checkboxGroup = std::optional<std::string>();
+    auto checkboxName = std::optional<std::string>("");
+    auto checkboxGroup = std::optional<std::string>("");
     if ((info.Length() >= 1) && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto name = paramObject->GetProperty("name");
