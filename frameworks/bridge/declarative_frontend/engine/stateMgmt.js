@@ -1507,6 +1507,7 @@ class PersistentStorage {
     // helper function to persist a property
     // does everything except writing prop to disk
     persistProp1(propName, defaultValue) {
+        
         if (defaultValue == null || defaultValue == undefined) {
             stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
@@ -1523,7 +1524,7 @@ class PersistentStorage {
         else {
             let newValue = PersistentStorage.storage_.get(propName);
             let returnValue;
-            if (!newValue) {
+            if (newValue == undefined || newValue == null) {
                 
                 returnValue = defaultValue;
             }
@@ -1806,7 +1807,6 @@ class errorReport {
         throw new TypeError(msg);
     }
 }
-;
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
