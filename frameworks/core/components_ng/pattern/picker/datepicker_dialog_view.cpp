@@ -168,7 +168,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
             SetSelectedDate(switchFlag_ ? monthDaysNode : dateNode, selectedDate);
             if (switchFlag_) {
                 datePickerPattern->SetFocusDisable();
-                timePickerPattern->SetFocusDisable();
+                timePickerPattern->SetFocusEnable();
                 monthDaysPickerPattern->SetFocusEnable();
                 monthDaysNode->MarkModifyDone();
             } else {
@@ -181,7 +181,11 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
             auto contentRow = AceType::DynamicCast<FrameNode>(contentColumn->GetLastChild());
             auto titleRow = AceType::DynamicCast<FrameNode>(contentColumn->GetChildAtIndex(0));
             CHECK_NULL_VOID(titleRow);
-            auto spinnerNode = AceType::DynamicCast<FrameNode>(titleRow->GetLastChild());
+            auto titleButtonNode = AceType::DynamicCast<FrameNode>(titleRow->GetFirstChild());
+            CHECK_NULL_VOID(titleButtonNode);
+            auto titleButtonRowNode = AceType::DynamicCast<FrameNode>(titleButtonNode->GetFirstChild());
+            CHECK_NULL_VOID(titleButtonRowNode);
+            auto spinnerNode = AceType::DynamicCast<FrameNode>(titleButtonRowNode->GetLastChild());
             CHECK_NULL_VOID(spinnerNode);
             animationController->SetButtonIcon(spinnerNode);
             animationController->SetMonthDays(monthDaysNode);
@@ -284,6 +288,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
 
     auto buttonTitleNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, pickerPattern->GetButtonTitleId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_RETURN(buttonTitleNode, nullptr);
+    auto titleButtonRow = CreateTitleButtonRowNode();
+    CHECK_NULL_RETURN(titleButtonRow, nullptr);
     auto textTitleNodeId = pickerPattern->GetTitleId();
     auto textTitleNode =
         FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textTitleNodeId, AceType::MakeRefPtr<TextPattern>());
@@ -307,10 +314,24 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     margin.top = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
     margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
     buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
-    textTitleNode->MountToParent(buttonTitleNode);
+    textTitleNode->MountToParent(titleButtonRow);
+    titleButtonRow->MountToParent(buttonTitleNode);
     buttonTitleNode->MountToParent(titleRow);
     titleRow->SetNeedCallChildrenUpdate(false);
     return titleRow;
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonRowNode()
+{
+    auto titleButtonRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(titleButtonRow, nullptr);
+    auto bottonRowlayoutProps = titleButtonRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(bottonRowlayoutProps, nullptr);
+    bottonRowlayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    bottonRowlayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    bottonRowlayoutProps->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    return titleButtonRow;
 }
 
 void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNode)
@@ -336,7 +357,11 @@ void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNod
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
     spinnerNode->MarkModifyDone();
-    spinnerNode->MountToParent(titleNode);
+    auto buttonNode = AceType::DynamicCast<FrameNode>(titleNode->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonRowNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    CHECK_NULL_VOID(buttonRowNode);
+    spinnerNode->MountToParent(buttonRowNode);
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateDividerNode(const RefPtr<FrameNode>& dateNode)

@@ -220,7 +220,7 @@ void DateTimeAnimationController::PlayButtonOpacityInAnimation()
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
         auto focusHub = buttonNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetFocusable(false);
+        focusHub->SetShow(false);
     });
     buttonRender->OpacityAnimation(animationOption, 1.0f, 0.0f);
 }
@@ -327,7 +327,7 @@ void DateTimeAnimationController::PlayButtonOpacityOutAnimation()
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         auto focusHub = buttonNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetFocusable(true);
+        focusHub->SetShow(true);
     });
     buttonRender->OpacityAnimation(animationOption, 0.0f, 1.0f);
 }
