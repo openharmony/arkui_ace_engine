@@ -646,6 +646,8 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
+    StopFadeAnimation();
+    StopSpringAnimation();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     jumpIndex_ = index;
@@ -666,7 +668,16 @@ void SwiperPattern::SwipeTo(int32_t index)
         LOGD("Target index is same with current index.");
         return;
     }
-
+    StopFadeAnimation();
+    if (springController_ && !springController_->IsStopped()) {
+        springController_->Stop();
+        jumpIndex_ = currentIndex_;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+    }
     StopAutoPlay();
     StopTranslateAnimation();
 
