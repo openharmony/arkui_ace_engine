@@ -368,17 +368,15 @@ void UIContentImpl::Initialize(
     if (window) {
         CommonInitialize(window, url, storage);
     }
-
     if (focusWindowId != 0) {
-        LOGI("Initialize focusWindow id:%{public}u", focusWindowId);
+        LOGI("UIExtension host window id:%{public}u", focusWindowId);
         Platform::AceContainer::GetContainer(instanceId_)->SetFocusWindowId(focusWindowId);
     }
 
-    LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
+    LOGI("UIExtension startUrl = %{public}s", startUrl_.c_str());
     // run page.
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
-    LOGD("Initialize UIContentImpl done.");
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
@@ -1792,22 +1790,6 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetIsFocusActive(isFocusActive);
-        },
-        TaskExecutor::TaskType::UI);
-}
-
-void UIContentImpl::SetFocusWindowId(uint32_t focusWindowId)
-{
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId_);
-    auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, focusWindowId]() {
-            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->SetFocusWindowId(focusWindowId);
         },
         TaskExecutor::TaskType::UI);
 }

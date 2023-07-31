@@ -125,7 +125,6 @@ void UIExtensionPattern::OnConnectInner()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
     auto pipeline = PipelineBase::GetCurrentContext();
-    TransferFocusWindowId(pipeline->GetFocusWindowId());
     if (onRemoteReadyCallback_) {
         onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(session_));
     }
@@ -187,9 +186,13 @@ void UIExtensionPattern::OnWindowHide()
 
 void UIExtensionPattern::RequestExtensionSessionActivation()
 {
-    LOGI("UIExtension request UIExtensionAbility foreground");
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto hostWindowId = pipeline->GetFocusWindowId();
+    LOGI("ui_extension request host windowId %{public}u", hostWindowId);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(extensionSession);
+    auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
+        extensionSession, hostWindowId);
     if (errcode != OHOS::Rosen::WSError::WS_OK) {
         int32_t code = static_cast<int32_t>(errcode);
         std::string name = "start_ability_fail";

@@ -38,7 +38,5 @@ void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive) {}
 
 void WindowPattern::OnModifyDone() {}
 
-void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId) {}
-
 void WindowPattern::TransferFocusState(bool focusState) {}
 } // namespace OHOS::Ace::NG

@@ -72,7 +72,6 @@ public:
         void(std::function<void(const std::string& code, const std::string& msg)>&& actionCallback));
     MOCK_METHOD1(ReloadForm, void(const std::string& url));
     MOCK_METHOD1(SetIsFocusActive, void(bool isFocusActive));
-    MOCK_METHOD1(SetFocusWindowId, void(uint32_t windowId));
 
     MOCK_METHOD2(CreateModalUIExtension, int32_t(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks));
     MOCK_METHOD1(CloseModalUIExtension, void(int32_t sessionId));
