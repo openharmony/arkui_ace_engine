@@ -340,4 +340,12 @@ void WindowPattern::TransferFocusState(bool focusState)
     CHECK_NULL_VOID(session_);
     session_->TransferFocusStateEvent(focusState);
 }
+
+std::vector<Rosen::Rect> WindowPattern::GetHotAreas()
+{
+    if (session_ == nullptr) {
+        return std::vector<Rosen::Rect>();
+    }
+    return session_->GetTouchHotAreas();
+}
 } // namespace OHOS::Ace::NG
