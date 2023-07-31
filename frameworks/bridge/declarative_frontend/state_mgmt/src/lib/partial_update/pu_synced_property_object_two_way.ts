@@ -36,7 +36,7 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
       // register to the parent property
       this.source_.addSubscriber(this);
       // register to the ObservedObject
-      ObservedObject.addOwningProperty(this.source_.getUnmonitored(), this);
+      ObservedObject.addOwningProperty(this.source_.get(), this);
     } else {
       stateMgmtConsole.error(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
     }
