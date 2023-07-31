@@ -89,7 +89,6 @@ void AbilityComponentPattern::FireConnect()
     hasConnectionToAbility_ = true;
     UpdateWindowRect();
     auto pipeline = PipelineBase::GetCurrentContext();
-    TransferFocusWindowId(pipeline->GetFocusWindowId());
     TransferFocusState(IsCurrentFocus());
 
     auto abilityComponentEventHub = GetEventHub<AbilityComponentEventHub>();

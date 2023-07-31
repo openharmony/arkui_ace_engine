@@ -151,7 +151,6 @@ public:
         const std::vector<std::string>& assetBasePaths) override;
     NativeValue* GetUIContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
-    void SetFocusWindowId(uint32_t focusWindowId) override;
 
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks) override;
     void CloseModalUIExtension(int32_t sessionId) override;

@@ -335,12 +335,6 @@ void WindowPattern::OnModifyDone()
     InitMouseEvent(inputHub);
 }
 
-void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferFocusWindowIdEvent(focusWindowId);
-}
-
 void WindowPattern::TransferFocusState(bool focusState)
 {
     CHECK_NULL_VOID(session_);
