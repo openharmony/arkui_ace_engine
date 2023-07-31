@@ -195,12 +195,17 @@ void SwiperIndicatorPattern::InitHoverMouseEvent()
         inputHub->AddOnHoverEvent(hoverEvent_);
     }
 
-    inputHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
+    auto mouseEvent = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleMouseEvent(info);
         }
-    });
+    };
+    if (mouseEvent_) {
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+    }
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseEvent));
+    inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
 void SwiperIndicatorPattern::HandleMouseEvent(const MouseInfo& info)

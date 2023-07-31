@@ -169,6 +169,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<PanEvent> panEvent_;
+    RefPtr<InputEvent> mouseEvent_;
     RefPtr<LongPressEvent> longPressEvent_;
     bool isHover_ = false;
     bool isPressed_ = false;
