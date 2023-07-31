@@ -365,6 +365,9 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->InitEditingValueText("");
     textFieldPattern->InitCaretPosition("");
+    auto textRect = textFieldPattern->GetTextRect();
+    textRect.SetLeft(0.0f);
+    textFieldPattern->SetTextRect(textRect);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateValue("");
