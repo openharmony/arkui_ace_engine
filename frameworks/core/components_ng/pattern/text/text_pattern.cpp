@@ -44,21 +44,6 @@ namespace {
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 };
 
-TextPattern::~TextPattern()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto context = PipelineContext::GetCurrentContext();
-    if (context) {
-        context->RemoveFontNodeNG(frameNode);
-        auto fontManager = context->GetFontManager();
-        if (fontManager) {
-            fontManager->UnRegisterCallbackNG(frameNode);
-            fontManager->RemoveVariationNodeNG(frameNode);
-        }
-    }
-}
-
 void TextPattern::OnAttachToFrameNode()
 {
     if (PipelineContext::GetCurrentContext() &&

@@ -45,7 +45,7 @@ class TextPattern : public Pattern, public TextDragBase {
 
 public:
     TextPattern() = default;
-    ~TextPattern() override;
+    ~TextPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {

@@ -161,7 +161,6 @@ void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  con
                 isCustomFont_ = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
     }
 }
 
