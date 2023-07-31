@@ -918,7 +918,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (isMousePressed_) {
         return;
     }
-    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if (IsDraggable(info.GetLocalLocation())) {
         // prevent long press event from being triggered when dragging
         return;
     }
@@ -1794,6 +1794,19 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            LOGI("Handle mouse right button press");
+            isMousePressed_ = true;
+        }
+        if (info.GetAction() == MouseAction::RELEASE) {
+            LOGI("Handle mouse right button release");
+            rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
+                static_cast<float>(info.GetGlobalLocation().GetY()));
+            ShowSelectOverlay(RectF(), RectF());
+        }
+        return;
+    }
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
@@ -2046,6 +2059,10 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         if (!pattern->IsUsingMouse()) {
             selectInfo.firstHandle.paintRect = firstHandle;
             selectInfo.secondHandle.paintRect = secondHandle;
+        } else {
+            selectInfo.isUsingMouse = true;
+            selectInfo.rightClickOffset = pattern->GetRightClickOffset();
+            pattern->ResetIsMousePressed();
         }
         selectInfo.onHandleMove = [weak](const RectF& handleRect, bool isFirst) {
             auto pattern = weak.Upgrade();
@@ -2060,8 +2077,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
 
         auto host = pattern->GetHost();
         CHECK_NULL_VOID_NOLOG(host);
-
-        selectInfo.isUsingMouse = pattern->IsUsingMouse();
 
         pattern->UpdateSelectMenuInfo(hasData, selectInfo);
         selectInfo.menuCallback.onCopy = [weak]() {
@@ -2139,12 +2154,12 @@ void RichEditorPattern::ResetAfterPaste()
 {
     SetCaretSpanIndex(-1);
     StartTwinkling();
+    CloseSelectOverlay();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         auto length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         textSelector_.Update(-1, -1);
         DeleteForward(length);
-        CloseSelectOverlay();
         ResetSelection();
     }
 }
