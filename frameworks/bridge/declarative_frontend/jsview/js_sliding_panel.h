@@ -37,7 +37,7 @@ public:
     static void Pop();
     static void SetHasDragBar(const JSCallbackInfo& info);
     static void SetShowCloseIcon(const JSCallbackInfo& info);
-    static void SetShow(bool isShow);
+    static void SetShow(const JSCallbackInfo& info);
     static void SetPanelMode(const JSCallbackInfo& info);
     static void SetPanelType(const JSCallbackInfo& info);
     static void SetCustomHeight(const JSCallbackInfo& info);
