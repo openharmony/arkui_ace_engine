@@ -88,11 +88,6 @@ void JSIndexer::Create(const JSCallbackInfo& args)
                 length = static_cast<uint32_t>(arrayVal->GetArraySize());
             }
         }
-        if (length <= 0) {
-            LOGE("info is invalid");
-            return;
-        }
-
         std::vector<std::string> indexerArray;
         for (size_t i = 0; i < length; i++) {
             auto value = arrayVal->GetArrayItem(i);
@@ -107,7 +102,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
             selectedVal = selectedProperty->ToNumber<int32_t>();
         }
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
-        if (!selectedProperty->IsObject()) {
+        if (length <= 0 || !selectedProperty->IsObject()) {
             return;
         }
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
