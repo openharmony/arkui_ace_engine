@@ -22,16 +22,16 @@ constexpr int32_t SELECT_OVERLAY_ID = 143;
 } // namespace
 
 RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
-    const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host)
+    const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host, bool animation)
 {
     return MakeRefPtr<SelectOverlayProxy>(0);
 }
 
-void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy) {}
+void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy, bool animation) {}
 
-void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId) {}
+void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId, bool animation) {}
 
-void SelectOverlayManager::DestroySelectOverlay() {}
+void SelectOverlayManager::DestroySelectOverlay(bool animation) {}
 
 bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
 {

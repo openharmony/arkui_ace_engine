@@ -108,6 +108,7 @@ ohos_unittest("select_overlay_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
 
     # test-src
+    "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_node.cpp",

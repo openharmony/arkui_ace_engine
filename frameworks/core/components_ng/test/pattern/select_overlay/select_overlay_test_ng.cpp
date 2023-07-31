@@ -829,4 +829,37 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout002, TestSize.Level1)
         EXPECT_TRUE(layoutWrapper->isActive_);
     }
 }
+/**
+ * @tc.name: SetHasShowAnimation001
+ * @tc.desc: Test SelectOverlayPattern SetHasShowAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SetHasShowAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern.
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. call SetHasShowAnimation functions with true.
+     * @tc.expected: The branch of function runs correctly
+     */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    pattern->SetHasShowAnimation(true);
+    EXPECT_EQ(pattern->hasShowAnimation_, true);
+}
 } // namespace OHOS::Ace::NG

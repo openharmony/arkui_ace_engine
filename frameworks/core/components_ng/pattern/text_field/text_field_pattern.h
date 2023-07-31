@@ -521,6 +521,7 @@ public:
 
     bool SelectOverlayIsOn();
     void CloseSelectOverlay() override;
+    void CloseSelectOverlay(bool animation);
     void SetInputMethodStatus(bool keyboardShown)
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -752,6 +753,8 @@ public:
 
     void CreateHandles() override;
 
+    void CreateHandles(bool animation);
+
     bool IsDragging() const
     {
         return dragStatus_ == DragStatus::DRAGGING;
@@ -971,7 +974,7 @@ private:
     std::function<void(Offset)> GetThumbnailCallback();
 #endif
     bool CaretPositionCloseToTouchPosition();
-    void CreateSingleHandle();
+    void CreateSingleHandle(bool animation = false);
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
@@ -989,12 +992,13 @@ private:
     // assert handles are inside the contentRect, reset them if not
     void CheckHandles(std::optional<RectF>& firstHandle,
         std::optional<RectF>& secondHandle, float firstHandleSize = 0.0f, float secondHandleSize = 0.0f);
-    void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
+    void ShowSelectOverlay(
+        const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle, bool animation = false);
 
     void CursorMoveOnClick(const Offset& offset);
     void UpdateCaretInfoToController() const;
 
-    void ProcessOverlay();
+    void ProcessOverlay(bool animation = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     // when moving one handle causes shift of textRect, update x position of the other handle

@@ -26,6 +26,26 @@
 
 namespace OHOS::Ace::NG {
 
+enum class FrameNodeType {
+    SELECTMENU,
+    EXTENSIONMENU,
+    BACKBUTTON
+};
+
+enum class FrameNodeStatus {
+    VISIBLE,
+    VISIBLETOGONE,
+    GONE,
+    GONETOVISIBLE
+};
+
+enum class FrameNodeTrigger {
+    SHOW,
+    SHOWN,
+    HIDE,
+    HIDDEN
+};
+
 class ACE_EXPORT SelectOverlayNode : public FrameNode {
     DECLARE_ACE_TYPE(SelectOverlayNode, FrameNode)
 public:
@@ -65,6 +85,10 @@ public:
         return isExtensionMenu_;
     }
 
+    void ShowSelectOverlay(bool animation);
+
+    void HideSelectOverlay(const std::function<void()>& callback);
+
 private:
     void CreateToolBar();
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
@@ -74,12 +98,26 @@ private:
     void MoreAnimation();
     void BackAnimation();
 
+    void DispatchVisibleState(FrameNodeType type, FrameNodeTrigger trigger);
+    void DispatchVisibleToGoneState(FrameNodeType type, FrameNodeTrigger trigger);
+    void DispatchGoneState(FrameNodeType type, FrameNodeTrigger trigger);
+    void DispatchGoneToVisibleState(FrameNodeType type, FrameNodeTrigger trigger);
+    void ExecuteOverlayStatus(FrameNodeType type, FrameNodeTrigger trigger);
+    void SetFrameNodeStatus(FrameNodeType type, FrameNodeStatus status);
+    void SetFrameNodeVisibility(FrameNodeType type, VisibleType visibleType);
+    void SetFrameNodeOpacity(FrameNodeType type, float opacity);
+    void SetSelectMenuOpacity(float value);
+    void SetExtensionMenuOpacity(float value);
+    void SetBackButtonOpacity(float value);
+
     void SetAnimationStatus(bool toDoAnimation)
     {
         isDoingAnimation_ = toDoAnimation;
     }
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
+
+    using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
 
     /* Text selection menu node structure.
         -rootNode
@@ -93,6 +131,12 @@ private:
     RefPtr<FrameNode> selectMenuInner_;
     RefPtr<FrameNode> extensionMenu_;
     RefPtr<FrameNode> backButton_;
+
+    FrameNodeStatus selectMenuStatus_ = FrameNodeStatus::VISIBLE;
+    FrameNodeStatus extensionMenuStatus_ = FrameNodeStatus::GONE;
+    FrameNodeStatus backButtonStatus_ = FrameNodeStatus::GONE;
+
+    std::map<FrameNodeStatus, ExecuteStateFunc> stateFuncs_;
 
     std::string selectInfo_;
 

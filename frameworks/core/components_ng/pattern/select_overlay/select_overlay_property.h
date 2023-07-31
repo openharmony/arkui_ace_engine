@@ -27,6 +27,10 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr int32_t MENU_SHOW_ANIMATION_DURATION = 250;
+constexpr int32_t MENU_HIDE_ANIMATION_DURATION = 200;
+constexpr int32_t HANDLE_ANIMATION_DURATION = 150;
+
 struct SelectHandleInfo {
     bool isShow = true;
     bool needLayout = false;
