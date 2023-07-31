@@ -64,30 +64,30 @@ std::pair<RefPtr<FrameNode>, OffsetF> TextFieldManagerNG::FindScrollableOfFocuse
 
 void TextFieldManagerNG::ScrollTextFieldToSafeArea(const SafeAreaInsets::Inset& bottomInset)
 {
-    auto textPattern = onFocusTextField_.Upgrade();
-    CHECK_NULL_VOID(textPattern);
-    auto textField = textPattern->GetHost();
+    auto textField = DynamicCast<TextFieldPattern>(onFocusTextField_.Upgrade());
     CHECK_NULL_VOID(textField);
 
-    auto [scrollable, textFieldOffsetToScrollable] = FindScrollableOfFocusedTextField(textField);
+    auto [scrollable, textFieldOffsetToScrollable] = FindScrollableOfFocusedTextField(textField->GetHost());
     CHECK_NULL_VOID_NOLOG(scrollable);
-
-    // global offset
-    RectF scrollableRect = scrollable->GetGeometryNode()->GetFrameRect();
-    scrollableRect.SetOffset(scrollable->GetPaintRectOffset());
-    CHECK_NULL_VOID_NOLOG(scrollableRect.Top() < bottomInset.start);
-
-    // global offset
-    auto textFieldRect = textField->GetGeometryNode()->GetFrameRect();
-    textFieldRect.SetOffset(textFieldOffsetToScrollable + scrollableRect.GetOffset());
-
-    // offset relative to textRect
-    auto caretRect = DynamicCast<TextFieldPattern>(textPattern)->GetCaretRect();
-    auto diff = bottomInset.start - (textFieldRect.GetY() + caretRect.Bottom() + textFieldRect.Height() / 2);
-
-    CHECK_NULL_VOID_NOLOG(diff < 0);
     auto scrollPattern = scrollable->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
-    scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diff);
+
+    // global rects
+    auto scrollableRect = scrollable->GetPaintRectWithTransform();
+    CHECK_NULL_VOID_NOLOG(scrollableRect.Top() < bottomInset.start);
+
+    auto caretRect = textField->GetCaretRect() + (scrollableRect.GetOffset() + textFieldOffsetToScrollable);
+
+    // caret above scroll's content region
+    auto diffTop = (caretRect.Top() - caretRect.Height() * 2) - scrollableRect.Top();
+    if (diffTop < 0) {
+        scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
+        return;
+    }
+
+    // caret below safeArea
+    auto diffBot = bottomInset.start - (caretRect.Bottom() + caretRect.Height() * 2);
+    CHECK_NULL_VOID_NOLOG(diffBot < 0);
+    scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
 }
 } // namespace OHOS::Ace::NG
