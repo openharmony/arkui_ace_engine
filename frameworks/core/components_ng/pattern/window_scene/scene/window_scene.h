@@ -26,26 +26,30 @@ public:
     explicit WindowScene(const sptr<Rosen::Session>& session);
     ~WindowScene() override;
 
+    void UpdateSession(const sptr<Rosen::Session>& session);
+
+protected:
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
         return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
-
-    void OnSetDepth(const int32_t depth) override;
-
-private:
-    void OnAttachToFrameNode() override;
 
     bool HasStartingPage() override
     {
         return true;
     }
 
-    void UpdateSession(const sptr<Rosen::Session>& session);
+    void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void OnConnect() override;
     void OnForeground() override;
+    void OnDisconnect() override;
 
-    friend class WindowSceneModel;
+    void OnSetDepth(const int32_t depth) override;
+
+private:
+    void BufferAvailableCallback();
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };

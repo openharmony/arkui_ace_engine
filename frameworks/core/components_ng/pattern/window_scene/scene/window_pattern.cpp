@@ -21,27 +21,15 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
-const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
-    { "default",              Rosen::RSAnimationTimingCurve::DEFAULT },
-    { "linear",               Rosen::RSAnimationTimingCurve::LINEAR },
-    { "ease",                 Rosen::RSAnimationTimingCurve::EASE },
-    { "easeIn",               Rosen::RSAnimationTimingCurve::EASE_IN },
-    { "easeOut",              Rosen::RSAnimationTimingCurve::EASE_OUT },
-    { "easeInOut",            Rosen::RSAnimationTimingCurve::EASE_IN_OUT },
-    { "spring",               Rosen::RSAnimationTimingCurve::SPRING },
-    { "interactiveSpring",    Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
-};
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -81,11 +69,6 @@ private:
     WeakPtr<WindowPattern> windowPattern_;
 };
 
-WindowPattern::WindowPattern()
-{
-    instanceId_ = Container::CurrentId();
-}
-
 void WindowPattern::RegisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
@@ -97,6 +80,12 @@ void WindowPattern::UnregisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
     session_->UnregisterLifecycleListener(lifecycleListener_);
+}
+
+bool WindowPattern::IsMainWindow() const
+{
+    CHECK_NULL_RETURN(session_, false);
+    return session_->GetWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
 
 void WindowPattern::InitContent()
@@ -114,53 +103,58 @@ void WindowPattern::InitContent()
         context->SetRSNode(surfaceNode);
     }
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!IsMainWindow()) {
+        host->AddChild(contentNode_);
+        return;
+    }
+
     auto state = session_->GetSessionState();
     auto bundleName = session_->GetSessionInfo().bundleName_;
-    LOGI("Session state: %{public}u, bundle name: %{public}s.", state, bundleName.c_str());
-    switch (state) {
-        case Rosen::SessionState::STATE_DISCONNECT: {
-            CreateStartingNode();
-            break;
+    LOGI("Session state: %{public}u, bundle name: %{public}s", state, bundleName.c_str());
+    if (state == Rosen::SessionState::STATE_DISCONNECT) {
+        if (!HasStartingPage()) {
+            return;
         }
-        default: {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->AddChild(contentNode_);
+        if (session_->GetShowRecent()) {
+            session_->SetShowRecent(false);
+            CreateSnapshotNode();
+            host->AddChild(snapshotNode_);
+            return;
+        }
+        CreateStartingNode();
+        host->AddChild(startingNode_);
+        return;
+    }
 
-            if (session_->GetWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-                !session_->GetBufferAvailable()) {
-                CreateStartingNode();
-            }
-            break;
+    host->AddChild(contentNode_);
+    if (!session_->GetBufferAvailable()) {
+        CreateStartingNode();
+        host->AddChild(startingNode_);
+        if (surfaceNode) {
+            surfaceNode->SetBufferAvailableCallback(callback_);
         }
     }
 }
 
 void WindowPattern::CreateStartingNode()
 {
-    if (!HasStartingPage() || CreatePersistentNode()) {
-        return;
-    }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
     startingNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    host->AddChild(startingNode_);
-
     startingNode_->SetHitTestMode(HitTestMode::HTMNONE);
-    std::string startPagePath;
+
+    std::string startupPagePath;
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     auto sessionInfo = session_->GetSessionInfo();
-    Rosen::SceneSessionManager::GetInstance().GetStartPage(sessionInfo, startPagePath, backgroundColor);
-    LOGI("start page path %{public}s, background color %{public}x", startPagePath.c_str(), backgroundColor);
+    Rosen::SceneSessionManager::GetInstance().GetStartPage(sessionInfo, startupPagePath, backgroundColor);
+    LOGI("startup page path %{public}s, background color %{public}x", startupPagePath.c_str(), backgroundColor);
 
     startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo(startPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
+        ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
     startingNode_->MarkModifyDone();
 }
@@ -171,80 +165,16 @@ void WindowPattern::CreateSnapshotNode()
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    snapshotNode_->SetHitTestMode(HitTestMode::HTMNONE);
+
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->AddChild(snapshotNode_);
-
     CHECK_NULL_VOID(session_);
     CHECK_NULL_VOID(session_->GetScenePersistence());
     imageLayoutProperty->UpdateImageSourceInfo(
         ImageSourceInfo("file:/" + session_->GetScenePersistence()->GetSnapshotFilePath()));
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
-}
-
-void WindowPattern::OnConnect()
-{
-    ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(session_);
-    auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
-
-    CHECK_NULL_VOID(contentNode_);
-    auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID(context);
-    context->SetRSNode(surfaceNode);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->AddChild(contentNode_, 0);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-    if (!HasStartingPage()) {
-        return;
-    }
-    surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this), weakSession = wptr(session_)]() {
-        LOGI("RSSurfaceNode buffer available callback");
-        auto session = weakSession.promote();
-        CHECK_NULL_VOID(session);
-        session->SetBufferAvailable(true);
-        auto windowPattern = weak.Upgrade();
-        CHECK_NULL_VOID(windowPattern);
-        windowPattern->BufferAvailableCallback();
-    });
-}
-
-void WindowPattern::BufferAvailableCallback()
-{
-    ContainerScope scope(instanceId_);
-
-    const auto& config =
-        Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
-    if (config.enabled_) {
-        CHECK_NULL_VOID(startingNode_);
-        auto context = AceType::DynamicCast<RosenRenderContext>(startingNode_->GetRenderContext());
-        CHECK_NULL_VOID(context);
-        auto rsNode = context->GetRSNode();
-        CHECK_NULL_VOID(rsNode);
-        auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
-        rsNode->SetTransitionEffect(effect);
-        Rosen::RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(config.duration_);
-        auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
-            Rosen::RSAnimationTimingCurve::DEFAULT;
-        Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
-            rsNode->NotifyTransition(effect, false);
-        });
-    }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->RemoveChild(startingNode_);
-    startingNode_.Reset();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void WindowPattern::OnAttachToFrameNode()
@@ -254,27 +184,6 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameRect = geometryNode->GetFrameRect();
-    Rosen::WSRect windowRect {
-        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
-        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
-        .width_ = std::round(frameRect.Width()),
-        .height_ = std::round(frameRect.Height())
-    };
-
-    CHECK_NULL_RETURN(session_, false);
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
-    return false;
 }
 
 void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -288,31 +197,8 @@ void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent
 void WindowPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     CHECK_NULL_VOID(session_);
+    CHECK_NULL_VOID(keyEvent);
     session_->TransferKeyEvent(keyEvent);
-}
-
-bool WindowPattern::CreatePersistentNode()
-{
-    CHECK_NULL_RETURN(session_, false);
-    if (session_->GetScenePersistence() == nullptr || !session_->GetScenePersistence()->IsSnapshotExisted()) {
-        return false;
-    }
-    startingNode_ = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    host->AddChild(startingNode_);
-
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo("file:/" + session_->GetScenePersistence()->GetSnapshotFilePath()));
-    imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
-    startingNode_->MarkModifyDone();
-    return true;
 }
 
 void WindowPattern::DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
