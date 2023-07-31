@@ -1818,6 +1818,14 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
 #ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        if (!manager->IsDragged() && manager->IsWindowConsumed()) {
+            manager->SetIsWindowConsumed(false);
+            LOGD("The event does not need to be handled");
+            return;
+        }
+    }
     if (action == DragEventAction::DRAG_EVENT_OUT) {
         manager->ClearSummary();
         manager->ClearExtraInfo();
@@ -1825,6 +1833,7 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END &&
         action != DragEventAction::DRAG_EVENT_START) {
+        manager->SetIsWindowConsumed(false);
         LOGI("current context is the source of drag");
         return;
     }
@@ -1854,6 +1863,7 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     if (manager->IsDragged()) {
         manager->OnDragMove(Point(x, y, x, y), extraInfo);
     }
+    manager->SetIsWindowConsumed(false);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)

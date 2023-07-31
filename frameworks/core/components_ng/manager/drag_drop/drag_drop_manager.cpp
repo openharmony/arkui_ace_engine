@@ -317,6 +317,15 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
 
 void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
 {
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        if (IsDragged() && IsWindowConsumed()) {
+            LOGD("The event does not need to be handled");
+            return;
+        }
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     UpdateVelocityTrackerPoint(point, false);
 
     auto dragFrameNode = FindDragFrameNodeByPosition(
@@ -369,6 +378,13 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
 {
     preTargetFrameNode_ = nullptr;
 #ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        if (IsDragged() && IsWindowConsumed()) {
+            LOGD("The event does not need to be handled");
+            return;
+        }
+    }
     if (isDragCancel_) {
         LOGD("DragDropManager Is On DragCancel");
         InteractionManager::GetInstance()->SetDragWindowVisible(false);
