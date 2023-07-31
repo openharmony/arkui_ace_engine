@@ -1696,6 +1696,9 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
 bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if (keyEvent.action == KeyAction::DOWN) {
+        if (keyEvent.code == KeyCode::KEY_TAB) {
+            return false;
+        }
         if (keyEvent.code == KeyCode::KEY_DEL) {
 #if defined(PREVIEW)
             DeleteForward(1);
