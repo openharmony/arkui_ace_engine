@@ -4655,7 +4655,7 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
             return;
         }
         ContainerScope scope(client->GetInstanceId());
-        client->HandleSetSelection(selectionStart, selectionEnd);
+        client->HandleSetSelection(selectionStart, selectionEnd, false);
         if (selectionStart == selectionEnd) {
             client->SetInSelectMode(SelectionMode::NONE);
             client->StartTwinkling();
