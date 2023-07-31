@@ -63,6 +63,13 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
         LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
+    auto frameNode = WeakClaim(node);
+    pipeline->RemoveFontNodeNG(frameNode);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        fontManager->UnRegisterCallbackNG(frameNode);
+        fontManager->RemoveVariationNodeNG(frameNode);
+    }
 }
 
 void TextPattern::CloseSelectOverlay()
