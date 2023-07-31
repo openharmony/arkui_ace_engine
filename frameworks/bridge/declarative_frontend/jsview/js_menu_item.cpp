@@ -238,6 +238,13 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
                 MenuItemModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
             }
         }
+
+        auto jsFamily = obj->GetProperty("family");
+        if (!jsFamily->IsNull() && jsFamily->IsString()) {
+            auto familyVal = jsFamily->ToString();
+            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+            MenuItemModel::GetInstance()->SetFontFamily(fontFamilies);
+        }
     }
     MenuItemModel::GetInstance()->SetFontSize(fontSize);
     MenuItemModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
@@ -288,6 +295,13 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
                 ParseJsString(jsStyle, style);
                 MenuItemModel::GetInstance()->SetLabelFontStyle(ConvertStrToFontStyle(style));
             }
+        }
+
+        auto jsFamily = obj->GetProperty("family");
+        if (!jsFamily->IsNull() && jsFamily->IsString()) {
+            auto familyVal = jsFamily->ToString();
+            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+            MenuItemModel::GetInstance()->SetLabelFontFamily(fontFamilies);
         }
     }
     MenuItemModel::GetInstance()->SetLabelFontSize(fontSize);

@@ -29,6 +29,7 @@ public:
     virtual void SetFontWeight(FontWeight weight);
     virtual void SetFontStyle(Ace::FontStyle style);
     virtual void SetFontColor(const std::optional<Color>& color);
+    virtual void SetFontFamily(const std::vector<std::string> &families);
 
 private:
     static std::unique_ptr<MenuModel> instance_;

@@ -26,6 +26,7 @@ public:
     void SetFontWeight(FontWeight weight) override;
     void SetFontStyle(Ace::FontStyle style) override;
     void SetFontColor(const std::optional<Color>& color) override;
+    void SetFontFamily(const std::vector<std::string> &families) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_NG_H
