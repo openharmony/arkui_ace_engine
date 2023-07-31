@@ -216,7 +216,7 @@ static napi_module componentUtilsModule = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_register_func = registerFunc,
-    .nm_modname = "componentUtils",
+    .nm_modname = "arkui.componentUtils",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
