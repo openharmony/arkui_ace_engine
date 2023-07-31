@@ -24,6 +24,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/rect.h"
 #include "base/mousestyle/mouse_style.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
@@ -429,6 +430,11 @@ public:
     const RectF& GetTextRect() override
     {
         return textRect_;
+    }
+
+    void SetTextRect(const RectF& textRect)
+    {
+        textRect_ = textRect;
     }
 
     const RectF& GetContentRect() const
