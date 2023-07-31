@@ -691,6 +691,10 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         case WindowSizeChangeReason::ROTATION: {
             SetRootRect(width, height, 0.0);
             FlushUITasks();
+            if (textFieldManager_) {
+                DynamicCast<TextFieldManagerNG>(textFieldManager_)->ScrollTextFieldToSafeArea();
+            }
+            FlushUITasks();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -874,13 +878,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         FlushUITasks();
 
         CHECK_NULL_VOID_NOLOG(manager);
-        // only scroll when keyboard shows
-        if (keyboardHeight <= 0) {
-            return;
-        }
-        auto safeAreaBottom = GetSafeArea().bottom_.Combine(safeAreaManager_->GetKeyboardInset());
-        CHECK_NULL_VOID_NOLOG(safeAreaBottom.IsValid());
-        manager->ScrollTextFieldToSafeArea(safeAreaBottom);
+        manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
 
@@ -1271,8 +1269,8 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     }
     auto container = Container::Current();
     if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-        event.action == MouseAction::MOVE) &&
-        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+             event.action == MouseAction::MOVE) &&
+            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
         (container && container->IsScenceBoardWindow() && (event.pullAction == MouseAction::PULL_MOVE ||
         event.pullAction == MouseAction::PULL_UP))) {
         auto touchPoint = event.CreateTouchPoint();
