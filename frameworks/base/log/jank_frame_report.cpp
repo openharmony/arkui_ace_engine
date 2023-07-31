@@ -19,6 +19,7 @@
 
 #include "render_service_client/core/transaction/rs_interfaces.h"
 
+#include "base/log/ace_trace.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/log/event_report.h"
 
@@ -67,6 +68,7 @@ steady_clock::time_point SteadyTimeRecorder::begin {};
 } // namespace
 
 std::vector<uint16_t> JankFrameReport::frameJankRecord_(JANK_SIZE, 0);
+int32_t OHOS::Ace::JankFrameReport::jankFrameCount_ = 0;
 JankFrameFlag JankFrameReport::recordStatus_ = JANK_IDLE;
 int64_t JankFrameReport::startTime_ = 0;
 int64_t JankFrameReport::prevEndTimeStamp_ = 0;
@@ -92,6 +94,8 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
         frameJankRecord_[JANK_FRAME_6_FREQ]++;
         return;
     }
+    jankFrameCount_++;
+    ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
     if (jank < 15.0f) {
         frameJankRecord_[JANK_FRAME_15_FREQ]++;
         return;
@@ -132,6 +136,7 @@ void JankFrameReport::RecordPreviousEnd()
 void JankFrameReport::ClearFrameJankRecord()
 {
     std::fill(frameJankRecord_.begin(), frameJankRecord_.end(), 0);
+    jankFrameCount_ = 0;
     recordStatus_ = JANK_IDLE;
     needReport_ = false;
 }
