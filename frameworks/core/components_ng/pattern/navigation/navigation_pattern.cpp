@@ -260,10 +260,8 @@ void NavigationPattern::OnModifyDone()
     CHECK_NULL_VOID(navBarLayoutProperty);
     if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
-        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
     } else {
         textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
-        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
     }
 }
 
