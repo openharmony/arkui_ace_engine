@@ -224,6 +224,7 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index)
     if (index < FrameCount()) {
         auto child = builder_->CreateChildByIndex(index);
         if (child.second) {
+            child.second->SetJSViewActive(true);
             if (child.second->GetDepth() != GetDepth() + 1) {
                 child.second->SetDepth(GetDepth() + 1);
             }
