@@ -780,6 +780,9 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     CHECK_NULL_VOID(navBarLayoutProperty);
     bool needAddBackButton = false;
     bool needRemoveBackButton = false;
+    if (navBarNode->GetPrevTitleIsCustomValue(false)) {
+        return;
+    }
 
     do {
         // add back button if current mode is mini and one of the following condition:
