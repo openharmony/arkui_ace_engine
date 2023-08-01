@@ -156,6 +156,10 @@ FlowItemIndex WaterFlowLayoutInfo::GetCrossIndexForNextItem() const
             position.crossIndex = i;
             position.lastItemIndex = lastItem->first;
             minHeight = lastOffset;
+            // first item height in this cross is 0
+            if (NearEqual(minHeight, 0.0f)) {
+                break;
+            }
         }
     }
 
