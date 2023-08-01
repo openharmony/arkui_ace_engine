@@ -205,7 +205,12 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         };
         SetDialogSwitchEvent(switchEvent);
         auto titleClickEvent = [func = std::move(titleSwitchEvent)](const GestureEvent& /* info */) { func(); };
-        auto titleEventHub = buttonTitleNode->GetOrCreateGestureEventHub();
+        auto titleButtonNode = AceType::DynamicCast<FrameNode>(buttonTitleNode->GetFirstChild());
+        CHECK_NULL_RETURN(titleButtonNode, nullptr);
+        auto titleButtonEventHub = titleButtonNode->GetEventHub<ButtonEventHub>();
+        CHECK_NULL_RETURN(titleButtonEventHub, nullptr);
+        titleButtonEventHub->SetStateEffect(false);
+        auto titleEventHub = titleButtonNode->GetOrCreateGestureEventHub();
         auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(titleClickEvent));
         titleEventHub->AddClickEvent(onClick);
         acceptNode = monthDaysNode;
@@ -963,38 +968,40 @@ void DatePickerDialogView::SetTimeTextProperties(
 
 void DatePickerDialogView::SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow)
 {
-    auto eventHub = titleRow->GetEventHub<EventHub>();
+    auto titleButtonNode = AceType::DynamicCast<FrameNode>(titleRow->GetFirstChild());
+    CHECK_NULL_VOID(titleButtonNode);
+    auto eventHub = titleButtonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
-    auto mouseTask = [titleRow](bool isHover) {
-        HandleMouseEvent(titleRow, isHover);
+    auto mouseTask = [titleButtonNode](bool isHover) {
+        HandleMouseEvent(titleButtonNode, isHover);
     };
     auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
     CHECK_NULL_VOID(mouseEvent);
     inputHub->AddOnHoverEvent(mouseEvent);
 }
 
-void DatePickerDialogView::HandleMouseEvent(const RefPtr<FrameNode>& titleRow, bool isHover)
+void DatePickerDialogView::HandleMouseEvent(const RefPtr<FrameNode>& titleButton, bool isHover)
 {
     if (isHover) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<PickerTheme>();
         CHECK_NULL_VOID(theme);
-        PlayHoverAnimation(titleRow, theme->GetHoverColor());
+        PlayHoverAnimation(titleButton, theme->GetHoverColor());
     } else {
-        PlayHoverAnimation(titleRow, Color::TRANSPARENT);
+        PlayHoverAnimation(titleButton, Color::TRANSPARENT);
     }
 }
 
-void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleRow, const Color& color)
+void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleButton, const Color& color)
 {
     AnimationOption option = AnimationOption();
     option.SetDuration(HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
-    AnimationUtils::Animate(option, [titleRow, color]() {
-        auto buttonTitleNode = AceType::DynamicCast<FrameNode>(titleRow);
+    AnimationUtils::Animate(option, [titleButton, color]() {
+        auto buttonTitleNode = AceType::DynamicCast<FrameNode>(titleButton);
         CHECK_NULL_VOID(buttonTitleNode);
         auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
         buttonTitleRenderContext->UpdateBackgroundColor(color);
