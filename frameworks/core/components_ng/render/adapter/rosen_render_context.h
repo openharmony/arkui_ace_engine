@@ -247,6 +247,7 @@ public:
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
     void SetUsingContentRectForRenderFrame(bool value) override;
+    void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

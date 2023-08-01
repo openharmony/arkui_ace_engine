@@ -2548,6 +2548,12 @@ void RosenRenderContext::SetUsingContentRectForRenderFrame(bool value)
     useContentRectForRSFrame_ = value;
 }
 
+void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFrameGravity(gravity);
+}
+
 void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();
