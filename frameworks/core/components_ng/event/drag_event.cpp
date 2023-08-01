@@ -59,8 +59,6 @@ constexpr float SCALE_NUMBER = 0.95f;
 constexpr int32_t FILTER_TIMES = 250;
 constexpr float PIXELMAP_ANIMATION_SCALE = 1.1f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
-constexpr int32_t MAX_PIXEL_MAP_WIDTH = 600;
-constexpr int32_t MAX_PIXEL_MAP_HEIGHT = 600;
 constexpr float SPRING_RESPONSE = 0.416f;
 constexpr float SPRING_DAMPING_FRACTION = 0.73f;
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -215,16 +213,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
             }
             CHECK_NULL_VOID(pixelMap);
-            auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
-            if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
-                    pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) ||
-                (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
-                    pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE &&
-                    pixelMap->GetWidth() > minDeviceLength)) {
-                float scale =
-                    static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
-                pixelMap->scale(scale, scale);
-            }
+            float scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+            pixelMap->scale(scale, scale);
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto dragDropManager = pipeline->GetDragDropManager();
@@ -749,15 +739,8 @@ void DragEventActuator::GetTextPixelMap(bool startDrag)
         return;
     }
     std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
-    auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
-    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
-            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) ||
-        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
-            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE &&
-            pixelMap->GetWidth() > minDeviceLength)) {
-        float scale = static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
-        mediaPixelMap->scale(scale, scale);
-    }
+    float scale = gestureHub->GetPixelMapScale(mediaPixelMap->GetHeight(), mediaPixelMap->GetWidth());
+    mediaPixelMap->scale(scale, scale);
     int32_t width = mediaPixelMap->GetWidth();
     int32_t height = mediaPixelMap->GetHeight();
     Msdp::DeviceStatus::ShadowInfo shadowInfo { mediaPixelMap, width * PIXELMAP_WIDTH_RATE,
@@ -869,9 +852,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto dragFrame = dragNode->GetGeometryNode()->GetFrameRect();
     auto frameWidth = dragFrame.Width();
     auto frameHeight = dragFrame.Height();
-    float scaleWidth = static_cast<float>(MAX_PIXEL_MAP_WIDTH) / pixelMap->GetWidth();
-    float scaleHeight = static_cast<float>(MAX_PIXEL_MAP_HEIGHT) / pixelMap->GetHeight();
-    float scale = std::min(std::min(scaleWidth, scaleHeight), 1.0f);
+    float scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateTransformScale(VectorF(1.0f, 1.0f));

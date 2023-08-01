@@ -1912,13 +1912,26 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(hub);
     RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
-    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
-            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE) ||
-        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
-            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE &&
-            pixelMap->GetWidth() > minDeviceLength)) {
-        scale = static_cast<float>(minDeviceLength * PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE) / pixelMap->GetHeight();
+    int32_t height = pixelMap->GetHeight();
+    int32_t width = pixelMap->GetWidth();
+    int32_t deviceWidth = PipelineContext::GetCurrentRootWidth();
+    int32_t deviceHeight = PipelineContext::GetCurrentRootHeight();
+    int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
+    int32_t minDeviceLength = std::min(deviceHeight, deviceWidth);
+    if (maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength) {
+        if (height > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) {
+            scale = static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / height;
+        }
+    } else {
+        if (hub->GetTextDraggable() && height > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE &&
+            width > minDeviceLength * PIXELMAP_DRAG_WGR_TEXT_SCALE / PIXELMAP_DRAG_WGR_SCALE) {
+            scale = fmin(static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / height,
+                static_cast<float>(minDeviceLength * PIXELMAP_DRAG_WGR_TEXT_SCALE / PIXELMAP_DRAG_WGR_SCALE) / width);
+        } else if (height > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE &&
+                   width > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) {
+            scale = fmin(static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / height,
+                static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / width);
+        }
     }
 }
 
