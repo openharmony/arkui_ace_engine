@@ -122,7 +122,7 @@ public:
             V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::REGULAR)).c_str());
         contentFontJsonObject->Put("style",
             V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
-        contentFontJsonObject->Put("family", V2::ConvertFontFamily(GetFontFamily().value()).c_str());
+        contentFontJsonObject->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
         json->Put("contentFont", contentFontJsonObject);
         json->Put("contentFontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str());
         auto labelFontJsonObject = JsonUtil::Create(true);
@@ -131,7 +131,7 @@ public:
             V2::ConvertWrapFontWeightToStirng(GetLabelFontWeight().value_or(FontWeight::REGULAR)).c_str());
         labelFontJsonObject->Put("style",
             V2::ConvertWrapFontStyleToStirng(GetLabelItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
-        labelFontJsonObject->Put("family", V2::ConvertFontFamily(GetLabelFontFamily().value()).c_str());
+        labelFontJsonObject->Put("family", V2::ConvertFontFamily(GetLabelFontFamilyValue({})).c_str());
         json->Put("labelFont", labelFontJsonObject);
         auto defaultLabelFontColor = theme ? theme->GetSecondaryFontColor() : Color::GRAY;
         json->Put("labelFontColor", GetLabelFontColor().value_or(defaultLabelFontColor).ColorToString().c_str());
