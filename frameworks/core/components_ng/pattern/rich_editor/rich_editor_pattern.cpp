@@ -576,7 +576,13 @@ bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
 {
     bool success = false;
     success = SetCaretPosition(caretPosition);
-    StartTwinkling();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (focusHub->IsCurrentFocus()) {
+        StartTwinkling();
+    }
     return success;
 }
 
