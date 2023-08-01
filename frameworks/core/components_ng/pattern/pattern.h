@@ -369,10 +369,9 @@ public:
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
-
-private:
+    
     WeakPtr<FrameNode> frameNode_;
-
+private:
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };
 } // namespace OHOS::Ace::NG
