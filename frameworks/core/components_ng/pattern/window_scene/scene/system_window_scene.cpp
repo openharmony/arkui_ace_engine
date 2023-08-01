@@ -37,6 +37,26 @@ void SystemWindowScene::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
+
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto touchCallback = [this](TouchEventInfo& info) {
+        const auto pointerEvent = info.GetPointerEvent();
+        CHECK_NULL_VOID(session_);
+        CHECK_NULL_VOID(pointerEvent);
+        session_->TransferPointerEvent(pointerEvent);
+    };
+    gestureHub->SetTouchEvent(std::move(touchCallback));
+
+    auto mouseEventHub = frameNode->GetOrCreateInputEventHub();
+    auto mouseCallback = [this](MouseInfo& info) {
+        const auto pointerEvent = info.GetPointerEvent();
+        CHECK_NULL_VOID(session_);
+        CHECK_NULL_VOID(pointerEvent);
+        session_->TransferPointerEvent(pointerEvent);
+    };
+    mouseEventHub->SetMouseEvent(std::move(mouseCallback));
 }
 
 bool SystemWindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
