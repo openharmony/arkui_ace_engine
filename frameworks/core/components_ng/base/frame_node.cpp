@@ -2479,6 +2479,9 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
     if ((!layoutAlgorithm_ || (needReset && layoutAlgorithm_->IsExpire())) && pattern_) {
         layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
     }
+    if (needReset) {
+        layoutAlgorithm_->SetNeedMeasure();
+    }
     return layoutAlgorithm_;
 }
 
