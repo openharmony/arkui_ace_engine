@@ -2608,7 +2608,7 @@ bool TextFieldPattern::AllowCopy()
            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD;
 }
 
-void TextFieldPattern::OnDetachFromFrameNode(FrameNode* /*node*/)
+void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -2625,6 +2625,13 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* /*node*/)
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField();
+    }
+    auto frameNode = WeakClaim(node);
+    pipeline->RemoveFontNodeNG(frameNode);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        fontManager->UnRegisterCallbackNG(frameNode);
+        fontManager->RemoveVariationNodeNG(frameNode);
     }
 }
 

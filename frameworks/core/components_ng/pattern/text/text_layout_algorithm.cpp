@@ -77,13 +77,14 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    
+    // Register callback for fonts.
+    FontRegisterCallback(frameNode, textStyle);
+
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
     }
-
-    // Register callback for fonts.
-    FontRegisterCallback(frameNode, textStyle);
 
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
@@ -143,16 +144,34 @@ void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  con
 {
     auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
         auto frameNode = weakNode.Upgrade();
-        if (frameNode) {
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto pattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+        if (modifier) {
+            modifier->SetFontReady(true);
         }
     };
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
+        bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
-            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (customFont) {
+                isCustomFont = true;
+            }
+        }
+        if (isCustomFont) {
+            auto pattern = frameNode->GetPattern<TextPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+            if (modifier) {
+                modifier->SetIsCustomFont(true);
+                modifier->SetFontReady(false);
+            }
         }
         fontManager->AddVariationNodeNG(frameNode);
     }
@@ -585,6 +604,10 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
 void TextLayoutAlgorithm::SetPropertyToModifier(
     const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier)
 {
+    auto fontFamily = layoutProperty->GetFontFamily();
+    if (fontFamily.has_value()) {
+        modifier->SetFontFamilies(fontFamily.value());
+    }
     auto fontSize = layoutProperty->GetFontSize();
     if (fontSize.has_value()) {
         modifier->SetFontSize(fontSize.value());

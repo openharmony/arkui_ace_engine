@@ -31,6 +31,7 @@
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
@@ -511,6 +512,44 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
 }
 
+void TextFieldLayoutAlgorithm::FontRegisterCallback(
+    const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies)
+{
+    auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
+        if (modifier) {
+            modifier->SetFontReady(true);
+        }
+    };
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        bool isCustomFont = false;
+        for (const auto& familyName : fontFamilies) {
+            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (customFont) {
+                isCustomFont = true;
+            }
+        }
+        if (isCustomFont) {
+            auto pattern = frameNode->GetPattern<TextFieldPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
+            if (modifier) {
+                modifier->SetIsCustomFont(true);
+                modifier->SetFontReady(false);
+            }
+        }
+        fontManager->AddVariationNodeNG(frameNode);
+    }
+}
+
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content,
     bool needObscureText, int32_t nakedCharPosition, bool disableTextAlign)
 {
@@ -539,25 +578,6 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
 
     auto paragraph = builder->Build();
     paragraph_.reset(paragraph.release());
-}
-
-void TextFieldLayoutAlgorithm::FontRegisterCallback(
-    const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies)
-{
-    auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
-        auto frameNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    if (fontManager) {
-        for (const auto& familyName : fontFamilies) {
-            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-        }
-        fontManager->AddVariationNodeNG(frameNode);
-    }
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& textStyles,
@@ -697,6 +717,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier)
 {
     CHECK_NULL_VOID(modifier);
+    modifier->SetFontFamilies(textStyle.GetFontFamilies());
     modifier->SetFontSize(textStyle.GetFontSize());
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());
