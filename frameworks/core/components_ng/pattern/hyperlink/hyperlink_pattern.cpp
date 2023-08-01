@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 
 #include "base/json/json_util.h"
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -64,11 +65,26 @@ void HyperlinkPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitClickEvent(gestureHub);
+    InitTouchEvent(gestureHub);
 
     auto inputHub = hub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     InitInputEvent(inputHub);
 
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+
+    auto enabled = hub->IsEnabled();
+    auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(hyperlinkLayoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!enabled) {
+        hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextDisabledColor());
+    }
     if (host->IsDraggable()) {
         EnableDrag();
     }
@@ -80,20 +96,19 @@ void HyperlinkPattern::LinkToAddress()
     LOGW("Unable to jump in preview.");
     return;
 #else
-    auto pipeline = PipelineContext::GetCurrentContext();
+    isLinked_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(hyperlinkLayoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(theme);
+    hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(theme->GetTextLinkedColor()));
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     pipeline->HyperlinkStartAbility(address_);
 #endif
-}
-
-void HyperlinkPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& /* info */) {
-        auto hyperlinkPattern = weak.Upgrade();
-        CHECK_NULL_VOID(hyperlinkPattern);
-        hyperlinkPattern->LinkToAddress();
-    };
-    gestureHub->SetUserOnClick(std::move(clickCallback));
 }
 
 void HyperlinkPattern::InitInputEvent(const RefPtr<InputEventHub>& inputHub)
@@ -120,21 +135,111 @@ void HyperlinkPattern::InitInputEvent(const RefPtr<InputEventHub>& inputHub)
     }
 }
 
+void HyperlinkPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (onTouchEvent_) {
+        return;
+    }
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->OnTouchEvent(info);
+    };
+    gestureHub->RemoveTouchEvent(onTouchEvent_);
+    onTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(onTouchEvent_);
+}
+
+void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(theme);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(hyperlinkLayoutProperty);
+    auto touchList = info.GetChangedTouches();
+    CHECK_NULL_VOID(!touchList.empty());
+    auto touchInfo = touchList.front();
+    auto touchType = touchInfo.GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
+        if (isLinked_) {
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
+                theme->GetTextLinkedColor()));
+        } else {
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor());
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    } else if (touchType == TouchType::UP) {
+        hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void HyperlinkPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->LinkToAddress();
+    };
+    auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickListener);
+}
+
+void HyperlinkPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool HyperlinkPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if ((event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER)) {
+        LinkToAddress();
+        return true;
+    }
+    return false;
+}
+
 void HyperlinkPattern::OnHoverEvent(bool isHovered)
 {
     LOGD("Hyperlink OnHoverEvent in. isHovered: %{public}d", isHovered);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto frame = GetHost();
-    CHECK_NULL_VOID(frame);
-    auto frameId = frame->GetId();
-
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(theme);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto frameId = host->GetId();
+    auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(hyperlinkLayoutProperty);
     if (isHovered) {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
+        hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
+        if (isLinked_) {
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
+                theme->GetTextLinkedColor()));
+        } else {
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor());
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
+        hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
