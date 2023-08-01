@@ -408,22 +408,22 @@ public:
 
     float GetBorderLeft() const
     {
-        return lastBorderWidth_.leftDimen->ConvertToPx();
+        return lastBorderWidth_.leftDimen.value_or(Dimension(0.0f)).ConvertToPx();
     }
 
     float GetBorderTop() const
     {
-        return lastBorderWidth_.topDimen->ConvertToPx();
+        return lastBorderWidth_.topDimen.value_or(Dimension(0.0f)).ConvertToPx();
     }
 
     float GetBorderBottom() const
     {
-        return lastBorderWidth_.bottomDimen->ConvertToPx();
+        return lastBorderWidth_.bottomDimen.value_or(Dimension(0.0f)).ConvertToPx();
     }
 
     float GetBorderRight() const
     {
-        return lastBorderWidth_.rightDimen->ConvertToPx();
+        return lastBorderWidth_.rightDimen.value_or(Dimension(0.0f)).ConvertToPx();
     }
 
     const RectF& GetTextRect() override
