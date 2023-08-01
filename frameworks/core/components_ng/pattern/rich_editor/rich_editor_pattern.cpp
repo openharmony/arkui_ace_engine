@@ -1400,19 +1400,23 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     moveLength_ += insertValueLength;
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto contentLength = StringUtils::ToWstring(spanNode->GetSpanItem()->content).length();
-    auto spanEnd = spanNode->GetSpanItem()->position + insertValueLength;
-    auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     retInfo.SetSpanIndex(host->GetChildIndex(spanNode));
-    retInfo.SetSpanRangeStart(spanStart);
-    retInfo.SetSpanRangeEnd(spanEnd);
     retInfo.SetEraseLength(insertValueLength);
     retInfo.SetValue(spanNode->GetSpanItem()->content);
+    auto contentLength = StringUtils::ToWstring(spanNode->GetSpanItem()->content).length();
     if (isCreate) {
+        auto spanEnd = GetCaretPosition() + 1;
+        auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
+        retInfo.SetSpanRangeStart(spanStart);
+        retInfo.SetSpanRangeEnd(spanEnd);
         retInfo.SetOffsetInSpan(0);
     } else {
+        auto spanEnd = spanNode->GetSpanItem()->position;
+        auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
+        retInfo.SetSpanRangeStart(spanStart);
+        retInfo.SetSpanRangeEnd(spanEnd);
         retInfo.SetOffsetInSpan(GetCaretPosition() - retInfo.GetSpanRangeStart());
     }
     retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
