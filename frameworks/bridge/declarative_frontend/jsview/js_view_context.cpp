@@ -157,7 +157,7 @@ const AnimationOption JSViewContext::CreateAnimation(
     RefPtr<Curve> curve;
     auto curveArgs = animationArgs->GetValue("curve");
     if (curveArgs->IsString()) {
-        curve = CreateCurve(animationArgs->GetString("curve", "linear"));
+        curve = CreateCurve(animationArgs->GetString("curve", DOM_ANIMATION_TIMING_FUNCTION_EASE_IN_OUT));
     } else if (curveArgs->IsObject()) {
         auto curveString = curveArgs->GetValue("__curveString");
         if (!curveString) {

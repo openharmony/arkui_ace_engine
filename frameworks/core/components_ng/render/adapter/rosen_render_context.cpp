@@ -2547,6 +2547,10 @@ void RosenRenderContext::OnOverlayTextUpdate(const OverlayOptions& overlay)
 void RosenRenderContext::OnMotionPathUpdate(const MotionPathOption& motionPath)
 {
     CHECK_NULL_VOID(rsNode_);
+    if (!motionPath.IsValid()) {
+        rsNode_->SetMotionPathOption(nullptr);
+        return;
+    }
     auto motionOption = Rosen::RSMotionPathOption(motionPath.GetPath());
     motionOption.SetBeginFraction(motionPath.GetBegin());
     motionOption.SetEndFraction(motionPath.GetEnd());
