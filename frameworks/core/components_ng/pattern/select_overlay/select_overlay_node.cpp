@@ -1033,7 +1033,16 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     CHECK_NULL_RETURN(menu, nullptr);
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
-    props->UpdateMenuOffset(info->rightClickOffset);
+    OffsetF pageOffset;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        pageOffset = GetPageOffset();
+    }
+    props->UpdateMenuOffset(info->rightClickOffset + pageOffset);
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
