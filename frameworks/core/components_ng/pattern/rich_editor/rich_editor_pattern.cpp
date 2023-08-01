@@ -919,10 +919,22 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (isMousePressed_) {
         return;
     }
-    if (IsDraggable(info.GetLocalLocation())) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         // prevent long press event from being triggered when dragging
+#ifdef ENABLE_DRAG_FRAMEWORK
+        gestureHub->SetIsTextDraggable(true);
+#endif
         return;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    gestureHub->SetIsTextDraggable(false);
+#endif
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -930,8 +942,6 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     InitSelection(textOffset);
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
