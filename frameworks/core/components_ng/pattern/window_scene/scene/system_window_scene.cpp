@@ -79,10 +79,4 @@ bool SystemWindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
     return false;
 }
-
-void SystemWindowScene::OnSetDepth(const int32_t depth)
-{
-    CHECK_NULL_VOID(session_);
-    session_->SetZOrder(static_cast<uint32_t>(depth));
-}
 } // namespace OHOS::Ace::NG

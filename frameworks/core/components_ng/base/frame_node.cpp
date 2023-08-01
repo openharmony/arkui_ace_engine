@@ -2178,14 +2178,6 @@ bool FrameNode::IsSecurityComponent()
            GetTag() == V2::SAVE_BUTTON_ETS_TAG;
 }
 
-void FrameNode::OnSetDepth(const int32_t depth)
-{
-    LOGD("Set depth = %{public}d", depth);
-    if (pattern_) {
-        pattern_->OnSetDepth(depth);
-    }
-}
-
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
