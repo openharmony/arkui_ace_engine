@@ -1058,6 +1058,7 @@ private:
     void RestorePreInlineStates();
 
     bool ResetObscureTickCountDown();
+    bool IsInPasswordMode() const;
 
     RectF frameRect_;
     RectF contentRect_;
