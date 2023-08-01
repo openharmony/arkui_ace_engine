@@ -312,9 +312,12 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
     CHECK_NULL_VOID(scrollableEvent_);
     scrollableEvent_->SetInBarRegionCallback(
-        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point) {
+        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point, SourceType source) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_RETURN_NOLOG(scrollBar, false);
+            if (source == SourceType::MOUSE) {
+                return scrollBar->InBarActiveRegion(Point(point.GetX(), point.GetY()));
+            }
             return scrollBar->InBarTouchRegion(Point(point.GetX(), point.GetY()));
         }
     );
