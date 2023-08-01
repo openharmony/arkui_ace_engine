@@ -74,7 +74,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateTextColor(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE) {
+            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
+                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
                 if (!tabBarPattern->GetChangeByClick()) {
                     tabBarPattern->PlayTabBarTranslateAnimation(index);
                     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -212,7 +213,7 @@ void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
     }
     auto jsonIsOn = info->GetValue("Index");
     swiperLayoutProperty->UpdateIndex(jsonIsOn->GetInt());
-    
+
     swiperPattern->OnRestoreInfo(restoreInfo);
     tabBarPattern->OnRestoreInfo(restoreInfo);
 }
