@@ -607,7 +607,11 @@ void OverlayManager::HideCustomPopups()
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
             } else {
-                HidePopup(targetNodeId, popupInfo);
+                UpdatePopupNode(targetNodeId, popupInfo);
+                CHECK_NULL_VOID(popupInfo.popupNode);
+                auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+                CHECK_NULL_VOID(pattern);
+                pattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
             }
         }
     }

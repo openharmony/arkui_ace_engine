@@ -32,6 +32,13 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
+
+enum class TransitionStatus {
+    INVISIABLE,
+    ENTERING,
+    NORMAL,
+    EXITING,
+};
 class BubblePattern : public PopupBasePattern {
     DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern);
 
@@ -105,6 +112,11 @@ public:
         isCustomPopup_ = isCustomPopup;
     }
 
+    void SetTransitionStatus(TransitionStatus transitionStatus)
+    {
+        transitionStatus_ = transitionStatus;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -147,13 +159,6 @@ private:
     std::optional<Placement> arrowPlacement_;
 
     bool showArrow_ = false;
-
-    enum class TransitionStatus {
-        INVISIABLE,
-        ENTERING,
-        NORMAL,
-        EXITING,
-    };
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
