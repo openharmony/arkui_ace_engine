@@ -17,6 +17,7 @@
 
 #include "base/mousestyle/mouse_style.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -33,7 +34,6 @@
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -145,7 +145,6 @@ void NavigationPattern::OnModifyDone()
     navBarNode->MarkModifyDone();
     auto contentNode = hostNode->GetContentNode();
     auto preTopNavPath = GetTopNavPath();
-    auto prePathListSize = navPathList_.size();
     auto pathNames = navigationStack_->GetAllPathName();
 
     if (!navPathList_.empty()) {
@@ -170,6 +169,7 @@ void NavigationPattern::OnModifyDone()
     }
 
     navigationStack_->SetNavPathList(navPathList_);
+    contentNode->Clean();
     hostNode->AddNavDestinationToNavigation();
     auto newTopNavPath = GetTopNavPath();
     if (preTopNavPath != newTopNavPath) {
@@ -192,6 +192,7 @@ void NavigationPattern::OnModifyDone()
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(false);
             focusHub->LostFocus();
+            
             if (!navDestinationPattern->GetIsUnderNavRouter()) {
                 navDestinationPattern->ResetNavDestinationNode();
             }
@@ -211,20 +212,18 @@ void NavigationPattern::OnModifyDone()
                 eventHub->FireOnShownEvent();
                 navDestinationPattern->SetIsOnShow(true);
             }
-            auto focusHub = AceType::DynamicCast<FrameNode>(newTopNavDestination)->GetFocusHub();
-            CHECK_NULL_VOID(focusHub);
-            focusHub->SetParentFocusable(true);
-            focusHub->RequestFocus();
+            auto context = PipelineContext::GetCurrentContext();
+            if (context) {
+                context->AddAfterLayoutTask([navDestination = newTopNavDestination]() {
+                    auto focusHub = AceType::DynamicCast<FrameNode>(navDestination)->GetFocusHub();
+                    CHECK_NULL_VOID(focusHub);
+                    focusHub->SetParentFocusable(true);
+                    focusHub->RequestFocus();
+                });
+            }
         }
         auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
         CHECK_NULL_VOID(navigationLayoutProperty);
-        if (GetNavigationMode() == NavigationMode::STACK) {
-            DoNavigationTransitionAnimation(
-                preTopNavPath.second, newTopNavPath.second, prePathListSize, pathNames.size());
-        } else {
-            contentNode->Clean();
-            hostNode->AddNavDestinationToNavigation();
-        }
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
@@ -399,9 +398,24 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
     navigationMode_ = navigationLayoutAlgorithm->GetNavigationMode();
-    auto contentNode = hostNode->GetContentNode();
-    contentNode->Clean();
-    hostNode->AddNavDestinationToNavigation();
+    auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    auto children = navigationContentNode->GetChildren();
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    context->GetTaskExecutor()->PostTask(
+        [children, navigationPattern, hostNode] {
+            auto child = children.back();
+            auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(child);
+            CHECK_NULL_VOID(navDestination);
+            if (children.size() == 1 && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
+                // set backButton gone for the first level page in SPLIT mode
+                hostNode->SetBackButtonVisible(navDestination, false);
+            } else {
+                hostNode->SetBackButtonVisible(navDestination, true);
+            }
+        },
+        TaskExecutor::TaskType::UI);
     OnNavBarStateChange();
     UpdateTitleModeChangeEventHub(hostNode);
     UpdateResponseRegion(navigationLayoutAlgorithm->GetRealDividerWidth(),

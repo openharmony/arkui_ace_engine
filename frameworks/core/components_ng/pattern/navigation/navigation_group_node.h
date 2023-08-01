@@ -103,7 +103,7 @@ public:
     void BackToPreNavDestination(const RefPtr<UINode>& preNavDestinationNode, const RefPtr<UINode>& navDestinationNode,
         const RefPtr<NavRouterPattern>& navRouterPattern = nullptr);
     void AddBackButtonIconToNavDestination(const RefPtr<UINode>& navDestinationNode);
-    void SetBackButtonVisible(const RefPtr<UINode>& navDestinationNode, bool isVisible = true);
+    void SetBackButtonVisible(const RefPtr<UINode>& navDestinationNode, bool isVisible);
     void SetOnStateChangeFalse(
         const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navDestination, bool isBackButton = false);
 
