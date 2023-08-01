@@ -155,7 +155,17 @@ public:
 
     bool IsUsingMouse() const
     {
-        return false;
+        return isMousePressed_;
+    }
+
+    void ResetIsMousePressed()
+    {
+        isMousePressed_ = false;
+    }
+
+    OffsetF GetRightClickOffset() const
+    {
+        return rightClickOffset_;
     }
 
     int32_t GetCaretSpanIndex()
@@ -268,6 +278,7 @@ private:
     bool focusEventInitialized_ = false;
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
+    OffsetF rightClickOffset_;
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;
