@@ -53,6 +53,8 @@ class Modifier;
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
+inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
+
 // RenderContext is used for render node to paint.
 class RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType)
