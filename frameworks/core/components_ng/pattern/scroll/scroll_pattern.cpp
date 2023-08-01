@@ -127,7 +127,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
-            GetScrollBar()->PlayScrollBarEndAnimation();
+            GetScrollBar()->ScheduleDisapplearDelayTask();
         }
     }
     if (scrollStop_) {
@@ -182,10 +182,6 @@ void ScrollPattern::FireOnScrollStop()
     if (GetScrollAbort()) {
         SetScrollAbort(false);
         return;
-    }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar) {
-        scrollBar->PlayScrollBarEndAnimation();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

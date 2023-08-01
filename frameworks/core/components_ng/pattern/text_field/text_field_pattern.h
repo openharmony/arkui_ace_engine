@@ -153,6 +153,11 @@ public:
             textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
         }
         auto textFieldOverlayModifier = AceType::DynamicCast<TextFieldOverlayModifier>(GetScrollBarOverlayModifier());
+        if (!textFieldOverlayModifier) {
+            textFieldOverlayModifier =
+                AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect());
+            SetScrollBarOverlayModifier(textFieldOverlayModifier);
+        }
         auto paint =
             MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier, textFieldContentModifier_);
         auto scrollBar = GetScrollBar();

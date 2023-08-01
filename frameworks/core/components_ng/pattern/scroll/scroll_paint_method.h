@@ -41,14 +41,17 @@ public:
         edgeEffect_ = edgeEffect;
     }
 
-    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+    void SetScrollBarOverlayModifier(WeakPtr<ScrollBarOverlayModifier>&& scrollBarOverlayModifier)
+    {
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
+    }
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
-        auto scrollBar = scrollBar_.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(scrollBar, nullptr);
-        return scrollBar->GetScrollBarOverlayModifier();
+        return scrollBarOverlayModifier_.Upgrade();
     }
+
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
     void PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
@@ -56,6 +59,7 @@ private:
 
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
+    WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
 };
 } // namespace OHOS::Ace::NG
 
