@@ -48,6 +48,7 @@ ohos_unittest("select_overlay_proxy_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_box_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_pattern.cpp",

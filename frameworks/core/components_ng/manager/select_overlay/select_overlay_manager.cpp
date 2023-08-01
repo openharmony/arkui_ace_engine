@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
-    const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host)
+    const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host, bool animation)
 {
     host_ = host;
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -48,47 +48,74 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     // mount to parent
     selectOverlayNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (!infoPtr->isUsingMouse) {
+        auto node = DynamicCast<SelectOverlayNode>(selectOverlayNode);
+        CHECK_NULL_RETURN(node, nullptr);
+        node->ShowSelectOverlay(animation);
+    }
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
     selectOverlayItem_ = selectOverlayNode;
     return proxy;
 }
 
-void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy)
+void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy, bool animation)
 {
     auto id = proxy->GetSelectOverlayId();
-    DestroySelectOverlay(id);
+    DestroySelectOverlay(id, animation);
 }
 
-void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId)
+void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId, bool animation)
 {
     auto current = selectOverlayItem_.Upgrade();
     if (current && (current->GetId() == overlayId)) {
-        DestroyHelper(current);
+        DestroyHelper(current, animation);
     } else {
         LOGD("current overlay id %{public}d is already destroyed.", overlayId);
     }
 }
 
-void SelectOverlayManager::DestroySelectOverlay()
+void SelectOverlayManager::DestroySelectOverlay(bool animation)
 {
     auto current = selectOverlayItem_.Upgrade();
     if (current) {
-        DestroyHelper(current);
+        DestroyHelper(current, animation);
     }
 }
 
-void SelectOverlayManager::DestroyHelper(const RefPtr<FrameNode>& overlay)
+void SelectOverlayManager::DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     LOGD("destroy overlay, id is %{public}d.", overlay->GetId());
+    if (animation && !selectOverlayInfo_.isUsingMouse) {
+        selectOverlayItem_.Reset();
+        host_.Reset();
+        touchDownPoints_.clear();
+        selectOverlayInfo_.callerFrameNode.Reset();
+        auto node = DynamicCast<SelectOverlayNode>(overlay);
+        node->HideSelectOverlay([overlayWeak = WeakClaim(RawPtr(overlay)), managerWeak = WeakClaim(this)]() {
+            auto manager = managerWeak.Upgrade();
+            CHECK_NULL_VOID(manager);
+            auto overlay = overlayWeak.Upgrade();
+            CHECK_NULL_VOID(overlay);
+            manager->Destroy(overlay);
+        });
+    } else {
+        Destroy(overlay);
+        selectOverlayItem_.Reset();
+        host_.Reset();
+        touchDownPoints_.clear();
+        selectOverlayInfo_.callerFrameNode.Reset();
+    }
+}
+
+void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(overlay);
     rootNode->MarkNeedSyncRenderTree();
     rootNode->RebuildRenderContextTree();
-    selectOverlayItem_.Reset();
-    host_.Reset();
-    touchDownPoints_.clear();
-    selectOverlayInfo_.callerFrameNode.Reset();
 }
 
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)

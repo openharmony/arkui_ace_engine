@@ -207,6 +207,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",

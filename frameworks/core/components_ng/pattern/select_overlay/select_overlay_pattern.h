@@ -23,11 +23,12 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
-#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -58,8 +59,18 @@ public:
         if (!selectOverlayModifier_) {
             selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
         }
-        return MakeRefPtr<SelectOverlayPaintMethod>(
-            selectOverlayModifier_, *info_, defaultMenuEndOffset_, hasExtensionMenu_);
+        if (!selectOverlayContentModifier_) {
+            selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>();
+        }
+
+        if (paintMethodCreated_) {
+            return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
+                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, true);
+        } else {
+            paintMethodCreated_ = true;
+            return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
+                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, false);
+        }
     }
 
     const std::shared_ptr<SelectOverlayInfo>& GetSelectOverlayInfo() const
@@ -94,6 +105,11 @@ public:
         return selectOverlayModifier_;
     }
 
+    const RefPtr<SelectOverlayContentModifier>& GetContentModifier()
+    {
+        return selectOverlayContentModifier_;
+    }
+
     const OffsetF& GetDefaultMenuEndOffset()
     {
         return defaultMenuEndOffset_;
@@ -119,6 +135,11 @@ public:
     void SetClosedByGlobalTouchEvent(bool closedByGlobalTouch)
     {
         closedByGlobalTouchEvent_ = closedByGlobalTouch;
+    }
+
+    void SetHasShowAnimation(bool animation)
+    {
+        hasShowAnimation_ = animation;
     }
 
 private:
@@ -150,6 +171,7 @@ private:
     // Used to record the original menu display status when the handle is moved.
     bool orignMenuIsShow_ = false;
     bool hasExtensionMenu_ = false;
+    bool hasShowAnimation_ = false;
 
     int32_t greatThanMaxWidthIndex_ = -1;
     float menuWidth_ = 0.0f;
@@ -159,6 +181,10 @@ private:
     OffsetF defaultMenuEndOffset_;
 
     RefPtr<SelectOverlayModifier> selectOverlayModifier_;
+
+    RefPtr<SelectOverlayContentModifier> selectOverlayContentModifier_;
+
+    bool paintMethodCreated_ = false;
 
     bool closedByGlobalTouchEvent_ = false;
 

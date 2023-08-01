@@ -101,6 +101,7 @@ ohos_unittest("date_picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/toss_animation_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",

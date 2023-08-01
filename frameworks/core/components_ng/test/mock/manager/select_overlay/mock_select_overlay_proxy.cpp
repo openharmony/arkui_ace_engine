@@ -21,7 +21,7 @@ bool SelectOverlayProxy::IsClosed() const
     return false;
 }
 
-void SelectOverlayProxy::Close() const {}
+void SelectOverlayProxy::Close(bool animation) const {}
 
 void SelectOverlayProxy::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info) const {}
 
