@@ -37,7 +37,7 @@ void CustomPaintPattern::OnAttachToFrameNode()
     auto renderCtx = host->GetRenderContext();
     renderCtx->SetClipToBounds(false);
     renderCtx->SetUsingContentRectForRenderFrame(true);
-
+    renderCtx->SetFrameGravity(OHOS::Rosen::Gravity::RESIZE_ASPECT_FILL);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
 

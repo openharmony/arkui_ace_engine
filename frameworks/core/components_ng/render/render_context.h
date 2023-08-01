@@ -42,6 +42,7 @@
 
 namespace OHOS::Rosen {
 class DrawCmdList;
+enum class Gravity;
 }
 
 namespace OHOS::Ace::NG {
@@ -449,6 +450,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
     virtual void SetUsingContentRectForRenderFrame(bool value) {}
+    virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
 protected:
     RenderContext() = default;
