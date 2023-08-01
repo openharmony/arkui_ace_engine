@@ -96,7 +96,7 @@ private:
     static std::string SpliceDateTime(
         const std::vector<std::string>& curDateTime, const std::vector<std::string>& inputFormatSplitter);
     static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const std::string& str,
-        const char& element, const int32_t& elementIndex);
+        const char& element, const int32_t& elementIndex, const bool& oneElement);
 
     std::string GetFormat() const;
     int32_t GetHoursWest() const;
