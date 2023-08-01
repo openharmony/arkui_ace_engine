@@ -1553,21 +1553,19 @@ void PipelineContext::OnHide()
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
-    LOGI("WindowFocus: windowId: %{public}d, onFocus: %{public}d, onShow: %{public}d.", windowId_, isFocus, onShow_);
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
+        LOGI("WindowFocus: window - %{public}d on blur.", windowId_);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         if (mouseStyle) {
             mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
         }
-        LOGD("WindowFocus: onFocus_ is %{public}d. Lost all focus.", onFocus_);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
-    }
-    if (onFocus_ && onShow_) {
-        LOGD("WindowFocus: onFocus_ and onShow_ are both true. Do FlushFocus().");
+    } else {
+        LOGI("WindowFocus: window - %{public}d on focus.", windowId_);
         isRootFocusNeedUpdate_ = true;
         FlushFocus();
     }
