@@ -897,6 +897,11 @@ public:
         formLinkInfoMap_[id] = info;
     }
 
+    virtual bool IsLayouting() const
+    {
+        return false;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

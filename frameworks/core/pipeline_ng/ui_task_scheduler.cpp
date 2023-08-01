@@ -57,6 +57,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     std::vector<RefPtr<FrameNode>> orderedNodes;
     for (auto&& pageNodes : dirtyLayoutNodes) {
@@ -91,6 +92,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
     }
+    isLayouting_ = false;
 }
 
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)

@@ -110,6 +110,11 @@ public:
         return frameId_;
     }
 
+    bool IsLayouting() const
+    {
+        return isLayouting_;
+    }
+
 private:
     bool NeedAdditionalLayout();
 
@@ -140,6 +145,7 @@ private:
     std::list<std::function<void()>> afterRenderTasks_;
 
     uint32_t currentPageId_ = 0;
+    bool isLayouting_ = false;
 
     FrameInfo* frameInfo_ = nullptr;
 
