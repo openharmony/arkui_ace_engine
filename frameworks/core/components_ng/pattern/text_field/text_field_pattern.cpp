@@ -894,13 +894,13 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
 
 void TextFieldPattern::OnTextInputScroll(float offset)
 {
-    if (IsTextArea() || textRect_.Width() <= contentRect_.Width() ||
-        (textRect_.GetX() + offset) > contentRect_.GetX()) {
+    if (IsTextArea() || textRect_.Width() <= contentRect_.Width()) {
         return;
     }
-    if ((std::abs(((textRect_.GetX() + offset) - contentRect_.Width() - GetPaddingRight())) > textRect_.Width()) &&
-        LessNotEqual(offset, 0.0f)) {
-        return;
+    if (textRect_.GetX() + offset > contentRect_.GetX()) {
+        offset = contentRect_.GetX() - textRect_.GetX();
+    } else if (textRect_.GetX() + textRect_.Width() + offset < contentRect_.GetX() + contentRect_.Width()) {
+        offset = contentRect_.GetX() + contentRect_.Width() - textRect_.GetX() - textRect_.Width();
     }
     caretRect_.SetLeft(caretRect_.GetX() + offset);
     currentOffset_ = textRect_.GetX() + offset;
