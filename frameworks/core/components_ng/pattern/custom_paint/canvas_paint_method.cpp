@@ -171,16 +171,16 @@ void CanvasPaintMethod::DrawImage(
 #endif
     InitPaintBlend(imagePaint_);
 
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
+
     const auto skCanvas = skCanvas_.get();
-    if (HasImageShadow()) {
+    if (HasShadow()) {
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
         path.addRect(skRect);
-        PaintShadow(path, *imageShadow_, skCanvas);
-    }
-
-    if (globalState_.HasGlobalAlpha()) {
-        imagePaint_.setAlphaf(globalState_.GetAlpha());
+        PaintShadow(path, shadow_, skCanvas, &imagePaint_);
     }
 
     switch (canvasImage.flag) {
@@ -780,15 +780,20 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
 }
 
 #ifndef USE_ROSEN_DRAWING
-void CanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
+void CanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    RosenDecorationPainter::PaintShadow(path, shadow, canvas, paint);
+#endif
+}
 #else
 void CanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas)
-#endif
 {
 #ifdef ENABLE_ROSEN_BACKEND
     RosenDecorationPainter::PaintShadow(path, shadow, canvas);
 #endif
 }
+#endif
 
 void CanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
 {
