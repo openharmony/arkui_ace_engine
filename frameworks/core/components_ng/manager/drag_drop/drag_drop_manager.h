@@ -98,6 +98,16 @@ public:
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
     bool CheckDragDropProxy(int64_t id) const;
 
+    bool IsWindowConsumed()
+    {
+        return isWindowConsumed_;
+    }
+
+    void SetIsWindowConsumed(bool consumed)
+    {
+        isWindowConsumed_ = consumed;
+    }
+
     bool IsDragged() const
     {
         return isDragged_;
@@ -168,6 +178,7 @@ private:
     std::function<void(void)> notifyInDraggedCallback_ = nullptr;
     bool isDragged_ = false;
     bool isMouseDragged_ = false;
+    bool isWindowConsumed_ = false;
     VelocityTracker velocityTracker_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
