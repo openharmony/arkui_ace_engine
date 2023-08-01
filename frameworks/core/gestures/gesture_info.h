@@ -351,6 +351,10 @@ public:
 
     bool IsUseCustomAnimation();
 
+    void SetUdKey(const std::string udKey);
+
+    std::string GetUdKey();
+
     void SetDragInfo(const RefPtr<UnifiedData>& dragInfo);
 
     RefPtr<UnifiedData>& GetDragInfo();
@@ -358,6 +362,10 @@ public:
     void SetCopy(bool copy);
 
     bool IsCopy();
+
+    void SetIsGetDataSuccess(bool isGetDataSuccess);
+
+    bool IsGetDataSuccess();
 #endif
 
     void SetVelocity(const Velocity& velocity)
@@ -381,9 +389,11 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<UnifiedData> unifiedData_;
     std::map<std::string, int64_t> summary_;
+    std::string udKey_ = "";
     DragRet dragRet_;
     Rect previewRect_;
     bool useCustomAnimation_ = false;
+    bool isGetDataSuccess_ = false;
     RefPtr<UnifiedData> dragInfo_;
     bool copy_ = true;
 #endif

@@ -807,11 +807,17 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     InteractionManager::GetInstance()->GetUdKey(udKey);
     if (udKey.empty()) {
         LOGW("InteractionManager GetUdkey is null");
+        event->SetIsGetDataSuccess(false);
+    } else {
+        event->SetUdKey(udKey);
     }
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
     int ret = UdmfClient::GetInstance()->GetData(udData, udKey);
     if (ret != 0) {
         LOGW("UDMF GetData failed: %{public}d", ret);
+        event->SetIsGetDataSuccess(false);
+    } else {
+        event->SetIsGetDataSuccess(true);
     }
     auto unifiedData = udData;
     event->SetData(unifiedData);
