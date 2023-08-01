@@ -146,7 +146,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
-    host->SetViewPort(geometryNode->GetFrameRect());
+    auto offsetRelativeToWindow = host->GetOffsetRelativeToWindow();
+    auto globalViewPort = RectF(offsetRelativeToWindow, geometryNode->GetFrameRect().GetSize());
+    host->SetViewPort(globalViewPort);
     return false;
 }
 
