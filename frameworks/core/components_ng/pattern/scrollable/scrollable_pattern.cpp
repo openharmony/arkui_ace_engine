@@ -342,7 +342,9 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
                 gestureHub->RemoveTouchEvent(scrollBar_->GetTouchEvent());
             }
             scrollBar_.Reset();
-            overlayModifier_->SetOpacity(0);
+            if (overlayModifier_) {
+                overlayModifier_->SetOpacity(0);
+            }
         }
         return;
     }
@@ -361,13 +363,10 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
 
     if (oldDisplayMode != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
-        if (overlayModifier_) {
+        if (overlayModifier_ && scrollBar_->IsScrollable()) {
             overlayModifier_->SetOpacity(UINT8_MAX);
         }
-        if (displayMode == DisplayMode::ON) {
-        } else if (displayMode == DisplayMode::AUTO) {
-            scrollBar_->ScheduleDisapplearDelayTask();
-        }
+        scrollBar_->ScheduleDisapplearDelayTask();
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(renderContext);
@@ -411,8 +410,16 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
     // inner scrollbar, viewOffset is padding offset
     if (scrollBar_) {
         auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
-        bool scrollable = GreatNotEqual(estimatedHeight, mainSize);
-        scrollBar_->SetScrollable(IsScrollable() && scrollable);
+        bool scrollable = GreatNotEqual(estimatedHeight, mainSize) && IsScrollable();
+        if (scrollBar_->IsScrollable() != scrollable) {
+            scrollBar_->SetScrollable(scrollable);
+            if (overlayModifier_) {
+                overlayModifier_->SetOpacity(scrollable ? UINT8_MAX : 0);
+            }
+            if (scrollable) {
+                scrollBar_->ScheduleDisapplearDelayTask();
+            }
+        }
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
