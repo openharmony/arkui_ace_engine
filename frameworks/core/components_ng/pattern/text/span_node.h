@@ -206,7 +206,7 @@ public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(int32_t nodeId);
 
     explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId) {}
-    ~SpanNode() override;
+    ~SpanNode() override = default;
 
     bool IsAtomicNode() const override
     {
