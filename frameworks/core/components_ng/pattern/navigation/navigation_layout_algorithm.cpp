@@ -281,7 +281,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto dividerWidth = 0.0f;
     if (navigationLayoutAlgorithm->GetNavigationMode() == NavigationMode::SPLIT) {
         if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-            // measure SPLIT and HideNavBar
+            // measure SPLIT with NavBar hidden
             navBarSize.SetWidth(0.0f);
             navBarSize.SetHeight(0.0f);
             contentWidth = size.Width();
@@ -292,7 +292,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutWrapper->GetGeometryNode()->SetFrameSize(size);
             return;
         }
-        // measure SPLIT and with NavBar
+        // measure SPLIT and with NavBar displaying
         bool isPercentSize = (navBarWidthValue.Unit() == DimensionUnit::PERCENT);
         if (isPercentSize) {
             navBarWidth = std::floor(static_cast<float>(navBarWidthValue.Value() * size.Width()));
@@ -314,11 +314,13 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     if (navigationLayoutProperty->GetDestinationChange().value_or(false) ||
         contentNode->FindChildNodeOfClass<NavDestinationGroupNode>()) {
-        contentWidth = size.Width();
+        // measure STACK with content displaying
+        contentSize.SetWidth(size.Width());
+    } else {
+        contentSize.SetWidth(0.0f);
     }
     navBarSize.SetWidth(size.Width());
     navBarSize.SetHeight(size.Height());
-    contentSize.SetWidth(size.Width());
     MeasureNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize);
     MeasureContentChild(layoutWrapper, hostNode, navigationLayoutProperty, contentSize);
     MeasureDivider(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize);
