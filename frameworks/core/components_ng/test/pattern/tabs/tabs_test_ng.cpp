@@ -5066,7 +5066,8 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable003, TestSize.Level1)
             for (int k = 0; k <= 1; k++) {
                 tabBarPattern->InitScrollable(gestureHub);
                 ASSERT_NE(tabBarPattern->scrollableEvent_, nullptr);
-                tabBarPattern->scrollableEvent_->callback_(0.1, SCROLL_FROM_NONE);
+                auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
+                scrollable->callback_(0.1, SCROLL_FROM_NONE);
                 tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
                 tabBarPattern->axis_ = Axis::HORIZONTAL;
             }
@@ -5076,13 +5077,15 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable003, TestSize.Level1)
         }
         tabBarPattern->tabItemOffsets_ = { { -1.0f, -1.0f } };
     }
-    tabBarPattern->scrollableEvent_->callback_(0.1, SCROLL_FROM_START);
+    auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
+    scrollable->callback_(0.1, SCROLL_FROM_START);
     tabBarPattern->axis_ = Axis::VERTICAL;
     tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     int32_t source = SCROLL_FROM_UPDATE;
     for (int i = 0; i <= 1; i++) {
         tabBarPattern->InitScrollable(gestureHub);
-        tabBarPattern->scrollableEvent_->callback_(0.1, source);
+        scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
+        scrollable->callback_(0.1, source);
         tabBarPattern->axis_ = Axis::VERTICAL;
         tabBarPattern->tabItemOffsets_.clear();
         tabBarPattern->tabItemOffsets_ = { { 1.0f, -1.0f } };
@@ -6289,7 +6292,8 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable004, TestSize.Level1)
             for (int k = 0; k <= 1; k++) {
                 tabBarPattern->InitScrollable(gestureHub);
                 ASSERT_NE(tabBarPattern->scrollableEvent_, nullptr);
-                tabBarPattern->scrollableEvent_->callback_(0.1, SCROLL_FROM_NONE);
+                auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
+                scrollable->callback_(0.1, SCROLL_FROM_NONE);
                 tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
                 tabBarPattern->axis_ = Axis::HORIZONTAL;
             }
@@ -6301,8 +6305,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable004, TestSize.Level1)
     }
     tabBarPattern->axis_ = Axis::VERTICAL;
     tabBarPattern->currentOffset_ = DEFAULT_OFFSET;
-    tabBarPattern->scrollableEvent_->callback_(0.1, SCROLL_FROM_AXIS);
-    tabBarPattern->scrollableEvent_->callback_(1.1, SCROLL_FROM_AXIS);
+    auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
+    scrollable->callback_(0.1, SCROLL_FROM_AXIS);
+    scrollable->callback_(1.1, SCROLL_FROM_AXIS);
     EXPECT_EQ(tabBarPattern->GetTabBarStyle(), TabBarStyle::BOTTOMTABBATSTYLE);
 }
 

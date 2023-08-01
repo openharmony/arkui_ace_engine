@@ -1255,8 +1255,9 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
      * @tc.steps: step1. Test OnScrollPosition/OnScrollEnd.
      */
     CreateGrid();
-    auto callback_1 = pattern_->scrollableEvent_->GetScrollPositionCallback();
-    auto callback_2 = pattern_->scrollableEvent_->GetScrollEndCallback();
+    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
+    auto callback_1 = scrollable->callback_;
+    auto callback_2 = scrollable->scrollEndCallback_;
     EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_START));
@@ -1482,7 +1483,7 @@ HWTEST_F(GridTestNg, Event006, TestSize.Level1)
 
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
-    EXPECT_NE(scrollableEvent->GetScrollFrameBeginCallback(), nullptr);
+    EXPECT_NE(scrollableEvent->GetScrollable()->scrollFrameBeginCallback_, nullptr);
     OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 }
 

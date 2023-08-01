@@ -147,7 +147,10 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     swiperController_->SetTabBarFinishCallback(std::move(callback));
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
-    scrollableEvent_->SetScrollPositionCallback(std::move(task));
+    auto scrollable = MakeRefPtr<Scrollable>(task, axis);
+    scrollable->SetNodeId(host->GetAccessibilityId());
+    scrollable->Initialize(host->GetContext());
+    scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 

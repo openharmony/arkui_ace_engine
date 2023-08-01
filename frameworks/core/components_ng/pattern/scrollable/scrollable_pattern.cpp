@@ -153,12 +153,13 @@ void ScrollablePattern::OnScrollEnd()
 
 void ScrollablePattern::AddScrollEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto gestureHub = GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
     if (scrollableEvent_) {
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
-    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
@@ -167,19 +168,19 @@ void ScrollablePattern::AddScrollEvent()
         }
         return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
-    scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
+    auto scrollable = MakeRefPtr<Scrollable>(std::move(scrollCallback), GetAxis());
+    scrollable->SetNodeId(host->GetAccessibilityId());
+    scrollable->Initialize(host->GetContext());
+
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnScrollEnd();
         pattern->OnScrollEndCallback();
     };
-    scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
-    scrollableEvent_->SetFriction(friction_);
-    gestureHub->AddScrollableEvent(scrollableEvent_);
+    scrollable->SetScrollEndCallback(std::move(scrollEnd));
+    scrollable->SetUnstaticFriction(friction_);
 
-    auto scrollable = scrollableEvent_->GetScrollable();
-    CHECK_NULL_VOID_NOLOG(scrollable);
     auto func = [weak = AceType::WeakClaim(this)](double offset) -> OverScrollOffset {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -211,6 +212,10 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->NeedScrollSnapToSide(delta);
     };
     scrollable->SetNeedScrollSnapToSideCallback(std::move(needScrollSnapToSideCallback));
+
+    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
+    scrollableEvent_->SetScrollable(scrollable);
+    gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
@@ -468,9 +473,9 @@ void ScrollablePattern::SetFriction(double friction)
         friction = FRICTION;
     }
     friction_ = friction;
-    if (scrollableEvent_) {
-        scrollableEvent_->SetFriction(friction_);
-    }
+    CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    scrollable->SetUnstaticFriction(friction_);
 }
 
 RefPtr<ScrollablePattern> ScrollablePattern::GetParentScrollable()

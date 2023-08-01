@@ -779,16 +779,10 @@ void ListPattern::InitScrollableEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listEventHub = host->GetEventHub<ListEventHub>();
-    auto onScrollBegin = listEventHub->GetOnScrollBegin();
     auto onScrollFrameBegin = listEventHub->GetOnScrollFrameBegin();
+    SetScrollFrameBeginCallback(onScrollFrameBegin);
     auto scrollableEvent = GetScrollableEvent();
     CHECK_NULL_VOID(scrollableEvent);
-    if (onScrollBegin) {
-        scrollableEvent->SetScrollBeginCallback(std::move(onScrollBegin));
-    }
-    if (onScrollFrameBegin) {
-        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
-    }
     scrollableTouchEvent_ = scrollableEvent->GetScrollable();
     CHECK_NULL_VOID(scrollableTouchEvent_);
     scrollableTouchEvent_->SetOnContinuousSliding([weak = AceType::WeakClaim(this)]() -> double {

@@ -135,12 +135,26 @@ public:
         return childOffset_;
     };
 
+    void SetChildRect(const RectF& rect)
+    {
+        childRect_ = rect;
+    }
+
+    void OnCollectTouchTarget(const OffsetF& coordinateOffset,
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void ValidateOffset(int32_t source);
     void SetAccessibilityAction();
+    void InitPanRecognizer();
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info);
+    void ProcessFrictionMotion(double value);
+    void ProcessFrictionMotionStop();
 
     RefPtr<Animator> scrollEndAnimator_;
     RefPtr<ScrollBarProxy> scrollBarProxy_;
@@ -152,8 +166,16 @@ private:
     float scrollableDistance_ = 0.0f;
     float controlDistance_ = 0.0f;
     float scrollOffset_ = 0.0f;
+    float friction_ = BAR_FRICTION;
+    float frictionPosition_ = 0.0;
 
     float childOffset_ = 0.0f;
+    RefPtr<PanRecognizer> panRecognizer_;
+    RefPtr<FrictionMotion> frictionMotion_;
+    RefPtr<Animator> frictionController_;
+    ScrollPositionCallback scrollPositionCallback_;
+    ScrollEndCallback scrollEndCallback_;
+    RectF childRect_;
 };
 
 } // namespace OHOS::Ace::NG

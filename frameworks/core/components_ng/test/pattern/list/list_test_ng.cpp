@@ -2603,10 +2603,6 @@ HWTEST_F(ListTestNg, Event006, TestSize.Level1)
 {
     ListModelNG listModelNG;
     listModelNG.Create();
-    listModelNG.SetOnScrollBegin([](Dimension, Dimension) {
-        ScrollInfo info;
-        return info;
-    });
     listModelNG.SetOnScrollFrameBegin([](Dimension, ScrollState) {
         ScrollFrameResult result;
         return result;
@@ -2616,8 +2612,8 @@ HWTEST_F(ListTestNg, Event006, TestSize.Level1)
 
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
-    EXPECT_NE(scrollableEvent->GetScrollBeginCallback(), nullptr);
-    EXPECT_NE(scrollableEvent->GetScrollFrameBeginCallback(), nullptr);
+    auto scrollable = scrollableEvent->GetScrollable();
+    EXPECT_NE(scrollable->scrollFrameBeginCallback_, nullptr);
     RunMeasureAndLayout(frameNode_);
 }
 
