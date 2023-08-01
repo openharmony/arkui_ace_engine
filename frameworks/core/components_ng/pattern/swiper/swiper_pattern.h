@@ -25,6 +25,7 @@
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -563,6 +564,7 @@ private:
     RefPtr<Animator> indicatorController_;
 
     RefPtr<SwiperController> swiperController_;
+    RefPtr<InputEvent> mouseEvent_;
 
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
