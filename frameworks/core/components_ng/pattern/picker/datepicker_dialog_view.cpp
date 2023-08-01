@@ -387,11 +387,6 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto dividerLayoutProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
     CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
     dividerLayoutProps->UpdateVertical(true);
-
-    MarginProperty margin;
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    dividerLayoutProps->UpdateMargin(margin);
     dividerLayoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
 
