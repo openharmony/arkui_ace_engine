@@ -176,16 +176,36 @@ void WindowScene::OnForeground()
         CHECK_NULL_VOID(self);
 
         CHECK_NULL_VOID(self->snapshotNode_);
-        CHECK_NULL_VOID(self->session_);
-        auto state = self->session_->GetSessionState();
-        CHECK_NULL_VOID_NOLOG(state == Rosen::SessionState::STATE_DISCONNECT);
-
-        self->CreateStartingNode();
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChild(self->snapshotNode_);
         self->snapshotNode_.Reset();
-        host->AddChild(self->startingNode_);
+        host->AddChild(self->contentNode_);
+        if (!self->session_->GetBufferAvailable()) {
+            self->CreateStartingNode();
+            host->AddChild(self->startingNode_);
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnBackground()
+{
+    CHECK_NULL_VOID_NOLOG(IsMainWindow());
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        self->CreateSnapshotNode();
+        host->RemoveChild(self->contentNode_);
+        host->AddChild(self->snapshotNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
@@ -202,11 +222,13 @@ void WindowScene::OnDisconnect()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
-        self->CreateSnapshotNode();
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
+        self->CreateSnapshotNode();
         host->RemoveChild(self->contentNode_);
         self->contentNode_.Reset();
+        host->RemoveChild(self->startingNode_);
+        self->startingNode_.Reset();
         host->AddChild(self->snapshotNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };

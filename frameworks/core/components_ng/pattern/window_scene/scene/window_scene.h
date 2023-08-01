@@ -44,6 +44,7 @@ protected:
 
     void OnConnect() override;
     void OnForeground() override;
+    void OnBackground() override;
     void OnDisconnect() override;
 
     void OnSetDepth(const int32_t depth) override;
