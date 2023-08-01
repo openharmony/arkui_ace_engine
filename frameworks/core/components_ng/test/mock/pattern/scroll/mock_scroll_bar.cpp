@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
 namespace OHOS::Ace::NG {
-ScrollBar::ScrollBar(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier) {}
+ScrollBar::ScrollBar() {}
 
 bool ScrollBar::NeedPaint() const
 {

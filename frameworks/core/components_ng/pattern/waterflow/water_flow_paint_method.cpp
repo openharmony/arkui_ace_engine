@@ -63,14 +63,14 @@ void WaterFlowPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 void WaterFlowPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID_NOLOG(paintWrapper);
+    auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(scrollBarOverlayModifier);
     auto scrollBar = scrollBar_.Upgrade();
     CHECK_NULL_VOID_NOLOG(scrollBar);
-    if (!scrollBar->NeedPaint()) {
+    if (!scrollBar || !scrollBar->NeedPaint()) {
         LOGD("no need paint scroll bar.");
         return;
     }
-    auto scrollBarOverlayModifier = scrollBar->GetScrollBarOverlayModifier();
-    CHECK_NULL_VOID_NOLOG(scrollBarOverlayModifier);
     scrollBarOverlayModifier->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
         SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
         OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),

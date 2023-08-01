@@ -71,6 +71,12 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
     auto paint = MakeRefPtr<GridPaintMethod>(GetScrollBar());
     CHECK_NULL_RETURN(paint, nullptr);
+    auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
+    if (!scrollBarOverlayModifier) {
+        scrollBarOverlayModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+        SetScrollBarOverlayModifier(scrollBarOverlayModifier);
+    }
+    paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier);
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
@@ -384,7 +390,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
-            GetScrollBar()->PlayScrollBarEndAnimation();
+            GetScrollBar()->ScheduleDisapplearDelayTask();
         }
     }
     CheckRestartSpring();
@@ -518,10 +524,6 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
     if (scrollStop_) {
         auto onScrollStop = gridEventHub->GetOnScrollStop();
         if (!GetScrollAbort()) {
-            auto scrollBar = GetScrollBar();
-            if (scrollBar) {
-                scrollBar->PlayScrollBarEndAnimation();
-            }
             if (onScrollStop) {
                 scrollState_ = SCROLL_FROM_NONE;
                 onScrollStop();

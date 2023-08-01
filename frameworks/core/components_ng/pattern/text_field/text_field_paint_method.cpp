@@ -131,7 +131,6 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetContentSize(contentSize);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     textFieldOverlayModifier_->SetFrameSize(frameSize);
-
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     auto cursorVisible = textFieldPattern->GetCursorVisible();
@@ -170,10 +169,13 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (textFieldPattern->GetSelectMode() != SelectionMode::NONE) {
         textFieldPattern->MarkRedrawOverlay();
     }
-    
+    UpdateScrollBar();
+}
+
+void TextFieldPaintMethod::UpdateScrollBar()
+{
     auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBar);
-    if (!scrollBar->NeedPaint()) {
+    if (!scrollBar || !scrollBar->NeedPaint()) {
         LOGD("UpdateOverlayModifier no need paint scroll bar.");
         return;
     }

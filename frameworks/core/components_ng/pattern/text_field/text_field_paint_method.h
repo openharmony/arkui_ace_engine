@@ -51,6 +51,8 @@ public:
         scrollBar_ = scrollBar;
     }
 
+    void UpdateScrollBar();
+
 private:
     void UpdateTextStyleToModifier(
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, bool isDisabled);
