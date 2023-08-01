@@ -190,6 +190,9 @@ public:
     {
         ACE_SCOPED_TRACE("RemoveAllChild");
         expiringItem_.merge(generatedItem_);
+        for (const auto& iter : generatedItem_) {
+            iter.second->SetJSViewActive(false);
+        }
         generatedItem_.clear();
     }
 
@@ -203,6 +206,7 @@ public:
             if (iter != generatedItem_.end()) {
                 child = iter->second;
                 expiringItem_.try_emplace(iter->first, std::move(iter->second));
+                iter->second->SetJSViewActive(false);
                 generatedItem_.erase(iter);
             }
         }
@@ -236,7 +240,9 @@ public:
         auto itemInfo = OnGetChildByIndex(index, expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, itemInfo.second);
+        cachedItems_[index] = itemInfo.first;
         itemInfo.second->Build();
+        itemInfo.second->SetJSViewActive(false);
         return itemInfo.second;
     }
 
