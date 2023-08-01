@@ -266,7 +266,8 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 
 bool TextPattern::IsSelectAll()
 {
-    return textSelector_.GetTextStart() == 0 && textSelector_.GetTextEnd() == GetWideText().length() + imageCount_;
+    return textSelector_.GetTextStart() == 0 &&
+           textSelector_.GetTextEnd() == static_cast<int32_t>(GetWideText().length()) + imageCount_;
 }
 std::wstring TextPattern::GetWideText() const
 {
