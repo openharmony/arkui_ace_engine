@@ -899,7 +899,6 @@ bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkB
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
     bool res = renderContext->GetBitmap(currentBitmap, drawCmdList);
     if (res) {
-        rsRecordingCanvas_->Clear();
         return true;
     }
     LOGD("GetBitmap failed.");
