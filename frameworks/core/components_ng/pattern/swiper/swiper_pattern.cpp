@@ -81,6 +81,16 @@ void SwiperPattern::OnAttachToFrameNode()
     InitSurfaceChangedCallback();
 }
 
+void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasSurfaceChangedCallback()) {
+        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
+        pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
+    }
+}
+
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 {
     auto host = GetHost();

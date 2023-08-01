@@ -82,9 +82,6 @@ public:
         for (auto& item : cbList_) {
             napi_delete_reference(env_, item);
         }
-        if (thisVarRef_ != nullptr) {
-            napi_delete_reference(env_, thisVarRef_);
-        }
     }
 
     static void NapiCallback(JsEngine* jsEngine)
@@ -113,8 +110,6 @@ public:
                 if (scope == nullptr) {
                     return;
                 }
-                napi_value thisVal = nullptr;
-                napi_get_reference_value(listener->env_, listener->thisVarRef_, &thisVal);
 
                 napi_value cb = nullptr;
                 napi_get_reference_value(listener->env_, cbRef, &cb);
@@ -123,7 +118,7 @@ public:
                 listener->MediaQueryResult::NapiSerializer(listener->env_, resultArg);
 
                 napi_value result = nullptr;
-                napi_call_function(listener->env_, thisVal, cb, 1, &resultArg, &result);
+                napi_call_function(listener->env_, listener->thisVar_, cb, 1, &resultArg, &result);
                 napi_close_handle_scope(listener->env_, scope);
             }
         }
@@ -259,9 +254,6 @@ private:
         if (env_ == nullptr) {
             env_ = env;
         }
-        if (thisVarRef_ == nullptr) {
-            napi_create_reference(env, thisVar, 1, &thisVarRef_);
-        }
         napi_close_handle_scope(env, scope);
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
@@ -316,7 +308,7 @@ private:
         return argc;
     }
 
-    napi_ref thisVarRef_ = nullptr;
+    napi_value thisVar_ = nullptr;
     napi_env env_ = nullptr;
     std::list<napi_ref> cbList_;
     static std::map<JsEngine*, std::set<MediaQueryListener*>> listenerSets_;
