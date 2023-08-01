@@ -43,6 +43,7 @@ namespace {
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_IMAGE_SIZE = 57.0f;
+constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 } // namespace
 RichEditorPattern::RichEditorPattern() {}
 
@@ -678,10 +679,10 @@ void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpan
             CalcLength(imageStyle.size.value().width.Value()), CalcLength(imageStyle.size.value().height.Value())));
     }
     if (updateSpanStyle_.updateImageFit.has_value()) {
-        imageLayoutProperty->UpdateVerticalAlign(imageStyle.verticalAlign.value());
+        imageLayoutProperty->UpdateImageFit(imageStyle.objectFit.value());
     }
     if (updateSpanStyle_.updateImageVerticalAlign.has_value()) {
-        imageLayoutProperty->UpdateImageFit(imageStyle.objectFit.value());
+        imageLayoutProperty->UpdateVerticalAlign(imageStyle.verticalAlign.value());
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
@@ -1376,6 +1377,7 @@ void RichEditorPattern::CreateTextSpanNode(
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
+    spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
     spanNode->UpdateContent(insertValue);
     AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true);
 }
