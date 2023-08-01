@@ -498,7 +498,7 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 
 MarginPropertyF LayoutProperty::CreateMargin()
 {
-    CHECK_NULL_RETURN(margin_, MarginPropertyF());
+    CHECK_NULL_RETURN_NOLOG(margin_, MarginPropertyF());
     if (!marginResult_.has_value() && margin_) {
         if (layoutConstraint_.has_value()) {
             marginResult_ = ConvertToMarginPropertyF(
