@@ -1244,6 +1244,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t s
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    renderContext->GetPointWithTransform(localPoint);
     auto clip = renderContext->GetClipEdge().value_or(false);
     if (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) {
         if (clip) {
