@@ -63,8 +63,12 @@ void JSList::SetDirection(int32_t direction)
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
 }
 
-void JSList::SetScrollBar(int32_t scrollBar)
+void JSList::SetScrollBar(const JSCallbackInfo& info)
 {
+    // default value 1 represents scrollBar DisplayMode::AUTO.
+    int32_t scrollBar = 1;
+    ParseJsInteger<int32_t>(info[0], scrollBar);
+    scrollBar = scrollBar < 0 ? 1 : scrollBar;
     ListModel::GetInstance()->SetScrollBar(static_cast<DisplayMode>(scrollBar));
 }
 
