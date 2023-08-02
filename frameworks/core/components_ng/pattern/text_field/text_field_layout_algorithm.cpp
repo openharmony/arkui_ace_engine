@@ -212,7 +212,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
-    auto disableTextAlign = !pattern->IsTextArea() && textFieldLayoutProperty->GetWidthAutoValue(false);
+    auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder && !isInlineStyle;
     if (pattern->IsDragging() && !showPlaceHolder) {
         TextStyle dragTextStyle = textStyle;
         Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
