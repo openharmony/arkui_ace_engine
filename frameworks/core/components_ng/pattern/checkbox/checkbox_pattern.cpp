@@ -248,7 +248,7 @@ void CheckBoxPattern::CheckPageNode()
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     auto pageNode = stageManager->GetPageById(host->GetPageId());
-    CHECK_NULL_VOID(pageNode);
+    CHECK_NULL_VOID_NOLOG(pageNode);
     if (pageNode->GetId() != prePageId) {
         auto eventHub = host->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -424,7 +424,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
             isAllCheckBoxSelected = false;
         }
     }
-    CHECK_NULL_VOID(checkBoxGroupNode);
+    CHECK_NULL_VOID_NOLOG(checkBoxGroupNode);
     auto groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(groupPaintProperty);
     auto pattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();

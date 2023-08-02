@@ -56,4 +56,8 @@ void ScrollablePattern::DrawSelectedZone(const RectF& selectedZone) {}
 void ScrollablePattern::ClearSelectedZone() {}
 
 void ScrollablePattern::MarkSelectedItems() {}
+
+void ScrollablePattern::ClearInvisibleItemsSelectedStatus() {}
+
+void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selectedZone) {}
 } // namespace OHOS::Ace::NG
