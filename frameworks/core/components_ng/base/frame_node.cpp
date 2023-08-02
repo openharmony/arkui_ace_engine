@@ -480,6 +480,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
         auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
