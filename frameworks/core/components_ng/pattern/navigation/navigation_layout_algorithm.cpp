@@ -225,7 +225,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto usrNavigationMode = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
     auto navigationMode = usrNavigationMode;
     if (usrNavigationMode == NavigationMode::AUTO) {
-        if (size.Width() >= navigationWidth) {
+        if (size.Width() > navigationWidth) {
             navigationMode = NavigationMode::SPLIT;
         } else {
             navigationMode = NavigationMode::STACK;
