@@ -55,7 +55,7 @@ public:
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_RETURN(sliderTipModifier_, nullptr);
+        CHECK_NULL_RETURN_NOLOG(sliderTipModifier_, nullptr);
         return sliderTipModifier_;
     }
 

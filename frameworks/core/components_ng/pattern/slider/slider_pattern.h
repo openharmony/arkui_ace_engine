@@ -54,7 +54,7 @@ public:
             sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, OffsetF());
-                auto blockCenter = pattern->sliderContentModifier_->GetBlockCenter();
+                auto blockCenter = pattern->GetBlockCenter();
                 auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
                 auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
                 return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
@@ -184,7 +184,7 @@ private:
     bool valueChangeFlag_ = false;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
-    bool AxisFlag_ = false; // Wheel operation flag
+    bool axisFlag_ = false; // Wheel operation flag
     bool focusFlag_ = false;
     bool panMoveFlag_ = false;
     bool hasVisibleChangeRegistered_ = false;
