@@ -240,7 +240,6 @@ public:
     {
         CHECK_NULL_VOID_NOLOG(isScrollable_ != isScrollable);
         isScrollable_ = isScrollable;
-        ScheduleDisapplearDelayTask();
     }
 
     bool IsScrollable() const
