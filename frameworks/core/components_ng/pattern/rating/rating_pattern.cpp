@@ -379,16 +379,12 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionCancelTask = [weak = WeakClaim(this)]() { LOGD("Pan event cancel"); };
 
-    float distance = DEFAULT_PAN_DISTANCE;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    distance = static_cast<float>(pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
     PanDirection panDirection;
     panDirection.type = PanDirection::HORIZONTAL;
 
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
 void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)

@@ -375,21 +375,12 @@ void SlidingPanelPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
-    float distance = DEFAULT_PAN_DISTANCE;
-    auto host = GetHost();
-    if (host) {
-        auto context = host->GetContext();
-        if (context) {
-            distance = static_cast<float>(
-                context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP))); // convert VP to Px
-        }
-    }
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     auto type = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
     panEvent_ = type == PanelType::CUSTOM ? MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr,
      std::move(actionCancelTask)) : MakeRefPtr<PanEvent>(std::move(actionStartTask),
      std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
 bool SlidingPanelPattern::IsNeedResetPanEvent(const RefPtr<GestureEventHub>& gestureHub)

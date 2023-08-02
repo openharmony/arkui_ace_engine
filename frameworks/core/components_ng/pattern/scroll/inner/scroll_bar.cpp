@@ -510,7 +510,7 @@ void ScrollBar::InitPanRecognizer()
 {
     PanDirection panDirection;
     panDirection.type = positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
-    panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, DEFAULT_PAN_DISTANCE);
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
     panRecognizer_->SetOnActionUpdate([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {

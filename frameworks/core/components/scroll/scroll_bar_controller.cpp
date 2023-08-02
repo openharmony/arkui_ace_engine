@@ -49,8 +49,8 @@ void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context, bo
 
     PanDirection panDirection;
     panDirection.type = isVertical ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
-    panRecognizer_ =
-        AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+    panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(
+        context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
     panRecognizer_->SetOnActionUpdate([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {
@@ -334,7 +334,7 @@ void ScrollBarController::SetIsHover(bool isInBarRegion)
         LOGD("isInBar_ state is not changed");
         return;
     }
-    isInBar_  = isInBarRegion;
+    isInBar_ = isInBarRegion;
     if (isPressed_) {
         LOGD("scroll bar is pressed now.");
         return;

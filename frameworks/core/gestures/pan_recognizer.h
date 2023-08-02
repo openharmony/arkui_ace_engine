@@ -55,8 +55,7 @@ public:
         double distanceNumber = panGestureOption->GetDistance();
         int32_t fingersNumber = panGestureOption->GetFingers();
 
-        double distance = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : distanceNumber;
-        distance_ = newContext->NormalizeToPx(Dimension(distance, DimensionUnit::VP));
+        distance_ = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceNumber;
         fingers_ = fingersNumber <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingersNumber;
 
         if (directNum >= PanDirection::NONE && directNum <= PanDirection::ALL) {

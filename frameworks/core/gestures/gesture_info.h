@@ -42,9 +42,9 @@
 namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
-constexpr double DEFAULT_PAN_DISTANCE = 5.0;
+constexpr Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
 constexpr double DRAG_PAN_DISTANCE_MOUSE = 1.0;
-constexpr double DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
+constexpr Dimension DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 300.0;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 100;
@@ -196,7 +196,7 @@ public:
 
 private:
     PanDirection direction_;
-    double distance_ = DEFAULT_PAN_DISTANCE;
+    double distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();
     int32_t fingers_ = 1;
     std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc> onPanFingersIds_;
     std::unordered_map<typename OnPanDirectionFunc::IdType, OnPanDirectionFunc> onPanDirectionIds_;
