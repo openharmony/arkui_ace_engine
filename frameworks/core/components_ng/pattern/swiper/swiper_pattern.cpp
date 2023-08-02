@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
@@ -2575,6 +2576,41 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
         auto lazyForEach = DynamicCast<LazyForEachNode>(child);
         if (lazyForEach) {
             lazyForEach->SetRequestLongPredict(useLazyLoad);
+        }
+    }
+    if (useLazyLoad) {
+        auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto cacheCount = layoutProperty->GetCachedCountValue(1);
+        std::set<int32_t> forEachIndexSet;
+        for (auto count = 1; count <= cacheCount; count++) {
+            forEachIndexSet.emplace(GetLoopIndex(currentIndex_ + count));
+            forEachIndexSet.emplace(GetLoopIndex(currentIndex_ - count));
+        }
+        if (forEachIndexSet.empty()) {
+            return;
+        }
+        for (const auto& child : children) {
+            if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
+                continue;
+            }
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto taskExecutor = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weak = WeakClaim(RawPtr(child)), forEachIndexSet]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    auto forEachNode = AceType::DynamicCast<ForEachNode>(node);
+                    CHECK_NULL_VOID(forEachNode);
+                    for (auto index : forEachIndexSet) {
+                        auto childNode = forEachNode->GetChildAtIndex(index);
+                        CHECK_NULL_VOID(childNode);
+                        childNode->Build();
+                    }
+                },
+                TaskExecutor::TaskType::UI);
         }
     }
 }
