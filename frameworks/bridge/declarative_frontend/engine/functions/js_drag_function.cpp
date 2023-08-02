@@ -102,7 +102,8 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("setResult", &JsDragEvent::SetResult);
     JSClass<JsDragEvent>::CustomMethod("getResult", &JsDragEvent::GetResult);
     JSClass<JsDragEvent>::CustomMethod("getPreviewRect", &JsDragEvent::GetPreviewRect);
-    JSClass<JsDragEvent>::CustomMethod("useCustomDropAnimation", &JsDragEvent::UseCustomDropAnimation);
+    JSClass<JsDragEvent>::CustomProperty(
+        "useCustomDropAnimation", &JsDragEvent::GetUseCustomDropAnimation, &JsDragEvent::SetUseCustomDropAnimation);
     JSClass<JsDragEvent>::CustomMethod("setDragInfo", &JsDragEvent::SetDragInfo);
     JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
     JSClass<JsDragEvent>::CustomMethod("dragBehavior", &JsDragEvent::DragBehavior);
@@ -243,11 +244,18 @@ void JsDragEvent::GetPreviewRect(const JSCallbackInfo& args)
     args.SetReturnValue(previewRect);
 }
 
-void JsDragEvent::UseCustomDropAnimation(const JSCallbackInfo& args)
+void JsDragEvent::SetUseCustomDropAnimation(const JSCallbackInfo& args)
 {
     if (args[0]->IsBoolean()) {
         dragEvent_->UseCustomAnimation(args[0]->ToBoolean());
     }
+}
+
+void JsDragEvent::GetUseCustomDropAnimation(const JSCallbackInfo& args)
+{
+    auto useCustomAnimation = JSVal(ToJSValue(dragEvent_->IsUseCustomAnimation()));
+    auto useCustomAnimationRef = JSRef<JSVal>::Make(useCustomAnimation);
+    args.SetReturnValue(useCustomAnimationRef);
 }
 
 void JsDragEvent::SetDragInfo(const JSCallbackInfo& args)
