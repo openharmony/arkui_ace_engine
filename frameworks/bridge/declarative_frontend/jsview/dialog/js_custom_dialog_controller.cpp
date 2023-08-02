@@ -152,6 +152,13 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.maskColor = maskColor;
         }
 
+        // Parse maskRect.
+        auto maskRectValue = constructorArg->GetProperty("maskRect");
+        DimensionRect maskRect;
+        if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+            instance->dialogProperties_.maskRect = maskRect;
+        }
+
         // Parse backgroundColor.
         auto backgroundColorValue = constructorArg->GetProperty("backgroundColor");
         Color backgroundColor;

@@ -166,6 +166,7 @@ struct DialogProperties {
     std::vector<ActionSheetInfo> sheetsInfo;
 
     WeakPtr<NG::UINode> windowScene;
+    std::optional<DimensionRect> maskRect;
 };
 
 } // namespace OHOS::Ace

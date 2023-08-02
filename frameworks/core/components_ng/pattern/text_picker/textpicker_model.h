@@ -29,6 +29,9 @@ struct TextPickerDialog {
     uint32_t selectedValue;
     std::vector<std::string> getRangeVector;
     bool isDefaultHeight;
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
+    std::optional<DimensionRect> maskRect;
 };
 using TextChangeEvent = std::function<void(const std::string&, double)>;
 using TextCascadeChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;

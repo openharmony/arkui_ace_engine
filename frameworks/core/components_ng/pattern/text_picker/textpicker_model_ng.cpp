@@ -494,8 +494,17 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     } else {
         properties.alignment = DialogAlignment::CENTER;
     }
+    if (textPickerDialog.alignment.has_value()) {
+        properties.alignment = textPickerDialog.alignment.value();
+    }
     properties.customStyle = false;
     properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (textPickerDialog.offset.has_value()) {
+        properties.offset = textPickerDialog.offset.value();
+    }
+
+    properties.maskRect = textPickerDialog.maskRect;
+
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

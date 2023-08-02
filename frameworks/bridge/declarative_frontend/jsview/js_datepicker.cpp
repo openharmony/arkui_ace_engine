@@ -39,6 +39,15 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
+namespace {
+const DimensionOffset ACTION_SHEET_OFFSET_DEFAULT = DimensionOffset(0.0_vp, -40.0_vp);
+const DimensionOffset ACTION_SHEET_OFFSET_DEFAULT_TOP = DimensionOffset(0.0_vp, 40.0_vp);
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
+    DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
+    DialogAlignment::BOTTOM_END };
+}
+
 std::unique_ptr<DatePickerModel> DatePickerModel::datePickerInstance_ = nullptr;
 std::unique_ptr<DatePickerDialogModel> DatePickerDialogModel::datePickerDialogInstance_ = nullptr;
 std::unique_ptr<TimePickerModel> TimePickerModel::timePickerInstance_ = nullptr;
@@ -823,6 +832,41 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     pickerDialog.parseSelectedDate = ParseDate(selectedDate);
     pickerDialog.pickerTime = ParseTime(selectedDate);
     JSDatePicker::ParseTextProperties(paramObject, settingData.properties);
+
+    // Parse alignment
+    auto alignmentValue = paramObject->GetProperty("alignment");
+    if (alignmentValue->IsNumber()) {
+        auto alignment = alignmentValue->ToNumber<int32_t>();
+        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
+        }
+        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+            pickerDialog.offset = ACTION_SHEET_OFFSET_DEFAULT_TOP;
+        }
+    }
+
+    // Parse offset
+    auto offsetValue = paramObject->GetProperty("offset");
+    if (offsetValue->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+        CalcDimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        ParseJsDimensionVp(dxValue, dx);
+        CalcDimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        ParseJsDimensionVp(dyValue, dy);
+        pickerDialog.offset = DimensionOffset(dx, dy);
+    }
+
+    // Parse maskRect.
+    auto maskRectValue = paramObject->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        pickerDialog.maskRect = maskRect;
+    }
+
     DatePickerDialogModel::GetInstance()->SetDatePickerDialogShow(
         pickerDialog, settingData, std::move(cancelEvent), std::move(acceptEvent), std::move(changeEvent),
         std::move(dateAcceptEvent), std::move(dateChangeEvent), pickerType);
@@ -1250,6 +1294,41 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
     JSDatePicker::ParseTextProperties(paramObject, settingData.properties);
+
+    // Parse alignment
+    auto alignmentValue = paramObject->GetProperty("alignment");
+    if (alignmentValue->IsNumber()) {
+        auto alignment = alignmentValue->ToNumber<int32_t>();
+        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
+        }
+        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+            pickerDialog.offset = ACTION_SHEET_OFFSET_DEFAULT_TOP;
+        }
+    }
+
+    // Parse offset
+    auto offsetValue = paramObject->GetProperty("offset");
+    if (offsetValue->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+        CalcDimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        JSAlertDialog::ParseJsDimensionVp(dxValue, dx);
+        CalcDimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        JSAlertDialog::ParseJsDimensionVp(dyValue, dy);
+        pickerDialog.offset = DimensionOffset(dx, dy);
+    }
+
+    // Parse maskRect.
+    auto maskRectValue = paramObject->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        pickerDialog.maskRect = maskRect;
+    }
+
     TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(
         pickerDialog, settingData, std::move(cancelEvent), std::move(acceptEvent), std::move(changeEvent));
 }
