@@ -137,17 +137,9 @@ void SheetPresentationPattern::InitPanEvent()
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
-    float distance = DEFAULT_PAN_DISTANCE;
-    if (host) {
-        auto context = host->GetContext();
-        if (context) {
-            distance = static_cast<float>(
-                context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP))); // convert VP to Px
-        }
-    }
     panEvent_ = MakeRefPtr<PanEvent>(
         nullptr, std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
 void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)

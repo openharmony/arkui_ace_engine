@@ -246,8 +246,7 @@ void SwiperPattern::OnModifyDone()
         CHECK_NULL_VOID(gestureHub);
         gestureHub->AddTouchEvent(swiperPattern->touchEvent_);
         if (!swiperPattern->IsDisableSwipe()) {
-            float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
-            gestureHub->AddPanEvent(swiperPattern->panEvent_, swiperPattern->panDirection_, 1, distance);
+            gestureHub->AddPanEvent(swiperPattern->panEvent_, swiperPattern->panDirection_, 1, DEFAULT_PAN_DISTANCE);
         }
     };
     swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
@@ -1044,8 +1043,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
-    gestureHub->AddPanEvent(panEvent_, panDirection_, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection_, 1, DEFAULT_PAN_DISTANCE);
 }
 
 void SwiperPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
