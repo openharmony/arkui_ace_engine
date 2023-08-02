@@ -1319,7 +1319,12 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
     auto mainSize = GetMainAxisSize(frameSize, gridLayoutInfo_.axis_);
     auto crossSize = GetCrossAxisSize(frameSize, gridLayoutInfo_.axis_);
     auto childConstraint = CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossStart, crossSpan);
-    auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
+    auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+    if (!childLayoutProperty) {
+        LOGW("childLayoutProperty is nullptr");
+        childLayoutWrapper->Measure(childConstraint);
+        return;
+    }
     auto oldConstraint = childLayoutProperty->GetLayoutConstraint();
     if (oldConstraint.has_value() && !NearEqual(GetCrossAxisSize(oldConstraint.value().maxSize, axis_),
                                                 GetCrossAxisSize(childConstraint.maxSize, axis_))) {
