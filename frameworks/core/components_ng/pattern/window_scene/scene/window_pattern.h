@@ -30,6 +30,7 @@ class WindowPattern : public Pattern {
 public:
     WindowPattern() = default;
     ~WindowPattern() override = default;
+
     std::vector<Rosen::Rect> GetHotAreas();
 
 protected:
