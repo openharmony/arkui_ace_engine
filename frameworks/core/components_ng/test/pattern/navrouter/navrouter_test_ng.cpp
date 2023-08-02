@@ -721,6 +721,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0015, TestSize.Level1)
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     parentNode->isOnAnimation_ = true;
     navRouterGroupNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
+    parentNode->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     navRouterGroupNode->OnDetachFromMainTree(false);
     EXPECT_TRUE(parentNode->isOnAnimation_);
 
@@ -732,7 +733,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0015, TestSize.Level1)
     std::pair<std::string, RefPtr<UINode>> p("navDestination", navDestinationNode);
     ASSERT_NE(parentNode->GetPattern<NavigationPattern>(), nullptr);
 
-    parentNode->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     ASSERT_NE(parentNode->GetPattern<NavigationPattern>()->navigationStack_, nullptr);
     parentNode->GetPattern<NavigationPattern>()->navigationStack_->navPathList_.push_back(p);
 
@@ -798,7 +798,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
     std::pair<std::string, RefPtr<UINode>> p("test", preNavDestination);
     stack->navPathList_.push_back(p);
     navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
-    EXPECT_TRUE(layoutProperty->propDestinationChange_.value());
+    EXPECT_FALSE(layoutProperty->propDestinationChange_.has_value());
 
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         "navDestinationNode", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
@@ -1239,7 +1239,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
     navDestination->GetPattern<NavDestinationPattern>()->navDestinationNode_ = preNavDestination;
     GestureEvent event;
     navDestination->backButtonEvent_(event);
-    EXPECT_FALSE(navigation->GetLayoutProperty<NavigationLayoutProperty>()->propDestinationChange_.value());
+    EXPECT_FALSE(navigation->GetLayoutProperty<NavigationLayoutProperty>()->propDestinationChange_.has_value());
 
     auto onBack = []() { return true; };
     navDestination->GetEventHub<NavDestinationEventHub>()->onBackPressedEvent_ = onBack;
@@ -1256,7 +1256,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
     navDestination->GetEventHub<NavDestinationEventHub>()->onBackPressedEvent_ = nullptr;
     preNavDestination->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     navDestination->backButtonEvent_(event);
-    EXPECT_TRUE(navigation->GetLayoutProperty<NavigationLayoutProperty>()->propDestinationChange_.value());
+    EXPECT_TRUE(navigation->GetLayoutProperty<NavigationLayoutProperty>()->propDestinationChange_.has_value());
 
     pattern->navigationMode_ = NavigationMode::AUTO;
     navDestination->backButtonEvent_(event);

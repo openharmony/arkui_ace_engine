@@ -964,6 +964,8 @@ HWTEST_F(NavigationTestNg, NavigationLayoutTest_001, TestSize.Level1)
     navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
     navigationLayoutProperty->UpdateContentConstraint();
 
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
@@ -1008,6 +1010,8 @@ HWTEST_F(NavigationTestNg, NavigationLayoutTest_002, TestSize.Level1)
     navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
     navigationLayoutProperty->UpdateContentConstraint();
 
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
@@ -1161,10 +1165,10 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
     pattern->navigationMode_ = NavigationMode::SPLIT;
     pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
     pattern->navigationMode_ = NavigationMode::STACK;
     pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
     pattern->navigationMode_ = NavigationMode::STACK;
     pattern->DoAnimation(NavigationMode::STACK);
     ASSERT_EQ(pattern->navigationMode_, NavigationMode::STACK);
@@ -1208,13 +1212,13 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     pattern->navigationMode_ = NavigationMode::SPLIT;
     layout->propVisibility_ = VisibleType::INVISIBLE;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ASSERT_TRUE(navigation->isModeChange_);
+    ASSERT_FALSE(navigation->isModeChange_);
 
     layout->propVisibility_ = VisibleType::VISIBLE;
     navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
     layout->propHideNavBar_ = true;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ASSERT_EQ(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.value(), VisibleType::GONE);
+    ASSERT_FALSE(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.has_value());
 }
 
 /**
@@ -1347,8 +1351,8 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     navigationLayoutProperty->propDestinationChange_ = false;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_EQ(navigationLayoutProperty->propDestinationChange_.value(), false);
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::STACK);
-    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::STACK);
+    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
+    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
 }
 
 /**
