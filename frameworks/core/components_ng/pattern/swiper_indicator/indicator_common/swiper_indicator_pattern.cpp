@@ -162,8 +162,9 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     CHECK_NULL_VOID(swiperPattern);
 
     auto currentIndex = swiperPattern->GetCurrentIndex();
-    auto lengthBeforeCurrentIndex =
-        INDICATOR_PADDING_DEFAULT.ConvertToPx() + (INDICATOR_ITEM_SPACE.ConvertToPx() + itemWidth) * currentIndex;
+    auto margin = HandleTouchClickMargin();
+    auto lengthBeforeCurrentIndex = margin + INDICATOR_PADDING_DEFAULT.ConvertToPx() +
+                                    (INDICATOR_ITEM_SPACE.ConvertToPx() + itemWidth) * currentIndex;
     auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
     auto axis = swiperPattern->GetDirection();
     auto mainClickOffset = axis == Axis::HORIZONTAL ? info.GetLocalLocation().GetX() : info.GetLocalLocation().GetY();
@@ -314,11 +315,18 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float itemHeightValue = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     float selectedItemWidthValue =
         static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx() * 2);
+    auto selectedItemHeightValue =
+        static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
+    auto swiperThemeSelectedItemHeightSize = swiperTheme->GetSize().ConvertToPx();
+    auto swiperThemeSelectedItemWidthSize = swiperTheme->GetSize().ConvertToPx() * 2.0f;
+    if (!NearEqual(selectedItemWidthValue, swiperThemeSelectedItemWidthSize) ||
+        !NearEqual(selectedItemHeightValue, swiperThemeSelectedItemHeightSize)) {
+        selectedItemWidthValue *= 0.5f;
+    }
     // diameter calculation
     float itemWidth = itemWidthValue * INDICATOR_ZOOM_IN_SCALE;
     float itemHeight = itemHeightValue * INDICATOR_ZOOM_IN_SCALE;
     float selectedItemWidth = selectedItemWidthValue * INDICATOR_ZOOM_IN_SCALE;
-
     float padding = static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx());
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     int32_t currentIndex = swiperPattern->GetCurrentIndex();
@@ -674,5 +682,36 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
         }
         dragStartPoint_ = dragPoint;
     }
+}
+
+float SwiperIndicatorPattern::HandleTouchClickMargin()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN_NOLOG(host, 0.0f);
+    auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
+    CHECK_NULL_RETURN_NOLOG(paintProperty, 0.0f);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN_NOLOG(pipeline, 0.0f);
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN_NOLOG(theme, 0.0f);
+    auto itemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
+    auto selectedItemWidth = paintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx();
+    if (Negative(itemWidth) || Negative(selectedItemWidth)) {
+        itemWidth = theme->GetSize().ConvertToPx();
+        selectedItemWidth = theme->GetSize().ConvertToPx();
+    }
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN_NOLOG(swiperNode, 0.0f);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    int32_t itemCount = swiperPattern->TotalCount();
+    auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
+    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
+    auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+    auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0f);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto axis = swiperPattern->GetDirection();
+    return ((axis == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5f;
 }
 } // namespace OHOS::Ace::NG
