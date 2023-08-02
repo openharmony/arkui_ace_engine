@@ -283,8 +283,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         PanDirection panDirection = {
             .type = axis_ == Axis::HORIZONTAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL,
         };
-        float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
-        gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+        gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 
         startNodeSize_ = 0.0f;
         endNodeSize_ = 0.0f;

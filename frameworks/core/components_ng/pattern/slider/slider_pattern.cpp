@@ -421,8 +421,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
-    float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
 void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
