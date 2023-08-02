@@ -30,6 +30,7 @@
 #include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/animation/animation_pub.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -145,10 +146,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 option.SetDuration(PIXELMAP_ANIMATION_DURATION);
                 option.SetCurve(Curves::SHARP);
                 AnimationUtils::Animate(
-                    option,
-                    [renderContext]() {
-                        renderContext->UpdateOpacity(SCALE_NUMBER);
-                    }, option.GetOnFinishEvent());
+                    option, [renderContext]() { renderContext->UpdateOpacity(SCALE_NUMBER); },
+                    option.GetOnFinishEvent());
             }
         }
 
@@ -417,7 +416,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 option,
                 [imageContext]() {
                     imageContext->UpdateTransformScale({ PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE });
-                }, option.GetOnFinishEvent());
+                },
+                option.GetOnFinishEvent());
             actuator->SetEventColumn(actuator);
         }
     };
@@ -505,10 +505,8 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
         option.SetCurve(Curves::SHARP);
         columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_VALUE);
         AnimationUtils::Animate(
-            option,
-            [columnNode]() {
-                columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_RADIUS);
-            }, option.GetOnFinishEvent());
+            option, [columnNode]() { columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_RADIUS); },
+            option.GetOnFinishEvent());
     }
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("DragEvent set filter success.");
@@ -557,6 +555,11 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     auto height = pixelMap->GetHeight();
     auto offsetX = GetFloatImageOffset(frameNode).GetX();
     auto offsetY = GetFloatImageOffset(frameNode).GetY();
+    // Check web tag.
+    if (frameNode->GetTag() != V2::WEB_ETS_TAG && pipelineContext->HasFloatTitle()) {
+        offsetX -= static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
+        offsetY -= static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx());
+    }
     // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
