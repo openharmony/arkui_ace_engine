@@ -395,6 +395,16 @@ public:
         textDraggable_ = draggable;
     }
 
+    void SetIsTextDraggable(bool isTextDraggable)
+    {
+        isTextDraggable_ = isTextDraggable;
+    }
+
+    bool GetIsTextDraggable()
+    {
+        return isTextDraggable_;
+    }
+
     bool IsTextField() const
     {
         return isTextField_;
@@ -501,6 +511,7 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;
     bool isTextField_ = false;
+    bool isTextDraggable_ = false;
     std::function<void()> callback_;
 #endif
 };

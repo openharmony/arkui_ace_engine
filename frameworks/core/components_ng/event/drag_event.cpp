@@ -135,7 +135,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto renderContext = frameNode->GetRenderContext();
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
-                HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+                if (gestureHub->GetIsTextDraggable()) {
+                    HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+                }
             } else if (!isNotInPreviewState_) {
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
@@ -308,7 +310,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         if (!GetIsBindOverlayValue(actuator)) {
             if (gestureHub->GetTextDraggable()) {
-                HideTextAnimation();
+                if (gestureHub->GetIsTextDraggable()) {
+                    HideTextAnimation();
+                }
             } else {
                 auto frameNode = gestureHub->GetFrameNode();
                 CHECK_NULL_VOID(frameNode);
@@ -393,7 +397,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (gestureHub->GetTextDraggable()) {
-            actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
+            if (gestureHub->GetIsTextDraggable()) {
+                actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
+            }
         } else {
             actuator->SetFilter(actuator);
             auto pipeline = PipelineContext::GetCurrentContext();

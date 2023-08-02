@@ -172,10 +172,22 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (copyOption_ == CopyOptions::None) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (IsDraggable(info.GetLocalLocation())) {
         // prevent long press event from being triggered when dragging
+#ifdef ENABLE_DRAG_FRAMEWORK
+        gestureHub->SetIsTextDraggable(true);
+#endif
         return;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    gestureHub->SetIsTextDraggable(false);
+#endif
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -184,8 +196,6 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

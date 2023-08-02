@@ -2441,9 +2441,19 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     lastTouchOffset_ = info.GetLocalLocation();
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+#ifdef ENABLE_DRAG_FRAMEWORK
+        gestureHub->SetIsTextDraggable(true);
+#endif
         return;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    gestureHub->SetIsTextDraggable(false);
+#endif
     caretUpdateType_ = isMousePressed_ ? CaretUpdateType::PRESSED : CaretUpdateType::LONG_PRESSED;
     selectionMode_ = SelectionMode::SELECT;
     isSingleHandle_ = false;
