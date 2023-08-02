@@ -43,6 +43,7 @@ namespace {
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_IMAGE_SIZE = 57.0f;
+constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 } // namespace
 RichEditorPattern::RichEditorPattern() {}
 
@@ -678,10 +679,10 @@ void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpan
             CalcLength(imageStyle.size.value().width.Value()), CalcLength(imageStyle.size.value().height.Value())));
     }
     if (updateSpanStyle_.updateImageFit.has_value()) {
-        imageLayoutProperty->UpdateVerticalAlign(imageStyle.verticalAlign.value());
+        imageLayoutProperty->UpdateImageFit(imageStyle.objectFit.value());
     }
     if (updateSpanStyle_.updateImageVerticalAlign.has_value()) {
-        imageLayoutProperty->UpdateImageFit(imageStyle.objectFit.value());
+        imageLayoutProperty->UpdateVerticalAlign(imageStyle.verticalAlign.value());
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
@@ -918,7 +919,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (isMousePressed_) {
         return;
     }
-    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if (IsDraggable(info.GetLocalLocation())) {
         // prevent long press event from being triggered when dragging
         return;
     }
@@ -1325,19 +1326,20 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
             return;
         }
         InsertValueToBeforeSpan(spanNodeBefore, insertValue);
-        AfterIMEInsertValue(spanNodeBefore, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
+        AfterIMEInsertValue(spanNodeBefore, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), false);
         return;
     }
     if (info.GetOffsetInSpan() == 0) {
         auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
         if (spanNodeBefore != nullptr) {
             InsertValueToBeforeSpan(spanNodeBefore, insertValue);
-            AfterIMEInsertValue(spanNodeBefore, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
+            AfterIMEInsertValue(
+                spanNodeBefore, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), false);
             return;
         }
     }
     InsertValueToSpanNode(spanNode, insertValue, info);
-    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
+    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), false);
 }
 
 void RichEditorPattern::InsertValueToSpanNode(
@@ -1375,8 +1377,9 @@ void RichEditorPattern::CreateTextSpanNode(
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
+    spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
     spanNode->UpdateContent(insertValue);
-    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
+    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true);
 }
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::string& insertValue)
@@ -1389,7 +1392,7 @@ bool RichEditorPattern::BeforeIMEInsertValue(const std::string& insertValue)
     return eventHub->FireAboutToIMEInput(insertValueInfo);
 }
 
-void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t insertValueLength)
+void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t insertValueLength, bool isCreate)
 {
     RichEditorAbstractSpanResult retInfo;
     isTextChange_ = true;
@@ -1397,19 +1400,25 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     moveLength_ += insertValueLength;
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto contentLength = StringUtils::ToWstring(spanNode->GetSpanItem()->content).length();
-    auto spanEnd = spanNode->GetSpanItem()->position + insertValueLength;
-    auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     retInfo.SetSpanIndex(host->GetChildIndex(spanNode));
-    retInfo.SetSpanRangeStart(spanStart);
-    retInfo.SetSpanRangeEnd(spanEnd);
-    auto offset = GetCaretPosition() - spanStart;
-    retInfo.SetOffsetInSpan(offset);
     retInfo.SetEraseLength(insertValueLength);
     retInfo.SetValue(spanNode->GetSpanItem()->content);
-    retInfo.SetOffsetInSpan(GetCaretPosition() - retInfo.GetSpanRangeStart());
+    auto contentLength = StringUtils::ToWstring(spanNode->GetSpanItem()->content).length();
+    if (isCreate) {
+        auto spanEnd = GetCaretPosition() + 1;
+        auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
+        retInfo.SetSpanRangeStart(spanStart);
+        retInfo.SetSpanRangeEnd(spanEnd);
+        retInfo.SetOffsetInSpan(0);
+    } else {
+        auto spanEnd = spanNode->GetSpanItem()->position;
+        auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
+        retInfo.SetSpanRangeStart(spanStart);
+        retInfo.SetSpanRangeEnd(spanEnd);
+        retInfo.SetOffsetInSpan(GetCaretPosition() - retInfo.GetSpanRangeStart());
+    }
     retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
     retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp());
     retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
@@ -1693,6 +1702,9 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
 bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if (keyEvent.action == KeyAction::DOWN) {
+        if (keyEvent.code == KeyCode::KEY_TAB) {
+            return false;
+        }
         if (keyEvent.code == KeyCode::KEY_DEL) {
 #if defined(PREVIEW)
             DeleteForward(1);
@@ -1794,6 +1806,19 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            LOGI("Handle mouse right button press");
+            isMousePressed_ = true;
+        }
+        if (info.GetAction() == MouseAction::RELEASE) {
+            LOGI("Handle mouse right button release");
+            rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
+                static_cast<float>(info.GetGlobalLocation().GetY()));
+            ShowSelectOverlay(RectF(), RectF());
+        }
+        return;
+    }
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
@@ -2046,6 +2071,10 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         if (!pattern->IsUsingMouse()) {
             selectInfo.firstHandle.paintRect = firstHandle;
             selectInfo.secondHandle.paintRect = secondHandle;
+        } else {
+            selectInfo.isUsingMouse = true;
+            selectInfo.rightClickOffset = pattern->GetRightClickOffset();
+            pattern->ResetIsMousePressed();
         }
         selectInfo.onHandleMove = [weak](const RectF& handleRect, bool isFirst) {
             auto pattern = weak.Upgrade();
@@ -2060,8 +2089,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
 
         auto host = pattern->GetHost();
         CHECK_NULL_VOID_NOLOG(host);
-
-        selectInfo.isUsingMouse = pattern->IsUsingMouse();
 
         pattern->UpdateSelectMenuInfo(hasData, selectInfo);
         selectInfo.menuCallback.onCopy = [weak]() {
@@ -2139,12 +2166,12 @@ void RichEditorPattern::ResetAfterPaste()
 {
     SetCaretSpanIndex(-1);
     StartTwinkling();
+    CloseSelectOverlay();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         auto length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         textSelector_.Update(-1, -1);
         DeleteForward(length);
-        CloseSelectOverlay();
         ResetSelection();
     }
 }

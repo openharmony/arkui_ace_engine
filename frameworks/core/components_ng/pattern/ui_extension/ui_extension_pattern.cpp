@@ -125,7 +125,6 @@ void UIExtensionPattern::OnConnectInner()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
     auto pipeline = PipelineBase::GetCurrentContext();
-    TransferFocusWindowId(pipeline->GetFocusWindowId());
     if (onRemoteReadyCallback_) {
         onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(session_));
     }
@@ -148,6 +147,25 @@ void UIExtensionPattern::OnDisconnect()
             CHECK_NULL_VOID_NOLOG(extensionPattern);
             if (extensionPattern->onReleaseCallback_) {
                 extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
+            }
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIExtensionPattern::OnExtensionDied()
+{
+    LOGI("UIExtensionPattern OnExtensionDied called");
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto extensionPattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(extensionPattern);
+            if (extensionPattern->onReleaseCallback_) {
+                extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
             }
         },
         TaskExecutor::TaskType::UI);
@@ -187,9 +205,13 @@ void UIExtensionPattern::OnWindowHide()
 
 void UIExtensionPattern::RequestExtensionSessionActivation()
 {
-    LOGI("UIExtension request UIExtensionAbility foreground");
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto hostWindowId = pipeline->GetFocusWindowId();
+    LOGI("ui_extension request host windowId %{public}u", hostWindowId);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(extensionSession);
+    auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
+        extensionSession, hostWindowId);
     if (errcode != OHOS::Rosen::WSError::WS_OK) {
         int32_t code = static_cast<int32_t>(errcode);
         std::string name = "start_ability_fail";

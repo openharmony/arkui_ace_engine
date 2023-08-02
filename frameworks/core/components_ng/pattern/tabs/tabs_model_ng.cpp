@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -170,7 +171,10 @@ void TabsModelNG::SetTabBarWidth(const Dimension& tabBarWidth)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    if (tabBarWidth.ConvertToPx() < 0.0) {
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto tabBarWidthToPx =
+        ConvertToPx(tabBarWidth, scaleProperty, tabBarLayoutProperty->GetLayoutConstraint()->percentReference.Width());
+    if (LessNotEqual(tabBarWidthToPx.value_or(0.0), 0.0)) {
         tabBarLayoutProperty->ClearUserDefinedIdealSize(true, false);
     } else {
         tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(tabBarWidth), std::nullopt));
@@ -187,7 +191,10 @@ void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    if (tabBarHeight.ConvertToPx() < 0.0) {
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto tabBarHeightToPx = ConvertToPx(
+        tabBarHeight, scaleProperty, tabBarLayoutProperty->GetLayoutConstraint()->percentReference.Height());
+    if (LessNotEqual(tabBarHeightToPx.value_or(0.0), 0.0)) {
         tabBarLayoutProperty->ClearUserDefinedIdealSize(false, true);
     } else {
         tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, NG::CalcLength(tabBarHeight)));

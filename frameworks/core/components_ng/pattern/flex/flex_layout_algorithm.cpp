@@ -579,7 +579,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             }
             ++iter;
         }
-        getFlexFunc(getFlex, remainSpace, spacePerFlex, flexItemProperties, lastChild);
+        CheckIsGrowOrShrink(getFlex, remainSpace, spacePerFlex, flexItemProperties, lastChild);
         iter = secondaryMeasureList_.rbegin();
         while (iter != secondaryMeasureList_.rend()) {
             auto child = *iter;
@@ -635,8 +635,8 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
     }
 }
 
-void FlexLayoutAlgorithm::getFlexFunc(std::function<float(const RefPtr<LayoutWrapper>&)>& getFlex, float remainSpace,
-    float& spacePerFlex, FlexItemProperties& flexItemProperties, RefPtr<LayoutWrapper>& lastChild)
+void FlexLayoutAlgorithm::CheckIsGrowOrShrink(std::function<float(const RefPtr<LayoutWrapper>&)>& getFlex,
+    float remainSpace, float& spacePerFlex, FlexItemProperties& flexItemProperties, RefPtr<LayoutWrapper>& lastChild)
 {
     if (GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)) {
         getFlex = [](const RefPtr<LayoutWrapper>& item) -> float {

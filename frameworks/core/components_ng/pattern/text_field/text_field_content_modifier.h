@@ -37,6 +37,7 @@ public:
     void ModifyTextStyle(TextStyle& textStyle);
     void SetDefaultAnimatablePropertyValue();
 
+    void SetFontFamilies(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
@@ -60,6 +61,7 @@ public:
     void SetShowUnderlineState(bool value);
     void SetShowPasswordIcon(const std::string& value);
     void SetHidePasswordIcon(const std::string& value);
+    void SetFontReady(bool value);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
@@ -70,6 +72,8 @@ private:
     void UpdatePaintConfig(RefPtr<CanvasImage>& passwordIconCanvasImage, DrawingContext context, RectF iconRect) const;
 
     WeakPtr<Pattern> pattern_;
+    RefPtr<PropertyString> fontFamilyString_;
+
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
 
@@ -95,6 +99,7 @@ private:
     RefPtr<PropertyString> showPasswordIconSrc_;
     RefPtr<PropertyString> hidePasswordIconSrc_;
     RefPtr<PropertyInt> fontStyle_;
+    RefPtr<PropertyBool> fontReady_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

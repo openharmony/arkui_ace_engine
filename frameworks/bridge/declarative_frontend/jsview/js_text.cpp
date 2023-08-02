@@ -173,7 +173,11 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        textColor = theme->GetTextStyle().GetTextColor();
     }
     TextModel::GetInstance()->SetTextColor(textColor);
 }

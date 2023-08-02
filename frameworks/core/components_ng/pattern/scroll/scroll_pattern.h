@@ -78,6 +78,12 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         auto paint = MakeRefPtr<ScrollPaintMethod>();
+        auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
+        if (!scrollBarOverlayModifier) {
+            scrollBarOverlayModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+            SetScrollBarOverlayModifier(scrollBarOverlayModifier);
+        }
+        paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier);
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
             paint->SetScrollBar(scrollBar);

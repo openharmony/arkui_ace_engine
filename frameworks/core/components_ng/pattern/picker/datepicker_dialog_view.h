@@ -47,6 +47,7 @@ public:
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
+    static RefPtr<FrameNode> CreateTitleButtonRowNode();
     static void CreateTitleIconNode(const RefPtr<FrameNode>& titleNode);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
@@ -69,8 +70,8 @@ private:
     static void CreateLunarswitchNode(
         const RefPtr<FrameNode>& contentColumn, std::function<void(const bool)>&& changeEvent, bool isLunar);
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);
-    static void HandleMouseEvent(const RefPtr<FrameNode>& titleRow, bool isHover);
-    static void PlayHoverAnimation(const RefPtr<FrameNode>& titleRow, const Color& color);
+    static void HandleMouseEvent(const RefPtr<FrameNode>& titleButton, bool isHover);
+    static void PlayHoverAnimation(const RefPtr<FrameNode>& titleButton, const Color& color);
 };
 } // namespace OHOS::Ace::NG
 

@@ -127,7 +127,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
-            GetScrollBar()->PlayScrollBarEndAnimation();
+            GetScrollBar()->ScheduleDisapplearDelayTask();
         }
     }
     if (scrollStop_) {
@@ -146,7 +146,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
-    host->SetViewPort(geometryNode->GetFrameRect());
+    auto offsetRelativeToWindow = host->GetOffsetRelativeToWindow();
+    auto globalViewPort = RectF(offsetRelativeToWindow, geometryNode->GetFrameRect().GetSize());
+    host->SetViewPort(globalViewPort);
     return false;
 }
 
@@ -182,10 +184,6 @@ void ScrollPattern::FireOnScrollStop()
     if (GetScrollAbort()) {
         SetScrollAbort(false);
         return;
-    }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar) {
-        scrollBar->PlayScrollBarEndAnimation();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

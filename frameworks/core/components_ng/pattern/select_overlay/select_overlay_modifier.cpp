@@ -50,9 +50,6 @@ std::vector<int32_t> circle_Y { 0, -1, 0, 1 };
 
 SelectOverlayModifier::SelectOverlayModifier(const OffsetF& menuOptionOffset)
 {
-    hasExtensitonMenu_ = AceType::MakeRefPtr<PropertyBool>(false);
-    AttachProperty(hasExtensitonMenu_);
-
     pointRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(Dimension(1.75_vp).ConvertToPx());
     AttachProperty(pointRadius_);
 
@@ -64,6 +61,9 @@ SelectOverlayModifier::SelectOverlayModifier(const OffsetF& menuOptionOffset)
 
     rotationAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(ROTATION_ANGLE);
     AttachProperty(rotationAngle_);
+
+    circlesAndBackArrowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
+    AttachProperty(circlesAndBackArrowOpacity_);
 
     SetDefaultCircleAndLineEndOffset();
 }
@@ -165,8 +165,6 @@ void SelectOverlayModifier::SetLineEndOffset(bool isMore)
 
 void SelectOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
-    CHECK_NULL_VOID(hasExtensitonMenu_);
-    CHECK_NULL_VOID_NOLOG(hasExtensitonMenu_->Get());
     for (int32_t i = 0; i < ROUND_NUMBER; i++) {
         CHECK_NULL_VOID(circleOffset_[i]);
         if (i < ROUND_NUMBER - 1) {
@@ -193,10 +191,12 @@ void SelectOverlayModifier::DrawbBackArrow(DrawingContext& drawingContext)
     canvas.Save();
     canvas.Rotate(rotationAngle_->Get(), menuOptionOffset_->Get().GetX(), menuOptionOffset_->Get().GetY());
 
+    Color iconColor = iconColor_;
+    iconColor = iconColor.BlendOpacity(circlesAndBackArrowOpacity_->Get());
     for (int32_t i = 0; i < ROUND_NUMBER - 2; i++) {
         RSPen pen;
         pen.SetAntiAlias(true);
-        pen.SetColor(iconColor_.GetValue());
+        pen.SetColor(iconColor.GetValue());
         pen.SetWidth(pointRadius_->Get() * 2);
         pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
         canvas.AttachPen(pen);
@@ -213,7 +213,7 @@ void SelectOverlayModifier::DrawbBackArrow(DrawingContext& drawingContext)
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     RSPen pen;
     pen.SetAntiAlias(true);
-    pen.SetColor(iconColor_.GetValue());
+    pen.SetColor(iconColor.GetValue());
     pen.SetWidth(pointRadius_->Get() * 2);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     canvas.AttachPen(pen);
@@ -228,6 +228,8 @@ void SelectOverlayModifier::DrawbCircles(DrawingContext& drawingContext)
 {
     auto& canvas = drawingContext.canvas;
     // Paint other circles.
+    Color iconColor = iconColor_;
+    iconColor = iconColor.BlendOpacity(circlesAndBackArrowOpacity_->Get());
     for (int32_t i = 0; i < ROUND_NUMBER; i++) {
         canvas.Save();
         canvas.Rotate(rotationAngle_->Get(), menuOptionOffset_->Get().GetX(), menuOptionOffset_->Get().GetY());
@@ -235,7 +237,7 @@ void SelectOverlayModifier::DrawbCircles(DrawingContext& drawingContext)
         canvas.Translate(coordinate.GetX(), coordinate.GetY());
         RSBrush brush;
         brush.SetAntiAlias(true);
-        brush.SetColor(iconColor_.GetValue());
+        brush.SetColor(iconColor.GetValue());
         canvas.AttachBrush(brush);
         // The radius UX effect of the top circle is different from other circles.
         if (i == 0) {

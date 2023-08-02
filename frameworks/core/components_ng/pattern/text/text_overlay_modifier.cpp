@@ -39,7 +39,7 @@ void TextOverlayModifier::onDraw(DrawingContext& drawingContext)
     brush.SetColor(selectedColor_->Get());
     drawingContext.canvas.AttachBrush(brush);
 
-    if (contentRect_.has_value() && isClip_) {
+    if (contentRect_.has_value() && isClip_ && isClip_->Get()) {
         drawingContext.canvas.ClipRect(ToRSRect(contentRect_.value()), RSClipOp::INTERSECT);
     }
 

@@ -34,6 +34,7 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
+    void SetFontFamilies(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
@@ -79,6 +80,8 @@ public:
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
 
     void SetClip(bool clip);
+
+    void SetFontReady(bool value);
 
 private:
     double NormalizeToPx(const Dimension& dimension);
@@ -141,6 +144,8 @@ private:
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyBool> clip_;
+    RefPtr<PropertyString> fontFamilyString_;
+    RefPtr<PropertyBool> fontReady_;
 
     RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;

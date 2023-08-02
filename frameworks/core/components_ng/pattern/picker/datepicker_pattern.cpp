@@ -228,8 +228,10 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(buttonTitleRenderContext);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 
-    auto childText = ButtonNode->GetFirstChild();
-    CHECK_NULL_VOID(childText);
+    auto childRow = ButtonNode->GetFirstChild();
+    CHECK_NULL_VOID(childRow);
+    auto childText = childRow->GetFirstChild();
+    CHECK_NULL_VOID(childRow);
     auto textTitleNode = DynamicCast<FrameNode>(childText);
     CHECK_NULL_VOID(textTitleNode);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();

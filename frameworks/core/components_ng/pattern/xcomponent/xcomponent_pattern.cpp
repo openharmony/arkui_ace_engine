@@ -350,21 +350,17 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 
 void XComponentPattern::XComponentSizeInit()
 {
+    CHECK_RUN_ON(UI);
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
-    platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto xcId = pattern->GetId();
-        auto eventHub = host->GetEventHub<XComponentEventHub>();
-        eventHub->FireSurfaceInitEvent(xcId, host->GetId());
-        eventHub->FireLoadEvent(xcId);
-    });
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireSurfaceInitEvent(id_, host->GetId());
+    eventHub->FireLoadEvent(id_);
 }
 
 void XComponentPattern::XComponentSizeChange(float textureWidth, float textureHeight)

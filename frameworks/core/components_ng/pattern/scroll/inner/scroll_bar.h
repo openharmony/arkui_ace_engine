@@ -92,9 +92,9 @@ class ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
 
 public:
-    ScrollBar(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier = nullptr);
-    ScrollBar(DisplayMode displayMode, RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier = nullptr,
-        ShapeMode shapeMode = ShapeMode::RECT, PositionMode positionMode = PositionMode::RIGHT);
+    ScrollBar();
+    ScrollBar(DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT,
+        PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
     bool InBarTouchRegion(const Point& point) const;
@@ -244,7 +244,9 @@ public:
 
     void SetScrollable(bool isScrollable)
     {
+        CHECK_NULL_VOID_NOLOG(isScrollable_ != isScrollable);
         isScrollable_ = isScrollable;
+        ScheduleDisapplearDelayTask();
     }
 
     bool IsScrollable() const
@@ -267,12 +269,8 @@ public:
 
     void SetDisplayMode(DisplayMode displayMode)
     {
+        CHECK_NULL_VOID_NOLOG(displayMode_ != displayMode);
         displayMode_ = displayMode;
-        if (displayMode_ == DisplayMode::AUTO) {
-            PlayScrollBarEndAnimation();
-        } else if (displayMode_ == DisplayMode::ON) {
-            PlayScrollBarStartAnimation();
-        }
     }
 
     void SetOutBoundary(double outBoundary)
@@ -327,6 +325,7 @@ public:
     void PlayScrollBarStartAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
+            disapplearDelayTask_.Cancel();
             opacityAnimationType_ = OpacityAnimationType::APPEAR;
             MarkNeedRender();
         }
@@ -468,16 +467,6 @@ public:
         return scrollEndCallback_;
     }
 
-    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
-    {
-        return scrollBarOverlayModifier_;
-    }
-
-    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier)
-    {
-        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
-    }
-
     void SetGestureEvent();
     void SetMouseEvent();
     void SetHoverEvent();
@@ -489,6 +478,7 @@ public:
     void CalcReservedHeight();
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
+    void ScheduleDisapplearDelayTask();
 
 protected:
     void InitTheme();
@@ -568,9 +558,9 @@ private:
     std::function<void()> markNeedRenderFunc_;
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
-    RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
+    CancelableCallback<void()> disapplearDelayTask_;
 };
 
 } // namespace OHOS::Ace::NG

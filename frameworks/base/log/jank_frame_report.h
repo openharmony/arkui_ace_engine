@@ -43,6 +43,7 @@ private:
     static void ResetFrameJankClock();
 
     static std::vector<uint16_t> frameJankRecord_;
+    static int32_t jankFrameCount_;
     static JankFrameFlag recordStatus_;
     static int64_t startTime_;
     static int64_t prevEndTimeStamp_;

@@ -22,22 +22,18 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t BAR_DISAPPRAE_DELAY_DURATION = 2000; // 2000ms
 constexpr int32_t BAR_ADAPT_DURATION = 400;  // 400ms, scroll bar adapts to the size changes of components
 constexpr double BAR_ADAPT_EPSLION = 1.0;
 } // namespace
 
-ScrollBar::ScrollBar(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier)
+ScrollBar::ScrollBar()
 {
     InitTheme();
-    if (scrollBarOverlayModifier) {
-        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
-        return;
-    }
-    scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
 }
 
-ScrollBar::ScrollBar(DisplayMode displayMode, RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier,
-    ShapeMode shapeMode, PositionMode positionMode) : ScrollBar(scrollBarOverlayModifier)
+ScrollBar::ScrollBar(DisplayMode displayMode,
+    ShapeMode shapeMode, PositionMode positionMode) : ScrollBar()
 {
     displayMode_ = displayMode;
     shapeMode_ = shapeMode;
@@ -60,7 +56,6 @@ void ScrollBar::InitTheme()
     SetForegroundColor(theme->GetForegroundColor());
     SetPadding(theme->GetPadding());
     SetHoverWidth(theme);
-    SetScrollable(true);
 }
 
 bool ScrollBar::InBarTouchRegion(const Point& point) const
@@ -385,7 +380,7 @@ void ScrollBar::SetMouseEvent()
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
                 if (scrollBar->GetDisplayMode() == DisplayMode::AUTO) {
-                    scrollBar->PlayScrollBarEndAnimation();
+                    scrollBar->ScheduleDisapplearDelayTask();
                 }
             }
         }
@@ -608,6 +603,23 @@ void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset,
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         result.emplace_front(panRecognizer_);
+    }
+}
+
+void ScrollBar::ScheduleDisapplearDelayTask()
+{
+    if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
+        disapplearDelayTask_.Cancel();
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        disapplearDelayTask_.Reset([weak = WeakClaim(this)] {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(scrollBar);
+            scrollBar->PlayScrollBarEndAnimation();
+        });
+        taskExecutor->PostDelayedTask(disapplearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION);
     }
 }
 } // namespace OHOS::Ace::NG

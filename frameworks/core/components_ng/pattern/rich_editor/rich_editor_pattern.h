@@ -155,7 +155,17 @@ public:
 
     bool IsUsingMouse() const
     {
-        return false;
+        return isMousePressed_;
+    }
+
+    void ResetIsMousePressed()
+    {
+        isMousePressed_ = false;
+    }
+
+    OffsetF GetRightClickOffset() const
+    {
+        return rightClickOffset_;
     }
 
     int32_t GetCaretSpanIndex()
@@ -243,7 +253,7 @@ private:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
-    void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength);
+    void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
     void InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
     void SetCaretSpanIndex(int32_t index);
 #if defined(ENABLE_STANDARD_INPUT)
@@ -268,6 +278,7 @@ private:
     bool focusEventInitialized_ = false;
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
+    OffsetF rightClickOffset_;
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;

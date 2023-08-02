@@ -97,6 +97,7 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
     CHECK_NULL_VOID(pattern);
     auto navDestinationNodes = pattern->GetAllNavDestinationNodes();
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
     // let navBarNode lose focus
     if (navDestinationNodes.size() == 1 && navBarNode) {
         auto navBarContentNode = navBarNode->GetNavBarContentNode();
@@ -124,6 +125,10 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(childNode.first);
         navDestinationPattern->SetNavDestinationNode(uiNode);
+        SetBackButtonVisible(navDestination, true);
+        if (!(navDestination->GetNavDestinationBackButtonEvent())) {
+            SetBackButtonEvent(navDestination);
+        }
         auto navDestinationContext = AceType::DynamicCast<FrameNode>(navDestination)->GetRenderContext();
         CHECK_NULL_VOID(navDestinationContext);
         if (!(navDestinationContext->GetBackgroundColor().has_value())) {
@@ -133,16 +138,6 @@ void NavigationGroupNode::AddNavDestinationToNavigation()
             if (theme) {
                 navDestinationContext->UpdateBackgroundColor(theme->GetBackgroundColor());
             }
-        }
-        if (!(navigationContentNode->GetChildren().empty() &&
-                navigationPattern->GetNavigationMode() == NavigationMode::SPLIT)) {
-            // add backButton except for the first level page in SPLIT mode
-            SetBackButtonVisible(navDestination);
-            if (!(navDestination->GetNavDestinationBackButtonEvent())) {
-                SetBackButtonEvent(navDestination);
-            }
-        } else {
-            SetBackButtonVisible(navDestination, false);
         }
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);

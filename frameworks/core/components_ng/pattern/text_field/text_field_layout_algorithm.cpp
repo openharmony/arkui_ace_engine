@@ -31,6 +31,7 @@
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
@@ -206,9 +207,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (contentModifier) {
         SetPropertyToModifier(textStyle, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
-        if (isCustomFont_) {
-            contentModifier->SetIsCustomFont(isCustomFont_);
-        }
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
@@ -529,16 +527,31 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
         auto frameNode = weakNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
+        if (modifier) {
+            modifier->SetFontReady(true);
+        }
     };
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
-        auto textFieldLayoutAlgorithm = DynamicCast<TextFieldLayoutAlgorithm>(frameNode->GetLayoutAlgorithm());
+        bool isCustomFont = false;
         for (const auto& familyName : fontFamilies) {
-            bool isCustomFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-            if (isCustomFont && textFieldLayoutAlgorithm) {
-                textFieldLayoutAlgorithm->isCustomFont_ = true;
+            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (customFont) {
+                isCustomFont = true;
+            }
+        }
+        if (isCustomFont) {
+            auto pattern = frameNode->GetPattern<TextFieldPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
+            if (modifier) {
+                modifier->SetIsCustomFont(true);
+                modifier->SetFontReady(false);
             }
         }
         fontManager->AddVariationNodeNG(frameNode);
@@ -712,6 +725,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier)
 {
     CHECK_NULL_VOID(modifier);
+    modifier->SetFontFamilies(textStyle.GetFontFamilies());
     modifier->SetFontSize(textStyle.GetFontSize());
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());

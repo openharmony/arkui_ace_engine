@@ -83,6 +83,7 @@ ace_unittest("option_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/search/search_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_node.cpp",

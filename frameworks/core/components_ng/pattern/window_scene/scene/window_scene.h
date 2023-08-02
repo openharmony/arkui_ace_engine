@@ -46,8 +46,6 @@ protected:
     void OnForeground() override;
     void OnDisconnect() override;
 
-    void OnSetDepth(const int32_t depth) override;
-
 private:
     void BufferAvailableCallback();
 

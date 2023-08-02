@@ -73,19 +73,6 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     }
 }
 
-SpanNode::~SpanNode()
-{
-    auto context = PipelineContext::GetCurrentContext();
-    if (context) {
-        context->RemoveFontNodeNG(AceType::WeakClaim(this));
-        auto fontManager = context->GetFontManager();
-        if (fontManager) {
-            fontManager->UnRegisterCallbackNG(AceType::WeakClaim(this));
-            fontManager->RemoveVariationNodeNG(AceType::WeakClaim(this));
-        }
-    }
-}
-
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
 {
     auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);

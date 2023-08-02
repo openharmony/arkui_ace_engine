@@ -196,6 +196,8 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     showErrorState_ = AceType::MakeRefPtr<PropertyBool>(false);
     showPasswordIconSrc_ = AceType::MakeRefPtr<PropertyString>("");
     hidePasswordIconSrc_ = AceType::MakeRefPtr<PropertyString>("");
+    fontFamilyString_ = AceType::MakeRefPtr<PropertyString>("");
+    fontReady_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
@@ -211,6 +213,8 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(showUnderline_);
     AttachProperty(showPasswordIconSrc_);
     AttachProperty(hidePasswordIconSrc_);
+    AttachProperty(fontFamilyString_);
+    AttachProperty(fontReady_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -260,6 +264,12 @@ void TextFieldContentModifier::ModifyTextStyle(TextStyle& textStyle)
     if (textColor_.has_value() && animatableTextColor_) {
         textStyle.SetTextColor(Color(animatableTextColor_->Get().GetValue()));
     }
+}
+
+void TextFieldContentModifier::SetFontFamilies(const std::vector<std::string>& value)
+{
+    CHECK_NULL_VOID(fontFamilyString_);
+    fontFamilyString_->Set(V2::ConvertFontFamily(value));
 }
 
 void TextFieldContentModifier::SetFontSize(const Dimension& value)
@@ -406,6 +416,13 @@ void TextFieldContentModifier::SetHidePasswordIcon(const std::string& value)
 {
     if (hidePasswordIconSrc_->Get() != value) {
         hidePasswordIconSrc_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetFontReady(bool value)
+{
+    if (fontReady_) {
+        fontReady_->Set(value);
     }
 }
 

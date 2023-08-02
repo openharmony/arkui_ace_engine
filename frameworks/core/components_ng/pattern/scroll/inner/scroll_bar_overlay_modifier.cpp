@@ -27,7 +27,6 @@ constexpr double FULL_ALPHA = 255.0;
 constexpr float HALF = 0.5f;
 constexpr int32_t BAR_END_DURATION = 400;        // 400ms
 constexpr int32_t BAR_APPEAR_DURATION = 100;     // 100ms
-constexpr int32_t BAR_END_DELAY_DURATION = 2000; // 2000ms
 constexpr int32_t BAR_GROW_DURATION = 150;       // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250;     // 250ms, scroll bar width shrinks from 8dp to 4dp
 } // namespace
@@ -103,7 +102,6 @@ void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacit
     option.SetCurve(Curves::SHARP);
     if (opacityAnimationType == OpacityAnimationType::DISAPPEAR) {
         option.SetDuration(BAR_END_DURATION);
-        option.SetDelay(BAR_END_DELAY_DURATION);
     } else if (opacityAnimationType == OpacityAnimationType::APPEAR) {
         option.SetDuration(BAR_APPEAR_DURATION);
     }

@@ -423,7 +423,7 @@ void DotIndicatorPaintMethod::ForwardCalculation(
             } else {
                 endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.endLongPointLeftCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                pointCenter.endLongPointRightCenterX = endCenterX + selectedItemWidth;
+                pointCenter.endLongPointRightCenterX = pointCenter.endLongPointLeftCenterX + selectedItemWidth;
                 endCenterX += selectedItemWidth * TWOFOLD;
             }
         }
@@ -480,7 +480,7 @@ void DotIndicatorPaintMethod::BackwardCalculation(
             } else {
                 endVectorBlackPointCenterX[i] = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.endLongPointRightCenterX = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                pointCenter.endLongPointLeftCenterX = endCenterX - selectedItemWidth;
+                pointCenter.endLongPointLeftCenterX = pointCenter.endLongPointLeftCenterX - selectedItemWidth;
                 endCenterX -= selectedItemWidth * TWOFOLD;
             }
         }

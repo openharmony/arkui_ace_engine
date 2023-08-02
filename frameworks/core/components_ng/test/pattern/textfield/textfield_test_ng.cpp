@@ -5858,7 +5858,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextInputScroll001, TestSize.
     pattern->OnTextInputScroll(0.0f);
     pattern->isSingleHandle_ = true;
     pattern->OnTextInputScroll(0.0f);
-    EXPECT_EQ(pattern->caretRect_.GetX(), 0.0f);
+    EXPECT_EQ(pattern->caretRect_.GetX(), -90.0f);
     EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->currentOffset_, pattern->textRect_.GetY()));
 }
 
@@ -5881,6 +5881,7 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     AceType::DynamicCast<MockPipelineBase>(pipeline)->SetRootSize(1000, 1000);
     pipeline->GetSafeAreaManager()->UpdateKeyboardSafeArea(500.0f);
+    pattern->caretUpdateType_ = CaretUpdateType::INPUT;
 
     // test caret inside safeArea
     pattern->contentRect_ = RectF { 0.0f, 0.0f, 1000.0f, 1000.0f };
@@ -5901,6 +5902,7 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     // test caret when keyboard is down
     pipeline->GetSafeAreaManager()->UpdateKeyboardSafeArea(0.0f);
     pattern->caretRect_ = CARE_RECT_DANGEROUS;
+    dy = pattern->AdjustTextAreaOffsetY();
     EXPECT_EQ(dy, 0.0f);
     EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
 }

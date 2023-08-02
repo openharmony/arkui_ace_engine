@@ -216,10 +216,4 @@ void WindowScene::OnDisconnect()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
-
-void WindowScene::OnSetDepth(const int32_t depth)
-{
-    CHECK_NULL_VOID(session_);
-    session_->SetZOrder(static_cast<uint32_t>(depth));
-}
 } // namespace OHOS::Ace::NG

@@ -65,6 +65,13 @@ public:
         windowPattern->OnDisconnect();
     }
 
+    void OnExtensionDied() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnExtensionDied();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
@@ -192,6 +199,17 @@ void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent
     CHECK_NULL_VOID(pointerEvent);
     pointerEvent->SetActionTime(GetMicroTickCount());
     session_->TransferPointerEvent(pointerEvent);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (pointerEvent->GetPointerAction() >= MMI::PointerEvent::POINTER_ACTION_PULL_DOWN &&
+        pointerEvent->GetPointerAction() <= MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            auto manager = pipeline->GetDragDropManager();
+            CHECK_NULL_VOID(manager);
+            manager->SetIsWindowConsumed(true);
+        }
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void WindowPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -288,8 +306,9 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
     int32_t action = pointerEvent->GetPointerAction();
-    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
-        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) {
+    if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) ||
+        (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW)) {
         DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
             AceType::DynamicCast<WindowNode>(host), pointerEvent);
     }
@@ -335,15 +354,17 @@ void WindowPattern::OnModifyDone()
     InitMouseEvent(inputHub);
 }
 
-void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferFocusWindowIdEvent(focusWindowId);
-}
-
 void WindowPattern::TransferFocusState(bool focusState)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusStateEvent(focusState);
+}
+
+std::vector<Rosen::Rect> WindowPattern::GetHotAreas()
+{
+    if (session_ == nullptr) {
+        return std::vector<Rosen::Rect>();
+    }
+    return session_->GetTouchHotAreas();
 }
 } // namespace OHOS::Ace::NG

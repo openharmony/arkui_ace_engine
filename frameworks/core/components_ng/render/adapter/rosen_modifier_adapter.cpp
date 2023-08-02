@@ -106,6 +106,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_PROP(property, PropertyFloat, float);
     CONVERT_PROP(property, PropertyString, std::string);
     CONVERT_PROP(property, PropertyColor, Color);
+    CONVERT_PROP(property, PropertyRectF, RectF);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyOffsetF, OffsetF);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyUint8, uint8_t);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyFloat, float);

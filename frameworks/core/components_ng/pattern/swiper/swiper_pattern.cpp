@@ -81,6 +81,16 @@ void SwiperPattern::OnAttachToFrameNode()
     InitSurfaceChangedCallback();
 }
 
+void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasSurfaceChangedCallback()) {
+        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
+        pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
+    }
+}
+
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 {
     auto host = GetHost();
@@ -236,7 +246,8 @@ void SwiperPattern::OnModifyDone()
         CHECK_NULL_VOID(gestureHub);
         gestureHub->AddTouchEvent(swiperPattern->touchEvent_);
         if (!swiperPattern->IsDisableSwipe()) {
-            gestureHub->AddPanEvent(swiperPattern->panEvent_, swiperPattern->panDirection_, 1, DEFAULT_PAN_DISTANCE);
+            float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
+            gestureHub->AddPanEvent(swiperPattern->panEvent_, swiperPattern->panDirection_, 1, distance);
         }
     };
     swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
@@ -1033,7 +1044,8 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection_, 1, DEFAULT_PAN_DISTANCE);
+    float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
+    gestureHub->AddPanEvent(panEvent_, panDirection_, 1, distance);
 }
 
 void SwiperPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1442,10 +1454,6 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity) const
 
 void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity)
 {
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
-
     AnimationOption option;
     option.SetDuration(GetDuration());
     option.SetCurve(GetCurveIncludeMotion(velocity / translate));
@@ -1681,10 +1689,6 @@ void SwiperPattern::PlayTranslateAnimation(
 
     SetLazyLoadFeature(false);
 
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
-
     if (!controller_) {
         controller_ = CREATE_ANIMATOR(host->GetContext());
     }
@@ -1848,8 +1852,8 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     float friction = currentOffset_ > 0
                          ? CalculateFriction(itemPosition_.begin()->second.startPos / mainSize)
                          : CalculateFriction((mainSize - itemPosition_.rbegin()->second.endPos) / mainSize);
-    auto springMotion = AceType::MakeRefPtr<SpringMotion>(
-        currentOffset_, extentPair.Trailing(), dragVelocity * friction, springProperty);
+    auto springMotion = AceType::MakeRefPtr<SpringMotion>(currentOffset_,
+        currentOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing(), dragVelocity * friction, springProperty);
     springMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
         auto swiper = weak.Upgrade();
         if (swiper) {
@@ -2690,10 +2694,6 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
         PostTranslateTask(delayTime);
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-#endif
 }
 
 void SwiperPattern::OnWindowShow()
@@ -2834,12 +2834,17 @@ void SwiperPattern::InitHoverMouseEvent()
         inputHub->AddOnHoverEvent(hoverEvent_);
     }
 
-    inputHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
+    auto mouseEvent = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleMouseEvent(info);
         }
-    });
+    };
+    if (mouseEvent_) {
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+    }
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseEvent));
+    inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
 void SwiperPattern::HandleMouseEvent(const MouseInfo& info)

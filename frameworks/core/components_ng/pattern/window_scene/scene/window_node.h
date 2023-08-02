@@ -18,6 +18,8 @@
 
 #include <optional>
 
+#include "wm/wm_common.h"
+
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -37,6 +39,7 @@ public:
 
 private:
     RectF ConvertHotRect(const RectF& rect, int32_t sourceType);
+    std::vector<RectF> ConvertHotRects(const std::vector<Rosen::Rect>& hotAreas);
 };
 } // namespace OHOS::Ace::NG
 

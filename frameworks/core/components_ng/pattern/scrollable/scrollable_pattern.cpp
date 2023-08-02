@@ -146,7 +146,7 @@ void ScrollablePattern::OnScrollEnd()
         }
     }
     if (scrollBar_) {
-        scrollBar_->PlayScrollBarEndAnimation();
+        scrollBar_->ScheduleDisapplearDelayTask();
     }
     StartScrollBarAnimatorByProxy();
 }
@@ -306,6 +306,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->OnScrollEnd();
         pattern->OnScrollEndCallback();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
@@ -334,30 +335,41 @@ void ScrollablePattern::RegisterScrollBarEventTask()
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
     if (displayMode == DisplayMode::OFF) {
         if (scrollBar_) {
             auto gestureHub = GetGestureHub();
             if (gestureHub) {
                 gestureHub->RemoveTouchEvent(scrollBar_->GetTouchEvent());
             }
-            scrollBar_->MarkNeedRender();
             scrollBar_.Reset();
+            overlayModifier_->SetOpacity(0);
         }
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode, overlayModifier_);
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
-        scrollBar_->PlayScrollBarEndAnimation();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    } else if (scrollBar_->GetDisplayMode() != displayMode) {
+    } else {
+        oldDisplayMode = scrollBar_->GetDisplayMode();
+    }
+
+    if (oldDisplayMode != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
+        if (overlayModifier_) {
+            overlayModifier_->SetOpacity(UINT8_MAX);
+        }
+        if (displayMode == DisplayMode::ON) {
+        } else if (displayMode == DisplayMode::AUTO) {
+            scrollBar_->ScheduleDisapplearDelayTask();
+        }
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(renderContext);

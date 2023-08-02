@@ -37,6 +37,26 @@ void SystemWindowScene::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
+
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto touchCallback = [this](TouchEventInfo& info) {
+        const auto pointerEvent = info.GetPointerEvent();
+        CHECK_NULL_VOID(session_);
+        CHECK_NULL_VOID(pointerEvent);
+        session_->TransferPointerEvent(pointerEvent);
+    };
+    gestureHub->SetTouchEvent(std::move(touchCallback));
+
+    auto mouseEventHub = frameNode->GetOrCreateInputEventHub();
+    auto mouseCallback = [this](MouseInfo& info) {
+        const auto pointerEvent = info.GetPointerEvent();
+        CHECK_NULL_VOID(session_);
+        CHECK_NULL_VOID(pointerEvent);
+        session_->TransferPointerEvent(pointerEvent);
+    };
+    mouseEventHub->SetMouseEvent(std::move(mouseCallback));
 }
 
 bool SystemWindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -58,11 +78,5 @@ bool SystemWindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(session_, false);
     session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
     return false;
-}
-
-void SystemWindowScene::OnSetDepth(const int32_t depth)
-{
-    CHECK_NULL_VOID(session_);
-    session_->SetZOrder(static_cast<uint32_t>(depth));
 }
 } // namespace OHOS::Ace::NG

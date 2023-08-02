@@ -30,6 +30,7 @@ class WindowPattern : public Pattern {
 public:
     WindowPattern() = default;
     ~WindowPattern() override = default;
+    std::vector<Rosen::Rect> GetHotAreas();
 
 protected:
     void OnModifyDone() override;
@@ -39,7 +40,6 @@ protected:
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DisPatchFocusActiveEvent(bool isFocusActive);
-    void TransferFocusWindowId(uint32_t focusWindowId);
     void TransferFocusState(bool focusState);
 
     virtual bool HasStartingPage() = 0;
@@ -56,6 +56,7 @@ protected:
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
+    virtual void OnExtensionDied() {}
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;

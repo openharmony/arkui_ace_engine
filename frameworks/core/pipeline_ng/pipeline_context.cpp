@@ -691,6 +691,10 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         case WindowSizeChangeReason::ROTATION: {
             SetRootRect(width, height, 0.0);
             FlushUITasks();
+            if (textFieldManager_) {
+                DynamicCast<TextFieldManagerNG>(textFieldManager_)->ScrollTextFieldToSafeArea();
+            }
+            FlushUITasks();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -874,13 +878,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         FlushUITasks();
 
         CHECK_NULL_VOID_NOLOG(manager);
-        // only scroll when keyboard shows
-        if (keyboardHeight <= 0) {
-            return;
-        }
-        auto safeAreaBottom = GetSafeArea().bottom_.Combine(safeAreaManager_->GetKeyboardInset());
-        CHECK_NULL_VOID_NOLOG(safeAreaBottom.IsValid());
-        manager->ScrollTextFieldToSafeArea(safeAreaBottom);
+        manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
 
@@ -1271,8 +1269,8 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     }
     auto container = Container::Current();
     if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-        event.action == MouseAction::MOVE) &&
-        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+             event.action == MouseAction::MOVE) &&
+            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
         (container && container->IsScenceBoardWindow() && (event.pullAction == MouseAction::PULL_MOVE ||
         event.pullAction == MouseAction::PULL_UP))) {
         auto touchPoint = event.CreateTouchPoint();
@@ -1586,21 +1584,19 @@ void PipelineContext::OnHide()
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
-    LOGI("WindowFocus: windowId: %{public}d, onFocus: %{public}d, onShow: %{public}d.", windowId_, isFocus, onShow_);
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
+        LOGI("WindowFocus: window - %{public}d on blur.", windowId_);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         if (mouseStyle) {
             mouseStyle->ChangePointerStyle(static_cast<int32_t>(GetWindowId()), MouseFormat::DEFAULT);
         }
-        LOGD("WindowFocus: onFocus_ is %{public}d. Lost all focus.", onFocus_);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
-    }
-    if (onFocus_ && onShow_) {
-        LOGD("WindowFocus: onFocus_ and onShow_ are both true. Do FlushFocus().");
+    } else {
+        LOGI("WindowFocus: window - %{public}d on focus.", windowId_);
         isRootFocusNeedUpdate_ = true;
         FlushFocus();
     }
@@ -1818,6 +1814,14 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
 #ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        if (!manager->IsDragged() && manager->IsWindowConsumed()) {
+            manager->SetIsWindowConsumed(false);
+            LOGD("The event does not need to be handled");
+            return;
+        }
+    }
     if (action == DragEventAction::DRAG_EVENT_OUT) {
         manager->ClearSummary();
         manager->ClearExtraInfo();
@@ -1825,6 +1829,7 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END &&
         action != DragEventAction::DRAG_EVENT_START) {
+        manager->SetIsWindowConsumed(false);
         LOGI("current context is the source of drag");
         return;
     }
@@ -1854,6 +1859,7 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     if (manager->IsDragged()) {
         manager->OnDragMove(Point(x, y, x, y), extraInfo);
     }
+    manager->SetIsWindowConsumed(false);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)

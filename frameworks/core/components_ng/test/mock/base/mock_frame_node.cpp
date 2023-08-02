@@ -316,8 +316,6 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
 
 void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
 
-void FrameNode::OnSetDepth(const int32_t depth) {}
-
 void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 {
     isActive_ = false;

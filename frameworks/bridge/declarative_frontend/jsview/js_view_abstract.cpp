@@ -306,6 +306,17 @@ bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOp
             double to = 1.0;
             JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("from"), from);
             JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("to"), to);
+            if (GreatNotEqual(from, 1.0) || LessNotEqual(from, 0.0)) {
+                LOGW("ParseMotionPath, from value %{public}f is illegal, use default 0.0", from);
+                from = 0.0;
+            }
+            if (GreatNotEqual(to, 1.0) || LessNotEqual(to, 0.0)) {
+                LOGW("ParseMotionPath, to value %{public}f is illegal, use default 1.0", to);
+                to = 1.0;
+            } else if (to < from) {
+                LOGW("ParseMotionPath, to value %{public}f less than from value %{public}f", to, from);
+                to = from;
+            }
             option.SetBegin(static_cast<float>(from));
             option.SetEnd(static_cast<float>(to));
             option.SetRotate(argsPtrItem->GetBool("rotatable", false));
@@ -2314,7 +2325,11 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
         auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
         JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].value);
         LOGD("option #%{public}d is %{public}s", static_cast<int>(i), params[i].value.c_str());
-        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(indexObject->GetProperty("action")));
+        auto actionFunc = indexObject->GetProperty("action");
+        if (!actionFunc->IsFunction()) {
+            return params;
+        }
+        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(actionFunc));
         // set onClick function
         params[i].action = [func = std::move(action), context = info.GetExecutionContext()]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
@@ -3077,8 +3092,12 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 }
 
 void JSViewAbstract::GetFractionStops(
-    std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array, bool& flag)
+    std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array)
 {
+    if (!array || !array->IsArray() || static_cast<int32_t>(array->GetArraySize()) <= 1) {
+        LOGI("Js Parse object failed, fractionStops is invalid");
+        return;
+    }
     float tmpPos = -1.0f;
     for (int32_t i = 0; i < array->GetArraySize(); i++) {
         std::pair<float, float> fractionStop;
@@ -3102,7 +3121,6 @@ void JSViewAbstract::GetFractionStops(
         }
         if (fractionStop.second <= tmpPos) {
             LOGE("fraction stop postion is not incremental.");
-            flag = false;
             fractionStops.clear();
             return;
         }
@@ -3117,44 +3135,32 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
         return;
     }
     double blurRadius = 0.0;
-    if (!ParseJsDouble(info[0], blurRadius)) {
-        return;
-    }
+    ParseJsDouble(info[0], blurRadius);
     blurRadius = std::clamp(blurRadius, 0.0, 60.0); // 60.0 represents largest blur radius;
 
-    if (!info[1]->IsObject()) {
-        LOGE("arg is not a object.");
-        return;
-    }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[1]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[1]->ToString().c_str());
-        return;
-    }
-
-    // Parse fractionStops
-    auto array = argsPtrItem->GetValue("fractionStops");
-    if (!array || array->IsNull() || !array->IsArray()) {
-        LOGE("Js Parse object failed, fractionStops is null or not Array");
-        return;
-    }
-    bool incrementalFlag = true;
     std::vector<std::pair<float, float>> fractionStops;
-    GetFractionStops(fractionStops, array, incrementalFlag);
-
-    if (fractionStops.size() <= 1) {
-        if (incrementalFlag) {
-            LOGE("fractionstops must greater than 1.");
+    auto direction = GradientDirection::BOTTOM;
+    if (info[1]->IsObject()) {
+        auto argsPtrItem = JsonUtil::ParseJsonString(info[1]->ToString());
+        if (argsPtrItem && !argsPtrItem->IsNull()) {
+            auto array = argsPtrItem->GetValue("fractionStops");
+            if (array) {
+                GetFractionStops(fractionStops, array);
+            }
+            auto directionValue = argsPtrItem->GetInt("direction", static_cast<int8_t>(GradientDirection::BOTTOM));
+            if (directionValue < static_cast<int8_t>(GradientDirection::LEFT) ||
+                directionValue >= static_cast<int8_t>(GradientDirection::NONE)) {
+                directionValue = static_cast<int8_t>(GradientDirection::BOTTOM);
+            }
+            direction = static_cast<GradientDirection>(directionValue);
         }
-        return;
+    }
+    if (static_cast<int32_t>(fractionStops.size()) <= 1) {
+        fractionStops.clear();
+        fractionStops.push_back(std::pair<float, float>(0.0f, 0.0f));
+        fractionStops.push_back(std::pair<float, float>(0.0f, 1.0f));
     }
     // Parse direction
-    auto direction =
-        static_cast<GradientDirection>(argsPtrItem->GetInt("direction", static_cast<int8_t>(GradientDirection::NONE)));
-    if (static_cast<int8_t>(direction) >= static_cast<int8_t>(GradientDirection::NONE)) {
-        direction = GradientDirection::BOTTOM;
-    }
-
     CalcDimension dimensionRadius(static_cast<float>(blurRadius), DimensionUnit::PX);
     NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, static_cast<NG::GradientDirection>(direction));
     SetLinearGradientBlur(blurPara);

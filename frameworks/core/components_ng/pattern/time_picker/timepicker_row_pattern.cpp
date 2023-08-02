@@ -276,7 +276,6 @@ uint32_t TimePickerRowPattern::GetHourFromAmPm(bool isAm, uint32_t amPmhour) con
 void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
 {
     std::vector<RefPtr<FrameNode>> tags;
-    OnDataLinking(tag, isAdd, index, tags);
     for (const auto& tag : tags) {
         auto iter = std::find_if(timePickerColumns_.begin(), timePickerColumns_.end(),
             [&tag](const RefPtr<FrameNode>& column) { return column->GetId() == tag->GetId(); });

@@ -421,8 +421,6 @@ public:
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     void AddFRCSceneInfo(const std::string& name, float speed, SceneStatus status);
 
-    void OnSetDepth(const int32_t depth) override;
-
     OffsetF GetParentGlobalOffsetDuringLayout() const;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
 
@@ -488,6 +486,8 @@ public:
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
+    std::pair<float, float> ContextPositionConvertToPX(
+        const RefPtr<RenderContext>& context, const SizeF& percentReference) const;
     bool IsNeedRequestParentMeasure() const;
     void UpdateLayoutPropertyFlag() override;
     void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) override;
@@ -542,7 +542,8 @@ private:
             auto left = weakLeft.Upgrade();
             auto right = weakRight.Upgrade();
             if (left && right) {
-                return left->GetRenderContext()->GetZIndexValue(1) < right->GetRenderContext()->GetZIndexValue(1);
+                return left->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE) <
+                    right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
             }
             return false;
         }

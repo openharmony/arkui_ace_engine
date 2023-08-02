@@ -125,7 +125,9 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
         pen.SetColor(
             ToRSColor(animatableBorderColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
     }
-    DrawBorder(canvas, paintOffset, pen, contentSize);
+    if (enabled_->Get() || !isSelect_->Get()) {
+        DrawBorder(canvas, paintOffset, pen, contentSize);
+    }
     pen.SetColor(ToRSColor(animatableCheckColor_->Get()));
     shadowPen.SetColor(ToRSColor(animatableShadowColor_->Get()));
     DrawCheck(canvas, paintOffset, pen, shadowPen, contentSize);
