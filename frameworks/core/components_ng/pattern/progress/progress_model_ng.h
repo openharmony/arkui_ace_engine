@@ -45,6 +45,8 @@ public:
     void SetRingSweepingEffect(bool value) override;
     void SetLinearSweepingEffect(bool value) override;
     void SetSmoothEffect(bool value) override;
+    void SetStrokeRadius(const Dimension& value) override;
+    void ResetStrokeRadius() override;
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

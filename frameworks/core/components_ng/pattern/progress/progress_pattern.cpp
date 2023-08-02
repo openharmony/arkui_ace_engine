@@ -248,7 +248,11 @@ void ProgressPattern::ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue
     auto theme = pipeline->GetTheme<ProgressTheme>();
 
     auto jsonValue = JsonUtil::Create(true);
-    jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
+    auto strokeWidth = layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness());
+    jsonValue->Put("strokeWidth", strokeWidth.ToString().c_str());
+    auto strokeRadius = paintProperty->GetStrokeRadiusValue(strokeWidth / 2);
+    strokeRadius = std::min(strokeWidth / 2, strokeRadius);
+    jsonValue->Put("strokeRadius", strokeRadius.ToString().c_str());
     jsonValue->Put("enableScanEffect", (paintProperty->GetEnableLinearScanEffect().value_or(false)) ? "true" : "false");
     json->Put("linearStyle", jsonValue);
 }

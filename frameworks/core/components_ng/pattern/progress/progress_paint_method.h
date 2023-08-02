@@ -90,14 +90,14 @@ public:
         auto ringProgressColor = GenerateRingProgressColor(paintWrapper);
         progressModifier_->SetRingProgressColor(ringProgressColor);
         progressModifier_->SetPaintShadow(paintShadow);
-        if (paintProperty->GetItalicFontStyle() == Ace::FontStyle::NORMAL) {
-            isItalic_ = false;
-        } else {
-            isItalic_ = true;
-        }
+        isItalic_ = paintProperty->GetItalicFontStyle() != Ace::FontStyle::NORMAL;
         progressModifier_->SetIsItalic(isItalic_);
         progressModifier_->SetMaxValue(maxValue_);
         progressModifier_->SetValue(value_);
+        auto strokeRadius = static_cast<float>(
+            paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2.0f, DimensionUnit::VP)).ConvertToPx());
+        strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);
+        progressModifier_->SetStrokeRadius(strokeRadius);
     }
 
     void GetThemeDate();

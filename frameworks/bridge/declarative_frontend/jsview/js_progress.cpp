@@ -518,6 +518,22 @@ void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
         sweepingEffect = false;
     }
     ProgressModel::GetInstance()->SetLinearSweepingEffect(sweepingEffect);
+
+    // Parse stroke radius
+    CalcDimension strokeRadiusDimension;
+    auto strokeRadius = paramObject->GetProperty("strokeRadius");
+    if (strokeRadius->IsUndefined() || strokeRadius->IsNull() ||
+        !ParseJsDimensionVpNG(strokeRadius, strokeRadiusDimension)) {
+        ProgressModel::GetInstance()->ResetStrokeRadius();
+        return;
+    }
+
+    if (LessNotEqual(strokeRadiusDimension.Value(), 0.0f) || strokeRadiusDimension.Unit() == DimensionUnit::PERCENT) {
+        ProgressModel::GetInstance()->ResetStrokeRadius();
+        return;
+    }
+
+    ProgressModel::GetInstance()->SetStrokeRadius(strokeRadiusDimension);
 }
 
 } // namespace OHOS::Ace::Framework

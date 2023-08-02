@@ -65,6 +65,7 @@ public:
     void SetLinearSweepEffect(bool value);
     void SetIsItalic(bool isItalic);
     void SetSmoothEffect(bool value);
+    void SetStrokeRadius(float strokeRaidus);
 
 private:
     void ContentDrawWithFunction(DrawingContext& context);
@@ -117,6 +118,7 @@ private:
     RefPtr<AnimatablePropertyFloat> sweepingDate_;
     RefPtr<AnimatablePropertyFloat> trailingHeadDate_;
     RefPtr<AnimatablePropertyFloat> trailingTailDate_;
+    RefPtr<AnimatablePropertyFloat> strokeRadius_;
 
     // no Animatable
     RefPtr<PropertyOffsetF> offset_;
