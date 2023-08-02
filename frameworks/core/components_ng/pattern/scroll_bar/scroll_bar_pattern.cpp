@@ -50,14 +50,13 @@ void ScrollBarPattern::OnModifyDone()
 
     auto oldDisplayMode = displayMode_;
     displayMode_ = layoutProperty->GetDisplayMode().value_or(DisplayMode::AUTO);
-    if (scrollBarProxy_ &&
-        (!scrollEndAnimator_ || (oldDisplayMode != displayMode_ && displayMode_ == DisplayMode::AUTO))) {
-        scrollBarProxy_->StartScrollBarAnimator();
+    if ((oldDisplayMode != displayMode_ || !scrollEndAnimator_)  && scrollBarProxy_) {
+        if (displayMode_ == DisplayMode::ON) {
+            scrollBarProxy_->StopScrollBarAnimator();
+        } else if (displayMode_ == DisplayMode::AUTO || !scrollEndAnimator_) {
+            scrollBarProxy_->StartScrollBarAnimator();
+        }
     }
-    if (displayMode_ == DisplayMode::ON) {
-        SetOpacity(UINT8_MAX);
-    }
-
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis_ == axis && scrollableEvent_) {
         LOGD("Direction not changed, need't resister scroll event again.");
