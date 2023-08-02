@@ -3097,6 +3097,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(context, false);
     if (needShowSoftKeyboard) {
         LOGI("Start to request keyboard");
+        if (customKeyboardBulder_) {
+            return RequestCustomKeyboard();
+        }
 #if defined(ENABLE_STANDARD_INPUT)
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
@@ -3149,6 +3152,9 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
     LOGI("Request close soft keyboard");
     if (forceClose) {
         StopTwinkling();
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+            return CloseCustomKeyboard();
+        }
 #if defined(ENABLE_STANDARD_INPUT)
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (!imeAttached_) {
@@ -3174,6 +3180,37 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
         return true;
     }
     return false;
+}
+
+bool TextFieldPattern::RequestCustomKeyboard()
+{
+    if (isCustomKeyboardAttached_) {
+        return true;
+    }
+    CHECK_NULL_RETURN(customKeyboardBulder_, false);
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->BindKeyboard(customKeyboardBulder_, frameNode->GetId());
+    isCustomKeyboardAttached_ = true;
+    return true;
+}
+
+bool TextFieldPattern::CloseCustomKeyboard()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->DestroyKeyboard();
+    isCustomKeyboardAttached_ = false;
+    return true;
 }
 
 void TextFieldPattern::ProcessPasswordIcon()
@@ -5748,7 +5785,7 @@ void TextFieldPattern::StopEditing()
         return;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (GetImeAttached()) {
+    if (GetImeAttached() || isCustomKeyboardAttached_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<TextFieldEventHub>();

@@ -523,4 +523,14 @@ void TextFieldModelNG::SetSelectionMenuHidden(bool selectionMenuHidden)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectionMenuHidden, selectionMenuHidden);
 }
+
+void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    if (pattern) {
+        pattern->SetCustomKeyboard(std::move(buildFunc));
+    }
+}
 } // namespace OHOS::Ace::NG

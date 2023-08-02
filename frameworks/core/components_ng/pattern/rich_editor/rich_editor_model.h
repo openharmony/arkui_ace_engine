@@ -133,6 +133,7 @@ public:
     virtual void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) = 0;
     virtual void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) = 0;
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
+    virtual void SetCustomKeyboard(std::function<void()>&& func) = 0;
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;
