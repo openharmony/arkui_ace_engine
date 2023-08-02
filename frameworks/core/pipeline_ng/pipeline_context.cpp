@@ -1089,9 +1089,15 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 
     if (scalePoint.type == TouchType::MOVE) {
         touchEvents_.emplace_back(point);
-        hasIdleTasks_ = true;
-        RequestFrame();
-        return;
+        auto container = Container::Current();
+        if (container && !container->IsScenceBoardWindow()) {
+            hasIdleTasks_ = true;
+            RequestFrame();
+            return;
+        } else {
+            FlushTouchEvents();
+            return;
+        }
     }
 
     if (scalePoint.type == TouchType::UP) {
