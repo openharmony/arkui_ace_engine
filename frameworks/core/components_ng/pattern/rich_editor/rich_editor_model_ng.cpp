@@ -104,4 +104,14 @@ void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDeleteComplete(std::move(func));
 }
+
+void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    if (pattern) {
+        pattern->SetCustomKeyboard(std::move(func));
+    }
+}
 } // namespace OHOS::Ace::NG

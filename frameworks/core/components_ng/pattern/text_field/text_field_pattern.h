@@ -786,6 +786,9 @@ public:
         return false;
     }
 
+    bool RequestCustomKeyboard();
+    bool CloseCustomKeyboard();
+
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
@@ -959,6 +962,13 @@ public:
     void TextAreaInputRectUpdate(RectF &rect);
     void UpdateRectByAlignment(RectF &rect);
 
+    void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
+    {
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+            CloseCustomKeyboard();
+        }
+        customKeyboardBulder_ = keyboardBuilder;
+    }
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -1219,6 +1229,8 @@ private:
     bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
+    bool isCustomKeyboardAttached_ = false;
+    std::function<void()> customKeyboardBulder_;
 };
 } // namespace OHOS::Ace::NG
 

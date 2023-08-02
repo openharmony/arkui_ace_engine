@@ -69,6 +69,7 @@ public:
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func);
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
+    virtual void SetCustomKeyboard(const std::function<void ()> &&buildFunc);
 
 private:
     static std::unique_ptr<SearchModel> instance_;
