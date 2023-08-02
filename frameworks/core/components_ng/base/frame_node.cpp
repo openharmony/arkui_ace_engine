@@ -2510,4 +2510,13 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     isActive_ = false;
 }
 
+void FrameNode::OnInspectorIdUpdate(const std::string& /*unused*/)
+{
+    auto parent = GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID_NOLOG(parent);
+    if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 } // namespace OHOS::Ace::NG

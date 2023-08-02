@@ -67,6 +67,7 @@ void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
 }
+void FrameNode::OnInspectorIdUpdate(const std::string& /*unused*/) {}
 void FrameNode::OnMountToParentDone() {}
 void FrameNode::FlushUpdateAndMarkDirty() {}
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag) {}

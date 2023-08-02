@@ -85,6 +85,8 @@ public:
         return 1;
     }
 
+    void OnInspectorIdUpdate(const std::string& /*unused*/) override;
+
     void InitializePatternAndContext();
 
     virtual void MarkModifyDone();

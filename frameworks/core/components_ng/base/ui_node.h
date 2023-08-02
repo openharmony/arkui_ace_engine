@@ -307,7 +307,7 @@ public:
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
-    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+    virtual void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
     template<typename T>
     RefPtr<T> FindChildNodeOfClass()
