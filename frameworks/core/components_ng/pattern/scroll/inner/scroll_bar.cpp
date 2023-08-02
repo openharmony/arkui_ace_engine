@@ -331,8 +331,9 @@ void ScrollBar::SetGestureEvent()
                 info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
+                    scrollBar->SetPressed(false);
+                    scrollBar->ScheduleDisapplearDelayTask();
                 }
-                scrollBar->SetPressed(false);
             }
         });
     }
@@ -361,9 +362,7 @@ void ScrollBar::SetMouseEvent()
             scrollBar->SetHover(false);
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
-                if (scrollBar->GetDisplayMode() == DisplayMode::AUTO) {
-                    scrollBar->ScheduleDisapplearDelayTask();
-                }
+                scrollBar->ScheduleDisapplearDelayTask();
             }
         }
     });

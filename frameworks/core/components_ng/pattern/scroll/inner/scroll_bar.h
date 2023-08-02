@@ -252,6 +252,12 @@ public:
         if (positionMode_ != positionMode) {
             positionModeUpdate_ = true;
             positionMode_ = positionMode;
+            if (panRecognizer_) {
+                PanDirection panDirection;
+                panDirection.type =
+                    positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
+                panRecognizer_->SetDirection(panDirection);
+            }
         }
     }
 
@@ -359,7 +365,6 @@ public:
         normalWidth_ = inactiveWidth_;
         FlushBarWidth();
         hoverAnimationType_ = HoverAnimationType::SHRINK;
-        PlayScrollBarEndAnimation();
         MarkNeedRender();
     }
 
@@ -459,9 +464,6 @@ public:
     void SetMouseEvent();
     void FlushBarWidth();
     void PlayAdaptAnimation(double activeSize, double activeMainOffset, double inactiveSize, double inactiveMainOffset);
-    void PlayGrowAnimation();
-    void PlayShrinkAnimation();
-    void PlayBarEndAnimation();
     void CalcReservedHeight();
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
