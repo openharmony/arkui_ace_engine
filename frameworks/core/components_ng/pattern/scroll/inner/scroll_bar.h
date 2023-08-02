@@ -25,6 +25,7 @@
 #include "core/animation/friction_motion.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/border_property.h"
@@ -97,7 +98,7 @@ public:
     ~ScrollBar() override = default;
 
     bool InBarTouchRegion(const Point& point) const;
-    bool InBarActiveRegion(const Point& point) const;
+    bool InBarHoverRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(
@@ -198,6 +199,11 @@ public:
     void SetActiveWidth(const Dimension& activeWidth)
     {
         activeWidth_ = activeWidth;
+    }
+
+    void SetHoverWidth(const RefPtr<ScrollBarTheme>& theme)
+    {
+        hoverWidth_ = theme->GetActiveWidth() + theme->GetScrollBarMargin() * 2;
     }
 
     const Dimension& GetActiveWidth() const
@@ -385,6 +391,11 @@ public:
         return mouseEvent_;
     }
 
+    RefPtr<InputEvent> GetHoverEvent() const
+    {
+        return hoverEvent_;
+    }
+
     void SetIsUserNormalWidth(bool isUserNormalWidth)
     {
         isUserNormalWidth_ = isUserNormalWidth;
@@ -457,6 +468,7 @@ public:
 
     void SetGestureEvent();
     void SetMouseEvent();
+    void SetHoverEvent();
     void FlushBarWidth();
     void PlayAdaptAnimation(double activeSize, double activeMainOffset, double inactiveSize, double inactiveMainOffset);
     void PlayGrowAnimation();
@@ -492,6 +504,7 @@ private:
     Color backgroundColor_;
     Color foregroundColor_;
     Rect touchRegion_;
+    Rect hoverRegion_;
     Rect barRect_;
     Rect activeRect_;
     Dimension minHeight_;           // this is min static height
@@ -502,6 +515,7 @@ private:
     Dimension activeWidth_;
     Dimension normalWidth_;
     Dimension touchWidth_;
+    Dimension hoverWidth_;
 
     Dimension position_;
 
@@ -535,6 +549,7 @@ private:
     uint8_t opacity_ = UINT8_MAX;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<Animator> adaptAnimator_;
     RefPtr<Animator> frictionController_;

@@ -291,6 +291,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     CHECK_NULL_VOID(inputHub);
     scrollBar_->SetGestureEvent();
     scrollBar_->SetMouseEvent();
+    scrollBar_->SetHoverEvent();
     scrollBar_->SetMarkNeedRenderFunc([weak = AceType::WeakClaim(AceType::RawPtr(host))]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
@@ -311,13 +312,14 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
+    inputHub->AddOnHoverEvent(scrollBar_->GetHoverEvent());
     CHECK_NULL_VOID(scrollableEvent_);
     scrollableEvent_->SetInBarRegionCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point, SourceType source) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_RETURN_NOLOG(scrollBar, false);
             if (source == SourceType::MOUSE) {
-                return scrollBar->InBarActiveRegion(Point(point.GetX(), point.GetY()));
+                return scrollBar->InBarHoverRegion(Point(point.GetX(), point.GetY()));
             }
             return scrollBar->InBarTouchRegion(Point(point.GetX(), point.GetY()));
         }
