@@ -619,6 +619,7 @@ void ScrollablePattern::UninitMouseEvent()
     CHECK_NULL_VOID(mouseEventHub);
     mouseEventHub->RemoveOnMouseEvent(mouseEvent_);
     ClearMultiSelect();
+    ClearInvisibleItemsSelectedStatus();
     isMouseEventInit_ = false;
 }
 
@@ -651,6 +652,40 @@ void ScrollablePattern::InitMouseEvent()
     });
 }
 
+void ScrollablePattern::ClearInvisibleItemsSelectedStatus()
+{
+    for (auto& item : itemToBeSelected_) {
+        item.second.FireSelectChangeEvent(false);
+    }
+    itemToBeSelected_.clear();
+}
+
+void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selectedZone)
+{
+    auto newRect = selectedZone;
+    auto startMainOffset = mouseStartOffset_.GetMainOffset(axis_);
+    auto endMainOffset = mouseEndOffset_.GetMainOffset(axis_);
+    if (LessNotEqual(startMainOffset, endMainOffset)) {
+        if (axis_ == Axis::VERTICAL) {
+            newRect.SetOffset(OffsetF(selectedZone.Left(), totalOffsetOfMousePressed_));
+        } else {
+            newRect.SetOffset(OffsetF(totalOffsetOfMousePressed_, selectedZone.Top()));
+        }
+    } else {
+        if (axis_ == Axis::VERTICAL) {
+            newRect.SetOffset(
+                OffsetF(selectedZone.Left(), totalOffsetOfMousePressed_ - (startMainOffset - endMainOffset)));
+        } else {
+            newRect.SetOffset(
+                OffsetF(totalOffsetOfMousePressed_ - (startMainOffset - endMainOffset), selectedZone.Top()));
+        }
+    }
+
+    for (auto& item : itemToBeSelected_) {
+        item.second.FireSelectChangeEvent(newRect.IsIntersectWith(item.second.rect));
+    }
+}
+
 void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
     if (info.GetButton() != MouseButton::LEFT_BUTTON) {
@@ -673,6 +708,7 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
     if (info.GetAction() == MouseAction::PRESS) {
         if (!IsItemSelected(info)) {
             ClearMultiSelect();
+            ClearInvisibleItemsSelectedStatus();
         }
         mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
@@ -692,6 +728,7 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
             MultiSelectWithoutKeyboard(selectedZone);
+            HandleInvisibleItemsSelectedStatus(selectedZone);
         }
         SelectWithScroll();
     } else if (info.GetAction() == MouseAction::RELEASE) {
@@ -796,6 +833,7 @@ void ScrollablePattern::MarkSelectedItems()
         auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
         if (!selectedZone.IsEmpty()) {
             MultiSelectWithoutKeyboard(selectedZone);
+            HandleInvisibleItemsSelectedStatus(selectedZone);
         }
     }
 }
