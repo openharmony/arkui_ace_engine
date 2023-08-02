@@ -159,7 +159,7 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
     return nullptr;
 }
 
-RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index)
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild)
 {
     return nullptr;
 }

@@ -125,7 +125,7 @@ public:
         return allFrameNodeChildren_;
     }
 
-    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index)
+    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild)
     {
         while (cursor_ != children_.end()) {
             if (cursor_->startIndex > index) {
@@ -134,8 +134,8 @@ public:
             }
 
             if (cursor_->startIndex + cursor_->count > index) {
-                auto frameNode =
-                    AceType::DynamicCast<FrameNode>(cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex));
+                auto frameNode = AceType::DynamicCast<FrameNode>(
+                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex, needBuild));
                 return frameNode;
             }
             cursor_++;
@@ -147,12 +147,12 @@ public:
         return nullptr;
     }
 
-    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index)
+    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
-            auto child = FindFrameNodeByIndex(index);
+            auto child = FindFrameNodeByIndex(index, needBuild);
             if (child) {
                 partFrameNodeChildren_[index] = child;
                 return child;
@@ -2418,11 +2418,16 @@ void FrameNode::SyncGeometryNode()
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
 {
-    auto child = frameProxy_->GetFrameNodeByIndex(index);
+    auto child = frameProxy_->GetFrameNodeByIndex(index, true);
     if (addToRenderTree && child) {
         child->SetActive(true);
     }
     return child;
+}
+
+RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index)
+{
+    return frameProxy_->GetFrameNodeByIndex(index, false);
 }
 
 const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
@@ -2480,7 +2485,7 @@ void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
     needSyncRenderTree_ = true;
 }
 
-RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index)
+RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild)
 {
     if (index != 0) {
         return nullptr;

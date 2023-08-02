@@ -474,6 +474,7 @@ public:
     }
 
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
+    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override;
     const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
@@ -501,7 +502,7 @@ public:
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
     void SyncGeometryNode();
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     template<typename T>

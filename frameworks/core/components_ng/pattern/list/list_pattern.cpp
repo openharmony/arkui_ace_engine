@@ -436,9 +436,8 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (listLayoutProperty->HasLanes() || listLayoutProperty->HasLaneMinLength() ||
         listLayoutProperty->HasLaneMaxLength()) {
         auto lanesLayoutAlgorithm = MakeRefPtr<ListLanesLayoutAlgorithm>();
-        if ((listLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT) == 0) {
-            lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
-        }
+        RefreshLanesItemRange();
+        lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
         lanesLayoutAlgorithm->SetLanes(lanes_);
         listLayoutAlgorithm.Swap(lanesLayoutAlgorithm);
     } else {
@@ -1691,5 +1690,29 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
         }
     }
     return false;
+}
+
+void ListPattern::RefreshLanesItemRange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto updatePos = host->GetChildrenUpdated();
+    if (updatePos == -1) {
+        return;
+    }
+    if (updatePos == 0) {
+        lanesItemRange_.clear();
+        return;
+    }
+    for (auto it = lanesItemRange_.begin(); it != lanesItemRange_.end();) {
+        if (it->second < updatePos) {
+            it++;
+        } else if (it->first >= updatePos) {
+            lanesItemRange_.erase(it++);
+        } else {
+            it->second = updatePos - 1;
+            it++;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
