@@ -274,6 +274,17 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
     }
+    if (IsTextArea()) {
+        CheckScrollable();
+    } else {
+        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
+    }
+    UpdateScrollBarOffset();
+    if (config.frameSizeChange) {
+        if (GetScrollBar() != nullptr) {
+            GetScrollBar()->ScheduleDisapplearDelayTask();
+        }
+    }
     if (textRectNotNeedToChange) {
         return true;
     }
@@ -304,12 +315,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         secondInfo.paintRect = { textSelector_.secondHandleOffset_, handlePaintSize };
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
     }
-    if (IsTextArea()) {
-        CheckScrollable();
-    } else {
-        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
-    }
-    UpdateScrollBarOffset();
     caretUpdateType_ = CaretUpdateType::NONE;
     return true;
 }
@@ -4995,6 +5000,10 @@ void TextFieldPattern::UpdateScrollBarOffset()
 bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            scrollBar->PlayScrollBarStartAnimation();
+        }
         return true;
     }
     OnTextInputScroll(offset);

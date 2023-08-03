@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_paint_method.h"
 
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 #include "core/components_ng/render/divider_painter.h"
 
@@ -42,7 +43,6 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto painter = weak.Upgrade();
         CHECK_NULL_VOID(painter);
-        painter->PaintScrollBar(canvas);
         painter->PaintEdgeEffect(paintWrapper, canvas);
     };
     return paintFunc;
@@ -88,5 +88,26 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
     listContentModifier_->SetDividerInfo(std::move(dividerInfo));
     listContentModifier_->FlushDivider();
+}
+
+void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID_NOLOG(paintWrapper);
+    auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
+    CHECK_NULL_VOID_NOLOG(scrollBarOverlayModifier);
+    auto scrollBar = scrollBar_.Upgrade();
+    if (!scrollBar || !scrollBar->NeedPaint()) {
+        LOGD("no need paint scroll bar.");
+        return;
+    }
+    scrollBarOverlayModifier->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
+        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
+        OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
+        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()), scrollBar->GetHoverAnimationType());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    scrollBarOverlayModifier->SetFgColor(scrollBar->GetForegroundColor());
+    scrollBarOverlayModifier->SetBgColor(scrollBar->GetBackgroundColor());
+    scrollBarOverlayModifier->StartOpacityAnimation(scrollBar->GetOpacityAnimationType());
+    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

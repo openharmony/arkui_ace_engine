@@ -30,6 +30,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -91,7 +92,7 @@ class ScrollBar final : public AceType {
 
 public:
     ScrollBar();
-    explicit ScrollBar(DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT,
+    ScrollBar(DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT,
         PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
@@ -237,6 +238,7 @@ public:
 
     void SetScrollable(bool isScrollable)
     {
+        CHECK_NULL_VOID_NOLOG(isScrollable_ != isScrollable);
         isScrollable_ = isScrollable;
     }
 
@@ -250,6 +252,12 @@ public:
         if (positionMode_ != positionMode) {
             positionModeUpdate_ = true;
             positionMode_ = positionMode;
+            if (panRecognizer_) {
+                PanDirection panDirection;
+                panDirection.type =
+                    positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
+                panRecognizer_->SetDirection(panDirection);
+            }
         }
     }
 
@@ -260,15 +268,8 @@ public:
 
     void SetDisplayMode(DisplayMode displayMode)
     {
+        CHECK_NULL_VOID_NOLOG(displayMode_ != displayMode);
         displayMode_ = displayMode;
-        if (displayMode_ == DisplayMode::AUTO) {
-            OnScrollEnd();
-        } else if (displayMode_ == DisplayMode::ON) {
-            if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
-                scrollEndAnimator_->Stop();
-            }
-            opacity_ = UINT8_MAX;
-        }
     }
 
     void SetOutBoundary(double outBoundary)
@@ -312,11 +313,59 @@ public:
         return opacity_;
     }
 
-    void OnScrollEnd()
+    void PlayScrollBarEndAnimation()
+    {
+        if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
+            opacityAnimationType_ = OpacityAnimationType::DISAPPEAR;
+            MarkNeedRender();
+        }
+    }
+
+    void PlayScrollBarStartAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
-            PlayBarEndAnimation();
+            disapplearDelayTask_.Cancel();
+            opacityAnimationType_ = OpacityAnimationType::APPEAR;
+            MarkNeedRender();
         }
+    }
+
+    OpacityAnimationType GetOpacityAnimationType() const
+    {
+        return opacityAnimationType_;
+    }
+
+    void SetOpacityAnimationType(OpacityAnimationType opacityAnimationType)
+    {
+        opacityAnimationType_ = opacityAnimationType;
+    }
+
+    HoverAnimationType GetHoverAnimationType() const
+    {
+        return hoverAnimationType_;
+    }
+
+    void SetHoverAnimationType(HoverAnimationType hoverAnimationType)
+    {
+        hoverAnimationType_ = hoverAnimationType;
+    }
+    
+
+    void PlayScrollBarGrowAnimation()
+    {
+        PlayScrollBarStartAnimation();
+        normalWidth_ = activeWidth_;
+        FlushBarWidth();
+        hoverAnimationType_ = HoverAnimationType::GROW;
+        MarkNeedRender();
+    }
+
+    void PlayScrollBarShrinkAnimation()
+    {
+        normalWidth_ = inactiveWidth_;
+        FlushBarWidth();
+        hoverAnimationType_ = HoverAnimationType::SHRINK;
+        MarkNeedRender();
     }
 
     void MarkNeedRender()
@@ -415,12 +464,10 @@ public:
     void SetMouseEvent();
     void FlushBarWidth();
     void PlayAdaptAnimation(double activeSize, double activeMainOffset, double inactiveSize, double inactiveMainOffset);
-    void PlayGrowAnimation();
-    void PlayShrinkAnimation();
-    void PlayBarEndAnimation();
     void CalcReservedHeight();
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
+    void ScheduleDisapplearDelayTask();
 
 protected:
     void InitTheme();
@@ -491,14 +538,15 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<PanRecognizer> panRecognizer_;
-    RefPtr<Animator> touchAnimator_;
-    RefPtr<Animator> scrollEndAnimator_;
     RefPtr<Animator> adaptAnimator_;
     RefPtr<Animator> frictionController_;
     RefPtr<FrictionMotion> frictionMotion_;
     std::function<void()> markNeedRenderFunc_;
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
+    OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
+    HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
+    CancelableCallback<void()> disapplearDelayTask_;
 };
 
 } // namespace OHOS::Ace::NG

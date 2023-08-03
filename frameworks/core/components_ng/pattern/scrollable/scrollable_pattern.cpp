@@ -146,7 +146,7 @@ void ScrollablePattern::OnScrollEnd()
         }
     }
     if (scrollBar_) {
-        scrollBar_->OnScrollEnd();
+        scrollBar_->ScheduleDisapplearDelayTask();
     }
     StartScrollBarAnimatorByProxy();
 }
@@ -305,6 +305,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->OnScrollEnd();
         pattern->OnScrollEndCallback();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
@@ -332,29 +333,40 @@ void ScrollablePattern::RegisterScrollBarEventTask()
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
     if (displayMode == DisplayMode::OFF) {
         if (scrollBar_) {
             auto gestureHub = GetGestureHub();
             if (gestureHub) {
                 gestureHub->RemoveTouchEvent(scrollBar_->GetTouchEvent());
             }
-            scrollBar_->MarkNeedRender();
             scrollBar_.Reset();
+            if (overlayModifier_) {
+                overlayModifier_->SetOpacity(0);
+            }
         }
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    } else if (scrollBar_->GetDisplayMode() != displayMode) {
+    } else {
+        oldDisplayMode = scrollBar_->GetDisplayMode();
+    }
+
+    if (oldDisplayMode != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
+        if (overlayModifier_ && scrollBar_->IsScrollable()) {
+            overlayModifier_->SetOpacity(UINT8_MAX);
+        }
+        scrollBar_->ScheduleDisapplearDelayTask();
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(renderContext);
@@ -398,8 +410,16 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
     // inner scrollbar, viewOffset is padding offset
     if (scrollBar_) {
         auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
-        bool scrollable = GreatNotEqual(estimatedHeight, mainSize);
-        scrollBar_->SetScrollable(IsScrollable() && scrollable);
+        bool scrollable = GreatNotEqual(estimatedHeight, mainSize) && IsScrollable();
+        if (scrollBar_->IsScrollable() != scrollable) {
+            scrollBar_->SetScrollable(scrollable);
+            if (overlayModifier_) {
+                overlayModifier_->SetOpacity(scrollable ? UINT8_MAX : 0);
+            }
+            if (scrollable) {
+                scrollBar_->ScheduleDisapplearDelayTask();
+            }
+        }
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
