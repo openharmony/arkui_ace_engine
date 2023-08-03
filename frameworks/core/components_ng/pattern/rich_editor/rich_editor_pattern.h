@@ -184,11 +184,12 @@ public:
     bool CloseCustomKeyboard();
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
-        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
             CloseCustomKeyboard();
         }
         customKeyboardBulder_ = keyboardBuilder;
     }
+    void DumpInfo() override;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)

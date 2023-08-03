@@ -969,11 +969,14 @@ public:
 
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
-        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
             CloseCustomKeyboard();
         }
         customKeyboardBulder_ = keyboardBuilder;
     }
+
+    void DumpInfo() override;
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
