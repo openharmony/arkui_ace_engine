@@ -2680,8 +2680,7 @@ bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper()
         return false;
     }
     if (static_cast<int32_t>(itemPosition_.size()) == TotalCount()) {
-        auto visibleLength = lastItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
-        auto totalChildrenSize = visibleLength;
+        auto totalChildrenSize = lastItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
         if (NonPositive(totalChildrenSize)) {
             return true;
         }
