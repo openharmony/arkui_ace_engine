@@ -186,7 +186,7 @@ void ListTestNg::CreateList(int32_t number, Axis axis)
     listModelNG.SetScroller(scroller, nullptr);
     CreateListItem(number, axis);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::CreateSwipeList(bool isStartNode, V2::SwipeEdgeEffect swipeEdgeEffect, int32_t itemNumber)
@@ -203,7 +203,7 @@ void ListTestNg::CreateSwipeList(bool isStartNode, V2::SwipeEdgeEffect swipeEdge
         }
     }
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::CreateSelectableList()
@@ -213,7 +213,7 @@ void ListTestNg::CreateSelectableList()
     listModelNG.SetMultiSelectable(true);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::CreateFocusableList(int32_t itemNumber, Axis axis)
@@ -233,7 +233,7 @@ void ListTestNg::CreateGroupItemFocusableList(int32_t groupNumber, Axis axis)
     listModelNG.SetListDirection(axis);
     CreateListItemGroup(groupNumber, axis, true); // Create focusable ListItem.
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::CreateChainList(const ChainAnimationOptions& options)
@@ -245,7 +245,7 @@ void ListTestNg::CreateChainList(const ChainAnimationOptions& options)
     listModelNG.SetChainAnimationOptions(options);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::CreateSnapAlignList(V2::ScrollSnapAlign scrollSnapAlign)
@@ -399,7 +399,7 @@ void ListTestNg::CreateListItemWithSwipeActionItem(std::function<void()> builder
     }
     ViewStackProcessor::GetInstance()->Pop();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 std::function<void()> ListTestNg::GetDefaultSwiperBuilder(float crossSize)
@@ -468,7 +468,7 @@ testing::AssertionResult ListTestNg::VerifyGroupItemPosition(
 
 testing::AssertionResult ListTestNg::IsEqualCurrentOffset(Offset expectOffset)
 {
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     Offset currentOffset = pattern_->GetCurrentOffset();
     return IsEqualOffset(currentOffset, expectOffset);
 }
@@ -519,11 +519,11 @@ testing::AssertionResult ListTestNg::ScrollToIndex(
 {
     float originalOffsetY = pattern_->GetCurrentOffset().GetY();
     pattern_->ScrollToIndex(index, smooth, align);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     Offset currentOffset = pattern_->GetCurrentOffset();
     // reset offset before return
     pattern_->ScrollTo(originalOffsetY);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     if (currentOffset != expectOffset) {
         return testing::AssertionFailure() <<
             "ScrollToIndex(" << index << ", " << smooth <<
@@ -540,11 +540,11 @@ testing::AssertionResult ListTestNg::ScrollToIndex(
 {
     float originalOffsetY = pattern_->GetCurrentOffset().GetY();
     pattern_->ScrollToIndex(index, indexInGroup, align);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     Offset currentOffset = pattern_->GetCurrentOffset();
     // reset offset before return
     pattern_->ScrollTo(originalOffsetY);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     if (currentOffset != expectOffset) {
         return testing::AssertionFailure() <<
             "ScrollToIndex(" << index << ", " << indexInGroup <<
@@ -575,19 +575,19 @@ void ListTestNg::MouseSelect(Offset start, Offset end)
 void ListTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
     pattern_->UpdateCurrentOffset(offset, source);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::ScrollToTop()
 {
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::ScrollToBottom()
 {
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::DragSwiperItem(int32_t index, float mainDelta, float mainVelocity)
@@ -611,7 +611,7 @@ void ListTestNg::HandleDragUpdate(int32_t index, float mainDelta)
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, index);
     itemPattern->HandleDragUpdate(info);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ListTestNg::HandleDragEnd(int32_t index, float mainVelocity)
@@ -624,7 +624,7 @@ void ListTestNg::HandleDragEnd(int32_t index, float mainVelocity)
     double position = itemPattern->springMotion_->GetEndValue();
     itemPattern->UpdatePostion(position - itemPattern->curOffset_);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 /**
@@ -657,7 +657,7 @@ HWTEST_F(ListTestNg, ListLayoutProperty001, TestSize.Level1)
     listModelNG.SetCachedCount(10);
     listModelNG.SetSticky(V2::StickyStyle::HEADER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Call ToJsonValue()
@@ -806,7 +806,7 @@ HWTEST_F(ListTestNg, AttrSpace001, TestSize.Level1)
     listModelNG.SetSpace(Dimension(space));
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_TRUE(VerifyItemPosition(VIEWPORT_NUMBER, 1, space));
 }
@@ -830,7 +830,7 @@ HWTEST_F(ListTestNg, AttrSpace002, TestSize.Level1)
     listModelNG.SetDivider(itemDivider);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_TRUE(VerifyItemPosition(VIEWPORT_NUMBER, 1, strokeWidth));
 }
@@ -850,7 +850,7 @@ HWTEST_F(ListTestNg, AttrInitIndex001, TestSize.Level1)
     listModelNG.SetInitialIndex(initIndex);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_TRUE(VerifyItemPosition(VIEWPORT_NUMBER, 1, 0, initIndex));
 }
@@ -872,7 +872,7 @@ HWTEST_F(ListTestNg, AttrInitIndex002, TestSize.Level1)
     listModelNG.SetInitialIndex(initIndex);
     CreateListItem(itemCount);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_TRUE(VerifyItemPosition(itemCount));
 }
@@ -893,7 +893,7 @@ HWTEST_F(ListTestNg, AttrInitIndex003, TestSize.Level1)
     listModelNG.SetInitialIndex(initIndex);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_TRUE(VerifyItemPosition(VIEWPORT_NUMBER, 1, 0, expectStartIndex));
 }
@@ -913,7 +913,7 @@ HWTEST_F(ListTestNg, AttrInitIndex004, TestSize.Level1)
     listModelNG.SetInitialIndex(initIndex);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_TRUE(VerifyItemPosition(VIEWPORT_NUMBER));
 }
@@ -939,7 +939,7 @@ HWTEST_F(ListTestNg, AttrInitIndex005, TestSize.Level1)
     listModelNG.SetLanes(lanes);
     CreateListItem(itemCount);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_TRUE(VerifyItemPosition(expectItemCount, lanes, 0, expectStartIndex));
 }
@@ -966,7 +966,7 @@ HWTEST_F(ListTestNg, AttrDivider001, TestSize.Level1)
     listModelNG.SetDivider(itemDivider);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_TRUE(VerifyItemPosition(VIEWPORT_NUMBER, 1, strokeWidth));
 }
@@ -986,7 +986,7 @@ HWTEST_F(ListTestNg, AttrScrollBar001, TestSize.Level1)
     listModelNG.SetScrollBar(Ace::DisplayMode::ON);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     RefPtr<ScrollBar> scrollBar = pattern_->GetScrollBar();
     ASSERT_NE(scrollBar, nullptr);
@@ -1010,7 +1010,7 @@ HWTEST_F(ListTestNg, AttrScrollBar002, TestSize.Level1)
     MockPipelineBase::pipeline_->SetMinPlatformVersion(platformVersionTen);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     RefPtr<ScrollBar> scrollBar = pattern_->GetScrollBar();
     ASSERT_NE(scrollBar, nullptr);
@@ -1032,7 +1032,7 @@ HWTEST_F(ListTestNg, AttrLanes001, TestSize.Level1)
     listModelNG.SetLanes(lanes);
     CreateListItem(itemCount);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     int32_t expectItemCount = 16;
     int32_t expectLanes = 2;
@@ -1065,7 +1065,7 @@ HWTEST_F(ListTestNg, AttrLanes002, TestSize.Level1)
     listModelNG.SetLaneMaxLength(Dimension(maxLaneLength));
     CreateListItem(itemCount);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     int32_t expectLanes = 2;
     int32_t expectItemCount = 16;
@@ -1107,7 +1107,7 @@ HWTEST_F(ListTestNg, AttrLanes003, TestSize.Level1)
     listModelNG.SetLaneMaxLength(Dimension(maxLaneLength));
     CreateListItem(itemCount);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     int32_t expectItemCount = 16;
     int32_t expectLanes = 2;
@@ -1139,7 +1139,7 @@ HWTEST_F(ListTestNg, AttrLanes005, TestSize.Level1)
     listModelNG.SetLaneGutter(laneGutter);
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     EXPECT_EQ(laneGutter, layoutProperty_->GetLaneGutter().value_or(Dimension(0.0f, DimensionUnit::VP)));
 }
 
@@ -1162,7 +1162,7 @@ HWTEST_F(ListTestNg, AttrAlignListItem001, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     }
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     for (int32_t index = 0; index < TOTAL_NUMBER; index++) {
         float offsetX = GetChildRect(frameNode_, index).GetX();
@@ -1190,7 +1190,7 @@ HWTEST_F(ListTestNg, AttrAlignListItem002, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     }
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     for (int32_t index = 0; index < TOTAL_NUMBER; index++) {
         float offsetX = GetChildRect(frameNode_, index).GetX();
@@ -1219,7 +1219,7 @@ HWTEST_F(ListTestNg, AttrAlignListItem003, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     }
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     for (int32_t index = 0; index < TOTAL_NUMBER; index++) {
         float offsetX = GetChildRect(frameNode_, index).GetX();
@@ -1295,7 +1295,7 @@ HWTEST_F(ListTestNg, AttrSLECM001, TestSize.Level1)
     listModelNG.SetMultiSelectable(true);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_NE(pattern_->positionController_, nullptr);
     EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
@@ -1320,7 +1320,7 @@ HWTEST_F(ListTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
     listModelNG.SetScrollEnabled(true);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     EXPECT_EQ(layoutProperty_->GetScrollEnabled(), true);
 
     /**
@@ -2131,7 +2131,7 @@ HWTEST_F(ListTestNg, ListItemGroup001, TestSize.Level1)
     listModelNG.SetInitialIndex(1);
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Verify second ListItemGroup itemPosition_/rect.
@@ -2198,7 +2198,7 @@ HWTEST_F(ListTestNg, ListItemGroup002, TestSize.Level1)
     listModelNG_1.SetSticky(V2::StickyStyle::HEADER);
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     int32_t groupIndex = 0;
     auto groupNode = GetChildFrameNode(frameNode_, groupIndex);
     auto headRect = GetChildRect(groupNode, 0);
@@ -2216,7 +2216,7 @@ HWTEST_F(ListTestNg, ListItemGroup002, TestSize.Level1)
     listModelNG_2.SetSticky(V2::StickyStyle::FOOTER);
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     groupIndex = 1;
     groupNode = GetChildFrameNode(frameNode_, groupIndex);
     auto footRect = GetChildRect(groupNode, 1);
@@ -2235,7 +2235,7 @@ HWTEST_F(ListTestNg, ListItemGroup002, TestSize.Level1)
     listModelNG_3.SetSticky(V2::StickyStyle::BOTH);
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     groupIndex = 0;
     groupNode = GetChildFrameNode(frameNode_, groupIndex);
     headRect = GetChildRect(groupNode, 0);
@@ -2271,7 +2271,7 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
     listModelNG_1.SetLanes(lanes);
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     int32_t groupIndex = 0;
     auto groupNode = GetChildFrameNode(frameNode_, groupIndex);
     auto groupRect = GetChildRect(frameNode_, groupIndex);
@@ -2291,7 +2291,7 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
     listModelNG_2.SetLaneMaxLength(Dimension(maxLaneLength));
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     groupIndex = 0;
     groupNode = GetChildFrameNode(frameNode_, groupIndex);
     EXPECT_TRUE(VerifyGroupItemPosition(groupNode, GROUP_ITEM_NUMBER, DEFAULT_LANES, SPACE, HEADER_MAIN_LENGTH));
@@ -2308,7 +2308,7 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
     listModelNG_3.SetLaneMaxLength(Dimension(maxLaneLength));
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     groupIndex = 0;
     groupNode = GetChildFrameNode(frameNode_, groupIndex);
     EXPECT_TRUE(VerifyGroupItemPosition(groupNode, GROUP_ITEM_NUMBER, DEFAULT_LANES, SPACE, HEADER_MAIN_LENGTH));
@@ -2330,7 +2330,7 @@ HWTEST_F(ListTestNg, ListItemGroup005, TestSize.Level1)
     listModelNG_1.SetListItemAlign(V2::ListItemAlign::START);
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     // scroll to second group
     UpdateCurrentOffset(-GetChildRect(frameNode_, 0).Height());
     int32_t groupIndex = 1;
@@ -2346,7 +2346,7 @@ HWTEST_F(ListTestNg, ListItemGroup005, TestSize.Level1)
     listModelNG_2.SetListItemAlign(V2::ListItemAlign::CENTER);
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     UpdateCurrentOffset(-GetChildRect(frameNode_, 0).Height());
     groupIndex = 1;
     groupNode = GetChildFrameNode(frameNode_, groupIndex);
@@ -2362,7 +2362,7 @@ HWTEST_F(ListTestNg, ListItemGroup005, TestSize.Level1)
     listModelNG_3.SetListItemAlign(V2::ListItemAlign::END);
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     UpdateCurrentOffset(-GetChildRect(frameNode_, 0).Height());
     groupIndex = 1;
     groupNode = GetChildFrameNode(frameNode_, groupIndex);
@@ -2438,7 +2438,7 @@ HWTEST_F(ListTestNg, Event001, TestSize.Level1)
     listModelNG.SetOnScroll(event);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
     EXPECT_EQ(offsetY.ConvertToPx(), ITEM_HEIGHT);
@@ -2476,7 +2476,7 @@ HWTEST_F(ListTestNg, Event001, TestSize.Level1)
 
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
     pattern_->OnScrollEndCallback();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 }
@@ -2501,7 +2501,7 @@ HWTEST_F(ListTestNg, Event002, TestSize.Level1)
     listModelNG.SetOnScrollIndex(event);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     UpdateCurrentOffset(-ITEM_HEIGHT);
     EXPECT_EQ(startIndex, 0);
@@ -2528,7 +2528,7 @@ HWTEST_F(ListTestNg, Event003, TestSize.Level1)
     listModelNG.SetOnReachStart(event);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
@@ -2554,7 +2554,7 @@ HWTEST_F(ListTestNg, Event004, TestSize.Level1)
     listModelNG.SetOnReachEnd(event);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     isTrigger = false;
     UpdateCurrentOffset(-ITEM_HEIGHT * 2);
@@ -2584,13 +2584,13 @@ HWTEST_F(ListTestNg, Event005, TestSize.Level1)
     listModelNG.SetOnScrollStart(scrollStart);
     listModelNG.SetOnScrollStop(scrollStop);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(isScrollStartCalled);
 
     pattern_->OnScrollEndCallback();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     EXPECT_TRUE(isScrollStopCalled);
 }
 
@@ -2612,13 +2612,13 @@ HWTEST_F(ListTestNg, Event006, TestSize.Level1)
         return result;
     });
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
     EXPECT_NE(scrollableEvent->GetScrollBeginCallback(), nullptr);
     EXPECT_NE(scrollableEvent->GetScrollFrameBeginCallback(), nullptr);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 /**
@@ -2758,7 +2758,7 @@ HWTEST_F(ListTestNg, MouseSelect003, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
     }
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step2. Select zone.
@@ -2914,7 +2914,7 @@ HWTEST_F(ListTestNg, AccessibilityProperty004, TestSize.Level1)
     listModelNG.Create();
     CreateListItemGroup();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     auto groupAccessibilityProperty =
         GetChildFrameNode(frameNode_, 0)->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
@@ -3292,7 +3292,7 @@ HWTEST_F(ListTestNg, FocusStep006, TestSize.Level1)
     listModelNG.SetLanes(4);
     CreateListItem(10, Axis::VERTICAL, true);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. GetNextFocusNode from left_top.
@@ -3489,7 +3489,7 @@ HWTEST_F(ListTestNg, FocusStep008, TestSize.Level1)
     CreateListItemGroup();
     ViewStackProcessor::GetInstance()->Pop();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     ASSERT_NE(frameNode_, nullptr);
 
     /**
@@ -3553,7 +3553,7 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     RefPtr<ScrollControllerBase> scrollController = listModelNG.CreateScrollController();
     listModelNG.SetScroller(scrollController, nullptr);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
     ASSERT_NE(paint, nullptr);
@@ -3591,7 +3591,7 @@ HWTEST_F(ListTestNg, PaintMethod002, TestSize.Level1)
     CreateListItemGroup();
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     auto scrollBar = pattern_->GetScrollBar();
     scrollBar->SetScrollable(true);
@@ -3637,7 +3637,7 @@ HWTEST_F(ListTestNg, PaintMethod003, TestSize.Level1)
     CreateListItemGroup();
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
     RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
@@ -3668,7 +3668,7 @@ HWTEST_F(ListTestNg, PaintMethod004, TestSize.Level1)
     CreateListItem(TOTAL_NUMBER);
     ViewStackProcessor::GetInstance()->Pop();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
@@ -3819,7 +3819,7 @@ HWTEST_F(ListTestNg, Pattern001, TestSize.Level1)
     listModelNG.SetMultiSelectable(true);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     pattern_->OnModifyDone();
     EXPECT_TRUE(pattern_->isMouseEventInit_);
@@ -3869,7 +3869,7 @@ HWTEST_F(ListTestNg, Pattern003, TestSize.Level1)
         { Dimension(0), Dimension(10), 0, 0, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     EXPECT_NE(pattern_->springProperty_, nullptr);
     EXPECT_NE(pattern_->chainAnimation_, nullptr);
     pattern_->OutBoundaryCallback();
@@ -4007,7 +4007,7 @@ HWTEST_F(ListTestNg, ScrollToIndex002, TestSize.Level1)
     listModelNG.SetLanes(lanes);
     CreateListItem(itemNumber);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. first item in viewport
@@ -4115,7 +4115,7 @@ HWTEST_F(ListTestNg, ScrollToIndex003, TestSize.Level1)
     listModelNG.Create();
     CreateListItemGroup(groupNumber);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     constexpr float groupHeight = GROUP_ITEM_NUMBER * ITEM_HEIGHT; // 400
 
     /**
@@ -4224,7 +4224,7 @@ HWTEST_F(ListTestNg, ScrollToIndex004, TestSize.Level1)
     listModelNG.Create();
     CreateListItemGroup(groupNumber);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     constexpr float groupHeight = GROUP_ITEM_NUMBER * ITEM_HEIGHT;
     constexpr int32_t indexInGroup = 2;
 
@@ -4299,7 +4299,7 @@ HWTEST_F(ListTestNg, ScrollToIndex005, TestSize.Level1)
     listModelNG.SetLanes(lanes);
     CreateListItemGroup(groupNumber);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     constexpr float groupHeight = GROUP_ITEM_NUMBER * ITEM_HEIGHT / lanes;
 
     /**
@@ -4383,7 +4383,7 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
     CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     // Set swiperItem_ to list pattern
     DragSwiperItem(0, 1.f);
@@ -4439,7 +4439,7 @@ HWTEST_F(ListTestNg, Pattern006, TestSize.Level1)
     listModelNG.SetLanes(2);
     CreateListItem(VIEWPORT_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. When lanes > 1, call GetItemIndexByPosition
@@ -4462,7 +4462,7 @@ HWTEST_F(ListTestNg, Pattern007, TestSize.Level1)
     listModelNG.Create();
     CreateListItem(VIEWPORT_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. When has ListItem, position not at any ListItem
@@ -4483,7 +4483,7 @@ HWTEST_F(ListTestNg, Pattern008, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. When has no ListItem, call GetItemIndexByPosition
@@ -4532,7 +4532,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     ListModelNG listModelNG_1;
     listModelNG_1.Create();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_, -1, -1);
+    RunMeasureAndLayout(frameNode_, -1, -1);
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), DEVICE_WIDTH);
 
     /**
@@ -4542,7 +4542,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     listModelNG_2.Create();
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_, -1, -1);
+    RunMeasureAndLayout(frameNode_, -1, -1);
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), DEVICE_WIDTH);
 
     /**
@@ -4552,7 +4552,7 @@ HWTEST_F(ListTestNg, Pattern010, TestSize.Level1)
     listModelNG_3.Create();
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_, Infinity<float>(), DEVICE_HEIGHT);
+    RunMeasureAndLayout(frameNode_, Infinity<float>(), DEVICE_HEIGHT);
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), Infinity<float>());
 }
 
@@ -4575,7 +4575,7 @@ HWTEST_F(ListTestNg, ListSelectForCardModeTest001, TestSize.Level1)
     CreateListItem(9);
     ViewStackProcessor::GetInstance()->Pop();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step2. Click the (0, 0) point of firstItem.
@@ -4633,7 +4633,7 @@ HWTEST_F(ListTestNg, ListSelectForCardModeTest002, TestSize.Level1)
     CreateListItem(9);
     ViewStackProcessor::GetInstance()->Pop();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step2. Select (0, 0) - (200, 100) zone.
@@ -4707,7 +4707,7 @@ HWTEST_F(ListTestNg, ListSelectForCardModeTest003, TestSize.Level1)
 
     ViewStackProcessor::GetInstance()->Pop();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step2. Select (120, 250) - (360, 350) zone.
@@ -5183,7 +5183,7 @@ HWTEST_F(ListTestNg, ListPattern_OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     ListModelNG listModelNG;
     listModelNG.Create();
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     ASSERT_NE(layoutAlgorithmWrapper, nullptr);
     auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -5333,7 +5333,7 @@ HWTEST_F(ListTestNg, ListPositionControllerTest001, TestSize.Level1)
     listModelNG.SetScroller(scroller, nullptr);
     CreateListItem(10);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Get positionController and set scroll_.
@@ -5370,7 +5370,7 @@ HWTEST_F(ListTestNg, ListPositionControllerTest002, TestSize.Level1)
     listModelNG.SetScroller(scroller, nullptr);
     CreateListItem(10);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Get positionController and set scroll_.
@@ -5406,7 +5406,7 @@ HWTEST_F(ListTestNg, ListPositionControllerTest003, TestSize.Level1)
     listModelNG.SetScroller(scroller, nullptr);
     CreateListItem(10);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. Get positionController and set scroll_.
@@ -5441,7 +5441,7 @@ HWTEST_F(ListTestNg, ListPositionControllerTest004, TestSize.Level1)
     listModelNG.SetScroller(scrollController, proxy);
     CreateListItem(10);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     EXPECT_FALSE(scrollController->IsAtEnd());
 
@@ -5488,7 +5488,7 @@ HWTEST_F(ListTestNg, ScrollToIndexAlign001, TestSize.Level1)
     listModelNG.SetInitialIndex(0);
     CreateListItem(TOTAL_NUMBER);
     GetInstance();
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step2. Call ScrollToIndex func.
@@ -5506,7 +5506,7 @@ HWTEST_F(ListTestNg, ScrollToIndexAlign001, TestSize.Level1)
     DirtySwapConfig config;
     config.skipMeasure = false;
     config.skipLayout = false;
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     pattern_->OnDirtyLayoutWrapperSwap(frameNode_, config);
     EXPECT_NE(pattern_->GetStartIndex(), 0);
     EXPECT_EQ(pattern_->GetEndIndex(), TOTAL_NUMBER - 2);
@@ -5520,7 +5520,7 @@ HWTEST_F(ListTestNg, ScrollToIndexAlign001, TestSize.Level1)
     EXPECT_FALSE(pattern_->jumpIndex_.has_value());
     EXPECT_EQ(pattern_->targetIndex_, TOTAL_NUMBER - 1);
     EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::AUTO);
-    ListRunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
     EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(frameNode_, config));
     pattern_->scrollAlign_ = ScrollAlign::END;
     EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(frameNode_, config));

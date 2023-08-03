@@ -376,9 +376,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest001, TestSize.Level1)
      * @tc.steps: step1. When setting fixed rows and columns, check the status of child nodes in the waterFlow.
      * @tc.expected: All child nodes are active.
      */
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, WATER_FLOW_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, WATER_FLOW_HEIGHT);
     for (int32_t i = 0; i < 9; ++i) {
-        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+        EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
 
@@ -399,9 +399,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest002, TestSize.Level1)
      * @tc.steps: step1. When setting fixed rows and columns, check the status of child nodes in the waterFlow.
      * @tc.expected: All child nodes are active.
      */
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, WATER_FLOW_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, WATER_FLOW_HEIGHT);
     for (int32_t i = 0; i < 9; ++i) {
-        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+        EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
 
@@ -418,9 +418,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest003, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     for (int32_t i = 0; i < 6; ++i) {
-        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+        EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
 
@@ -437,9 +437,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest004, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 250.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 250.f);
     for (int32_t i = 0; i < 9; ++i) {
-        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+        EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
 
@@ -456,11 +456,11 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest005, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     pattern_->UpdateCurrentOffset(-50.f, SCROLL_FROM_UPDATE);
-    layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     for (int32_t i = 0; i < 9; ++i) {
-        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+        EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
 
@@ -477,11 +477,11 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest006, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
-    layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     for (int32_t i = 3; i < 9; ++i) {
-        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+        EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
 
@@ -498,11 +498,11 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     pattern_->UpdateStartIndex(8);
-    layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     for (int32_t i = 0; i < 3; ++i) {
-        EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+        EXPECT_FALSE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
 
@@ -519,11 +519,11 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest008, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     pattern_->UpdateStartIndex(1);
-    layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     for (int32_t i = 6; i < 9; ++i) {
-        EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+        EXPECT_FALSE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
 
@@ -540,11 +540,11 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest009, TestSize.Level1)
     CreateWaterFlowItem(9);
     GetInstance();
 
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     pattern_->UpdateStartIndex(3);
-    layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     for (int32_t i = 0; i < 6; ++i) {
-        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+        EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
 
@@ -561,16 +561,16 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest010, TestSize.Level1)
     CreateWaterFlowItem(10);
     GetInstance();
 
-    RefPtr<LayoutWrapperNode> layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
     pattern_->UpdateStartIndex(9);
-    layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
-    EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
-    EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(0, false)->IsActive());
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(9, false)->IsActive());
+    EXPECT_FALSE(frameNode_->GetOrCreateChildByIndex(0, false)->IsActive());
 
     pattern_->UpdateStartIndex(0);
-    layoutWrapper = RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
-    EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
-    EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(0, false)->IsActive());
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 200.f);
+    EXPECT_FALSE(frameNode_->GetOrCreateChildByIndex(9, false)->IsActive());
+    EXPECT_TRUE(frameNode_->GetOrCreateChildByIndex(0, false)->IsActive());
 }
 
 /**

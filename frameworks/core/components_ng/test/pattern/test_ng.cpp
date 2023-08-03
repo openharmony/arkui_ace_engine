@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#define protected public
+#define private public
 #include "core/components_ng/test/pattern/test_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -30,7 +32,22 @@ void TestNG::SetHeight(const Dimension& height)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
 }
 
-RefPtr<LayoutWrapperNode> TestNG::RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode, float width, float height)
+void TestNG::RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode, float width, float height)
+{
+    frameNode->SetActive();
+    frameNode->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    if (NonNegative(width) && NonNegative(height)) {
+        LayoutConstraint.selfIdealSize = { width, height };
+    }
+    LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    frameNode->Measure(LayoutConstraint);
+    frameNode->Layout();
+}
+
+void TestNG::OldRunMeasureAndLayout(const RefPtr<FrameNode>& frameNode, float width, float height)
 {
     RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
     layoutWrapper->SetActive();
@@ -45,22 +62,6 @@ RefPtr<LayoutWrapperNode> TestNG::RunMeasureAndLayout(const RefPtr<FrameNode>& f
     layoutWrapper->Measure(LayoutConstraint);
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
-    return layoutWrapper;
-}
-
-void TestNG::ListRunMeasureAndLayout(const RefPtr<FrameNode>& frameNode, float width, float height)
-{
-    frameNode->SetActive();
-    frameNode->SetRootMeasureNode();
-    LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    if (NonNegative(width) && NonNegative(height)) {
-        LayoutConstraint.selfIdealSize = { width, height };
-    }
-    LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
-    frameNode->Measure(LayoutConstraint);
-    frameNode->Layout();
 }
 
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)

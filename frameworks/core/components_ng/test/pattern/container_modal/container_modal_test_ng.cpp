@@ -43,7 +43,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
 } // namespace
-class ContainerModelTestNg : public testing::Test, public TestNG  {
+class ContainerModelTestNg : public testing::Test, public TestNG {
 protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
