@@ -718,7 +718,9 @@ void FocusHub::OnClick(const KeyEvent& event)
     if (onClickCallback) {
         auto info = GestureEvent();
         info.SetTimeStamp(event.timeStamp);
-        auto rect = GetGeometryNode()->GetFrameRect();
+        auto geometryNode = GetGeometryNode();
+        CHECK_NULL_VOID_NOLOG(geometryNode);
+        auto rect = geometryNode->GetFrameRect();
         info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
         info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
         info.SetSourceDevice(event.sourceType);
