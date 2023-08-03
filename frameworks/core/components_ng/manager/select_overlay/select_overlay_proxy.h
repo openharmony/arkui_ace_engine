@@ -48,7 +48,7 @@ public:
 
     bool IsClosed() const;
 
-    void Close() const;
+    void Close(bool animation = false) const;
 
     int32_t GetSelectOverlayId() const
     {

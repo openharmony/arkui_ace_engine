@@ -100,6 +100,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
+    JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -651,6 +652,21 @@ void JSSearch::SetSelectionMenuHidden(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
+}
+
+void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && (info[0]->IsUndefined() || info[0]->IsNull())) {
+        SearchModel::GetInstance()->SetCustomKeyboard(nullptr);
+        return;
+    }
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    std::function<void()> buildFunc;
+    if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
+        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+    }
 }
 
 void JSSearchController::JSBind(BindingTarget globalObj)

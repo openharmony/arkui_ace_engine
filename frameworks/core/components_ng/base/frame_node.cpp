@@ -688,6 +688,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
         auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
@@ -1746,6 +1747,21 @@ void FrameNode::OnWindowUnfocused()
     pattern_->OnWindowUnfocused();
 }
 
+std::pair<float, float> FrameNode::ContextPositionConvertToPX(
+    const RefPtr<RenderContext>& context, const SizeF& percentReference) const
+{
+    std::pair<float, float> position;
+    CHECK_NULL_RETURN_NOLOG(context, position);
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    position.first =
+        ConvertToPx(context->GetPositionProperty()->GetPosition()->GetX(), scaleProperty, percentReference.Width())
+            .value_or(0.0);
+    position.second =
+        ConvertToPx(context->GetPositionProperty()->GetPosition()->GetY(), scaleProperty, percentReference.Height())
+            .value_or(0.0);
+    return position;
+}
+
 void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     pattern_->OnWindowSizeChanged(width, height, type);
@@ -1757,18 +1773,22 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     auto parent = GetAncestorNodeOfFrame();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
-            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
-            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
+            auto renderPosition =
+                ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            offset.SetX(static_cast<float>(renderPosition.first));
+            offset.SetY(static_cast<float>(renderPosition.second));
         }
     }
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         if (parentRenderContext && parentRenderContext->GetPositionProperty()) {
             if (parentRenderContext->GetPositionProperty()->HasPosition()) {
-                offset.AddX(static_cast<float>(
-                    parentRenderContext->GetPositionProperty()->GetPosition()->GetX().ConvertToPx()));
-                offset.AddY(static_cast<float>(
-                    parentRenderContext->GetPositionProperty()->GetPosition()->GetY().ConvertToPx()));
+                auto parentLayoutProperty = parent->GetLayoutProperty();
+                CHECK_NULL_RETURN_NOLOG(parentLayoutProperty, offset);
+                auto parentRenderContextPosition = ContextPositionConvertToPX(
+                    parentRenderContext, parentLayoutProperty->GetLayoutConstraint()->percentReference);
+                offset.AddX(static_cast<float>(parentRenderContextPosition.first));
+                offset.AddY(static_cast<float>(parentRenderContextPosition.second));
                 parent = parent->GetAncestorNodeOfFrame();
                 continue;
             }
@@ -2159,14 +2179,6 @@ bool FrameNode::IsSecurityComponent()
            GetTag() == V2::SAVE_BUTTON_ETS_TAG;
 }
 
-void FrameNode::OnSetDepth(const int32_t depth)
-{
-    LOGD("Set depth = %{public}d", depth);
-    if (pattern_) {
-        pattern_->OnSetDepth(depth);
-    }
-}
-
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
@@ -2478,6 +2490,9 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 {
     if ((!layoutAlgorithm_ || (needReset && layoutAlgorithm_->IsExpire())) && pattern_) {
         layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
+    }
+    if (needReset) {
+        layoutAlgorithm_->SetNeedMeasure();
     }
     return layoutAlgorithm_;
 }

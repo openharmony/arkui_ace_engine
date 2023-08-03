@@ -42,6 +42,7 @@
 
 namespace OHOS::Rosen {
 class DrawCmdList;
+enum class Gravity;
 }
 
 namespace OHOS::Ace::NG {
@@ -51,6 +52,8 @@ class FrameNode;
 class Modifier;
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
+
+inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
 // RenderContext is used for render node to paint.
 class RenderContext : public virtual AceType {
@@ -447,6 +450,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
     virtual void SetUsingContentRectForRenderFrame(bool value) {}
+    virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
 protected:
     RenderContext() = default;

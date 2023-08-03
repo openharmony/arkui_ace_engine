@@ -2278,11 +2278,13 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
 void RosenRenderContext::PaintProgressMask()
 {
     if (!moonProgressModifier_) {
-        moonProgressModifier_ = std::make_shared<MoonProgressModifier>();
-        rsNode_->AddModifier(moonProgressModifier_);
+        moonProgressModifier_ = AceType::MakeRefPtr<MoonProgressModifier>();
+        auto modifierAdapter =
+            std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(moonProgressModifier_));
+        rsNode_->AddModifier(modifierAdapter);
+        modifierAdapter->AttachProperties();
     }
     auto progress = GetProgressMaskValue();
-    moonProgressModifier_->InitRatio();
     moonProgressModifier_->SetMaskColor(LinearColor(progress->GetColor()));
     moonProgressModifier_->SetMaxValue(progress->GetMaxValue());
     if (progress->GetValue() > moonProgressModifier_->GetMaxValue()) {
@@ -2366,7 +2368,7 @@ void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>&)
+void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& /* progress */)
 {
     PaintProgressMask();
     CHECK_NULL_VOID(rsNode_);
@@ -2547,6 +2549,10 @@ void RosenRenderContext::OnOverlayTextUpdate(const OverlayOptions& overlay)
 void RosenRenderContext::OnMotionPathUpdate(const MotionPathOption& motionPath)
 {
     CHECK_NULL_VOID(rsNode_);
+    if (!motionPath.IsValid()) {
+        rsNode_->SetMotionPathOption(nullptr);
+        return;
+    }
     auto motionOption = Rosen::RSMotionPathOption(motionPath.GetPath());
     motionOption.SetBeginFraction(motionPath.GetBegin());
     motionOption.SetEndFraction(motionPath.GetEnd());
@@ -2610,6 +2616,12 @@ void RosenRenderContext::SetBounds(float positionX, float positionY, float width
 void RosenRenderContext::SetUsingContentRectForRenderFrame(bool value)
 {
     useContentRectForRSFrame_ = value;
+}
+
+void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFrameGravity(gravity);
 }
 
 void RosenRenderContext::ClearDrawCommands()

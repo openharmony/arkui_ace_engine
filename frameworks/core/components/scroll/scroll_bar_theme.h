@@ -73,6 +73,7 @@ public:
                 Color::TRANSPARENT).BlendOpacity(0.4);
             auto padding = pattern->GetAttr<Dimension>("scroll_bar_margin", Dimension(4.0, DimensionUnit::VP));
             theme->padding_ = Edge(0.0, 0.0, padding.Value(), padding.Value(), padding.Unit());
+            theme->scrollBarMargin_ = padding;
         }
     };
 
@@ -128,6 +129,11 @@ public:
         return padding_;
     }
 
+    const Dimension& GetScrollBarMargin() const
+    {
+        return scrollBarMargin_;
+    }
+
 protected:
     ScrollBarTheme() = default;
 
@@ -139,6 +145,7 @@ private:
     Dimension minDynamicHeight_;
     Dimension reservedHeight_;
     Dimension touchWidth_;
+    Dimension scrollBarMargin_;
     Color backgroundColor_;
     Color foregroundColor_;
     Edge padding_;

@@ -46,21 +46,6 @@ constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 constexpr float BOX_EPSILON = 0.5f;
 }; // namespace
 
-TextPattern::~TextPattern()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto context = PipelineContext::GetCurrentContext();
-    if (context) {
-        context->RemoveFontNodeNG(frameNode);
-        auto fontManager = context->GetFontManager();
-        if (fontManager) {
-            fontManager->UnRegisterCallbackNG(frameNode);
-            fontManager->RemoveVariationNodeNG(frameNode);
-        }
-    }
-}
-
 void TextPattern::OnAttachToFrameNode()
 {
     if (PipelineContext::GetCurrentContext() &&
@@ -80,12 +65,24 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
         LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
+    auto frameNode = WeakClaim(node);
+    pipeline->RemoveFontNodeNG(frameNode);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        fontManager->UnRegisterCallbackNG(frameNode);
+        fontManager->RemoveVariationNodeNG(frameNode);
+    }
 }
 
 void TextPattern::CloseSelectOverlay()
 {
+    CloseSelectOverlay(false);
+}
+
+void TextPattern::CloseSelectOverlay(bool animation)
+{
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        selectOverlayProxy_->Close();
+        selectOverlayProxy_->Close(animation);
     }
 }
 
@@ -175,19 +172,30 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (copyOption_ == CopyOptions::None) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (IsDraggable(info.GetLocalLocation())) {
         // prevent long press event from being triggered when dragging
+#ifdef ENABLE_DRAG_FRAMEWORK
+        gestureHub->SetIsTextDraggable(true);
+#endif
         return;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    gestureHub->SetIsTextDraggable(false);
+#endif
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     showSelectOverlay_ = true;
     InitSelection(textOffset);
     CalculateHandleOffsetAndShowOverlay();
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CloseSelectOverlay(true);
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -258,7 +266,7 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
         }
         return;
     }
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -266,7 +274,8 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 
 bool TextPattern::IsSelectAll()
 {
-    return textSelector_.GetTextStart() == 0 && textSelector_.GetTextEnd() == GetWideText().length() + imageCount_;
+    return textSelector_.GetTextStart() == 0 &&
+           textSelector_.GetTextEnd() == static_cast<int32_t>(GetWideText().length()) + imageCount_;
 }
 std::wstring TextPattern::GetWideText() const
 {
@@ -309,6 +318,10 @@ void TextPattern::HandleOnCopy()
 
 void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
 {
+    ShowSelectOverlay(firstHandle, secondHandle, false);
+}
+void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation)
+{
     SelectOverlayInfo selectInfo;
     selectInfo.firstHandle.paintRect = firstHandle;
     selectInfo.secondHandle.paintRect = secondHandle;
@@ -350,7 +363,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         selectInfo.menuOptionItems = GetMenuOptionItems();
     }
     selectMenuInfo_ = selectInfo.menuInfo;
-    UpdateSelectOverlayOrCreate(selectInfo);
+    UpdateSelectOverlayOrCreate(selectInfo, animation);
 }
 
 void TextPattern::HandleOnSelectAll()
@@ -358,21 +371,10 @@ void TextPattern::HandleOnSelectAll()
     auto textSize = GetWideText().length() + imageCount_;
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
-    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        SelectHandleInfo firstHandleInfo;
-        SelectHandleInfo secondHandleInfo;
-        firstHandleInfo.paintRect = textSelector_.firstHandle;
-        secondHandleInfo.paintRect = textSelector_.secondHandle;
-        auto start = textSelector_.GetTextStart();
-        auto end = textSelector_.GetTextEnd();
-        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
-        CheckHandles(secondHandleInfo);
-        selectMenuInfo_.showCopyAll = false;
-        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
-        selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
-    } else {
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-    }
+    CloseSelectOverlay(true);
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+    selectMenuInfo_.showCopyAll = false;
+    selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -435,7 +437,7 @@ void TextPattern::OnHandleTouchUp()
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
     if (textSelector_.IsValid()) {
-        CloseSelectOverlay();
+        CloseSelectOverlay(true);
         ResetSelection();
     }
 
@@ -514,7 +516,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
         InitSelection(textOffset);
         CalculateHandleOffsetAndShowOverlay(true);
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -820,7 +822,7 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo)
+void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation)
 {
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         SelectHandleInfo firstHandleInfo;
@@ -836,7 +838,7 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo)
         CHECK_NULL_VOID(pipeline);
         selectInfo.callerFrameNode = GetHost();
         selectOverlayProxy_ =
-            pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
+            pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this), animation);
         CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
         auto start = textSelector_.GetTextStart();
         auto end = textSelector_.GetTextEnd();
@@ -1147,7 +1149,7 @@ void TextPattern::SetAccessibilityAction()
         auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
-            pattern->CloseSelectOverlay();
+            pattern->CloseSelectOverlay(true);
             pattern->ResetSelection();
         }
     });
@@ -1159,7 +1161,7 @@ void TextPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(textLayoutProperty);
         if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
             pattern->HandleOnCopy();
-            pattern->CloseSelectOverlay();
+            pattern->CloseSelectOverlay(true);
             pattern->ResetSelection();
         }
     });

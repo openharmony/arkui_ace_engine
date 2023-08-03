@@ -30,6 +30,7 @@ class WindowPattern : public Pattern {
 public:
     WindowPattern() = default;
     ~WindowPattern() override = default;
+
     std::vector<Rosen::Rect> GetHotAreas();
 
 protected:
@@ -56,6 +57,7 @@ protected:
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
+    virtual void OnExtensionDied() {}
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;

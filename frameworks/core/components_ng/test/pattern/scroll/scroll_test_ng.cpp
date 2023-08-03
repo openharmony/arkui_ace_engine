@@ -84,6 +84,7 @@ public:
     void Touch(TouchType touchType, Offset offset, SourceType sourceType);
     void Mouse(MouseInfo mouseInfo);
     void Mouse(Offset moveOffset);
+    void Hover(bool isHover);
     testing::AssertionResult IsEqualCurrentOffset(Offset expectOffset);
 
     RefPtr<FrameNode> frameNode_;
@@ -303,6 +304,14 @@ void ScrollTestNg::Mouse(Offset moveOffset)
     mouseInfo.SetAction(MouseAction::MOVE);
     mouseInfo.SetLocalLocation(moveOffset);
     Mouse(mouseInfo);
+}
+
+void ScrollTestNg::Hover(bool isHover)
+{
+    auto hoverEventHub = frameNode_->GetOrCreateInputEventHub();
+    RefPtr<InputEvent> inputEvent = hoverEventHub->hoverEventActuator_->inputEvents_.front();
+    auto hoverEvent = inputEvent->GetOnHoverEventFunc();
+    hoverEvent(isHover);
 }
 
 testing::AssertionResult ScrollTestNg::IsEqualCurrentOffset(Offset expectOffset)
@@ -1279,7 +1288,7 @@ HWTEST_F(ScrollTestNg, ScrollBar001, TestSize.Level1)
 
 /**
  * @tc.name: ScrollBar002
- * @tc.desc: Test SetGestureEvent() / SetMouseEvent()
+ * @tc.desc: Test SetGestureEvent() / SetMouseEvent() / SetHoverEvent()
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
@@ -1418,6 +1427,26 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
     Mouse(moveOutBar);
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     EXPECT_FALSE(scrollBar->IsHover());
+
+    /**
+     * @tc.steps: step9. Mouse in bar and move out of component containing bar
+     * @tc.expected: HoverAnimation is take effect
+     */
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    Hover(true);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    scrollBar->SetHover(false);
+    Hover(false);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    scrollBar->SetHover(true);
+    scrollBar->SetPressed(true);
+    Hover(false);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    scrollBar->SetHover(true);
+    scrollBar->SetPressed(false);
+    Hover(false);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
+    EXPECT_FALSE(scrollBar->IsHover());
 }
 
 /**
@@ -1494,12 +1523,12 @@ HWTEST_F(ScrollTestNg, ScrollBar004, TestSize.Level1)
     auto scrollBar = pattern_->GetScrollBar();
     scrollBar->SetShapeMode(ShapeMode::ROUND);
     EXPECT_FALSE(scrollBar->InBarTouchRegion(Point(0, 0)));
-    EXPECT_FALSE(scrollBar->InBarActiveRegion(Point(0, 0)));
+    EXPECT_FALSE(scrollBar->InBarHoverRegion(Point(0, 0)));
     scrollBar->FlushBarWidth();
 
     scrollBar->SetDisplayMode(DisplayMode::OFF);
     EXPECT_FALSE(scrollBar->InBarTouchRegion(Point(0, 0)));
-    EXPECT_FALSE(scrollBar->InBarActiveRegion(Point(0, 0)));
+    EXPECT_FALSE(scrollBar->InBarHoverRegion(Point(0, 0)));
 
     scrollBar->SetPositionMode(PositionMode::LEFT);
     scrollBar->UpdateActiveRectSize(20.f);

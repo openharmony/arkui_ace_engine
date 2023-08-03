@@ -34,6 +34,7 @@ public:
     static void SetOnIMEInputComplete(const JSCallbackInfo& args);
     static void SetAboutToDelete(const JSCallbackInfo& args);
     static void SetOnDeleteComplete(const JSCallbackInfo& args);
+    static void SetCustomKeyboard(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);

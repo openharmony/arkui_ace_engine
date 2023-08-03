@@ -364,15 +364,12 @@ public:
 
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
-
-    virtual void OnSetDepth(const int32_t depth) {}
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
-
-private:
+    
     WeakPtr<FrameNode> frameNode_;
-
+private:
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };
 } // namespace OHOS::Ace::NG

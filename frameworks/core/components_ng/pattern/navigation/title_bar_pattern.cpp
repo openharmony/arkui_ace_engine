@@ -97,9 +97,13 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
         } else {
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
         }
+        titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     }
 
     if (hostNode->GetSubtitle()) {
@@ -119,6 +123,15 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(subtitleNode);
     auto titleLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(titleLayoutProperty);
+
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
+        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    }
+
     subtitleNode->MarkModifyDone();
 }
 

@@ -20,7 +20,6 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -63,6 +62,13 @@ public:
         auto windowPattern = windowPattern_.Upgrade();
         CHECK_NULL_VOID(windowPattern);
         windowPattern->OnDisconnect();
+    }
+
+    void OnExtensionDied() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnExtensionDied();
     }
 
 private:
@@ -128,6 +134,12 @@ void WindowPattern::InitContent()
         return;
     }
 
+    if (state == Rosen::SessionState::STATE_BACKGROUND) {
+        CreateSnapshotNode();
+        host->AddChild(snapshotNode_);
+        return;
+    }
+
     host->AddChild(contentNode_);
     if (!session_->GetBufferAvailable()) {
         CreateStartingNode();
@@ -190,8 +202,18 @@ void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent
 {
     CHECK_NULL_VOID(session_);
     CHECK_NULL_VOID(pointerEvent);
-    pointerEvent->SetActionTime(GetMicroTickCount());
     session_->TransferPointerEvent(pointerEvent);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (pointerEvent->GetPointerAction() >= MMI::PointerEvent::POINTER_ACTION_PULL_DOWN &&
+        pointerEvent->GetPointerAction() <= MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            auto manager = pipeline->GetDragDropManager();
+            CHECK_NULL_VOID(manager);
+            manager->SetIsWindowConsumed(true);
+        }
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void WindowPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)

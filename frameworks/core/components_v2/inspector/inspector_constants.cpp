@@ -533,4 +533,7 @@ const char PASTE_BUTTON_ETS_TAG[] = "PasteButton";
 // SaveButton
 const char SAVE_BUTTON_COMPONENT_TAG[] = "SaveButtonComponent";
 const char SAVE_BUTTON_ETS_TAG[] = "SaveButton";
+
+// Keyboard
+const char KEYBOARD_ETS_TAG[] = "Keyboard";
 } // namespace OHOS::Ace::V2

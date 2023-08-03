@@ -38,6 +38,7 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HOURS_WEST = -8;
+constexpr int32_t DATE_INDEX = 0;
 constexpr int32_t HOURS_WEST2 = INT_MAX;
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 inline const std::string CLOCK_FORMAT = "aa h:m:s";
@@ -310,6 +311,10 @@ HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
     dateTimeValue = "07/08/2023, 20:35:07.007";
     curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
     pattern->SpliceDateTime(curDateTime, inputFormatSplitter);
+    pattern->CheckDateTimeElement(curDateTime, "yy", 'y', (int32_t)DATE_INDEX, true);
+    pattern->CheckDateTimeElement(curDateTime, "MM", 'M', (int32_t)DATE_INDEX, true);
+    pattern->CheckDateTimeElement(curDateTime, "dd", 'd', (int32_t)DATE_INDEX, true);
+    pattern->CheckDateTimeElement(curDateTime, "mm", 'm', (int32_t)DATE_INDEX, true);
     EXPECT_EQ(is24H, true);
     EXPECT_EQ(weekType, 2);
     EXPECT_EQ(month, 1);

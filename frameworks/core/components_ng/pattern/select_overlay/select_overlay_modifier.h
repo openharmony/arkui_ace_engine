@@ -48,11 +48,20 @@ public:
 
     void SetLineEndOffset(bool isMore);
 
-    void SetHasExtensitonMenu(bool hasExtensitonMenu)
+    void SetHasExtensionMenu(bool hasExtensionMenu)
     {
-        if (hasExtensitonMenu_) {
-            hasExtensitonMenu_->Set(hasExtensitonMenu);
-        }
+        hasExtensionMenu_ = hasExtensionMenu;
+    }
+
+    bool GetHasExtensionMenu()
+    {
+        return hasExtensionMenu_;
+    }
+
+    void SetCirclesAndBackArrowOpacity(float circlesAndBackArrowOpacity)
+    {
+        CHECK_NULL_VOID(circlesAndBackArrowOpacity_);
+        circlesAndBackArrowOpacity_->Set(circlesAndBackArrowOpacity);
     }
 
 private:
@@ -62,14 +71,15 @@ private:
     void DrawbCircles(DrawingContext& context);
 
     RefPtr<PropertyOffsetF> menuOptionOffset_;
-    RefPtr<PropertyBool> hasExtensitonMenu_;
     RefPtr<AnimatablePropertyFloat> pointRadius_;
     RefPtr<AnimatablePropertyFloat> headPointRadius_;
     RefPtr<AnimatablePropertyFloat> rotationAngle_;
+    RefPtr<AnimatablePropertyFloat> circlesAndBackArrowOpacity_;
     std::vector<RefPtr<AnimatablePropertyOffsetF>> circleOffset_;
     std::vector<RefPtr<AnimatablePropertyOffsetF>> lineEndOffset_;
 
     Color iconColor_ = Color::BLACK;
+    bool hasExtensionMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayModifier);
 };

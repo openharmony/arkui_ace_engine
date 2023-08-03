@@ -690,6 +690,12 @@ var DialogAlignment;
   DialogAlignment[DialogAlignment["BottomEnd"] = 9] = "BottomEnd";
 })(DialogAlignment || (DialogAlignment = {}));
 
+var DialogButtonStyle;
+(function (DialogButtonStyle) {
+  DialogButtonStyle[DialogButtonStyle["DEFAULT"] = 0] = "DEFAULT";
+  DialogButtonStyle[DialogButtonStyle["HIGHLIGHT"] = 1] = "HIGHLIGHT";
+})(DialogButtonStyle || (DialogButtonStyle = {}));
+
 var EditMode;
 (function (EditMode) {
   EditMode[EditMode["None"] = 0] = "None";

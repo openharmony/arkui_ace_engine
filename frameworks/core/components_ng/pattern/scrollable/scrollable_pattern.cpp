@@ -146,7 +146,7 @@ void ScrollablePattern::OnScrollEnd()
         }
     }
     if (scrollBar_) {
-        scrollBar_->PlayScrollBarEndAnimation();
+        scrollBar_->ScheduleDisapplearDelayTask();
     }
     StartScrollBarAnimatorByProxy();
 }
@@ -291,6 +291,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     CHECK_NULL_VOID(inputHub);
     scrollBar_->SetGestureEvent();
     scrollBar_->SetMouseEvent();
+    scrollBar_->SetHoverEvent();
     scrollBar_->SetMarkNeedRenderFunc([weak = AceType::WeakClaim(AceType::RawPtr(host))]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
@@ -305,18 +306,20 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->OnScrollEnd();
         pattern->OnScrollEndCallback();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
+    inputHub->AddOnHoverEvent(scrollBar_->GetHoverEvent());
     CHECK_NULL_VOID(scrollableEvent_);
     scrollableEvent_->SetInBarRegionCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point, SourceType source) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_RETURN_NOLOG(scrollBar, false);
             if (source == SourceType::MOUSE) {
-                return scrollBar->InBarActiveRegion(Point(point.GetX(), point.GetY()));
+                return scrollBar->InBarHoverRegion(Point(point.GetX(), point.GetY()));
             }
             return scrollBar->InBarTouchRegion(Point(point.GetX(), point.GetY()));
         }
@@ -332,30 +335,40 @@ void ScrollablePattern::RegisterScrollBarEventTask()
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
     if (displayMode == DisplayMode::OFF) {
         if (scrollBar_) {
             auto gestureHub = GetGestureHub();
             if (gestureHub) {
                 gestureHub->RemoveTouchEvent(scrollBar_->GetTouchEvent());
             }
-            scrollBar_->MarkNeedRender();
             scrollBar_.Reset();
+            if (overlayModifier_) {
+                overlayModifier_->SetOpacity(0);
+            }
         }
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode, overlayModifier_);
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
-        scrollBar_->PlayScrollBarEndAnimation();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    } else if (scrollBar_->GetDisplayMode() != displayMode) {
+    } else {
+        oldDisplayMode = scrollBar_->GetDisplayMode();
+    }
+
+    if (oldDisplayMode != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
+        if (overlayModifier_ && scrollBar_->IsScrollable()) {
+            overlayModifier_->SetOpacity(UINT8_MAX);
+        }
+        scrollBar_->ScheduleDisapplearDelayTask();
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(renderContext);
@@ -399,8 +412,16 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
     // inner scrollbar, viewOffset is padding offset
     if (scrollBar_) {
         auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
-        bool scrollable = GreatNotEqual(estimatedHeight, mainSize);
-        scrollBar_->SetScrollable(IsScrollable() && scrollable);
+        bool scrollable = GreatNotEqual(estimatedHeight, mainSize) && IsScrollable();
+        if (scrollBar_->IsScrollable() != scrollable) {
+            scrollBar_->SetScrollable(scrollable);
+            if (overlayModifier_) {
+                overlayModifier_->SetOpacity(scrollable ? UINT8_MAX : 0);
+            }
+            if (scrollable) {
+                scrollBar_->ScheduleDisapplearDelayTask();
+            }
+        }
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
@@ -607,6 +628,7 @@ void ScrollablePattern::UninitMouseEvent()
     CHECK_NULL_VOID(mouseEventHub);
     mouseEventHub->RemoveOnMouseEvent(mouseEvent_);
     ClearMultiSelect();
+    ClearInvisibleItemsSelectedStatus();
     isMouseEventInit_ = false;
 }
 
@@ -639,6 +661,40 @@ void ScrollablePattern::InitMouseEvent()
     });
 }
 
+void ScrollablePattern::ClearInvisibleItemsSelectedStatus()
+{
+    for (auto& item : itemToBeSelected_) {
+        item.second.FireSelectChangeEvent(false);
+    }
+    itemToBeSelected_.clear();
+}
+
+void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selectedZone)
+{
+    auto newRect = selectedZone;
+    auto startMainOffset = mouseStartOffset_.GetMainOffset(axis_);
+    auto endMainOffset = mouseEndOffset_.GetMainOffset(axis_);
+    if (LessNotEqual(startMainOffset, endMainOffset)) {
+        if (axis_ == Axis::VERTICAL) {
+            newRect.SetOffset(OffsetF(selectedZone.Left(), totalOffsetOfMousePressed_));
+        } else {
+            newRect.SetOffset(OffsetF(totalOffsetOfMousePressed_, selectedZone.Top()));
+        }
+    } else {
+        if (axis_ == Axis::VERTICAL) {
+            newRect.SetOffset(
+                OffsetF(selectedZone.Left(), totalOffsetOfMousePressed_ - (startMainOffset - endMainOffset)));
+        } else {
+            newRect.SetOffset(
+                OffsetF(totalOffsetOfMousePressed_ - (startMainOffset - endMainOffset), selectedZone.Top()));
+        }
+    }
+
+    for (auto& item : itemToBeSelected_) {
+        item.second.FireSelectChangeEvent(newRect.IsIntersectWith(item.second.rect));
+    }
+}
+
 void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
     if (info.GetButton() != MouseButton::LEFT_BUTTON) {
@@ -661,6 +717,7 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
     if (info.GetAction() == MouseAction::PRESS) {
         if (!IsItemSelected(info)) {
             ClearMultiSelect();
+            ClearInvisibleItemsSelectedStatus();
         }
         mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
@@ -673,13 +730,12 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             return;
         }
         lastMouseMove_ = info;
-        const static double FRAME_SELECTION_DISTANCE =
-            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
         auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
-        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
+        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > DEFAULT_PAN_DISTANCE.ConvertToPx()) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
             MultiSelectWithoutKeyboard(selectedZone);
+            HandleInvisibleItemsSelectedStatus(selectedZone);
         }
         SelectWithScroll();
     } else if (info.GetAction() == MouseAction::RELEASE) {
@@ -784,6 +840,7 @@ void ScrollablePattern::MarkSelectedItems()
         auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
         if (!selectedZone.IsEmpty()) {
             MultiSelectWithoutKeyboard(selectedZone);
+            HandleInvisibleItemsSelectedStatus(selectedZone);
         }
     }
 }

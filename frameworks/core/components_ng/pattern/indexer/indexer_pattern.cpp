@@ -164,7 +164,7 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(onActionStart), std::move(onActionUpdate), std::move(onActionEnd), std::move(onActionCancel));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, 0.0);
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, 0.0_vp);
 }
 
 void IndexerPattern::OnHover(bool isHover)

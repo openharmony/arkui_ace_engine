@@ -45,7 +45,7 @@ class TextPattern : public Pattern, public TextDragBase {
 
 public:
     TextPattern() = default;
-    ~TextPattern() override;
+    ~TextPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
@@ -209,6 +209,7 @@ public:
         return true;
     }
     virtual void CloseSelectOverlay() override;
+    void CloseSelectOverlay(bool animation);
     void CreateHandles() override;
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -261,7 +262,7 @@ public:
         return imageOffset_;
     }
 
-    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo);
+    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
     void CheckHandles(SelectHandleInfo& handleInfo);
 
 protected:
@@ -276,6 +277,7 @@ protected:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     virtual void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelected() const;

@@ -124,13 +124,14 @@ public:
         if (cachedItems_.empty()) {
             return true;
         }
-        if (index > cachedItems_.rbegin()->first || index < cachedItems_.begin()->first) {
+        if (index > static_cast<size_t>(cachedItems_.rbegin()->first) ||
+            index < static_cast<size_t>(cachedItems_.begin()->first)) {
             return false;
         }
         decltype(cachedItems_) temp(std::move(cachedItems_));
 
         for (auto& [oldindex, id] : temp) {
-            cachedItems_.try_emplace(index > oldindex ? oldindex : oldindex + 1, std::move(id));
+            cachedItems_.try_emplace(index > static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
         }
         return true;
     }
@@ -140,13 +141,13 @@ public:
         if (cachedItems_.empty()) {
             return false;
         }
-        if (index > cachedItems_.rbegin()->first) {
+        if (index > static_cast<size_t>(cachedItems_.rbegin()->first)) {
             return false;
         }
         decltype(cachedItems_) temp(std::move(cachedItems_));
 
         for (auto& [oldindex, id] : temp) {
-            cachedItems_.try_emplace(index > oldindex ? oldindex : oldindex - 1, std::move(id));
+            cachedItems_.try_emplace(index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(id));
         }
         return true;
     }
@@ -156,6 +157,7 @@ public:
         auto keyIter = cachedItems_.find(index);
         if (keyIter != cachedItems_.end()) {
             auto iter = generatedItem_.find(keyIter->second);
+            cachedItems_.erase(keyIter);
             if (iter != generatedItem_.end()) {
                 expiringItem_.try_emplace(iter->first, std::move(iter->second));
                 generatedItem_.erase(iter);
@@ -190,6 +192,9 @@ public:
     {
         ACE_SCOPED_TRACE("RemoveAllChild");
         expiringItem_.merge(generatedItem_);
+        for (const auto& iter : generatedItem_) {
+            iter.second->SetJSViewActive(false);
+        }
         generatedItem_.clear();
     }
 
@@ -202,6 +207,7 @@ public:
             auto iter = generatedItem_.find(keyIter->second);
             if (iter != generatedItem_.end()) {
                 child = iter->second;
+                iter->second->SetJSViewActive(false);
                 expiringItem_.try_emplace(iter->first, std::move(iter->second));
                 generatedItem_.erase(iter);
             }
@@ -236,7 +242,9 @@ public:
         auto itemInfo = OnGetChildByIndex(index, expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, itemInfo.second);
+        cachedItems_[index] = itemInfo.first;
         itemInfo.second->Build();
+        itemInfo.second->SetJSViewActive(false);
         return itemInfo.second;
     }
 

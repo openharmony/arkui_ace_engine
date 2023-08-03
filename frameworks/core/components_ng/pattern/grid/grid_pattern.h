@@ -185,6 +185,8 @@ public:
     float EstimateHeight() const;
     float GetAverageHeight() const;
 
+    void DumpInfo() override;
+
 private:
     float GetMainGap();
     float GetAllDelta();
@@ -233,6 +235,7 @@ private:
     bool initialIndex_ = false;
     float prevHeight_ = 0;
     float currentHeight_ = 0;
+    float prevFinalOffset_ = 0;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;

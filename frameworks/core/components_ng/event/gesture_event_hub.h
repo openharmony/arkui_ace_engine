@@ -242,18 +242,20 @@ public:
     }
 
     // Set by user define, which will replace old one.
-    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, float distance)
+    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
     {
         if (!panEventActuator_) {
-            panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance);
+            panEventActuator_ =
+                MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
         }
         panEventActuator_->ReplacePanEvent(panEvent);
     }
 
-    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, float distance)
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
     {
         if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
-            panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance);
+            panEventActuator_ =
+                MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
         }
         panEventActuator_->AddPanEvent(panEvent);
     }
@@ -267,18 +269,21 @@ public:
     }
 
     // Set by user define, which will replace old one.
-    void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
+    void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance)
     {
         if (!dragEventActuator_) {
-            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
+            dragEventActuator_ =
+                MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
         }
         dragEventActuator_->ReplaceDragEvent(dragEvent);
     }
 
-    void SetCustomDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
+    void SetCustomDragEvent(
+        const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance)
     {
         if (!dragEventActuator_) {
-            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
+            dragEventActuator_ =
+                MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
         }
         dragEventActuator_->SetCustomDragEvent(dragEvent);
     }
@@ -390,6 +395,16 @@ public:
         textDraggable_ = draggable;
     }
 
+    void SetIsTextDraggable(bool isTextDraggable)
+    {
+        isTextDraggable_ = isTextDraggable;
+    }
+
+    bool GetIsTextDraggable()
+    {
+        return isTextDraggable_;
+    }
+
     bool IsTextField() const
     {
         return isTextField_;
@@ -419,7 +434,7 @@ public:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
-    OnDragCallback GetDragCallback();
+    OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 
     void SetThumbnailPixelMapCallback(std::function<void()>&& callback)
     {
@@ -460,6 +475,8 @@ private:
 
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
 
+    void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode);
+
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
@@ -494,6 +511,7 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;
     bool isTextField_ = false;
+    bool isTextDraggable_ = false;
     std::function<void()> callback_;
 #endif
 };

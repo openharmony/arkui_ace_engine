@@ -302,6 +302,11 @@ public:
     {
         taskScheduler_.FlushTask();
     }
+
+    bool IsLayouting() const override
+    {
+        return taskScheduler_.IsLayouting();
+    }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
     RectF GetRootRect()

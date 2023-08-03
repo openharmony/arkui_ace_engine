@@ -28,12 +28,12 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/frameworks/core/components_ng/image_provider/pixel_map_image_object.cpp",
     "$ace_root/frameworks/core/components_ng/image_provider/static_image_object.cpp",
     "$ace_root/frameworks/core/components_ng/image_provider/svg_image_object.cpp",
+    "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
 
     # mock
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_decoder.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loader.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_skia_image_data.cpp",

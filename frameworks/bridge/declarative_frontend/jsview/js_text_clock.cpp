@@ -57,7 +57,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const int32_t TWENTY_FOUR_HOUR_BASE = 24;
-const std::string DEFAULT_FORMAT = "h:m:s";
+const std::string DEFAULT_FORMAT = "hms";
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;

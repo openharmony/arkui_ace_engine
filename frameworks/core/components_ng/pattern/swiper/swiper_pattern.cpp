@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
@@ -79,6 +80,16 @@ void SwiperPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToBounds(true);
     host->GetRenderContext()->UpdateClipEdge(true);
     InitSurfaceChangedCallback();
+}
+
+void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasSurfaceChangedCallback()) {
+        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
+        pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
+    }
 }
 
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
@@ -296,6 +307,9 @@ void SwiperPattern::InitSurfaceChangedCallback()
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
             [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
                 WindowSizeChangeReason type) {
+                if (type == WindowSizeChangeReason::UNDEFINED) {
+                    return;
+                }
                 auto swiper = weak.Upgrade();
                 if (!swiper) {
                     return;
@@ -2604,6 +2618,41 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
             lazyForEach->SetRequestLongPredict(useLazyLoad);
         }
     }
+    if (useLazyLoad) {
+        auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto cacheCount = layoutProperty->GetCachedCountValue(1);
+        std::set<int32_t> forEachIndexSet;
+        for (auto count = 1; count <= cacheCount; count++) {
+            forEachIndexSet.emplace(GetLoopIndex(currentIndex_ + count));
+            forEachIndexSet.emplace(GetLoopIndex(currentIndex_ - count));
+        }
+        if (forEachIndexSet.empty()) {
+            return;
+        }
+        for (const auto& child : children) {
+            if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
+                continue;
+            }
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto taskExecutor = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weak = WeakClaim(RawPtr(child)), forEachIndexSet]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    auto forEachNode = AceType::DynamicCast<ForEachNode>(node);
+                    CHECK_NULL_VOID(forEachNode);
+                    for (auto index : forEachIndexSet) {
+                        auto childNode = forEachNode->GetChildAtIndex(index);
+                        CHECK_NULL_VOID(childNode);
+                        childNode->Build();
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+        }
+    }
 }
 
 void SwiperPattern::SetLazyLoadIsLoop() const
@@ -2631,8 +2680,7 @@ bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper()
         return false;
     }
     if (static_cast<int32_t>(itemPosition_.size()) == TotalCount()) {
-        auto visibleLength = lastItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
-        auto totalChildrenSize = visibleLength;
+        auto totalChildrenSize = lastItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
         if (NonPositive(totalChildrenSize)) {
             return true;
         }
@@ -2822,12 +2870,17 @@ void SwiperPattern::InitHoverMouseEvent()
         inputHub->AddOnHoverEvent(hoverEvent_);
     }
 
-    inputHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
+    auto mouseEvent = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleMouseEvent(info);
         }
-    });
+    };
+    if (mouseEvent_) {
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+    }
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseEvent));
+    inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
 void SwiperPattern::HandleMouseEvent(const MouseInfo& info)

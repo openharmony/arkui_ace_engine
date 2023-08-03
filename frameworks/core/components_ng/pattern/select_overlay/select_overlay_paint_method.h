@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
@@ -30,13 +31,13 @@ class ACE_EXPORT SelectOverlayPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SelectOverlayPaintMethod, NodePaintMethod)
 public:
     SelectOverlayPaintMethod(const RefPtr<SelectOverlayModifier>& selectOverlayModifier,
-        SelectOverlayInfo info, const OffsetF& offset, bool hasExtensionMenu)
-        : selectOverlayModifier_(selectOverlayModifier), info_(std::move(info)), defaultMenuEndOffset_(offset),
-          hasExtensionMenu_(hasExtensionMenu)
+        const RefPtr<SelectOverlayContentModifier>& selectOverlayContentModifier, SelectOverlayInfo info,
+        const OffsetF& offset, bool hasExtensionMenu, bool hasShowAnimation, bool isCreated)
+        : selectOverlayModifier_(selectOverlayModifier), selectOverlayContentModifier_(selectOverlayContentModifier),
+          info_(std::move(info)), defaultMenuEndOffset_(offset), hasExtensionMenu_(hasExtensionMenu),
+          hasShowAnimation_(hasShowAnimation), isCreated_(isCreated)
     {}
     ~SelectOverlayPaintMethod() override = default;
-
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
@@ -44,20 +45,40 @@ public:
         return selectOverlayModifier_;
     }
 
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(selectOverlayContentModifier_, nullptr);
+        return selectOverlayContentModifier_;
+    }
+
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
-private:
-    void DrawHandles(RSCanvas& canvas, const RectF& frameRect);
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
-    static void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop);
+private:
+    void CheckCirclesAndBackArrowIsShown();
+
+    void CheckHasExtensionMenu();
+
+    void CheckHandleIsShown();
 
     RefPtr<SelectOverlayModifier> selectOverlayModifier_;
+
+    RefPtr<SelectOverlayContentModifier> selectOverlayContentModifier_;
 
     SelectOverlayInfo info_;
 
     OffsetF defaultMenuEndOffset_;
 
     bool hasExtensionMenu_ = false;
+
+    bool hasShowAnimation_ = false;
+
+    bool isCreated_ = false;
+
+    bool handleIsShown_ = false;
+
+    bool circlesAndBackArrowIsShown_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPaintMethod);
 };

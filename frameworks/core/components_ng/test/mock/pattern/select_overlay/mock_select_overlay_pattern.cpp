@@ -52,10 +52,7 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return firstHandleDrag_ && secondHandleDrag_ && false;
 }
 
-CanvasDrawFunction SelectOverlayPaintMethod::GetContentDrawFunction(PaintWrapper* /* paintWrapper */)
-{
-    return nullptr;
-};
-
 void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper) {}
+
+void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper) {}
 } // namespace OHOS::Ace::NG

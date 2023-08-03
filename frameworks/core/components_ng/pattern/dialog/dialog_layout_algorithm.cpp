@@ -140,8 +140,11 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(textLayoutAlgorithm);
-    auto lineCount = textLayoutAlgorithm->GetLineCount();
-    if (lineCount == 1 && layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetTitle().empty()) {
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
         scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     } else {
         scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);

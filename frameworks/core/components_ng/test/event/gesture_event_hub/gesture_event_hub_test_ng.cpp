@@ -56,7 +56,7 @@ const PanDirection PAN_DIRECTION_ALL;
 constexpr int32_t FINGERS = 1;
 constexpr int32_t DOUBLE_FINGERS = 2;
 constexpr int32_t CLICK_COUNTS = 2;
-constexpr float DISTANCE = 10.0;
+constexpr Dimension DISTANCE = 10.0_vp;
 const std::string CHECK_TAG_1("HELLO");
 const std::string CHECK_TAG_2("WORLD");
 const PointF GLOBAL_POINT { 20.0f, 20.0f };

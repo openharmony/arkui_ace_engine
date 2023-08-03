@@ -723,6 +723,7 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 
 void ImagePattern::OnLanguageConfigurationUpdate()
 {
+    CHECK_NULL_VOID_NOLOG(loadingCtx_);
     auto&& src = loadingCtx_->GetSourceInfo();
     // Resource image needs to reload when Language changes
     if (src.GetSrcType() == SrcType::RESOURCE) {

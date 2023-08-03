@@ -153,6 +153,11 @@ public:
             textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
         }
         auto textFieldOverlayModifier = AceType::DynamicCast<TextFieldOverlayModifier>(GetScrollBarOverlayModifier());
+        if (!textFieldOverlayModifier) {
+            textFieldOverlayModifier =
+                AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect());
+            SetScrollBarOverlayModifier(textFieldOverlayModifier);
+        }
         auto paint =
             MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier, textFieldContentModifier_);
         auto scrollBar = GetScrollBar();
@@ -409,22 +414,22 @@ public:
 
     float GetBorderLeft() const
     {
-        return lastBorderWidth_.leftDimen->ConvertToPx();
+        return lastBorderWidth_.leftDimen.value_or(Dimension(0.0f)).ConvertToPx();
     }
 
     float GetBorderTop() const
     {
-        return lastBorderWidth_.topDimen->ConvertToPx();
+        return lastBorderWidth_.topDimen.value_or(Dimension(0.0f)).ConvertToPx();
     }
 
     float GetBorderBottom() const
     {
-        return lastBorderWidth_.bottomDimen->ConvertToPx();
+        return lastBorderWidth_.bottomDimen.value_or(Dimension(0.0f)).ConvertToPx();
     }
 
     float GetBorderRight() const
     {
-        return lastBorderWidth_.rightDimen->ConvertToPx();
+        return lastBorderWidth_.rightDimen.value_or(Dimension(0.0f)).ConvertToPx();
     }
 
     const RectF& GetTextRect() override
@@ -521,6 +526,7 @@ public:
 
     bool SelectOverlayIsOn();
     void CloseSelectOverlay() override;
+    void CloseSelectOverlay(bool animation);
     void SetInputMethodStatus(bool keyboardShown)
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -752,6 +758,8 @@ public:
 
     void CreateHandles() override;
 
+    void CreateHandles(bool animation);
+
     bool IsDragging() const
     {
         return dragStatus_ == DragStatus::DRAGGING;
@@ -780,6 +788,9 @@ public:
         }
         return false;
     }
+
+    bool RequestCustomKeyboard();
+    bool CloseCustomKeyboard();
 
     // xts
     std::string TextInputTypeToString() const;
@@ -956,6 +967,13 @@ public:
 
     void EditingValueFilterChange();
 
+    void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
+    {
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+            CloseCustomKeyboard();
+        }
+        customKeyboardBulder_ = keyboardBuilder;
+    }
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -971,7 +989,7 @@ private:
     std::function<void(Offset)> GetThumbnailCallback();
 #endif
     bool CaretPositionCloseToTouchPosition();
-    void CreateSingleHandle();
+    void CreateSingleHandle(bool animation = false);
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
@@ -989,12 +1007,13 @@ private:
     // assert handles are inside the contentRect, reset them if not
     void CheckHandles(std::optional<RectF>& firstHandle,
         std::optional<RectF>& secondHandle, float firstHandleSize = 0.0f, float secondHandleSize = 0.0f);
-    void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
+    void ShowSelectOverlay(
+        const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle, bool animation = false);
 
     void CursorMoveOnClick(const Offset& offset);
     void UpdateCaretInfoToController() const;
 
-    void ProcessOverlay();
+    void ProcessOverlay(bool animation = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     // when moving one handle causes shift of textRect, update x position of the other handle
@@ -1220,6 +1239,8 @@ private:
     bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
+    bool isCustomKeyboardAttached_ = false;
+    std::function<void()> customKeyboardBulder_;
 };
 } // namespace OHOS::Ace::NG
 

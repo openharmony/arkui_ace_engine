@@ -615,7 +615,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         if (windowManager_->GetWindowType() == WindowType::WINDOW_TYPE_UNDEFINED ||
             (windowManager_->GetWindowType() > WindowType::WINDOW_TYPE_APP_END &&
-             windowManager_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT)) {
+                windowManager_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT)) {
             LOGW("this window type: %{public}d do not need avoid virtual keyboard.",
                 static_cast<int32_t>(windowManager_->GetWindowMode()));
             return;
@@ -650,6 +650,13 @@ Rect PipelineBase::GetCurrentWindowRect() const
         return window_->GetCurrentWindowRect();
     }
     return {};
+}
+
+bool PipelineBase::HasFloatTitle() const
+{
+    CHECK_NULL_RETURN_NOLOG(windowManager_, false);
+    return GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+           windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 }
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const

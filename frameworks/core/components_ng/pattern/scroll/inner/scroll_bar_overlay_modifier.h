@@ -95,6 +95,18 @@ public:
         opacityAnimatingType_ = opacityAnimatingType;
     }
 
+    void SetOpacity(uint8_t opacity)
+    {
+        CHECK_NULL_VOID_NOLOG(opacity_);
+        opacity_->Set(opacity);
+    }
+
+    uint8_t GetOpacity() const
+    {
+        CHECK_NULL_RETURN_NOLOG(opacity_, 0);
+        return opacity_->Get();
+    }
+
 private:
     // Animatable
     RefPtr<AnimatablePropertyUint8> opacity_;

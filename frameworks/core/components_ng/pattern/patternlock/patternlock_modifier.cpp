@@ -339,13 +339,32 @@ OffsetF PatternLockModifier::GetCircleCenterByXY(const OffsetF& offset, int32_t 
 void PatternLockModifier::SetSideLength(float sideLength)
 {
     CHECK_NULL_VOID(sideLength_);
-    sideLength_->Set(sideLength);
+    if (!NearEqual(sideLength_->Get(), sideLength)) {
+        sideLength_->Set(sideLength);
+        size_t count = choosePoint_.size();
+        if (count > 0) {
+            OffsetF lastPoint = GetCircleCenterByXY(
+                offset_->Get(), choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
+            connectedLineTailPoint_->Set(lastPoint);
+            canceledLineTailPoint_->Set(lastPoint);
+        }
+    }
 }
 
 void PatternLockModifier::SetCircleRadius(float circleRadius)
 {
     CHECK_NULL_VOID(circleRadius_);
-    circleRadius_->Set(circleRadius);
+    if (!NearEqual(circleRadius_->Get(), circleRadius)) {
+        circleRadius_->Set(circleRadius);
+        for (const auto& cell : choosePoint_) {
+            auto index = (cell.GetColumn() - 1) * PATTERN_LOCK_COL_COUNT + cell.GetRow() - 1;
+            if (index < PATTERN_LOCK_POINT_COUNT && index >= 0) {
+                backgroundCircleRadius_.at(index)->Set(circleRadius * scaleBackgroundCircleRadius_);
+                activeCircleRadius_.at(index)->Set(circleRadius * scaleActiveCircleRadius_);
+                lightRingRadius_.at(index)->Set(circleRadius * scaleLightRingRadiusStart_);
+            }
+        }
+    }
 }
 
 void PatternLockModifier::SetRegularColor(const Color& regularColor)
@@ -522,7 +541,7 @@ void PatternLockModifier::SetHoverRadiusScale(float scale)
 
 void PatternLockModifier::SetBackgroundCircleRadius(int32_t index)
 {
-    if (index < backgroundCircleRadius_.size() && index >= 0) {
+    if (index < static_cast<int32_t>(backgroundCircleRadius_.size()) && index >= 0) {
         AnimationOption option = AnimationOption();
         auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(
             BACKROUND_RADIUS_SPRING_RESPONSE, BACKROUND_RADIUS_SPRING_DAMPING);
@@ -542,7 +561,7 @@ float PatternLockModifier::GetBackgroundCircleRadius(int32_t index) const
 
 void PatternLockModifier::SetActiveCircleRadius(int32_t index)
 {
-    if (index < backgroundCircleRadius_.size() && index >= 0) {
+    if (index < static_cast<int32_t>(activeCircleRadius_.size()) && index >= 0) {
         activeCircleRadius_.at(index)->Set(circleRadius_->Get());
         AnimationOption option = AnimationOption();
         option.SetDuration(ACTIVE_RADIUS_ANIMATION_DURATION);
@@ -562,7 +581,7 @@ float PatternLockModifier::GetActiveCircleRadius(int32_t index) const
 
 void PatternLockModifier::SetLightRingCircleRadius(int32_t index)
 {
-    if (index < lightRingRadius_.size() && index >= 0) {
+    if (index < static_cast<int32_t>(lightRingRadius_.size()) && index >= 0) {
         auto circleRadius = circleRadius_->Get();
         lightRingRadius_.at(index)->Set(circleRadius * scaleLightRingRadiusStart_);
         AnimationOption option = AnimationOption();
@@ -583,7 +602,7 @@ float PatternLockModifier::GetLightRingCircleRadius(int32_t index) const
 
 void PatternLockModifier::SetLightRingAlphaF(int32_t index)
 {
-    if (index < lightRingAlphaF_.size() && index >= 0) {
+    if (index < static_cast<int32_t>(lightRingAlphaF_.size()) && index >= 0) {
         auto singleLightRingAlphaF = lightRingAlphaF_.at(index);
         singleLightRingAlphaF->Set(LIGHT_RING_ALPHAF_START);
         AnimationOption optionFirst = AnimationOption();

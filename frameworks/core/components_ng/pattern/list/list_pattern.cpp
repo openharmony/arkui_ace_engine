@@ -194,7 +194,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
-            GetScrollBar()->PlayScrollBarEndAnimation();
+            GetScrollBar()->ScheduleDisapplearDelayTask();
         }
     }
     CheckRestartSpring();
@@ -248,6 +248,12 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto drawVertical = (axis == Axis::HORIZONTAL);
     auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_);
+    auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
+    if (!scrollBarOverlayModifier) {
+        scrollBarOverlayModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+        SetScrollBarOverlayModifier(scrollBarOverlayModifier);
+    }
+    paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier);
     paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
     auto scrollEffect = GetScrollEdgeEffect();
@@ -345,10 +351,6 @@ void ListPattern::ProcessEvent(
     if (scrollStop_) {
         auto onScrollStop = listEventHub->GetOnScrollStop();
         if (!GetScrollAbort()) {
-            auto scrollBar = GetScrollBar();
-            if (scrollBar) {
-                scrollBar->PlayScrollBarEndAnimation();
-            }
             if (onScrollStop) {
                 scrollState_ = SCROLL_FROM_NONE;
                 onScrollStop();

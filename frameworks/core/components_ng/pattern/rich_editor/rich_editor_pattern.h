@@ -155,7 +155,17 @@ public:
 
     bool IsUsingMouse() const
     {
-        return false;
+        return isMousePressed_;
+    }
+
+    void ResetIsMousePressed()
+    {
+        isMousePressed_ = false;
+    }
+
+    OffsetF GetRightClickOffset() const
+    {
+        return rightClickOffset_;
     }
 
     int32_t GetCaretSpanIndex()
@@ -170,6 +180,15 @@ public:
 #endif
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
+    bool RequestCustomKeyboard();
+    bool CloseCustomKeyboard();
+    void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
+    {
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+            CloseCustomKeyboard();
+        }
+        customKeyboardBulder_ = keyboardBuilder;
+    }
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
@@ -268,6 +287,7 @@ private:
     bool focusEventInitialized_ = false;
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
+    OffsetF rightClickOffset_;
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;
@@ -278,6 +298,8 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
 #endif // ENABLE_DRAG_FRAMEWORK
+    bool isCustomKeyboardAttached_ = false;
+    std::function<void()> customKeyboardBulder_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

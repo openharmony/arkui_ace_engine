@@ -281,7 +281,8 @@ private:
     float dividerSpacingWidth_;
 
     float dividerSpacing_ = 0.0f;
-
+    FontWeight SelectedWeight_;
+    FontWeight CandidateWeight_;
     Color pressColor_;
     Color hoverColor_;
 

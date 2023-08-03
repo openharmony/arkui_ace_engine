@@ -540,6 +540,18 @@ void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
     eventHub->SetOnPaste(std::move(func));
 }
 
+void SearchModelNG::SetCustomKeyboard(const std::function<void ()> &&buildFunc)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    if (textFieldPattern) {
+        textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
+    }
+}
+
 void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode)
 {

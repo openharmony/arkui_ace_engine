@@ -146,7 +146,11 @@ void PagePattern::OnShow()
     // Do not invoke onPageShow unless the initialRender function has been executed.
     CHECK_NULL_VOID_NOLOG(isRenderDone_);
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
-    CHECK_NULL_VOID_NOLOG(Container::IsForeground());
+    auto container = Container::Current();
+    if (!container || !container->WindowIsShow()) {
+        LOGW("no need to trigger onPageShow callback when not in the foreground");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(true);

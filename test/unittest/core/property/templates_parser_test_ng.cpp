@@ -181,9 +181,9 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg001, TestSize.Level1)
     };
     for (auto [args, size, gap, childrenCount, rt] : parms) {
         auto result = ParseTemplateArgs(args(), size, gap, childrenCount);
-        EXPECT_EQ(result.size(), rt.size());
-        for (int i = 0; i < rt.size() && i < result.size(); i++) {
-            EXPECT_EQ(rt[i], result[i]);
+        EXPECT_EQ(result.first.size(), rt.size());
+        for (int i = 0; i < rt.size() && i < result.first.size(); i++) {
+            EXPECT_EQ(rt[i], result.first[i]);
         }
     }
 }

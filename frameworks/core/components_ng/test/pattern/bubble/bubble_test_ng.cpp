@@ -686,30 +686,30 @@ HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
      */
     pattern->arrowPlacement_ = Placement::BOTTOM;
     pattern->StartEnteringAnimation(nullptr);
-    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::NORMAL);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::NORMAL);
     pattern->StartExitingAnimation(nullptr);
-    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::INVISIABLE);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::INVISIABLE);
 
     /**
      * @tc.steps: step3. call StartEnteringAnimation and StartExitingAnimation with finish callback.
      * @tc.expected: pattern->transitionStatus_ changed.
      */
-    pattern->transitionStatus_ = BubblePattern::TransitionStatus::INVISIABLE;
+    pattern->transitionStatus_ = TransitionStatus::INVISIABLE;
     pattern->StartEnteringAnimation([]() {});
-    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::NORMAL);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::NORMAL);
     pattern->StartExitingAnimation([]() {});
-    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::INVISIABLE);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::INVISIABLE);
 
     /**
      * @tc.steps: step4. call StartEnteringAnimation and StartExitingAnimation while animating.
      * @tc.expected: pattern->transitionStatus_ has no changed.
      */
-    pattern->transitionStatus_ = BubblePattern::TransitionStatus::ENTERING;
+    pattern->transitionStatus_ = TransitionStatus::ENTERING;
     pattern->StartEnteringAnimation(nullptr);
-    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::ENTERING);
-    pattern->transitionStatus_ = BubblePattern::TransitionStatus::EXITING;
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::ENTERING);
+    pattern->transitionStatus_ = TransitionStatus::EXITING;
     pattern->StartExitingAnimation(nullptr);
-    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::EXITING);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::EXITING);
 }
 
 /**
@@ -728,13 +728,13 @@ HWTEST_F(BubbleTestNg, BubblePatternTest010, TestSize.Level1)
     /**
      * @tc.steps: step2. call IsOnShow.
      */
-    pattern->transitionStatus_ = BubblePattern::TransitionStatus::ENTERING;
+    pattern->transitionStatus_ = TransitionStatus::ENTERING;
     EXPECT_TRUE(pattern->IsOnShow());
-    pattern->transitionStatus_ = BubblePattern::TransitionStatus::NORMAL;
+    pattern->transitionStatus_ = TransitionStatus::NORMAL;
     EXPECT_TRUE(pattern->IsOnShow());
-    pattern->transitionStatus_ = BubblePattern::TransitionStatus::EXITING;
+    pattern->transitionStatus_ = TransitionStatus::EXITING;
     EXPECT_FALSE(pattern->IsOnShow());
-    pattern->transitionStatus_ = BubblePattern::TransitionStatus::INVISIABLE;
+    pattern->transitionStatus_ = TransitionStatus::INVISIABLE;
     EXPECT_FALSE(pattern->IsOnShow());
 }
 
@@ -833,14 +833,14 @@ HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level1)
      * @tc.expected: pattern->transitionStatus_ has no changed.
      */
     pattern->StartEnteringAnimation(nullptr);
-    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::INVISIABLE);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::INVISIABLE);
 
     /**
      * @tc.steps: step3. call OnDirtyLayoutWrapperSwap.
      * @tc.expected: pattern->transitionStatus_ has changed.
      */
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->transitionStatus_, BubblePattern::TransitionStatus::NORMAL);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::NORMAL);
 }
 
 /*

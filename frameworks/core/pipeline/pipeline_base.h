@@ -659,6 +659,8 @@ public:
         return windowManager_;
     }
 
+    bool HasFloatTitle() const;
+
     bool IsRebuildFinished() const
     {
         return isRebuildFinished_;
@@ -895,6 +897,11 @@ public:
     {
         LOGI("AddFormLinkInfo is %{public}s, id is %{public}d", info.c_str(), id);
         formLinkInfoMap_[id] = info;
+    }
+
+    virtual bool IsLayouting() const
+    {
+        return false;
     }
 
 protected:

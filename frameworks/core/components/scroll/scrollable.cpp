@@ -173,21 +173,16 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     };
 
     if (Container::IsCurrentUseNewPipeline()) {
-        const static int32_t PLATFORM_VERSION_TEN = 10;
-        float distance = DEFAULT_PAN_DISTANCE;
-        auto context = context_.Upgrade();
-        if (context && (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN)) {
-            distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
-        }
-        panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distance);
+        panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(
+            DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
 
         panRecognizerNG_->SetOnActionStart(actionStart);
         panRecognizerNG_->SetOnActionUpdate(actionUpdate);
         panRecognizerNG_->SetOnActionEnd(actionEnd);
         panRecognizerNG_->SetOnActionCancel(actionCancel);
     } else {
-        panRecognizer_ =
-            AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+        panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(
+            context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
         panRecognizer_->SetOnActionStart(actionStart);
         panRecognizer_->SetOnActionUpdate(actionUpdate);
         panRecognizer_->SetOnActionEnd(actionEnd);
@@ -302,15 +297,15 @@ void Scrollable::HandleTouchCancel()
 bool Scrollable::IsAnimationNotRunning() const
 {
     return !isTouching_ && !controller_->IsRunning() && !springController_->IsRunning() &&
-        !scrollSnapController_->IsRunning();
+           !scrollSnapController_->IsRunning();
 }
 
 bool Scrollable::Idle() const
 {
     return !isTouching_ && (controller_->IsStopped() || controller_->GetStatus() == Animator::Status::IDLE) &&
-        (springController_->IsStopped() || springController_->GetStatus() == Animator::Status::IDLE) &&
-        (scrollSnapController_->IsStopped() || scrollSnapController_->GetStatus() == Animator::Status::IDLE) &&
-        (snapController_->IsStopped() || snapController_->GetStatus() == Animator::Status::IDLE);
+           (springController_->IsStopped() || springController_->GetStatus() == Animator::Status::IDLE) &&
+           (scrollSnapController_->IsStopped() || scrollSnapController_->GetStatus() == Animator::Status::IDLE) &&
+           (snapController_->IsStopped() || snapController_->GetStatus() == Animator::Status::IDLE);
 }
 
 bool Scrollable::IsStopped() const
@@ -563,13 +558,13 @@ ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState
     if (NearZero(offset) || !NearZero(backOverOffset)) {
         ExecuteScrollFrameBegin(offset, scrollState);
     } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::PARENT_FIRST) ||
-        (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARENT_FIRST))) {
+                             (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARENT_FIRST))) {
         result = HandleScrollParentFirst(offset, source, state);
     } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::SELF_FIRST) ||
-        (offset > 0 && nestedOpt_.backward == NestedScrollMode::SELF_FIRST))) {
+                             (offset > 0 && nestedOpt_.backward == NestedScrollMode::SELF_FIRST))) {
         result = HandleScrollSelfFirst(offset, source, state);
     } else if (parent && ((offset < 0 && nestedOpt_.forward == NestedScrollMode::PARALLEL) ||
-        (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARALLEL))) {
+                             (offset > 0 && nestedOpt_.backward == NestedScrollMode::PARALLEL))) {
         result = HandleScrollParallel(offset, source, state);
     } else {
         result = HandleScrollSelfOnly(offset, source, state);

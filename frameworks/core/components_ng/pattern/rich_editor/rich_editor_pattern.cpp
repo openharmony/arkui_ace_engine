@@ -43,6 +43,7 @@ namespace {
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_IMAGE_SIZE = 57.0f;
+constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 } // namespace
 RichEditorPattern::RichEditorPattern() {}
 
@@ -575,7 +576,13 @@ bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
 {
     bool success = false;
     success = SetCaretPosition(caretPosition);
-    StartTwinkling();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (focusHub->IsCurrentFocus()) {
+        StartTwinkling();
+    }
     return success;
 }
 
@@ -674,14 +681,14 @@ void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpan
     CHECK_NULL_VOID(host);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     if (updateSpanStyle_.updateImageWidth.has_value() || updateSpanStyle_.updateImageHeight.has_value()) {
-        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(imageStyle.size.value().width.Value()), CalcLength(imageStyle.size.value().height.Value())));
+        imageLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(imageStyle.size.value().width), CalcLength(imageStyle.size.value().height)));
     }
     if (updateSpanStyle_.updateImageFit.has_value()) {
-        imageLayoutProperty->UpdateVerticalAlign(imageStyle.verticalAlign.value());
+        imageLayoutProperty->UpdateImageFit(imageStyle.objectFit.value());
     }
     if (updateSpanStyle_.updateImageVerticalAlign.has_value()) {
-        imageLayoutProperty->UpdateImageFit(imageStyle.objectFit.value());
+        imageLayoutProperty->UpdateVerticalAlign(imageStyle.verticalAlign.value());
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
@@ -889,6 +896,9 @@ void RichEditorPattern::OnVisibleChange(bool isVisible)
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
     if (forceClose) {
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+            return CloseCustomKeyboard();
+        }
 #if defined(ENABLE_STANDARD_INPUT)
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (!imeAttached_) {
@@ -918,10 +928,22 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (isMousePressed_) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         // prevent long press event from being triggered when dragging
+#ifdef ENABLE_DRAG_FRAMEWORK
+        gestureHub->SetIsTextDraggable(true);
+#endif
         return;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    gestureHub->SetIsTextDraggable(false);
+#endif
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -929,8 +951,6 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     InitSelection(textOffset);
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1205,6 +1225,9 @@ bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartT
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(needShowSoftKeyboard, false);
+    if (needShowSoftKeyboard && customKeyboardBulder_) {
+        return RequestCustomKeyboard();
+    }
 #if defined(ENABLE_STANDARD_INPUT)
     if (!EnableStandardInput(needShowSoftKeyboard)) {
         return false;
@@ -1292,6 +1315,37 @@ bool RichEditorPattern::HasConnection() const
 #endif
 }
 
+bool RichEditorPattern::RequestCustomKeyboard()
+{
+    if (isCustomKeyboardAttached_) {
+        return true;
+    }
+    CHECK_NULL_RETURN(customKeyboardBulder_, false);
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->BindKeyboard(customKeyboardBulder_, frameNode->GetId());
+    isCustomKeyboardAttached_ = true;
+    return true;
+}
+
+bool RichEditorPattern::CloseCustomKeyboard()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->DestroyKeyboard();
+    isCustomKeyboardAttached_ = false;
+    return true;
+}
+
 void RichEditorPattern::InsertValue(const std::string& insertValue)
 {
     bool isSelector = false;
@@ -1376,6 +1430,7 @@ void RichEditorPattern::CreateTextSpanNode(
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
+    spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
     spanNode->UpdateContent(insertValue);
     AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true);
 }
@@ -1398,19 +1453,23 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     moveLength_ += insertValueLength;
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto contentLength = StringUtils::ToWstring(spanNode->GetSpanItem()->content).length();
-    auto spanEnd = spanNode->GetSpanItem()->position + insertValueLength;
-    auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     retInfo.SetSpanIndex(host->GetChildIndex(spanNode));
-    retInfo.SetSpanRangeStart(spanStart);
-    retInfo.SetSpanRangeEnd(spanEnd);
     retInfo.SetEraseLength(insertValueLength);
     retInfo.SetValue(spanNode->GetSpanItem()->content);
+    auto contentLength = StringUtils::ToWstring(spanNode->GetSpanItem()->content).length();
     if (isCreate) {
+        auto spanEnd = GetCaretPosition() + 1;
+        auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
+        retInfo.SetSpanRangeStart(spanStart);
+        retInfo.SetSpanRangeEnd(spanEnd);
         retInfo.SetOffsetInSpan(0);
     } else {
+        auto spanEnd = spanNode->GetSpanItem()->position;
+        auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
+        retInfo.SetSpanRangeStart(spanStart);
+        retInfo.SetSpanRangeEnd(spanEnd);
         retInfo.SetOffsetInSpan(GetCaretPosition() - retInfo.GetSpanRangeStart());
     }
     retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
@@ -1800,6 +1859,19 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            LOGI("Handle mouse right button press");
+            isMousePressed_ = true;
+        }
+        if (info.GetAction() == MouseAction::RELEASE) {
+            LOGI("Handle mouse right button release");
+            rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
+                static_cast<float>(info.GetGlobalLocation().GetY()));
+            ShowSelectOverlay(RectF(), RectF());
+        }
+        return;
+    }
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
@@ -2052,6 +2124,10 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         if (!pattern->IsUsingMouse()) {
             selectInfo.firstHandle.paintRect = firstHandle;
             selectInfo.secondHandle.paintRect = secondHandle;
+        } else {
+            selectInfo.isUsingMouse = true;
+            selectInfo.rightClickOffset = pattern->GetRightClickOffset();
+            pattern->ResetIsMousePressed();
         }
         selectInfo.onHandleMove = [weak](const RectF& handleRect, bool isFirst) {
             auto pattern = weak.Upgrade();
@@ -2066,8 +2142,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
 
         auto host = pattern->GetHost();
         CHECK_NULL_VOID_NOLOG(host);
-
-        selectInfo.isUsingMouse = pattern->IsUsingMouse();
 
         pattern->UpdateSelectMenuInfo(hasData, selectInfo);
         selectInfo.menuCallback.onCopy = [weak]() {
@@ -2145,12 +2219,12 @@ void RichEditorPattern::ResetAfterPaste()
 {
     SetCaretSpanIndex(-1);
     StartTwinkling();
+    CloseSelectOverlay();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         auto length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         textSelector_.Update(-1, -1);
         DeleteForward(length);
-        CloseSelectOverlay();
         ResetSelection();
     }
 }
