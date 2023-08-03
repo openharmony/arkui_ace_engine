@@ -47,6 +47,7 @@ const float DEFAULT_SPLIT_HEIGHT = 2.0f;
 const int32_t FIVE_ITEM_SIZE = 5;
 const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
+constexpr int32_t PLATFORM_VERSION_10 = 10;
 } // namespace
 
 class LinearSplitPatternTestNg : public testing::Test {
@@ -364,6 +365,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
      */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
     model.SetResizeable(SplitType::COLUMN_SPLIT, true);
@@ -557,6 +559,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. Create rowSplit and initialize related properties.
      */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
     LinearSplitModelNG model;
     model.Create(SplitType::ROW_SPLIT);
     model.SetResizeable(SplitType::ROW_SPLIT, true);
@@ -739,6 +742,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
      */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
     model.SetResizeable(SplitType::COLUMN_SPLIT, true);
