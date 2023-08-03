@@ -207,9 +207,6 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         auto titleClickEvent = [func = std::move(titleSwitchEvent)](const GestureEvent& /* info */) { func(); };
         auto titleButtonNode = AceType::DynamicCast<FrameNode>(buttonTitleNode->GetFirstChild());
         CHECK_NULL_RETURN(titleButtonNode, nullptr);
-        auto titleButtonEventHub = titleButtonNode->GetEventHub<ButtonEventHub>();
-        CHECK_NULL_RETURN(titleButtonEventHub, nullptr);
-        titleButtonEventHub->SetStateEffect(false);
         auto titleEventHub = titleButtonNode->GetOrCreateGestureEventHub();
         auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(titleClickEvent));
         titleEventHub->AddClickEvent(onClick);
@@ -1000,7 +997,6 @@ void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleButt
         CHECK_NULL_VOID(buttonTitleNode);
         auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
         buttonTitleRenderContext->UpdateBackgroundColor(color);
-        buttonTitleNode->MarkModifyDone();
         buttonTitleNode->MarkDirtyNode();
     });
 }
