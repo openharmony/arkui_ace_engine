@@ -26,6 +26,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
+#include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -211,6 +212,9 @@ TextFieldPattern::~TextFieldPattern()
         connection_->Close(GetInstanceId());
         connection_ = nullptr;
 #endif
+    }
+    if (isCustomKeyboardAttached_) {
+        CloseCustomKeyboard();
     }
 }
 
@@ -4685,11 +4689,14 @@ bool TextFieldPattern::OnBackPressed()
 {
     LOGI("Textfield %{public}d receives back press event", GetHost()->GetId());
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!imeAttached_ || (imeAttached_ && !imeShown_)) {
+    if ((!imeAttached_ || (imeAttached_ && !imeShown_)) && !isCustomKeyboardAttached_) {
+#else
+    if (!isCustomKeyboardAttached_) {
+#endif
         LOGI("Ime is not attached or is hidden, return for not consuming the back press event");
         return false;
     }
-#endif
+
     LOGI("Closing keyboard on back press");
     CloseKeyboard(true);
 #if defined(ANDROID_PLATFORM)
@@ -5698,17 +5705,27 @@ void TextFieldPattern::StopEditing()
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (GetImeAttached() || isCustomKeyboardAttached_) {
+#else
+    if (isCustomKeyboardAttached_) {
+#endif
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnEditChanged(false);
     }
-#endif
     HandleSetSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
     StopTwinkling();
     MarkRedrawOverlay();
     CloseSelectOverlay();
     CloseKeyboard(true);
+}
+
+void TextFieldPattern::DumpInfo()
+{
+    if (customKeyboardBulder_) {
+        DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
+            .append(", Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
+    }
 }
 } // namespace OHOS::Ace::NG

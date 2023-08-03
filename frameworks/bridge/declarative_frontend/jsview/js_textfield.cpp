@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -39,7 +40,6 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
-#include "base/log/ace_scoring_log.h"
 
 namespace OHOS::Ace {
 
@@ -1048,8 +1048,8 @@ void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
 }
 
-bool JSTextField::ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info,
-    int32_t index, std::function<void()>& buildFunc)
+bool JSTextField::ParseJsCustomKeyboardBuilder(
+    const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc)
 {
     if (info.Length() <= index) {
         return false;
@@ -1078,7 +1078,7 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
-    std::function<void()>buildFunc;
+    std::function<void()> buildFunc;
     if (ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
         TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
     }

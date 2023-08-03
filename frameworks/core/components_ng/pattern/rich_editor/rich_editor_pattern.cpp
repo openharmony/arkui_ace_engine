@@ -16,6 +16,7 @@
 
 #include <chrono>
 
+#include "base/log/dump_log.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -45,7 +46,12 @@ constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 } // namespace
 RichEditorPattern::RichEditorPattern() {}
 
-RichEditorPattern::~RichEditorPattern() {}
+RichEditorPattern::~RichEditorPattern()
+{
+    if (isCustomKeyboardAttached_) {
+        CloseCustomKeyboard();
+    }
+}
 
 void RichEditorPattern::OnModifyDone()
 {
@@ -2270,5 +2276,13 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
     textFieldManager->SetClickPosition(offset);
     textFieldManager->SetHeight(height);
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
+}
+
+void RichEditorPattern::DumpInfo()
+{
+    if (customKeyboardBulder_) {
+        DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
+            .append(", Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
+    }
 }
 } // namespace OHOS::Ace::NG
