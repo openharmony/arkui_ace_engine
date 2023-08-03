@@ -117,6 +117,16 @@ public:
         transitionStatus_ = transitionStatus;
     }
 
+    void SetSkipHotArea(bool skip)
+    {
+        skipHotArea_ = skip;
+    }
+
+    bool IsSkipHotArea() const
+    {
+        return skipHotArea_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -163,6 +173,7 @@ private:
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
     bool delayShow_ = false;
+    bool skipHotArea_ = false;
 
     std::optional<OffsetF> targetOffset_;
     std::optional<SizeF> targetSize_;

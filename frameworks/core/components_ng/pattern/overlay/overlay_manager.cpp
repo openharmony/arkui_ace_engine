@@ -572,6 +572,9 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
     CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
+    auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSkipHotArea(true);
 
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
