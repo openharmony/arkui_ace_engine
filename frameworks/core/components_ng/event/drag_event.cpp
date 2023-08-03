@@ -562,7 +562,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     auto offsetX = GetFloatImageOffset(frameNode).GetX();
     auto offsetY = GetFloatImageOffset(frameNode).GetY();
     // Check web tag.
-    if (frameNode->GetTag() != V2::WEB_ETS_TAG && pipelineContext->HasFloatTitle()) {
+    if (pipelineContext->HasFloatTitle()) {
         offsetX -= static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
         offsetY -= static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx());
     }
