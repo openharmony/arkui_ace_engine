@@ -37,7 +37,6 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     auto layoutProperty = select->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetSelectDefaultHeight())));
 }
 } // namespace
 
