@@ -546,6 +546,7 @@ private:
     int32_t TotalDisPlayCount() const;
     void StopAndResetSpringAnimation();
     void OnLoopChange();
+    void StopSpringAnimationAndFlushImmediately();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

@@ -54,6 +54,7 @@ constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
 constexpr Dimension SWIPER_MARGIN = 16.0_vp;
 constexpr Dimension SWIPER_GUTTER = 16.0_vp;
+constexpr float PX_EPSILON = 0.01f;
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -637,12 +638,34 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     if (IsChildrenSizeLessThanSwiper()) {
         return;
     }
+
+    if (usePropertyAnimation_) {
+        StopPropertyTranslateAnimation();
+    }
+
     StopFadeAnimation();
     StopSpringAnimation();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     jumpIndex_ = index;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void SwiperPattern::StopSpringAnimationAndFlushImmediately()
+{
+    if (springController_ && !springController_->IsStopped()) {
+        springController_->Stop();
+        currentDelta_ = 0.0f;
+        itemPosition_.clear();
+        jumpIndex_ = currentIndex_;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+    }
 }
 
 void SwiperPattern::SwipeTo(int32_t index)
@@ -716,6 +739,9 @@ void SwiperPattern::ShowNext()
     StopAutoPlay();
     StopTranslateAnimation();
 
+    StopSpringAnimationAndFlushImmediately();
+    StopFadeAnimation();
+
     if (indicatorController_) {
         indicatorController_->Stop();
     }
@@ -766,6 +792,8 @@ void SwiperPattern::ShowPrevious()
     }
     StopAutoPlay();
     StopTranslateAnimation();
+    StopSpringAnimationAndFlushImmediately();
+    StopFadeAnimation();
 
     if (indicatorController_) {
         indicatorController_->Stop();
@@ -1876,11 +1904,16 @@ bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
     if (IsLoop() || itemPosition_.empty()) {
         return false;
     }
-    auto isOutOfStart =
-        itemPosition_.begin()->first == 0 && GreatNotEqual(itemPosition_.begin()->second.startPos + mainOffset, 0.0);
+
+    auto startPos = itemPosition_.begin()->second.startPos;
+    startPos = NearZero(startPos, PX_EPSILON) ? 0.0 : startPos;
+    auto isOutOfStart = itemPosition_.begin()->first == 0 && GreatNotEqual(startPos + mainOffset, 0.0);
+
     auto visibleWindowSize = CalculateVisibleSize();
-    auto isOutOfEnd = itemPosition_.rbegin()->first == TotalCount() - 1 &&
-                      LessNotEqual(itemPosition_.rbegin()->second.endPos + mainOffset, visibleWindowSize);
+    auto endPos = itemPosition_.rbegin()->second.endPos + mainOffset;
+    endPos = NearEqual(endPos, visibleWindowSize, PX_EPSILON) ? visibleWindowSize : endPos;
+    auto isOutOfEnd = itemPosition_.rbegin()->first == TotalCount() - 1 && LessNotEqual(endPos, visibleWindowSize);
+
     return isOutOfStart || isOutOfEnd;
 }
 
