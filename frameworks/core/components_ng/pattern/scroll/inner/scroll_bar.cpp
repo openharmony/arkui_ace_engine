@@ -396,6 +396,7 @@ void ScrollBar::SetHoverEvent()
             scrollBar->SetHover(false);
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
+                scrollBar->ScheduleDisapplearDelayTask();
             }
         }
     });
