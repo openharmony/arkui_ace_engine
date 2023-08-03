@@ -331,21 +331,9 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     }
 }
 
-void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
+void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        if (IsDragged() && IsWindowConsumed()) {
-            LOGD("The event does not need to be handled");
-            return;
-        }
-    }
-#endif // ENABLE_DRAG_FRAMEWORK
-    UpdateVelocityTrackerPoint(point, false);
-
-    auto dragFrameNode = FindDragFrameNodeByPosition(
-        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON, false);
+    CHECK_NULL_VOID(dragFrameNode);
     if (SystemProperties::GetDebugEnabled()) {
         if (preTargetFrameNode_) {
             LOGI("Position is %{public}f and %{public}f.",
@@ -362,6 +350,25 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
                 dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth());
         }
     }
+}
+
+void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
+{
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        if (IsDragged() && IsWindowConsumed()) {
+            LOGD("The event does not need to be handled");
+            SetIsWindowConsumed(false);
+            return;
+        }
+    }
+    SetIsWindowConsumed(false);
+#endif // ENABLE_DRAG_FRAMEWORK
+    UpdateVelocityTrackerPoint(point, false);
+    auto dragFrameNode = FindDragFrameNodeByPosition(
+        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON, false);
+    PrintDragFrameNode(point, dragFrameNode);
     if (!dragFrameNode) {
         if (preTargetFrameNode_) {
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
@@ -385,7 +392,6 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
         }
     }
-
     FireOnDragEvent(dragFrameNode, point, DragEventType::ENTER, extraInfo);
     preTargetFrameNode_ = dragFrameNode;
 }
