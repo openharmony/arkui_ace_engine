@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #define private public
+#define protected public
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -31,6 +32,7 @@
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_ng/test/pattern/test_ng.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
@@ -65,6 +67,9 @@ public:
 void RefreshTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RefreshTheme>()));
 }
 
 void RefreshTestNg::TearDownTestCase()
