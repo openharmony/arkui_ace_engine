@@ -128,6 +128,10 @@ public:
         layoutAlgorithm->SetIndicator(indicator_);
         layoutAlgorithm->SetIsBuilder(IsContainsBuilder());
         layoutAlgorithm->SetTabBarStyle(tabBarStyle_);
+        if (needSetCentered_) {
+            layoutAlgorithm->SetNeedSetCentered();
+            needSetCentered_ = false;
+        }
         return layoutAlgorithm;
     }
 
@@ -391,6 +395,7 @@ private:
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
+    bool needSetCentered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG
