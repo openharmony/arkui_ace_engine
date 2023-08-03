@@ -72,8 +72,7 @@ public:
     void GetUseCustomDropAnimation(const JSCallbackInfo& args);
     void SetDragInfo(const JSCallbackInfo& args);
     void GetDragInfo(const JSCallbackInfo& args);
-    void SetDragBehavior(const JSCallbackInfo& args);
-    void GetDragBehavior(const JSCallbackInfo& args);
+    void DragBehavior(const JSCallbackInfo& args);
 #endif
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent)
     {
