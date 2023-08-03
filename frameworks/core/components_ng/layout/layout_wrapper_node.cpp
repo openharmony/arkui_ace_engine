@@ -59,7 +59,7 @@ void LayoutWrapperNode::AppendChild(const RefPtr<LayoutWrapperNode>& child, bool
 }
 RefPtr<LayoutWrapper> LayoutWrapperNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
 {
-    if ((index >= currentChildCount_) || (index < 0)) {
+    if ((index >= static_cast<uint32_t>(currentChildCount_)) || (index < 0)) {
         LOGD("index is of out boundary, total count: %{public}d, target index: %{public}d", currentChildCount_, index);
         return nullptr;
     }
