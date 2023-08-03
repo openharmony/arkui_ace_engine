@@ -156,6 +156,7 @@ public:
         auto keyIter = cachedItems_.find(index);
         if (keyIter != cachedItems_.end()) {
             auto iter = generatedItem_.find(keyIter->second);
+            cachedItems_.erase(keyIter);
             if (iter != generatedItem_.end()) {
                 expiringItem_.try_emplace(iter->first, std::move(iter->second));
                 generatedItem_.erase(iter);
@@ -205,8 +206,8 @@ public:
             auto iter = generatedItem_.find(keyIter->second);
             if (iter != generatedItem_.end()) {
                 child = iter->second;
-                expiringItem_.try_emplace(iter->first, std::move(iter->second));
                 iter->second->SetJSViewActive(false);
+                expiringItem_.try_emplace(iter->first, std::move(iter->second));
                 generatedItem_.erase(iter);
             }
         }
