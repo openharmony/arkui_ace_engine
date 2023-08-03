@@ -745,30 +745,31 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("Start handle onDragEnd.");
     }
-    auto eventHub = eventHub_.Upgrade();
-    CHECK_NULL_VOID(eventHub);
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    if (pipeline && (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN)) {
+        auto eventHub = eventHub_.Upgrade();
+        CHECK_NULL_VOID(eventHub);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+        auto frameNode = GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
 
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-
-    // Only the onDrop callback of dragged frame node is triggered.
-    // The onDrop callback of target frame node is triggered in PipelineContext::OnDragEvent.
-    if (eventHub->HasOnDrop()) {
-        RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-        if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-            LOGI("web on drag end");
-            event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-            event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
-        } else {
-            event->SetX(info.GetGlobalPoint().GetX());
-            event->SetY(info.GetGlobalPoint().GetY());
+        // Only the onDrop callback of dragged frame node is triggered.
+        // The onDrop callback of target frame node is triggered in PipelineContext::OnDragEvent.
+        if (eventHub->HasOnDrop()) {
+            RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+            if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+                LOGI("web on drag end");
+                event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+                event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+            } else {
+                event->SetX(info.GetGlobalPoint().GetX());
+                event->SetY(info.GetGlobalPoint().GetY());
+            }
+            event->SetScreenX(info.GetScreenLocation().GetX());
+            event->SetScreenY(info.GetScreenLocation().GetY());
+            eventHub->FireOnDrop(event, "");
         }
-        event->SetScreenX(info.GetScreenLocation().GetX());
-        event->SetScreenY(info.GetScreenLocation().GetY());
-        eventHub->FireOnDrop(event, "");
     }
 
     CHECK_NULL_VOID(dragDropProxy_);
