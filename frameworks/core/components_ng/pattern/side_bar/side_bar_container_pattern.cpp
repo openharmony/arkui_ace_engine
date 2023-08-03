@@ -41,7 +41,6 @@ constexpr int32_t SLIDE_TRANSLATE_DURATION = 400;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM = 2;
 constexpr float RATIO_NEGATIVE = -1.0f;
 constexpr float RATIO_ZERO = 0.0f;
-constexpr float DEFAULT_HALF = 2.0f;
 constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
@@ -216,6 +215,27 @@ RefPtr<FrameNode> SideBarContainerPattern::GetControlImageNode() const
     return AceType::DynamicCast<FrameNode>(imageNode);
 }
 
+RefPtr<FrameNode> SideBarContainerPattern::GetDividerNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto children = host->GetChildren();
+    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
+        LOGE("GetDividerNode: children's size is less than 3.");
+        return nullptr;
+    }
+
+    auto begin = children.rbegin();
+    auto dividerNode = *(++begin);
+    CHECK_NULL_RETURN(dividerNode, nullptr);
+    if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
+        LOGE("GetDividerNode: Get divider failed.");
+        return nullptr;
+    }
+
+    return AceType::DynamicCast<FrameNode>(dividerNode);
+}
+
 void SideBarContainerPattern::OnUpdateSideBarAndContent(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
@@ -291,14 +311,15 @@ void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragEnd();
     };
 
-    if (dragEvent_) {
-        gestureHub->RemovePanEvent(dragEvent_);
-    }
-
     dragEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    gestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerGestureHub = dividerNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dividerGestureHub);
+    dividerGestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void SideBarContainerPattern::InitSideBar()
@@ -567,7 +588,8 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     auto layoutAlgorithm = DynamicCast<SideBarContainerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
 
-    UpdateResponseRegion(layoutAlgorithm);
+    realDividerWidth_ = layoutAlgorithm->GetRealDividerWidth();
+    realSideBarWidth_ = layoutAlgorithm->GetRealSideBarWidth();
     AddDividerHotZoneRect(layoutAlgorithm);
 
     if (needInitRealSideBarWidth_) {
@@ -586,61 +608,6 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return paddingProperty != nullptr;
-}
-
-void SideBarContainerPattern::UpdateResponseRegion(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm)
-{
-    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    auto scaleProperty = constraint->scaleProperty;
-    auto halfDragRegionWidth = ConvertToPx(DEFAULT_DRAG_REGION, scaleProperty).value_or(0);
-    auto dragRegionWidth = halfDragRegionWidth * 2;
-
-    CHECK_NULL_VOID(layoutAlgorithm);
-    realDividerWidth_ = layoutAlgorithm->GetRealDividerWidth();
-    auto halfRealDividerWidth = 0.0f;
-    if (realDividerWidth_ > 0.0f) {
-        halfRealDividerWidth = realDividerWidth_ / DEFAULT_HALF;
-    }
-    halfDragRegionWidth += halfRealDividerWidth;
-    dragRegionWidth += realDividerWidth_;
-    realSideBarWidth_ = layoutAlgorithm->GetRealSideBarWidth();
-    auto dragRegionHeight = layoutAlgorithm->GetRealSideBarHeight();
-    auto dragRectOffset = layoutAlgorithm->GetSideBarOffset();
-
-    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
-    if (sideBarPosition == SideBarPosition::START) {
-        dragRectOffset.SetX(dragRectOffset.GetX() + halfRealDividerWidth + realSideBarWidth_ - halfDragRegionWidth);
-    } else {
-        dragRectOffset.SetX(dragRectOffset.GetX() - halfDragRegionWidth);
-    }
-
-    dragRect_.SetOffset(dragRectOffset);
-    dragRect_.SetSize(SizeF(dragRegionWidth, dragRegionHeight));
-
-    auto eventHub = GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-
-    gestureEventHub->MarkResponseRegion(true);
-    std::vector<DimensionRect> responseRegion;
-    DimensionOffset responseOffset(dragRectOffset);
-    DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
-        Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
-    responseRegion.emplace_back(responseRect);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameRect = geometryNode->GetFrameRect();
-    DimensionRect responseRectAll(Dimension(frameRect.Width(), DimensionUnit::PX),
-        Dimension(frameRect.Height(), DimensionUnit::PX), DimensionOffset());
-    responseRegion.emplace_back(responseRectAll);
-
-    gestureEventHub->SetResponseRegion(responseRegion);
 }
 
 void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm)
@@ -666,25 +633,28 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto children = host->GetChildren();
-    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("AddDividerHotZoneRect: children's size is less than 3.");
-        return;
-    }
+    std::vector<DimensionRect> mouseRegion;
+    mouseRegion.emplace_back(hotZoneRegion);
 
-    auto begin = children.rbegin();
-    auto dividerNode = *(++begin);
-    CHECK_NULL_VOID(dividerNode);
-    if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
-        LOGE("AddDividerHotZoneRect: Get divider failed.");
-        return;
-    }
-
-    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(dividerNode);
+    auto dividerFrameNode = GetDividerNode();
     CHECK_NULL_VOID(dividerFrameNode);
-    dividerFrameNode->AddHotZoneRect(hotZoneRegion);
+    auto dividerGestureHub = dividerFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dividerGestureHub);
+    dividerGestureHub->SetMouseResponseRegion(mouseRegion);
+
+    auto dragRegionHeight = layoutAlgorithm->GetRealSideBarHeight();
+    auto dragRectOffset = layoutAlgorithm->GetSideBarOffset();
+    dragRectOffset.SetX(-DEFAULT_DRAG_REGION.ConvertToPx());
+    dragRect_.SetOffset(dragRectOffset);
+    dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * 2 + realDividerWidth_, dragRegionHeight));
+
+    std::vector<DimensionRect> responseRegion;
+    DimensionOffset responseOffset(dragRectOffset);
+    DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
+        Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
+    responseRegion.emplace_back(responseRect);
+    dividerGestureHub->MarkResponseRegion(true);
+    dividerGestureHub->SetResponseRegion(responseRegion);
 }
 
 void SideBarContainerPattern::HandleDragStart()
