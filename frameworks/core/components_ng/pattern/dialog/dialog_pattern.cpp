@@ -79,7 +79,16 @@ constexpr char DIALOG_BUTTONS_CONTAINER_ID[] = "__container__";
 constexpr char DIALOG_DIVIDER_ID[] = "Dialog_Divider";
 constexpr char DIALOG_BUTTON0_ID[] = "Button0";
 constexpr char DIALOG_BUTTON1_ID[] = "Button1";
-
+constexpr uint32_t DIALOG_TITLE_MAXLINES = 1;
+constexpr Dimension DIALOG_ONE_TITLE_ALL_HEIGHT = 56.0_vp;
+constexpr Dimension DIALOG_TITLE_CONTENT_HEIGHT = 35.0_px;
+constexpr int32_t DIALOG_TITLE_AVE_BY_2 = 2;
+constexpr Dimension DIALOG_CONTENT_PADDING_TOP = 0.0_vp;
+constexpr Dimension DIALOG_SUBTITLE_PADDING_LEFT = 24.0_vp;
+constexpr Dimension DIALOG_SUBTITLE_PADDING_RIGHT = 24.0_vp;
+constexpr Dimension DIALOG_TWO_TITLE_ZERO_SPACE = 0.0_vp;
+constexpr Dimension DIALOG_TWO_TITLE_SPACE = 16.0_vp;
+constexpr float BUTTON_TEXT_OPACITY = 0.6f; // [Button Component Defect]
 } // namespace
 
 void DialogPattern::OnModifyDone()
@@ -156,15 +165,19 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 }
 
 // set render context properties of content frame
-void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode)
+void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props)
 {
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
-    contentRenderContext->UpdateBackgroundColor(dialogTheme_->GetBackgroundColor());
+    contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(dialogTheme_->GetBackgroundColor()));
 
-    BorderRadiusProperty radius;
-    radius.SetRadius(dialogTheme_->GetRadius().GetX());
-    contentRenderContext->UpdateBorderRadius(radius);
+    if (props.borderRadius.has_value()) {
+        contentRenderContext->UpdateBorderRadius(props.borderRadius.value());
+    } else {
+        BorderRadiusProperty radius;
+        radius.SetRadius(dialogTheme_->GetRadius().GetX());
+        contentRenderContext->UpdateBorderRadius(radius);
+    }
     contentRenderContext->SetClipToBounds(true);
 }
 
@@ -177,7 +190,8 @@ RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dial
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
     // If title not exist, set scroll align center so that text align center.
-    if (dialogProps.title.empty() || SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+    if ((dialogProps.title.empty() && dialogProps.subtitle.empty()) ||
+        SystemProperties::GetDeviceType() == DeviceType::WATCH) {
         props->UpdateAlignSelf(FlexAlign::CENTER);
     } else {
         props->UpdateAlignSelf(FlexAlign::FLEX_START);
@@ -195,7 +209,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(contentWrapper);
         if (!props.customStyle) {
-            UpdateContentRenderContext(contentWrapper);
+            UpdateContentRenderContext(contentWrapper, props);
         }
         customNode_->MountToParent(contentWrapper);
         auto dialog = GetHost();
@@ -208,7 +222,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(contentColumn);
 
-    if (!props.title.empty()) {
+    if (!props.title.empty() || !props.subtitle.empty()) {
         auto title = BuildTitle(props);
         CHECK_NULL_VOID(title);
         contentColumn->AddChild(title);
@@ -226,7 +240,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     }
 
     if (!props.customStyle) {
-        UpdateContentRenderContext(contentColumn);
+        UpdateContentRenderContext(contentColumn, props);
     }
 
     auto columnProp = AceType::DynamicCast<LinearLayoutProperty>(contentColumn->GetLayoutProperty());
@@ -266,18 +280,18 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     contentColumn->MountToParent(dialog);
 }
 
-RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProperties)
+RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
 {
-    // Make Title node
     auto title = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(title->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
-    titleProp->UpdateMaxLines(dialogTheme_->GetTitleMaxLines());
+    titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     titleProp->UpdateAdaptMaxFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
-    titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleMinFontSize());
-    titleProp->UpdateContent(dialogProperties.title);
+    titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
+    std::string titleContent = dialogProperties.title.empty() ? dialogProperties.subtitle : dialogProperties.title;
+    titleProp->UpdateContent(titleContent);
     auto titleStyle = dialogTheme_->GetTitleTextStyle();
     titleProp->UpdateFontSize(titleStyle.GetFontSize());
     titleProp->UpdateTextColor(titleStyle.GetTextColor());
@@ -287,23 +301,88 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
                               : dialogTheme_->GetTitleAdjustPadding();
     titlePadding.left = CalcLength(paddingInTheme.Left());
     titlePadding.right = CalcLength(paddingInTheme.Right());
-    titlePadding.top = CalcLength(paddingInTheme.Top());
-    titlePadding.bottom = CalcLength(paddingInTheme.Bottom());
+    if (!dialogProperties.title.empty() && !dialogProperties.subtitle.empty()) {
+        titlePadding.top = CalcLength(DIALOG_TWO_TITLE_SPACE);
+        titlePadding.bottom = CalcLength(DIALOG_TWO_TITLE_ZERO_SPACE);
+    } else {
+        titlePadding.top = CalcLength(
+            (DIALOG_ONE_TITLE_ALL_HEIGHT - Dimension(DIALOG_TITLE_CONTENT_HEIGHT.ConvertToVp(), DimensionUnit::VP)) /
+            DIALOG_TITLE_AVE_BY_2);
+        titlePadding.bottom = CalcLength(
+            (DIALOG_ONE_TITLE_ALL_HEIGHT - Dimension(DIALOG_TITLE_CONTENT_HEIGHT.ConvertToVp(), DimensionUnit::VP)) /
+            DIALOG_TITLE_AVE_BY_2);
+    }
     titleProp->UpdatePadding(titlePadding);
 
     // XTS inspector value
     title_ = dialogProperties.title;
+    subtitle_ = dialogProperties.subtitle;
 
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    CHECK_NULL_RETURN(row, nullptr);
-    auto rowProps = row->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(rowProps, nullptr);
-    rowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    rowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    title->MountToParent(row);
+    CHECK_NULL_RETURN(titleRow, nullptr);
+    auto titleRowProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(titleRowProps, nullptr);
+    titleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    title->MountToParent(titleRow);
     title->MarkModifyDone();
-    return row;
+    return titleRow;
+}
+
+RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogProperties)
+{
+    auto subtitle = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto titleProp = AceType::DynamicCast<TextLayoutProperty>(subtitle->GetLayoutProperty());
+    CHECK_NULL_RETURN(titleProp, nullptr);
+    auto titleStyle = dialogTheme_->GetSubTitleTextStyle();
+    titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
+    titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    titleProp->UpdateAdaptMaxFontSize(titleStyle.GetFontSize());
+    titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
+    titleProp->UpdateContent(dialogProperties.subtitle);
+    titleProp->UpdateFontSize(titleStyle.GetFontSize());
+    titleProp->UpdateTextColor(titleStyle.GetTextColor());
+    PaddingProperty titlePadding;
+    titlePadding.left = CalcLength(DIALOG_SUBTITLE_PADDING_LEFT);
+    titlePadding.right = CalcLength(DIALOG_SUBTITLE_PADDING_RIGHT);
+    titlePadding.top = CalcLength(DIALOG_TWO_TITLE_ZERO_SPACE);
+    titlePadding.bottom = CalcLength(DIALOG_TWO_TITLE_SPACE);
+    titleProp->UpdatePadding(titlePadding);
+
+    // XTS inspector value
+    subtitle_ = dialogProperties.subtitle;
+
+    auto subtitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(subtitleRow, nullptr);
+    auto subtitleRowProps = subtitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(subtitleRowProps, nullptr);
+    subtitleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    subtitle->MountToParent(subtitleRow);
+    subtitle->MarkModifyDone();
+    return subtitleRow;
+}
+
+RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProperties)
+{
+    auto titleRow = BuildMainTitle(dialogProperties);
+    if (!dialogProperties.title.empty() && !dialogProperties.subtitle.empty()) {
+        auto titleColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        CHECK_NULL_RETURN(titleColumn, nullptr);
+        auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(columnProps, nullptr);
+        columnProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+        columnProps->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+        auto subtitleRow = BuildSubTitle(dialogProperties);
+        titleColumn->AddChild(titleRow);
+        titleColumn->AddChild(subtitleRow);
+        return titleColumn;
+    }
+    return titleRow;
 }
 
 RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
@@ -322,17 +401,18 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     LOGD("content = %s", props.content.c_str());
     // update padding
     Edge contentPaddingInTheme;
-    if (!props.title.empty()) {
+    PaddingProperty contentPadding;
+    if (!props.title.empty() || !props.subtitle.empty()) {
         contentPaddingInTheme =
             props.buttons.empty() ? dialogTheme_->GetDefaultPadding() : dialogTheme_->GetAdjustPadding();
+        contentPadding.top = CalcLength(DIALOG_CONTENT_PADDING_TOP);
     } else {
         contentPaddingInTheme =
             props.buttons.empty() ? dialogTheme_->GetContentDefaultPadding() : dialogTheme_->GetContentAdjustPadding();
+        contentPadding.top = CalcLength(contentPaddingInTheme.Top());
     }
-    PaddingProperty contentPadding;
     contentPadding.left = CalcLength(contentPaddingInTheme.Left());
     contentPadding.right = CalcLength(contentPaddingInTheme.Right());
-    contentPadding.top = CalcLength(contentPaddingInTheme.Top());
     contentPadding.bottom = CalcLength(contentPaddingInTheme.Bottom());
     contentProp->UpdatePadding(contentPadding);
 
@@ -384,6 +464,51 @@ void DialogPattern::AnalysisLayoutPropertyOfButton(RefPtr<OHOS::Ace::NG::FrameNo
     }
 }
 
+void DialogPattern::ParseButtonFontColorAndBgColor(
+    const ButtonInfo& params, std::string& textColor, std::optional<Color>& bgColor)
+{
+    // Parse Button Style
+    if (params.dlgButtonStyle.has_value()) {
+        switch (params.dlgButtonStyle.value()) {
+            case DialogButtonStyle::DEFAULT:
+                textColor = dialogTheme_->GetButtonDefaultFontColor().ColorToString();
+                bgColor = dialogTheme_->GetButtonDefaultBgColor();
+                break;
+            case DialogButtonStyle::HIGHTLIGHT:
+                textColor = dialogTheme_->GetButtonHighlightFontColor().ColorToString();
+                bgColor = dialogTheme_->GetButtonHighlightBgColor();
+                break;
+            default:
+                break;
+        }
+    }
+
+    // font color and background color
+    if (!params.textColor.empty()) {
+        textColor = params.textColor;
+    }
+    if (params.isBgColorSetted) {
+        bgColor = params.bgColor;
+    }
+
+    // Parse default focus
+    if (textColor.empty()) {
+        if (params.defaultFocus && isFirstDefaultFocus_) {
+            textColor = dialogTheme_->GetButtonHighlightFontColor().ColorToString();
+        } else {
+            textColor = dialogTheme_->GetButtonDefaultFontColor().ColorToString();
+        }
+    }
+    if (!bgColor.has_value()) {
+        if (params.defaultFocus && isFirstDefaultFocus_) {
+            bgColor = dialogTheme_->GetButtonHighlightBgColor();
+            isFirstDefaultFocus_ = false;
+        } else {
+            bgColor = dialogTheme_->GetButtonDefaultBgColor();
+        }
+    }
+}
+
 RefPtr<FrameNode> DialogPattern::CreateButton(
     const ButtonInfo& params, int32_t index, bool isCancel, bool useRelativeLayout)
 {
@@ -391,11 +516,20 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
     UpdateDialogButtonProperty(buttonNode);
+
+    // parse button text color and background color
+    std::string textColor;
+    std::optional<Color> bgColor;
+    ParseButtonFontColorAndBgColor(params, textColor, bgColor);
+
     // append text inside button
-    auto textNode = CreateButtonText(params.text, params.textColor);
+    auto textNode = CreateButtonText(params.text, textColor);
     CHECK_NULL_RETURN(textNode, nullptr);
+    SetButtonTextOpacity(textNode, params.enabled);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
+
+    SetButtonEnabled(buttonNode, params.enabled);
 
     auto hub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
@@ -433,11 +567,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // update background color
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    if (params.isBgColorSetted) {
-        renderContext->UpdateBackgroundColor(params.bgColor);
-    } else {
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    }
+    renderContext->UpdateBackgroundColor(bgColor.value());
 
     // set flex grow to fill horizontal space
     auto layoutProps = buttonNode->GetLayoutProperty();
@@ -756,6 +886,7 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     CHECK_NULL_VOID(host);
     if (host->GetTag() == V2::ALERT_DIALOG_ETS_TAG || host->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {
         json->Put("title", title_.c_str());
+        json->Put("subtitle", subtitle_.c_str());
         json->Put("message", message_.c_str());
     }
 }
@@ -788,5 +919,24 @@ void DialogPattern::OnColorConfigurationUpdate()
     }
     OnModifyDone();
     host->MarkDirtyNode();
+}
+
+void DialogPattern::SetButtonTextOpacity(const RefPtr<FrameNode>& textNode, bool enabled)
+{
+    auto textNodeRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textNodeRenderContext);
+    // [Button Component Defect] Button text color is no set while disabled status.
+    if (!enabled) {
+        textNodeRenderContext->UpdateOpacity(BUTTON_TEXT_OPACITY);
+    }
+}
+
+void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled)
+{
+    // set Enabled and Focusable
+    auto buttonButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonButtonEvent);
+    buttonButtonEvent->SetEnabled(enabled);
+    buttonNode->GetOrCreateFocusHub()->SetFocusable(enabled);
 }
 } // namespace OHOS::Ace::NG
