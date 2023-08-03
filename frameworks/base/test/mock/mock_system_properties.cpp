@@ -19,7 +19,7 @@
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
-DeviceType SystemProperties::deviceType_ = DeviceType::UNKNOWN;
+DeviceType SystemProperties::deviceType_ = DeviceType::PHONE;
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
@@ -86,7 +86,7 @@ float SystemProperties::GetFontWeightScale()
 
 DeviceType SystemProperties::GetDeviceType()
 {
-    return DeviceType::PHONE;
+    return deviceType_;
 }
 
 bool SystemProperties::GetDebugEnabled()
