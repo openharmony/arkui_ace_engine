@@ -111,10 +111,6 @@ void WindowPattern::InitContent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!IsMainWindow()) {
-        host->AddChild(contentNode_);
-        return;
-    }
 
     auto state = session_->GetSessionState();
     auto bundleName = session_->GetSessionInfo().bundleName_;
