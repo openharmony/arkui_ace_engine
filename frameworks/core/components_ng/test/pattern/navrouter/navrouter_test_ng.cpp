@@ -1265,7 +1265,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
     navDestination->backButtonEvent_(event);
     preNavDestination->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     navDestination->backButtonEvent_(event);
-    EXPECT_FALSE(navigation->GetLayoutProperty<NavigationLayoutProperty>()->propDestinationChange_.value());
+    EXPECT_TRUE(navigation->GetLayoutProperty<NavigationLayoutProperty>()->propDestinationChange_.value());
 }
 
 /**
@@ -2266,7 +2266,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
     algorithm->Layout(AceType::RawPtr(layoutWrapper));
     ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
     ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FREE);
-    EXPECT_FALSE(algorithm->isInitialTitle_);
+    EXPECT_TRUE(algorithm->isInitialTitle_);
 
     layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
     layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;

@@ -154,6 +154,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
     "$ace_root/frameworks/base/test/mock/mock_subwindow_manager.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/base/thread/background_task_executor.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
