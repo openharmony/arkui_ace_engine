@@ -517,6 +517,7 @@ void SelectOverlayNode::MoreAnimation()
     isExtensionMenu_ = true;
 
     extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
+    extensionMenuStatus_ = FrameNodeStatus::VISIBLE;
     AnimationOption extensionOption;
     extensionOption.SetDuration(ANIMATION_DURATION2);
     extensionOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -747,6 +748,7 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
         CHECK_NULL_VOID(extensionMenuContext);
 
         extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        extensionMenuStatus_ = FrameNodeStatus::GONE;
         extensionMenuContext->UpdateOpacity(0.0);
 
         extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
@@ -802,8 +804,10 @@ void SelectOverlayNode::CreateToolBar()
 
     if (info->menuInfo.menuIsShow) {
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        selectMenuStatus_ = FrameNodeStatus::VISIBLE;
     } else {
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        selectMenuStatus_ = FrameNodeStatus::GONE;
     }
 
     selectMenuInner_->MountToParent(selectMenu_);
