@@ -168,7 +168,7 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
         return;
     }
-    if (indicator != indicator_ &&
+    if ((indicator != indicator_ || (indicator == indicator_ && needSetCentered_)) &&
         layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
         if (childrenMainSize_ > frameSize.MainSize(axis) && tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE &&
             axis == Axis::HORIZONTAL) {
@@ -180,6 +180,13 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         indicator_ = indicator;
         auto space = GetSpace(layoutWrapper, indicator, frameSize, axis);
         float frontChildrenMainSize = CalculateFrontChildrenMainSize(layoutWrapper, indicator, axis);
+        if (space < 0.0f) {
+            OffsetF childOffset = (axis == Axis::HORIZONTAL ? OffsetF(-frontChildrenMainSize, 0.0f)
+                                                            : OffsetF(0.0f, -frontChildrenMainSize));
+            currentOffset_ = -frontChildrenMainSize;
+            LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+            return;
+        }
         if (frontChildrenMainSize < space) {
             OffsetF childOffset = OffsetF(0.0f, 0.0f);
             currentOffset_ = 0.0f;
