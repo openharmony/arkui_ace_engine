@@ -85,6 +85,7 @@ public:
         return 1;
     }
 
+    void OnInspectorIdUpdate(const std::string& /*unused*/) override;
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
         {
