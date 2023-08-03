@@ -288,6 +288,7 @@ private:
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
+    bool isDragMoving = false;
 #endif // ENABLE_DRAG_FRAMEWORK
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

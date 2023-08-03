@@ -175,20 +175,30 @@ void SpanItem::UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::opti
         updateTextAction(content, textStyle);
 #ifdef ENABLE_DRAG_FRAMEWORK
     } else {
-        auto beforeSelectedText = content.substr(0, selectedStart);
-        updateTextAction(beforeSelectedText, textStyle);
+        if (content.empty()) {
+            return;
+        }
+        auto displayContent = StringUtils::Str8ToStr16(content);
+        auto contentLength = static_cast<int32_t>(displayContent.length());
+        auto beforeSelectedText = displayContent.substr(0, selectedStart);
+        updateTextAction(StringUtils::Str16ToStr8(beforeSelectedText), textStyle);
 
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        TextStyle normalStyle = !pipelineContext ? TextStyle()
-            : CreateTextStyleUsingTheme(nullptr, nullptr, pipelineContext->GetTheme<TextTheme>());
-        TextStyle selectedTextStyle = textStyle.value_or(normalStyle);
-        Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
-        selectedTextStyle.SetTextColor(color);
-        auto selectedText = content.substr(selectedStart, selectedEnd - selectedStart);
-        updateTextAction(selectedText, selectedTextStyle);
+        if (selectedStart < contentLength) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            TextStyle normalStyle =
+                !pipelineContext ? TextStyle()
+                                 : CreateTextStyleUsingTheme(nullptr, nullptr, pipelineContext->GetTheme<TextTheme>());
+            TextStyle selectedTextStyle = textStyle.value_or(normalStyle);
+            Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
+            selectedTextStyle.SetTextColor(color);
+            auto selectedText = displayContent.substr(selectedStart, selectedEnd - selectedStart);
+            updateTextAction(StringUtils::Str16ToStr8(selectedText), selectedTextStyle);
+        }
 
-        auto afterSelectedText = content.substr(selectedEnd);
-        updateTextAction(afterSelectedText, textStyle);
+        if (selectedEnd < contentLength) {
+            auto afterSelectedText = displayContent.substr(selectedEnd);
+            updateTextAction(StringUtils::Str16ToStr8(afterSelectedText), textStyle);
+        }
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 }
@@ -209,7 +219,7 @@ void SpanItem::EndDrag()
 
 bool SpanItem::IsDragging()
 {
-    return selectedStart != -1 && selectedEnd != -1;
+    return selectedStart >= 0 && selectedEnd >= 0;
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 

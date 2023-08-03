@@ -1073,6 +1073,7 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
 
     AceEngineExt::GetInstance().DragStartExt();
 
+    isDragMoving = false;
     StopTwinkling();
     CloseKeyboard(true);
     CloseSelectOverlay();
@@ -1083,21 +1084,24 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
 
 void RichEditorPattern::OnDragEnd()
 {
+    isDragMoving = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (dragResultObjects_.empty()) {
         return;
     }
     UpdateSpanItemDragStatus(dragResultObjects_, false);
+    dragResultObjects_.clear();
     StartTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
-    if (!dragResultObjects_.empty()) {
+    if (!isDragMoving && !dragResultObjects_.empty()) {
         UpdateSpanItemDragStatus(dragResultObjects_, true);
     }
+    isDragMoving = true;
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
