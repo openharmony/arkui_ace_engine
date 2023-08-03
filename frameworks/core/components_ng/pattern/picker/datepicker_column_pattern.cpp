@@ -54,7 +54,8 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr int32_t MINDDLE_CHILD_INDEX = 2;
-const char* MEASURE_SIZE_STRING = "TEST";
+constexpr char MEASURE_SIZE_STRING[] = "TEST";
+constexpr float FONTWEIGHT = 0.33f;
 } // namespace
 
 void DatePickerColumnPattern::OnAttachToFrameNode()
@@ -378,8 +379,8 @@ void DatePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetColor().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
+    textLayoutProperty->UpdateTextColor(
+        dataPickerRowLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (dataPickerRowLayoutProperty->HasFontSize()) {
         textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetFontSize().value());
     } else {
@@ -387,12 +388,14 @@ void DatePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         textLayoutProperty->UpdateAdaptMinFontSize(
             pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
     }
-    textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetWeight().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontWeight(
+        dataPickerRowLayoutProperty->GetWeight().value_or(pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    CandidateWeight_ =
+        dataPickerRowLayoutProperty->GetWeight().value_or(pickerTheme->GetOptionStyle(false, false).GetFontWeight());
     textLayoutProperty->UpdateFontFamily(dataPickerRowLayoutProperty->GetFontFamily().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
-    textLayoutProperty->UpdateItalicFontStyle(dataPickerRowLayoutProperty->GetFontStyle().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    textLayoutProperty->UpdateItalicFontStyle(
+        dataPickerRowLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -410,6 +413,8 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     }
     textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetSelectedWeight().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontWeight()));
+    SelectedWeight_ = dataPickerRowLayoutProperty->GetSelectedWeight().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     textLayoutProperty->UpdateFontFamily(dataPickerRowLayoutProperty->GetSelectedFontFamily().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(dataPickerRowLayoutProperty->GetSelectedFontStyle().value_or(
@@ -528,18 +533,40 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     }
     Dimension endFontSize;
     Color endColor;
+    auto midIndex = showCount / 2;
     if (!isDown) {
         endFontSize = animationProperties_[index].downFontSize;
         endColor = animationProperties_[index].downColor;
+        if ((index == midIndex - 1) && (scale >= FONTWEIGHT)) {
+            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
+        }
+        if ((index == midIndex) && (scale >= FONTWEIGHT)) {
+            textLayoutProperty->UpdateFontWeight(CandidateWeight_);
+        }
+
     } else {
         endFontSize = animationProperties_[index].upFontSize;
         endColor = animationProperties_[index].upColor;
+
+        if ((index == midIndex + 1) && (scale >= FONTWEIGHT)) {
+            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
+        }
+        if ((index == midIndex) && (scale >= FONTWEIGHT)) {
+            textLayoutProperty->UpdateFontWeight(CandidateWeight_);
+        }
     }
     Dimension updateSize = LinearFontSize(startFontSize, endFontSize, scale);
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, scale);
     textLayoutProperty->UpdateTextColor(updateColor);
+    if (scale == 0.0) {
+        if (index == midIndex) {
+            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
+        } else {
+            textLayoutProperty->UpdateFontWeight(CandidateWeight_);
+        }
+    }
 }
 
 void DatePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
@@ -742,7 +769,7 @@ void DatePickerColumnPattern::CreateAnimation()
 RefPtr<CurveAnimation<double>> DatePickerColumnPattern::CreateAnimation(double from, double to)
 {
     auto weak = AceType::WeakClaim(this);
-    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FRICTION);
+    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FAST_OUT_SLOW_IN);
     curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);

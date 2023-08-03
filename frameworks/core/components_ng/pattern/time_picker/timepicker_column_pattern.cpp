@@ -48,8 +48,8 @@ const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
-
-const char* MEASURE_SIZE_STRING = "TEST";
+constexpr float FONTWEIGHT = 0.33f;
+constexpr char MEASURE_SIZE_STRING[] = "TEST";
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
@@ -333,6 +333,8 @@ void TimePickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     }
     textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetDisappearWeight().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    DisappearWeight_ = timePickerLayoutProperty->GetDisappearWeight().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontWeight());
     textLayoutProperty->UpdateFontFamily(timePickerLayoutProperty->GetDisappearFontFamily().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(timePickerLayoutProperty->GetDisappearFontStyle().value_or(
@@ -344,8 +346,8 @@ void TimePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    textLayoutProperty->UpdateTextColor(timePickerLayoutProperty->GetColor().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
+    textLayoutProperty->UpdateTextColor(
+        timePickerLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (timePickerLayoutProperty->HasFontSize()) {
         textLayoutProperty->UpdateFontSize(timePickerLayoutProperty->GetFontSize().value());
     } else {
@@ -353,12 +355,12 @@ void TimePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         textLayoutProperty->UpdateAdaptMinFontSize(
             pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
     }
-    textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetWeight().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontWeight(
+        timePickerLayoutProperty->GetWeight().value_or(pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
     textLayoutProperty->UpdateFontFamily(timePickerLayoutProperty->GetFontFamily().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
-    textLayoutProperty->UpdateItalicFontStyle(timePickerLayoutProperty->GetFontStyle().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    textLayoutProperty->UpdateItalicFontStyle(
+        timePickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
 }
 
 void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -366,8 +368,8 @@ void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    textLayoutProperty->UpdateTextColor(timePickerLayoutProperty->GetSelectedColor().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+    textLayoutProperty->UpdateTextColor(
+        timePickerLayoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     if (timePickerLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(timePickerLayoutProperty->GetSelectedFontSize().value());
     } else {
@@ -376,6 +378,8 @@ void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     }
     textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetSelectedWeight().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontWeight()));
+    SelectedWeight_ = timePickerLayoutProperty->GetSelectedWeight().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     textLayoutProperty->UpdateFontFamily(timePickerLayoutProperty->GetSelectedFontFamily().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(timePickerLayoutProperty->GetSelectedFontStyle().value_or(
@@ -528,21 +532,42 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
         textLayoutProperty->UpdateTextColor(startColor);
         return;
     }
-
+    auto midIndex = showCount / 2;
     Dimension endFontSize;
     Color endColor;
     if (!isDown) {
         endFontSize = animationProperties_[index].downFontSize;
         endColor = animationProperties_[index].downColor;
+
+        if ((index == midIndex - 1) && (scale >= FONTWEIGHT)) {
+            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
+        }
+        if ((index == midIndex) && (scale >= FONTWEIGHT)) {
+            textLayoutProperty->UpdateFontWeight(DisappearWeight_);
+        }
     } else {
         endFontSize = animationProperties_[index].upFontSize;
         endColor = animationProperties_[index].upColor;
+
+        if ((index == midIndex + 1) && (scale >= FONTWEIGHT)) {
+            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
+        }
+        if ((index == midIndex) && (scale >= FONTWEIGHT)) {
+            textLayoutProperty->UpdateFontWeight(DisappearWeight_);
+        }
     }
     Dimension updateSize = LinearFontSize(startFontSize, endFontSize, scale);
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, scale);
     textLayoutProperty->UpdateTextColor(updateColor);
+    if (scale == 0.0) {
+        if (index == midIndex) {
+            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
+        } else {
+            textLayoutProperty->UpdateFontWeight(DisappearWeight_);
+        }
+    }
 }
 
 void TimePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
@@ -703,7 +728,7 @@ void TimePickerColumnPattern::CreateAnimation()
 RefPtr<CurveAnimation<double>> TimePickerColumnPattern::CreateAnimation(double from, double to)
 {
     auto weak = AceType::WeakClaim(this);
-    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FRICTION);
+    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::LINEAR_OUT_SLOW_IN);
     curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
