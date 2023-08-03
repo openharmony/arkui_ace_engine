@@ -635,9 +635,7 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
 void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
-    for (const auto& child : GetChildren()) {
-        child->OnVisibleChange(isVisible);
-    }
+    UpdateChildrenVisible(isVisible);
     TriggerVisibleAreaChangeCallback(true);
 }
 
