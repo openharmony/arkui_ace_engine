@@ -654,6 +654,8 @@ public:
         return windowManager_;
     }
 
+    bool HasFloatTitle() const;
+
     bool IsRebuildFinished() const
     {
         return isRebuildFinished_;
