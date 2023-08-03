@@ -896,6 +896,9 @@ void RichEditorPattern::OnVisibleChange(bool isVisible)
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
     if (forceClose) {
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+            return CloseCustomKeyboard();
+        }
 #if defined(ENABLE_STANDARD_INPUT)
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (!imeAttached_) {
@@ -1222,6 +1225,9 @@ bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartT
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(needShowSoftKeyboard, false);
+    if (needShowSoftKeyboard && customKeyboardBulder_) {
+        return RequestCustomKeyboard();
+    }
 #if defined(ENABLE_STANDARD_INPUT)
     if (!EnableStandardInput(needShowSoftKeyboard)) {
         return false;
@@ -1307,6 +1313,37 @@ bool RichEditorPattern::HasConnection() const
 #else
     return connection_ != nullptr;
 #endif
+}
+
+bool RichEditorPattern::RequestCustomKeyboard()
+{
+    if (isCustomKeyboardAttached_) {
+        return true;
+    }
+    CHECK_NULL_RETURN(customKeyboardBulder_, false);
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->BindKeyboard(customKeyboardBulder_, frameNode->GetId());
+    isCustomKeyboardAttached_ = true;
+    return true;
+}
+
+bool RichEditorPattern::CloseCustomKeyboard()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->DestroyKeyboard();
+    isCustomKeyboardAttached_ = false;
+    return true;
 }
 
 void RichEditorPattern::InsertValue(const std::string& insertValue)

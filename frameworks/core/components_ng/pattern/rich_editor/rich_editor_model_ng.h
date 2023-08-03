@@ -30,6 +30,7 @@ public:
     void SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func) override;
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
+    void SetCustomKeyboard(std::function<void()>&& func) override;
 
 private:
     void SetDraggable(bool draggable);

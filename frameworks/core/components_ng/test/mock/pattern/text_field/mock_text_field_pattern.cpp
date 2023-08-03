@@ -147,4 +147,13 @@ void TextFieldPattern::TextIsEmptyRect(RectF &rect) {}
 void TextFieldPattern::TextAreaInputRectUpdate(RectF &rect) {}
 void TextFieldPattern::UpdateRectByAlignment(RectF &rect) {}
 
+bool TextFieldPattern::RequestCustomKeyboard()
+{
+    return true;
+};
+bool TextFieldPattern::CloseCustomKeyboard()
+{
+    return true;
+};
+
 } // namespace OHOS::Ace::NG

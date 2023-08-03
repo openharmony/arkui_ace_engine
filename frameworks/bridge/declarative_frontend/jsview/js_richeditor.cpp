@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 
 #include <string>
+#include "bridge/declarative_frontend/jsview/js_textfield.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
@@ -257,6 +258,21 @@ void JSRichEditor::SetOnDeleteComplete(const JSCallbackInfo& args)
     RichEditorModel::GetInstance()->SetOnDeleteComplete(callback);
 }
 
+void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
+{
+    if (args.Length() > 0 && (args[0]->IsUndefined() || args[0]->IsNull())) {
+        RichEditorModel::GetInstance()->SetCustomKeyboard(nullptr);
+        return;
+    }
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    std::function<void()> buildFunc;
+    if (JSTextField::ParseJsCustomKeyboardBuilder(args, 0, buildFunc)) {
+        RichEditorModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+    }
+}
+
 JSRef<JSVal> JSRichEditor::CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue)
 {
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
@@ -401,6 +417,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onIMEInputComplete", &JSRichEditor::SetOnIMEInputComplete);
     JSClass<JSRichEditor>::StaticMethod("aboutToDelete", &JSRichEditor::SetAboutToDelete);
     JSClass<JSRichEditor>::StaticMethod("onDeleteComplete", &JSRichEditor::SetOnDeleteComplete);
+    JSClass<JSRichEditor>::StaticMethod("customKeyboard", &JSRichEditor::SetCustomKeyboard);
     JSClass<JSRichEditor>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRichEditor>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSRichEditor>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
