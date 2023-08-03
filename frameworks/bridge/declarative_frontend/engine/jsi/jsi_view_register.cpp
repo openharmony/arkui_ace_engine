@@ -470,7 +470,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
             auto arrayVal = panda::Local<panda::ArrayRef>(secondArg);
             auto len = arrayVal->Length(vm);
             std::vector<std::string> arrayResult;
-            for (int32_t i = 0; i < len; i++) {
+            for (auto i = 0U; i < len; i++) {
                 auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
                 if (!subItemVal->IsString()) {
                     arrayResult.emplace_back(std::string());
