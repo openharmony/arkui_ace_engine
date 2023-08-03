@@ -103,6 +103,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (listLayoutProperty->GetDivider().has_value()) {
             auto divider = listLayoutProperty->GetDivider().value();
             std::optional<float> dividerSpace = divider.strokeWidth.ConvertToPx();
+            if (GreatOrEqual(dividerSpace.value(), contentMainSize_)) {
+                dividerSpace.reset();
+            }
             if (dividerSpace.has_value()) {
                 spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
             }

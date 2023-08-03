@@ -59,9 +59,10 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     listContentModifier_->SetClipOffset(paddingOffset);
     listContentModifier_->SetClipSize(frameSize);
     listContentModifier_->SetClip(clip);
-    
+    float contentSize = vertical_ ? frameSize.Width() : frameSize.Height();
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
-        divider_.strokeWidth.Unit() == DimensionUnit::PERCENT) {
+        divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||
+        GreatOrEqual(divider_.strokeWidth.ConvertToPx(), contentSize)) {
         listContentModifier_->ResetDividerInfo();
         return;
     }
