@@ -208,7 +208,7 @@ public:
     {
         return true;
     }
-    void CloseSelectOverlay() override;
+    virtual void CloseSelectOverlay() override;
     void CreateHandles() override;
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -290,7 +290,7 @@ protected:
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     CopyOptions copyOption_ = CopyOptions::None;
-    
+
     OffsetF imageOffset_;
     std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
