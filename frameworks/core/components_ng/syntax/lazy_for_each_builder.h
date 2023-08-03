@@ -156,6 +156,7 @@ public:
         auto keyIter = cachedItems_.find(index);
         if (keyIter != cachedItems_.end()) {
             auto iter = generatedItem_.find(keyIter->second);
+            cachedItems_.erase(keyIter);
             if (iter != generatedItem_.end()) {
                 expiringItem_.try_emplace(iter->first, std::move(iter->second));
                 generatedItem_.erase(iter);
