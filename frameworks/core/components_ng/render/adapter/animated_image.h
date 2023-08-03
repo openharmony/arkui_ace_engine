@@ -40,10 +40,18 @@ public:
     // initialize animator
     AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url);
     ~AnimatedImage() override = default;
+
+    struct ResizeParam {
+        int32_t width = 0;
+        int32_t height = 0;
+        bool forceResize = false;
+    };
 #ifndef USE_ROSEN_DRAWING
-    static RefPtr<CanvasImage> Create(const RefPtr<SkiaImageData>& data, const SizeF& size, const std::string& url);
+    static RefPtr<CanvasImage> Create(
+        const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url);
 #else
-    static RefPtr<CanvasImage> Create(const RefPtr<DrawingImageData>& data, const SizeF& size, const std::string& url);
+    static RefPtr<CanvasImage> Create(
+        const RefPtr<DrawingImageData>& data, const SizeParam& size, const std::string& url);
 #endif
     void ControlAnimation(bool play) override;
     void SetRedrawCallback(std::function<void()>&& callback) override
@@ -133,10 +141,8 @@ private:
 class AnimatedPixmap : public AnimatedImage, public PixelMapImage {
     DECLARE_ACE_TYPE(AnimatedPixmap, AnimatedImage, PixelMapImage)
 public:
-    AnimatedPixmap(
-        const std::unique_ptr<SkCodec>& codec, const RefPtr<ImageSource>& src, const SizeF& size, std::string url)
-        : AnimatedImage(codec, std::move(url)), width_(size.Width()), height_(size.Height()), src_(src)
-    {}
+    AnimatedPixmap(const std::unique_ptr<SkCodec>& codec, const RefPtr<ImageSource>& src, const ResizeParam& size,
+        std::string url);
     ~AnimatedPixmap() override = default;
     RefPtr<PixelMap> GetPixelMap() const override;
 
@@ -154,8 +160,7 @@ private:
 
     RefPtr<PixelMap> currentFrame_;
 
-    int32_t width_;
-    int32_t height_;
+    ResizeParam size_;
     const RefPtr<ImageSource> src_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AnimatedPixmap);
