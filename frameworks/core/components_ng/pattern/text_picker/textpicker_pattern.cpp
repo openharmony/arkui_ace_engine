@@ -840,7 +840,7 @@ void TextPickerPattern::OnColorConfigurationUpdate()
         host->SetNeedCallChildrenUpdate(false);
         return;
     }
-    dialogContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto contentChildren = contentRowNode_->GetChildren();
     auto layoutRenderContext = contentRowNode_->GetRenderContext();
     layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
