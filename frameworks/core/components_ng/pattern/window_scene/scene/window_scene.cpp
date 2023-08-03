@@ -150,22 +150,31 @@ void WindowScene::BufferAvailableCallback()
 void WindowScene::OnConnect()
 {
     CHECK_NULL_VOID_NOLOG(IsMainWindow());
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        CHECK_NULL_VOID(self->session_);
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+
+        CHECK_NULL_VOID(self->contentNode_);
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(self->contentNode_->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        context->SetRSNode(surfaceNode);
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        host->AddChild(self->contentNode_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+        surfaceNode->SetBufferAvailableCallback(self->callback_);
+    };
+
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(session_);
-    auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
-
-    CHECK_NULL_VOID(contentNode_);
-    auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID(context);
-    context->SetRSNode(surfaceNode);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->AddChild(contentNode_, 0);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-    surfaceNode->SetBufferAvailableCallback(callback_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnForeground()

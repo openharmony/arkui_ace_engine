@@ -134,7 +134,7 @@ void WindowPattern::InitContent()
         return;
     }
 
-    if (state == Rosen::SessionState::STATE_BACKGROUND) {
+    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetBufferAvailable()) {
         CreateSnapshotNode();
         host->AddChild(snapshotNode_);
         return;
