@@ -31,6 +31,24 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void ProcessMaskRect(const DialogProperties& param, const RefPtr<FrameNode>& dialog)
+{
+    auto dialogContext = dialog->GetRenderContext();
+    auto hub = dialog->GetEventHub<DialogEventHub>();
+    if (param.maskRect.has_value()) {
+        RectF rect = RectF(param.maskRect->GetOffset().GetX().ConvertToPx(),
+                           param.maskRect->GetOffset().GetY().ConvertToPx(),
+                           param.maskRect->GetWidth().ConvertToPx(), param.maskRect->GetHeight().ConvertToPx());
+        dialogContext->ClipWithRect(rect);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        std::vector<DimensionRect> mouseResponseRegion;
+        mouseResponseRegion.push_back(param.maskRect.value());
+        gestureHub->SetMouseResponseRegion(mouseResponseRegion);
+        gestureHub->SetResponseRegion(mouseResponseRegion);
+    }
+}
+}
 
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
@@ -76,16 +94,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     CHECK_NULL_RETURN(hub, nullptr);
     hub->SetOnCancel(param.onCancel);
     hub->SetOnSuccess(param.onSuccess);
-    if (param.maskRect.has_value()) {
-        RectF rect = RectF(param.maskRect->GetOffset().GetX().ConvertToPx(), param.maskRect->GetOffset().GetY().ConvertToPx(),
-                           param.maskRect->GetWidth().ConvertToPx(), param.maskRect->GetHeight().ConvertToPx());
-        dialogContext->ClipWithRect(rect);
-        auto gestureHub = hub->GetOrCreateGestureEventHub();
-        std::vector<DimensionRect> mouseResponseRegion;
-        mouseResponseRegion.push_back(param.maskRect.value());
-        gestureHub->SetMouseResponseRegion(mouseResponseRegion);
-        gestureHub->SetResponseRegion(mouseResponseRegion);
-    }
+
+    ProcessMaskRect(param, dialog);
 
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);

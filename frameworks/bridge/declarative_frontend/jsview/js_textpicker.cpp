@@ -34,8 +34,7 @@
 
 namespace OHOS::Ace {
 namespace {
-const DimensionOffset ACTION_SHEET_OFFSET_DEFAULT = DimensionOffset(0.0_vp, -40.0_vp);
-const DimensionOffset ACTION_SHEET_OFFSET_DEFAULT_TOP = DimensionOffset(0.0_vp, 40.0_vp);
+const DimensionOffset TEXT_PICKER_OFFSET_DEFAULT_TOP = DimensionOffset(0.0_vp, 40.0_vp);
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
@@ -1178,7 +1177,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
             alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
             alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
-            textPickerDialog.offset = ACTION_SHEET_OFFSET_DEFAULT_TOP;
+            textPickerDialog.offset = TEXT_PICKER_OFFSET_DEFAULT_TOP;
         }
     }
 
