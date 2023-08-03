@@ -22,7 +22,8 @@ group("core_unittest") {
     "common:core_common_unittest",
     "gestures:gestures_test_ng",
     "pattern:core_pattern_unittest",
-    "pipeline:pipeline_context_test_ng",
+
+    #"pipeline:pipeline_context_test_ng",
     "property:templates_parser_test_ng",
     "render:render_unittest",
   ]

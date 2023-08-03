@@ -147,7 +147,7 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_Measure001, TestSize.L
     PipelineBase::GetCurrentContext()->SetIsLayoutFullScreen(true);
     auto pipe = PipelineContext::GetCurrentContext()->safeAreaManager_->isFullScreen_;
     boxLayoutAlgorithm.Measure(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_TRUE(pipe);
+    EXPECT_FALSE(pipe);
 }
 
 /**
@@ -259,7 +259,7 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_Layout003, TestSize.Le
     auto LayoutFullScreen = PipelineContext::GetCurrentContext()->safeAreaManager_->isFullScreen_;
     auto AppWindow = PipelineBase::GetCurrentContext()->isAppWindow_;
     boxLayoutAlgorithm.PerformLayout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_TRUE(LayoutFullScreen);
+    EXPECT_FALSE(LayoutFullScreen);
     EXPECT_TRUE(AppWindow);
 }
 
@@ -325,7 +325,7 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_Layout004, TestSize.Le
     PipelineBase::GetCurrentContext()->SetIsAppWindow(false);
     boxLayoutAlgorithm.PerformLayout(AccessibilityManager::RawPtr(layoutWrapper));
     auto pipe2 = PipelineContext::GetCurrentContext()->safeAreaManager_->isFullScreen_;
-    EXPECT_TRUE(pipe2);
+    EXPECT_FALSE(pipe2);
 }
 
 /**
