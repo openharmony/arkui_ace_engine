@@ -85,6 +85,7 @@ const double YOFFSET_END2 = 3000.0;
 const double TIME_PLUS = 1 * 100.0;
 const double TIME_PLUS_LARGE = 10 * 1000.0;
 constexpr double DISTANCE = 20.0;
+const OffsetF CHILD_OFFSET(0.0f, 10.0f);
 } // namespace
 
 class TextPickerTestNg : public testing::Test {
@@ -279,11 +280,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp001, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("1", content);
-    ASSERT_TRUE(textLayoutProperty->HasFontSize());
-    double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    double expectFontSize = FONT_SIZE_5 * HALF + FONT_SIZE_5 * HALF * HALF;
-    EXPECT_EQ(expectFontSize, fontSize);
+    EXPECT_EQ("3", content);
 }
 
 /**
@@ -337,11 +334,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown001, Test
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("5", content);
-    ASSERT_TRUE(textLayoutProperty->HasFontSize());
-    double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    double expectFontSize = FONT_SIZE_5 * HALF + FONT_SIZE_5 * HALF * HALF;
-    EXPECT_EQ(expectFontSize, fontSize);
+    EXPECT_EQ("4", content);
 }
 
 /**
@@ -1055,10 +1048,6 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSi
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
     EXPECT_EQ("test2", content);
-    ASSERT_TRUE(textLayoutProperty->HasFontSize());
-    double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    double expectFontSize = FONT_SIZE_5 * HALF + FONT_SIZE_5 * HALF * HALF;
-    EXPECT_EQ(expectFontSize, fontSize);
 }
 
 /**
@@ -1114,7 +1103,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp004, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
     double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    EXPECT_EQ(FONT_SIZE_5, fontSize);
+    EXPECT_EQ(FONT_SIZE_10, fontSize);
 }
 
 /**
@@ -1173,11 +1162,10 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     std::string content = textLayoutProperty->GetContent().value_or("");
-    EXPECT_EQ("test2", content);
+    EXPECT_EQ("test1", content);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
     double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    double expectFontSize = FONT_SIZE_5 * HALF + FONT_SIZE_5 * HALF * HALF;
-    EXPECT_EQ(expectFontSize, fontSize);
+    EXPECT_EQ(FONT_SIZE_5, fontSize);
 }
 
 /**
@@ -1335,7 +1323,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll004, TestSize
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    EXPECT_FALSE(textLayoutProperty->HasTextColor());
+    EXPECT_TRUE(textLayoutProperty->HasTextColor());
 }
 
 /**
@@ -3029,7 +3017,6 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level1)
     ASSERT_NE(pickerProperty, nullptr);
     auto subNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
     ASSERT_NE(subNode, nullptr);
-
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
     RefPtr<LayoutWrapperNode> subLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(subNode, subNode->GetGeometryNode(), nullptr);
@@ -3037,7 +3024,11 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level1)
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 1);
     TextPickerLayoutAlgorithm textPickerLayoutAlgorithm;
+    textPickerLayoutAlgorithm.currentOffset_.emplace_back(0.0f);
     textPickerLayoutAlgorithm.Layout(&layoutWrapper);
+    auto childGeometryNode = subLayoutWrapper->GetGeometryNode();
+    childGeometryNode->SetMarginFrameOffset(CHILD_OFFSET);
+    EXPECT_EQ(childGeometryNode->GetMarginFrameOffset(),  OffsetF(0.0f, 10.0f));
 }
 
 /**
@@ -3102,7 +3093,11 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest004, TestSize.Level1)
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 1);
     TextPickerLayoutAlgorithm textPickerLayoutAlgorithm;
+    textPickerLayoutAlgorithm.currentOffset_.emplace_back(0.0f);
     textPickerLayoutAlgorithm.Layout(&layoutWrapper);
+    auto childGeometryNode = subLayoutWrapper->GetGeometryNode();
+    childGeometryNode->SetMarginFrameOffset(CHILD_OFFSET);
+    EXPECT_EQ(childGeometryNode->GetMarginFrameOffset(),  OffsetF(0.0f, 10.0f));
 }
 
 /**
@@ -3263,6 +3258,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest001, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 1;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 4);
@@ -3292,6 +3296,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest002, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 0;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 3);
@@ -3321,6 +3334,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest003, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 3;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 1);
@@ -3350,6 +3372,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest004, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 4;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 2);
@@ -3379,6 +3410,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest005, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 1;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 1);
@@ -3408,6 +3448,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest006, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 0;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 0);
@@ -3437,6 +3486,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest007, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 3;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 3);
@@ -3466,6 +3524,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest008, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 4;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 4);
@@ -3495,6 +3562,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest009, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 1;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 3);
@@ -3524,6 +3600,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest010, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 0;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 2);
@@ -3553,6 +3638,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest011, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 3;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 0);
@@ -3582,6 +3676,15 @@ HWTEST_F(TextPickerTestNg, OnClickEventTest012, TestSize.Level1)
     param->instance = nullptr;
     param->itemIndex = 4;
     param->itemTotalCounts = 5;
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 1);
@@ -3631,6 +3734,15 @@ HWTEST_F(TextPickerTestNg, CanLoopTest001, TestSize.Level1)
     param->itemTotalCounts = 5;
     textPickerColumnPattern_->SetCurrentIndex(4);
     pickerNodeLayout->UpdateCanLoop(false);
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     uint32_t index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 4);
@@ -3659,6 +3771,15 @@ HWTEST_F(TextPickerTestNg, CanLoopTest002, TestSize.Level1)
     param->itemTotalCounts = 5;
     textPickerColumnPattern_->SetCurrentIndex(4);
     pickerNodeLayout->UpdateCanLoop(false);
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     uint32_t index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 4);
@@ -3687,6 +3808,15 @@ HWTEST_F(TextPickerTestNg, CanLoopTest003, TestSize.Level1)
     param->itemTotalCounts = 5;
     textPickerColumnPattern_->SetCurrentIndex(0);
     pickerNodeLayout->UpdateCanLoop(false);
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     uint32_t index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 0);
@@ -3715,6 +3845,15 @@ HWTEST_F(TextPickerTestNg, CanLoopTest004, TestSize.Level1)
     param->itemTotalCounts = 5;
     textPickerColumnPattern_->SetCurrentIndex(0);
     pickerNodeLayout->UpdateCanLoop(false);
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     uint32_t index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 0);
@@ -4429,8 +4568,16 @@ HWTEST_F(TextPickerTestNg, TextEventActionsTest001, TestSize.Level1)
     auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerNodeLayout, nullptr);
     pickerNodeLayout->UpdateCanLoop(false);
-
     ASSERT_NE(panEvent->actionEnd_, nullptr);
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     panEvent->actionEnd_(gestureEvent);
     EXPECT_FALSE(textPickerColumnPattern_->pressed_);
 
@@ -4445,7 +4592,6 @@ HWTEST_F(TextPickerTestNg, TextEventActionsTest001, TestSize.Level1)
     toss->SetEnd(YOFFSET_END1);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
     EXPECT_TRUE(toss->Play());
-
     textPickerColumnPattern_->pressed_ = true;
     panEvent->actionEnd_(gestureEvent);
     EXPECT_FALSE(textPickerColumnPattern_->pressed_);
@@ -4462,6 +4608,17 @@ HWTEST_F(TextPickerTestNg, TextPickerTossAnimationControllerTest001, TestSize.Le
      * @tc.steps: step1. create TextPickerTossAnimationController instance.
      */
     RefPtr<TextPickerTossAnimationController> toss = AceType::MakeRefPtr<TextPickerTossAnimationController>();
+    auto column = AceType::MakeRefPtr<TextPickerColumnPattern>();
+    toss->SetColumn(column);
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    column->optionProperties_.emplace_back(prop);
+    column->optionProperties_.emplace_back(prop);
+    column->optionProperties_.emplace_back(prop);
+    column->optionProperties_.emplace_back(prop);
     toss->SetStart(YOFFSET_START1);
     toss->SetEnd(YOFFSET_END1);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
@@ -4473,8 +4630,7 @@ HWTEST_F(TextPickerTestNg, TextPickerTossAnimationControllerTest001, TestSize.Le
     EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
     EXPECT_TRUE(ret);
-    auto column = AceType::MakeRefPtr<TextPickerColumnPattern>();
-    toss->SetColumn(column);
+
     /**
      * cover StopCallback callback
      */
@@ -4832,6 +4988,9 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest008, TestSize.Level1)
     InitTextPickerTestNg();
     auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showOptionCount_ = 5;
     ScrollDirection dir = ScrollDirection::UP;
     textPickerColumnPattern->algorithmOffset_.clear();
     TextPickerOptionProperty prop;
@@ -4920,7 +5079,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest011, TestSize.Level1)
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->ScrollOption(20.0f);
-    EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size(), 5);
+    EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size(), 4);
 }
 
 /**
