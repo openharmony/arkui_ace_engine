@@ -765,6 +765,18 @@ void NavigationModelNG::SetTitleHeight(const Dimension& height)
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     titleBarLayoutProperty->UpdateTitleHeight(height);
+    SetHideBackButton(true);
+
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    auto navTitleMode = navBarLayoutProperty->GetTitleMode();
+    if (navTitleMode.has_value()) {
+        if (navTitleMode.value() == NavigationTitleMode::MINI) {
+            navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::NONE);
+        } else {
+            navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(NavigationTitleMode::MINI));
+        }
+    }
 }
 
 void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
@@ -778,15 +790,20 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     CHECK_NULL_VOID(navBarLayoutProperty);
     bool needAddBackButton = false;
     bool needRemoveBackButton = false;
-    if (navBarNode->GetPrevTitleIsCustomValue(false)) {
-        return;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    const auto& titleHeightProperty = titleBarLayoutProperty->GetTitleHeight();
+    if (titleHeightProperty.has_value()) {
+        mode = NavigationTitleMode::MINI;
     }
 
     do {
         // add back button if current mode is mini and one of the following condition:
         // first create or not first create but previous mode is not mini
         if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI &&
-            mode == NavigationTitleMode::MINI) {
+            mode == NavigationTitleMode::MINI && !titleHeightProperty.has_value()) {
             needAddBackButton = true;
             break;
         }
