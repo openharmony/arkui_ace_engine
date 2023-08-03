@@ -149,7 +149,6 @@ private:
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void HandlePanEventEnd();
-    void UpdateResponseRegion(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
     void OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     void OnUpdateShowControlButton(
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
@@ -162,6 +161,7 @@ private:
     RefPtr<FrameNode> GetSideBarNode(const RefPtr<FrameNode>& host) const;
     RefPtr<FrameNode> GetContentNode(const RefPtr<FrameNode>& host) const;
     RefPtr<FrameNode> GetControlImageNode() const;
+    RefPtr<FrameNode> GetDividerNode() const;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
