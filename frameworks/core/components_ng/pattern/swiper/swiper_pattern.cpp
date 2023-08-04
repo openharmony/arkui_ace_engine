@@ -2566,6 +2566,8 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
     }
     if (currentIndex_ != nextIndex) {
         if (isFinishAnimation_) {
+            currentDelta_ = 0.0f;
+            itemPosition_.clear();
             jumpIndex_ = nextIndex;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             auto pipeline = PipelineContext::GetCurrentContext();
