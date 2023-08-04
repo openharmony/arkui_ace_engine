@@ -281,15 +281,6 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
-    if (pipelineContextBase->IsLayouting()) {
-        pipelineContextBase->GetTaskExecutor()->PostTask(
-            [id = Container::CurrentId(), option]() {
-                ContainerScope scope(id);
-                ViewContextModel::GetInstance()->openAnimation(option);
-            },
-            TaskExecutor::TaskType::UI);
-        return;
-    }
     ViewContextModel::GetInstance()->openAnimation(option);
 }
 
@@ -351,6 +342,8 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         LOGD("RSAnimationInfo: Begin JSAnimateTo, usingSharedRuntime: %{public}d", usingSharedRuntime);
         if (usingSharedRuntime) {
             if (pipelineContext->IsLayouting()) {
+                LOGW("pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
+                    option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(
                     [id = Container::CurrentId(), option, func = JSRef<JSFunc>::Cast(info[1]),
                         onFinishEvent]() mutable {
