@@ -49,7 +49,6 @@ RefPtr<PixelMap> g_pixelMap;
 bool g_getPixelMapSucc = false;
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 using namespace Msdp::DeviceStatus;
-constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
 #endif // ENABLE_DRAG_FRAMEWORK
 constexpr const char* HIT_TEST_MODE[] = {
@@ -518,6 +517,31 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
     }
     return result;
 }
+
+float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t width) const
+{
+    float scale = 1.0f;
+    int32_t deviceWidth = PipelineContext::GetCurrentRootWidth();
+    int32_t deviceHeight = PipelineContext::GetCurrentRootHeight();
+    int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
+    int32_t minDeviceLength = std::min(deviceHeight, deviceWidth);
+    if (maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength) {
+        if (height > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) {
+            scale = static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / height;
+        }
+    } else {
+        if (GetTextDraggable() && height > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE &&
+            width > minDeviceLength * PIXELMAP_DRAG_WGR_TEXT_SCALE / PIXELMAP_DRAG_WGR_SCALE) {
+            scale = fmin(static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / height,
+                static_cast<float>(minDeviceLength * PIXELMAP_DRAG_WGR_TEXT_SCALE / PIXELMAP_DRAG_WGR_SCALE) / width);
+        } else if (height > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE &&
+                   width > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) {
+            scale = fmin(static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / height,
+                static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / width);
+        }
+    }
+    return scale;
+}
 #endif
 
 void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
@@ -664,18 +688,8 @@ void GestureEventHub::OnDragStart(
             pixelMap = pixelMap_->GetPixelMapSharedPtr();
         }
     }
-    float scale = 1.0f;
-    auto minDeviceLength = std::min(SystemProperties::GetDeviceHeight(), SystemProperties::GetDeviceWidth());
-    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT &&
-            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) ||
-        (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
-            pixelMap->GetHeight() > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE &&
-            pixelMap->GetWidth() > minDeviceLength)) {
-        scale = static_cast<float>(minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE) / pixelMap->GetHeight();
-        pixelMap->scale(scale, scale);
-    } else if (!GetTextDraggable()) {
-        pixelMap->scale(PIXELMAP_DRAG_SCALE, PIXELMAP_DRAG_SCALE);
-    }
+    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+    pixelMap->scale(scale, scale);
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
