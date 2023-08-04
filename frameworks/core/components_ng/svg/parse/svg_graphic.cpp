@@ -74,7 +74,7 @@ void SvgGraphic::UpdateGradient(const Size& viewPort)
 
 bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAlias)
 {
-    if (fillState_.GetColor() == Color::TRANSPARENT && !fillState_.GetGradient()) {
+    if (!color && fillState_.GetColor() == Color::TRANSPARENT && !fillState_.GetGradient()) {
         return false;
     }
     double curOpacity = fillState_.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);

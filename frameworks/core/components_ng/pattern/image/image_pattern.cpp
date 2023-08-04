@@ -290,13 +290,8 @@ void ImagePattern::LoadImageDataIfNeed()
     CHECK_NULL_VOID(imageRenderProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
-    std::optional<Color> svgFillColorOpt = std::nullopt;
-    if (src.IsSvg()) {
-        svgFillColorOpt = src.GetFillColor();
-    }
 
-    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src ||
-        (src.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
 
         loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
@@ -305,15 +300,9 @@ void ImagePattern::LoadImageDataIfNeed()
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        std::optional<Color> altSvgFillColorOpt = std::nullopt;
-        if (altImageSourceInfo.IsSvg()) {
-            altSvgFillColorOpt = imageRenderProperty->GetSvgFillColor() ? imageRenderProperty->GetSvgFillColor()
-                                                                        : altImageSourceInfo.GetFillColor();
-        }
         LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
         if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
-            (altLoadingCtx_ && altImageSourceInfo.IsSvg() && altSvgFillColorOpt.has_value() &&
-                altLoadingCtx_->GetSvgFillColor() != altSvgFillColorOpt)) {
+            (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
             altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, std::move(altLoadNotifier));
             altLoadingCtx_->LoadImageData();
         }

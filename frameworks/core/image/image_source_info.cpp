@@ -171,7 +171,6 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
         return false;
     }
     return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
-           // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
            src_ == info.src_ && resourceId_ == info.resourceId_;
 }
 
