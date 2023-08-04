@@ -36,10 +36,12 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t STANDARD_FRAME_DURATION = 100;
 constexpr int32_t FORM_REPEAT_COUNT = 1;
+constexpr float RESIZE_THRESHOLD = 0.7f;
 } // namespace
 
 #ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<SkiaImageData>& data, const SizeF& size, const std::string& url)
+RefPtr<CanvasImage> AnimatedImage::Create(
+    const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url)
 {
     CHECK_NULL_RETURN(data, nullptr);
     auto skData = data->GetSkData();
@@ -55,7 +57,7 @@ RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<SkiaImageData>& data, con
 }
 #else
 RefPtr<CanvasImage> AnimatedImage::Create(
-    const RefPtr<DrawingImageData>& data, const SizeF& size, const std::string& url)
+    const RefPtr<DrawingImageData>& data, const ResizeParam& size, const std::string& url)
 {
     CHECK_NULL_RETURN(data, nullptr);
     auto rsData = data->GetRSData();
@@ -287,6 +289,17 @@ void AnimatedRSImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
 // ----------------------------------------------------------
 // AnimatedPixmap implementation
 // ----------------------------------------------------------
+AnimatedPixmap::AnimatedPixmap(
+    const std::unique_ptr<SkCodec>& codec, const RefPtr<ImageSource>& src, const ResizeParam& size, std::string url)
+    : AnimatedImage(codec, std::move(url)), size_(size), src_(src)
+{
+    // resizing to a size >= 0.7 [~= sqrt(2) / 2] intrinsic size takes 2x longer to decode while memory usage is 1/2.
+    // 0.7 is the balance point.
+    auto intrSize = src_->GetImageSize();
+    if (intrSize.first * RESIZE_THRESHOLD >= size_.width || intrSize.second * RESIZE_THRESHOLD >= size_.height) {
+        size_.forceResize = true;
+    }
+}
 
 RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
 {
@@ -296,7 +309,13 @@ RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
 
 void AnimatedPixmap::DecodeImpl(uint32_t idx)
 {
-    auto frame = src_->CreatePixelMap(idx, width_, height_);
+    RefPtr<PixelMap> frame;
+    if (size_.forceResize) {
+        frame = src_->CreatePixelMap(idx, { size_.width, size_.height });
+    } else {
+        // decode to intrinsic size
+        frame = src_->CreatePixelMap(idx, { -1, -1 });
+    }
     std::scoped_lock<std::mutex> lock(frameMtx_);
     currentFrame_ = frame;
 }

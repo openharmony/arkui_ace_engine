@@ -24,12 +24,18 @@
 
 namespace OHOS::Ace::NG {
 void AnimatedImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool /*forceResize*/, bool /*syncLoad*/)
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& size, bool forceResize, bool /*syncLoad*/)
 {
+    AnimatedImage::ResizeParam params {
+        .width = size.Width(),
+        .height = size.Height(),
+        .forceResize = forceResize,
+    };
+
 #ifndef USE_ROSEN_DRAWING
-    auto image = AnimatedImage::Create(DynamicCast<SkiaImageData>(data_), resizeTarget, src_.GetSrc());
+    auto image = AnimatedImage::Create(DynamicCast<SkiaImageData>(data_), params, src_.GetSrc());
 #else
-    auto image = AnimatedImage::Create(DynamicCast<DrawingImageData>(data_), resizeTarget, src_.GetSrc());
+    auto image = AnimatedImage::Create(DynamicCast<DrawingImageData>(data_), params, src_.GetSrc());
 #endif
     CHECK_NULL_VOID(ctx);
     if (!image) {
