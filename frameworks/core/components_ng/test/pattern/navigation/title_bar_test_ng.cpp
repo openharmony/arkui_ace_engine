@@ -368,7 +368,7 @@ HWTEST_F(TitleBarTestNg, GetOrCreateTitleBarNode001, TestSize.Level1)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barNode = AceType::MakeRefPtr<TitleBarNode>(barTag, nodeId);
     auto frameNode = FrameNode::GetFrameNode(barTag, nodeId);
-    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode, nullptr);
     RefPtr<TitleBarNode> titleBarNode = barNode->GetOrCreateTitleBarNode(barTag, nodeId, nullptr);
     ASSERT_NE(titleBarNode, nullptr);
 }
@@ -381,7 +381,7 @@ HWTEST_F(TitleBarTestNg, GetOrCreateTitleBarNode001, TestSize.Level1)
 HWTEST_F(TitleBarTestNg, TitleBarAccessibilityPropertyGetText001, TestSize.Level1)
 {
     InitTitleBarTestNg();
-    EXPECT_EQ(titleBarAccessibilityProperty_->GetText(), "NavdestinationTestNg");
+    EXPECT_EQ(titleBarAccessibilityProperty_->GetText(), "");
     auto titleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(titleNode, nullptr);

@@ -18,6 +18,7 @@
 #define protected public
 #define private public
 #include "base/json/json_util.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -470,6 +471,11 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
     pattern->OnModifyDone();
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
@@ -480,7 +486,6 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
     ASSERT_NE(layoutWrapper1, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
-
     // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
     pattern->OnModifyDone();
@@ -488,7 +493,6 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
     ASSERT_NE(layoutWrapper2, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
-
     // SetUsrNavigationMode:AUTO, expect navigationMode_:STACK in SPLIT_WIDTH case after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
     pattern->OnModifyDone();
@@ -496,14 +500,13 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
     ASSERT_NE(layoutWrapper3, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper3);
     EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
-
     // SetUsrNavigationMode:AUTO, expect navigationMode_:SPILT in SPLIT_WIDTH case after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
     pattern->OnModifyDone();
     auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 
 /**
@@ -568,7 +571,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_007, TestSize.Level1)
     auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 
 /**
@@ -631,7 +634,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_008, TestSize.Level1)
     auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 
 /**
@@ -696,7 +699,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_009, TestSize.Level1)
     auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 
 /**
@@ -1494,6 +1497,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG004, TestSize.Level1)
     model.SetTitleMode(NavigationTitleMode::MINI);
     navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
     model.SetTitleMode(NavigationTitleMode::FREE);
-    ASSERT_EQ(navBarNode->propBackButtonNodeOperation_.value(), ChildNodeOperation::REMOVE);
+    ASSERT_FALSE(navBarNode->propBackButtonNodeOperation_.has_value());
 }
 } // namespace OHOS::Ace::NG

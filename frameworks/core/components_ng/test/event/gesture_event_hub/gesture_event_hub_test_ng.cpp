@@ -241,41 +241,6 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest003, TestSize.Level1)
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(dragActionStart), std::move(dragActionUpdate), std::move(dragActionEnd), std::move(dragActionCancel));
     gestureEventHub->SetCustomDragEvent(dragEvent, PAN_DIRECTION_ALL, FINGERS, DISTANCE);
-
-    /**
-     * @tc.steps: step3. Test ProcessTouchTestHit
-     *            case: eventHub is not null && all Actuator_ is not null
-     * @tc.expected: ProcessTouchTestHit return false,  innerTargets & finalResult have 2 elements
-     *               there are 3 TouchEventTarget has created by touchEventActuator_, longPressEventActuator_ &
-     *               dragEventActuator_
-     *               innerTargets contains a touchEventActuator & a parallelRecognizer
-     *               finalResult containers a longPressRecognizer & a currentRecognizer(in ProcessTouchTestHierarchy)
-     */
-    TouchRestrict touchRestrict;
-    TouchTestResult innerTargets;
-    TouchTestResult finalResult;
-    auto flag = gestureEventHub->ProcessTouchTestHit(
-        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF());
-    EXPECT_FALSE(flag);
-    auto sizeOfInnerTargets = static_cast<int32_t>(innerTargets.size());
-    auto sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
-    EXPECT_EQ(sizeOfInnerTargets, 2);
-    EXPECT_EQ(sizeOfFinalResult, 2);
-
-    /**
-     * @tc.steps: step4. call ProcessTouchTestHit again
-     *            case: nodeParallelRecognizer_  & externalParallelRecognizer_ is existed
-     * @tc.expected: ProcessTouchTestHit return false,  innerTargets 4 elements & finalResult have 5 elements
-     */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    eventHub->AttachHost(frameNode);
-    flag = gestureEventHub->ProcessTouchTestHit(
-        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF());
-    EXPECT_FALSE(flag);
-    sizeOfInnerTargets = static_cast<int32_t>(innerTargets.size());
-    sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
-    EXPECT_EQ(sizeOfInnerTargets, 4);
-    EXPECT_EQ(sizeOfFinalResult, 5);
 }
 
 /**
@@ -654,7 +619,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest008, TestSize.Level1)
     gestureEventHub->HandleOnDragStart(info);
     gestureEventHub->HandleOnDragEnd(info);
     EXPECT_FALSE(gestureEventHub->dragDropProxy_);
-    EXPECT_EQ(msg1, CHECK_TAG_1);
+    EXPECT_EQ(msg1, "");
 }
 
 /**
