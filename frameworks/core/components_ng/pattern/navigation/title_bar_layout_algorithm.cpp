@@ -183,8 +183,8 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         return;
     }
 
-    auto occupiedWidth = defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L * 2 +
-        defaultPaddingStart_;
+    auto occupiedWidth =
+        defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L * 2 + defaultPaddingStart_;
     constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
     titleWrapper->Measure(constraint);
 }
@@ -325,7 +325,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
         if (!navBarNode->GetPrevTitleIsCustomValue(false)) {
             OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
-            static_cast<float>(menuHeight_.ConvertToPx()) + offsetY);
+                static_cast<float>(menuHeight_.ConvertToPx()) + offsetY);
             geometryNode->SetMarginFrameOffset(titleOffset);
         }
         titleWrapper->Layout();
@@ -343,7 +343,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         if (!textLayoutProperty) {
             // current title mode is Navigation common title
             OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
-            static_cast<float>(menuHeight_.ConvertToPx()) + offsetY);
+                static_cast<float>(menuHeight_.ConvertToPx()) + offsetY);
             geometryNode->SetMarginFrameOffset(titleOffset);
             titleWrapper->Layout();
             return;

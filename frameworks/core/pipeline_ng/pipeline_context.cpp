@@ -20,9 +20,6 @@
 #include <cstdint>
 #include <memory>
 
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/safe_area_insets.h"
-
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -59,6 +56,7 @@
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -66,6 +64,8 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
@@ -953,21 +953,19 @@ bool PipelineContext::OnBackPressed()
                 result = false;
                 return;
             }
-            if (context->GetNavDestinationBackButtonNode()) {
-                auto navDestinationNode =
-                    AceType::DynamicCast<NavDestinationGroupNode>(context->GetNavDestinationBackButtonNode());
-                if (navDestinationNode->GetNavDestinationBackButtonEvent()) {
-                    GestureEvent gestureEvent;
-                    navDestinationNode->GetNavDestinationBackButtonEvent()(gestureEvent);
-                    result = true;
-                }
+            auto navDestinationNode =
+                AceType::DynamicCast<NavDestinationGroupNode>(context->GetNavDestinationBackButtonNode());
+            if (navDestinationNode && navDestinationNode->GetNavDestinationBackButtonEvent()) {
+                GestureEvent gestureEvent;
+                navDestinationNode->GetNavDestinationBackButtonEvent()(gestureEvent);
+                result = true;
             }
         },
         TaskExecutor::TaskType::UI);
 
     if (result) {
         // user accept
-        LOGI("CallRouterBackToPopPage(): frontend accept");
+        LOGI("CallRouterBackToPopPage(): navDestination accept");
         return true;
     }
 
@@ -997,24 +995,8 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
     auto lastPage = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(lastPage, nullptr);
     auto navigationNode = lastPage->FindChildNodeOfClass<NavigationGroupNode>();
-    CHECK_NULL_RETURN(navigationNode, nullptr);
-    auto navigationContentNode = navigationNode->GetContentNode();
-    CHECK_NULL_RETURN(navigationContentNode, nullptr);
-    auto navDestinationNode = navigationContentNode->FindChildNodeOfClass<NavDestinationGroupNode>();
-    CHECK_NULL_RETURN(navDestinationNode, nullptr);
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleBarNode, nullptr);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-    CHECK_NULL_RETURN(backButtonNode, nullptr);
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-    if (!backButtonLayoutProperty->HasVisibility()) {
-        return nullptr;
-    }
-
-    if (backButtonLayoutProperty->GetVisibilityValue() != VisibleType::VISIBLE) {
-        return nullptr;
-    }
-    return navDestinationNode;
+    CHECK_NULL_RETURN_NOLOG(navigationNode, nullptr);
+    return navigationNode->GetNavDestinationNodeToHandleBack();
 }
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive)
@@ -1277,8 +1259,8 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
              event.action == MouseAction::MOVE) &&
             (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
-        (container && container->IsScenceBoardWindow() && (event.pullAction == MouseAction::PULL_MOVE ||
-        event.pullAction == MouseAction::PULL_UP))) {
+        (container && container->IsScenceBoardWindow() &&
+            (event.pullAction == MouseAction::PULL_MOVE || event.pullAction == MouseAction::PULL_UP))) {
         auto touchPoint = event.CreateTouchPoint();
         OnTouchEvent(touchPoint);
     }

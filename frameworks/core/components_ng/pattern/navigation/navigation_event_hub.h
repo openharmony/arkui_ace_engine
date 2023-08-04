@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_EVENT_HUB_H
 
+#include <optional>
+
 #include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,16 +48,27 @@ public:
         onNavBarStateChangeEvent_ = changeEvent;
     }
 
-    void FireNavBarStateChangeEvent(bool isVisible) const
+    void FireNavBarStateChangeEvent(bool isVisible)
     {
-        if (onNavBarStateChangeEvent_) {
-            onNavBarStateChangeEvent_(isVisible);
+        if (isVisible_.has_value()) {
+            if (isVisible_.value() != isVisible) {
+                if (onNavBarStateChangeEvent_) {
+                    onNavBarStateChangeEvent_(isVisible);
+                }
+            }
+        } else {
+            if (onNavBarStateChangeEvent_) {
+                onNavBarStateChangeEvent_(isVisible);
+            }
         }
+        isVisible_ = isVisible;
     }
 
 private:
     OnTitleModeChangeEvent onTitleModeChangeEvent_;
     OnNavBarStateChangeEvent onNavBarStateChangeEvent_;
+
+    std::optional<bool> isVisible_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -79,16 +79,10 @@ public:
         navDestinationNode_ = navDestinationNode;
     }
 
-    const RefPtr<UINode>& GetNavDestinationNode() const
+    RefPtr<UINode> GetNavDestinationNode()
     {
-        return navDestinationNode_;
+        return navDestinationNode_.Upgrade();
     }
-
-    void ResetNavDestinationNode()
-    {
-        navDestinationNode_.Reset();
-    }
-
 
     void SetRouteInfo(const RefPtr<RouteInfo>& routeInfo)
     {
@@ -114,24 +108,13 @@ public:
     {
         return isOnShow_;
     }
-    
-    void SetIsUnderNavRouter(bool isUnderNavRouter)
-    {
-        isUnderNavRouter_ = isUnderNavRouter;
-    }
-
-    bool GetIsUnderNavRouter()
-    {
-        return isUnderNavRouter_;
-    }
 
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
     RefPtr<RouteInfo> routeInfo_;
-    RefPtr<UINode> navDestinationNode_;
+    WeakPtr<UINode> navDestinationNode_;
     bool isOnShow_ = false;
-    bool isUnderNavRouter_ = false;
 };
 
 } // namespace OHOS::Ace::NG
