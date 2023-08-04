@@ -133,31 +133,32 @@ bool CheckJSCallbackInfo(
     }
     bool typeVerified = false;
     std::string unrecognizedType;
+    auto tmpInfo = info[0];
     for (const auto& infoType : infoTypes) {
         switch (infoType) {
             case JSCallbackInfoType::STRING:
-                if (info[0]->IsString()) {
+                if (tmpInfo->IsString()) {
                     typeVerified = true;
                 } else {
                     unrecognizedType += "string|";
                 }
                 break;
             case JSCallbackInfoType::NUMBER:
-                if (info[0]->IsNumber()) {
+                if (tmpInfo->IsNumber()) {
                     typeVerified = true;
                 } else {
                     unrecognizedType += "number|";
                 }
                 break;
             case JSCallbackInfoType::OBJECT:
-                if (info[0]->IsObject()) {
+                if (tmpInfo->IsObject()) {
                     typeVerified = true;
                 } else {
                     unrecognizedType += "object|";
                 }
                 break;
             case JSCallbackInfoType::FUNCTION:
-                if (info[0]->IsFunction()) {
+                if (tmpInfo->IsFunction()) {
                     typeVerified = true;
                 } else {
                     unrecognizedType += "Function|";

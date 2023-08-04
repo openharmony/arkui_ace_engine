@@ -63,12 +63,20 @@ TextPattern::~TextPattern()
 
 void TextPattern::OnAttachToFrameNode()
 {
-    if (PipelineContext::GetCurrentContext() &&
-        PipelineContext::GetCurrentContext()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
         host->GetRenderContext()->UpdateClipEdge(true);
     }
+    InitSurfaceChangedCallback();
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    host->SetDraggable(theme->GetDraggable());
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextAlign(TextAlign::START);
+    textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
 }
 
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)

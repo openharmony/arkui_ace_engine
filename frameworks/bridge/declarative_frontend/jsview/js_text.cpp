@@ -100,10 +100,11 @@ void JSText::SetFont(const JSCallbackInfo& info)
 
 void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
 {
-    if (!info[0]->IsObject()) {
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsObject()) {
         return;
     }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
     auto fontSize = paramObject->GetProperty("size");
     CalcDimension size;
     if (!JSContainerBase::ParseJsDimensionFp(fontSize, size) || fontSize->IsNull()) {
@@ -227,14 +228,13 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
 {
     do {
-        if (!info[0]->IsObject()) {
-            LOGI("info[0] not is Object");
+        auto tmpInfo = info[0];
+        if (!tmpInfo->IsObject()) {
             break;
         }
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
         JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
         if (!overflowValue->IsNumber()) {
-            LOGI("overflow value is not a number");
             break;
         }
         auto overflow = overflowValue->ToNumber<int32_t>();
@@ -384,11 +384,11 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 void JSText::SetDecoration(const JSCallbackInfo& info)
 {
     do {
-        if (!info[0]->IsObject()) {
-            LOGI("info[0] not is Object");
+        auto tmpInfo = info[0];
+        if (!tmpInfo->IsObject()) {
             break;
         }
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
         JSRef<JSVal> typeValue = obj->GetProperty("type");
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -484,8 +484,9 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
         return;
     }
     auto copyOptions = CopyOptions::None;
-    if (info[0]->IsNumber()) {
-        auto emunNumber = info[0]->ToNumber<int>();
+    auto tmpInfo = info[0];
+    if (tmpInfo->IsNumber()) {
+        auto emunNumber = tmpInfo->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
     TextModel::GetInstance()->SetCopyOption(copyOptions);
@@ -581,29 +582,32 @@ void JSText::JsOnDrop(const JSCallbackInfo& info)
 
 void JSText::JsFocusable(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsBoolean()) {
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
         LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
-    JSInteractableView::SetFocusable(info[0]->ToBoolean());
+    JSInteractableView::SetFocusable(tmpInfo->ToBoolean());
     JSInteractableView::SetFocusNode(false);
 }
 
 void JSText::JsDraggable(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsBoolean()) {
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
         LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
-    TextModel::GetInstance()->SetDraggable(info[0]->ToBoolean());
+    TextModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
 }
 
 void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsArray()) {
+        auto tmpInfo = info[0];
+        if (tmpInfo->IsArray()) {
             std::vector<NG::MenuOptionsParam> menuOptionsItems;
-            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
+            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(tmpInfo), menuOptionsItems);
             TextModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
         }
     } else {
