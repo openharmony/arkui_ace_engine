@@ -502,6 +502,33 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
+    template<typename T>
+    RefPtr<T> FindFocusChildNodeOfClass()
+    {
+        const auto& children = GetChildren();
+        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+            auto& child = *iter;
+            auto target = DynamicCast<FrameNode>(child->FindChildNodeOfClass<T>());
+            if (target) {
+                auto focusEvent = target->eventHub_->GetFocusHub();
+                if (focusEvent && focusEvent->IsCurrentFocus()) {
+                    return AceType::DynamicCast<T>(target);
+                }
+            }
+        }
+
+        if (AceType::InstanceOf<T>(this)) {
+            auto target = DynamicCast<FrameNode>(this);
+            if (target) {
+                auto focusEvent = target->eventHub_->GetFocusHub();
+                if (focusEvent && focusEvent->IsCurrentFocus()) {
+                    return Claim(AceType::DynamicCast<T>(this));
+                }
+            }
+        }
+        return nullptr;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -553,7 +580,6 @@ private:
 
     // set costom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
-
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

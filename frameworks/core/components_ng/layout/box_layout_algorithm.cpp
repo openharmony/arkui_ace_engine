@@ -117,6 +117,9 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
             float maxWidth = 0.0f;
             float maxHeight = 0.0f;
             for (const auto& child : childList) {
+                if (!child) {
+                    continue;
+                }
                 auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
                 if (maxWidth < childSize.Width()) {
                     maxWidth = childSize.Width();

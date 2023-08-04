@@ -33,11 +33,14 @@ public:
         onStateChangeEvent_ = changeEvent;
     }
 
-    void FireChangeEvent(bool isActivated) const
+    void FireChangeEvent(bool isActivated)
     {
-        if (onStateChangeEvent_) {
-            onStateChangeEvent_(isActivated);
+        if (isActivated_ != isActivated) {
+            if (onStateChangeEvent_) {
+                onStateChangeEvent_(isActivated);
+            }
         }
+        isActivated_ = isActivated;
     }
 
     void SetOnShown(const std::function<void()>& onShown)
@@ -87,6 +90,8 @@ private:
     std::function<void()> onShownEvent_;
     std::function<void()> onHiddenEvent_;
     std::function<bool()> onBackPressedEvent_;
+
+    bool isActivated_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -126,9 +126,6 @@ void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
         CHECK_NULL_VOID(layoutProperty);
         auto navigationPattern = navigation->GetPattern<NavigationPattern>();
         CHECK_NULL_VOID(navigationPattern);
-        if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
-            layoutProperty->UpdateDestinationChange(true);
-        }
         navRouter->AddNavDestinationToNavigation(navigation);
     };
     auto eventHub = GetEventHub<NavRouterEventHub>();
@@ -154,6 +151,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     auto navigationStack = navigationPattern->GetNavigationStack();
     auto routeInfo = navRouterPattern->GetRouteInfo();
     std::string name;
+    auto navRouteMode = navRouterPattern->GetNavRouteMode();
     if (!navDestination && routeInfo) {
         // create navDestination with routeInfo
         name = routeInfo->GetName();
@@ -165,13 +163,14 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(name);
         navDestinationPattern->SetNavDestinationNode(uiNode);
-        navDestinationPattern->SetIsUnderNavRouter(true);
         navDestinationPattern->SetRouteInfo(routeInfo);
         navRouterPattern->SetNavDestination(name);
     } else if (navDestination) {
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         name = navDestinationPattern->GetName();
+        // process shallowBuilder
+        navDestination->ProcessShallowBuilder();
     }
     CHECK_NULL_VOID(navDestination);
     // the one at the top of the stack
@@ -179,7 +178,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
     if (currentNavDestination && currentNavDestination != navDestination) {
         auto destinationContent = currentNavDestination->GetContentNode();
-        if (destinationContent) {
+        if (destinationContent && (navRouteMode != NavRouteMode::PUSH)) {
             auto navDestinationPattern = currentNavDestination->GetPattern<NavDestinationPattern>();
             CHECK_NULL_VOID(navDestinationPattern);
             auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
@@ -187,7 +186,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
             shallowBuilder->MarkIsExecuteDeepRenderDone(false);
             destinationContent->Clean();
         }
-        navigationNode->SetOnStateChangeFalse(currentNavDestination, navDestination);
     }
 
     auto parentNode = GetParent();
@@ -201,28 +199,26 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     auto navBarNode = AceType::DynamicCast<NavBarNode>(parentNode);
     auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
     CHECK_NULL_VOID(navigationContentNode);
-    auto navRouteMode = navRouterPattern->GetNavRouteMode();
     // deal with split mode without user provided navigation stack
     if (navBarNode && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT &&
         !navigationPattern->GetNavigationStackProvided()) {
-        navigationContentNode->Clean();
         navigationPattern->CleanStack();
     }
     // remove if this navDestinationNode is already in the NavigationStack and not at the top, as the latter will
     // later be modified by NavRouteMode
     navigationPattern->RemoveIfNeeded(name, navDestination);
 
-    navigationContentNode->AddChild(navDestination);
     if (routeInfo) {
         navigationPattern->AddNavDestinationNode(name, navDestination, navRouteMode, routeInfo);
     } else {
         navigationPattern->AddNavDestinationNode(navRouterPattern->GetNavDestination(), navDestination, navRouteMode);
     }
 
-    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    navigationNode->MarkModifyDone();
-    navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    // when js navigationStack is provided, modifyDone will be called by state manager.
+    if (!navigationPattern->GetNavigationStackProvided()) {
+        navigationNode->MarkModifyDone();
+        navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 bool NavRouterGroupNode::CleanNodeInNavigation(const RefPtr<UINode>& parent)
