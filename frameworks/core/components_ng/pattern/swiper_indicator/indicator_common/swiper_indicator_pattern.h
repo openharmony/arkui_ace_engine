@@ -165,6 +165,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void HandleLongDragUpdate(const TouchLocationInfo& info);
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
+    float HandleTouchClickMargin();
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
