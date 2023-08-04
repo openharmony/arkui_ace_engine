@@ -42,7 +42,7 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
                    keyEvent.code == KeyCode::KEY_MOVE_END) {
             HandleDirectionalKey(keyEvent);
             return true;
-        } else if (keyEvent.IsNumberKey()) {
+        } else if (keyEvent.IsNumberKey() && !keyEvent.IsCombinationKey()) {
             appendElement = keyEvent.ConvertCodeToString();
         } else if (keyEvent.code == KeyCode::KEY_INSERT) {
             if (keyEvent.IsShiftWith(KeyCode::KEY_INSERT)) {
@@ -73,7 +73,7 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
             } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
                        keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
                 pattern->HandleOnCut();
-            } else {
+            } else if (!keyEvent.IsCombinationKey()) {
                 appendElement = keyEvent.ConvertCodeToString();
             }
         }
