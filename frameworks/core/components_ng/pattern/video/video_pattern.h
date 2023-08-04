@@ -15,7 +15,6 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
-
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
@@ -99,7 +98,7 @@ public:
         return loop_;
     }
 
-    bool IsFullScreen() const;
+    virtual bool IsFullScreen();
 
     void UpdateProgressRate(double progressRate)
     {
@@ -214,6 +213,8 @@ public:
     {
         lastBoundsRect_.SetRect(0.0f, 0.0f, 0.0f, 0.0f);
     }
+
+    RefPtr<VideoPattern> GetTargetVideoPattern();
 
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
