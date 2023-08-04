@@ -33,6 +33,8 @@ public:
     virtual void SetPrevLabel(const std::string& leftLabel) = 0;
     virtual void SetNextLabel(const std::string& rightLabel) = 0;
     virtual void SetStatus(const std::string& labelStatus) = 0;
+    virtual void ResetPrevLabel() {}
+    virtual void ResetNextLabel() {}
 
 private:
     static std::unique_ptr<StepperItemModel> instance_;
