@@ -24,6 +24,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
 
@@ -34,6 +35,8 @@ constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
 constexpr Dimension MENU_END_ICON_WIDTH = 12.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
+constexpr Dimension DEFAULT_MENU_WIDTH = 0.0_vp;
+constexpr Dimension MIN_MENU_WIDTH = 64.0_vp;
 
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
@@ -86,6 +89,7 @@ public:
             theme->titleTopPadding_ = Dimension(8.0, DimensionUnit::VP);
             theme->titleRightPadding_ = Dimension(8.0, DimensionUnit::VP);
             theme->titleBottomPadding_ = Dimension(16.0, DimensionUnit::VP);
+            theme->menuWidth_ = Dimension(0.0, DimensionUnit::VP);
             theme->titleStyle_.SetFontSize(themeConstants->GetDimension(THEME_OHOS_TEXT_SIZE_HEADLINE7));
             std::vector<std::string> families;
             families.emplace_back("sans-serif");
@@ -252,8 +256,12 @@ public:
         theme->selectedColorText_ = selectedColorText_;
         theme->lineColor_ = lineColor_;
         theme->optionTextStyle_ = optionTextStyle_;
+        theme->menuWidth_ = menuWidth_;
+        theme->ChangeBorderRadius_ = ChangeBorderRadius_;
         theme->selectBorderRadius_ = selectBorderRadius_;
         theme->menuBorderRadius_ = menuBorderRadius_;
+        theme->menuScrollTag_ = menuScrollTag_;
+        theme->menuScrollNodeId_ = menuScrollNodeId_;
         theme->innerBorderRadius_ = innerBorderRadius_;
         theme->menuFontSize_ = menuFontSize_;
         theme->menuTitleFontSize_ = menuTitleFontSize_;
@@ -671,9 +679,45 @@ public:
         return menuBorderRadius_;
     }
 
+    const NG::BorderRadiusProperty& GetChangeBorderRadius() const
+    {
+        return ChangeBorderRadius_;
+    }
+
+    void SetChangeBorderRadius(const NG::BorderRadiusProperty& radius)
+    {
+        ChangeBorderRadius_ = radius;
+    }
+
+    void SetMenuScrollId(const std::string& tag, int32_t nodeId)
+    {
+        menuScrollTag_ = tag;
+        menuScrollNodeId_ = nodeId;
+    }
+
+    const std::string& GetMenuScrollTag() const
+    {
+        return menuScrollTag_;
+    }
+
+    int32_t GetMenuScrollNodeId() const
+    {
+        return menuScrollNodeId_;
+    }
+
     const Dimension& GetInnerBorderRadius() const
     {
         return innerBorderRadius_;
+    }
+
+    const Dimension& GetMenuWidth() const
+    {
+        return menuWidth_;
+    }
+
+    void SetMenuWidth(const Dimension& width)
+    {
+        menuWidth_ = width;
     }
 
     const Dimension& GetMenuFontSize() const
@@ -835,6 +879,8 @@ private:
     std::string fontFamily_;
     FontWeight fontWeight_ { FontWeight::NORMAL };
     TextDecoration textDecoration_ { TextDecoration::NONE };
+    std::string menuScrollTag_;
+    int32_t menuScrollNodeId_ = -1;
 
     std::size_t optionSize_ { 0 };
     Dimension rrectSize_;
@@ -858,6 +904,8 @@ private:
 
     Dimension selectBorderRadius_;
     Dimension menuBorderRadius_;
+    Dimension menuWidth_;
+    NG::BorderRadiusProperty ChangeBorderRadius_;
     Dimension innerBorderRadius_;
     Dimension menuFontSize_;
     Dimension menuTitleFontSize_;

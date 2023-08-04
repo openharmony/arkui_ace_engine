@@ -174,6 +174,7 @@ void InnerMenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    SetMenuAttribute(host);
     UpdateMenuItemChildren(host);
     SetAccessibilityAction();
 }
@@ -261,6 +262,31 @@ void MenuPattern::RemoveParentHoverStyle()
     CHECK_NULL_VOID(theme);
     menuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
     menuItemPattern->PlayBgColorAnimation();
+}
+
+void MenuPattern::SetMenuAttribute(RefPtr<FrameNode>& host)
+{
+    auto layoutProperty = host->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!layoutProperty->GetMenuWidth().has_value()) {
+        theme->SetMenuWidth(DEFAULT_MENU_WIDTH);
+    } else {
+        theme->SetMenuWidth(layoutProperty->GetMenuWidth().value());
+    }
+
+    BorderRadiusProperty borderRadius;
+    if (!layoutProperty->GetBorderRadius().has_value()) {
+        auto defaultRadius = theme->GetMenuBorderRadius();
+        borderRadius.SetRadius(defaultRadius);
+        theme->SetChangeBorderRadius(borderRadius);
+    } else {
+        borderRadius = layoutProperty->GetBorderRadius().value();
+        theme->SetChangeBorderRadius(borderRadius);
+    }
 }
 
 void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
@@ -571,7 +597,34 @@ void MenuPattern::SetAccessibilityAction()
 
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    return false;
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+        return false;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto scroll = FrameNode::GetFrameNode(theme->GetMenuScrollTag(), theme->GetMenuScrollNodeId());
+    CHECK_NULL_RETURN(scroll, false);
+    auto renderScroll = scroll->GetRenderContext();
+    CHECK_NULL_RETURN(renderScroll, false);
+    auto renderContext = dirty->GetHostNode()->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+
+    auto borderRadius = theme->GetChangeBorderRadius();
+    auto TopRadius = borderRadius.radiusTopLeft.value() + borderRadius.radiusTopRight.value();
+    auto bottomRadius = borderRadius.radiusBottomLeft.value() + borderRadius.radiusBottomRight.value();
+    auto menuRadius = std::max(TopRadius.ConvertToVp(), bottomRadius.ConvertToVp());
+    auto idealSize = dirty->GetGeometryNode()->GetMarginFrameSize();
+    if (LessOrEqual(menuRadius, idealSize.Width())) {
+        renderContext->UpdateBorderRadius(borderRadius);
+    } else {
+        auto defaultRadius = theme->GetMenuBorderRadius();
+        borderRadius.SetRadius(defaultRadius);
+        theme->SetChangeBorderRadius(borderRadius);
+    }
+    renderScroll->UpdateBorderRadius(borderRadius);
+    return true;
 }
 
 

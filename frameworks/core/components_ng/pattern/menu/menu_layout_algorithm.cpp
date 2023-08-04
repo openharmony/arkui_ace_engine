@@ -656,9 +656,27 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     } else {
         columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
     }
-    // set max width
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto menuWidth = theme->GetMenuWidth().ConvertToPxWithSize(wrapperSize_.Width());
+    if (LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth)) {
+        if (LessNotEqual(menuWidth, wrapperSize_.Width())) {
+            theme->SetMenuWidth(Dimension(menuWidth, DimensionUnit::PX));
+            constraint.maxSize.SetWidth(menuWidth);
+            constraint.minSize.SetWidth(MIN_MENU_WIDTH.ConvertToPx());
+            return;
+        } else {
+            theme->SetMenuWidth(DEFAULT_MENU_WIDTH);
+        }
+
+    }
+
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
+    // set max width
     const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
     auto maxHorizontalSpace = std::max(leftSpace_, rightSpace_) - 2.0f * padding.Width();
     auto maxWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
@@ -675,6 +693,7 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     } else {
         minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     }
+
     if (minWidth > constraint.maxSize.Width()) {
         minWidth = constraint.maxSize.Width();
     }

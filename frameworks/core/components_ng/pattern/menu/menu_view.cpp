@@ -118,11 +118,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
     props->UpdatePadding(padding);
     node->MountToParent(scroll);
-    auto renderContext = scroll->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
-    renderContext->UpdateBorderRadius(borderRadius);
+    theme->SetMenuScrollId(scroll->GetTag(), scroll->GetId());
     return scroll;
 }
 

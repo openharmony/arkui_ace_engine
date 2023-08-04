@@ -61,16 +61,22 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
     MeasureRow(leftRow, childConstraint);
-    float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
+    float leftRowWidth = leftRow->GetGeometryNode()->GetContentSize().Width();
+    float menuWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
 
     if (!layoutConstraint->selfIdealSize.Width().has_value()) {
         float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
-        layoutConstraint->selfIdealSize.SetWidth(std::max(minRowWidth, contentWidth));
+        if (leftRowWidth == menuWidth) {
+            layoutConstraint->selfIdealSize.SetWidth(std::max(minRowWidth, contentWidth));
+        } else {
+            layoutConstraint->selfIdealSize.SetWidth(menuWidth);
+        }
         props->UpdateLayoutConstraint(layoutConstraint.value());
     } else if (layoutConstraint->selfIdealSize.Width().value() >= layoutConstraint->maxSize.Width()) {
         layoutConstraint->selfIdealSize.SetWidth(layoutConstraint->maxSize.Width());
         props->UpdateLayoutConstraint(layoutConstraint.value());
     }
+    
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 }
 
@@ -136,6 +142,13 @@ void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const
         roWHeight = std::max(roWHeight, childSize.Height());
     }
     rowWidth -= iconContentPadding;
-    row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, roWHeight));
+    auto menuWidth = static_cast<float>(theme->GetMenuWidth().ConvertToPx());
+    if (GreatOrEqual(menuWidth, MIN_MENU_WIDTH.ConvertToPx())) {
+        menuWidth -= iconContentPadding;
+        row->GetGeometryNode()->SetFrameSize(SizeF(menuWidth, roWHeight));
+    } else {
+        row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, roWHeight));
+    }
+    row->GetGeometryNode()->SetContentSize(SizeF(rowWidth, roWHeight));
 }
 } // namespace OHOS::Ace::NG
