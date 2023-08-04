@@ -1702,7 +1702,8 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
     CreateScroll(Axis::VERTICAL, std::move(event));
     pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Resume();
-    auto onScrollCallback = pattern_->scrollableEvent_->GetScrollPositionCallback();
+    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
+    auto onScrollCallback = scrollable->callback_;
     EXPECT_TRUE(onScrollCallback(-100.f, SCROLL_FROM_START));
     EXPECT_TRUE(pattern_->animator_->IsStopped());
     EXPECT_FALSE(isTrigger);

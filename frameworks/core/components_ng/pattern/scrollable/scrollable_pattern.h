@@ -152,6 +152,14 @@ public:
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
     }
 
+    void SetScrollFrameBeginCallback(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
+    {
+        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID_NOLOG(scrollable);
+        scrollable->SetOnScrollFrameBegin(scrollFrameBeginCallback);
+    }
+
     bool IsScrollableSpringEffect() const
     {
         CHECK_NULL_RETURN_NOLOG(scrollEffect_, false);

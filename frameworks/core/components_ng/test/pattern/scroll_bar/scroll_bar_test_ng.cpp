@@ -242,8 +242,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest002, TestSize.Level1)
      */
     pattern->OnModifyDone();
     EXPECT_EQ(pattern->axis_, Axis::HORIZONTAL);
-    EXPECT_NE(pattern->scrollableEvent_, nullptr);
-    auto callback = pattern->scrollableEvent_->GetScrollPositionCallback();
+    auto callback = pattern->scrollPositionCallback_;
     EXPECT_NE(callback, nullptr);
     auto ret = callback(0.0, SCROLL_FROM_START);
     EXPECT_EQ(ret, true);
@@ -355,7 +354,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest003, TestSize.Level1)
     EXPECT_NE(scrollBarProxy, nullptr);
     pattern->SetScrollBarProxy(scrollBarProxy);
     EXPECT_NE(pattern->scrollBarProxy_, nullptr);
-    auto callback = pattern->scrollableEvent_->GetScrollPositionCallback();
+    auto callback = pattern->scrollPositionCallback_;
     EXPECT_NE(callback, nullptr);
     pattern->scrollableDistance_ = SCROLL_BAR_FLOAT_100;
     auto ret = callback(1.0, SCROLL_FROM_BAR);
@@ -734,7 +733,7 @@ HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
      */
     pattern->OnModifyDone();
     ASSERT_NE(pattern->scrollableEvent_, nullptr);
-    auto callback = pattern->scrollableEvent_->GetScrollEndCallback();
+    auto callback = pattern->scrollEndCallback_;
     ASSERT_NE(callback, nullptr);
     EXPECT_EQ(pattern->scrollEndAnimator_, nullptr);
 

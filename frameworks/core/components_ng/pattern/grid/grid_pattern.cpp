@@ -89,13 +89,10 @@ void GridPattern::InitScrollableEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gridEventHub = host->GetEventHub<GridEventHub>();
-    auto onScrollFrameBegin = gridEventHub->GetOnScrollFrameBegin();
-    auto scrollableEvent = GetScrollableEvent();
-    CHECK_NULL_VOID(scrollableEvent);
-    if (onScrollFrameBegin) {
-        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
-    }
+    auto eventHub = host->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
+    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
 }
 
 void GridPattern::OnModifyDone()
