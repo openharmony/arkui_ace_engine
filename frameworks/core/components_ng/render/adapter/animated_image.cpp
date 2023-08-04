@@ -117,6 +117,12 @@ AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string 
     animator_->Play();
 }
 
+AnimatedImage::~AnimatedImage()
+{
+    // animator has to destruct on UI thread
+    ImageUtils::PostToUI([animator = animator_]() mutable { animator.Reset(); });
+}
+
 void AnimatedImage::ControlAnimation(bool play)
 {
     (play) ? animator_->Play() : animator_->Pause();
