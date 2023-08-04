@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -162,6 +163,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     float prevStartOffset = startMainPos_;
     float prevEndOffset = endMainPos_ - contentMainSize_;
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
+    contentStartOffset_ = listLayoutAlgorithm->GetContentStartOffset();
+    contentEndOffset_ = listLayoutAlgorithm->GetContentEndOffset();
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
@@ -463,6 +466,8 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
+    listLayoutAlgorithm->SetContentStartOffset(contentStartOffset_);
+    listLayoutAlgorithm->SetContentEndOffset(contentEndOffset_);
     if (IsOutOfBoundary(false) && scrollState_ != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
@@ -821,7 +826,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
             return list->contentMainSize_ / 2.0f + endItemHeight / 2.0f - (endPos - startPos);
         }
-        return list->contentMainSize_ - (endPos - startPos);
+        return list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
     });
     scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
@@ -832,7 +837,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
             return list->contentMainSize_ / 2.0f - startItemHeight / 2.0f;
         }
 
-        return 0.0;
+        return list->contentStartOffset_;
     });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
@@ -843,7 +848,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
             return list->contentMainSize_ / 2.0f + endItemHeight / 2.0f - (endPos - startPos);
         }
-        return list->contentMainSize_ - (endPos - startPos);
+        return list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
     });
     scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
@@ -854,7 +859,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
             return list->contentMainSize_ / 2.0f - startItemHeight / 2.0f;
         }
 
-        return 0.0;
+        return list->contentStartOffset_;
     });
 }
 

@@ -65,6 +65,8 @@ public:
     ACE_DEFINE_COMPONENT_PROP(HasHeight, bool, false);
     ACE_DEFINE_COMPONENT_PROP(HasWidth, bool, false);
     ACE_DEFINE_COMPONENT_PROP(Sticky, StickyStyle, StickyStyle::NONE);
+    ACE_DEFINE_COMPONENT_PROP(ContentStartOffset, float, 0.0f);
+    ACE_DEFINE_COMPONENT_PROP(ContentEndOffset, float, 0.0f);
 
     ACE_DEFINE_COMPONENT_EVENT(OnScroll, void(Dimension, ScrollState));
     ACE_DEFINE_COMPONENT_EVENT(OnScrollIndex, void(int32_t, int32_t, int32_t));
