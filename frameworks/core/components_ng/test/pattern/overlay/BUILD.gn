@@ -298,6 +298,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid_container/mock_grid_container_layout_property.cpp",
@@ -313,6 +314,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/test/mock/base/mock_subwindow.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_drag_drop_manager.cpp",
   ]
 
   deps = [

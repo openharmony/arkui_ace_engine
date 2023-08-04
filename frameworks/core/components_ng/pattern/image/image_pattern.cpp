@@ -21,6 +21,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/image/image_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
@@ -502,6 +503,16 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    // set draggable for framenode
+    auto theme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    auto draggable = theme->GetDraggable();
+    if (draggable && !host->IsDraggable()) {
+        auto gestureHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    host->SetDraggable(draggable);
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)

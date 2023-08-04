@@ -53,11 +53,6 @@ void ImageModelNG::Create(
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(
         ImageLayoutProperty, ImageSourceInfo, CreateSourceInfo(src, pixMap, bundleName, moduleName));
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ImageTheme>();
-    CHECK_NULL_VOID(theme);
-    SetDraggable(theme->GetDraggable());
 }
 
 void ImageModelNG::SetAlt(const std::string& src)
