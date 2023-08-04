@@ -135,6 +135,7 @@ struct PreInlineState {
     RectF frameRect;
     bool setHeight = false;
     bool saveInlineState = false;
+    bool hasBorderColor = false;
 };
 
 class TextFieldPattern : public ScrollablePattern,
