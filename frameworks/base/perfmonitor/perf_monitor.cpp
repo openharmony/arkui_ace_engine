@@ -126,7 +126,9 @@ void ReportPerfEventToUI(DataBase data)
             }
             break;
         case EVENT_JANK_FRAME:
-            EventReport::ReportEventJankFrame(data);
+            if (data.totalMissed > 0) {
+                EventReport::ReportEventJankFrame(data);
+            }
             break;
         default :
             break;
@@ -234,14 +236,14 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
-    RecordBaseInfo();
     SceneRecord* record = GetRecord(sceneId);
     if (record != nullptr) {
+        RecordBaseInfo(record);
         record->Report(sceneId, mVsyncTime);
         ReportAnimateEnd(sceneId, record, !isJsApi);
         RemoveRecord(sceneId);
+        AceAsyncTraceEnd(0, sceneId.c_str());
     }
-    AceAsyncTraceEnd(0, sceneId.c_str());
 }
 
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time)
@@ -293,7 +295,7 @@ std::string PerfMonitor::GetPageUrl()
     return baseInfo.pageUrl;
 }
 
-void PerfMonitor::RecordBaseInfo()
+void PerfMonitor::RecordBaseInfo(SceneRecord* record)
 {
     baseInfo.pid = AceApplicationInfo::GetInstance().GetPid();
     baseInfo.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
@@ -301,6 +303,9 @@ void PerfMonitor::RecordBaseInfo()
     baseInfo.versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
     baseInfo.processName = AceApplicationInfo::GetInstance().GetProcessName();
     baseInfo.abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    if (record != nullptr) {
+        baseInfo.note = record->note;
+    }
 }
 
 SceneRecord* PerfMonitor::GetRecord(const std::string& sceneId)

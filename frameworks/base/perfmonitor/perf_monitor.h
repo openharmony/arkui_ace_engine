@@ -57,6 +57,7 @@ struct BaseInfo {
     std::string processName {""};
     std::string abilityName {""};
     std::string pageUrl {""};
+    std::string note {""};
 };
 
 struct DataBase {
@@ -120,7 +121,7 @@ private:
     void ReportAnimateEnd(const std::string& sceneId, SceneRecord* record, bool needCompleteTime);
     void FlushDataBase(SceneRecord* record, DataBase& data, bool needCompleteTime);
     void ReportPerfEvent(PerfEventType type, DataBase& data);
-    void RecordBaseInfo();
+    void RecordBaseInfo(SceneRecord* record);
 private:
     int64_t firstMoveTime {0};
     int64_t lastInputDownTime {0};
