@@ -31,8 +31,7 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
 void ScrollableActuator::InitializeScrollable(RefPtr<ScrollableEvent> event)
 {}
 
-bool ScrollableActuator::IsHitTestBlock() const
-{
-    return false;
-}
+void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint)
+{}
 } // namespace OHOS::Ace::NG

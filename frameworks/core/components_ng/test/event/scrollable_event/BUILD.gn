@@ -60,6 +60,7 @@ ohos_unittest("scrollable_event_test_ng") {
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_click_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_exclusive_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_gesture_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_pan_recognizer.cpp",

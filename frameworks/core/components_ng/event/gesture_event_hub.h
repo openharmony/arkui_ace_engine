@@ -300,9 +300,6 @@ public:
 
     HitTestMode GetHitTestMode() const
     {
-        if (scrollableActuator_ && scrollableActuator_->IsHitTestBlock()) {
-            return HitTestMode::HTMBLOCK;
-        }
         return hitTestMode_;
     }
 
