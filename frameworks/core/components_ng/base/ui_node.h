@@ -506,6 +506,9 @@ protected:
     virtual bool RemoveImmediately() const;
     void ResetParent();
 
+    // update visible change signal to children
+    void UpdateChildrenVisible(bool isVisible) const;
+
 protected:
     bool needCallChildrenUpdate_ = true;
 
