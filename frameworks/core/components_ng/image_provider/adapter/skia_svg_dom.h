@@ -54,17 +54,11 @@ public:
 
     // skia SVG doesn't support <animate> element
 
-    const std::optional<Color>& GetFillColor() override
-    {
-        return svgColor_;
-    }
-
 private:
     void FitImage(SkCanvas* canvas, const ImageFit& imageFit, const Size& layout);
     void FitViewPort(const Size& layout);
 
     sk_sp<SkSVGDOM> skiaDom_;
-    std::optional<Color> svgColor_;
 };
 
 } // namespace OHOS::Ace::NG

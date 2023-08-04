@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -117,6 +118,10 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(props, nullptr);
     UpdatePaintConfig(props, paintWrapper);
+    auto&& fillColor = props->GetSvgFillColor();
+    if (InstanceOf<SvgCanvasImage>(canvasImage_) && fillColor) {
+        DynamicCast<SvgCanvasImage>(canvasImage_)->SetFillColor(fillColor);
+    }
     ImagePainter imagePainter(canvasImage_);
     return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };
 }
