@@ -127,6 +127,9 @@ public:
         return skipHotArea_;
     }
 
+protected:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
