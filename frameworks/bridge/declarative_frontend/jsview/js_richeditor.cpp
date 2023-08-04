@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 
 #include <string>
+
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -494,7 +495,12 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject)
     }
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
-    if (!fontWeight->IsNull() && JSContainerBase::ParseJsString(fontWeight, weight)) {
+    if (!fontWeight->IsNull()) {
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            JSContainerBase::ParseJsString(fontWeight, weight);
+        }
         updateSpanStyle_.updateFontWeight = ConvertStrToFontWeight(weight);
         style.SetFontWeight(ConvertStrToFontWeight(weight));
     }
