@@ -68,6 +68,7 @@ void RichEditorPattern::OnModifyDone()
         AddDragFrameNodeToManager(host);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
