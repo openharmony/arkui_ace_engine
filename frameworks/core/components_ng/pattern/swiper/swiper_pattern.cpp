@@ -1490,15 +1490,19 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
         }
     }
     // property callback will call immediately.
-    auto propertyUpdateCallback = [this, offset]() {
-        for (auto& item : itemPosition_) {
+    auto propertyUpdateCallback = [swiper = WeakClaim(this), offset]() {
+        auto swiperPattern = swiper.Upgrade();
+        if (!swiperPattern) {
+            return;
+        }
+        for (auto& item : swiperPattern->itemPosition_) {
             auto frameNode = item.second.node;
             if (frameNode) {
                 frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
                 item.second.finialOffset = offset;
             }
         }
-        itemPositionInAnimation_ = itemPosition_;
+        swiperPattern->itemPositionInAnimation_ = swiperPattern->itemPosition_;
     };
     usePropertyAnimation_ = true;
     propertyAnimationIndex_ = nextIndex;
