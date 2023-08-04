@@ -92,7 +92,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
 
 void JSCheckboxGroup::Create(const JSCallbackInfo& info)
 {
-    std::optional<std::string> checkboxGroupName;
+    std::optional<std::string> checkboxGroupName = std::make_optional("");
     if ((info.Length() >= 1) && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto groupName = paramObject->GetProperty("group");
