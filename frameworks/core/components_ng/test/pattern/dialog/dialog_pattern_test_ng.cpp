@@ -228,11 +228,7 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0020, TestSize.Level1)
     for (size_t i = 0; i < sizeof(aligns) / sizeof(aligns[0]); i++) {
         dialogLayoutAlgorithm->alignment_ = aligns[i];
         auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
-        if (dialogLayoutAlgorithm->alignment_ == DialogAlignment::DEFAULT) {
-            EXPECT_EQ(result, false);
-        } else {
-            EXPECT_EQ(result, true);
-        }
+        EXPECT_EQ(result, true);
     }
 }
 

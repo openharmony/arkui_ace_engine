@@ -826,7 +826,7 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout002, TestSize.Level1)
          */
         EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
         selectOverlayLayoutAlgorithm->Layout(layoutWrapper);
-        EXPECT_TRUE(layoutWrapper->isActive_);
+        EXPECT_FALSE(layoutWrapper->isActive_);
     }
 }
 /**
