@@ -804,7 +804,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg012, TestSize.Level1)
     info.inputEventType_ = InputEventType::AXIS;
     sliderPattern->HandlingGestureEvent(info);
     EXPECT_TRUE(sliderPattern->bubbleFlag_);
-    EXPECT_TRUE(sliderPattern->AxisFlag_);
+    EXPECT_TRUE(sliderPattern->axisFlag_);
     /**
      * @tc.steps: step4. After the mouse wheel starts scrolling, move the mouse out of the slider area
      */
@@ -813,7 +813,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg012, TestSize.Level1)
     EXPECT_FALSE(sliderPattern->hotFlag_);
     EXPECT_FALSE(sliderPattern->mouseHoverFlag_);
     EXPECT_FALSE(sliderPattern->bubbleFlag_);
-    EXPECT_FALSE(sliderPattern->AxisFlag_);
+    EXPECT_FALSE(sliderPattern->axisFlag_);
     /**
      * @tc.steps: step5. When moving the mouse out of the slider area, mouse wheel starts scrolling quickly.
      * @tc.desc: SliderTips will not show.
@@ -824,7 +824,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg012, TestSize.Level1)
     EXPECT_FALSE(sliderPattern->hotFlag_);
     EXPECT_FALSE(sliderPattern->mouseHoverFlag_);
     EXPECT_FALSE(sliderPattern->bubbleFlag_);
-    EXPECT_FALSE(sliderPattern->AxisFlag_);
+    EXPECT_FALSE(sliderPattern->axisFlag_);
 }
 
 
@@ -2238,25 +2238,25 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest010, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call HandleHoverEvent hover false with mouse pressed.
-     * @tc.expected: step3. sliderPattern->bubbleFlag_ is true.
+     * @tc.expected: step3. sliderPattern->bubbleFlag_ is false.
      */
     sliderPattern->bubbleFlag_ = true;
     sliderPattern->mouseHoverFlag_ = false;
     sliderPattern->mousePressedFlag_ = true;
     sliderPattern->focusFlag_ = false;
     sliderPattern->HandleHoverEvent(false);
-    ASSERT_TRUE(sliderPattern->bubbleFlag_);
+    ASSERT_FALSE(sliderPattern->bubbleFlag_);
 
     /**
      * @tc.steps: step4. call HandleHoverEvent hover false with focus.
-     * @tc.expected: step4. sliderPattern->bubbleFlag_ is true.
+     * @tc.expected: step4. sliderPattern->bubbleFlag_ is false.
      */
     sliderPattern->bubbleFlag_ = true;
     sliderPattern->mouseHoverFlag_ = false;
     sliderPattern->mousePressedFlag_ = false;
     sliderPattern->focusFlag_ = true;
     sliderPattern->HandleHoverEvent(false);
-    ASSERT_TRUE(sliderPattern->bubbleFlag_);
+    ASSERT_FALSE(sliderPattern->bubbleFlag_);
 
     /**
      * @tc.steps: step5. call HandleHoverEvent hover true.

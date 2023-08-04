@@ -239,6 +239,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
+        axisFlag_ = false;
         // when Touch Down area is at Pan Area, value is unchanged.
         if (!AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
             UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
@@ -304,10 +305,10 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
             reverse ? (offset > 0.0 ? MoveStep(1) : MoveStep(-1)) : (offset > 0.0 ? MoveStep(-1) : MoveStep(1));
         }
         if (hotFlag_) {
-            // Only when the mouse hovers over the slider, AxisFlag_ can be set true
-            AxisFlag_ = true;
+            // Only when the mouse hovers over the slider, axisFlag_ can be set true
+            axisFlag_ = true;
         }
-        if (showTips_ && AxisFlag_) {
+        if (showTips_ && axisFlag_) {
             bubbleFlag_ = true;
             InitializeBubble();
         }
@@ -424,7 +425,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandledGestureEvent();
         pattern->FireChangeEvent(SliderChangeMode::End);
-        pattern->AxisFlag_ = false;
+        pattern->axisFlag_ = false;
     };
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
@@ -672,7 +673,7 @@ void SliderPattern::HandleHoverEvent(bool isHover)
     mouseHoverFlag_ = mouseHoverFlag_ && isHover;
     if (!mouseHoverFlag_) {
         bubbleFlag_ = false;
-        AxisFlag_ = false;
+        axisFlag_ = false;
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -689,7 +690,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
         }
     }
     // when mouse hovers over slider, distinguish between hover block and Wheel operation.
-    if (!mouseHoverFlag_ && !AxisFlag_) {
+    if (!mouseHoverFlag_ && !axisFlag_) {
         bubbleFlag_ = false;
     }
 
