@@ -86,13 +86,15 @@ public:
     }
 
     void OnInspectorIdUpdate(const std::string& /*unused*/) override;
+
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
         {
             auto left = weakLeft.Upgrade();
             auto right = weakRight.Upgrade();
             if (left && right) {
-                return left->GetRenderContext()->GetZIndexValue(1) < right->GetRenderContext()->GetZIndexValue(1);
+                return left->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE) <
+                    right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
             }
             return false;
         }
@@ -553,7 +555,6 @@ private:
 
     // set costom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
-
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
