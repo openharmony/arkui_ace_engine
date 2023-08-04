@@ -5393,9 +5393,9 @@ HWTEST_F(TextFieldPatternTestNg, GetInputStyleString, TestSize.Level2)
      * @tc.expected: Check the return value.
      */
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
-    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextInputStyle.Inline");
+    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextInputStyle.INLINE");
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
-    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextInputStyle.Default");
+    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextInputStyle.DEFAULT");
 }
 
 /**

@@ -1347,6 +1347,7 @@ void TextFieldPattern::HandleBlurEvent()
     CHECK_NULL_VOID(host);
     LOGI("TextField %{public}d OnBlur", host->GetId());
     auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField();
@@ -2391,26 +2392,27 @@ void TextFieldPattern::ProcessInnerPadding()
     } else {
         currentBorderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
     }
-    auto left = layoutProperty->GetPaddingProperty()
-                    ->left.value_or(CalcLength(themePadding.Left()))
-                    .GetDimension()
-                    .ConvertToPx();
+    auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    auto left = !paddingProperty
+                    ? CalcLength(themePadding.Left()).GetDimension().ConvertToPx()
+                    : paddingProperty->left.value_or(CalcLength(themePadding.Left())).GetDimension().ConvertToPx();
     offsetDifference_.SetX(left + (float)currentBorderWidth.leftDimen->ConvertToPx() - GetPaddingLeft() -
                            GetBorderLeft());
     utilPadding_.left = left;
-    auto top =
-        layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
+    auto top = !paddingProperty
+                   ? CalcLength(themePadding.Top()).GetDimension().ConvertToPx()
+                   : paddingProperty->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
     offsetDifference_.SetY(top + (float)currentBorderWidth.topDimen->ConvertToPx() - GetPaddingTop() -
                            GetBorderTop());
     utilPadding_.top = top;
-    utilPadding_.bottom = layoutProperty->GetPaddingProperty()
-                              ->bottom.value_or(CalcLength(themePadding.Bottom()))
-                              .GetDimension()
-                              .ConvertToPx();
-    utilPadding_.right = layoutProperty->GetPaddingProperty()
-                             ->right.value_or(CalcLength(themePadding.Right()))
-                             .GetDimension()
-                             .ConvertToPx();
+    utilPadding_.bottom =
+        !paddingProperty
+            ? CalcLength(themePadding.Bottom()).GetDimension().ConvertToPx()
+            : paddingProperty->bottom.value_or(CalcLength(themePadding.Bottom())).GetDimension().ConvertToPx();
+    utilPadding_.right =
+        !paddingProperty
+            ? CalcLength(themePadding.Right()).GetDimension().ConvertToPx()
+            : paddingProperty->right.value_or(CalcLength(themePadding.Right())).GetDimension().ConvertToPx();
     lastBorderWidth_ = currentBorderWidth;
 }
 
@@ -5437,10 +5439,10 @@ void TextFieldPattern::TextRectSetOffset(RefPtr<TextFieldLayoutProperty> layoutP
         currentBorderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
     }
     textRect_.SetOffset(OffsetF(GetPaddingLeft() + (float)(currentBorderWidth.leftDimen->ConvertToPx()),
-                                GetPaddingTop() + (float)(currentBorderWidth.topDimen->ConvertToPx())));
+        GetPaddingTop() + (float)(currentBorderWidth.topDimen->ConvertToPx())));
 }
 
-void TextFieldPattern::TextIsEmptyRect(RectF &rect)
+void TextFieldPattern::TextIsEmptyRect(RectF& rect)
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -5453,7 +5455,7 @@ void TextFieldPattern::TextIsEmptyRect(RectF &rect)
                 break;
             case TextAlign::END:
                 rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() -
-                                static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
+                             static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
                 break;
             default:
                 break;
@@ -5462,7 +5464,7 @@ void TextFieldPattern::TextIsEmptyRect(RectF &rect)
     }
 }
 
-void TextFieldPattern::TextAreaInputRectUpdate(RectF &rect)
+void TextFieldPattern::TextAreaInputRectUpdate(RectF& rect)
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -5476,15 +5478,15 @@ void TextFieldPattern::TextAreaInputRectUpdate(RectF &rect)
                 break;
             case TextAlign::CENTER:
                 if (inputContentWidth < contentRect_.Width()) {
-                    rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() / 2.0f -
-                                 inputContentWidth / 2.0f);
+                    rect.SetLeft(
+                        static_cast<float>(rect.GetX()) + contentRect_.Width() / 2.0f - inputContentWidth / 2.0f);
                     rect.SetWidth(inputContentWidth);
                 }
                 break;
             case TextAlign::END:
                 if (inputContentWidth < contentRect_.Width()) {
                     rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() -
-                                static_cast<float>(CURSOR_WIDTH.ConvertToPx()) - inputContentWidth);
+                                 static_cast<float>(CURSOR_WIDTH.ConvertToPx()) - inputContentWidth);
                     rect.SetWidth(inputContentWidth);
                 }
                 break;
@@ -5494,7 +5496,7 @@ void TextFieldPattern::TextAreaInputRectUpdate(RectF &rect)
     }
 }
 
-void TextFieldPattern::UpdateRectByAlignment(RectF &rect)
+void TextFieldPattern::UpdateRectByAlignment(RectF& rect)
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -5613,7 +5615,7 @@ void TextFieldPattern::RestorePreInlineStates()
         currentBorderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
     }
     textRect_.SetOffset(OffsetF((GetPaddingLeft() + (float)(currentBorderWidth.leftDimen->ConvertToPx())),
-                                (GetPaddingTop() + (float)currentBorderWidth.topDimen->ConvertToPx())));
+        (GetPaddingTop() + (float)currentBorderWidth.topDimen->ConvertToPx())));
     layoutProperty->UpdateMargin(inlineState_.margin);
     CalcSize idealSize;
     std::optional<CalcLength> width(inlineState_.frameRect.Width());
@@ -5632,7 +5634,7 @@ bool TextFieldPattern::IsNormalInlineState() const
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
+           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -5873,10 +5875,9 @@ bool TextFieldPattern::LastTouchIsInSelectRegion(const std::vector<RSTypographyP
 }
 bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
 {
-    OffsetF offset(paintRect.GetX() - parentGlobalOffset_.GetX(),
-        paintRect.GetY() - parentGlobalOffset_.GetY());
+    OffsetF offset(paintRect.GetX() - parentGlobalOffset_.GetX(), paintRect.GetY() - parentGlobalOffset_.GetY());
     return !(!contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) ||
-        !contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON }));
+             !contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON }));
 }
 
 void TextFieldPattern::EditingValueFilterChange()
