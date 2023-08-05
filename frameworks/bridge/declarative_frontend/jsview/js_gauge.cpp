@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,11 @@
 
 #include <string>
 
+#include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/models/gauge_model_impl.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 
 namespace OHOS::Ace {
@@ -116,6 +119,10 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 
 void JSGauge::SetColors(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        SetGradientColors(info);
+        return;
+    }
     if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The number of argument is less than 1, or the argument is not array.");
         return;
@@ -146,6 +153,69 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
         }
     }
     GaugeModel::GetInstance()->SetColors(colors, weights);
+}
+
+void JSGauge::SetGradientColors(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The number of argument is less than 1, or the argument is not array.");
+        return;
+    }
+
+    NG::GaugeType type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
+    std::vector<NG::ColorStopArray> colors;
+    std::vector<float> weights;
+    if (info[0]->IsArray()) {
+        auto jsColorsArray = JSRef<JSArray>::Cast(info[0]);
+        for (size_t i = 0; i < jsColorsArray->Length(); ++i) {
+            JSRef<JSVal> jsValue = jsColorsArray->GetValueAt(i);
+            if (!jsValue->IsArray()) {
+                continue;
+            }
+            auto tempColors = JSRef<JSArray>::Cast(jsValue);
+            // Get weight
+            float weight = tempColors->GetValueAt(1)->ToNumber<float>();
+            weight = Negative(weight) ? 0.0f : weight;
+            weights.push_back(weight);
+            // Get color
+            JSRef<JSVal> jsColorValue = tempColors->GetValueAt(0);
+            ConvertGradientColor(jsColorValue, colors, type);
+        }
+        type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
+        GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+        return;
+    }
+    ConvertGradientColor(info[0], colors, type);
+    GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+}
+
+void JSGauge::ConvertGradientColor(
+    const JsiRef<JsiValue>& itemParam, std::vector<NG::ColorStopArray>& colors, NG::GaugeType& type)
+{
+    if (!itemParam->IsObject()) {
+        type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
+        return ConvertResourceColor(itemParam, colors);
+    }
+
+    JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(itemParam)->Unwrap<JSLinearGradient>();
+    if (!jsLinearGradient) {
+        type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
+        return ConvertResourceColor(itemParam, colors);
+    }
+
+    type = NG::GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT;
+    colors.emplace_back(jsLinearGradient->GetGradient());
+}
+
+void JSGauge::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, std::vector<NG::ColorStopArray>& colors)
+{
+    Color color;
+    if (!ParseJsColor(itemParam, color)) {
+        color = Color::BLACK;
+    }
+    NG::ColorStopArray colorStopArray;
+    colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
+    colors.emplace_back(colorStopArray);
 }
 
 void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
