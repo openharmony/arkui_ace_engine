@@ -122,13 +122,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        actuator->previewLongPressRecognizer_->OnRejected();
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
-        auto menuLongPressRecognizer = gestureHub->GetLongPressRecognizer();
-        if (menuLongPressRecognizer && isNotInPreviewState_) {
-            menuLongPressRecognizer->OnRejected();
-        }
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
@@ -294,7 +289,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        actuator->previewLongPressRecognizer_->OnRejected();
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (!GetIsBindOverlayValue(actuator)) {
@@ -418,7 +412,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
     };
     longPressUpdate_ = longPressUpdate;
-    previewLongPressRecognizer_->SetOnActionUpdate(longPressUpdate);
+    previewLongPressRecognizer_->SetOnAction(longPressUpdate);
 #endif // ENABLE_DRAG_FRAMEWORK
     previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     auto frameNode = gestureHub->GetFrameNode();
