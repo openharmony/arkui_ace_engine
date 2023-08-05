@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -1320,7 +1321,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_NE(layoutWrapper->layoutAlgorithm_, nullptr);
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
+    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::AUTO);
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
     ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
 

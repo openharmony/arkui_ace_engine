@@ -82,9 +82,6 @@ void NavDestinationModelNG::Create()
     }
 
     stack->Push(navDestinationNode);
-    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-    navDestinationLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 }
 void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
 {
@@ -145,9 +142,6 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         navDestinationNode->SetContentNode(contentNode);
     }
     stack->Push(navDestinationNode);
-    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-    navDestinationLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 }
 
 void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar)

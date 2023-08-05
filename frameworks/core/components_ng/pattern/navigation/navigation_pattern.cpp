@@ -238,11 +238,18 @@ void NavigationPattern::CheckTopNavPathChange(
             focusHub->LostFocus();
 
             // in STACK mode with pop page, need to remain page until animation is finished
-            if (navigationMode_ == NavigationMode::STACK && isPopPage) {
-                contentNode->AddChild(preTopNavDestination, contentNode->GetChildren().size() - 1);
-            } else if (isPopPage) {
+            if (navigationMode_ != NavigationMode::STACK && isPopPage) {
                 // without animation, clean content directly
+                auto navDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+                auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+                if (shallowBuilder) {
+                    shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+                }
                 preTopNavDestination->GetContentNode()->Clean();
+                auto parent = preTopNavDestination->GetParent();
+                if (parent) {
+                    parent->RemoveChild(preTopNavDestination);
+                }
             }
         } else {
             LOGW("prev page is illegal");

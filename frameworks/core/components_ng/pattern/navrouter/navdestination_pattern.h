@@ -49,7 +49,9 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<NavDestinationLayoutAlgorithm>();
+        auto layout = MakeRefPtr<NavDestinationLayoutAlgorithm>();
+        layout->SetIsShown(isOnShow_);
+        return layout;
     }
 
     RefPtr<EventHub> CreateEventHub() override

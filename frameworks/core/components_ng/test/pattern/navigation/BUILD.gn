@@ -222,6 +222,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_content_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_model_ng.cpp",
