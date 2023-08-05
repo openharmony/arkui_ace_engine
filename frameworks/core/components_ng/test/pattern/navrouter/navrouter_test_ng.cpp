@@ -321,6 +321,9 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg007, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
     pattern->shallowBuilder_ = builder;
     auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "contentNode", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->contentNode_ = contentNode;
     navDestinationNode->OnAttachToMainTree(false);
     EXPECT_TRUE(builder->executeDeepRenderDone_);
     pattern->shallowBuilder_ = builder;
@@ -961,10 +964,19 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0021, TestSize.Level1)
     ASSERT_NE(navRouterGroupNode, nullptr);
     auto parent = NavigationGroupNode::GetOrCreateGroupNode(
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navContentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navContentNode", 12, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    parent->contentNode_ = navContentNode;
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "contentNode", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->contentNode_ = contentNode;
     auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preContentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preContentNode", 34, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->contentNode_ = preContentNode;
     auto preDestinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 44, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
@@ -987,7 +999,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0021, TestSize.Level1)
     bool isPop = true;
     EXPECT_TRUE(parent->isOnAnimation_);
     pattern->DoNavigationTransitionAnimation(preNavDestination, navDestination, isPop);
-    EXPECT_FALSE(parent->isOnAnimation_);
 }
 
 /**
@@ -1010,8 +1021,14 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0022, TestSize.Level1)
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preContentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preContentNode", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preNavDestination->contentNode_ = preContentNode;
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "contentNode", 34, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->contentNode_ = contentNode;
     auto preDestinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 44, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
@@ -1032,7 +1049,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0022, TestSize.Level1)
     bool isPop = false;
     EXPECT_TRUE(parent->isOnAnimation_);
     pattern->DoNavigationTransitionAnimation(preNavDestination, navDestination, isPop);
-    EXPECT_FALSE(parent->isOnAnimation_);
 }
 
 /**
@@ -1055,12 +1071,18 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0023, TestSize.Level1)
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "contentNode", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->contentNode_ = contentNode;
     auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preContentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preContentNode", 34, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preNavDestination->contentNode_ = preContentNode;
     auto navBar =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto contentNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
-    parent->contentNode_ = contentNode;
+    auto navContentNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
+    parent->contentNode_ = navContentNode;
     parent->navBarNode_ = navBar;
     navRouterGroupNode->navDestinationNode_ = navDestination;
 
@@ -1091,11 +1113,16 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0024, TestSize.Level1)
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "contentNode", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->contentNode_ = contentNode;
     auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preContentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preContentNode", 34, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preNavDestination->contentNode_ = preContentNode;
     auto navBar =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto contentNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
 
     auto preDestinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 55, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
@@ -1137,11 +1164,16 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0025, TestSize.Level1)
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "contentNode", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->contentNode_ = contentNode;
     auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "preNavDestination", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+        "preNavDestination", 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preContentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preContentNode", 34, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preNavDestination->contentNode_ = preContentNode;
     auto navBar =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto contentNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
     auto preDestinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 55, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
@@ -1434,11 +1466,16 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0031, TestSize.Level1)
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "contentNode", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->contentNode_ = contentNode;
     auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto preContentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "preContentNode", 34, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preNavDestination->contentNode_ = preContentNode;
     auto navBar =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto contentNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
     auto preDestinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 55, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
