@@ -280,7 +280,8 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     }
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
-        textSelector_.Update(-1, -1);
+        CloseSelectOverlay();
+        ResetSelection();
     }
     SetCaretOffset(start);
     ResetSelection();
@@ -678,7 +679,6 @@ void RichEditorPattern::UpdateSpanStyle(int32_t start, int32_t end, TextStyle te
     CHECK_NULL_VOID(host);
     int32_t spanStart = 0;
     int32_t spanEnd = 0;
-
     for (auto it = host->GetChildren().begin(); it != host->GetChildren().end(); ++it) {
         auto spanNode = DynamicCast<SpanNode>(*it);
         auto imageNode = DynamicCast<FrameNode>(*it);
@@ -721,6 +721,10 @@ void RichEditorPattern::UpdateSpanStyle(int32_t start, int32_t end, TextStyle te
         if (spanStart >= end) {
             break;
         }
+    }
+    if (textSelector_.IsValid()) {
+        CloseSelectOverlay();
+        ResetSelection();
     }
 }
 
@@ -844,6 +848,10 @@ void RichEditorPattern::HandleBlurEvent()
 {
     StopTwinkling();
     CloseKeyboard(true);
+    if (textSelector_.IsValid()) {
+        CloseSelectOverlay();
+        ResetSelection();
+    }
 }
 
 void RichEditorPattern::HandleFocusEvent()
@@ -917,11 +925,15 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         eventHub->FireOnSelect(&textSelectInfo);
     }
     SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
     if (richEditorOverlayModifier_) {
         RequestKeyboard(false, true, true);
     }
-
-    StopTwinkling();
+    if (caretVisible_) {
+        StopTwinkling();
+    }
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1276,9 +1288,12 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
     if (isSelector) {
-        auto length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        textSelector_.Update(-1, -1);
-        DeleteForward(length);
+        DeleteForward(textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
+    if (!caretVisible_) {
+        StartTwinkling();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1313,7 +1328,6 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     text = StringUtils::ToString(textTemp);
     spanNode->UpdateContent(text);
     AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), false);
-    return;
 }
 
 void RichEditorPattern::InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue)
@@ -2126,5 +2140,10 @@ RefPtr<SpanItem> RichEditorPattern::GetSpanItemByIndex(int32_t index) const
     auto pos = spanItemChildren_.begin();
     std::advance(pos, index);
     return *pos;
+}
+
+void RichEditorPattern::CloseSelectOverlay()
+{
+    TextPattern::CloseSelectOverlay();
 }
 } // namespace OHOS::Ace::NG

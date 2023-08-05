@@ -150,6 +150,7 @@ public:
 #endif
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();
+    void CloseSelectOverlay() override;
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
