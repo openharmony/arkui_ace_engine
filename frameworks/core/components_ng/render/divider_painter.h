@@ -48,6 +48,11 @@ public:
         dividerLength_ = length;
     }
 
+    float GetDividerLength() const
+    {
+        return dividerLength_;
+    }
+
 private:
     float constrainStrokeWidth_ = 0.0f;
     float dividerLength_ = 0.0f;

@@ -54,7 +54,6 @@ void ListContentModifier::PaintDivider(
     float fSpacingTotal = (dividerInfo.lanes - 1) * dividerInfo.laneGutter;
     float laneLen =
         (dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
-
     float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
     DividerPainter dividerPainter(
         dividerInfo.constrainStrokeWidth, crossLen, dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
@@ -78,7 +77,9 @@ void ListContentModifier::PaintDivider(
                 dividerPainter.SetDividerLength(crossLen);
             }
             OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
+            if (dividerPainter.GetDividerLength() > 0) {
+                dividerPainter.DrawLine(canvas, offset);
+            }
         }
         if (laneIdx == 0 || child.second.isGroup) {
             lastLineIndex.clear();
@@ -105,7 +106,9 @@ void ListContentModifier::PaintDivider(
                 dividerPainter.SetDividerLength(crossLen);
             }
             OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
+            if (dividerPainter.GetDividerLength() > 0) {
+                dividerPainter.DrawLine(canvas, offset);
+            }
             laneIdx++;
         }
     }
