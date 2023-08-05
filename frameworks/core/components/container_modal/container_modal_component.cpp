@@ -83,8 +83,9 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     // handle touch move and mouse move
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
-    auto panGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
-    panGesture->SetOnActionStartId([contextWptr = context_] (const GestureEvent&) {
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panGesture->SetOnActionStartId([contextWptr = context_](const GestureEvent&) {
         auto context = contextWptr.Upgrade();
         if (context) {
             LOGI("container window start move.");

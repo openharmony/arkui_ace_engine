@@ -677,10 +677,8 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             return;
         }
         lastMouseMove_ = info;
-        const static double FRAME_SELECTION_DISTANCE =
-            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
         auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
-        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
+        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > DEFAULT_PAN_DISTANCE.ConvertToPx()) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
             MultiSelectWithoutKeyboard(selectedZone);

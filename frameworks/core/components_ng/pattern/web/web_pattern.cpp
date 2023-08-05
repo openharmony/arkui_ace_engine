@@ -720,12 +720,6 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragCancel();
     };
 
-    float distance = DEFAULT_PAN_DISTANCE;
-    auto context = host->GetContext();
-    if (context) {
-        distance = static_cast<float>(context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
-    }
-
     dragEvent_ = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->SetCustomDragEvent(dragEvent_, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
