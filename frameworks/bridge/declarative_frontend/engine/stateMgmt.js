@@ -1699,7 +1699,14 @@ class Environment {
             default:
                 tmp = value;
         }
+        if (!tmp) {
+            tmp = value;
+        }
         prop = AppStorage.setAndProp(key, tmp);
+        if (!prop) {
+            stateMgmtConsole.warn(`Environment: envProp '${key}': AppStorage setAndProp failed.`);
+            return false;
+        }
         this.props_.set(key, prop);
         
         return true;
