@@ -1676,7 +1676,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
     std::optional<CalcDimension> offsetX;
     std::optional<CalcDimension> offsetY;
 
-    if (info.Length() > 1 && !info[1]->IsNull()) {
+    if (info[1]->IsObject()) {
         JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSVal> alignVal = optionObj->GetProperty("align");
         auto value = alignVal->ToNumber<int32_t>();
