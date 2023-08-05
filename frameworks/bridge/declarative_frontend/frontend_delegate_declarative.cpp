@@ -1471,11 +1471,11 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     const std::set<std::string>& callbacks)
 {
     DialogProperties dialogProperties = {
-            .title = dialogAttr.title,
-            .content = dialogAttr.message,
-            .autoCancel = dialogAttr.autoCancel,
-            .buttons = buttons,
-            .maskRect = dialogAttr.maskRect,
+        .title = dialogAttr.title,
+        .content = dialogAttr.message,
+        .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
+        .maskRect = dialogAttr.maskRect,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
