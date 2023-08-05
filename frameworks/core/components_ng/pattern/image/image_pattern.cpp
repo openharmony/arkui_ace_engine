@@ -142,10 +142,9 @@ RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geomet
         const float invalidValue = -1;
         paintSize.SetWidth(dstRect_.IsValid() ? dstRect_.Width() : invalidValue);
         paintSize.SetHeight(dstRect_.IsValid() ? dstRect_.Height() : invalidValue);
-        paintSize.SetLeft(dstRect_.IsValid() ? dstRect_.GetX() + geometryNode->GetContentOffset().GetX() :
-            invalidValue);
-        paintSize.SetTop(dstRect_.IsValid() ? dstRect_.GetY() + geometryNode->GetContentOffset().GetY() :
-            invalidValue);
+        paintSize.SetLeft(
+            dstRect_.IsValid() ? dstRect_.GetX() + geometryNode->GetContentOffset().GetX() : invalidValue);
+        paintSize.SetTop(dstRect_.IsValid() ? dstRect_.GetY() + geometryNode->GetContentOffset().GetY() : invalidValue);
     } else {
         paintSize.SetWidth(imageRepeatX ? geometryNode->GetContentSize().Width() : dstRect_.Width());
         paintSize.SetHeight(imageRepeatY ? geometryNode->GetContentSize().Height() : dstRect_.Height());
@@ -167,10 +166,9 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
 
     RectF paintRect = CalcImageContentPaintSize(geometryNode);
-    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(),
-        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 1, paintRect.Width(), paintRect.Height(),
-        paintRect.GetX(), paintRect.GetY());
+    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1, paintRect.Width(),
+        paintRect.Height(), paintRect.GetX(), paintRect.GetY());
     auto eventHub = GetEventHub<ImageEventHub>();
     if (eventHub) {
         eventHub->FireCompleteEvent(event);
@@ -198,11 +196,10 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(geometryNode);
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(),
-        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 0, geometryNode->GetContentSize().Width(),
-        geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
-        geometryNode->GetContentOffset().GetY());
+    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 0,
+        geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height(),
+        geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
@@ -608,6 +605,20 @@ void ImagePattern::OpenSelectOverlay()
         CHECK_NULL_VOID(pattern);
         pattern->HandleCopy();
         pattern->CloseSelectOverlay();
+    };
+    info.onHandleMoveDone = [weak = WeakClaim(this), firstRect = info.firstHandle.paintRect,
+                                secondRect = info.secondHandle.paintRect](const RectF&, bool isFirst) {
+        // reset handle position
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern && pattern->selectOverlay_);
+        SelectHandleInfo info;
+        if (isFirst) {
+            info.paintRect = firstRect;
+            pattern->selectOverlay_->UpdateFirstSelectHandleInfo(info);
+        } else {
+            info.paintRect = secondRect;
+            pattern->selectOverlay_->UpdateSecondSelectHandleInfo(info);
+        }
     };
     info.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
         if (closedByGlobalEvent) {
