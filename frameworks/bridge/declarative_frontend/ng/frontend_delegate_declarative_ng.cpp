@@ -646,6 +646,27 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
+{
+    DialogProperties dialogProperties = {
+            .title = dialogAttr.title,
+            .content = dialogAttr.message,
+            .autoCancel = dialogAttr.autoCancel,
+            .buttons = buttons,
+            .onStatusChanged = std::move(onStatusChanged),
+            .maskRect = dialogAttr.maskRect,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {

@@ -51,6 +51,9 @@ public:
     MOCK_METHOD6(ShowDialog,
         void(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
             bool autoCancel, std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks));
+    MOCK_METHOD4(ShowDialog,
+        void(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+            std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks));
     MOCK_METHOD3(ShowActionMenu, void(const std::string& title, const std::vector<ButtonInfo>& button,
                                      std::function<void(int32_t, int32_t)>&& callback));
     MOCK_METHOD1(CloseDialog, void(int32_t instanceId));
