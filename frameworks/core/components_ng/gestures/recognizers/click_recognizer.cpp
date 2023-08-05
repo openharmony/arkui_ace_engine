@@ -37,14 +37,6 @@ int32_t MULTI_TAP_SLOP = 100;
 constexpr int32_t MULTI_TAP_SLOP_TOUCH = 30;
 constexpr int32_t MULTI_TAP_SLOP_MOUSE = 15;
 constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
-#ifndef WEARABLE_PRODUCT
-double MAX_THRESHOLD = 20.0;
-constexpr double MAX_THRESHOLD_TOUCH = 20.0;
-#else
-constexpr double MAX_THRESHOLD = 12.0;
-constexpr double MAX_THRESHOLD_TOUCH = 12.0;
-#endif
-constexpr int32_t MAX_THRESHOLD_MOUSE = 15;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 
 } // namespace
