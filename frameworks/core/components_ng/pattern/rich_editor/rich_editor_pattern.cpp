@@ -16,6 +16,7 @@
 
 #include <chrono>
 
+#include "base/log/dump_log.h"
 #include "core/common/clipboard/paste_data.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -47,7 +48,12 @@ constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 } // namespace
 RichEditorPattern::RichEditorPattern() {}
 
-RichEditorPattern::~RichEditorPattern() {}
+RichEditorPattern::~RichEditorPattern()
+{
+    if (isCustomKeyboardAttached_) {
+        CloseCustomKeyboard();
+    }
+}
 
 void RichEditorPattern::OnModifyDone()
 {
@@ -2553,5 +2559,12 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
         }
     }
     return false;
+}
+void RichEditorPattern::DumpInfo()
+{
+    if (customKeyboardBulder_) {
+        DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
+            .append(", Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
+    }
 }
 } // namespace OHOS::Ace::NG

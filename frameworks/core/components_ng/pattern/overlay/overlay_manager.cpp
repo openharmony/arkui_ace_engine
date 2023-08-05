@@ -1766,6 +1766,7 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, i
     customKeyboard_ = KeyboardView::CreateKeyboard(targetId, keybordBuilder);
     customKeyboard_->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    PlayDefaultModalTransition(customKeyboard_, true);
 }
 
 void OverlayManager::DestroyKeyboard()
