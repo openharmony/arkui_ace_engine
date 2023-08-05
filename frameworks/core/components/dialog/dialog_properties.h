@@ -169,6 +169,16 @@ struct DialogProperties {
     std::optional<DimensionRect> maskRect;
 };
 
+struct PromptDialogAttr {
+    std::string title;
+    std::string message;
+    bool autoCancel;
+
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
+    std::optional<DimensionRect> maskRect;
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H
