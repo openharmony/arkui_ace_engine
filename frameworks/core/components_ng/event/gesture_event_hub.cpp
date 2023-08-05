@@ -521,8 +521,8 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
 float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t width) const
 {
     float scale = 1.0f;
-    int32_t deviceWidth = PipelineContext::GetCurrentRootWidth();
-    int32_t deviceHeight = PipelineContext::GetCurrentRootHeight();
+    int32_t deviceWidth = SystemProperties::GetDeviceWidth();
+    int32_t deviceHeight = SystemProperties::GetDeviceHeight();
     int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
     int32_t minDeviceLength = std::min(deviceHeight, deviceWidth);
     if (maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength) {
