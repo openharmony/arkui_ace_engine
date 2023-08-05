@@ -451,8 +451,8 @@ void DialogContainer::ShowDialog(int32_t instanceId, const std::string& title, c
 }
 
 void DialogContainer::ShowDialog(int32_t instanceId, const PromptDialogAttr& dialogAttr,
-                                 const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
-                                 const std::set<std::string>& callbacks)
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
 {
     LOGI("DialogContainer::ShowDialog begin");
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
@@ -462,12 +462,12 @@ void DialogContainer::ShowDialog(int32_t instanceId, const PromptDialogAttr& dia
     auto delegate = frontend->GetDelegate();
     CHECK_NULL_VOID(delegate);
     delegate->ShowDialog(
-            dialogAttr, buttons, std::move(callback), callbacks, [instanceId = instanceId](bool isShow) {
-                LOGI("DialogContainer::ShowDialog HideWindow instanceId = %{public}d", instanceId);
-                if (!isShow) {
-                    DialogContainer::HideWindow(instanceId);
-                }
-            });
+        dialogAttr, buttons, std::move(callback), callbacks, [instanceId = instanceId](bool isShow) {
+            LOGI("DialogContainer::ShowDialog HideWindow instanceId = %{public}d", instanceId);
+            if (!isShow) {
+                DialogContainer::HideWindow(instanceId);
+            }
+        });
     LOGI("DialogContainer::ShowDialog end");
 }
 

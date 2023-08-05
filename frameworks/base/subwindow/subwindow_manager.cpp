@@ -479,7 +479,7 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
 }
 
 void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
-                std::function<void(int32_t, int32_t)>&& napiCallback, const std::set<std::string>& dialogCallbacks)
+    std::function<void(int32_t, int32_t)>&& napiCallback, const std::set<std::string>& dialogCallbacks)
 {
     auto containerId = Container::CurrentId();
     // Get active container when current instanceid is less than 0

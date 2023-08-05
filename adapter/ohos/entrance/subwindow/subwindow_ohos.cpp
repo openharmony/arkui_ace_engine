@@ -900,7 +900,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
 }
 
 void SubwindowOhos::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
-                    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowDialogForService(dialogAttr, buttons, std::move(callback), callbacks);
