@@ -20,6 +20,7 @@ ohos_unittest("xcomponent_test_ng") {
   sources = [
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/linear_layout_utils.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",

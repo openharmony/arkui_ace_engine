@@ -23,6 +23,7 @@ ohos_unittest("form_test_ng") {
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
 
     #mock
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",

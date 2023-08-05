@@ -58,7 +58,7 @@ AceEngine::AceEngine()
 
 AceEngine::~AceEngine()
 {
-    LOGI("~AceEngine");
+    LOG_DESTROY();
 }
 
 AceEngine& AceEngine::Get()
