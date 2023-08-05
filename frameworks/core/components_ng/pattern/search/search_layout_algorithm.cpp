@@ -126,9 +126,14 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto cancelButtonNode = cancelButtonWrapper->GetHostNode();
     auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
     auto geometryNode = layoutWrapper->GetGeometryNode();
+    float leftPadding = 0.0f;
+    float rightPadding = 0.0f;
+    if (geometryNode && geometryNode->GetPadding()) {
+        leftPadding = geometryNode->GetPadding()->left.value_or(0.0f);
+        rightPadding = geometryNode->GetPadding()->right.value_or(0.0f);
+    }
     auto textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
-                    searchTheme->GetSearchIconRightSpace().ConvertToPx() - geometryNode->GetPadding()->left.value() -
-                    geometryNode->GetPadding()->right.value();
+                    searchTheme->GetSearchIconRightSpace().ConvertToPx() - leftPadding - rightPadding;
     if (searchButtonEvent->IsEnabled()) {
         textFieldWidth = textFieldWidth - buttonWidth - searchTheme->GetSearchDividerWidth().ConvertToPx() -
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
@@ -407,7 +412,10 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto iconFrameHeight = searchIconSizeMeasure_.Height();
     auto iconRenderWidth = layoutProperty->GetSearchIconUDSizeValue(Dimension(iconFrameWidth)).ConvertToPx();
 
-    auto leftOffset = geometryNode->GetPadding()->left.value();
+    float leftOffset = 0.0f;
+    if (geometryNode->GetPadding()) {
+        leftOffset = geometryNode->GetPadding()->left.value_or(0.0f);
+    }
     // layout search icon
     float iconHorizontalOffset = leftOffset + searchIconLeftSpace + (iconRenderWidth - iconFrameWidth) / 2.0;
     float imageVerticalOffset = (searchFrameHeight - iconFrameHeight) / 2.0;
@@ -443,7 +451,10 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto cancelImageFrameWidth = cancelImageFrameSize.Width();
     auto cancelImageFrameHeight = cancelImageFrameSize.Height();
 
-    auto rightOffset = geometryNode->GetPadding()->right.value();
+    float rightOffset = 0.0f;
+    if (geometryNode->GetPadding()) {
+        rightOffset = geometryNode->GetPadding()->right.value_or(0.0f);
+    }
     // layout search button
     auto searchButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     CHECK_NULL_VOID(searchButtonWrapper);

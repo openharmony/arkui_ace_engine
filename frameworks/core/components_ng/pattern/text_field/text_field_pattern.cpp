@@ -790,7 +790,7 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
         textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
         return dy;
     }
-    auto dy = contentRect_.GetY() + lastBorderWidth_.topDimen->ConvertToPx() +
+    auto dy = contentRect_.GetY() + GetBorderTop() +
             contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
     // caret does not exceed bottom boundary, still need to check against safeArea
     if (GreatOrEqual(dy, 0.0f)) {
@@ -2334,12 +2334,12 @@ void TextFieldPattern::ProcessInnerPadding()
                     .GetDimension()
                     .ConvertToPx();
     offsetDifference_.SetX(left + (float)currentBorderWidth.leftDimen->ConvertToPx() - GetPaddingLeft() -
-                           (float)lastBorderWidth_.leftDimen->ConvertToPx());
+                           GetBorderLeft());
     utilPadding_.left = left;
     auto top =
         layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
     offsetDifference_.SetY(top + (float)currentBorderWidth.topDimen->ConvertToPx() - GetPaddingTop() -
-                           (float)lastBorderWidth_.topDimen->ConvertToPx());
+                           GetBorderTop());
     utilPadding_.top = top;
     utilPadding_.bottom = layoutProperty->GetPaddingProperty()
                               ->bottom.value_or(CalcLength(themePadding.Bottom()))
