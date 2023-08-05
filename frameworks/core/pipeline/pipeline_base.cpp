@@ -395,7 +395,13 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
     auto frontend = weakFrontend_.Upgrade();
     CHECK_NULL_VOID(frontend);
-    auto& windowConfig = frontend->GetWindowConfig();
+    CHECK_NULL_VOID(taskExecutor_);
+    WindowConfig windowConfig;
+    taskExecutor_->PostSyncTask(
+        [frontend, &windowConfig] {
+            windowConfig = frontend->GetWindowConfig();
+        },
+        TaskExecutor::TaskType::JS);
     if (windowConfig.designWidth <= 0) {
         LOGE("the frontend design width <= 0");
         return;
@@ -724,19 +730,13 @@ void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
 bool PipelineBase::MaybeRelease()
 {
     CHECK_RUN_ON(UI);
-    CHECK_NULL_RETURN(taskExecutor_, (Destroy(), true));
+    CHECK_NULL_RETURN(taskExecutor_, true);
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         LOGI("Destroy Pipeline on UI thread.");
-        Destroy();
         return true;
     } else {
         LOGI("Post Destroy Pipeline Task to UI thread.");
-        return !taskExecutor_->PostTask(
-            [this]() {
-                Destroy();
-                delete this;
-            },
-            TaskExecutor::TaskType::UI);
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI);
     }
 }
 

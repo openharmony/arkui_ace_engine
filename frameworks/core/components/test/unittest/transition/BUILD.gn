@@ -69,6 +69,7 @@ common_module_files = [
   # common
   "$ace_root/frameworks/core/common/ace_application_info.cpp",
   "$ace_root/frameworks/core/common/ace_engine.cpp",
+  "$ace_root/frameworks/core/common/frontend.cpp",
   "$ace_root/frameworks/core/common/container.cpp",
   "$ace_root/frameworks/core/common/container_scope.cpp",
   "$ace_root/frameworks/core/common/thread_checker.cpp",
