@@ -240,6 +240,8 @@ int32_t ImageSpanItem::UpdateParagraph(
         default:
             run.alignment = PlaceholderAlignment::BOTTOM;
     }
+    // ImageSpan should ignore decoration styles
+    textStyle.SetTextDecoration(TextDecoration::NONE);
     builder->PushStyle(textStyle);
     LOGD("ImageSpan fontsize = %{public}f", textStyle.GetFontSize().Value());
     int32_t index = builder->AddPlaceholder(run);
