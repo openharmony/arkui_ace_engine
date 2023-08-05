@@ -74,6 +74,18 @@ public:
         return laneGutter_;
     }
 
+    void SetScrollBarOverlayModifier(WeakPtr<ScrollBarOverlayModifier>&& scrollBarOverlayModifier)
+    {
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
+    }
+
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
+    {
+        return scrollBarOverlayModifier_.Upgrade();
+    }
+
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+
 private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
@@ -85,6 +97,7 @@ private:
 
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
+    WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

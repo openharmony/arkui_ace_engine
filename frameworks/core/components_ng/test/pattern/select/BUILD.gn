@@ -153,6 +153,7 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_fade_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/mock_scrollable_pattern.cpp",

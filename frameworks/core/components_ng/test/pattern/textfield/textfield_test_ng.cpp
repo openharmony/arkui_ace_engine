@@ -1052,10 +1052,9 @@ HWTEST_F(TextFieldPatternTestNg, SetFrameSize001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     SizeF value;
     textFieldOverlayModifier.SetFrameSize(value);
     EXPECT_EQ(textFieldOverlayModifier.frameSize_->Get(), value);
@@ -1070,10 +1069,9 @@ HWTEST_F(TextFieldPatternTestNg, SetCurrentOffset001, TestSize.Level1)
 {
     auto pattern = GetPattern();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     float value = 1.0;
     textFieldOverlayModifier.SetCurrentOffset(value);
     EXPECT_EQ(textFieldOverlayModifier.currentOffset_->Get(), value);
@@ -1090,10 +1088,9 @@ HWTEST_F(TextFieldPatternTestNg, GetContentModifier001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1117,10 +1114,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateContentModifier001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     textFieldContentModifier->contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     textFieldContentModifier->contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
@@ -1150,10 +1146,9 @@ HWTEST_F(TextFieldPatternTestNg, GetOverlayModifier001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1177,10 +1172,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateOverlayModifier001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1455,14 +1449,9 @@ HWTEST_F(TextFieldPatternTestNg, onDraw001, TestSize.Level1)
     pattern->AddScrollEvent();
     pattern->scrollable_ = true;
     pattern->CheckScrollable();
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
-    scrollBar->isScrollable_ = true;
-    scrollBar->displayMode_ = DisplayMode::AUTO;
-    scrollBar->SetNormalWidth(CURSOR_WIDTH_SIZE);
-    scrollBar->opacity_ = UINT8_MAX;
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1480,10 +1469,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -1504,10 +1492,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection002, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1537,10 +1524,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
     RSTypographyProperties::TextBox textBox;
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1566,10 +1552,9 @@ HWTEST_F(TextFieldPatternTestNg, SetCursortWidth001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     float value = 1.0;
     textFieldOverlayModifier.SetCursorWidth(value);
     EXPECT_EQ(textFieldOverlayModifier.cursorWidth_->Get(), value);
@@ -1587,10 +1572,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->selectionMode_ = SelectionMode::NONE;
     pattern->paragraph_ = std::make_shared<RSParagraph>();
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -1933,14 +1917,13 @@ HWTEST_F(TextFieldPatternTestNg, UpdateContentModifier002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
 
     /**
      * @tc.steps: step2. create textFieldOverlayModifier and textFieldContentModifier.
      */
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     textFieldContentModifier->contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     textFieldContentModifier->contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
@@ -1987,10 +1970,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateOverlayModifier002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
 
@@ -2835,10 +2817,9 @@ HWTEST_F(TextFieldPatternTestNg, SetUnderlineWidth, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
 
     /**
      * @tc.steps: step2. call SetUnderlineWidth function.
@@ -2863,10 +2844,9 @@ HWTEST_F(TextFieldPatternTestNg, SetUnderlineColor, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
 
     /**
      * @tc.steps: step2. call SetUnderlineColor function.
@@ -3023,11 +3003,6 @@ HWTEST_F(TextFieldPatternTestNg, onDraw004, TestSize.Level1)
     pattern->CheckScrollable();
     bool showUnderLine = true;
     layoutProperty->UpdateShowUnderline(showUnderLine);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
-    scrollBar->isScrollable_ = true;
-    scrollBar->displayMode_ = DisplayMode::AUTO;
-    scrollBar->SetNormalWidth(CURSOR_WIDTH_SIZE);
-    scrollBar->opacity_ = UINT8_MAX;
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
 
@@ -3035,7 +3010,7 @@ HWTEST_F(TextFieldPatternTestNg, onDraw004, TestSize.Level1)
      * @tc.steps: step2. Create the textFieldOverlayModifier.Set different properties.Call function onDraw.
      * @tc.expected: Check the properties.
      */
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -3457,10 +3432,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->selectionMode_ = SelectionMode::NONE;
     pattern->paragraph_ = std::make_shared<RSParagraph>();
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -3496,10 +3470,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
     RSTypographyProperties::TextBox textBox;
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));

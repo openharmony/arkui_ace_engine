@@ -191,6 +191,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();
+    if (config.frameSizeChange) {
+        if (GetScrollBar() != nullptr) {
+            GetScrollBar()->ScheduleDisapplearDelayTask();
+        }
+    }
     CheckRestartSpring();
 
     DrivenRender(dirty);
@@ -242,6 +247,12 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto drawVertical = (axis == Axis::HORIZONTAL);
     auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_);
+    auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
+    if (!scrollBarOverlayModifier) {
+        scrollBarOverlayModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+        SetScrollBarOverlayModifier(scrollBarOverlayModifier);
+    }
+    paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier);
     paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
     auto scrollEffect = GetScrollEdgeEffect();
@@ -338,9 +349,11 @@ void ListPattern::ProcessEvent(
 
     if (scrollStop_) {
         auto onScrollStop = listEventHub->GetOnScrollStop();
-        if (!GetScrollAbort() && onScrollStop) {
-            SetScrollState(SCROLL_FROM_NONE);
-            onScrollStop();
+        if (!GetScrollAbort()) {
+            if (onScrollStop) {
+                scrollState_ = SCROLL_FROM_NONE;
+                onScrollStop();
+            }
         }
         scrollStop_ = false;
         SetScrollAbort(false);
@@ -725,6 +738,10 @@ void ListPattern::FireOnScrollStart()
 {
     if (GetScrollAbort()) {
         return;
+    }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarStartAnimation();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
