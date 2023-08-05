@@ -802,9 +802,7 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
         host->SetNeedCallChildrenUpdate(false);
         return;
     }
-    auto dialogContext = host->GetRenderContext();
-    CHECK_NULL_VOID(dialogContext);
-    dialogContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto buttonTitleRenderContext = buttonTitleNode_->GetRenderContext();
     CHECK_NULL_VOID(buttonTitleRenderContext);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
