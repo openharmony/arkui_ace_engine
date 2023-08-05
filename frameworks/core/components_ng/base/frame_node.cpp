@@ -48,10 +48,8 @@
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
-#if defined(PREVIEW)
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
-#endif
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -516,7 +514,6 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-#if defined(PREVIEW)
     bool hasIdealWidth = false;
     bool hasIdealHeight = false;
     if (layoutProperty_ && layoutProperty_->GetCalcLayoutConstraint()) {
@@ -545,7 +542,6 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
             jsonSize->Put("height", heightStr);
         }
     }
-#endif
 }
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
