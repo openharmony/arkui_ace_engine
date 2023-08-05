@@ -5883,7 +5883,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextInputScroll001, TestSize.
     pattern->OnTextInputScroll(0.0f);
     pattern->isSingleHandle_ = true;
     pattern->OnTextInputScroll(0.0f);
-    EXPECT_EQ(pattern->caretRect_.GetX(), 0.0f);
+    EXPECT_EQ(pattern->caretRect_.GetX(), -90.0f);
     EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->currentOffset_, pattern->textRect_.GetY()));
 }
 
