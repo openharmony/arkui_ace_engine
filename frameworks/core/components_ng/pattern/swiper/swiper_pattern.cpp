@@ -3021,4 +3021,9 @@ int32_t SwiperPattern::TotalDisPlayCount() const
     }
     return displayCount;
 }
+
+void SwiperPattern::SwipeToWithoutAnimationAutoPlay()
+{
+    PostTranslateTask(GetInterval());
+}
 } // namespace OHOS::Ace::NG

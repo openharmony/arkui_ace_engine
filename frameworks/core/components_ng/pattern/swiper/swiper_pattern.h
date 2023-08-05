@@ -421,6 +421,7 @@ public:
 
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
+    void SwipeToWithoutAnimationAutoPlay();
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
