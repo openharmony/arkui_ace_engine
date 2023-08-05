@@ -20,6 +20,7 @@
 #include <vector>
 
 namespace OHOS::Ace::NG {
-std::vector<double> ParseTemplateArgs(const std::string& args, double size, double gap, int32_t childrenCount);
+std::pair<std::vector<double>, bool> ParseTemplateArgs(
+    const std::string& args, double size, double gap, int32_t childrenCount);
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTY_TEMPLATES_PARSER_H

@@ -71,16 +71,23 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
     rowsGap_ = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, idealSize.Height()).value_or(0);
     columnsGap_ = ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, idealSize.Width()).value_or(0);
-    auto rowsLen = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetRowsTemplate().value_or("")),
+    auto rows = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetRowsTemplate().value_or("")),
         idealSize.Height(), rowsGap_, layoutWrapper->GetTotalChildCount());
-    auto colsLen = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetColumnsTemplate().value_or("")),
+    auto cols = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetColumnsTemplate().value_or("")),
         idealSize.Width(), columnsGap_, layoutWrapper->GetTotalChildCount());
-
+    auto rowsLen = rows.first;
+    auto colsLen = cols.first;
     if (rowsLen.empty()) {
         rowsLen.push_back(idealSize.Height());
     }
+    if (rows.second) {
+        rowsGap_ = 0;
+    }
     if (colsLen.empty()) {
         colsLen.push_back(idealSize.Width());
+    }
+    if (cols.second) {
+        columnsGap_ = 0;
     }
 
     if (static_cast<uint32_t>(mainCount_) != rowsLen.size()) {
