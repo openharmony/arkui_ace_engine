@@ -53,7 +53,7 @@ void GridItemPattern::SetSelectable(bool selectable)
         auto context = host->GetRenderContext();
         CHECK_NULL_VOID(context);
         context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
-        MarkIsSelected(true);
+        MarkIsSelected(false);
     }
     selectable_ = selectable;
 }
@@ -74,7 +74,6 @@ void GridItemPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(host);
         auto context = host->GetRenderContext();
         CHECK_NULL_VOID(context);
-        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         pattern->MarkIsSelected(true);
         context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
