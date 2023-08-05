@@ -36,6 +36,7 @@ constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 500;
 int32_t MULTI_TAP_SLOP = 100;
 constexpr int32_t MULTI_TAP_SLOP_TOUCH = 30;
 constexpr int32_t MULTI_TAP_SLOP_MOUSE = 15;
+constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 #ifndef WEARABLE_PRODUCT
 double MAX_THRESHOLD = 20.0;
 constexpr double MAX_THRESHOLD_TOUCH = 20.0;
@@ -274,7 +275,7 @@ bool ClickRecognizer::ExceedSlop()
     if (tappedCount_ > 0 && tappedCount_ < count_) {
         Offset currentFocusPoint = ComputeFocusPoint();
         Offset slop = currentFocusPoint - focusPoint_;
-        if (GreatOrEqual(slop.GetDistance(), MULTI_TAP_SLOP)) {
+        if (GreatOrEqual(SystemProperties::Px2Vp(slop.GetDistance()), MAX_THRESHOLD_MANYTAP)) {
             return true;
         }
     }
