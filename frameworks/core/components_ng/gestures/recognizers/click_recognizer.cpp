@@ -33,9 +33,6 @@ constexpr int32_t MULTI_FINGER_TIMEOUT_MOUSE = 300;
 int32_t MULTI_TAP_TIMEOUT = 300;
 constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 350;
 constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 300;
-int32_t MULTI_TAP_SLOP = 100;
-constexpr int32_t MULTI_TAP_SLOP_TOUCH = 30;
-constexpr int32_t MULTI_TAP_SLOP_MOUSE = 15;
 constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 
@@ -47,13 +44,11 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
         case SourceType::TOUCH:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_TOUCH;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_TOUCH;
-            MULTI_TAP_SLOP = MULTI_TAP_SLOP_TOUCH;
             break;
         case SourceType::MOUSE:
         case SourceType::TOUCH_PAD:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_MOUSE;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_MOUSE;
-            MULTI_TAP_SLOP = MULTI_TAP_SLOP_MOUSE;
             break;
         default:
             LOGI("Unrecognized input source type: %{public}d", sourceType);
