@@ -24,9 +24,8 @@
  * property.
 */
 
-class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectAbstractPU<T>
-  implements PeerChangeEventReceiverPU<T>,
-  ObservedObjectEventsPUReceiver<T> {
+class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
+  implements PeerChangeEventReceiverPU<T>, ObservedObjectEventsPUReceiver<T> {
 
   private wrappedValue_: T;
 
@@ -41,6 +40,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
     this.removeSubscriber(unsubscribeMe);
     super.aboutToBeDeleted();
   }
+
 
   /**
    * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
@@ -77,31 +77,28 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
       }
     }
   }
-  
+
   /*
     actually update this.wrappedValue_
     called needs to do value change check
     and also notify with this.aboutToChange();
   */
   private setValueInternal(newValue: T): boolean {
-    if (newValue == undefined || newValue == null) {
-      stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide value must not be undefined or null. Application error!`);
-      // TODO enable support for undefined and null
-      // unsubscribe old value, set wrappedValue_ to null/undefined
-    }
-    if (typeof newValue !== 'object') {
-      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
-      return false;
-    }
-
     if (newValue == this.wrappedValue_) {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] newValue unchanged`);
       return false;
     }
 
-    this.unsubscribeWrappedObject();
+    if (!this.checkIsSupportedValue(newValue)) {
+      return false;
+    }
 
-    if (newValue instanceof SubscribableAbstract) {
+    this.unsubscribeWrappedObject();
+    if (!newValue || typeof newValue !== 'object') {
+      // undefined, null, simple type: 
+      // nothing to subscribe to in case of new value undefined || null || simple type 
+      this.wrappedValue_ = newValue;
+    } else if (newValue instanceof SubscribableAbstract) {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribableAbstract, subscribiung to it.`);
       this.wrappedValue_ = newValue;
       (this.wrappedValue_ as unknown as SubscribableAbstract).addOwningProperty(this);
@@ -138,4 +135,13 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
       this.notifyPropertyHasChangedPU();
     }
   }
+}
+
+// class definitions for backward compatibility
+class ObservedPropertyObjectPU<T> extends ObservedPropertyPU<T> {
+
+}
+
+class ObservedPropertySimplePU<T> extends ObservedPropertyPU<T> {
+  
 }

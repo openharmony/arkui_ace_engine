@@ -21,7 +21,7 @@
  * 
  */
 class SynchedPropertyNestedObjectPU<C extends Object>
-  extends ObservedPropertyObjectAbstractPU<C>
+  extends ObservedPropertyAbstractPU<C>
   implements ObservedObjectEventsPUReceiver<C> {
 
   private obsObject_: C;
@@ -39,7 +39,6 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     owningChildView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningChildView, propertyName);
     this.obsObject_ = obsObject;
-
     this.setValueInternal(obsObject);
   }
 
@@ -87,14 +86,19 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     }
 
     stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set: @ObjectLink set to new value: .`);
-    this.setValueInternal(newValue);
 
-    // notify value change to subscribing View
-    this.notifyPropertyHasChangedPU();
+    if (this.setValueInternal(newValue)) {
+      // notify value change to subscribing View
+      this.notifyPropertyHasChangedPU();
+    }
   }
 
 
-  private setValueInternal(newValue: C): void {
+  private setValueInternal(newValue: C): boolean {
+    if (!this.checkIsObject(newValue)) {
+      return false;
+    }
+
     if (this.obsObject_ != undefined) {
       if (this.obsObject_ instanceof SubscribableAbstract) {
         // unregister from SubscribableAbstract object
@@ -119,6 +123,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
       value changes will bot be observed and UI will not update. forgot @Observed class decorator? Application error.`);
       }
     }
+    return true;
   }
 }
 
