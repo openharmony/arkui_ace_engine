@@ -37,16 +37,19 @@ public:
         onSelect_ = std::move(onSelect);
     }
 
-    void FireOnSelect(bool isSelected) const
+    SelectFunc GetOnSelect() const
     {
-        if (onSelect_) {
-            onSelect_(isSelected);
-        }
+        return onSelect_;
     }
 
     void SetSelectChangeEvent(SelectFunc&& changeEvent)
     {
         selectChangeEvent_ = std::move(changeEvent);
+    }
+
+    SelectFunc GetSelectChangeEvent() const
+    {
+        return selectChangeEvent_;
     }
 
     void FireSelectChangeEvent(bool select) const

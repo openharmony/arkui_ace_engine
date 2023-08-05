@@ -214,9 +214,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
         host->SetNeedCallChildrenUpdate(false);
         return;
     }
-    auto dialogContext = host->GetRenderContext();
-    CHECK_NULL_VOID(dialogContext);
-    dialogContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto titleLayoutRenderContext = buttonTitleNode_->GetRenderContext();
     titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
 

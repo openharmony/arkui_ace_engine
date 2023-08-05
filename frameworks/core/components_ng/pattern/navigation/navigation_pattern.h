@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -97,6 +98,7 @@ public:
         return navigationStack_;
     }
 
+    // use for navRouter case
     void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
         navigationStack_->Add(name, navDestinationNode);
@@ -134,31 +136,15 @@ public:
         return navigationStack_->GetAllNavDestinationNodes();
     }
 
-    std::pair<std::string, RefPtr<UINode>> GetTopNavPath()
-    {
-        if (navPathList_.empty()) {
-            return std::make_pair("", nullptr);
-        }
-        int32_t top = navPathList_.size() - 1;
-        return std::make_pair(navPathList_[top].first, navPathList_[top].second);
-    }
-
     void RemoveIfNeeded(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
-        auto index = navigationStack_->FindIndex(name, navDestinationNode);
-        // exit and not the top, need to be removed
-        if (index != -1 && index != static_cast<int32_t>(navPathList_.size()) - 1) {
-            navigationStack_->Remove(name, navDestinationNode);
-        }
+        navigationStack_->Remove(name, navDestinationNode);
     }
 
     void RemoveNavDestination()
     {
         navigationStack_->Remove();
     }
-
-    void DoNavigationTransitionAnimation(const RefPtr<UINode>& preTopNavDestination,
-        const RefPtr<UINode>& newTopNavDestination, int preStackSize, int newStackSize);
 
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
 
@@ -190,21 +176,15 @@ public:
         return navBarVisibilityChange_;
     }
 
-    void SetNavModeChange(bool isChange)
-    {
-        navModeChange_ = isChange;
-    }
-
-    bool GetNavModeChange() const
-    {
-        return navModeChange_;
-    }
+    void OnVisibleChange(bool isVisible) override;
 
 private:
+    void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
+    void DoNavigationTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
-    bool CheckExistPreStack(const std::string& name);
-    RefPtr<UINode> GetNodeAndRemoveByName(const std::string& name);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
@@ -216,13 +196,11 @@ private:
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
-    void OnNavBarStateChange();
+    void OnNavBarStateChange(bool modeChange);
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
-    NavPathList preNavPathList_;
-    NavPathList navPathList_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<DragEvent> dragEvent_;
     RectF dragRect_;
@@ -232,7 +210,6 @@ private:
     float realDividerWidth_ = 2.0f;
     bool navigationStackProvided_ = false;
     bool navBarVisibilityChange_ = false;
-    bool navModeChange_ = false;
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
     Dimension minNavBarWidthValue_ = 0.0_vp;

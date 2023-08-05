@@ -86,18 +86,10 @@ void ScrollPattern::OnModifyDone()
 
 void ScrollPattern::RegisterScrollEventTask()
 {
-    auto scrollableEvent = GetScrollableEvent();
-    CHECK_NULL_VOID(scrollableEvent);
     auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto scrollBeginEvent = eventHub->GetScrollBeginEvent();
-    if (scrollBeginEvent) {
-        scrollableEvent->SetScrollBeginCallback(std::move(scrollBeginEvent));
-    }
     auto scrollFrameBeginEvent = eventHub->GetScrollFrameBeginEvent();
-    if (scrollFrameBeginEvent) {
-        scrollableEvent->SetScrollFrameBeginCallback(std::move(scrollFrameBeginEvent));
-    }
+    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

@@ -40,6 +40,9 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     columnInfo->GetParent()->BuildColumnWidth();
     auto minWidth = static_cast<float>(columnInfo->GetWidth());
     childConstraint.minSize.SetWidth(minWidth);
+    if (layoutConstraint->minSize.Width() < minWidth) {
+        layoutConstraint->minSize.SetWidth(minWidth);
+    }
     // Calculate max width of menu items
     UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
 
@@ -57,6 +60,10 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (layoutConstraint->selfIdealSize.Width().has_value() &&
         layoutConstraint->selfIdealSize.Width().value() >= layoutConstraint->maxSize.Width()) {
         layoutConstraint->selfIdealSize.SetWidth(layoutConstraint->maxSize.Width());
+        layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
+    } else if (layoutConstraint->selfIdealSize.Width().has_value() &&
+               layoutConstraint->selfIdealSize.Width().value() < layoutConstraint->minSize.Width()) {
+        layoutConstraint->selfIdealSize.SetWidth(layoutConstraint->minSize.Width());
         layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
     }
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);

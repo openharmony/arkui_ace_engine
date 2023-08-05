@@ -167,12 +167,11 @@ void JSImage::OnError(const JSCallbackInfo& args)
 
 void JSImage::OnFinish(const JSCallbackInfo& info)
 {
-    LOGD("JSImage OnFinish");
-    if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsFunction()) {
         return;
     }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(tmpInfo));
     auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Image.onFinish");
@@ -184,7 +183,6 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
 void JSImage::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -201,7 +199,6 @@ void JSImage::Create(const JSCallbackInfo& info)
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
         if (notSupport) {
-            LOGE("Not supported src : %{public}s when form render", src.c_str());
             src.clear();
         }
     }
@@ -346,31 +343,34 @@ void JSImage::SetAutoResize(bool autoResize)
 
 void JSImage::SetSyncLoad(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsBoolean()) {
-        LOGE("info[0] is not a Boolean.");
+    if (info.Length() < 1) {
         return;
     }
-    ImageModel::GetInstance()->SetSyncMode(info[0]->ToBoolean());
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
+        return;
+    }
+    ImageModel::GetInstance()->SetSyncMode(tmpInfo->ToBoolean());
 }
 
 void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The argv is wrong, it it supposed to have at least 1 argument");
         return;
     }
-    if (!args[0]->IsArray()) {
-        LOGE("jscallback is not object or array");
+    auto tmpInfo = args[0];
+    if (!tmpInfo->IsArray()) {
+        LOGD("jscallback is not object or array");
         return;
     }
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGE("arg length illegal");
+        LOGI("arg length illegal");
         return;
     }
     auto jscolorfilter = Referenced::MakeRefPtr<JSColorFilter>();
     if (jscolorfilter == nullptr) {
-        LOGE("make jscolorfilter object failed");
+        LOGW("make jscolorfilter object failed");
         return;
     }
     std::vector<float> colorfilter;
@@ -398,13 +398,16 @@ void JSColorFilter::DestructorCallback(JSColorFilter* obj)
 
 void JSImage::SetColorFilter(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsArray()) {
-        LOGE("The arg is wrong, it is supposed to have 1 arguments");
+    if (info.Length() != 1) {
         return;
     }
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsArray()) {
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGE("arg length illegal");
+        LOGW("arg length illegal");
         return;
     }
     std::vector<float> colorfilter;
@@ -415,7 +418,7 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         }
     }
     if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGE("colorfilter length illegal");
+        LOGI("colorfilter length illegal");
         return;
     }
     ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
@@ -474,7 +477,6 @@ void JSImage::JsSetDraggable(bool draggable)
 void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
         return;
     }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -485,7 +487,6 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
-            LOGE("builder param is not an object.");
             return itemInfo;
         }
         if (ParseAndUpdateDragItemInfo(ret, itemInfo)) {

@@ -147,7 +147,10 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     swiperController_->SetTabBarFinishCallback(std::move(callback));
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
-    scrollableEvent_->SetScrollPositionCallback(std::move(task));
+    auto scrollable = MakeRefPtr<Scrollable>(task, axis);
+    scrollable->SetNodeId(host->GetAccessibilityId());
+    scrollable->Initialize(host->GetContext());
+    scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
@@ -493,6 +496,7 @@ void TabBarPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
+    needSetCentered_ = true;
 
     CHECK_NULL_VOID(swiperController_);
     auto removeEventCallback = [weak = WeakClaim(this)]() {
@@ -713,7 +717,7 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     CHECK_NULL_VOID(imageLayoutProperty);
     ImageSourceInfo info;
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
-    
+
     auto maskPosition = host->GetChildren().size() - MASK_COUNT;
     if (maskPosition < 0) {
         return;
@@ -900,7 +904,8 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         auto space = GetSpace(index);
         float frontChildrenMainSize = CalculateFrontChildrenMainSize(index);
         float backChildrenMainSize = CalculateBackChildrenMainSize(index);
-        targetOffset = frontChildrenMainSize < space ? 0.0f
+        targetOffset = space < 0.0f                    ? -frontChildrenMainSize
+                        : frontChildrenMainSize < space ? 0.0f
                        : backChildrenMainSize < space
                            ? host->GetGeometryNode()->GetFrameSize().Width() - childrenMainSize_
                            : space - frontChildrenMainSize;
@@ -1343,7 +1348,8 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     auto space = GetSpace(targetIndex);
     float frontChildrenMainSize = CalculateFrontChildrenMainSize(targetIndex);
     float backChildrenMainSize = CalculateBackChildrenMainSize(targetIndex);
-    auto targetOffset = frontChildrenMainSize < space ? 0.0f
+    auto targetOffset = space < 0.0f                    ? -frontChildrenMainSize
+                        : frontChildrenMainSize < space ? 0.0f
                         : backChildrenMainSize < space
                             ? host->GetGeometryNode()->GetFrameSize().Width() - childrenMainSize_
                             : space - frontChildrenMainSize;
@@ -1685,7 +1691,6 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
     } else {
         swiperController_->SwipeToWithoutAnimation(index);
     }
-
 }
 
 void TabBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

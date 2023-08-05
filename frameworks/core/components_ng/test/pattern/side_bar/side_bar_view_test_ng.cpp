@@ -393,7 +393,6 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg005, TestSize.Level1)
     EXPECT_NE(sideBarContainerLayoutAlgorithm, nullptr);
     sideBarContainerLayoutAlgorithm->SetRealDividerWidth(REAL_WIDTH);
     sideBarContainerLayoutAlgorithm->GetRealDividerWidth();
-    sideBarContainerPattern->UpdateResponseRegion(sideBarContainerLayoutAlgorithm);
     sideBarContainerPattern->AddDividerHotZoneRect(sideBarContainerLayoutAlgorithm);
 }
 
@@ -456,7 +455,6 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg006, TestSize.Level1)
     EXPECT_NE(sideBarContainerLayoutAlgorithm, nullptr);
     sideBarContainerLayoutAlgorithm->SetRealDividerWidth(REAL_WIDTH);
     sideBarContainerLayoutAlgorithm->GetRealDividerWidth();
-    sideBarContainerPattern->UpdateResponseRegion(sideBarContainerLayoutAlgorithm);
     sideBarContainerPattern->AddDividerHotZoneRect(sideBarContainerLayoutAlgorithm);
 }
 
@@ -495,7 +493,6 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg007, TestSize.Level1)
     EXPECT_NE(sideBarContainerLayoutAlgorithm, nullptr);
     sideBarContainerLayoutAlgorithm->SetRealDividerWidth(REAL_WIDTH);
     sideBarContainerLayoutAlgorithm->GetRealDividerWidth();
-    sideBarContainerPattern->UpdateResponseRegion(sideBarContainerLayoutAlgorithm);
     sideBarContainerPattern->AddDividerHotZoneRect(sideBarContainerLayoutAlgorithm);
 }
 

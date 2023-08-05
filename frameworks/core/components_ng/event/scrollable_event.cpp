@@ -27,21 +27,6 @@ ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEv
     : gestureEventHub_(gestureEventHub)
 {}
 
-void ScrollableActuator::InitializeScrollable(RefPtr<ScrollableEvent> event)
-{
-    auto gestureEventHub = gestureEventHub_.Upgrade();
-    auto host = gestureEventHub ? gestureEventHub->GetFrameNode() : nullptr;
-    CHECK_NULL_VOID(host);
-    auto scrollable = MakeRefPtr<Scrollable>(event->GetScrollPositionCallback(), event->GetAxis());
-    scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->SetOnScrollBegin(event->GetScrollBeginCallback());
-    scrollable->SetOnScrollFrameBegin(event->GetScrollFrameBeginCallback());
-    scrollable->SetScrollEndCallback(event->GetScrollEndCallback());
-    scrollable->Initialize(host->GetContext());
-    scrollable->SetUnstaticFriction(event->GetFriction());
-    event->SetScrollable(scrollable);
-}
-
 void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect)
 {
     CHECK_NULL_VOID_NOLOG(effect);

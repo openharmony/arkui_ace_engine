@@ -32,13 +32,18 @@ std::string ImageSourcePreview::GetProperty(const std::string& /* key */)
     return "";
 }
 
-RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(int32_t width, int32_t height)
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(const Size& size)
 {
     return nullptr;
 }
 
-RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(uint32_t index, int32_t width, int32_t height)
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(uint32_t index, const Size& size)
 {
     return nullptr;
+}
+
+ImageSource::Size ImageSourcePreview::GetImageSize()
+{
+    return {};
 }
 } // namespace OHOS::Ace

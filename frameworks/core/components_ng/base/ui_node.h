@@ -304,7 +304,7 @@ public:
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
-    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+    virtual void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
     template<typename T>
     RefPtr<T> FindChildNodeOfClass()
@@ -505,6 +505,9 @@ protected:
     virtual bool OnRemoveFromParent(bool allowTransition);
     virtual bool RemoveImmediately() const;
     void ResetParent();
+
+    // update visible change signal to children
+    void UpdateChildrenVisible(bool isVisible) const;
 
 protected:
     bool needCallChildrenUpdate_ = true;

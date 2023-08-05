@@ -152,6 +152,14 @@ public:
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
     }
 
+    void SetScrollFrameBeginCallback(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
+    {
+        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID_NOLOG(scrollable);
+        scrollable->SetOnScrollFrameBegin(scrollFrameBeginCallback);
+    }
+
     bool IsScrollableSpringEffect() const
     {
         CHECK_NULL_RETURN_NOLOG(scrollEffect_, false);
@@ -275,12 +283,34 @@ protected:
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
     // select with mouse
+    struct ItemSelectedStatus {
+        std::function<void(bool)> onSelected;
+        std::function<void(bool)> selectChangeEvent;
+        RectF rect;
+        bool selected = false;
+        void FireSelectChangeEvent(bool isSelected)
+        {
+            if (selected == isSelected) {
+                return;
+            }
+            selected = isSelected;
+            if (onSelected) {
+                onSelected(isSelected);
+            }
+            if (selectChangeEvent) {
+                selectChangeEvent(isSelected);
+            }
+        }
+    };
     void InitMouseEvent();
     void UninitMouseEvent();
     void DrawSelectedZone(const RectF& selectedZone);
     void ClearSelectedZone();
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
+    OffsetF mouseStartOffset_;
+    float totalOffsetOfMousePressed_ = 0.0f;
+    std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
 
     RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
     {
@@ -308,6 +338,8 @@ private:
     {
         return false;
     }
+    void ClearInvisibleItemsSelectedStatus();
+    void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
     void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void OnMouseRelease();
     void SelectWithScroll();
@@ -340,10 +372,8 @@ private:
 
     // select with mouse
     bool mousePressed_ = false;
-    OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
-    float totalOffsetOfMousePressed_ = 0.0f;
     MouseInfo lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<InputEvent> mouseEvent_;

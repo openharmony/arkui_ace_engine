@@ -181,6 +181,7 @@ INTERACTION_COMPLETED_LATENCY:
   ANIMATION_START_LATENCY: {type: UINT64, desc: animation start time of the scene}
   ANIMATION_END_LATENCY: {type: UINT64, desc: end time of the scene}
   E2E_LATENCY: {type: UINT64, desc: end to end time}
+  NOTE: {type: STRING, desc: extra infomation}
 
 INTERACTION_APP_JANK:
   __BASE: {type: STATISTIC, level: MINOR, tag: performance, desc: interaction jank statistics}
@@ -198,3 +199,4 @@ INTERACTION_APP_JANK:
   TOTAL_MISSED_FRAMES: {type: INT32, desc: total missed frames during the scene}
   MAX_FRAMETIME: {type: UINT64, desc: max single frame time during the scene}
   MAX_SEQ_MISSED_FRAMES: {type: INT32, desc: max successive missed frames during the scene}
+  NOTE: {type: STRING, desc: extra infomation}

@@ -196,6 +196,20 @@ RefPtr<UINode> NavigationStack::Get(const std::string& name)
     return nullptr;
 }
 
+RefPtr<UINode> NavigationStack::GetFromPreBackup(const std::string& name)
+{
+    // from bottom to top
+    if (preNavPathList_.empty()) {
+        return nullptr;
+    }
+    for (auto it = preNavPathList_.begin(); it != preNavPathList_.end(); ++it) {
+        if ((*it).first == name) {
+            return (*it).second;
+        }
+    }
+    return nullptr;
+}
+
 RefPtr<UINode> NavigationStack::GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode)
 {
     if (navPathList_.empty() || navPathList_.size() == 1) {

@@ -41,71 +41,6 @@ public:
     explicit ScrollableEvent(Axis axis) : axis_(axis) {};
     ~ScrollableEvent() override = default;
 
-    void SetScrollPositionCallback(ScrollPositionCallback&& callback)
-    {
-        if (!callback) {
-            return;
-        }
-        callback_ = std::move(callback);
-    }
-
-    const ScrollPositionCallback& GetScrollPositionCallback() const
-    {
-        return callback_;
-    }
-
-    void SetScrollBeginCallback(ScrollBeginCallback&& scrollBeginCallback)
-    {
-        scrollBeginCallback_ = std::move(scrollBeginCallback);
-        if (scrollable_) {
-            scrollable_->SetOnScrollBegin(scrollBeginCallback_);
-        }
-    }
-
-    const ScrollBeginCallback& GetScrollBeginCallback() const
-    {
-        return scrollBeginCallback_;
-    }
-
-    void SetScrollFrameBeginCallback(ScrollFrameBeginCallback&& scrollFrameBeginCallback)
-    {
-        scrollFrameBeginCallback_ = std::move(scrollFrameBeginCallback);
-        if (scrollable_) {
-            scrollable_->SetOnScrollFrameBegin(scrollFrameBeginCallback_);
-        }
-    }
-
-    const ScrollFrameBeginCallback& GetScrollFrameBeginCallback() const
-    {
-        return scrollFrameBeginCallback_;
-    }
-
-    void SetScrollEndCallback(ScrollEndCallback&& scrollEndCallback)
-    {
-        if (!scrollEndCallback) {
-            return;
-        }
-        scrollEndCallback_ = std::move(scrollEndCallback);
-    }
-
-    const ScrollEndCallback& GetScrollEndCallback() const
-    {
-        return scrollEndCallback_;
-    }
-
-    void SetOutBoundaryCallback(OutBoundaryCallback&& outBoundaryCallback)
-    {
-        if (!outBoundaryCallback) {
-            return;
-        }
-        outBoundaryCallback_ = std::move(outBoundaryCallback);
-    }
-
-    const OutBoundaryCallback& GetOutBoundaryCallback() const
-    {
-        return outBoundaryCallback_;
-    }
-
     Axis GetAxis() const
     {
         return axis_;
@@ -155,19 +90,6 @@ public:
         return false;
     }
 
-    void SetFriction(double friction)
-    {
-        friction_ = friction;
-        if (scrollable_) {
-            scrollable_->SetUnstaticFriction(friction_);
-        }
-    }
-
-    double GetFriction() const
-    {
-        return friction_;
-    }
-
     void SetBarCollectTouchTargetCallback(const BarCollectTouchTargetCallback&& barCollectTouchTarget)
     {
         barCollectTouchTarget_ = std::move(barCollectTouchTarget);
@@ -192,18 +114,11 @@ public:
     }
 
 private:
-    ScrollPositionCallback callback_;
-    ScrollBeginCallback scrollBeginCallback_;
-    ScrollFrameBeginCallback scrollFrameBeginCallback_;
-    ScrollEndCallback scrollEndCallback_;
-    OutBoundaryCallback outBoundaryCallback_;
-
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
     RefPtr<Scrollable> scrollable_;
     BarCollectTouchTargetCallback barCollectTouchTarget_;
     InBarRegionCallback inBarRegionCallback_;
-    double friction_ = -1.0;
 };
 
 class ScrollableActuator : public GestureEventActuator {
@@ -215,9 +130,6 @@ public:
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
         scrollableEvents_[scrollableEvent->GetAxis()] = scrollableEvent;
-        if (scrollableEvent && !scrollableEvent->GetScrollable()) {
-            InitializeScrollable(scrollableEvent);
-        }
     }
 
     void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
@@ -237,7 +149,7 @@ public:
             }
             if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
                 event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
-            } else {
+            } else if (event->GetScrollable()) {
                 const auto& scrollable = event->GetScrollable();
                 scrollable->SetGetEventTargetImpl(getEventTargetImpl);
                 scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));

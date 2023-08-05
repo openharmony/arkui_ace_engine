@@ -977,8 +977,6 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
     ASSERT_NE(imageLayoutProperty, nullptr);
     image.SetAlt(RESOURCE_URL);
     image.SetImageFill(Color::BLUE);
-    ASSERT_NE(imageLayoutProperty->GetImageSourceInfo(), std::nullopt);
-    EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->fillColor_.value(), Color::BLUE);
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(imageRenderProperty, nullptr);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::BLUE);

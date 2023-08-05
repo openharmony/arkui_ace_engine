@@ -14,7 +14,8 @@
  */
 #include "core/components_ng/render/adapter/animated_image.h"
 namespace OHOS::Ace::NG {
-RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<SkiaImageData>& data, const SizeF& size, const std::string& url)
+RefPtr<CanvasImage> AnimatedImage::Create(
+    const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url)
 {
     return nullptr;
 }

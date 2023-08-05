@@ -174,7 +174,7 @@ OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr
     UpdateTouchRegion();
 
     // If bubble displayed in subwindow, set the hotarea of subwindow.
-    if (bubbleProp->GetShowInSubWindowValue(false)) {
+    if (bubbleProp->GetShowInSubWindowValue(false) && (!bubblePattern->IsSkipHotArea())) {
         std::vector<Rect> rects;
         if (!bubbleProp->GetBlockEventValue(true)) {
             auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
@@ -187,6 +187,7 @@ OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr
         }
         SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId(), bubblePattern->GetContainerId());
     }
+    bubblePattern->SetSkipHotArea(false);
 
     Dimension childOffsetX(childOffset_.GetX());
     Dimension childOffsetY(childOffset_.GetY());

@@ -108,6 +108,8 @@ using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
+constexpr float PIXELMAP_DRAG_WGR_TEXT_SCALE = 2.0f;
+constexpr float PIXELMAP_DRAG_WGR_SCALE = 3.0f;
 #endif
 class EventHub;
 
@@ -447,6 +449,7 @@ public:
     }
 
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f) const;
+    float GetPixelMapScale(const int32_t height, const int32_t width) const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);

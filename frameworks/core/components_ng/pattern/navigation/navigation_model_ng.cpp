@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -613,8 +615,11 @@ void NavigationModelNG::Create()
     // content node
     if (!navigationGroupNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto contentNode = FrameNode::GetOrCreateFrameNode(
-            V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
+            []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+        contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+            HitTestMode::HTMTRANSPARENT_SELF);
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
     }
@@ -644,8 +649,8 @@ void NavigationModelNG::Create()
     navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 }
 
-bool NavigationModelNG::ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
-    const std::string& title)
+bool NavigationModelNG::ParseCommonTitle(
+    bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
 {
     bool isCommonTitle = false;
     if (hasSubTitle) {
@@ -725,6 +730,8 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
         textLayoutProperty->UpdateMaxLines(1); // 1:title's maxLine.
     }
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
 }
@@ -930,6 +937,9 @@ void NavigationModelNG::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
     textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
+    textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetSubtitle(subtitleNode);
 }
@@ -968,10 +978,6 @@ void NavigationModelNG::SetHideNavBar(bool hideNavBar)
 
 void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
 {
-    ImageSourceInfo imageSourceInfo(src);
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, noPixMap);
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo);
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
@@ -982,33 +988,14 @@ void NavigationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap,
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
+    ImageSourceInfo imageSourceInfo(src);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, noPixMap);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap);
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarNode->MarkModifyDone();
-    auto navBarContentNode = navBarNode->GetNavBarContentNode();
-    CHECK_NULL_VOID(navBarContentNode);
-    if (navBarContentNode->GetChildren().empty()) {
-        return;
-    }
-    for (const auto& navBarContentChild : navBarContentNode->GetChildren()) {
-        auto navBarContentChildFrameNode = AceType::DynamicCast<FrameNode>(navBarContentChild);
-        CHECK_NULL_VOID(navBarContentChildFrameNode);
-        if (navBarContentChildFrameNode->GetTag() != V2::NAVROUTER_VIEW_ETS_TAG) {
-            return;
-        }
-
-        auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
-        CHECK_NULL_VOID(navigationPattern);
-        auto navDestinationNode =
-            AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
-        CHECK_NULL_VOID(navDestinationNode);
-        auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
-        navDestinationLayoutProperty->UpdateImageSource(imageSourceInfo);
-        navDestinationLayoutProperty->UpdateNoPixMap(noPixMap);
-        navDestinationLayoutProperty->UpdatePixelMap(pixMap);
-        navDestinationNode->MarkModifyDone();
-    }
 }
 
 void NavigationModelNG::SetHideBackButton(bool hideBackButton)
@@ -1291,7 +1278,12 @@ void NavigationModelNG::SetNavigationStack(RefPtr<NG::NavigationStack>&& navigat
     CHECK_NULL_VOID(navigationGroupNode);
     auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetNavigationStack(std::move(navigationStack));
+    const auto& stack = pattern->GetNavigationStack();
+    if (stack) {
+        stack->UpdateStackInfo(navigationStack);
+    } else {
+        pattern->SetNavigationStack(std::move(navigationStack));
+    }
 }
 
 void NavigationModelNG::SetNavigationStack()

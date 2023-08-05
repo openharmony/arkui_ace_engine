@@ -23,14 +23,8 @@ namespace OHOS::Ace::NG {
 void SystemWindowScene::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(session_);
-    auto sessionInfo = session_->GetSessionInfo();
-    auto name = sessionInfo.bundleName_;
-    auto pos = name.find_last_of('.');
-    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
-
-    Rosen::RSSurfaceNodeConfig config;
-    config.SurfaceNodeName = name;
-    auto surfaceNode = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -38,9 +32,7 @@ void SystemWindowScene::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
 
-    auto frameNode = frameNode_.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto gestureHub = host->GetOrCreateGestureEventHub();
     auto touchCallback = [this](TouchEventInfo& info) {
         const auto pointerEvent = info.GetPointerEvent();
         CHECK_NULL_VOID(session_);
@@ -49,7 +41,7 @@ void SystemWindowScene::OnAttachToFrameNode()
     };
     gestureHub->SetTouchEvent(std::move(touchCallback));
 
-    auto mouseEventHub = frameNode->GetOrCreateInputEventHub();
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
     auto mouseCallback = [this](MouseInfo& info) {
         const auto pointerEvent = info.GetPointerEvent();
         CHECK_NULL_VOID(session_);

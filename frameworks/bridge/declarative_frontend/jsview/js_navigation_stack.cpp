@@ -20,6 +20,8 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::Framework {
@@ -181,7 +183,10 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index)
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     navDestBuilderFunc_->Call(JSRef<JSObject>(), 2, params);
     auto node = NG::ViewStackProcessor::GetInstance()->Finish();
-    return GetNavDestinationNodeFromUINode(node);
+    if (CheckNavDestinationNodeInUINode(node)) {
+        return node;
+    }
+    return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
 }
 
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo)
@@ -196,7 +201,10 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     navDestBuilderFunc_->Call(JSRef<JSObject>(), 2, params);
     auto node = NG::ViewStackProcessor::GetInstance()->Finish();
-    return GetNavDestinationNodeFromUINode(node);
+    if (CheckNavDestinationNodeInUINode(node)) {
+        return node;
+    }
+    return DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
 }
 
 void JSNavigationStack::SetJSExecutionContext(const JSExecutionContext& context)
@@ -225,22 +233,19 @@ JSRef<JSVal> JSNavigationStack::GetParamByIndex(int32_t index) const
     return func->Call(dataSourceObj_, 1, params);
 }
 
-RefPtr<NG::UINode> JSNavigationStack::GetNavDestinationNodeFromUINode(RefPtr<NG::UINode> node)
+bool JSNavigationStack::CheckNavDestinationNodeInUINode(RefPtr<NG::UINode> node)
 {
-    RefPtr<NG::UINode> navDesNode;
     while (node) {
         if (node->GetTag() == V2::JS_VIEW_ETS_TAG) {
-            navDesNode = AceType::DynamicCast<NG::UINode>(node);
-            navDesNode->Build();
-            break;
-        }
-        if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-            navDesNode = AceType::DynamicCast<NG::UINode>(node);
-            break;
+            auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            // render, and find deep further
+            customNode->Render();
+        } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            return true;
         }
         auto children = node->GetChildren();
         node = children.front();
     }
-    return navDesNode;
+    return false;
 }
 } // namespace OHOS::Ace::Framework

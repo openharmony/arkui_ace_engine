@@ -133,31 +133,32 @@ bool CheckJSCallbackInfo(
     }
     bool typeVerified = false;
     std::string unrecognizedType;
+    auto tmpInfo = info[0];
     for (const auto& infoType : infoTypes) {
         switch (infoType) {
             case JSCallbackInfoType::STRING:
-                if (info[0]->IsString()) {
+                if (tmpInfo->IsString()) {
                     typeVerified = true;
                 } else {
                     unrecognizedType += "string|";
                 }
                 break;
             case JSCallbackInfoType::NUMBER:
-                if (info[0]->IsNumber()) {
+                if (tmpInfo->IsNumber()) {
                     typeVerified = true;
                 } else {
                     unrecognizedType += "number|";
                 }
                 break;
             case JSCallbackInfoType::OBJECT:
-                if (info[0]->IsObject()) {
+                if (tmpInfo->IsObject()) {
                     typeVerified = true;
                 } else {
                     unrecognizedType += "object|";
                 }
                 break;
             case JSCallbackInfoType::FUNCTION:
-                if (info[0]->IsFunction()) {
+                if (tmpInfo->IsFunction()) {
                     typeVerified = true;
                 } else {
                     unrecognizedType += "Function|";
@@ -1883,8 +1884,8 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto optionsArgs = JsonUtil::ParseJsonString(info[1]->ToString());
         sharedOption = std::make_shared<SharedTransitionOption>();
-        // default: duration: 1000; if not specify: duration: 0
-        int32_t duration = 0;
+        // default: duration: 1000
+        int32_t duration = DEFAULT_DURATION;
         auto durationValue = optionsArgs->GetValue("duration");
         if (durationValue && durationValue->IsNumber()) {
             duration = durationValue->GetInt();
@@ -1903,15 +1904,16 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         RefPtr<Curve> curve;
         auto curveArgs = optionsArgs->GetValue("curve");
         if (curveArgs->IsString()) {
-            curve = CreateCurve(optionsArgs->GetString("curve", "linear"));
+            curve = CreateCurve(optionsArgs->GetString("curve", "linear"), false);
         } else if (curveArgs->IsObject()) {
             auto curveString = curveArgs->GetValue("__curveString");
             if (!curveString) {
                 return;
             }
-            curve = CreateCurve(curveString->GetString());
-        } else {
-            curve = AceType::MakeRefPtr<LinearCurve>();
+            curve = CreateCurve(curveString->GetString(), false);
+        }
+        if (!curve) {
+            curve = Curves::LINEAR;
         }
         sharedOption->curve = curve;
         // motionPath
@@ -4593,6 +4595,8 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsMotionPath", info, checkList)) {
+        LOGW("motionPath is not object");
+        ViewAbstractModel::GetInstance()->SetMotionPath(MotionPathOption());
         return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -4600,7 +4604,8 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
     if (ParseMotionPath(argsPtrItem, motionPathOption)) {
         ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
     } else {
-        LOGE("parse motionPath failed. %{public}s", info[0]->ToString().c_str());
+        LOGW("parse motionPath failed. %{public}s", info[0]->ToString().c_str());
+        ViewAbstractModel::GetInstance()->SetMotionPath(MotionPathOption());
     }
 }
 

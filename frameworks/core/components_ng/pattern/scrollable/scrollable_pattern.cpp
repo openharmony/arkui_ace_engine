@@ -153,12 +153,13 @@ void ScrollablePattern::OnScrollEnd()
 
 void ScrollablePattern::AddScrollEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto gestureHub = GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
     if (scrollableEvent_) {
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
-    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
@@ -167,19 +168,19 @@ void ScrollablePattern::AddScrollEvent()
         }
         return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
-    scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
+    auto scrollable = MakeRefPtr<Scrollable>(std::move(scrollCallback), GetAxis());
+    scrollable->SetNodeId(host->GetAccessibilityId());
+    scrollable->Initialize(host->GetContext());
+
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnScrollEnd();
         pattern->OnScrollEndCallback();
     };
-    scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
-    scrollableEvent_->SetFriction(friction_);
-    gestureHub->AddScrollableEvent(scrollableEvent_);
+    scrollable->SetScrollEndCallback(std::move(scrollEnd));
+    scrollable->SetUnstaticFriction(friction_);
 
-    auto scrollable = scrollableEvent_->GetScrollable();
-    CHECK_NULL_VOID_NOLOG(scrollable);
     auto func = [weak = AceType::WeakClaim(this)](double offset) -> OverScrollOffset {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -211,6 +212,10 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->NeedScrollSnapToSide(delta);
     };
     scrollable->SetNeedScrollSnapToSideCallback(std::move(needScrollSnapToSideCallback));
+
+    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
+    scrollableEvent_->SetScrollable(scrollable);
+    gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
@@ -468,9 +473,9 @@ void ScrollablePattern::SetFriction(double friction)
         friction = FRICTION;
     }
     friction_ = friction;
-    if (scrollableEvent_) {
-        scrollableEvent_->SetFriction(friction_);
-    }
+    CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    scrollable->SetUnstaticFriction(friction_);
 }
 
 RefPtr<ScrollablePattern> ScrollablePattern::GetParentScrollable()
@@ -628,6 +633,7 @@ void ScrollablePattern::UninitMouseEvent()
     CHECK_NULL_VOID(mouseEventHub);
     mouseEventHub->RemoveOnMouseEvent(mouseEvent_);
     ClearMultiSelect();
+    ClearInvisibleItemsSelectedStatus();
     isMouseEventInit_ = false;
 }
 
@@ -660,6 +666,40 @@ void ScrollablePattern::InitMouseEvent()
     });
 }
 
+void ScrollablePattern::ClearInvisibleItemsSelectedStatus()
+{
+    for (auto& item : itemToBeSelected_) {
+        item.second.FireSelectChangeEvent(false);
+    }
+    itemToBeSelected_.clear();
+}
+
+void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selectedZone)
+{
+    auto newRect = selectedZone;
+    auto startMainOffset = mouseStartOffset_.GetMainOffset(axis_);
+    auto endMainOffset = mouseEndOffset_.GetMainOffset(axis_);
+    if (LessNotEqual(startMainOffset, endMainOffset)) {
+        if (axis_ == Axis::VERTICAL) {
+            newRect.SetOffset(OffsetF(selectedZone.Left(), totalOffsetOfMousePressed_));
+        } else {
+            newRect.SetOffset(OffsetF(totalOffsetOfMousePressed_, selectedZone.Top()));
+        }
+    } else {
+        if (axis_ == Axis::VERTICAL) {
+            newRect.SetOffset(
+                OffsetF(selectedZone.Left(), totalOffsetOfMousePressed_ - (startMainOffset - endMainOffset)));
+        } else {
+            newRect.SetOffset(
+                OffsetF(totalOffsetOfMousePressed_ - (startMainOffset - endMainOffset), selectedZone.Top()));
+        }
+    }
+
+    for (auto& item : itemToBeSelected_) {
+        item.second.FireSelectChangeEvent(newRect.IsIntersectWith(item.second.rect));
+    }
+}
+
 void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
     if (info.GetButton() != MouseButton::LEFT_BUTTON) {
@@ -682,6 +722,7 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
     if (info.GetAction() == MouseAction::PRESS) {
         if (!IsItemSelected(info)) {
             ClearMultiSelect();
+            ClearInvisibleItemsSelectedStatus();
         }
         mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
@@ -699,6 +740,7 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
             MultiSelectWithoutKeyboard(selectedZone);
+            HandleInvisibleItemsSelectedStatus(selectedZone);
         }
         SelectWithScroll();
     } else if (info.GetAction() == MouseAction::RELEASE) {
@@ -803,6 +845,7 @@ void ScrollablePattern::MarkSelectedItems()
         auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
         if (!selectedZone.IsEmpty()) {
             MultiSelectWithoutKeyboard(selectedZone);
+            HandleInvisibleItemsSelectedStatus(selectedZone);
         }
     }
 }

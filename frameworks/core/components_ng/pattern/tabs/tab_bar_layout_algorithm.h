@@ -80,6 +80,11 @@ public:
         tabBarStyle_ = tabBarStyle;
     }
 
+    void SetNeedSetCentered()
+    {
+        needSetCentered_ = true;
+    }
+
 private:
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
     void UpdateChildConstraint(LayoutConstraintF& childConstraint, const RefPtr<TabBarLayoutProperty>& layoutProperty,
@@ -96,6 +101,7 @@ private:
     int32_t indicator_ = 0;
     bool isBuilder_ = false;
     TabBarStyle tabBarStyle_;
+    bool needSetCentered_ = false;
 };
 } // namespace OHOS::Ace::NG
 

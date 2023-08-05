@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <list>
 
+#include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
@@ -201,6 +202,16 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ToolBarNodeOperation, ChildNodeOperation);
     void OnToolBarNodeOperationUpdate(ChildNodeOperation value) {}
 
+    void SetTransitionType(PageTransitionType type)
+    {
+        transitionType_ = type;
+    }
+
+    PageTransitionType GetTransitionType() const
+    {
+        return transitionType_;
+    }
+
 private:
     RefPtr<UINode> backButton_;
     RefPtr<UINode> title_;
@@ -217,6 +228,7 @@ private:
     RefPtr<UINode> preToolBarNode_;
     RefPtr<UINode> toolBarDividerNode_;
     bool isNewToolbar_ = false;
+    PageTransitionType transitionType_ = PageTransitionType::NONE;
 };
 
 } // namespace OHOS::Ace::NG

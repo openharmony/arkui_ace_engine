@@ -117,7 +117,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
 
     auto width = std::lround(desiredSize_.Width());
     auto height = std::lround(desiredSize_.Height());
-    auto pixmap = source->CreatePixelMap(width, height);
+    auto pixmap = source->CreatePixelMap({ width, height });
     CHECK_NULL_RETURN(pixmap, nullptr);
     auto image = PixelMapImage::Create(pixmap);
     LOGD("decode to pixmap, desiredSize = %{public}s, pixmap size = %{public}d x %{public}d",

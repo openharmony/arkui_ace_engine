@@ -21,11 +21,6 @@ const RefPtr<SvgDomBase>& SvgCanvasImage::GetSVGDom() const
     return nullptr;
 }
 
-std::optional<Color> SvgCanvasImage::GetFillColor()
-{
-    return svgDom_ ? std::nullopt : svgDom_->GetFillColor();
-}
-
 void SvgCanvasImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& /* dstRect */, const BorderRadiusArray& /* radiusXY */)
 {}

@@ -83,7 +83,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowPasswordIconValue(false) && showErrorState_->Get()) {
+    if (layoutProperty->GetShowUnderlineValue(false) && showErrorState_->Get()) {
         errorMargin = ERROR_TEXT_UNDERLINE_MARGIN.ConvertToPx();
     } else if (textFieldPattern->NeedShowPasswordIcon() && showErrorState_->Get()) {
         errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();

@@ -32,6 +32,7 @@ public:
     void SetOnShown(std::function<void()>&& onShow) override;
     void SetOnHidden(std::function<void()>&& onHidden) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
+    RefPtr<AceType> CreateEmpty() override;
 };
 } // namespace OHOS::Ace::NG
 

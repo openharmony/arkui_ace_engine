@@ -124,13 +124,14 @@ public:
         if (cachedItems_.empty()) {
             return true;
         }
-        if (index > cachedItems_.rbegin()->first || index < cachedItems_.begin()->first) {
+        if (index > static_cast<size_t>(cachedItems_.rbegin()->first) ||
+            index < static_cast<size_t>(cachedItems_.begin()->first)) {
             return false;
         }
         decltype(cachedItems_) temp(std::move(cachedItems_));
 
         for (auto& [oldindex, id] : temp) {
-            cachedItems_.try_emplace(index > oldindex ? oldindex : oldindex + 1, std::move(id));
+            cachedItems_.try_emplace(index > static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
         }
         return true;
     }
@@ -140,13 +141,13 @@ public:
         if (cachedItems_.empty()) {
             return false;
         }
-        if (index > cachedItems_.rbegin()->first) {
+        if (index > static_cast<size_t>(cachedItems_.rbegin()->first)) {
             return false;
         }
         decltype(cachedItems_) temp(std::move(cachedItems_));
 
         for (auto& [oldindex, id] : temp) {
-            cachedItems_.try_emplace(index > oldindex ? oldindex : oldindex - 1, std::move(id));
+            cachedItems_.try_emplace(index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(id));
         }
         return true;
     }

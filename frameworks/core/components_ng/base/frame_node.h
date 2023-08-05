@@ -85,6 +85,24 @@ public:
         return 1;
     }
 
+    void OnInspectorIdUpdate(const std::string& /*unused*/) override;
+    struct ZIndexComparator {
+        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
+        {
+            auto left = weakLeft.Upgrade();
+            auto right = weakRight.Upgrade();
+            if (left && right) {
+                return left->GetRenderContext()->GetZIndexValue(1) < right->GetRenderContext()->GetZIndexValue(1);
+            }
+            return false;
+        }
+    };
+
+    const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& GetFrameChildren() const
+    {
+        return frameChildren_;
+    }
+
     void InitializePatternAndContext();
 
     virtual void MarkModifyDone();
@@ -484,6 +502,33 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
+    template<typename T>
+    RefPtr<T> FindFocusChildNodeOfClass()
+    {
+        const auto& children = GetChildren();
+        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+            auto& child = *iter;
+            auto target = DynamicCast<FrameNode>(child->FindChildNodeOfClass<T>());
+            if (target) {
+                auto focusEvent = target->eventHub_->GetFocusHub();
+                if (focusEvent && focusEvent->IsCurrentFocus()) {
+                    return AceType::DynamicCast<T>(target);
+                }
+            }
+        }
+
+        if (AceType::InstanceOf<T>(this)) {
+            auto target = DynamicCast<FrameNode>(this);
+            if (target) {
+                auto focusEvent = target->eventHub_->GetFocusHub();
+                if (focusEvent && focusEvent->IsCurrentFocus()) {
+                    return Claim(AceType::DynamicCast<T>(this));
+                }
+            }
+        }
+        return nullptr;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -536,18 +581,6 @@ private:
     // set costom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
 
-    struct ZIndexComparator {
-        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
-        {
-            auto left = weakLeft.Upgrade();
-            auto right = weakRight.Upgrade();
-            if (left && right) {
-                return left->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE) <
-                    right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
-            }
-            return false;
-        }
-    };
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();

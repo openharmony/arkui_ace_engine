@@ -135,6 +135,7 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                                                     : OffsetF(currentOffset_, alignmentPosition.GetY());
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentAxisOffset);
     childWrapper->Layout();
+    scrollBarPattern->SetChildRect(childGeometryNode->GetFrameRect());
 }
 
 } // namespace OHOS::Ace::NG

@@ -111,10 +111,6 @@ void WindowPattern::InitContent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!IsMainWindow()) {
-        host->AddChild(contentNode_);
-        return;
-    }
 
     auto state = session_->GetSessionState();
     auto bundleName = session_->GetSessionInfo().bundleName_;
@@ -134,7 +130,7 @@ void WindowPattern::InitContent()
         return;
     }
 
-    if (state == Rosen::SessionState::STATE_BACKGROUND) {
+    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetBufferAvailable()) {
         CreateSnapshotNode();
         host->AddChild(snapshotNode_);
         return;

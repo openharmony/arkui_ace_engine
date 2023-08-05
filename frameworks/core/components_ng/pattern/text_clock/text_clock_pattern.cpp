@@ -32,7 +32,7 @@ constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
-const std::string DEFAULT_FORMAT = "h:m:s";
+const std::string DEFAULT_FORMAT = "hms";
 
 enum class TextClockElementIndex {
     CUR_YEAR_INDEX = 0,
@@ -46,6 +46,7 @@ enum class TextClockElementIndex {
     CUR_WEEK_INDEX = 8,
 };
 enum class TextClockElementLen {
+    ONLY_ONE_DATE_ELEMENT = 1,
     YEAR_FORMAT_MIN_LEN = 2,
     MON_DAY_FORMAT_MAX_LEN = 2,
     MILLISECOND_FORMAT_LEN = 3,
@@ -278,7 +279,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
 std::vector<std::string> TextClockPattern::ParseInputFormat(
     bool& is24H, int32_t& weekType, int32_t& month, int32_t& day, bool& isMilliSecond)
 {
-    std::string inputFormat = GetFormat();
+    std::string inputFormat = (GetFormat() == DEFAULT_FORMAT) ? "h:m:s" : GetFormat();
     std::vector<std::string> formatSplitter;
     auto i = 0;
     auto j = 0;
@@ -443,10 +444,16 @@ std::string TextClockPattern::SpliceDateTime(
 {
     std::string format = "";
     std::string tempFormat = "";
+    bool oneElement = false;
+    if (((int32_t)(inputFormatSplitter.size()) == (int32_t)TextClockElementLen::ONLY_ONE_DATE_ELEMENT) &&
+        ((strcmp(Localization::GetInstance()->GetLanguage().c_str(), "zh") == 0))) {
+        oneElement = true;
+    }
     for (auto i = 0; i < (int32_t)(inputFormatSplitter.size()); i++) {
         std::unordered_map<char, TextClockElementIndex>::iterator it = curDateTimeMap.begin();
         while (it != curDateTimeMap.end()) {
-            tempFormat = CheckDateTimeElement(curDateTime, inputFormatSplitter[i], it->first, (int32_t)it->second);
+            tempFormat =
+                CheckDateTimeElement(curDateTime, inputFormatSplitter[i], it->first, (int32_t)it->second, oneElement);
             if (!tempFormat.empty()) {
                 break;
             }
@@ -462,7 +469,7 @@ std::string TextClockPattern::SpliceDateTime(
 }
 
 std::string TextClockPattern::CheckDateTimeElement(const std::vector<std::string>& curDateTime, const std::string& str,
-    const char& element, const int32_t& elementIndex)
+    const char& element, const int32_t& elementIndex, const bool& oneElement)
 {
     std::string format = "";
     if (str.find(element) != std::string::npos) {
@@ -473,6 +480,21 @@ std::string TextClockPattern::CheckDateTimeElement(const std::vector<std::string
                     (int32_t)(TextClockElementLen::YEAR_FORMAT_MIN_LEN));
         } else {
             format = curDateTime[elementIndex];
+        }
+        if ((oneElement)) {
+            switch (element) {
+                case 'y':
+                    format += "年";
+                    break;
+                case 'M':
+                    format += "月";
+                    break;
+                case 'd':
+                    format += "日";
+                    break;
+                default:
+                    break;
+            }
         }
     }
     return format;

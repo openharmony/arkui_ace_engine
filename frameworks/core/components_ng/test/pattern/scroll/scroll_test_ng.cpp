@@ -69,15 +69,15 @@ public:
     void TearDown() override;
     void GetInstance();
     void UpdateCurrentOffset(float offset);
-    RefPtr<LayoutWrapperNode> CreateScroll(Axis axis = Axis::VERTICAL);
-    RefPtr<LayoutWrapperNode> CreateScroll(NG::DisplayMode displayMode);
-    RefPtr<LayoutWrapperNode> CreateScroll(Color color);
-    RefPtr<LayoutWrapperNode> CreateScroll(Dimension barWidth, Axis axis = Axis::VERTICAL);
-    RefPtr<LayoutWrapperNode> CreateScroll(EdgeEffect edgeEffect);
-    RefPtr<LayoutWrapperNode> CreateScroll(Axis axis, NG::ScrollEvent&& event);
-    RefPtr<LayoutWrapperNode> CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event);
-    RefPtr<LayoutWrapperNode> CreateScroll(Axis axis, OnScrollStartEvent&& event);
-    RefPtr<LayoutWrapperNode> CreateScroll(bool isScrollEnabled);
+    void CreateScroll(Axis axis = Axis::VERTICAL);
+    void CreateScroll(NG::DisplayMode displayMode);
+    void CreateScroll(Color color);
+    void CreateScroll(Dimension barWidth, Axis axis = Axis::VERTICAL);
+    void CreateScroll(EdgeEffect edgeEffect);
+    void CreateScroll(Axis axis, NG::ScrollEvent&& event);
+    void CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event);
+    void CreateScroll(Axis axis, OnScrollStartEvent&& event);
+    void CreateScroll(bool isScrollEnabled);
     void CreateContent(Axis axis = Axis::VERTICAL);
     RefPtr<FrameNode> GetContentChild(int32_t index);
     void Touch(TouchLocationInfo locationInfo, SourceType sourceType);
@@ -132,37 +132,37 @@ void ScrollTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ScrollAccessibilityProperty>();
 }
 
-RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis)
+void ScrollTestNg::CreateScroll(Axis axis)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
     scrollModel.SetAxis(axis);
     CreateContent(axis);
     GetInstance();
-    return RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
-RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(NG::DisplayMode displayMode)
+void ScrollTestNg::CreateScroll(NG::DisplayMode displayMode)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
     scrollModel.SetDisplayMode(static_cast<int>(displayMode));
     CreateContent();
     GetInstance();
-    return RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
-RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Color color)
+void ScrollTestNg::CreateScroll(Color color)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
     scrollModel.SetScrollBarColor(color);
     CreateContent();
     GetInstance();
-    return RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
-RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Dimension barWidth, Axis axis)
+void ScrollTestNg::CreateScroll(Dimension barWidth, Axis axis)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -170,20 +170,20 @@ RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Dimension barWidth, Axis ax
     scrollModel.SetScrollBarWidth(barWidth);
     CreateContent(axis);
     GetInstance();
-    return RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
-RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(EdgeEffect edgeEffect)
+void ScrollTestNg::CreateScroll(EdgeEffect edgeEffect)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
     scrollModel.SetEdgeEffect(edgeEffect);
     CreateContent();
     GetInstance();
-    return RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
-RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEvent&& event)
+void ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEvent&& event)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -191,10 +191,10 @@ RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEvent&
     scrollModel.SetOnScroll(std::move(event));
     CreateContent(axis);
     GetInstance();
-    return RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
-RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event)
+void ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -202,10 +202,10 @@ RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis, NG::ScrollEdgeEv
     scrollModel.SetOnScrollEdge(std::move(event));
     CreateContent(axis);
     GetInstance();
-    return RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
-RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis, OnScrollStartEvent&& event)
+void ScrollTestNg::CreateScroll(Axis axis, OnScrollStartEvent&& event)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -215,17 +215,17 @@ RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(Axis axis, OnScrollStartEve
     scrollModel.SetOnScrollEnd(std::move(event));
     CreateContent(axis);
     GetInstance();
-    return RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
-RefPtr<LayoutWrapperNode> ScrollTestNg::CreateScroll(bool isScrollEnabled)
+void ScrollTestNg::CreateScroll(bool isScrollEnabled)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
     scrollModel.SetScrollEnabled(isScrollEnabled);
     CreateContent();
     GetInstance();
-    return RunMeasureAndLayout(frameNode_);
+    RunMeasureAndLayout(frameNode_);
 }
 
 void ScrollTestNg::CreateContent(Axis axis)
@@ -1386,7 +1386,7 @@ HWTEST_F(ScrollTestNg, ScrollBar002, TestSize.Level1)
     EXPECT_TRUE(scrollBar->IsPressed());
     Touch(TouchType::UP, upInBar, SourceType::TOUCH);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    EXPECT_FALSE(scrollBar->IsPressed());
+    EXPECT_TRUE(scrollBar->IsPressed());
 
     /**
      * @tc.steps: step7. Mouse in bar and move out of bar (out->in->in->out)
@@ -1702,7 +1702,8 @@ HWTEST_F(ScrollTestNg, OnScrollCallback001, TestSize.Level1)
     CreateScroll(Axis::VERTICAL, std::move(event));
     pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Resume();
-    auto onScrollCallback = pattern_->scrollableEvent_->GetScrollPositionCallback();
+    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
+    auto onScrollCallback = scrollable->callback_;
     EXPECT_TRUE(onScrollCallback(-100.f, SCROLL_FROM_START));
     EXPECT_TRUE(pattern_->animator_->IsStopped());
     EXPECT_FALSE(isTrigger);

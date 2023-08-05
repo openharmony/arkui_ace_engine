@@ -543,7 +543,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     }
 
     auto parent = host->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID(parent);
+    CHECK_NULL_VOID_NOLOG(parent);
     // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
     if (preVisible != VisibleType::GONE && visible != VisibleType::GONE) {
         parent->MarkNeedSyncRenderTree();
