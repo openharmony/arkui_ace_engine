@@ -21,6 +21,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/plugin_manager.cpp",
     "$ace_root/frameworks/core/components/plugin/plugin_window.cpp",
     "$ace_root/frameworks/core/components/plugin/resource/plugin_manager_delegate.cpp",
