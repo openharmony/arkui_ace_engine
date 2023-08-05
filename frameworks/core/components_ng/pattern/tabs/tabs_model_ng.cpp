@@ -74,6 +74,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
     swiperPaintProperty->UpdateDuration(tabTheme->GetTabContentAnimationDuration());
+    swiperPaintProperty->UpdateCurve(TabBarPhysicalCurve);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     swiperLayoutProperty->UpdateLoop(false);
     swiperLayoutProperty->UpdateCachedCount(0);
