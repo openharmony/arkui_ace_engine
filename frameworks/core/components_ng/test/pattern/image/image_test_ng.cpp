@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/geometry_node.h"
 
 #define private public
 #define protected public
@@ -24,12 +23,14 @@
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/test/mock/render/mock_canvas_image.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -64,6 +65,8 @@ constexpr ImageRenderMode IMAGE_RENDERMODE_DEFAULT = ImageRenderMode::ORIGINAL;
 constexpr bool MATCHTEXTDIRECTION_DEFAULT = true;
 const Color SVG_FILL_COLOR_DEFAULT = Color::BLUE;
 const std::vector<float> COLOR_FILTER_DEFAULT = { 1.0, 2.0, 3.0 };
+const SizeF CONTENT_SIZE = SizeF(400.0f, 500.0f);
+const OffsetF CONTENT_OFFSET = OffsetF(50.0f, 60.0f);
 constexpr bool SYNCMODE_DEFAULT = false;
 constexpr CopyOptions COPYOPTIONS_DEFAULT = CopyOptions::None;
 constexpr bool AUTORESIZE_DEFAULT = true;
@@ -106,7 +109,7 @@ void ImageTestNg::TearDownTestSuite()
 RefPtr<FrameNode> ImageTestNg::CreateImageNode(const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
 {
     ImageModelNG image;
-    image.Create(src, pixMap, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(alt);
     auto onError = [](const LoadImageFailEvent& info) {};
     image.SetOnError(std::move(onError));
@@ -120,7 +123,7 @@ RefPtr<FrameNode> ImageTestNg::CreateImageNodeWithDefaultProp(
     const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
 {
     ImageModelNG image;
-    image.Create(src, pixMap, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(alt);
     image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
@@ -141,7 +144,7 @@ RefPtr<FrameNode> ImageTestNg::CreateSyncImageNode()
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(PNG_IMAGE, true, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -152,7 +155,7 @@ RefPtr<FrameNode> ImageTestNg::CreateSyncWebImageNode()
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(WEB_IMAGE, true, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(WEB_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -216,6 +219,47 @@ HWTEST_F(ImageTestNg, ImagePatternModifyDone001, TestSize.Level1)
     frameNode->MarkModifyDone();
     EXPECT_NE(imagePattern->loadingCtx_, nullptr);
     EXPECT_NE(imagePattern->altLoadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternModifyDone002
+ * @tc.desc: When enter pattern's onModifyDone, check obscured and events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImagePatternModifyDone002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetCopyOption(CopyOptions::InApp);
+    /**
+     * @tc.steps: step2. call MarkModifyDone and check obscured and events
+     * @tc.expected: step2. has_value return false and events are not nullptr
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_FALSE(frameNode->GetRenderContext()->GetObscured().has_value());
+    EXPECT_NE(imagePattern->longPressEvent_, nullptr);
+    EXPECT_NE(imagePattern->clickEvent_, nullptr);
+    EXPECT_NE(imagePattern->mouseEvent_, nullptr);
+    /**
+     * @tc.steps: step3. set obscured
+     */
+    std::vector<ObscuredReasons> reasons;
+    reasons.emplace_back(static_cast<ObscuredReasons>(0));
+    frameNode->GetRenderContext()->UpdateObscured(reasons);
+    /**
+     * @tc.steps: step4. call MarkModifyDone and check obscured
+     * @tc.expected: step4. has_value return true and and events are nullptr
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(frameNode->GetRenderContext()->GetObscured().has_value());
+    EXPECT_EQ(imagePattern->longPressEvent_, nullptr);
+    EXPECT_EQ(imagePattern->clickEvent_, nullptr);
+    EXPECT_EQ(imagePattern->mouseEvent_, nullptr);
 }
 
 /**
@@ -521,6 +565,115 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImagePatternCreateNodePaintMethod002
+ * @tc.desc: When SrcImage and AltImage are not loaded, check return of CreateNodePaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create ImagePattern and ImageLayoutProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. set image_ = nullptr, altImage_ = nullptr
+     */
+    imagePattern->image_ = nullptr;
+    imagePattern->altImage_ = nullptr;
+    /**
+     * @tc.steps: step4. call CreateNodePaintMethod.
+     * @tc.expected: step4. return nullptr
+     */
+    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
+    /**
+     * @tc.steps: step5. set obscuredImage_ is not nullptr;
+     */
+    imagePattern->obscuredImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step6. call CreateNodePaintMethod.
+     * @tc.expected: step6. return is not nullptr
+     */
+    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternCreateObscuredImageIfNeed001
+ * @tc.desc: Check CreateObscuredImage method if will create ObscuredImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImagePatternCreateObscuredImageIfNeed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create ImagePattern and ImageLayoutProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. set invalid selfIdealSize.
+     */
+    LayoutConstraintF layoutConstraint;
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    EXPECT_FALSE(layoutConstraint.selfIdealSize.IsValid());
+    /**
+     * @tc.steps: step4. check obscuredImage_.
+     * @tc.expected: step4. obscuredImage is nullptr
+     */
+    imagePattern->CreateObscuredImage();
+    EXPECT_EQ(imagePattern->obscuredImage_, nullptr);
+    /**
+     * @tc.steps: step5. set valid obscured.
+     */
+    std::vector<ObscuredReasons> reasons;
+    reasons.emplace_back(static_cast<ObscuredReasons>(0));
+    frameNode->GetRenderContext()->UpdateObscured(reasons);
+    /**
+     * @tc.steps: step6. check obscuredImage_.
+     * @tc.expected: step6. obscuredImage_ is nullptr
+     */
+    imagePattern->CreateObscuredImage();
+    EXPECT_EQ(imagePattern->obscuredImage_, nullptr);
+    /**
+     * @tc.steps: step7. set valid selfIdealSize.
+     */
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    /**
+     * @tc.steps: step8. check obscuredImage_.
+     * @tc.expected: step8. obscuredImage_ is not nullptr
+     */
+    imagePattern->CreateObscuredImage();
+    EXPECT_NE(imagePattern->obscuredImage_, nullptr);
+    /**
+     * @tc.steps: step9. set empty obscured.
+     */
+    imagePattern->CreateObscuredImage();
+    reasons.clear();
+    frameNode->GetRenderContext()->UpdateObscured(reasons);
+    /**
+     * @tc.steps: step10. check obscuredImage_.
+     * @tc.expected: step10. obscuredImage_ is not nullptr
+     */
+    imagePattern->CreateObscuredImage();
+    EXPECT_NE(imagePattern->obscuredImage_, nullptr);
+}
+
+/**
  * @tc.name: ImagePaintMethod002
  * @tc.desc: ImagePaintMethod can update radius correctly.
  * @tc.type: FUNC
@@ -576,6 +729,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
     config = *imagePaintMethod.canvasImage_->paintConfig_;
     EXPECT_NE(config.borderRadiusXY_->at(0).GetX(), RADIUS_EXTREME);
     EXPECT_EQ(config.borderRadiusXY_->at(0).GetX(), WIDTH / 2);
+    EXPECT_EQ(config.borderRadiusXY_->at(0).GetY(), WIDTH / 2);
 }
 
 /**
@@ -618,8 +772,9 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     EXPECT_EQ(config->renderMode_, IMAGE_RENDERMODE_DEFAULT);
     EXPECT_EQ(config->imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
     EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_EQ(config->needFlipCanvasHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
+    EXPECT_EQ(config->flipHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
     EXPECT_EQ(*config->colorFilter_, COLOR_FILTER_DEFAULT);
+    EXPECT_EQ(config->obscuredReasons_, std::vector<ObscuredReasons>());
 
     /**
      * @tc.steps: step4. ImagePaintMethod GetOverlayDrawFunction
@@ -649,7 +804,7 @@ HWTEST_F(ImageTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     layoutWrapper->skipMeasureContent_ = true;
@@ -672,7 +827,7 @@ HWTEST_F(ImageTestNg, ImageCreator001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create("", false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create("", pixMap, BUNDLE_NAME, MODULE_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -687,7 +842,7 @@ HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create("", false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create("", pixMap, BUNDLE_NAME, MODULE_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -712,7 +867,7 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(SYNCMODE_DEFAULT);
@@ -762,7 +917,7 @@ HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     LoadImageSuccessEvent curEvent(
         IMAGE_WIDTH_DEFAULT, IMAGE_HEIGHT_DEFAULT, IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, -1);
     auto onComplete = [&curEvent](const LoadImageSuccessEvent& info) { curEvent = info; };
@@ -790,7 +945,7 @@ HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     LoadImageFailEvent curEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "");
     auto onError = [&curEvent](const LoadImageFailEvent& info) { curEvent = info; };
     image.SetOnError(std::move(onError));
@@ -815,15 +970,13 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
     image.SetAlt(RESOURCE_URL);
     image.SetImageFill(Color::BLUE);
-    ASSERT_NE(imageLayoutProperty->GetImageSourceInfo(), std::nullopt);
-    EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->fillColor_.value(), Color::BLUE);
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(imageRenderProperty, nullptr);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::BLUE);
@@ -847,7 +1000,7 @@ HWTEST_F(ImageTestNg, ImageLayout001, TestSize.Level1)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
@@ -897,7 +1050,7 @@ HWTEST_F(ImageTestNg, ImageLayout002, TestSize.Level1)
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateFitOriginalSize(true);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
@@ -939,7 +1092,7 @@ HWTEST_F(ImageTestNg, ImageLayout003, TestSize.Level1)
     imageLayoutProperty->UpdateFitOriginalSize(true);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper(nullptr, geometryNode, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, geometryNode, imageLayoutProperty);
     auto altloadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
@@ -966,7 +1119,7 @@ HWTEST_F(ImageTestNg, ImageLayout004, TestSize.Level1)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
@@ -1035,7 +1188,7 @@ HWTEST_F(ImageTestNg, ImageLayout005, TestSize.Level1)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     auto altloadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
@@ -1078,7 +1231,7 @@ HWTEST_F(ImageTestNg, ImageLayout006, TestSize.Level1)
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateFitOriginalSize(false);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
@@ -1141,7 +1294,7 @@ HWTEST_F(ImageTestNg, ImageLayout007, TestSize.Level1)
     layoutConstraintSize.maxSize.SetWidth(IMAGE_COMPONENT_MAXSIZE_WIDTH);
     layoutConstraintSize.maxSize.SetHeight(IMAGE_COMPONENT_MAXSIZE_HEIGHT);
     imageLayoutProperty->UpdateLayoutConstraint(layoutConstraintSize);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     /**
     //     corresponding ets code:
     //          Row.Width(600).Height(700) {
@@ -1188,7 +1341,7 @@ HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level1)
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateFitOriginalSize(false);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
@@ -1258,7 +1411,7 @@ HWTEST_F(ImageTestNg, ImageLayout009, TestSize.Level1)
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateFitOriginalSize(false);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     auto altloadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
@@ -1308,7 +1461,7 @@ HWTEST_F(ImageTestNg, ImageLayout010, TestSize.Level1)
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
     ASSERT_NE(loadingCtx, nullptr);
-    LayoutWrapper layoutWrapper1(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper1(nullptr, nullptr, imageLayoutProperty);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL)
@@ -1320,7 +1473,7 @@ HWTEST_F(ImageTestNg, ImageLayout010, TestSize.Level1)
     EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENT_MAXSIZE_WIDTH, IMAGE_COMPONENT_MAXSIZE_HEIGHT));
 
     imageLayoutProperty->UpdateFitOriginalSize(false);
-    LayoutWrapper layoutWrapper2(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper2(nullptr, nullptr, imageLayoutProperty);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).fitOriginalSize(false)
@@ -1342,7 +1495,7 @@ HWTEST_F(ImageTestNg, ImageLayout011, TestSize.Level1)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH, HEIGHT));
     /**
@@ -1366,7 +1519,7 @@ HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level1)
     ASSERT_NE(imageLayoutProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper(nullptr, geometryNode, imageLayoutProperty);
+    LayoutWrapperNode layoutWrapper(nullptr, geometryNode, imageLayoutProperty);
     /**
      * @tc.cases: case1. layoutWrapper->GetGeometryNode()->GetContent() == nullptr, func will return.
      */
@@ -1464,5 +1617,23 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
 
     pattern->OnVisibleChange(false);
     EXPECT_FALSE(pattern->selectOverlay_);
+}
+
+/**
+ * @tc.name: Resource001
+ * @tc.desc: Test image reload Resource url when language changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, Resource001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->loadingCtx_);
+
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_FALSE(pattern->loadingCtx_);
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->loadingCtx_);
 }
 } // namespace OHOS::Ace::NG

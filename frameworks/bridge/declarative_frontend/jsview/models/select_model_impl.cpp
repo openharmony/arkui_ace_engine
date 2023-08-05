@@ -363,27 +363,27 @@ void SelectModelImpl::SetSize(Dimension& width, Dimension& height)
     selectComponent->SetHeight(height);
 }
 
-void SelectModelImpl::SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-    const std::optional<Dimension>& left, const std::optional<Dimension>& right)
+void SelectModelImpl::SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+    const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(selectComponent);
-    Dimension topDimen;
+    CalcDimension topDimen;
     topDimen.SetValue(top.value().Value());
     selectComponent->SetTopPadding(topDimen);
-    Dimension leftDimen;
+    CalcDimension leftDimen;
     leftDimen.SetValue(left.value().Value());
     selectComponent->SetLeftPadding(leftDimen);
-    Dimension rightDimen;
+    CalcDimension rightDimen;
     rightDimen.SetValue(right.value().Value());
     selectComponent->SetRightPadding(rightDimen);
-    Dimension bottomDimen;
+    CalcDimension bottomDimen;
     bottomDimen.SetValue(bottom.value().Value());
     selectComponent->SetBottomPadding(bottomDimen);
 }
 
-void SelectModelImpl::SetPadding(const Dimension& value)
+void SelectModelImpl::SetPadding(const CalcDimension& value)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
@@ -394,7 +394,7 @@ void SelectModelImpl::SetPadding(const Dimension& value)
     selectComponent->SetBottomPadding(value);
 }
 
-void SelectModelImpl::SetPaddingLeft(const Dimension& value)
+void SelectModelImpl::SetPaddingLeft(const CalcDimension& value)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
@@ -402,7 +402,7 @@ void SelectModelImpl::SetPaddingLeft(const Dimension& value)
     selectComponent->SetLeftPadding(value);
 }
 
-void SelectModelImpl::SetPaddingTop(const Dimension& value)
+void SelectModelImpl::SetPaddingTop(const CalcDimension& value)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
@@ -410,7 +410,7 @@ void SelectModelImpl::SetPaddingTop(const Dimension& value)
     selectComponent->SetTopPadding(value);
 }
 
-void SelectModelImpl::SetPaddingRight(const Dimension& value)
+void SelectModelImpl::SetPaddingRight(const CalcDimension& value)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
@@ -418,7 +418,7 @@ void SelectModelImpl::SetPaddingRight(const Dimension& value)
     selectComponent->SetRightPadding(value);
 }
 
-void SelectModelImpl::SetPaddingBottom(const Dimension& value)
+void SelectModelImpl::SetPaddingBottom(const CalcDimension& value)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());

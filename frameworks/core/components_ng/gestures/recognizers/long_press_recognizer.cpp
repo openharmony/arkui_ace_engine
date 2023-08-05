@@ -15,6 +15,8 @@
 
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
+#include "base/perf/socperf_client.h"
+#include "base/thread/frame_trace_adapter.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -32,6 +34,10 @@ constexpr int32_t MAX_FINGERS = 10;
 
 void LongPressRecognizer::OnAccepted()
 {
+    FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
+    if (ft != nullptr) {
+        ft->SetFrameTraceLimit();
+    }
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }
@@ -85,10 +91,6 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
-        return;
-    }
     if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
         LOGI("mouse left button is disabled for long press recognizer.");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -202,6 +204,9 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
 
 void LongPressRecognizer::DoRepeat()
 {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onAction_, true);
         StartRepeatTimer();
@@ -248,10 +253,14 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         }
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
+        info.SetTargetDisplayId(trackPoint.targetDisplayId);
         info.SetGlobalPoint(globalPoint_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetForce(trackPoint.force);
         if (trackPoint.tiltX.has_value()) {
             info.SetTiltX(trackPoint.tiltX.value());

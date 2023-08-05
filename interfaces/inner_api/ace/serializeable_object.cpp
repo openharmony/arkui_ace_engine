@@ -47,7 +47,6 @@ SerializeableObject* CreateNodeObjectInner()
     }
 
     auto nodeObject = entry();
-    FREELIB(handle);
     return nodeObject;
 }
 } // namespace

@@ -43,10 +43,14 @@ public:
     virtual void SetOnChange(std::function<void(bool)>&& onChange);
     virtual void SetFontSize(const Dimension& fontSize);
     virtual void SetFontWeight(FontWeight weight);
+    virtual void SetFontStyle(Ace::FontStyle style);
     virtual void SetFontColor(const std::optional<Color>& color);
+    virtual void SetFontFamily(const std::vector<std::string>& families);
     virtual void SetLabelFontSize(const Dimension& fontSize);
     virtual void SetLabelFontWeight(FontWeight weight);
+    virtual void SetLabelFontStyle(Ace::FontStyle style);
     virtual void SetLabelFontColor(const std::optional<Color>& color);
+    virtual void SetLabelFontFamily(const std::vector<std::string>& families);
     virtual void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent);
 
 private:

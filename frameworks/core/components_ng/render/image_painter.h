@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_IMAGE_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_IMAGE_PAINT_H
 
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -28,15 +26,16 @@ public:
     explicit ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;
 
+    void DrawObscuration(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void DrawStaticImage(RSCanvas& canvas, const OffsetF& offset) const;
+    void DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize) const;
     void DrawImageWithRepeat(RSCanvas& canvas, const RectF& rect) const;
 
     static void ApplyImageFit(
         ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect);
 
-    static void FlipHorizontal(RSCanvas& canvas, double horizontalOffset, double drawRectWidth);
+    static void FlipHorizontal(RSCanvas& canvas, const SizeF& contentSize);
 
     static SizeF CalculateBgImageSize(
         const SizeF& boxPaintSize_, const SizeF& srcSize, const std::optional<BackgroundImageSize>& bgImageSizeOpt);

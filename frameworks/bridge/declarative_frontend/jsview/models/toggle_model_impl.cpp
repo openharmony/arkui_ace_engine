@@ -186,7 +186,7 @@ bool ToggleModelImpl::IsToggle()
     return toggleComponent;
 }
 
-void ToggleModelImpl::SetPadding(const NG::PaddingPropertyF& args)
+void ToggleModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& /*newArgs*/)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();

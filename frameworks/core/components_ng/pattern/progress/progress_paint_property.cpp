@@ -81,6 +81,7 @@ void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& js
     capsuleStyle->Put("fontColor", (GetTextColor().value_or(progressTheme->GetTextColor())).ColorToString().c_str());
     capsuleStyle->Put("content", (GetText().value_or("")).c_str());
     capsuleStyle->Put("enableScanEffect", (GetEnableScanEffect().value_or(false)) ? "true" : "false");
+    capsuleStyle->Put("showDefaultPercentage", (GetEnableShowText().value_or(false)) ? "true" : "false");
     font->Put("size", (GetTextSize().value_or(progressTheme->GetTextSize())).ToString().c_str());
     font->Put("style", GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
                            ? "FontStyle.Normal"

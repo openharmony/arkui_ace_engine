@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+uint64_t UITaskScheduler::frameId_ = 0;
 
 UITaskScheduler::~UITaskScheduler() = default;
 
@@ -56,6 +57,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     std::vector<RefPtr<FrameNode>> orderedNodes;
     for (auto&& pageNodes : dirtyLayoutNodes) {
@@ -76,25 +78,26 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             continue;
         }
         time = GetSysTimestamp();
+        frameId_++;
         auto task = node->CreateLayoutTask(forceUseMainThread);
         if (task) {
             if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
                 (*task)();
                 time = GetSysTimestamp() - time;
-                if (frameInfo_ != nullptr) {
-                    frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
-                }
             } else {
                 LOGW("need to use multithread feature");
             }
         }
+        if (frameInfo_ != nullptr) {
+            frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
+        }
     }
+    isLayouting_ = false;
 }
 
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }
@@ -102,6 +105,7 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     // Priority task creation
     int64_t time = 0;
     for (auto&& pageNodes : dirtyRenderNodes) {
+        ACE_SCOPED_TRACE("FlushRenderTask %zu", pageNodes.second.size());
         for (auto&& node : pageNodes.second) {
             if (!node) {
                 continue;
@@ -164,12 +168,12 @@ void UITaskScheduler::AddPredictTask(PredictTask&& task)
     predictTask_.push_back(std::move(task));
 }
 
-void UITaskScheduler::FlushPredictTask(int64_t deadline)
+void UITaskScheduler::FlushPredictTask(int64_t deadline, bool canUseLongPredictTask)
 {
     decltype(predictTask_) tasks(std::move(predictTask_));
     for (const auto& task : tasks) {
         if (task) {
-            task(deadline);
+            task(deadline, canUseLongPredictTask);
         }
     }
 }
@@ -193,6 +197,22 @@ void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)
 void UITaskScheduler::FlushAfterLayoutTask()
 {
     decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void UITaskScheduler::AddAfterRenderTask(std::function<void()>&& task)
+{
+    afterRenderTasks_.emplace_back(std::move(task));
+}
+
+void UITaskScheduler::FlushAfterRenderTask()
+{
+    ACE_SCOPED_TRACE("UITaskScheduler::FlushAfterRenderTask");
+    decltype(afterRenderTasks_) tasks(std::move(afterRenderTasks_));
     for (const auto& task : tasks) {
         if (task) {
             task();

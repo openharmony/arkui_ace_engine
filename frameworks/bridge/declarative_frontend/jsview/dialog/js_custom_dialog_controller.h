@@ -19,13 +19,9 @@
 #include "core/components/dialog/dialog_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
+#include "frameworks/core/components_ng/pattern/dialog/custom_dialog_controller_model.h"
 
 namespace OHOS::Ace::Framework {
-
-enum class DialogOperation {
-    DIALOG_OPEN = 0,
-    DIALOG_CLOSE,
-};
 
 class JSCustomDialogController : public virtual AceType {
     DECLARE_ACE_TYPE(JSCustomDialogController, AceType)
@@ -38,14 +34,12 @@ public:
     static void ConstructorCallback(const JSCallbackInfo& args);
     static void DestructorCallback(JSCustomDialogController* instance);
 
+    static void ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+
     void JsOpenDialog(const JSCallbackInfo& info);
     void JsCloseDialog(const JSCallbackInfo& info);
 
 private:
-    void ShowDialog();
-    void CloseDialog();
-    void NotifyDialogOperation(DialogOperation operation);
-
     static bool ParseAnimation(
         const JsiExecutionContext& execContext, const JsiRef<JsiValue>& jsiValue, AnimationOption& result);
 
@@ -54,13 +48,13 @@ private:
     bool pending_ = false;
 
     // NG
-    std::vector<WeakPtr<NG::FrameNode>> dialogs_;
+    std::vector<WeakPtr<AceType>> dialogs_;
 
     DialogProperties dialogProperties_;
     RefPtr<JsFunction> jsBuilderFunction_;
     RefPtr<JsFunction> jsCancelFunction_;
-    RefPtr<Component> customDialog_;
-    RefPtr<DialogComponent> dialogComponent_;
+    RefPtr<AceType> customDialog_;
+    RefPtr<AceType> dialogComponent_;
     std::list<DialogOperation> dialogOperation_;
 };
 

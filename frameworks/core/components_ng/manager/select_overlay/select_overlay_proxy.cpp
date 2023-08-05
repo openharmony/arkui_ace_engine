@@ -73,6 +73,13 @@ void SelectOverlayProxy::UpdateShowArea(const RectF& area) const
     pattern->UpdateShowArea(area);
 }
 
+void SelectOverlayProxy::SetHandleReverse(bool reverse)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHandleReverse(reverse);
+}
+
 bool SelectOverlayProxy::IsClosed() const
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -82,13 +89,13 @@ bool SelectOverlayProxy::IsClosed() const
     return !manager->HasSelectOverlay(selectOverlayId_);
 }
 
-void SelectOverlayProxy::Close() const
+void SelectOverlayProxy::Close(bool animation) const
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->DestroySelectOverlay(selectOverlayId_);
+    manager->DestroySelectOverlay(selectOverlayId_, animation);
 }
 
 void SelectOverlayProxy::SetSelectInfo(const std::string& selectInfo) const
@@ -98,4 +105,17 @@ void SelectOverlayProxy::SetSelectInfo(const std::string& selectInfo) const
     pattern->SetSelectInfo(selectInfo);
 }
 
+void SelectOverlayProxy::ShowOrHiddenMenu(bool isHidden)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->ShowOrHiddenMenu(isHidden);
+}
+
+void SelectOverlayProxy::DisableMenu(bool isDisabled)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->DisableMenu(isDisabled);
+}
 } // namespace OHOS::Ace::NG

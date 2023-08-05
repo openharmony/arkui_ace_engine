@@ -214,6 +214,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     }
     if (boxes.empty()) {
+        LOGD("boxes is empty.");
         return false;
     }
 
@@ -293,11 +294,9 @@ void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects)
 
 void TxtParagraph::SetIndents(const std::vector<float>& indents)
 {
-#ifndef NEW_SKIA
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->SetIndents(indents);
-#endif
 }
 
 } // namespace OHOS::Ace::NG

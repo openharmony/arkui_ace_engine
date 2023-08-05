@@ -216,44 +216,70 @@ void RadioPattern::OnTouchUp()
     host->MarkNeedRenderOnly();
 }
 
+void RadioPattern::CheckPageNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto prePageId = GetPrePageId();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetPageById(host->GetPageId());
+    CHECK_NULL_VOID(pageNode);
+    if (pageNode->GetId() != prePageId) {
+        auto eventHub = host->GetEventHub<RadioEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
+        CHECK_NULL_VOID(pageEventHub);
+        auto group = eventHub->GetGroup();
+
+        pageEventHub->AddRadioToGroup(group, host->GetId());
+        auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        bool check = false;
+        if (paintProperty->HasRadioCheck()) {
+            check = paintProperty->GetRadioCheckValue();
+        }
+        UpdateGroupCheckStatus(host, pageNode, check);
+    }
+}
+
 void RadioPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<RadioPattern>();
-    CHECK_NULL_VOID(pattern);
     auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    auto preGroup = pattern->GetPreGroup();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
+    CHECK_NULL_VOID(pageEventHub);
+    auto preGroup = GetPreGroup();
     auto group = eventHub->GetGroup();
     if (!preGroup.has_value()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto stageManager = pipelineContext->GetStageManager();
-        CHECK_NULL_VOID(stageManager);
-        auto pageNode = stageManager->GetLastPage();
-        CHECK_NULL_VOID(pageNode);
-        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-        CHECK_NULL_VOID(pageEventHub);
         pageEventHub->AddRadioToGroup(group, host->GetId());
-    } else {
-        if (preGroup.value() != group) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto stageManager = pipelineContext->GetStageManager();
-            CHECK_NULL_VOID(stageManager);
-            auto pageNode = stageManager->GetLastPage();
-            CHECK_NULL_VOID(pageNode);
-            auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-            CHECK_NULL_VOID(pageEventHub);
-
-            pageEventHub->RemoveRadioFromGroup(preGroup.value(), host->GetId());
-            pageEventHub->AddRadioToGroup(group, host->GetId());
-            isGroupChanged_ = true;
-        }
+        SetPrePageId(pageNode->GetId());
+        auto callback = [weak = WeakClaim(this)]() {
+            auto radio = weak.Upgrade();
+            if (radio) {
+                radio->CheckPageNode();
+            }
+        };
+        pipelineContext->AddBuildFinishCallBack(callback);
     }
-    pattern->SetPreGroup(group);
+    if (preGroup.has_value() && preGroup.value() != group) {
+        pageEventHub->RemoveRadioFromGroup(preGroup.value(), host->GetId());
+        pageEventHub->AddRadioToGroup(group, host->GetId());
+        SetPrePageId(pageNode->GetId());
+        isGroupChanged_ = true;
+    }
+    SetPreGroup(group);
 
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -279,7 +305,7 @@ void RadioPattern::UpdateState()
         isFirstCreated_ = false;
     }
     if (preCheck_ != check || isGroupChanged_) {
-        UpdateGroupCheckStatus(host, check);
+        UpdateGroupCheckStatus(host, pageNode, check);
     }
     preCheck_ = check;
     isGroupChanged_ = false;
@@ -301,16 +327,11 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
     preCheck_ = false;
 }
 
-void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool check)
+void RadioPattern::UpdateGroupCheckStatus(
+    const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& pageNode, bool check)
 {
     frameNode->MarkNeedRenderOnly();
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
     auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
     CHECK_NULL_VOID(pageEventHub);
 
@@ -342,15 +363,6 @@ void RadioPattern::UpdateUIStatus(bool check)
 
 void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
-        auto pattern = wp.Upgrade();
-        if (!pattern) {
-            return false;
-        }
-        return pattern->OnKeyEvent(event);
-    };
-    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
-
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -358,18 +370,6 @@ void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
-}
-
-bool RadioPattern::OnKeyEvent(const KeyEvent& event)
-{
-    if (event.action != KeyAction::DOWN) {
-        return false;
-    }
-    if (event.code == KeyCode::KEY_ENTER) {
-        OnClick();
-        return true;
-    }
-    return false;
 }
 
 void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -406,11 +406,12 @@ FocusPattern RadioPattern::GetFocusPattern() const
 bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
 {
     auto geometryNode = dirty->GetGeometryNode();
-    offset_ = geometryNode->GetContentOffset();
-    size_ = geometryNode->GetContentSize();
-    if (isFirstAddhotZoneRect_) {
+    auto offset = geometryNode->GetContentOffset();
+    auto size = geometryNode->GetContentSize();
+    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+        offset_ = offset;
+        size_ = size;
         AddHotZoneRect();
-        isFirstAddhotZoneRect_ = false;
     }
     return true;
 }
@@ -437,5 +438,27 @@ void RadioPattern::RemoveLastHotZoneRect() const
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveLastHotZoneRect();
+}
+
+std::string RadioPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    auto radioPaintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_RETURN(radioPaintProperty, "");
+    jsonObj->Put("checked", radioPaintProperty->GetRadioCheck().value_or(false));
+    return jsonObj->ToString();
+}
+
+void RadioPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto radioPaintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(radioPaintProperty);
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonChecked = info->GetValue("checked");
+    radioPaintProperty->UpdateRadioCheck(jsonChecked->GetBool());
+    OnModifyDone();
 }
 } // namespace OHOS::Ace::NG

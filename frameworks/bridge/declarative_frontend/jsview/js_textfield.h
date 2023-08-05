@@ -41,7 +41,6 @@ public:
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
-    static void RequestKeyboardOnFocus(bool needToRequest);
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
@@ -67,6 +66,8 @@ public:
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnTextSelectionChange(const JSCallbackInfo& info);
+    static void SetOnContentScroll(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
@@ -80,8 +81,15 @@ public:
     static void SetShowUnit(const JSCallbackInfo& info);
     static void SetShowCounter(const JSCallbackInfo& info);
     static void SetShowError(const JSCallbackInfo& info);
+    static void SetBarState(const JSCallbackInfo& info);
+    static void SetMaxLines(const JSCallbackInfo& info);
 
     static void SetShowUnderline(const JSCallbackInfo& info);
+    static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
+    static void SetSelectionMenuHidden(const JSCallbackInfo& info);
+    static bool ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info,
+        int32_t index, std::function<void()>& buildFunc);
+    static void SetCustomKeyboard(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

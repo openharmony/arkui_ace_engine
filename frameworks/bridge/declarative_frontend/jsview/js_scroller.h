@@ -38,6 +38,7 @@ public:
     void CurrentOffset(const JSCallbackInfo& args);
     void ScrollToIndex(const JSCallbackInfo& args);
     void ScrollBy(const JSCallbackInfo& args);
+    void IsAtEnd(const JSCallbackInfo& args);
 
     const WeakPtr<ScrollControllerBase>& GetController() const
     {
@@ -60,6 +61,8 @@ public:
     }
 
 private:
+    void ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue);
+
     WeakPtr<ScrollControllerBase> controllerWeak_;
     WeakPtr<ScrollProxy> scrollBarProxyWeak_;
 

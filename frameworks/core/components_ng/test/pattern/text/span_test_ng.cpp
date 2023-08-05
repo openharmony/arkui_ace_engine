@@ -52,6 +52,10 @@ const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 void onClickFunc(const BaseEventInfo* info) {};
 const std::string FONT_SIZE = "fontSize";
+const std::string FONT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
+                                       "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
+const std::string FONT_EQUALS_VALUE =
+    R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
 } // namespace
 
 class SpanTestNg : public testing::Test {};
@@ -498,7 +502,7 @@ HWTEST_F(SpanTestNg, Create001, TestSize.Level1)
     std::string moduleName;
     std::string src;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(src, true, pixMap, bundleName, moduleName);
+    imageSpan.Create(src, pixMap, bundleName, moduleName);
     ImageSpanView::SetObjectFit(ImageFit::FILL);
     ImageSpanView::SetVerticalAlign(VerticalAlign::TOP);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -507,5 +511,72 @@ HWTEST_F(SpanTestNg, Create001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetImageFitValue(ImageFit::COVER), ImageFit::FILL);
     EXPECT_EQ(layoutProperty->GetVerticalAlignValue(VerticalAlign::BOTTOM), VerticalAlign::TOP);
+}
+
+/**
+ * @tc.name: SpanModelSetFont001
+ * @tc.desc: Test if SetFont is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanModelSetFont001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+
+    /**
+     * @tc.steps: step2. Set Font, call SetFont
+     */
+    Font font;
+    font.fontSize = FONT_SIZE_VALUE;
+    font.fontWeight = FontWeight::BOLD;
+    font.fontFamilies = FONT_FAMILY_VALUE;
+    font.fontStyle = ITALIC_FONT_STYLE_VALUE;
+    spanModelNG.SetFont(font);
+    /**
+     * @tc.steps: step3. Gets the relevant properties of the Font
+     * @tc.expected: step3. Check the font value
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    EXPECT_EQ(spanNode->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLD);
+    EXPECT_EQ(spanNode->GetFontFamily(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(spanNode->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+}
+
+/**
+ * @tc.name: SpanItemSetFont001GetFontSize
+ * @tc.desc: Test if GetFont is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemGetFont001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG and SpanNode
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    spanModelNG.SetFontWeight(FontWeight::NORMAL);
+
+    /**
+     * @tc.steps: step2. not set Gets the relevant properties of the Font
+     * @tc.expected: step2. Check the font value
+     */
+    EXPECT_EQ(spanNode->spanItem_->GetFont(), FONT_DEFAULT_VALUE);
+
+    /**
+     * @tc.steps: step2. set and Gets the relevant properties of the Font
+     * @tc.expected: step2. Check the font value
+     */
+    spanModelNG.SetFontSize(FONT_SIZE_VALUE);
+    spanModelNG.SetFontWeight(FontWeight::BOLD);
+    spanModelNG.SetFontFamily(FONT_FAMILY_VALUE);
+    spanModelNG.SetItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(spanNode->spanItem_->GetFont(), FONT_EQUALS_VALUE);
 }
 } // namespace OHOS::Ace::NG

@@ -34,9 +34,9 @@ constexpr Dimension MORE_ANIMATION_OTHER_CIRCLE_X = 1.25_vp;
 constexpr Dimension MORE_ANIMATION_OTHER_CIRCLE_Y = 8.25_vp;
 constexpr Dimension MORE_ANIMATION_END_CIRCLE_X = 9.0_vp;
 constexpr Dimension MORE_ANIMATION_TOP_CIRCLE_Y = -0.25_vp;
-constexpr Dimension MASK_OFFSET_X = -12.0_vp;
+constexpr Dimension MASK_OFFSET_Y = 1.75_vp;
 constexpr Dimension MASK_WIDTH = 24.0_vp;
-constexpr Dimension MASK_HEIGHT = 1.0_vp;
+constexpr Dimension MASK_HEIGHT = 10.25_vp;
 
 constexpr int32_t ICON_MICRO_ANIMATION_DURATION1 = 300;
 constexpr int32_t ICON_MICRO_ANIMATION_DURATION2 = 200;
@@ -50,9 +50,6 @@ std::vector<int32_t> circle_Y { 0, -1, 0, 1 };
 
 SelectOverlayModifier::SelectOverlayModifier(const OffsetF& menuOptionOffset)
 {
-    hasExtensitonMenu_ = AceType::MakeRefPtr<PropertyBool>(false);
-    AttachProperty(hasExtensitonMenu_);
-
     pointRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(Dimension(1.75_vp).ConvertToPx());
     AttachProperty(pointRadius_);
 
@@ -64,6 +61,9 @@ SelectOverlayModifier::SelectOverlayModifier(const OffsetF& menuOptionOffset)
 
     rotationAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(ROTATION_ANGLE);
     AttachProperty(rotationAngle_);
+
+    circlesAndBackArrowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
+    AttachProperty(circlesAndBackArrowOpacity_);
 
     SetDefaultCircleAndLineEndOffset();
 }
@@ -165,8 +165,6 @@ void SelectOverlayModifier::SetLineEndOffset(bool isMore)
 
 void SelectOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
-    CHECK_NULL_VOID(hasExtensitonMenu_);
-    CHECK_NULL_VOID_NOLOG(hasExtensitonMenu_->Get());
     for (int32_t i = 0; i < ROUND_NUMBER; i++) {
         CHECK_NULL_VOID(circleOffset_[i]);
         if (i < ROUND_NUMBER - 1) {
@@ -190,12 +188,15 @@ void SelectOverlayModifier::DrawbBackArrow(DrawingContext& drawingContext)
 {
     auto& canvas = drawingContext.canvas;
     // Draw a back arrow.
-    for (int32_t i = 0; i < ROUND_NUMBER - 1; i++) {
-        canvas.Save();
-        canvas.Rotate(rotationAngle_->Get(), menuOptionOffset_->Get().GetX(), menuOptionOffset_->Get().GetY());
+    canvas.Save();
+    canvas.Rotate(rotationAngle_->Get(), menuOptionOffset_->Get().GetX(), menuOptionOffset_->Get().GetY());
+
+    Color iconColor = iconColor_;
+    iconColor = iconColor.BlendOpacity(circlesAndBackArrowOpacity_->Get());
+    for (int32_t i = 0; i < ROUND_NUMBER - 2; i++) {
         RSPen pen;
         pen.SetAntiAlias(true);
-        pen.SetColor(iconColor_.GetValue());
+        pen.SetColor(iconColor.GetValue());
         pen.SetWidth(pointRadius_->Get() * 2);
         pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
         canvas.AttachPen(pen);
@@ -203,42 +204,40 @@ void SelectOverlayModifier::DrawbBackArrow(DrawingContext& drawingContext)
         auto endOffset = menuOptionOffset_->Get() + lineEndOffset_[i]->Get();
         canvas.DrawLine({ coordinate.GetX(), coordinate.GetY() }, { endOffset.GetX(), endOffset.GetY() });
         canvas.DetachPen();
-        canvas.Restore();
     }
+
+    auto sideWidth = MASK_WIDTH.ConvertToPx();
+    auto maskOffset = menuOptionOffset_->Get() + OffsetF(-sideWidth / 2.0, MASK_OFFSET_Y.ConvertToPx());
+    RSRect clipInnerRect = RSRect(maskOffset.GetX(), maskOffset.GetY(), sideWidth + maskOffset.GetX(),
+        maskOffset.GetY() + MASK_HEIGHT.ConvertToPx());
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(iconColor.GetValue());
+    pen.SetWidth(pointRadius_->Get() * 2);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    canvas.AttachPen(pen);
+    auto coordinate = menuOptionOffset_->Get() + circleOffset_[3]->Get();
+    auto endOffset = menuOptionOffset_->Get() + lineEndOffset_[2]->Get();
+    canvas.DrawLine({ coordinate.GetX(), coordinate.GetY() }, { endOffset.GetX(), endOffset.GetY() });
+    canvas.DetachPen();
+    canvas.Restore();
 }
 
 void SelectOverlayModifier::DrawbCircles(DrawingContext& drawingContext)
 {
     auto& canvas = drawingContext.canvas;
-    // Draw a mask.
-    canvas.Save();
-    canvas.Rotate(rotationAngle_->Get(), menuOptionOffset_->Get().GetX(), menuOptionOffset_->Get().GetY());
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-    Color maskColor = Color::WHITE;
-    if (textOverlayTheme) {
-        maskColor = textOverlayTheme->GetMenuBackgroundColor();
-    }
-    brush.SetColor(maskColor.GetValue());
-    canvas.AttachBrush(brush);
-    OffsetF offset = OffsetF(menuOptionOffset_->Get().GetX() + MASK_OFFSET_X.ConvertToPx(),
-        menuOptionOffset_->Get().GetY() + MASK_HEIGHT.ConvertToPx());
-    RSRect coveredRect = RSRect(offset.GetX(), offset.GetY(), offset.GetX() + MASK_WIDTH.ConvertToPx(),
-        offset.GetY() + MASK_HEIGHT.ConvertToPx());
-    canvas.DrawRect(coveredRect);
-    canvas.DetachBrush();
-    canvas.Restore();
-
     // Paint other circles.
+    Color iconColor = iconColor_;
+    iconColor = iconColor.BlendOpacity(circlesAndBackArrowOpacity_->Get());
     for (int32_t i = 0; i < ROUND_NUMBER; i++) {
-        auto coordinate = menuOptionOffset_->Get() + circleOffset_[i]->Get();
         canvas.Save();
         canvas.Rotate(rotationAngle_->Get(), menuOptionOffset_->Get().GetX(), menuOptionOffset_->Get().GetY());
+        auto coordinate = menuOptionOffset_->Get() + circleOffset_[i]->Get();
         canvas.Translate(coordinate.GetX(), coordinate.GetY());
-        brush.SetColor(iconColor_.GetValue());
+        RSBrush brush;
+        brush.SetAntiAlias(true);
+        brush.SetColor(iconColor.GetValue());
         canvas.AttachBrush(brush);
         // The radius UX effect of the top circle is different from other circles.
         if (i == 0) {

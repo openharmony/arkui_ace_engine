@@ -33,7 +33,12 @@ class SkiaSvgDom : public SvgDomBase {
 
 public:
     SkiaSvgDom() = default;
-    explicit SkiaSvgDom(const sk_sp<SkSVGDOM>& skiaDom) : skiaDom_(skiaDom) {}
+    explicit SkiaSvgDom(const sk_sp<SkSVGDOM>& skiaDom) : skiaDom_(skiaDom)
+    {
+        const SkSize& size = skiaDom_->containerSize();
+        svgSize_.SetWidth(size.width());
+        svgSize_.SetHeight(size.height());
+    }
 
     static RefPtr<SkiaSvgDom> CreateSkiaSvgDom(SkStream& svgStream, const std::optional<Color>& svgFillColor);
 
@@ -49,14 +54,11 @@ public:
 
     // skia SVG doesn't support <animate> element
 
-    const std::optional<Color>& GetFillColor() override
-    {
-        return svgColor_;
-    }
-
 private:
+    void FitImage(SkCanvas* canvas, const ImageFit& imageFit, const Size& layout);
+    void FitViewPort(const Size& layout);
+
     sk_sp<SkSVGDOM> skiaDom_;
-    std::optional<Color> svgColor_;
 };
 
 } // namespace OHOS::Ace::NG

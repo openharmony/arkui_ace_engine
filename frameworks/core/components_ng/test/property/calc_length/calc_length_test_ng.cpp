@@ -48,11 +48,24 @@ HWTEST_F(CalcLengthTestNg, calcLengthTest001, TestSize.Level1)
 {
     CalcLength calc;
     double result = 0.0;
+
+    /**
+     * @tc.steps: step1. When the unit of member variable size is px.
+     * @tc.expected: step1. The return value of the NormalizeToPx method is true.
+     */
     calc.dimension_ = Dimension(100.0, DimensionUnit::PX);
     auto calcBool = calc.NormalizeToPx(VP_SCALE, FP_SCALE, LPX_SCALE, PARENT_LENGTH, result);
     EXPECT_TRUE(calcBool);
     calc.SetCalcValue("calcLengthTest");
     calcBool = calc.NormalizeToPx(VP_SCALE, FP_SCALE, LPX_SCALE, PARENT_LENGTH, result);
+    EXPECT_TRUE(calcBool);
+
+    /**
+     * @tc.steps: step1. When the unit of member variable size is vp.
+     * @tc.expected: step1. The return value of the NormalizeToPx method is true.
+     */
+    calc.dimension_ = Dimension(100.0, DimensionUnit::VP);
+    calc.NormalizeToPx(VP_SCALE, FP_SCALE, LPX_SCALE, PARENT_LENGTH, result);
     EXPECT_TRUE(calcBool);
 }
 } // namespace OHOS::Ace::NG

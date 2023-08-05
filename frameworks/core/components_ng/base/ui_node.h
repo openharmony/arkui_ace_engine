@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <list>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -29,6 +30,7 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
@@ -50,7 +52,7 @@ public:
 
     virtual int32_t FrameCount() const;
 
-    virtual RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
+    virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
@@ -68,27 +70,13 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
+    void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange);
+    virtual void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+
+    // process offscreen process.
+    void ProcessOffscreenTask(bool recursive = false);
 
     int32_t TotalChildCount() const;
-
-    // performance check get child count, depth, flex layout times and layout time
-    void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
-    void AddFlexLayouts()
-    {
-        flexLayouts_++;
-    }
-    void SetLayoutTime(int64_t time)
-    {
-        layoutTime_ = time;
-    }
-    int64_t GetLayoutTime()
-    {
-        return layoutTime_;
-    }
-    int32_t GetFlexLayouts()
-    {
-        return flexLayouts_;
-    }
 
     // Returns index in the flatten tree structure
     // of the node with given id and type
@@ -97,7 +85,7 @@ public:
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
-    const std::list<RefPtr<UINode>>& GetChildren() const
+    virtual const std::list<RefPtr<UINode>>& GetChildren() const
     {
         return children_;
     }
@@ -129,6 +117,11 @@ public:
         return parent_.Upgrade();
     }
 
+    void SetNeedCallChildrenUpdate(bool needCallChildrenUpdate)
+    {
+        needCallChildrenUpdate_ = needCallChildrenUpdate;
+    }
+
     void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
@@ -139,7 +132,7 @@ public:
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
-    virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout);
+    virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
     // DFX info.
     void DumpTree(int32_t depth);
@@ -237,16 +230,6 @@ public:
         return isInDestroying_;
     }
 
-    int32_t GetRow() const
-    {
-        return row_;
-    }
-
-    int32_t GetCol() const
-    {
-        return col_;
-    }
-
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -266,6 +249,8 @@ public:
     // of parent's layout wrapper
     virtual void UpdateLayoutPropertyFlag();
 
+    virtual void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) {}
+
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
     virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
@@ -279,7 +264,7 @@ public:
         }
     }
 
-    virtual void MarkNeedSyncRenderTree();
+    virtual void MarkNeedSyncRenderTree(bool needRebuild = false);
 
     virtual void RebuildRenderContextTree();
 
@@ -298,6 +283,8 @@ public:
 
     virtual void SetActive(bool active);
 
+    virtual void SetJSViewActive(bool active);
+
     virtual void OnVisibleChange(bool isVisible);
 
     virtual bool MarkRemoving();
@@ -307,12 +294,17 @@ public:
         return onMainTree_;
     }
 
+    bool UseOffscreenProcess() const
+    {
+        return useOffscreenProcess_;
+    }
+
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
-    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+    virtual void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
     template<typename T>
     RefPtr<T> FindChildNodeOfClass()
@@ -349,6 +341,7 @@ public:
     {
         return isDisappearing_;
     }
+    RefPtr<UINode> GetDisappearingChildById(const std::string& id) const;
 
     // These two interfaces are only used for fast preview.
     // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
@@ -359,6 +352,7 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
+    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index);
 
 #ifdef PREVIEW
     void SetDebugLine(const std::string& line)
@@ -396,6 +390,81 @@ public:
         nodeId_ = newElmtId;
     }
 
+    // --------------------------------------------------------------------------------
+    // performance check get child count, depth, flex layout times and layout time
+    void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
+    void SetLayoutTime(int64_t time)
+    {
+        if (nodeInfo_) {
+            nodeInfo_->layoutTime = time;
+        }
+    }
+    int64_t GetLayoutTime()
+    {
+        if (nodeInfo_) {
+            return nodeInfo_->layoutTime;
+        }
+        return 0;
+    }
+    int32_t GetFlexLayouts()
+    {
+        if (nodeInfo_) {
+            return nodeInfo_->flexLayouts;
+        }
+        return 0;
+    }
+    int32_t GetRow() const
+    {
+        if (nodeInfo_) {
+            return nodeInfo_->codeRow;
+        }
+        return 0;
+    }
+    int32_t GetCol() const
+    {
+        if (nodeInfo_) {
+            return nodeInfo_->codeCol;
+        }
+        return 0;
+    }
+    void SetRow(const int32_t row)
+    {
+        if (nodeInfo_) {
+            nodeInfo_->codeRow = row;
+        }
+    }
+    void SetCol(const int32_t col)
+    {
+        if (nodeInfo_) {
+            nodeInfo_->codeCol = col;
+        }
+    }
+    void SetForeachItem()
+    {
+        if (nodeInfo_) {
+            nodeInfo_->isForEachItem = true;
+        }
+    }
+    void AddFlexLayouts()
+    {
+        if (nodeInfo_) {
+            nodeInfo_->flexLayouts++;
+        }
+    }
+    virtual std::string GetCustomTag()
+    {
+        return GetTag();
+    }
+    void SetBuildByJs(bool isBuildByJS)
+    {
+        isBuildByJS_ = isBuildByJS;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
+    virtual void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint);
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -427,6 +496,9 @@ protected:
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false);
 
+    // run offscreen process.
+    virtual void OnOffscreenProcess(bool recursive) {}
+
     bool isRemoving_ = false;
 
     // return value: true if the node can be removed immediately.
@@ -434,32 +506,39 @@ protected:
     virtual bool RemoveImmediately() const;
     void ResetParent();
 
+    // update visible change signal to children
+    void UpdateChildrenVisible(bool isVisible) const;
+
+protected:
+    bool needCallChildrenUpdate_ = true;
+
 private:
-    void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
+    void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
+        bool allowTransition = true);
 
     std::list<RefPtr<UINode>> children_;
     std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
+    std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t row_ = -1;
-    int32_t col_ = -1;
     int32_t depth_ = 0;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
     int32_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
-    int32_t flexLayouts_ = 0;
-    int64_t layoutTime_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;
+    bool isBuildByJS_ = false;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
     int32_t restoreId_ = -1;
+
+    bool useOffscreenProcess_ = false;
 
 #ifdef PREVIEW
     std::string debugLine_;

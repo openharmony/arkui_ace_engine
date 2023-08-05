@@ -15,9 +15,14 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
+#include <stack>
+
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
@@ -34,7 +39,36 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
+void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
+    RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
+{
+    auto contentNode = itemPattern->GetContentNode();
+    CHECK_NULL_VOID(contentNode);
+    auto textLayoutProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto label = itemPattern->GetLabelNode();
+    RefPtr<TextLayoutProperty> labelProperty = label ? label->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    if (menuProperty->GetItalicFontStyle().has_value()) {
+        if (!itemProperty->GetItalicFontStyle().has_value()) {
+            textLayoutProperty->UpdateItalicFontStyle(menuProperty->GetItalicFontStyle().value());
+            contentChanged = true;
+        }
+        if (labelProperty && !itemProperty->GetLabelItalicFontStyle().has_value()) {
+            labelProperty->UpdateItalicFontStyle(menuProperty->GetItalicFontStyle().value());
+            labelChanged = true;
+        }
+    }
+    if (menuProperty->GetFontFamily().has_value()) {
+        if (!itemProperty->GetFontFamily().has_value()) {
+            textLayoutProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
+            contentChanged = true;
+        }
+        if (labelProperty && !itemProperty->GetLabelFontFamily().has_value()) {
+            labelProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
+            labelChanged = true;
+        }
+    }
+}
 
 void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern)
@@ -77,6 +111,7 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
             labelChanged = true;
         }
     }
+    UpdateFontStyle(menuProperty, itemProperty, itemPattern, contentChanged, labelChanged);
     if (contentChanged) {
         contentNode->MarkModifyDone();
         contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -108,21 +143,38 @@ void MenuPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     UpdateMenuItemChildren(host);
 
-    // get theme from SelectThemeManager
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-
-    if (HasInnerMenu()) {
+    auto innerMenuCount = GetInnerMenuCount();
+    if (innerMenuCount == 1) {
         ResetTheme(host, false);
+    } else if (innerMenuCount > 1) {
+        // multiple inner menus, reset outer container's shadow for desktop UX
+        ResetTheme(host, true);
     }
 
-    if (type_ == MenuType::MULTI_MENU) {
-        // move padding from scroll to inner menu
-        PaddingProperty padding;
-        padding.SetEdges(CalcLength(theme->GetOutPadding()));
-        host->GetLayoutProperty()->UpdatePadding(padding);
+    SetAccessibilityAction();
+}
+
+void InnerMenuPattern::BeforeCreateLayoutWrapper()
+{
+    RecordItemsAndGroups();
+
+    // determine menu type based on sibling menu count
+    auto count = FindSiblingMenuCount();
+    if (count > 0) {
+        SetType(MenuType::DESKTOP_MENU);
+        ApplyDesktopMenuTheme();
+    } else {
+        SetType(MenuType::MULTI_MENU);
+        ApplyMultiMenuTheme();
     }
+}
+
+void InnerMenuPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    UpdateMenuItemChildren(host);
     SetAccessibilityAction();
 }
 
@@ -145,7 +197,7 @@ void MenuPattern::RegisterOnTouch()
 
 void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    if (HasInnerMenu() || IsMultiMenu()) {
+    if (GetInnerMenuCount() > 0 || IsMultiMenu()) {
         // not click hide menu for multi menu
         return;
     }
@@ -160,7 +212,7 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
         if (lastTouchOffset_.has_value() &&
             (touchUpOffset - lastTouchOffset_.value()).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
-            HideMenu();
+            HideMenu(true);
         }
         lastTouchOffset_.reset();
     }
@@ -181,11 +233,7 @@ bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
     if (event.action != KeyAction::DOWN || IsMultiMenu()) {
         return false;
     }
-    if (event.code == KeyCode::KEY_ESCAPE) {
-        HideMenu();
-        return true;
-    }
-    if (event.code == KeyCode::KEY_DPAD_LEFT && IsSubMenu()) {
+    if ((event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_ESCAPE) && IsSubMenu()) {
         auto menuWrapper = GetMenuWrapper();
         CHECK_NULL_RETURN(menuWrapper, true);
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
@@ -283,7 +331,7 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuPattern::HideMenu() const
+void MenuPattern::HideMenu(bool isMenuOnTouch) const
 {
     if (IsContextMenu()) {
         SubwindowManager::GetInstance()->HideMenuNG(targetId_);
@@ -293,7 +341,7 @@ void MenuPattern::HideMenu() const
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->HideMenu(targetId_);
+    overlayManager->HideMenu(targetId_, isMenuOnTouch);
     LOGI("MenuPattern closing menu %{public}d", targetId_);
 }
 
@@ -335,24 +383,29 @@ RefPtr<FrameNode> MenuPattern::GetMenuWrapper() const
     return nullptr;
 }
 
-// judge children has component menu
-bool MenuPattern::HasInnerMenu() const
+// search for inner <Menu> node, once found a <Menu> node, count the number of sibling <Menu>
+uint32_t MenuPattern::GetInnerMenuCount() const
 {
-    if (type_ == MenuType::MULTI_MENU) {
-        return false;
+    if (type_ == MenuType::MULTI_MENU || type_ == MenuType::DESKTOP_MENU) {
+        return 0;
     }
 
+    constexpr uint32_t MAX_SEARCH_DEPTH = 5;
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(host, 0);
     auto child = host->GetChildAtIndex(0);
-    while (child) {
-        // is component menu
+    uint32_t depth = 0;
+    while (child && depth < MAX_SEARCH_DEPTH) {
+        // found component <Menu>
         if (child->GetTag() == V2::MENU_ETS_TAG) {
-            return true;
+            auto parent = child->GetParent();
+            CHECK_NULL_RETURN(parent, 0);
+            return parent->GetChildren().size();
         }
         child = child->GetChildAtIndex(0);
+        ++depth;
     }
-    return false;
+    return 0;
 }
 
 // mount option on menu
@@ -412,9 +465,8 @@ void MenuPattern::DisableTabInMenu()
 RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
 {
     switch (type_) {
-        case MenuType::NAVIGATION_MENU:
-            return MakeRefPtr<NavigationMenuLayoutAlgorithm>();
         case MenuType::MULTI_MENU:
+        case MenuType::DESKTOP_MENU:
             return MakeRefPtr<MultiMenuLayoutAlgorithm>();
         case MenuType::SUB_MENU:
             return MakeRefPtr<SubMenuLayoutAlgorithm>();
@@ -423,17 +475,25 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
     }
 }
 
-void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetShadow)
+void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu)
 {
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    if (resetShadow) {
-        renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
-    }
-
     auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(scroll);
+
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+    if (resetForDesktopMenu) {
+        // DesktopMenu apply shadow on inner Menu node
+        renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+    } else {
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+    }
+    // to enable inner menu shadow effect for desktopMenu, need to remove clipping from container
+    bool clip = !resetForDesktopMenu;
+    scroll->GetRenderContext()->SetClipToBounds(clip);
+
     // move padding from scroll to inner menu
     auto scrollProp = scroll->GetLayoutProperty();
     scrollProp->UpdatePadding(PaddingProperty());
@@ -450,15 +510,30 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 
     auto bgColor = theme->GetBackgroundColor();
     renderContext->UpdateBackgroundColor(bgColor);
-    // interior menu nodes don't need shadow effect
-    if (type_ != MenuType::MULTI_MENU) {
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
-    }
-    renderContext->SetClipToBounds(true);
+    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     // make menu round rect
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(theme->GetMenuBorderRadius());
     renderContext->UpdateBorderRadius(borderRadius);
+}
+
+void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
+{
+    MenuPattern::InitTheme(host);
+    // inner menu applies shadow in OnModifyDone(), where it can determine if it's a DesktopMenu or a regular menu
+
+    auto layoutProperty = host->GetLayoutProperty();
+    if (layoutProperty->GetPaddingProperty()) {
+        // if user defined padding exists, skip applying default padding
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    // apply default padding from theme on inner menu
+    PaddingProperty padding;
+    padding.SetEdges(CalcLength(theme->GetOutPadding()));
+    host->GetLayoutProperty()->UpdatePadding(padding);
 }
 
 void MenuPattern::SetAccessibilityAction()
@@ -492,5 +567,101 @@ void MenuPattern::SetAccessibilityAction()
             scrollPattern->ScrollPage(true, true);
         }
     });
+}
+
+bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    return false;
+}
+
+
+RefPtr<MenuPattern> MenuPattern::GetMainMenuPattern() const
+{
+    auto wrapperFrameNode = GetMenuWrapper();
+    CHECK_NULL_RETURN(wrapperFrameNode, nullptr);
+    auto mainMenuUINode = wrapperFrameNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(mainMenuUINode, nullptr);
+    auto mainMenuFrameNode = AceType::DynamicCast<FrameNode>(mainMenuUINode);
+    return mainMenuFrameNode->GetPattern<MenuPattern>();
+}
+
+void InnerMenuPattern::RecordItemsAndGroups()
+{
+    itemsAndGroups_.clear();
+    auto host = GetHost();
+    std::stack<RefPtr<UINode>> nodeStack;
+    nodeStack.emplace(host);
+    bool isMenu = true;
+
+    while (!nodeStack.empty()) {
+        auto currentNode = nodeStack.top();
+        nodeStack.pop();
+        // push items and item groups, skip menu node
+        if (!isMenu && AceType::InstanceOf<FrameNode>(currentNode)) {
+            itemsAndGroups_.emplace_back(WeakClaim(RawPtr(currentNode)));
+            continue;
+        }
+        isMenu = false;
+        // skip other type UiNode, such as ForEachNode
+        for (int32_t index = currentNode->GetChildren().size() - 1; index >= 0; index--) {
+            nodeStack.push(currentNode->GetChildAtIndex(index));
+        }
+    }
+}
+
+uint32_t InnerMenuPattern::FindSiblingMenuCount()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    auto parent = host->GetParent();
+    CHECK_NULL_RETURN(parent, 0);
+    auto siblings = parent->GetChildren();
+    uint32_t count = 0;
+    for (auto&& sibling : siblings) {
+        if (sibling->GetTag() == V2::MENU_ETS_TAG && sibling != host) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+void InnerMenuPattern::ApplyDesktopMenuTheme()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+}
+
+void InnerMenuPattern::ApplyMultiMenuTheme()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->UpdateBackShadow(ShadowConfig::NoneShadow);
+}
+
+void MenuPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+
+    auto renderContext = host->GetRenderContext();
+    renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
+
+    auto optionNode = menuPattern->GetOptions();
+    for (const auto& child : optionNode) {
+        auto optionsPattern = child->GetPattern<OptionPattern>();
+        optionsPattern->SetFontColor(menuTheme->GetFontColor());
+
+        child->MarkModifyDone();
+        child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    host->SetNeedCallChildrenUpdate(false);
 }
 } // namespace OHOS::Ace::NG

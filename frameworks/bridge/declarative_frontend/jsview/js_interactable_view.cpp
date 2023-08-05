@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "bridge/declarative_frontend/jsview/js_touch_handler.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
@@ -39,6 +40,11 @@ namespace OHOS::Ace::Framework {
 void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
 {
     LOGD("JSInteractableView JsOnTouch");
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnTouch callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnTouch();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGW("the info is not touch function");
         return;
@@ -54,6 +60,12 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
 
 void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
 {
+    LOGD("JSInteractableView JsOnKey");
+    if (args[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnKey callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnKeyEvent();
+        return;
+    }
     if (!args[0]->IsFunction()) {
         LOGE("OnKeyEvent args need a function.");
         return;
@@ -69,15 +81,22 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
 
 void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 {
+    LOGD("JSInteractableView JsOnHover");
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnHover callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnHover();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGE("the param is not a function");
         return;
     }
     RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
+    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](
+                       bool isHover, HoverInfo& hoverInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHover");
-        func->Execute(param);
+        func->HoverExecute(isHover, hoverInfo);
     };
     ViewAbstractModel::GetInstance()->SetOnHover(std::move(onHover));
 }
@@ -122,6 +141,12 @@ void JSInteractableView::JsTouchable(const JSCallbackInfo& info)
 
 void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
 {
+    LOGD("JSInteractableView JsOnClick");
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnClick callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnClick();
+        return;
+    }
     if (!info[0]->IsFunction()) {
         LOGW("the info is not click function");
         return;
@@ -154,6 +179,12 @@ void JSInteractableView::SetFocusNode(bool isFocusNode)
 
 void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
 {
+    LOGD("JSInteractableView JsOnAppear");
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnAppear callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnAppear();
+        return;
+    }
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -169,6 +200,12 @@ void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
 
 void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
 {
+    LOGD("JSInteractableView JsOnDisAppear");
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        LOGD("JsOnDisAppear callback is undefined");
+        ViewAbstractModel::GetInstance()->DisableOnDisAppear();
+        return;
+    }
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnDisAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));

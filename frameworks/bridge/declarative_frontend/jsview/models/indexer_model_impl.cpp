@@ -21,6 +21,9 @@
 namespace OHOS::Ace::Framework {
 void IndexerModelImpl::Create(std::vector<std::string>& indexerArray, int32_t selectedVal)
 {
+    if (static_cast<int32_t>(indexerArray.size()) <= 0) {
+        return;
+    }
     auto indexerComponent = AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
     ViewStackProcessor::GetInstance()->ClaimElementId(indexerComponent);
     ViewStackProcessor::GetInstance()->Push(indexerComponent);
@@ -30,54 +33,54 @@ void IndexerModelImpl::Create(std::vector<std::string>& indexerArray, int32_t se
     focusableComponent->SetFocusNode(true);
 }
 
-void IndexerModelImpl::SetSelectedColor(const Color& color)
+void IndexerModelImpl::SetSelectedColor(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
+    if (indexerComponent && color.has_value()) {
         auto textStyle = indexerComponent->GetActiveTextStyle();
-        textStyle.SetTextColor(color);
+        textStyle.SetTextColor(color.value());
         indexerComponent->SetActiveTextStyle(std::move(textStyle));
     }
 }
 
-void IndexerModelImpl::SetColor(const Color& color)
+void IndexerModelImpl::SetColor(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
+    if (indexerComponent && color.has_value()) {
         auto textStyle = indexerComponent->GetNormalTextStyle();
-        textStyle.SetTextColor(color);
+        textStyle.SetTextColor(color.value());
         indexerComponent->SetNormalTextStyle(std::move(textStyle));
     }
 }
 
-void IndexerModelImpl::SetPopupColor(const Color& color)
+void IndexerModelImpl::SetPopupColor(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
+    if (indexerComponent && color.has_value()) {
         auto textStyle = indexerComponent->GetBubbleTextStyle();
-        textStyle.SetTextColor(color);
+        textStyle.SetTextColor(color.value());
         indexerComponent->SetBubbleTextStyle(std::move(textStyle));
     }
 }
 
-void IndexerModelImpl::SetSelectedBackgroundColor(const Color& color)
+void IndexerModelImpl::SetSelectedBackgroundColor(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
-        indexerComponent->SetSelectedBackgroundColor(color);
+    if (indexerComponent && color.has_value()) {
+        indexerComponent->SetSelectedBackgroundColor(color.value());
     }
 }
 
-void IndexerModelImpl::SetPopupBackground(const Color& color)
+void IndexerModelImpl::SetPopupBackground(const std::optional<Color>& color)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (indexerComponent) {
-        indexerComponent->SetBubbleBackgroundColor(color);
+    if (indexerComponent && color.has_value()) {
+        indexerComponent->SetBubbleBackgroundColor(color.value());
     }
 }
 
@@ -90,36 +93,39 @@ void IndexerModelImpl::SetUsingPopup(bool state)
     }
 }
 
-void IndexerModelImpl::SetSelectedFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
+void IndexerModelImpl::SetSelectedFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+    std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
-        auto textStyle = indexerComponent->GetActiveTextStyle();
-        getTextStyleFunc(textStyle);
-        indexerComponent->SetActiveTextStyle(std::move(textStyle));
+        TextStyle textStyle;
+        SetTextStyle(textStyle, fontSize, fontWeight, fontFamily, fontStyle);
+        indexerComponent->SetActiveTextStyle(textStyle);
     }
 }
 
-void IndexerModelImpl::SetPopupFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
+void IndexerModelImpl::SetPopupFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+    std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
-        auto textStyle = indexerComponent->GetBubbleTextStyle();
-        getTextStyleFunc(textStyle);
-        indexerComponent->SetBubbleTextStyle(std::move(textStyle));
+        TextStyle textStyle;
+        SetTextStyle(textStyle, fontSize, fontWeight, fontFamily, fontStyle);
+        indexerComponent->SetBubbleTextStyle(textStyle);
     }
 }
 
-void IndexerModelImpl::SetFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc)
+void IndexerModelImpl::SetFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+    std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle)
 {
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
-        auto textStyle = indexerComponent->GetNormalTextStyle();
-        getTextStyleFunc(textStyle);
-        indexerComponent->SetNormalTextStyle(std::move(textStyle));
+        TextStyle textStyle;
+        SetTextStyle(textStyle, fontSize, fontWeight, fontFamily, fontStyle);
+        indexerComponent->SetNormalTextStyle(textStyle);
     }
 }
 
@@ -191,6 +197,24 @@ void IndexerModelImpl::SetOnPopupSelected(std::function<void(const int32_t selec
     auto eventMarker = EventMarker(std::move(onPopupSelectedEvent));
     if (indexerComponent) {
         indexerComponent->SetPopupSelectedEvent(eventMarker);
+    }
+}
+
+void IndexerModelImpl::SetTextStyle(TextStyle& textStyle, std::optional<Dimension>& fontSize,
+    std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
+    std::optional<FontStyle>& fontStyle)
+{
+    if (fontSize.has_value()) {
+        textStyle.SetFontSize(fontSize.value());
+    }
+    if (fontWeight.has_value()) {
+        textStyle.SetFontWeight(fontWeight.value());
+    }
+    if (fontFamily.has_value()) {
+        textStyle.SetFontFamilies(fontFamily.value());
+    }
+    if (fontStyle.has_value()) {
+        textStyle.SetFontStyle(fontStyle.value());
     }
 }
 } // namespace OHOS::Ace::Framework

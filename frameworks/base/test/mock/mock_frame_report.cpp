@@ -30,6 +30,7 @@ bool FrameReport::LoadLibrary()
 {
     frameSchedHandle_ = nullptr;
     frameSchedSoLoaded_ = false;
+    enable_ = false;
     return false;
 }
 
@@ -119,5 +120,15 @@ void FrameReport::BeginListFling()
 void FrameReport::EndListFling()
 {
     endListFlingFunc_ = nullptr;
+}
+
+void FrameReport::FlushBegin()
+{
+    flushBeginFunc_ = nullptr;
+}
+
+void FrameReport::FlushEnd()
+{
+    flushEndFunc_ = nullptr;
 }
 } // namespace OHOS::Ace

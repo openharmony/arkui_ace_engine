@@ -37,15 +37,34 @@ public:
         onSelect_ = std::move(onSelect);
     }
 
-    void FireOnSelect(bool isSelected) const
+    SelectFunc GetOnSelect() const
     {
+        return onSelect_;
+    }
+
+    void SetSelectChangeEvent(SelectFunc&& changeEvent)
+    {
+        selectChangeEvent_ = std::move(changeEvent);
+    }
+
+    SelectFunc GetSelectChangeEvent() const
+    {
+        return selectChangeEvent_;
+    }
+
+    void FireSelectChangeEvent(bool select) const
+    {
+        if (selectChangeEvent_) {
+            selectChangeEvent_(select);
+        }
         if (onSelect_) {
-            onSelect_(isSelected);
+            onSelect_(select);
         }
     }
 
 private:
     SelectFunc onSelect_;
+    SelectFunc selectChangeEvent_;
 };
 
 } // namespace OHOS::Ace::NG

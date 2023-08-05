@@ -24,6 +24,7 @@
 #include "base/window/drag_window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
+#include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,6 +44,14 @@ public:
         dragFrameNodes_.insert(dragFrameNode);
     }
 
+    void RemoveDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    {
+        dragFrameNodes_.erase(dragFrameNode);
+        gridDragFrameNodes_.erase(dragFrameNode);
+        listDragFrameNodes_.erase(dragFrameNode);
+        textFieldDragFrameNodes_.erase(dragFrameNode);
+    }
+
     void AddGridDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
     {
         gridDragFrameNodes_.insert(dragFrameNode);
@@ -59,9 +68,9 @@ public:
     }
 
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
-    void OnDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
-    void OnDragMove(float globalX, float globalY, const std::string& extraInfo);
-    void OnDragEnd(float globalX, float globalY, const std::string& extraInfo);
+    void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
+    void OnDragMove(const Point& point, const std::string& extraInfo);
+    void OnDragEnd(const Point& point, const std::string& extraInfo);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
@@ -73,7 +82,7 @@ public:
     void RestoreClipboardData();
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const RefPtr<OHOS::Ace::DragEvent>& event);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
@@ -86,18 +95,52 @@ public:
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
 #endif // ENABLE_DRAG_FRAMEWORK
-    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, float globalX, float globalY);
+    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
     bool CheckDragDropProxy(int64_t id) const;
+
+    bool IsWindowConsumed()
+    {
+        return isWindowConsumed_;
+    }
+
+    void SetIsWindowConsumed(bool consumed)
+    {
+        isWindowConsumed_ = consumed;
+    }
 
     bool IsDragged() const
     {
         return isDragged_;
     }
 
+    void SetIsDragged(bool isDragged)
+    {
+        if (isDragged && isDragged_ != isDragged && notifyInDraggedCallback_) {
+            notifyInDraggedCallback_();
+        }
+        isDragged_ = isDragged;
+    }
+
+    void SetIsDragCancel(bool isDragCancel)
+    {
+        isDragCancel_ = isDragCancel;
+    }
+
+    void SetIsMouseDrag(bool isMouseDragged)
+    {
+        isMouseDragged_ = isMouseDragged;
+    }
+
+    RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
+        std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
+
+    void SetNotifyInDraggedCallback(const std::function<void(void)>& callback)
+    {
+        notifyInDraggedCallback_ = callback;
+    }
+
 private:
-    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
-    std::map<int32_t, RefPtr<FrameNode>> FindDragFrameNodeMapByPosition(
-        float globalX, float globalY, DragType dragType);
+    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
@@ -107,6 +150,8 @@ private:
     int32_t GetItemIndex(const RefPtr<FrameNode>& frameNode, DragType dragType, float globalX, float globalY);
     void CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height);
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
+    void ClearVelocityInfo();
+    void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
 
     std::set<WeakPtr<FrameNode>> dragFrameNodes_;
     std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -124,12 +169,17 @@ private:
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
     std::string extraInfo_;
     std::unique_ptr<JsonValue> newData_ = nullptr;
+    bool isDragCancel_ = false;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::map<std::string, int64_t> summaryMap_;
 #endif // ENABLE_DRAG_FRAMEWORK
     int64_t currentId_ = -1;
 
+    std::function<void(void)> notifyInDraggedCallback_ = nullptr;
     bool isDragged_ = false;
+    bool isMouseDragged_ = false;
+    bool isWindowConsumed_ = false;
+    VelocityTracker velocityTracker_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

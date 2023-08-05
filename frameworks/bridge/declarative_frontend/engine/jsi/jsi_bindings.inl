@@ -17,7 +17,6 @@
 
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsi_bindings.h"
-#include "uicast_interface/uicast_jsi_impl.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -341,7 +340,7 @@ void JsiClass<C>::InheritAndBind(
     panda::Local<panda::JSValueRef> hasExistRef = t->Get(vm,
         panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())));
     if (hasExistRef.IsEmpty()) {
-        LOGI("InheritAndBind JSClass(%{public}s) has existed", ThisJSClass::JSName());
+        LOGE("InheritAndBind JSClass(%{public}s) has existed", ThisJSClass::JSName());
         return;
     }
 
@@ -415,7 +414,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(pand
         LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    LOGD("InternalMemberFunctionCallback: Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<FunctionBinding<T, panda::Local<panda::JSValueRef>, Args...>*>(binding)->Get();
     (instance->*fnPtr)(runtimeCallInfo);
 }
@@ -435,7 +433,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
         LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    LOGD("InternalmemberFunctionCallback: Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
 
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(runtimeCallInfo);
@@ -463,7 +460,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
         LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
 
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
@@ -504,7 +500,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSMethodCallback(panda::JsiRuntimeC
         LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     JsiCallbackInfo info(runtimeCallInfo);
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     (instance->*fnPtr)(info);
@@ -521,19 +516,12 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
         LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
 
     auto fnPtr = static_cast<StaticFunctionBinding<R, Args...>*>(binding)->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
     constexpr bool isVoid = std::is_void_v<R>;
     constexpr bool hasArguments = sizeof...(Args) != 0;
-
-    {
-        constexpr bool singleArg = sizeof...(Args) == 1;
-        std::string cmd = std::string(ThisJSClass::JSName()) + "::" + binding->Name();
-        UICastJsiImpl::CacheAceCmd(cmd, isVoid, hasArguments, singleArg, runtimeCallInfo, vm);
-    }
 
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     if constexpr (isVoid && hasArguments) {
@@ -565,15 +553,8 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRu
         LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(runtimeCallInfo);
-
-    {
-        std::string cmd = std::string(ThisJSClass::JSName()) + "::" + binding->Name();
-        UICastJsiImpl::CacheAceCmd(cmd, info);
-    }
-
     fnPtr(info);
     std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal = info.GetReturnValue();
     auto jsVal = std::get_if<panda::CopyableGlobal<panda::JSValueRef>>(&retVal);
@@ -622,7 +603,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Jsi
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     panda::Local<panda::JSValueRef> newTarget = runtimeCallInfo->GetNewTargetRef();
-    if (newTarget->IsFunction()) {
+    if (newTarget->IsFunction() && jsConstructor_) {
         JsiCallbackInfo info(runtimeCallInfo);
         jsConstructor_(info);
         auto retVal = info.GetReturnValue();
@@ -635,7 +616,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Jsi
             panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
             Local<ObjectRef>(thisObj)->SetNativePointerFieldCount(1);
             Local<ObjectRef>(thisObj)->SetNativePointerField(0, *instance, &JsiClass<C>::DestructorInterceptor);
-            LOGD("Constructed %{public}s", ThisJSClass::JSName());
             return thisObj;
         }
     }

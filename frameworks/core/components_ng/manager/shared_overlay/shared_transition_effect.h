@@ -22,6 +22,7 @@
 #include "core/animation/animator.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -78,6 +79,10 @@ public:
     {
         return initialPosition_;
     }
+    const std::optional<MarginProperty>& GetPassengerInitMargin() const
+    {
+        return initialMargin_;
+    }
     OffsetF GetPassengerInitFrameOffset() const
     {
         return initialFrameOffset_;
@@ -85,10 +90,6 @@ public:
     const std::optional<int32_t>& GetPassengerInitZIndex() const
     {
         return initialZIndex_;
-    }
-    bool GetPassengerInitEventEnabled() const
-    {
-        return initialEventEnabled_;
     }
     bool GetPassengerCurrentFocused() const
     {
@@ -107,6 +108,10 @@ public:
     {
         initialPosition_ = position;
     }
+    void SetPassengerInitMargin(const std::optional<MarginProperty>& margin)
+    {
+        initialMargin_ = margin;
+    }
     void SetPassengerInitFrameOffset(const OffsetF& offset)
     {
         initialFrameOffset_ = offset;
@@ -114,10 +119,6 @@ public:
     void SetPassengerInitZIndex(const std::optional<int32_t>& zIndex)
     {
         initialZIndex_ = zIndex;
-    }
-    void SetPassengerInitEventEnabled(bool enabled)
-    {
-        initialEventEnabled_ = enabled;
     }
     void SetPassengerCurrentFocused(bool isFocused)
     {
@@ -139,10 +140,10 @@ protected:
     ShareId shareId_;
     std::shared_ptr<SharedTransitionOption> option_;
     std::optional<OffsetT<Dimension>> initialPosition_;
+    std::optional<MarginProperty> initialMargin_;
     OffsetF initialFrameOffset_;
     std::optional<int32_t> initialZIndex_;
     std::list<std::function<void()>> finishCallbacks_;
-    bool initialEventEnabled_ = true;
     bool isCurrentFocused_ = false;
 };
 

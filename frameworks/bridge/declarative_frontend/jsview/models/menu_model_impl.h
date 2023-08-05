@@ -24,7 +24,9 @@ public:
     void Create() override;
     void SetFontSize(const Dimension& fontSize) override;
     void SetFontWeight(FontWeight weight) override;
+    void SetFontStyle(Ace::FontStyle style) override;
     void SetFontColor(const std::optional<Color>& color) override;
+    void SetFontFamily(const std::vector<std::string> &families) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_MENU_MODEL_IMPL_H

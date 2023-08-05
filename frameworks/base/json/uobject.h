@@ -56,7 +56,7 @@ public:
     bool Contains(const std::string& key) const;
 
     void Serialize(char* buffer, int32_t bufferLen);
-    void Deserialize(char* buffer, int32_t bufferLen);
+    void Deserialize(const char* buffer, int32_t bufferLen);
 
     size_t Hash();
 
@@ -90,6 +90,7 @@ private:
     void ReadKV();
 
     char* buffer_ = nullptr;
+    const char* constBuffer_ = nullptr;
     int32_t bufferLen_ = 0;
     int32_t offset_ = 0;
     size_t hashValue_ = 0;

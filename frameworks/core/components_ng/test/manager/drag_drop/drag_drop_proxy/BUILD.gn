@@ -35,6 +35,8 @@ ohos_unittest("drag_drop_proxy_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
@@ -61,7 +63,7 @@ ohos_unittest("drag_drop_proxy_test_ng") {
     "drag_drop_proxy_test_ng.cpp",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ "hilog:libhilog" ]
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
@@ -71,10 +73,5 @@ ohos_unittest("drag_drop_proxy_test_ng") {
     "//third_party/googletest:gmock_main",
   ]
 
-  configs = [
-    "$ace_root:ace_test_config",
-    "$ace_root:ace_config",
-    "//commonlibrary/c_utils/base:utils_config",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text_config",
-  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

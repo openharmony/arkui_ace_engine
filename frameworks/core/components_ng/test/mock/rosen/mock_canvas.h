@@ -35,8 +35,13 @@ public:
     MOCK_METHOD1(DrawRect, void(const TestingRect& rect));
     MOCK_METHOD3(Rotate, void(float deg, float sx, float sy));
     MOCK_METHOD1(Rotate, void(float deg));
-    MOCK_METHOD2(Translate, void(float sx, float sy));
-    MOCK_METHOD2(ClipRoundRect, void(const TestingRoundRect& roundRect, ClipOp op));
+    MOCK_METHOD2(Translate, void(float tx, float ty));
+    MOCK_METHOD2(Scale, void(float sx, float sy));
+    MOCK_METHOD3(ClipRoundRectImpl, void(const TestingRoundRect& roundRect, ClipOp op, bool antiAlias));
+    virtual void ClipRoundRect(const TestingRoundRect& roundRect, ClipOp op, bool antiAlias = false)
+    {
+        ClipRoundRectImpl(roundRect, op, antiAlias);
+    }
     MOCK_METHOD1(AttachPen, TestingCanvas&(const TestingPen& pen));
     MOCK_METHOD1(AttachBrush, TestingCanvas&(const TestingBrush& brush));
     MOCK_METHOD0(DetachPen, TestingCanvas&());

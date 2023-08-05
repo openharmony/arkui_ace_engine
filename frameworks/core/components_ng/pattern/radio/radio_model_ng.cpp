@@ -55,11 +55,20 @@ void RadioModelNG::SetOnChange(ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
-void RadioModelNG::SetWidth(const Dimension& width) {}
+void RadioModelNG::SetWidth(const Dimension& width)
+{
+    NG::ViewAbstract::SetWidth(NG::CalcLength(width));
+}
 
-void RadioModelNG::SetHeight(const Dimension& height) {}
+void RadioModelNG::SetHeight(const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(NG::CalcLength(height));
+}
 
-void RadioModelNG::SetPadding(const NG::PaddingPropertyF& args) {}
+void RadioModelNG::SetPadding(const NG::PaddingPropertyF& /*args*/, const NG::PaddingProperty& newArgs)
+{
+    NG::ViewAbstract::SetPadding(newArgs);
+}
 
 void RadioModelNG::SetCheckedBackgroundColor(const Color& color)
 {

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 module_output_path = "ace_engine_full/jsframework/event"
@@ -29,9 +30,33 @@ ohos_unittest("CommonEventTest") {
     "$ace_root:ace_test_config",
   ]
 
-  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_runtime:abilitykit_native",
+    "c_utils:utils",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
+  ]
 
   part_name = ace_engine_part
+  sources += [
+    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
+  ]
+
+  if (ability_runtime_graphics) {
+    external_deps += [ "image_framework:image_native" ]
+  }
 }
 
 config("config_domnode_test") {

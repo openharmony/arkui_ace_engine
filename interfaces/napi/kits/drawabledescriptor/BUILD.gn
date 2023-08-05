@@ -19,13 +19,25 @@ ohos_shared_library("drawabledescriptor") {
 
   sources = [ "drawable_register.cpp" ]
 
+  deps = [
+    "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+  ]
+
   external_deps = [
-    "ace_engine:drawable_descriptor",
-    "hiviewdfx_hilog_native:libhilog",
-    "multimedia_image_framework:image",
-    "multimedia_image_framework:image_native",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "napi:ace_napi",
   ]
+
+  if (current_os == "ohos") {
+    external_deps += [
+      "graphic_2d:2d_graphics",
+      "image_framework:image",
+      "image_framework:image_native",
+    ]
+  } else {
+    defines = [ "PREVIEW" ]
+  }
 
   relative_install_dir = "module/arkui"
   subsystem_name = ace_engine_subsystem

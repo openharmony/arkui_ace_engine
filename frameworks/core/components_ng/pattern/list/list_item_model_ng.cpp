@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc)
+void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -38,8 +38,9 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc)
         return ViewStackProcessor::GetInstance()->Finish();
     };
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId, [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
-            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder);
+        V2::LIST_ITEM_ETS_TAG, nodeId,
+        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
+            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
         });
     stack->Push(frameNode);
 }
@@ -48,8 +49,8 @@ void ListItemModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
     stack->Push(frameNode);
 }
 
@@ -99,6 +100,27 @@ void ListItemModelNG::SetSelectable(bool selectable)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectable(selectable);
+}
+
+void ListItemModelNG::SetSelected(bool selected)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(selected);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
+}
+
+void ListItemModelNG::SetSelectChangeEvent(std::function<void(bool)>&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
 
 void ListItemModelNG::SetSelectCallback(OnSelectFunc&& selectCallback)

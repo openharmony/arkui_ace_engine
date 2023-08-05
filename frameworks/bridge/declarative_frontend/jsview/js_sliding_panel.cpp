@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,13 +56,16 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::vector<PanelMode> PANEL_MODES = { PanelMode::MINI, PanelMode::HALF, PanelMode::FULL, PanelMode::AUTO };
-const std::vector<PanelType> PANEL_TYPES = { PanelType::MINI_BAR, PanelType::FOLDABLE_BAR, PanelType::TEMP_DISPLAY };
+const std::vector<PanelType> PANEL_TYPES = { PanelType::MINI_BAR, PanelType::FOLDABLE_BAR, PanelType::TEMP_DISPLAY,
+    PanelType::CUSTOM };
 const std::vector<VisibleType> PANEL_VISIBLE_TYPES = { VisibleType::GONE, VisibleType::VISIBLE,
     VisibleType::INVISIBLE };
 
 const static bool DEFAULT_HASDRAGBAR = true;
+const static bool DEFAULT_SHOWCLOSEICON = false;
 const static PanelMode DEFAULT_PANELMODE = PanelMode::HALF;
 const static PanelType DEFAULT_PANELTYPE = PanelType::FOLDABLE_BAR;
+const static int32_t PLATFORM_VERSION_TEN = 10;
 
 } // namespace
 
@@ -84,8 +87,10 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("pop", &JSSlidingPanel::Pop, opt);
     JSClass<JSSlidingPanel>::StaticMethod("dragBar", &JSSlidingPanel::SetHasDragBar, opt);
     JSClass<JSSlidingPanel>::StaticMethod("show", &JSSlidingPanel::SetShow, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("showCloseIcon", &JSSlidingPanel::SetShowCloseIcon, opt);
     JSClass<JSSlidingPanel>::StaticMethod("mode", &JSSlidingPanel::SetPanelMode, opt);
     JSClass<JSSlidingPanel>::StaticMethod("type", &JSSlidingPanel::SetPanelType, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("customHeight", &JSSlidingPanel::SetCustomHeight, opt);
     JSClass<JSSlidingPanel>::StaticMethod("backgroundMask", &JSSlidingPanel::SetBackgroundMask, opt);
     JSClass<JSSlidingPanel>::StaticMethod("fullHeight", &JSSlidingPanel::SetFullHeight, opt);
     JSClass<JSSlidingPanel>::StaticMethod("halfHeight", &JSSlidingPanel::SetHalfHeight, opt);
@@ -104,6 +109,8 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSlidingPanel>::StaticMethod("onChange", &JSSlidingPanel::SetOnSizeChange);
     JSClass<JSSlidingPanel>::StaticMethod("onHeightChange", &JSSlidingPanel::SetOnHeightChange);
+    JSClass<JSSlidingPanel>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSlidingPanel>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
     JSClass<JSSlidingPanel>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -314,9 +321,28 @@ void JSSlidingPanel::SetHasDragBar(const JSCallbackInfo& info)
     SlidingPanelModel::GetInstance()->SetHasDragBar(hasDragBar);
 }
 
-void JSSlidingPanel::SetShow(bool isShow)
+void JSSlidingPanel::SetShowCloseIcon(const JSCallbackInfo& info)
 {
-    SlidingPanelModel::GetInstance()->SetIsShow(isShow);
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    auto showCloseIcon = DEFAULT_SHOWCLOSEICON;
+    if (info[0]->IsBoolean()) {
+        showCloseIcon = info[0]->ToBoolean();
+    }
+    SlidingPanelModel::GetInstance()->SetShowCloseIcon(showCloseIcon);
+}
+
+void JSSlidingPanel::SetShow(const JSCallbackInfo& info)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsUndefined() || info[0]->IsNull())) {
+        SlidingPanelModel::GetInstance()->SetIsShow(true);
+    } else {
+        SlidingPanelModel::GetInstance()->SetIsShow(info[0]->ToBoolean());
+    }
 }
 
 void ParseModeObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -373,6 +399,20 @@ void JSSlidingPanel::SetPanelType(const JSCallbackInfo& info)
         }
     }
     SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
+}
+
+void JSSlidingPanel::SetCustomHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    CalcDimension customHeight;
+    if (!ParseJsDimensionVp(info[0], customHeight)) {
+        customHeight = Dimension(0.0);
+    }
+
+    SlidingPanelModel::GetInstance()->SetCustomHeight(customHeight);
 }
 
 void JSSlidingPanel::SetMiniHeight(const JSCallbackInfo& info)

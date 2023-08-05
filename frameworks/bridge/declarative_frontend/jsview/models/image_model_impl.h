@@ -33,7 +33,7 @@ public:
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;
     void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override;
     void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;
-    void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap, const std::string& bundleName,
+    void Create(const std::string& src, RefPtr<PixelMap>& pixMap, const std::string& bundleName,
         const std::string& moduleName) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
     void SetImageFill(const Color& color) override;

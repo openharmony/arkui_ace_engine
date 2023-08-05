@@ -15,40 +15,100 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
+#include "interfaces/inner_api/ace/modal_ui_extension_callbacks.h"
+
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void UIExtensionModelNG::Create(const std::string& bundleName, const std::string& abilityName)
+RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, const std::string& abilityName,
+    const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease,
+    std::function<void(int32_t, const std::string&, const std::string&)>&& onError)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
+    wantWrap->SetWantParam(params);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+        [wantWrap]() { return AceType::MakeRefPtr<UIExtensionPattern>(wantWrap); });
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->SetOnReleaseCallback(std::move(onRelease));
+    pattern->SetOnErrorCallback(std::move(onError));
+    return frameNode;
+}
+
+RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, [want]() { return AceType::MakeRefPtr<UIExtensionPattern>(want); });
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, frameNode);
+    pipeline->AddWindowStateChangedCallback(nodeId);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->SetOnReleaseCallback(std::move(callbacks.onRelease));
+    pattern->SetOnErrorCallback(std::move(callbacks.onError));
+    pattern->SetOnResultCallback(std::move(callbacks.onResult));
+    pattern->SetOnReceiveCallback(std::move(callbacks.onReceive));
+    return frameNode;
+}
+
+void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        [bundleName, abilityName]() { return AceType::MakeRefPtr<UIExtensionPattern>(bundleName, abilityName); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+        [wantWrap]() { return AceType::MakeRefPtr<UIExtensionPattern>(wantWrap); });
     stack->Push(frameNode);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
-void UIExtensionModelNG::SetWant(const std::string& want)
+void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)
 {
-    ACE_UPDATE_PAINT_PROPERTY(UIExtensionPaintProperty, Want, want);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnRemoteReadyCallback(std::move(onRemoteReady));
 }
 
-void UIExtensionModelNG::SetOnConnect(std::function<void()>&& onConnect) {}
+void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnReleaseCallback(std::move(onRelease));
+}
 
-void UIExtensionModelNG::SetOnDisconnect(std::function<void()>&& onDisconnect) {}
+void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    pattern->SetOnResultCallback(std::move(onResult));
+}
 
-void UIExtensionModelNG::SetOnError(std::function<void()>&& onError) {}
+void UIExtensionModelNG::SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    pattern->SetOnReceiveCallback(std::move(onReceive));
+}
 
-void UIExtensionModelNG::SetOnCall(std::function<void()>&& onCall) {}
-
-void UIExtensionModelNG::SetOnResult(std::function<void()>&& onResult) {}
+void UIExtensionModelNG::SetOnError(
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    pattern->SetOnErrorCallback(std::move(onError));
+}
 } // namespace OHOS::Ace::NG

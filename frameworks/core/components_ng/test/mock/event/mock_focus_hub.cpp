@@ -28,10 +28,20 @@ bool FocusHub::IsFocusable()
     return false;
 }
 
+void FocusHub::SetFocusable(bool focusable) {}
+
 bool FocusHub::RequestFocusImmediately()
 {
     return true;
 }
 
 void FocusHub::OnClick(const KeyEvent& event) {}
+
+void FocusHub::MarkRootFocusNeedUpdate() {}
+
+bool FocusHub::PaintFocusState(bool isNeedStateStyles)
+{
+    return false;
+}
+void FocusHub::ClearFocusState(bool isNeedStateStyles) {}
 } // namespace OHOS::Ace::NG

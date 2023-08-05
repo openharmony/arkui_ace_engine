@@ -45,4 +45,45 @@ void TimePickerModelImpl::SetOnChange(ChangeEvent&& onChange)
     auto datePicker = EventMarker([func = std::move(onChange)](const BaseEventInfo* info) { func(info); });
     JSViewSetProperty(&PickerBaseComponent::SetOnChange, std::move(datePicker));
 }
+
+void TimePickerModelImpl::SetBackgroundColor(const Color& color)
+{
+    auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!pickerBase) {
+        LOGE("PickerBaseComponent is null");
+        return;
+    }
+
+    pickerBase->SetHasBackgroundColor(true);
+}
+
+void TimePickerDialogModelImpl::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
+    NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
+    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange)
+{
+    RefPtr<Component> component;
+    auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
+    bool isUseMilitaryTime = pickerDialog.isUseMilitaryTime;
+    if (pickerDialog.isSelectedTime == true) {
+        timePicker->SetSelectedTime(pickerDialog.pickerTime);
+    }
+    timePicker->SetIsDialog(true);
+    timePicker->SetIsCreateDialogComponent(true);
+    timePicker->SetHour24(isUseMilitaryTime);
+    component = timePicker;
+
+    auto datePicker = AceType::DynamicCast<PickerBaseComponent>(component);
+    DialogProperties properties {};
+    properties.alignment = DialogAlignment::CENTER;
+    properties.customComponent = datePicker;
+    properties.customStyle = true;
+    auto acceptId = EventMarker(std::move(onAccept));
+    datePicker->SetDialogAcceptEvent(acceptId);
+    auto cancelId = EventMarker(std::move(onCancel));
+    datePicker->SetDialogCancelEvent(cancelId);
+    auto changeId = EventMarker(std::move(onChange));
+    datePicker->SetDialogChangeEvent(changeId);
+    datePicker->SetDialogName("TimePickerDialog");
+    datePicker->OpenDialog(properties);
+}
 } // namespace OHOS::Ace::Framework

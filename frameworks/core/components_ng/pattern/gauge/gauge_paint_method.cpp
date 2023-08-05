@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "core/common/container.h"
@@ -46,10 +47,10 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto offset = paintWrapper->GetContentOffset();
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    auto contentSize = paintWrapper->GetContentSize();
     RenderRingInfo data;
-    data.radius = std::min(frameSize.Width(), frameSize.Height()) / 2.0f;
-    data.center = Offset(frameSize.Width() / 2.0f + offset.GetX(), frameSize.Height() / 2.0f + offset.GetY());
+    data.radius = std::min(contentSize.Width(), contentSize.Height()) / 2.0f;
+    data.center = Offset(contentSize.Width() / 2.0f + offset.GetX(), contentSize.Height() / 2.0f + offset.GetY());
     float startAngle = DEFAULT_START_DEGREE;
     float endAngle = DEFAULT_END_DEGREE;
     if (paintProperty->GetStartAngle().has_value() && !std::isnan(paintProperty->GetStartAngle().value())) {
@@ -69,15 +70,20 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     auto theme = pipelineContext->GetTheme<ProgressTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
     if (paintProperty->GetStrokeWidth().has_value() && paintProperty->GetStrokeWidth()->Value() > 0) {
-        data.thickness = paintProperty->GetStrokeWidth()->ConvertToPx();
+        data.thickness =
+            std::min(static_cast<float>(paintProperty->GetStrokeWidth()->ConvertToPx()), contentSize.Width() / 2);
     }
     std::vector<float> weights;
     if (paintProperty->GetValues().has_value()) {
         weights = paintProperty->GetValuesValue();
+    } else {
+        weights.push_back(1);
     }
     std::vector<Color> colors;
     if (paintProperty->GetColors().has_value()) {
         colors = paintProperty->GetColorsValue();
+    } else {
+        colors.push_back(Color::BLACK);
     }
     float min = paintProperty->GetMinValue();
     float max = paintProperty->GetMaxValue();
@@ -99,6 +105,13 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     float highLightStart = 0.0f;
     size_t highLightIndex = 0;
     float ratio = 0.0f;
+    if (max < min) {
+        min = 0.0f;
+        max = 100.0f;
+    }
+    if (value < min || value > max) {
+        value = min;
+    }
     if (min < max && value >= min && value <= max) {
         ratio = (value - min) / (max - min);
     }

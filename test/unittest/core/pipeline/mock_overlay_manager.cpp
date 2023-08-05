@@ -30,7 +30,11 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo) {}
 
+void OverlayManager::ErasePopup(int32_t targetId) {}
+
 void OverlayManager::HideAllPopups() {}
+
+void OverlayManager::HideCustomPopups() {};
 
 bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
@@ -42,7 +46,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 // subwindow only contains one menu instance.
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu) {}
 
-void OverlayManager::HideMenu(int32_t targetId) {}
+void OverlayManager::HideMenu(int32_t targetId, bool isMenuOnTouch) {}
 
 void OverlayManager::HideAllMenus() {}
 
@@ -51,14 +55,13 @@ void OverlayManager::DeleteMenu(int32_t targetId) {}
 void OverlayManager::CleanMenuInSubWindow() {}
 
 RefPtr<FrameNode> OverlayManager::ShowDialog(
-    const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
     return nullptr;
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {}
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
@@ -76,7 +79,12 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     removeOverlayFlag = (dialogNode != nullptr);
 }
 
-bool OverlayManager::RemoveOverlay()
+bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
+{
+    return removeOverlayFlag;
+}
+
+bool OverlayManager::RemoveOverlayInSubwindow()
 {
     return removeOverlayFlag;
 }
@@ -85,5 +93,17 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
 {
     customPopupMap_[targetId] = customNode;
 }
+
+void OverlayManager::RemoveIndexerPopupById(int32_t targetId) {}
+
+void OverlayManager::BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
+    std::function<void()>&& onDisappear, int32_t targetId)
+{}
+
+void OverlayManager::MarkDirty(PropertyChangeFlag flag) {}
+
+void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId) {}
+void OverlayManager::DestroyKeyboard() {}
 
 } // namespace OHOS::Ace::NG

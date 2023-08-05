@@ -28,11 +28,21 @@
 
 namespace OHOS::Ace::NG {
 
+struct ListItemGroupPaintInfo {
+    bool vertical = false;
+    int32_t lanes = 1;
+    float spaceWidth = 0.0f;
+    float laneGutter = 0.0f;
+};
+
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
 
 public:
-    explicit ListItemGroupPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
+    explicit ListItemGroupPattern(
+        const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemGroupStyle listItemGroupStyle)
+        : shallowBuilder_(shallowBuilder), listItemGroupStyle_(listItemGroupStyle)
+    {}
     ~ListItemGroupPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -105,21 +115,52 @@ public:
         return indexInList_;
     }
 
+    int32_t GetDisplayEndIndexInGroup() const
+    {
+        return itemDisplayEndIndex_;
+    }
+
+    int32_t GetDiasplayStartIndexInGroup() const
+    {
+        return itemDiasplayStartIndex_;
+    }
+
+    int32_t GetEndIndexInGroup() const
+    {
+        return (itemTotalCount_ - 1);
+    }
+
+    int32_t GetLanesInGroup() const
+    {
+        return lanes_;
+    }
+
+    V2::ListItemGroupStyle GetListItemGroupStyle()
+    {
+        return listItemGroupStyle_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnAttachToFrameNode() override;
+    void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
     RefPtr<ShallowBuilder> shallowBuilder_;
+    V2::ListItemGroupStyle listItemGroupStyle_ = V2::ListItemGroupStyle::NONE;
 
     int32_t indexInList_ = 0;
 
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
     int32_t itemStartIndex_ = 0;
+    int32_t itemTotalCount_ = -1;
+    int32_t itemDisplayEndIndex_ = -1;
+    int32_t itemDiasplayStartIndex_ = -1;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
-
+    float laneGutter_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };
 } // namespace OHOS::Ace::NG

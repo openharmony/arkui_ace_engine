@@ -13,5 +13,8 @@
 
 group("svg_unittest") {
   testonly = true
-  deps = [ "parse:svg_parse_unit_test" ]
+  deps = [
+    "dom:svg_dom_test_ng",
+    "parse:svg_parse_unit_test",
+  ]
 }

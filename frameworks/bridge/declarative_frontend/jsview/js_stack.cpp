@@ -83,6 +83,7 @@ void JSStack::SetOverflow(int value)
 bool GetAlignment(const JSCallbackInfo& info, Alignment& alignment)
 {
     if (info.Length() != 1 || !info[0]->IsNumber()) {
+        StackModel::GetInstance()->SetAlignment(Alignment::CENTER);
         return false;
     }
     auto value = info[0]->ToNumber<size_t>();
@@ -126,11 +127,6 @@ bool GetAlignment(const JSCallbackInfo& info, Alignment& alignment)
 void JSStack::SetAlignment(const JSCallbackInfo& info)
 {
     SET_ALIGNMENT(info, Alignment);
-}
-
-void JSStack::SetAlignmentContent(const JSCallbackInfo& info)
-{
-    SET_ALIGNMENT(info, AlignmentContent);
 }
 
 void JSStack::SetWidth(const JSCallbackInfo& info)
@@ -218,7 +214,7 @@ void JSStack::JSBind(BindingTarget globalObj)
     JSClass<JSStack>::StaticMethod("stackFit", &JSStack::SetStackFit, opt);
     JSClass<JSStack>::StaticMethod("overflow", &JSStack::SetOverflow, opt);
     JSClass<JSStack>::StaticMethod("align", &JSStack::SetAlignment, opt);
-    JSClass<JSStack>::StaticMethod("alignContent", &JSStack::SetAlignmentContent, opt);
+    JSClass<JSStack>::StaticMethod("alignContent", &JSStack::SetAlignment, opt);
     JSClass<JSStack>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSStack>::StaticMethod("width", SetWidth);
     JSClass<JSStack>::StaticMethod("height", SetHeight);

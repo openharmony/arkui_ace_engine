@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
 #include "core/components/progress/progress_theme.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -59,6 +60,8 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonValue->Put("scaleWidth", paintProperty->GetScaleWidthValue(theme->GetScaleWidth()).ToString().c_str());
     json->Put("style", jsonValue->ToString().c_str());
     ToJsonValueForRingStyleOptions(json);
+    ToJsonValueForLinearStyleOptions(json);
+    json->Put("enableSmoothEffect", paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false");
 }
 
 void ProgressPattern::InitTouchEvent()
@@ -79,6 +82,17 @@ void ProgressPattern::InitTouchEvent()
     gesture->AddTouchEvent(touchListener_);
 }
 
+void ProgressPattern::RemoveTouchEvent()
+{
+    if (touchListener_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto gesture = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        gesture->RemoveTouchEvent(touchListener_);
+        touchListener_ = nullptr;
+    }
+}
 void ProgressPattern::HandleEnabled()
 {
     auto host = GetHost();
@@ -151,6 +165,39 @@ void ProgressPattern::OnPress(const TouchEventInfo& info)
     host->MarkDirtyNode();
 }
 
+void ProgressPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->GetInnerFocusPaintRect(paintRect);
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void ProgressPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& content = host->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentOffset = content->GetRect().GetOffset();
+    auto contentSize = content->GetRect().GetSize();
+    auto currentContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(currentContext);
+    auto appTheme = currentContext->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    auto paintWidth = appTheme->GetFocusWidthVp();
+    auto focusPadding = appTheme->GetFocusOutPaddingVp();
+    auto focusDistance = paintWidth + focusPadding;
+    auto focusRadius =
+        std::min(contentSize.Width(), contentSize.Height()) * 0.5 + static_cast<float>(focusDistance.ConvertToPx());
+    paintRect.SetRect(RectF(contentOffset.GetX() - focusDistance.ConvertToPx(),
+        contentOffset.GetY() - focusDistance.ConvertToPx(), contentSize.Width() + 2 * focusDistance.ConvertToPx(),
+        contentSize.Height() + 2 * focusDistance.ConvertToPx()));
+    paintRect.SetCornerRadius(focusRadius);
+}
+
 void ProgressPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -159,8 +206,14 @@ void ProgressPattern::OnModifyDone()
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     if (progressLayoutProperty->GetType() == ProgressType::CAPSULE) {
+        auto hub = host->GetEventHub<EventHub>();
         HandleEnabled();
         InitTouchEvent();
+        auto focusHub = hub->GetFocusHub();
+        CHECK_NULL_VOID_NOLOG(focusHub);
+        InitOnKeyEvent(focusHub);
+    } else {
+        RemoveTouchEvent();
     }
 }
 
@@ -181,10 +234,24 @@ void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>&
 
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
+    jsonValue->Put("enableScanEffect", (paintProperty->GetEnableRingScanEffect().value_or(false)) ? "true" : "false");
     jsonValue->Put("shadow", paintProperty->GetPaintShadowValue(false) ? "true" : "false");
     jsonValue->Put("status",
         ConvertProgressStatusToString(paintProperty->GetProgressStatusValue(ProgressStatus::PROGRESSING)).c_str());
     json->Put("ringStyle", jsonValue);
+}
+
+void ProgressPattern::ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json) const
+{
+    auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
+    jsonValue->Put("enableScanEffect", (paintProperty->GetEnableLinearScanEffect().value_or(false)) ? "true" : "false");
+    json->Put("linearStyle", jsonValue);
 }
 
 std::string ProgressPattern::ConvertProgressStatusToString(const ProgressStatus status)

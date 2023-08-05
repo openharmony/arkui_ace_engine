@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_RENDER_PROPERTY_H
 
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/divider/divider_theme.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -46,7 +48,11 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);
-        json->Put("color", propDividerColor_.value_or(Color::BLACK).ColorToString().c_str());
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<DividerTheme>();
+        CHECK_NULL_VOID(theme);
+        json->Put("color", propDividerColor_.value_or(theme->GetColor()).ColorToString().c_str());
         json->Put("lineCap", propLineCap_.value_or(LineCap::SQUARE) == LineCap::BUTT
                                  ? "BUTT"
                                  : (propLineCap_.value_or(LineCap::SQUARE) == LineCap::ROUND ? "ROUND" : "SQUARE"));

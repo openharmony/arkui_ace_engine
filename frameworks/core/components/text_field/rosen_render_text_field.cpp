@@ -120,18 +120,27 @@ bool RosenRenderTextField::GetCaretRect(int32_t extent, Rect& caretRect, double 
     return true;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintCaret(SkCanvas& canvas, const Rect& caretRect)
+#else
+void RosenRenderTextField::PaintCaret(RSCanvas& canvas, const Rect& caretRect)
+#endif
 {
     // We simply not to draw the caret rather than do an alpha animation.
     if (!caretRect_.IsValid() || !showCursor_ || !cursorVisibility_) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
+#else
+    RSBrush brush;
+#endif
     Color cursorColor = cursorColor_;
     if (!cursorColorIsSet_) {
         // Default strategy: Keep color same with text.
         cursorColor = style_.GetTextColor();
     }
+#ifndef USE_ROSEN_DRAWING
     paint.setColor(Constants::ConvertSkColor(cursorColor));
     paint.setAntiAlias(true);
     if (NearZero(cursorRadius_.Value())) {
@@ -145,27 +154,60 @@ void RosenRenderTextField::PaintCaret(SkCanvas& canvas, const Rect& caretRect)
             radius, radius);
         canvas.drawRRect(rrect, paint);
     }
+#else
+    brush.SetColor(cursorColor.GetValue());
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+    if (NearZero(cursorRadius_.Value())) {
+        canvas.DrawRect(RSRect(caretRect.Left(), caretRect.Top(), caretRect.Right(), caretRect.Bottom()));
+    } else {
+        const RSScalar radius = static_cast<RSScalar>(NormalizeToPx(cursorRadius_));
+        RSRoundRect rrect(RSRect(static_cast<RSScalar>(caretRect.Left()), static_cast<RSScalar>(caretRect.Top()),
+            static_cast<RSScalar>(caretRect.Right()), static_cast<RSScalar>(caretRect.Bottom())), radius, radius);
+        canvas.DrawRoundRect(rrect);
+    }
+    canvas.DetachBrush();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintSelectCaret(SkCanvas* canvas)
+#else
+void RosenRenderTextField::PaintSelectCaret(RSCanvas* canvas)
+#endif
 {
     if (!isOverlayShowed_ || !paragraph_) {
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(cursorColor_.GetValue());
     paint.setStrokeWidth(caretRect_.Width());
     paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(cursorColor_.GetValue());
+    pen.SetWidth(caretRect_.Width());
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+#endif
 
     Rect caretRect = caretRect_;
     // 1.0_dp is UX design.
     caretRect = caretRect + Offset(0.0, -CARET_HEIGHT_OFFSET - NormalizeToPx(1.0_vp)) +
                 Size(0.0, (CARET_HEIGHT_OFFSET + NormalizeToPx(1.0_vp)) * 2.0);
     if (IsSingleHandle()) {
+#ifndef USE_ROSEN_DRAWING
         canvas->drawLine((caretRect.Left() + caretRect.Right()) / 2.0, caretRect.Top(),
             (caretRect.Top(), caretRect.Left() + caretRect.Right()) / 2.0, caretRect.Bottom(), paint);
+#else
+        canvas->AttachPen(pen);
+        canvas->DrawLine(RSPoint((caretRect.Left() + caretRect.Right()) / 2.0, caretRect.Top()),
+            RSPoint((caretRect.Top(), caretRect.Left() + caretRect.Right()) / 2.0, caretRect.Bottom()));
+        canvas->DetachPen();
+#endif
     }
 
     const auto& selection = GetEditingValue().selection;
@@ -188,14 +230,27 @@ void RosenRenderTextField::PaintSelectCaret(SkCanvas* canvas)
 
     // Draw line
     if (IsSingleHandle()) {
+#ifndef USE_ROSEN_DRAWING
         canvas->drawLine((startCaretRect_.Left() + startCaretRect_.Right()) / 2.0, startCaretRect_.Top(),
             (startCaretRect_.Top(), startCaretRect_.Left() + startCaretRect_.Right()) / 2.0, startCaretRect_.Bottom(),
             paint);
+#else
+        canvas->AttachPen(pen);
+        canvas->DrawLine(RSPoint((startCaretRect_.Left() + startCaretRect_.Right()) / 2.0, startCaretRect_.Top()),
+            RSPoint((startCaretRect_.Top(), startCaretRect_.Left() + startCaretRect_.Right()) / 2.0,
+            startCaretRect_.Bottom()));
+        canvas->DetachPen();
+#endif
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintDecoration(
     const Offset& offset, SkCanvas* canvas, const Size& size, RenderContext& context)
+#else
+void RosenRenderTextField::PaintDecoration(
+    const Offset& offset, RSCanvas* canvas, const Size& size, RenderContext& context)
+#endif
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
@@ -250,7 +305,11 @@ void RosenRenderTextField::PaintIcon(const Offset& offset, RenderContext& contex
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
+#else
+void RosenRenderTextField::PaintSelection(RSCanvas* canvas) const
+#endif
 {
     if (!IsSelectiveDevice()) {
         return;
@@ -268,6 +327,7 @@ void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
     if (boxes.empty()) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->save();
     SkPaint paint;
     if (inputStyle_ == InputStyle::INLINE) {
@@ -275,6 +335,15 @@ void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
     } else {
         paint.setColor(selectedColor_.GetValue());
     }
+#else
+    canvas->Save();
+    RSBrush brush;
+    if (inputStyle_ == InputStyle::INLINE) {
+        brush.SetColor(INLINE_STYLE_SELECTED_COLOR.GetValue());
+    } else {
+        brush.SetColor(selectedColor_.GetValue());
+    }
+#endif
     Offset effectiveOffset = innerRect_.GetOffset() + textOffsetForShowCaret_;
     for (const auto& box : boxes) {
         auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
@@ -289,6 +358,7 @@ void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
                 LOGE("Unknown textinput style");
                 break;
         }
+#ifndef USE_ROSEN_DRAWING
         auto rect =
             SkRect::MakeLTRB(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom());
 
@@ -299,23 +369,51 @@ void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
         canvas->drawRect(rect, paint);
     }
     canvas->restore();
+#else
+        auto rect = RSRect(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom());
+
+        if (box.direction == txt::TextDirection::ltr) {
+            rect = RSRect(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom());
+        }
+        canvas->AttachBrush(brush);
+        canvas->DrawRect(rect);
+        canvas->DetachBrush();
+    }
+    canvas->Restore();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintTextAndPlaceholder(SkCanvas* canvas) const
+#else
+void RosenRenderTextField::PaintTextAndPlaceholder(RSCanvas* canvas) const
+#endif
 {
     // Offset for the painting area of text
     Offset textAreaOffset = innerRect_.GetOffset();
     if (showPlaceholder_) {
         textAreaOffset += ComputeVerticalOffsetForCenter(innerRect_.Height(), placeholderParagraph_->GetHeight());
+#ifndef USE_ROSEN_DRAWING
         placeholderParagraph_->Paint(canvas, textAreaOffset.GetX(), textAreaOffset.GetY());
+#else
+        // Drawing is not supported
+#endif
     } else {
         textAreaOffset += ComputeVerticalOffsetForCenter(innerRect_.Height(), paragraph_->GetHeight());
         Offset textOffset = textOffsetForShowCaret_ + textAreaOffset;
+#ifndef USE_ROSEN_DRAWING
         paragraph_->Paint(canvas, textOffset.GetX(), textOffset.GetY());
+#else
+        // Drawing is not supported
+#endif
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintErrorText(SkCanvas* canvas) const
+#else
+void RosenRenderTextField::PaintErrorText(RSCanvas* canvas) const
+#endif
 {
     if (!errorParagraph_ || (canvas == nullptr)) {
         return;
@@ -333,10 +431,18 @@ void RosenRenderTextField::PaintErrorText(SkCanvas* canvas) const
         }
         errorOffset += Offset(0.0, innerRect_.Height() + bottomPadding + NormalizeToPx(COUNT_SPACING));
     }
+#ifndef USE_ROSEN_DRAWING
     errorParagraph_->Paint(canvas, errorOffset.GetX(), errorOffset.GetY());
+#else
+    // Drawing is not supported
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintCountText(SkCanvas* canvas) const
+#else
+void RosenRenderTextField::PaintCountText(RSCanvas* canvas) const
+#endif
 {
     if (!countParagraph_ || (canvas == nullptr)) {
         return;
@@ -351,18 +457,34 @@ void RosenRenderTextField::PaintCountText(SkCanvas* canvas) const
             }
             countOffset += Offset(0.0, bottomPadding + NormalizeToPx(COUNT_SPACING));
         }
+#ifndef USE_ROSEN_DRAWING
         countParagraph_->Paint(canvas, countOffset.GetX(), countOffset.GetY());
+#else
+        // Drawing is not supported
+#endif
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkVector RosenRenderTextField::GetSkRadii(const Radius& radius) const
 {
     SkVector fRadii;
     fRadii.set(SkDoubleToScalar(NormalizeToPx(radius.GetX())), SkDoubleToScalar(NormalizeToPx(radius.GetY())));
     return fRadii;
 }
+#else
+RSPoint RosenRenderTextField::GetRSRadii(const Radius& radius) const
+{
+    return RSPoint(static_cast<RSScalar>(
+        NormalizeToPx(radius.GetX())), static_cast<RSScalar>(NormalizeToPx(radius.GetY())));
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintOverlayForHoverAndPress(const Offset& offset, SkCanvas* canvas) const
+#else
+void RosenRenderTextField::PaintOverlayForHoverAndPress(const Offset& offset, RSCanvas* canvas) const
+#endif
 {
     if (canvas == nullptr) {
         return;
@@ -378,6 +500,7 @@ void RosenRenderTextField::PaintOverlayForHoverAndPress(const Offset& offset, Sk
     if (decoration_) {
         border = decoration_->GetBorder();
     }
+#ifndef USE_ROSEN_DRAWING
     SkRRect clipRRect = decorationPainter->GetBoxRRect(Offset(), border, 0.0, true);
     canvas->save();
     canvas->clipRRect(clipRRect, true);
@@ -397,6 +520,28 @@ void RosenRenderTextField::PaintOverlayForHoverAndPress(const Offset& offset, Sk
     rrect.setRectRadii(skRect, fRadii);
     canvas->drawRRect(rrect, paint);
     canvas->restore();
+#else
+    RSRoundRect clipRRect = decorationPainter->GetBoxRRect(Offset(), border, 0.0, true);
+    canvas->Save();
+    canvas->ClipRoundRect(clipRRect, RSClipOp::INTERSECT, true);
+
+    RSBrush brush;
+    brush.SetColor(GetEventEffectColor().GetValue());
+    brush.SetAntiAlias(true);
+
+    auto rect = RSRect(offset.GetX(), offset.GetY(),
+        GetLayoutSize().Width() + offset.GetX(), GetLayoutSize().Height() + offset.GetY());
+    std::vector<RSPoint> fRadii;
+    fRadii.push_back(GetRSRadii(border.TopLeftRadius()));
+    fRadii.push_back(GetRSRadii(border.TopRightRadius()));
+    fRadii.push_back(GetRSRadii(border.BottomRightRadius()));
+    fRadii.push_back(GetRSRadii(border.BottomLeftRadius()));
+    RSRoundRect rrect(rect, fRadii);
+    canvas->AttachBrush(brush);
+    canvas->DrawRoundRect(rrect);
+    canvas->DetachBrush();
+    canvas->Restore();
+#endif
 }
 
 void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHeight, RenderContext& context)
@@ -406,6 +551,7 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setColor(DEFAULT_FOCUS_BORDER_COLOR);
     paint.setStrokeWidth(NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH));
@@ -424,6 +570,27 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
     fRadii[SkRRect::kLowerLeft_Corner] = GetSkRadii(decoration_->GetBorder().BottomLeftRadius());
     rrect.setRectRadii(skRect, fRadii);
     canvas->drawRRect(rrect, paint);
+#else
+    RSPen pen;
+    pen.SetColor(DEFAULT_FOCUS_BORDER_COLOR);
+    pen.SetWidth(NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH));
+    pen.SetAntiAlias(true);
+
+    RSScalar left = offset.GetX() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF;
+    RSScalar top  = offset.GetY() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF;
+    RSScalar width = widthHeight.Width() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH);
+    RSScalar height = widthHeight.Height() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH);
+    auto rect = RSRect(left, top, width + left, height + top);
+    std::vector<RSPoint> fRadii;
+    fRadii.push_back(GetRSRadii(decoration_->GetBorder().TopLeftRadius()));
+    fRadii.push_back(GetRSRadii(decoration_->GetBorder().TopRightRadius()));
+    fRadii.push_back(GetRSRadii(decoration_->GetBorder().BottomRightRadius()));
+    fRadii.push_back(GetRSRadii(decoration_->GetBorder().BottomLeftRadius()));
+    RSRoundRect rrect(rect, fRadii);
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rrect);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
@@ -446,6 +613,7 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
     }
     auto viewScale = pipelineContext->GetViewScale();
     if (lastLayoutSize_ != GetLayoutSize() || !magnifierCanvas_) {
+#ifndef USE_ROSEN_DRAWING
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale * MAGNIFIER_GAIN,
             GetLayoutSize().Height() * viewScale * MAGNIFIER_GAIN, SkColorType::kRGBA_8888_SkColorType,
             SkAlphaType::kOpaque_SkAlphaType);
@@ -456,19 +624,42 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
         canvasCache_.reset();
         canvasCache_.allocPixels(imageInfo);
         magnifierCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
+#else
+        auto width = GetLayoutSize().Width() * viewScale * MAGNIFIER_GAIN;
+        auto height = GetLayoutSize().Height() * viewScale * MAGNIFIER_GAIN;
+        if (width < 0 || height < 0) {
+            LOGE("Paint imageInfo width is invalid");
+            return;
+        }
+        RSBitmapFormat format = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+        canvasCache_.Free();
+        canvasCache_.Build(width, height, format);
+        magnifierCanvas_ = std::make_unique<RSCanvas>();
+        magnifierCanvas_->Bind(canvasCache_);
+#endif
         lastLayoutSize_ = GetLayoutSize();
     }
 
+#ifndef USE_ROSEN_DRAWING
     canvasCache_.eraseColor(SK_ColorTRANSPARENT);
     magnifierCanvas_->scale(viewScale * MAGNIFIER_GAIN, viewScale * MAGNIFIER_GAIN);
+#else
+    canvasCache_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    magnifierCanvas_->Scale(viewScale * MAGNIFIER_GAIN, viewScale * MAGNIFIER_GAIN);
+#endif
 
     PaintTextField(offset, context, canvas);
     PaintTextField(offset, context, magnifierCanvas_.get(), true);
 
+#ifndef USE_ROSEN_DRAWING
     magnifierCanvas_->scale(1.0 / (viewScale * MAGNIFIER_GAIN), 1.0 / (viewScale * MAGNIFIER_GAIN));
+#else
+    magnifierCanvas_->Scale(1.0 / (viewScale * MAGNIFIER_GAIN), 1.0 / (viewScale * MAGNIFIER_GAIN));
+#endif
 
     if ((SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-            SystemProperties::GetDeviceType() == DeviceType::TABLET) &&
+            SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) &&
         hasFocus_) {
         PaintFocus(offset, GetPaintRect().GetSize(), context);
     }
@@ -690,7 +881,11 @@ Offset RosenRenderTextField::ComputeVerticalOffsetForCenter(double outerHeight, 
     return Offset(0.0, (outerHeight - innerHeight) / 2.0);
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkShader> RosenRenderTextField::MakeGradientShader(double shadeWidth) const
+#else
+std::shared_ptr<RSShaderEffect> RosenRenderTextField::MakeGradientShader(double shadeWidth) const
+#endif
 {
     // If need move canvas for caret, the left side must be overflow.
     bool needShadeLeft = !NearZero(textOffsetForShowCaret_.GetX());
@@ -716,6 +911,7 @@ sk_sp<SkShader> RosenRenderTextField::MakeGradientShader(double shadeWidth) cons
     uint32_t originColor = style_.GetTextColor().GetValue();
     uint32_t transparentColor = originColor & 0x00FFFFFF;
 
+#ifndef USE_ROSEN_DRAWING
     SkPoint pts[] = { SkPoint::Make(SkDoubleToScalar(innerRect_.Left()), SkDoubleToScalar(0.0)),
         SkPoint::Make(SkDoubleToScalar(innerRect_.Right()), SkDoubleToScalar(0.0)) };
     // Text or placeholder color from alpha 0 - 255
@@ -724,6 +920,16 @@ sk_sp<SkShader> RosenRenderTextField::MakeGradientShader(double shadeWidth) cons
 
     int32_t start = 0;
     int32_t renderCount = static_cast<int32_t>(sizeof(pos) / sizeof(pos[0]));
+#else
+    RSPoint startPoint = RSPoint(static_cast<RSScalar>(innerRect_.Left()), static_cast<RSScalar>(0.0));
+    RSPoint endPoint = RSPoint(static_cast<RSScalar>(innerRect_.Right()), static_cast<RSScalar>(0.0));
+    // Text or placeholder color from alpha 0 - 255
+    RSColorQuad colorsTemplate[] = { transparentColor, originColor, originColor, transparentColor };
+    RSScalar posTemplate[] = { 0.0f, posLeft, posRight, 1.0f };
+
+    int32_t start = 0;
+    int32_t renderCount = static_cast<int32_t>(sizeof(posTemplate) / sizeof(posTemplate[0]));
+#endif
     int32_t totalCount = renderCount;
     if (!needShadeLeft) {
         start = 2;
@@ -740,10 +946,20 @@ sk_sp<SkShader> RosenRenderTextField::MakeGradientShader(double shadeWidth) cons
             start = 2;
         }
     }
+#ifndef USE_ROSEN_DRAWING
 #ifdef USE_SYSTEM_SKIA
     return SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkShader::kClamp_TileMode);
 #else
     return SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkTileMode::kClamp);
+#endif
+#else
+    std::vector<RSColorQuad> colors;
+    std::vector<RSScalar> pos;
+    for (int i = 0; i < renderCount; i++) {
+        colors.push_back(colorsTemplate[start + i]);
+        pos.push_back(posTemplate[start + i]);
+    }
+    return RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP);
 #endif
 }
 
@@ -769,7 +985,11 @@ void RosenRenderTextField::SetShaderIfNeeded(
     std::unique_ptr<txt::ParagraphBuilder> builder =
         txt::ParagraphBuilder::CreateTxtBuilder(*paragraphStyle, GetFontCollection());
     txtStyle->has_foreground = true;
+#ifndef USE_ROSEN_DRAWING
     txtStyle->foreground.setShader(shader);
+#else
+    // Drawing is not supported
+#endif
     builder->PushStyle(*txtStyle);
     builder->AddText(GetTextForDisplay(GetEditingValue().text));
     paragraph_ = builder->Build();
@@ -1370,6 +1590,7 @@ Size RosenRenderTextField::ComputeDeflateSizeOfErrorAndCountText() const
     return deflateSize;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintTextField(
     const Offset& offset, RenderContext& context, SkCanvas* canvas, bool isMagnifier)
 {
@@ -1378,16 +1599,32 @@ void RosenRenderTextField::PaintTextField(
     Rect clipRect(Offset::Zero(), GetLayoutSize());
     canvas->clipRect(
         SkRect::MakeLTRB(clipRect.Left(), clipRect.Top(), clipRect.Right(), clipRect.Bottom()), SkClipOp::kIntersect);
+#else
+void RosenRenderTextField::PaintTextField(
+    const Offset& offset, RenderContext& context, RSCanvas* canvas, bool isMagnifier)
+{
+    canvas->Save();
+    canvas->Translate(offset.GetX(), offset.GetY());
+    Rect clipRect(Offset::Zero(), GetLayoutSize());
+    canvas->ClipRect(RSRect(clipRect.Left(), clipRect.Top(), clipRect.Right(), clipRect.Bottom()), RSClipOp::INTERSECT);
+#endif
     if (!isMagnifier) {
         PaintDecoration(offset, canvas, GetPaintRect().GetSize(), context);
         PaintOverlayForHoverAndPress(offset, canvas);
         PaintIcon(offset, context);
     }
 
+#ifndef USE_ROSEN_DRAWING
     canvas->save();
     // Restrict painting rect to text area, excluding the decoration.
     canvas->clipRect(SkRect::MakeLTRB(innerRect_.Left(), innerRect_.Top(), innerRect_.Right(), innerRect_.Bottom()),
         SkClipOp::kIntersect);
+#else
+    canvas->Save();
+    // Restrict painting rect to text area, excluding the decoration.
+    canvas->ClipRect(RSRect(innerRect_.Left(), innerRect_.Top(), innerRect_.Right(), innerRect_.Bottom()),
+        RSClipOp::INTERSECT);
+#endif
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext ||
         lastLayoutSize_.Height() < decoration_->VerticalSpaceOccupied(pipelineContext->GetDipScale())) {
@@ -1397,10 +1634,17 @@ void RosenRenderTextField::PaintTextField(
     // Paint cursor.
     PaintCaret(*canvas, caretRect_);
     PaintTextAndPlaceholder(canvas);
+#ifndef USE_ROSEN_DRAWING
     canvas->restore();
 
     PaintErrorText(canvas);
     canvas->restore();
+#else
+    canvas->Restore();
+
+    PaintErrorText(canvas);
+    canvas->Restore();
+#endif
     PaintCountText(canvas);
     if (isMagnifier) {
         PaintSelectCaret(canvas);

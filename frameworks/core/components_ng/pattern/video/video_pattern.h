@@ -15,7 +15,6 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
-
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
@@ -42,7 +41,7 @@ public:
 
     VideoPattern() = default;
     explicit VideoPattern(const RefPtr<VideoControllerV2>& videoController);
-    ~VideoPattern() override = default;
+    ~VideoPattern() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -64,6 +63,11 @@ public:
         return MakeRefPtr<VideoAccessibilityProperty>();
     }
 
+    bool DefaultSupportDrag() override
+    {
+        return true;
+    }
+    
     void UpdateMuted(bool muted)
     {
         muted_ = muted;
@@ -94,10 +98,7 @@ public:
         return loop_;
     }
 
-    bool IsFullScreen() const
-    {
-        return isFullScreen_;
-    }
+    virtual bool IsFullScreen();
 
     void UpdateProgressRate(double progressRate)
     {
@@ -115,6 +116,8 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    RefPtr<FrameNode> CreateControlBar(int32_t nodeId = -1);
+    
     void SetHiddenChangeEvent(HiddenChangeEvent&& hiddenChangeEvent)
     {
         hiddenChangeEvent_ = std::move(hiddenChangeEvent);
@@ -130,24 +133,101 @@ public:
         return duration_;
     }
 
-    bool OnBackPressed();
+    bool GetInitialState() const
+    {
+        return isInitialState_;
+    }
+
+    virtual bool OnBackPressed()
+    {
+        return false;
+    }
 
     void OnVisibleChange(bool isVisible) override;
 
     void OnAreaChangedInner() override;
 
     void UpdateMediaPlayer();
-    
+
+    // It is used to init mediaplayer on background.
+    void UpdateMediaPlayerOnBg();
+    void ResetMediaPlayer();
+
     void EnableDrag();
     void SetIsStop(bool isStop)
     {
         isStop_ = isStop;
     }
 
+    bool GetIsStop() const
+    {
+        return isStop_;
+    }
+
     void SetIsDrag(bool isDrag)
     {
         isDrag_ = isDrag;
     }
+
+    bool isInitialState() const
+    {
+        return isInitialState_;
+    }
+
+    void UpdateMediaParam(const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderSurface>& renderSurface,
+        const RefPtr<RenderContext>& renderContext)
+    {
+        mediaPlayer_ = AceType::Claim(AceType::RawPtr(mediaPlayer));
+        renderSurface_ = AceType::Claim(AceType::RawPtr(renderSurface));
+        renderContextForMediaPlayer_ = AceType::Claim(AceType::RawPtr(renderContext));
+    }
+
+    void ResetMediaParam()
+    {
+        mediaPlayer_.Reset();
+        renderSurface_.Reset();
+        renderContextForMediaPlayer_.Reset();
+    }
+
+    void OnFullScreenChange(bool isFullScreen);
+
+    void RecoverState(const RefPtr<VideoPattern>& videoPattern);
+
+    RefPtr<FrameNode> GetFullScreenNode() const
+    {
+        if (!fullScreenNodeId_.has_value()) {
+            return nullptr;
+        }
+        return FrameNode::GetFrameNode(V2::VIDEO_ETS_TAG, fullScreenNodeId_.value());
+    }
+
+    void OnPlayerStatus(PlaybackStatus status);
+
+    void OnCurrentTimeChange(uint32_t currentPos);
+
+    void OnError(const std::string& errorId);
+
+    void OnResolutionChange() const;
+
+    void ResetLastBoundsRect()
+    {
+        lastBoundsRect_.SetRect(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+
+    RefPtr<VideoPattern> GetTargetVideoPattern();
+
+protected:
+    void OnUpdateTime(uint32_t time, int pos) const;
+    void RegisterMediaPlayerEvent();
+
+    // Video src.
+    std::string src_;
+    bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
+    bool isPlaying_ = false;
+    
+    RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
+    RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
+    RefPtr<RenderContext> renderContextForMediaPlayer_ = RenderContext::Create();
 
 private:
     void OnAttachToFrameNode() override;
@@ -157,13 +237,13 @@ private:
 
     // Set properties for media player.
     void PrepareMediaPlayer();
-    void PrepareSurface();
-    void RegisterMediaPlayerEvent();
     void SetMethodCall();
+    
     bool SetSourceForMediaPlayer();
     void UpdateLooping();
     void UpdateSpeed();
     void UpdateMuted();
+    void PrepareSurface();
 
     bool HasPlayer() const;
 
@@ -172,40 +252,43 @@ private:
     void Pause();
     void Stop();
     void FullScreen();
-    void ExitFullScreen();
+    
     void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
+    void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
 
-    void OnCurrentTimeChange(uint32_t currentPos);
-    void OnPlayerStatus(PlaybackStatus status);
-    void OnError(const std::string& errorId);
-    void OnResolutionChange() const;
     void OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnCompletion();
     void OnSliderChange(float posTime, int32_t mode);
-    void OnUpdateTime(uint32_t time, int pos) const;
-    void OnFullScreenChange(bool isFullScreen);
 
-    void AddPreviewNodeIfNeeded();
-    void AddControlBarNodeIfNeeded();
+    void UpdatePreviewImage();
+    void UpdateControllerBar();
     void UpdateVideoProperty();
-    RefPtr<FrameNode> CreateControlBar();
+    
     static RefPtr<FrameNode> CreateSVG();
     static RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag();
     void ChangePlayButtonTag(RefPtr<FrameNode>& playBtn);
-    void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
+    
     void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
     void ResetStatus();
     void HiddenChange(bool hidden);
+    void PrintPlayerStatus(PlaybackStatus status);
+
+    void UpdateFsState();
 
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError();
 
+    void SetMediaFullScreen(bool isFullScreen)
+    {
+        mediaPlayer_->FullScreenChange(isFullScreen);
+        if (SystemProperties::GetExtSurfaceEnabled()) {
+            renderSurface_->SetIsFullScreen(isFullScreen);
+        }
+    }
+
     RefPtr<VideoControllerV2> videoControllerV2_;
-    RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
-    RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
-    RefPtr<RenderContext> renderContextForMediaPlayer_ = RenderContext::Create();
 
     GestureEventFunc playBtnCallBack_;
     GestureEventFunc pauseBtnCallBack_;
@@ -217,22 +300,20 @@ private:
     bool muted_ = false;
     bool autoPlay_ = false;
     bool loop_ = false;
-    bool isFullScreen_ = false;
-    bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
-    bool isPlaying_ = false;
+    
     bool pastPlayingStatus_ = false;
 
-    // Video duration.
-    uint32_t duration_ = 0;
     uint32_t currentPos_ = 0;
+    uint32_t duration_ = 0;
+
+    // full screen node id
+    std::optional<int32_t> fullScreenNodeId_;
 
     // Video playback speed.
     double progressRate_ = 1.0;
 
     Rect lastBoundsRect_;
 
-    // Video src.
-    std::string src_;
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG

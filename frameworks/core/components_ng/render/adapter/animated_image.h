@@ -22,58 +22,148 @@
 #include "include/codec/SkCodec.h"
 #include "include/core/SkImage.h"
 
-#include "core/components_ng/image_provider/image_data.h"
+#include "base/image/image_source.h"
+#ifndef USE_ROSEN_DRAWING
+#include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 
 namespace OHOS::Ace::NG {
-class AnimatedImage : public SkiaImage {
-    DECLARE_ACE_TYPE(AnimatedImage, SkiaImage)
+class AnimatedImage : public virtual CanvasImage {
+    DECLARE_ACE_TYPE(AnimatedImage, CanvasImage)
 public:
-    AnimatedImage(std::unique_ptr<SkCodec> codec, std::string url);
-
+    // initialize animator
+    AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url);
     ~AnimatedImage() override = default;
 
-    static RefPtr<CanvasImage> Create(const RefPtr<ImageData>& data, const std::string& url);
-
-    sk_sp<SkImage> GetImage() const override;
-
-    RefPtr<CanvasImage> Clone() override
+    struct ResizeParam {
+        int32_t width = 0;
+        int32_t height = 0;
+        bool forceResize = false;
+    };
+#ifndef USE_ROSEN_DRAWING
+    static RefPtr<CanvasImage> Create(
+        const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url);
+#else
+    static RefPtr<CanvasImage> Create(
+        const RefPtr<DrawingImageData>& data, const SizeParam& size, const std::string& url);
+#endif
+    void ControlAnimation(bool play) override;
+    void SetRedrawCallback(std::function<void()>&& callback) override
     {
-        return Claim(this);
+        redraw_ = std::move(callback);
     }
 
     bool IsStatic() override
     {
         return false;
     }
-    void SetRedrawCallback(std::function<void()>&& callback) override
-    {
-        redraw_ = std::move(callback);
-    }
-    void ControlAnimation(bool play) override;
 
-private:
-    AnimatedImage(std::unique_ptr<SkCodec> codec, const SkISize& size, std::string key);
-
-    void RenderFrame(uint32_t idx);
-    void DecodeFrame(uint32_t idx);
-
-    void CacheFrame(uint32_t idx);
-    bool GetCachedFrame(uint32_t idx);
-
-    // ensure frames decode serially, protect bitmap
+protected:
+    // ensure frames decode serially
     std::mutex decodeMtx_;
-    SkBitmap requiredFrame_;
-
     // protect currentFrame_
     mutable std::mutex frameMtx_;
+
+private:
+    void RenderFrame(uint32_t idx);
+
+    // runs on Background thread
+    void DecodeFrame(uint32_t idx);
+    bool GetCachedFrame(uint32_t idx);
+
+    virtual void DecodeImpl(uint32_t idx) = 0;
+    virtual RefPtr<CanvasImage> GetCachedFrameImpl(const std::string& key) = 0;
+    virtual void UseCachedFrame(RefPtr<CanvasImage>&& image) = 0;
+    virtual void CacheFrame(const std::string& key) = 0;
+
+    RefPtr<Animator> animator_;
+    std::function<void()> redraw_;
+    const std::string cacheKey_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(AnimatedImage);
+};
+
+#ifndef USE_ROSEN_DRAWING
+class AnimatedSkImage : public AnimatedImage, public SkiaImage {
+    DECLARE_ACE_TYPE(AnimatedSkImage, AnimatedImage, SkiaImage)
+public:
+    AnimatedSkImage(std::unique_ptr<SkCodec> codec, std::string url)
+        : AnimatedImage(codec, std::move(url)), codec_(std::move(codec))
+    {}
+    ~AnimatedSkImage() override = default;
+
+    sk_sp<SkImage> GetImage() const override;
+#else
+class AnimatedRSImage : public AnimatedImage, public DrawingImage {
+    DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, DrawingImage)
+public:
+    AnimatedRSImage(std::unique_ptr<SkCodec> codec, std::string url)
+        : AnimatedImage(codec, std::move(url)), codec_(std::move(codec))
+    {}
+    ~AnimatedRSImage() override = default;
+
+    std::shared_ptr<RSImage> GetImage() const override;
+#endif
+
+    RefPtr<CanvasImage> Clone() override
+    {
+        return Claim(this);
+    }
+
+private:
+    void DecodeImpl(uint32_t idx) override;
+
+    void CacheFrame(const std::string& key) override;
+    RefPtr<CanvasImage> GetCachedFrameImpl(const std::string& key) override;
+    void UseCachedFrame(RefPtr<CanvasImage>&& image) override;
+
+#ifndef USE_ROSEN_DRAWING
+    SkBitmap requiredFrame_;
+    std::unique_ptr<SkCodec> codec_;
     sk_sp<SkImage> currentFrame_;
 
-    std::function<void()> redraw_;
-    RefPtr<Animator> animator_;
+    ACE_DISALLOW_COPY_AND_MOVE(AnimatedSkImage);
+#else
+    RSBitmap requiredFrame_;
     std::unique_ptr<SkCodec> codec_;
+    std::shared_ptr<RSImage> currentFrame_;
 
-    const std::string cacheKey_;
+    ACE_DISALLOW_COPY_AND_MOVE(AnimatedRSImage);
+#endif
+};
+
+class AnimatedPixmap : public AnimatedImage, public PixelMapImage {
+    DECLARE_ACE_TYPE(AnimatedPixmap, AnimatedImage, PixelMapImage)
+public:
+    AnimatedPixmap(const std::unique_ptr<SkCodec>& codec, const RefPtr<ImageSource>& src, const ResizeParam& size,
+        std::string url);
+    ~AnimatedPixmap() override = default;
+    RefPtr<PixelMap> GetPixelMap() const override;
+
+    RefPtr<CanvasImage> Clone() override
+    {
+        return Claim(this);
+    }
+
+private:
+    void DecodeImpl(uint32_t idx) override;
+
+    void CacheFrame(const std::string& key) override;
+    RefPtr<CanvasImage> GetCachedFrameImpl(const std::string& key) override;
+    void UseCachedFrame(RefPtr<CanvasImage>&& image) override;
+
+    RefPtr<PixelMap> currentFrame_;
+
+    ResizeParam size_;
+    const RefPtr<ImageSource> src_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(AnimatedPixmap);
 };
 } // namespace OHOS::Ace::NG
 

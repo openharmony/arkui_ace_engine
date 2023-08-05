@@ -18,6 +18,9 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/font/rosen_font_collection.h"
+#include "core/components_ng/render/drawing.h"
+#include "rosen_text/properties/font_collection_txt.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,10 +37,14 @@ RefPtr<FontCollection> FontCollection::Current()
 
 TxtFontCollection::TxtFontCollection()
 {
-    collection_ = std::make_shared<txt::FontCollection>();
-    collection_->SetupDefaultFontManager();
-    dynamicFontManager_ = sk_make_sp<txt::DynamicFontManager>();
-    collection_->SetDynamicFontManager(dynamicFontManager_);
+    auto rosenCollection = RSFontCollection::GetInstance(false);
+    auto collectionTxtBase = rosenCollection->GetFontCollection();
+    auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
+    if (collectionTxt) {
+        collection_ = collectionTxt->GetFontCollection();
+    } else {
+        LOGE("Fail to get FontFollectionTxt!");
+    }
     if (collection_) {
         std::string emptyLocale;
         // 0x4e2d is unicode for '中'.

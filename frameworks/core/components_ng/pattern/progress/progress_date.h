@@ -82,6 +82,9 @@ struct ProgressDate {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableRingScanEffect, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableLinearScanEffect, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableShowText, bool);
 };
 
 struct ProgressStyle {

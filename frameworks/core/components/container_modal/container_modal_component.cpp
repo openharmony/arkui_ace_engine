@@ -37,7 +37,17 @@ constexpr int32_t TITLE_ROW = ROOT_DECOR_BASE;
 constexpr int32_t FLOATING_TITLE_ROW = ROOT_DECOR_BASE + 1;
 constexpr int32_t TITLE_LABEL = ROOT_DECOR_BASE + 2;
 constexpr int32_t FLOATING_TITLE_LABEL = ROOT_DECOR_BASE + 3;
-}
+constexpr int32_t WINDOW_SPLIT_BUTTON = ROOT_DECOR_BASE + 4;
+constexpr int32_t WINDOW_MAX_RECOVER_BUTTON = ROOT_DECOR_BASE + 6;
+constexpr int32_t WINDOW_MINIMIZE_BUTTON = ROOT_DECOR_BASE + 8;
+constexpr int32_t WINDOW_CLOSE_BUTTON = ROOT_DECOR_BASE + 10;
+constexpr int32_t WINDOW_BUTTON_INVALID = ROOT_DECOR_BASE + 12;
+
+const std::string SPLIT_LEFT_KEY = "container_modal_split_left_button";
+const std::string MAXIMIZE_KEY = "container_modal_maximize_button";
+const std::string MINIMIZE_KEY = "container_modal_minimize_button";
+const std::string CLOSE_KEY = "container_modal_close_button";
+}  // namespace
 
 RefPtr<Component> ContainerModalComponent::Create(
     const WeakPtr<PipelineContext>& context, const RefPtr<Component>& child)
@@ -73,8 +83,9 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     // handle touch move and mouse move
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
-    auto panGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
-    panGesture->SetOnActionStartId([contextWptr = context_] (const GestureEvent&) {
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panGesture->SetOnActionStartId([contextWptr = context_](const GestureEvent&) {
         auto context = contextWptr.Upgrade();
         if (context) {
             LOGI("container window start move.");
@@ -138,7 +149,23 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
 RefPtr<Component> ContainerModalComponent::BuildControlButton(
     InternalResource::ResourceId icon, std::function<void()>&& clickCallback, bool isFocus, bool isFloating)
 {
-    static int32_t controlButtonId = 0;
+    static std::unordered_map<InternalResource::ResourceId, std::pair<int32_t, std::string>> controlButtonIdMap = {
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, { WINDOW_SPLIT_BUTTON, SPLIT_LEFT_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT,
+            { WINDOW_SPLIT_BUTTON, SPLIT_LEFT_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER, { WINDOW_MAX_RECOVER_BUTTON, MAXIMIZE_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, { WINDOW_MAX_RECOVER_BUTTON, MAXIMIZE_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER,
+            { WINDOW_MAX_RECOVER_BUTTON, MAXIMIZE_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE,
+            { WINDOW_MAX_RECOVER_BUTTON, MAXIMIZE_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, { WINDOW_MINIMIZE_BUTTON, MINIMIZE_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE,
+            { WINDOW_MINIMIZE_BUTTON, MINIMIZE_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, { WINDOW_CLOSE_BUTTON, CLOSE_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, { WINDOW_CLOSE_BUTTON, CLOSE_KEY } },
+    };
+
     auto image = AceType::MakeRefPtr<ImageComponent>(icon);
     image->SetWidth(TITLE_ICON_SIZE);
     image->SetHeight(TITLE_ICON_SIZE);
@@ -154,10 +181,18 @@ RefPtr<Component> ContainerModalComponent::BuildControlButton(
     button->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
     button->SetClickFunction(std::move(clickCallback));
     button->SetFocusable(false);
-    
-    ++controlButtonId;
-    int32_t buttonId = FLOATING_TITLE_LABEL + controlButtonId;
+    std::string buttonKey = "";
+    auto iter = controlButtonIdMap.find(icon);
+    if (iter != controlButtonIdMap.end()) {
+        buttonKey = (iter->second).second;
+    }
+    button->SetInspectorKey(buttonKey.c_str());
     if (!isDeclarative_) {
+        auto buttonId = WINDOW_BUTTON_INVALID;
+        auto iter = controlButtonIdMap.find(icon);
+        if (iter != controlButtonIdMap.end()) {
+            buttonId = isFloating ? (iter->second).first + 1 : (iter->second).first;
+        }
         CreateAccessibilityNode(DOM_NODE_TAG_BUTTON, buttonId, isFloating ? FLOATING_TITLE_ROW : TITLE_ROW);
         return AceType::MakeRefPtr<ComposedComponent>(std::to_string(buttonId), DOM_NODE_TAG_BUTTON, button);
     } else {

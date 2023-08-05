@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 
 #include <securec.h>
 
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
@@ -30,18 +32,19 @@
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-} // namespace
+
+RefPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
 
 RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogProperties,
-    const TextPickerSettingData& settingData,
-    std::map<std::string, NG::DialogTextEvent> dialogEvent,
+    const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    if (settingData.rangeVector.empty() && settingData.options.empty()) {
+        LOGI("Dialog input parameter range vector is empty, not display dialog.");
+        return dialogNode_;
+    }
     if (settingData.options.empty()) {
         return RangeShow(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
     } else {
@@ -62,10 +65,14 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, nullptr);
     textPickerPattern->SetColumnsKind(settingData.columnKind);
+    textPickerPattern->SetIsShowInDialog(true);
     auto context = textPickerNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
+    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    textPickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     auto pickerNodeLayout = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -74,10 +81,6 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
         CalcSize(NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
     pickerNodeLayout->UpdateCanLoop(settingData.canLoop);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
     OptionsCreateNode(textPickerPattern, settingData, textPickerNode, showCount, 1, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
     SetTextProperties(pickerTheme, settingData.properties);
@@ -93,16 +96,21 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
         overlayManager->CloseDialog(dialogNode);
     };
     auto contentRow = CreateButtonNode(textPickerNode, dialogEvent, std::move(dialogCancelEvent), closeCallback);
-
+    textPickerPattern->SetContentRowNode(contentRow);
+    contentRow->SetNeedCallChildrenUpdate(false);
     contentRow->AddChild(CreateDividerNode(textPickerNode), 1);
     contentRow->MountToParent(contentColumn);
+    auto focusHub = contentColumn->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    InitOnKeyEvent(focusHub);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    dialogNode_ = dialogNode;
     return dialogNode;
 }
 
-void TextPickerDialogView::OptionsCreateNode(
-    const RefPtr<TextPickerPattern>& textPickerPattern, const TextPickerSettingData& settingData,
-    const RefPtr<FrameNode>& textPickerNode, uint32_t showCount, uint32_t columnCount, RefPtr<PickerTheme> pickerTheme)
+void TextPickerDialogView::OptionsCreateNode(const RefPtr<TextPickerPattern>& textPickerPattern,
+    const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode, uint32_t showCount,
+    uint32_t columnCount, RefPtr<PickerTheme> pickerTheme)
 {
     if (textPickerNode->GetChildren().empty()) {
         for (size_t i = 0; i < columnCount; i++) {
@@ -117,7 +125,6 @@ void TextPickerDialogView::OptionsCreateNode(
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             stackNode->MountToParent(textPickerNode);
         }
-
     }
     if (settingData.options.size() > 0) {
         SetSelectedValues(textPickerPattern, settingData.selectedValues);
@@ -128,19 +135,19 @@ void TextPickerDialogView::OptionsCreateNode(
     }
 }
 
-void TextPickerDialogView::OptionsShowInternal(
-    const RefPtr<TextPickerPattern>& textPickerPattern, const TextPickerSettingData& settingData,
-    const RefPtr<FrameNode>& textPickerNode, uint32_t showCount, RefPtr<PickerTheme> pickerTheme)
+void TextPickerDialogView::OptionsShowInternal(const RefPtr<TextPickerPattern>& textPickerPattern,
+    const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode, uint32_t showCount,
+    RefPtr<PickerTheme> pickerTheme)
 {
     textPickerPattern->SetIsCascade(settingData.attr.isCascade);
     textPickerPattern->SetHasSelectAttr(settingData.attr.isHasSelectAttr);
     textPickerPattern->SetColumnsKind(settingData.columnKind);
     if (settingData.attr.isCascade) {
         std::vector<NG::TextCascadePickerOptions> reOptions;
-        uint32_t columnCount = settingData.options.empty()? 0 : 1;
+        uint32_t columnCount = settingData.options.empty() ? 0 : 1;
         // Caculate max depth
         for (size_t i = 0; i < settingData.options.size(); i++) {
-            size_t tmp  = textPickerPattern->ProcessCascadeOptionDepth(settingData.options[i]);
+            size_t tmp = textPickerPattern->ProcessCascadeOptionDepth(settingData.options[i]);
             if (tmp > columnCount) {
                 columnCount = tmp;
             }
@@ -157,15 +164,14 @@ void TextPickerDialogView::OptionsShowInternal(
         }
         textPickerPattern->SetCascadeOptions(settingData.options, reOptions);
     } else {
-        OptionsCreateNode(textPickerPattern, settingData, textPickerNode,
-            showCount, settingData.options.size(), pickerTheme);
+        OptionsCreateNode(
+            textPickerPattern, settingData, textPickerNode, showCount, settingData.options.size(), pickerTheme);
         textPickerPattern->SetCascadeOptions(settingData.options, settingData.options);
     }
 }
 
 RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dialogProperties,
-    const TextPickerSettingData& settingData,
-    std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+    const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent>& dialogEvent,
     std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -176,10 +182,14 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     ViewStackProcessor::GetInstance()->Push(textPickerNode);
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, nullptr);
+    textPickerPattern->SetIsShowInDialog(true);
     auto context = textPickerNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
+    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    textPickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     auto pickerNodeLayout = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -198,7 +208,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     textPickerNode->MountToParent(contentColumn);
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
-    
+
     auto closeCallBack = [dialogNode](const GestureEvent& /* info */) {
         auto pipeline = PipelineContext::GetCurrentContext();
         auto overlayManager = pipeline->GetOverlayManager();
@@ -213,8 +223,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
 
 RefPtr<FrameNode> TextPickerDialogView::CreateIconItemNode(RefPtr<PickerTheme> pickerTheme)
 {
-    auto row = FrameNode::CreateFrameNode(
-        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(row, nullptr);
     auto layoutProps = row->GetLayoutProperty<LinearLayoutProperty>();
@@ -228,8 +237,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateIconItemNode(RefPtr<PickerTheme> p
     layoutProps->UpdateMargin(marginProperty);
 
     auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<ImagePattern>());
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(imageNode, nullptr);
     imageNode->MountToParent(row);
 
@@ -238,8 +246,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateIconItemNode(RefPtr<PickerTheme> p
 RefPtr<FrameNode> TextPickerDialogView::CreateTextItemNode(RefPtr<PickerTheme> pickerTheme)
 {
     auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<TextPattern>());
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textLayout = textNode->GetLayoutProperty<TextLayoutProperty>();
     MarginProperty marginProperty;
@@ -251,8 +258,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateTextItemNode(RefPtr<PickerTheme> p
 }
 RefPtr<FrameNode> TextPickerDialogView::CreateMixtureItemNode(RefPtr<PickerTheme> pickerTheme)
 {
-    auto row = FrameNode::CreateFrameNode(
-        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(row, nullptr);
 
@@ -263,32 +269,30 @@ RefPtr<FrameNode> TextPickerDialogView::CreateMixtureItemNode(RefPtr<PickerTheme
     rowProperty->UpdateMargin(marginProperty);
 
     auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<ImagePattern>());
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(imageNode, nullptr);
     imageNode->MountToParent(row);
 
     auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<TextPattern>());
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
     textNode->MountToParent(row);
 
     return row;
 }
 
-RefPtr<FrameNode> TextPickerDialogView::CreateColumnNode(uint32_t columnKind, uint32_t showCount,
-    RefPtr<PickerTheme> pickerTheme)
+RefPtr<FrameNode> TextPickerDialogView::CreateColumnNode(
+    uint32_t columnKind, uint32_t showCount, RefPtr<PickerTheme> pickerTheme)
 {
     auto columnNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
+            []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
 
-        auto columnLayout = columnNode->GetLayoutProperty<LayoutProperty>();
-        MarginProperty marginProperty;
-        marginProperty.top = CalcLength(pickerTheme->GetContentMarginVertical());
-        marginProperty.bottom = CalcLength(pickerTheme->GetContentMarginVertical());
-        columnLayout->UpdateMargin(marginProperty);
+    auto columnLayout = columnNode->GetLayoutProperty<LayoutProperty>();
+    MarginProperty marginProperty;
+    marginProperty.top = CalcLength(pickerTheme->GetContentMarginVertical());
+    marginProperty.bottom = CalcLength(pickerTheme->GetContentMarginVertical());
+    columnLayout->UpdateMargin(marginProperty);
 
     if (columnKind == ICON) {
         for (uint32_t index = 0; index < showCount; index++) {
@@ -333,15 +337,21 @@ RefPtr<FrameNode> TextPickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto dividerNode = FrameNode::GetOrCreateFrameNode(V2::DIVIDER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
-    auto dividerRenderContext = dividerNode->GetRenderContext();
-    CHECK_NULL_RETURN(dividerRenderContext, nullptr);
-    dividerRenderContext->UpdateBackgroundColor(dialogTheme->GetDividerColor());
+    CHECK_NULL_RETURN(dividerNode, nullptr);
+
+    auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_RETURN(dividerPaintProps, nullptr);
+    dividerPaintProps->UpdateDividerColor(dialogTheme->GetDividerColor());
+
+    auto dividerLayoutProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
+    dividerLayoutProps->UpdateVertical(true);
 
     MarginProperty margin;
     margin.top = CalcLength(dialogTheme->GetDividerHeight());
     margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    dividerNode->GetLayoutProperty()->UpdateMargin(margin);
-    dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+    dividerLayoutProps->UpdateMargin(margin);
+    dividerLayoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
 
     return dividerNode;
@@ -349,8 +359,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateDividerNode(const RefPtr<FrameNode
 
 RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>& frameNode,
     std::map<std::string, NG::DialogTextEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-    GestureEventFunc callback)
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent, GestureEventFunc callback)
 {
     auto acceptEvent = dialogEvent["acceptId"];
     auto cancelEvent = dialogCancelEvent["cancelId"];
@@ -362,12 +371,12 @@ RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
 
-    auto buttonCancelNode = CreateCancelNode(cancelEvent);
-    auto buttonConfirmNode = CreateConfirmNode(frameNode, acceptEvent);
+    auto buttonCancelNode = CreateCancelNode(cancelEvent, frameNode);
+    auto buttonConfirmNode = CreateConfirmNode(frameNode, frameNode, acceptEvent);
 
     buttonCancelNode->MountToParent(contentRow);
     buttonConfirmNode->MountToParent(contentRow);
-    
+
     auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(callback));
     for (const auto& child : contentRow->GetChildren()) {
         auto childNode = AceType::DynamicCast<FrameNode>(child);
@@ -380,7 +389,8 @@ RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     return contentRow;
 }
 
-RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent)
+RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
+    const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& textPickerNode, DialogEvent& acceptEvent)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -399,6 +409,8 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    textPattern->SetConfirmNode(buttonConfirmNode);
     auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
@@ -406,6 +418,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
     buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
@@ -435,7 +448,8 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     return buttonConfirmNode;
 }
 
-RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent)
+RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(
+    NG::DialogGestureEvent& cancelEvent, const RefPtr<FrameNode>& textPickerNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -453,6 +467,8 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    textPattern->SetCancelNode(buttonCancelNode);
     textCancelNode->MountToParent(buttonCancelNode);
     auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
@@ -471,6 +487,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
     buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
 
@@ -486,15 +503,15 @@ void TextPickerDialogView::SetSelected(const RefPtr<TextPickerPattern>& textPick
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selected, value);
 }
 
-void TextPickerDialogView::SetSelectedValues(const RefPtr<TextPickerPattern>& textPickerPattern,
-    const std::vector<uint32_t>& values)
+void TextPickerDialogView::SetSelectedValues(
+    const RefPtr<TextPickerPattern>& textPickerPattern, const std::vector<uint32_t>& values)
 {
     textPickerPattern->SetSelecteds(values);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selecteds, values);
 }
 
-void TextPickerDialogView::SetValues(const RefPtr<TextPickerPattern>& textPickerPattern,
-    const std::vector<std::string>& values)
+void TextPickerDialogView::SetValues(
+    const RefPtr<TextPickerPattern>& textPickerPattern, const std::vector<std::string>& values)
 {
     textPickerPattern->SetValues(values);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Values, values);
@@ -506,8 +523,8 @@ void TextPickerDialogView::SetRange(
     textPickerPattern->SetRange(value);
 }
 
-void TextPickerDialogView::SetTextProperties(const RefPtr<PickerTheme>& pickerTheme,
-    const PickerTextProperties& properties)
+void TextPickerDialogView::SetTextProperties(
+    const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties)
 {
     CHECK_NULL_VOID(pickerTheme);
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
@@ -524,17 +541,24 @@ void TextPickerDialogView::SetTextProperties(const RefPtr<PickerTheme>& pickerTh
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearWeight,
         properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontFamily,
+        properties.disappearTextStyle_.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontStyle,
+        properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(
-            TextPickerLayoutProperty, FontSize, properties.normalTextStyle_.fontSize.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, properties.normalTextStyle_.fontSize.value());
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, normalStyle.GetFontSize());
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color,
-        properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight,
-        properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, Color, properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, Weight, properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontFamily,
+        properties.normalTextStyle_.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle,
+        properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(
@@ -546,6 +570,10 @@ void TextPickerDialogView::SetTextProperties(const RefPtr<PickerTheme>& pickerTh
         properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight,
         properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontFamily,
+        properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontStyle,
+        properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
 void TextPickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange)
@@ -569,4 +597,24 @@ void TextPickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNo
     eventHub->SetDialogAcceptEvent(std::move(onChange));
 }
 
+void TextPickerDialogView::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [](const KeyEvent& event) -> bool { return TextPickerDialogView::OnKeyEvent(event); };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+bool TextPickerDialogView::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode_);
+        return true;
+    }
+
+    return false;
+}
 } // namespace OHOS::Ace::NG

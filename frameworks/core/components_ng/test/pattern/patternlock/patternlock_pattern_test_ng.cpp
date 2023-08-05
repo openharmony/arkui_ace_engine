@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,13 +37,30 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-const Dimension SIDE_LENGTH = 300.0_vp;
-const Dimension CIRCLE_RADIUS = 14.0_vp;
+constexpr Dimension SIDE_LENGTH = 300.0_vp;
+constexpr Dimension CIRCLE_RADIUS = 14.0_vp;
 const Color REGULAR_COLOR = Color::BLACK;
 const Color SELECTED_COLOR = Color::BLUE;
 const Color ACTIVE_COLOR = Color::RED;
 const Color PATH_COLOR = Color::GRAY;
-const Dimension PATH_STROKE_WIDTH = 34.0_vp;
+const Color HOVER_COLOR = Color::GRAY;
+const Color PRESS_COLOR = Color::GRAY;
+constexpr Dimension PATH_STROKE_WIDTH = 34.0_vp;
+constexpr Dimension HOTSPOT_CIRCLE_RADIUS = 48.0_vp;
+constexpr float SIDE_LENGH = 36.0f;
+constexpr float POINT_NOT_CHECK_FLOAT = -4.0f;
+constexpr float POINT_CHECK_FLOAT = 10.0f;
+constexpr float LAST_POINT_CHECK_FLOAT = 3.0f;
+constexpr float FIRST_POINT_CHECK_FLOAT = 75.0f;
+constexpr float CONTENT_SIZE_FLOAT = 300.0f;
+constexpr float CONTENT_OFFSET_FLOAT = 150.0f;
+constexpr float CIRCLE_RADIUS_FLOAT = 200.0f;
+constexpr float DEFAULT_SIDE_LENGTH = 20.0f;
+constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
+inline int32_t GetPointIndex(int32_t x, int32_t y)
+{
+    return (x - 1) * PATTERN_LOCK_COL_COUNT + (y - 1);
+}
 } // namespace
 
 struct TestProperty {
@@ -95,7 +112,6 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintPropertyTest001, TestSize.Lev
      * @tc.steps: step2. Init PatternLock parameters and set them to PatternLock property
      */
     TestProperty testProperty;
-    testProperty.sideLength = std::make_optional(SIDE_LENGTH);
     testProperty.circleRadius = std::make_optional(CIRCLE_RADIUS);
     testProperty.regularColor = std::make_optional(REGULAR_COLOR);
     testProperty.selectedColor = std::make_optional(SELECTED_COLOR);
@@ -103,8 +119,6 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintPropertyTest001, TestSize.Lev
     testProperty.pathColor = std::make_optional(PATH_COLOR);
     testProperty.strokeWidth = std::make_optional(PATH_STROKE_WIDTH);
     testProperty.autoReset = std::make_optional(true);
-    EXPECT_TRUE(testProperty.sideLength.has_value());
-    patternLockModelNG.SetSideLength(testProperty.sideLength.value());
     patternLockModelNG.SetCircleRadius(testProperty.circleRadius.value());
     patternLockModelNG.SetRegularColor(testProperty.regularColor.value());
     patternLockModelNG.SetSelectedColor(testProperty.selectedColor.value());
@@ -114,27 +128,58 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintPropertyTest001, TestSize.Lev
     patternLockModelNG.SetAutoReset(testProperty.autoReset.value());
 
     /**
-     * @tc.steps: step3. Get layout property and get PatternLock property
+     * @tc.steps: step3. Get paint property and get PatternLock property
      * @tc.expected: step3. Check the PatternLock property value
      */
     auto patternLockPaintProperty = frameNode->GetPaintProperty<PatternLockPaintProperty>();
     ASSERT_NE(patternLockPaintProperty, nullptr);
-    EXPECT_EQ(patternLockPaintProperty->GetSideLengthValue(), SIDE_LENGTH);
     EXPECT_EQ(patternLockPaintProperty->GetCircleRadiusValue(), CIRCLE_RADIUS);
     EXPECT_EQ(patternLockPaintProperty->GetRegularColorValue(), REGULAR_COLOR);
     EXPECT_EQ(patternLockPaintProperty->GetSelectedColorValue(), SELECTED_COLOR);
     EXPECT_EQ(patternLockPaintProperty->GetActiveColorValue(), ACTIVE_COLOR);
     EXPECT_EQ(patternLockPaintProperty->GetPathColorValue(), PATH_COLOR);
     EXPECT_EQ(patternLockPaintProperty->GetPathStrokeWidthValue(), PATH_STROKE_WIDTH);
-    EXPECT_EQ(patternLockPaintProperty->GetAutoResetValue(), true);
+    EXPECT_TRUE(patternLockPaintProperty->GetAutoResetValue());
 }
 
 /**
- * @tc.name: PatternLockEventTest002
+ * @tc.name: PatternLockLayoutPropertyTest001
+ * @tc.desc: Set PatternLock value into PatternLockLayoutProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockLayoutPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init PatternLock node
+     */
+    PatternLockModelNG patternLockModelNG;
+    auto controller = patternLockModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    /**
+     * @tc.steps: step2. Init PatternLock parameters and set them to PatternLock property
+     */
+    TestProperty testProperty;
+    testProperty.sideLength = std::make_optional(SIDE_LENGTH);
+    patternLockModelNG.SetSideLength(testProperty.sideLength.value());
+
+    /**
+     * @tc.steps: step3. Get layout property and get PatternLock property
+     * @tc.expected: step3. Check the PatternLock property value
+     */
+    auto patternLockLayoutProperty = frameNode->GetLayoutProperty<PatternLockLayoutProperty>();
+    ASSERT_NE(patternLockLayoutProperty, nullptr);
+    EXPECT_EQ(patternLockLayoutProperty->GetSideLength(), SIDE_LENGTH);
+}
+
+/**
+ * @tc.name: PatternLockEventTest001
  * @tc.desc: Test PatternLock onComplete event.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest002, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -184,11 +229,43 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest003
+ * @tc.name: PatternLockEventTest002
+ * @tc.desc: Test PatternLock onDotConnected event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init PatternLock node
+     */
+    PatternLockModelNG patternLockModelNG;
+    auto controller = patternLockModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Init dotConnected result data structure and onDotConnected function
+     */
+    int32_t connectedDot = -1;
+    auto onDotConnected = [&connectedDot](int32_t currentIndex) { connectedDot = currentIndex; };
+    patternLockModelNG.SetDotConnected(onDotConnected);
+
+    /**
+     * @tc.steps: step3. Get event hub and call UpdateDotConnectedEvent function
+     * @tc.expected: step3. Check the event result value
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::PatternLockEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->UpdateDotConnectedEvent(1);
+    EXPECT_EQ(connectedDot, 1);
+}
+
+/**
+ * @tc.name: PatternLockPatternTest001
  * @tc.desc: Test PatternLock pattern method HandleReset.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest003, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -203,6 +280,8 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<PatternLockPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    ASSERT_NE(pattern->patternLockModifier_, nullptr);
 
     /**
      * @tc.steps: step3. Set PatternLock pattern variable and call HandleReset
@@ -228,11 +307,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest004
+ * @tc.name: PatternLockPatternTest002
  * @tc.desc: Test PatternLock pattern method CheckAutoReset.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest004, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -269,11 +348,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest005
+ * @tc.name: PatternLockPatternTest003
  * @tc.desc: Test PatternLock pattern method AddPassPoint.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest005, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -287,6 +366,8 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest005, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<PatternLockPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    ASSERT_NE(pattern->patternLockModifier_, nullptr);
     /**
      * @tc.steps: step3. Set PatternLock pattern variable and call AddPassPoint
      * @tc.expected: step3. Check the return value of PatternLock pattern method AddPassPoint
@@ -332,11 +413,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest006
+ * @tc.name: PatternLockPatternTest004
  * @tc.desc: Test PatternLock pattern method CheckChoosePoint.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest006, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -365,11 +446,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest007
+ * @tc.name: PatternLockPatternTest005
  * @tc.desc: Test PatternLock pattern method AddChoosePoint.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -384,6 +465,16 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<PatternLockPattern>();
     ASSERT_NE(pattern, nullptr);
+    frameNode->GetGeometryNode()->SetContentSize(SizeF(300.0f, 300.0f));
+    pattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    ASSERT_NE(pattern->patternLockModifier_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
+    ASSERT_NE(patternlockTheme, nullptr);
+    patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
 
     /**
      * @tc.cases: when distance is unvalid, Point(x, y) will not AddChoosePoint.
@@ -395,7 +486,6 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
     EXPECT_FALSE(result1);
     auto patternLockPaintProperty = frameNode->GetPaintProperty<PatternLockPaintProperty>();
     ASSERT_NE(patternLockPaintProperty, nullptr);
-    patternLockPaintProperty->UpdateSideLength(SIDE_LENGTH);
     patternLockPaintProperty->UpdateCircleRadius(CIRCLE_RADIUS);
     bool result2 = pattern->AddChoosePoint(offset, 1, 1);
     EXPECT_FALSE(result2);
@@ -403,7 +493,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
     /**
      * @tc.cases: when distance is valid, Point(x, y) will AddChoosePoint.
      */
-    patternLockPaintProperty->UpdateCircleRadius(Dimension(20.0));
+    patternLockPaintProperty->UpdateCircleRadius(Dimension(200.0));
     EXPECT_EQ(pattern->choosePoint_.size(), 0);
     EXPECT_FALSE(pattern->CheckChoosePoint(1, 1));
     bool result3 = pattern->AddChoosePoint(offset, 1, 1);
@@ -426,11 +516,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest008
+ * @tc.name: PatternLockPatternTest006
  * @tc.desc: Test PatternLock pattern method OnTouchUp.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest008, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -445,6 +535,8 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest008, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<PatternLockPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    ASSERT_NE(pattern->patternLockModifier_, nullptr);
 
     /**
      * @tc.steps: step3. Set PatternLock pattern variable and call OnTouchUp
@@ -460,11 +552,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest009
- * @tc.desc: Test PatternLock pattern method OnTouchMove.
+ * @tc.name: PatternLockPatternTest007
+ * @tc.desc: Test PatternLock pattern method HandleGestureUpdate.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest009, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -488,24 +580,28 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest009, TestSize.Level1)
     float offsetY = 1.0f;
     Offset offset(offsetX, offsetY);
     pattern->isMoveEventValid_ = false;
-    TouchLocationInfo locationInfo(0);
-    locationInfo.SetTouchType(TouchType::MOVE);
-    locationInfo.SetLocalLocation(offset);
-    TouchEventInfo touchEventInfo("onTouchMove");
-    touchEventInfo.AddTouchLocationInfo(std::move(locationInfo));
-    pattern->OnTouchMove(touchEventInfo);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    pattern->HandleGestureUpdate(info);
+    EXPECT_EQ(pattern->cellCenter_.GetX(), .0f);
+    EXPECT_EQ(pattern->cellCenter_.GetY(), .0f);
+    info.SetLocalLocation(offset);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    pattern->HandleGestureUpdate(info);
+    EXPECT_EQ(pattern->cellCenter_.GetX(), .0f);
+    EXPECT_EQ(pattern->cellCenter_.GetY(), .0f);
     pattern->isMoveEventValid_ = true;
-    pattern->OnTouchMove(touchEventInfo);
+    pattern->HandleGestureUpdate(info);
     EXPECT_EQ(pattern->cellCenter_.GetX(), offset.GetX());
     EXPECT_EQ(pattern->cellCenter_.GetY(), offset.GetY());
 }
 
 /**
- * @tc.name: PatternLockPatternTest010
+ * @tc.name: PatternLockPatternTest008
  * @tc.desc: Test PatternLock pattern method OnTouchDown.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest010, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -520,6 +616,8 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest010, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<PatternLockPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    ASSERT_NE(pattern->patternLockModifier_, nullptr);
 
     /**
      * @tc.steps: step3. Set PatternLock pattern variable and call OnTouchDown
@@ -543,11 +641,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest011
+ * @tc.name: PatternLockPatternTest009
  * @tc.desc: Test PatternLock pattern method HandleTouchEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest011, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -562,6 +660,8 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest011, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<PatternLockPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    ASSERT_NE(pattern->patternLockModifier_, nullptr);
 
     /**
      * @tc.steps: step3. Set PatternLock pattern variable and call HandleTouchEvent
@@ -590,16 +690,6 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest011, TestSize.Level1)
     EXPECT_EQ(pattern->isMoveEventValid_, false);
 
     pattern->isMoveEventValid_ = true;
-    TouchLocationInfo locationInfoTouchMove(0);
-    locationInfoTouchMove.SetLocalLocation(offset);
-    locationInfoTouchMove.SetTouchType(TouchType::MOVE);
-    TouchEventInfo touchEventInfoTouchMove("onTouchMove");
-    touchEventInfoTouchMove.AddTouchLocationInfo(std::move(locationInfoTouchMove));
-    pattern->HandleTouchEvent(touchEventInfoTouchMove);
-    EXPECT_EQ(pattern->cellCenter_.GetX(), offset.GetX());
-    EXPECT_EQ(pattern->cellCenter_.GetY(), offset.GetY());
-    pattern->cellCenter_.Reset();
-
     TouchLocationInfo locationInfoTouchUnkown(0);
     locationInfoTouchUnkown.SetLocalLocation(offset);
     locationInfoTouchUnkown.SetTouchType(TouchType::UNKNOWN);
@@ -609,11 +699,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: PatternLockPatternTest012
+ * @tc.name: PatternLockPatternTest010
  * @tc.desc: Test PatternLock pattern method InitTouchEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest012, TestSize.Level1)
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init PatternLock node
@@ -645,6 +735,351 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PatternLockPatternTest011
+ * @tc.desc: Test PatternLock pattern method HandleFocusEvent, HandleBlurEvent and GetInnerFocusPaintRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init PatternLock node
+     */
+    PatternLockModelNG patternLockModelNG;
+    auto controller = patternLockModelNG.Create();
+    /**
+     * @tc.steps: step2. Get PatternLock pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto focushub = frameNode->GetFocusHub();
+    ASSERT_NE(focushub, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
+    ASSERT_NE(patternlockTheme, nullptr);
+    patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    /**
+     * @tc.steps: step3. Set PatternLock pattern variable and Init FocusHub.
+     */
+    pattern->isMoveEventValid_ = false;
+    pattern->choosePoint_.push_back(PatternLockCell(1, 2));
+    pattern->cellCenter_ = OffsetF(1.0f, 1.0f);
+    pattern->currentPoint_ = {0, 0};
+    pattern->InitFocusEvent();
+    /**
+     * @tc.steps: step4. Call HandleFocusEvent function.
+     */
+    ASSERT_NE(focushub->onFocusInternal_, nullptr);
+    focushub->onFocusInternal_();
+    EXPECT_EQ(pattern->isMoveEventValid_, true);
+    EXPECT_EQ(pattern->choosePoint_.empty(), true);
+    EXPECT_EQ(pattern->cellCenter_, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(pattern->currentPoint_, std::make_pair(1, 1));
+    /**
+     * @tc.steps: step5. Call HandleBlurEvent function.
+     */
+    ASSERT_NE(focushub->onBlurInternal_, nullptr);
+    focushub->onBlurInternal_();
+    EXPECT_EQ(pattern->isMoveEventValid_, false);
+    /**
+     * @tc.steps: step6. Call GetInnerFocusPaintRect function.
+     */
+    ASSERT_NE(focushub->getInnerFocusRectFunc_, nullptr);
+    RoundRect focusRectInner;
+    focushub->getInnerFocusRectFunc_(focusRectInner);
+    EXPECT_FALSE(focusRectInner.radius_.data_.empty());
+}
+
+/**
+ * @tc.name: PatternLockPatternTest012
+ * @tc.desc: Test PatternLock pattern method HandleFocusEvent, HandleBlurEvent and GetInnerFocusPaintRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init PatternLock node
+     */
+    PatternLockModelNG patternLockModelNG;
+    auto controller = patternLockModelNG.Create();
+    /**
+     * @tc.steps: step2. Get PatternLock pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto focushub = frameNode->GetFocusHub();
+    ASSERT_NE(focushub, nullptr);
+    pattern->InitFocusEvent();
+    ASSERT_NE(focushub->onKeyEventsInternal_[OnKeyEventType::DEFAULT], nullptr);
+    /**
+     * @tc.steps: step3. Call OnKeyEvent function.
+     */
+    auto event = KeyEvent();
+    /**
+     * @tc.case: case1: KeyAction is UNKNOWN.
+     */
+    event.action = KeyAction::UNKNOWN;
+    EXPECT_FALSE(focushub->onKeyEventsInternal_[OnKeyEventType::DEFAULT](event));
+    /**
+     * @tc.case: case2: KeyAction is DOWN and KeyCode is KEY_SPACE.
+     */
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_SPACE;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case3: KeyAction is DOWN, KeyCode is KEY_ENTER and isMoveEventValid_ is true.
+     */
+    event.code = KeyCode::KEY_ENTER;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case4: KeyAction is DOWN, KeyCode is KEY_ENTER and isMoveEventValid_ is false.
+     */
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case5: KeyAction is DOWN, KeyCode is KEY_DPAD_UP and current point is first point.
+     */
+    event.code = KeyCode::KEY_DPAD_UP;
+    pattern->currentPoint_ = {1, 1};
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case6: KeyAction is DOWN, KeyCode is KEY_DPAD_UP and current point is last point.
+     */
+    pattern->currentPoint_ = {3, 3};
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case7: KeyAction is DOWN, KeyCode is KEY_DPAD_DOWN and current point is first point.
+     */
+    event.code = KeyCode::KEY_DPAD_DOWN;
+    pattern->currentPoint_ = {1, 1};
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case8: KeyAction is DOWN, KeyCode is KEY_DPAD_DOWN and current point is last point.
+     */
+    pattern->currentPoint_ = {3, 3};
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case9: KeyAction is DOWN, KeyCode is KEY_DPAD_LEFT and current point is first point.
+     */
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    pattern->currentPoint_ = {1, 1};
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case10: KeyAction is DOWN, KeyCode is KEY_DPAD_LEFT and current point is last point.
+     */
+    pattern->currentPoint_ = {3, 3};
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case11: KeyAction is DOWN, KeyCode is KEY_DPAD_RIGHT and current point is first point.
+     */
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    pattern->currentPoint_ = {1, 1};
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case12: KeyAction is DOWN, KeyCode is KEY_DPAD_RIGHT and current point is last point.
+     */
+    pattern->currentPoint_ = {3, 3};
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case13: KeyAction is DOWN, KeyCode is KEY_MOVE_HOME and current point is last point.
+     */
+    event.code = KeyCode::KEY_MOVE_HOME;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case14: KeyAction is DOWN, KeyCode is KEY_MOVE_END and current point is first point.
+     */
+    event.code = KeyCode::KEY_MOVE_END;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case15: KeyAction is DOWN and KeyCode is KEY_ESCAPE.
+     */
+    event.code = KeyCode::KEY_ESCAPE;
+    EXPECT_TRUE(pattern->OnKeyEvent(event));
+    /**
+     * @tc.case: case16: KeyAction is DOWN and KeyCode is illegal.
+     */
+    event.code = KeyCode::KEY_FORWARD_DEL;
+    EXPECT_FALSE(pattern->OnKeyEvent(event));
+}
+
+/**
+ * @tc.name: PatternLockPatternTest013
+ * @tc.desc: Test PatternLock pattern OnFocusClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init PatternLock node
+     */
+    PatternLockModelNG patternLockModelNG;
+    auto controller = patternLockModelNG.Create();
+    /**
+     * @tc.steps: step2. Get PatternLock pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. Call OnFocusClick.
+     */
+    /**
+     * @tc.case: case1: CheckAutoReset is false.
+     */
+    pattern->autoReset_ = false;
+    pattern->choosePoint_ = { PatternLockCell(1, 2) };
+    pattern->isMoveEventValid_ = false;
+    EXPECT_FALSE(pattern->CheckAutoReset());
+    pattern->OnFocusClick();
+    EXPECT_FALSE(pattern->isMoveEventValid_);
+    /**
+     * @tc.case: case2: CheckAutoReset is true and isMoveEventValid_ is false.
+     */
+    pattern->autoReset_ = true;
+    pattern->currentPoint_ = std::make_pair(1, 1);
+    pattern->OnFocusClick();
+    EXPECT_TRUE(pattern->isMoveEventValid_);
+    EXPECT_FALSE(pattern->choosePoint_.empty());
+    /**
+     * @tc.case: case3: CheckAutoReset is true, isMoveEventValid_ is false current point is checked.
+     */
+    pattern->OnFocusClick();
+    EXPECT_TRUE(pattern->isMoveEventValid_);
+}
+
+/**
+ * @tc.name: PatternLockPatternTest014
+ * @tc.desc: Test PatternLock pattern method HandleHoverEvent and HandleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init PatternLock node
+     */
+    PatternLockModelNG patternLockModelNG;
+    auto controller = patternLockModelNG.Create();
+    /**
+     * @tc.steps: step2. Init PatternLock pattern
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->GetGeometryNode()->SetContentSize(SizeF(CONTENT_SIZE_FLOAT, CONTENT_SIZE_FLOAT));
+    frameNode->GetGeometryNode()->SetContentOffset(OffsetF(CONTENT_OFFSET_FLOAT, CONTENT_OFFSET_FLOAT));
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputEventHub = eventHub->GetInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
+    pattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    ASSERT_NE(pattern->patternLockModifier_, nullptr);
+    auto patternLockPaintProperty = frameNode->GetPaintProperty<PatternLockPaintProperty>();
+    ASSERT_NE(patternLockPaintProperty, nullptr);
+    patternLockPaintProperty->UpdateCircleRadius(Dimension(CIRCLE_RADIUS_FLOAT));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
+    ASSERT_NE(patternlockTheme, nullptr);
+    patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    pattern->InitMouseEvent();
+    ASSERT_FALSE(inputEventHub->hoverEventActuator_->inputEvents_.empty());
+    ASSERT_FALSE(inputEventHub->mouseEventActuator_->inputEvents_.empty());
+    /**
+     * @tc.steps: step3. Call HandleHoverEvent function.
+     */
+    for (const auto& hoverCallback : inputEventHub->hoverEventActuator_->inputEvents_) {
+        ASSERT_NE(hoverCallback, nullptr);
+        (*hoverCallback)(false);
+    }
+    EXPECT_FALSE(pattern->patternLockModifier_->isHover_->Get());
+    /**
+     * @tc.steps: step4. Call HandleMouseEvent function and hover not on point.
+     */
+    auto info = MouseInfo();
+    info.SetLocalLocation(Offset(0.0f, 0.0f));
+    for (const auto& mouseCallback : inputEventHub->mouseEventActuator_->inputEvents_) {
+        ASSERT_NE(mouseCallback, nullptr);
+        (*mouseCallback)(info);
+    }
+    EXPECT_EQ(pattern->patternLockModifier_->hoverIndex_->Get(), -1);
+    /**
+     * @tc.steps: step5. Call HandleMouseEvent function and hover on point.
+     */
+    info.SetLocalLocation(Offset(FIRST_POINT_CHECK_FLOAT, FIRST_POINT_CHECK_FLOAT));
+    for (const auto& mouseCallback : inputEventHub->mouseEventActuator_->inputEvents_) {
+        ASSERT_NE(mouseCallback, nullptr);
+        (*mouseCallback)(info);
+    }
+    EXPECT_EQ(pattern->patternLockModifier_->hoverIndex_->Get(), 0);
+}
+
+/**
+ * @tc.name: PatternLockPatternTest015
+ * @tc.desc: Test PatternLock pattern method SetChallengeResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init PatternLock node
+     */
+    PatternLockModelNG patternLockModelNG;
+    auto controller = patternLockModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Get PatternLock pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    ASSERT_NE(pattern->patternLockModifier_, nullptr);
+    ASSERT_NE(pattern->patternLockController_->setChallengeResultImpl_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetChallengeResult function and challenge result set CORRECT.
+     */
+    pattern->patternLockController_->SetChallengeResult(V2::PatternLockChallengeResult::CORRECT);
+    ASSERT_TRUE(pattern->patternLockModifier_->challengeResult_.has_value());
+    EXPECT_EQ(pattern->patternLockModifier_->challengeResult_.value(), NG::PatternLockChallengeResult::CORRECT);
+
+    /**
+     * @tc.steps: step4. Call SetChallengeResult function and challenge result set WRONG.
+     */
+    pattern->patternLockController_->SetChallengeResult(V2::PatternLockChallengeResult::WRONG);
+    ASSERT_TRUE(pattern->patternLockModifier_->challengeResult_.has_value());
+    EXPECT_EQ(pattern->patternLockModifier_->challengeResult_.value(), NG::PatternLockChallengeResult::WRONG);
+
+    /**
+     * @tc.steps: step5. When isMoveEventValid_ is true call SetChallengeResult function and challenge result set
+     * CORRECT.
+     */
+    EXPECT_EQ(pattern->patternLockModifier_->challengeResult_, NG::PatternLockChallengeResult::WRONG);
+    pattern->isMoveEventValid_ = true;
+    pattern->patternLockController_->SetChallengeResult(V2::PatternLockChallengeResult::CORRECT);
+    ASSERT_TRUE(pattern->patternLockModifier_->challengeResult_.has_value());
+    EXPECT_EQ(pattern->patternLockModifier_->challengeResult_.value(), NG::PatternLockChallengeResult::WRONG);
+
+    /**
+     * @tc.steps: step6. Call SetChallengeResult function and challenge result illegal.
+     */
+    pattern->isMoveEventValid_ = false;
+    pattern->patternLockController_->SetChallengeResult(V2::PatternLockChallengeResult(0));
+    ASSERT_FALSE(pattern->patternLockModifier_->challengeResult_.has_value());
+}
+
+
+/**
  * @tc.name: PatternLockPaintMethodTest001
  * @tc.desc: Test PatternLockPaintMethod GetThemeProp and UpdateContentModifier Function.
  * @tc.type: FUNC
@@ -669,12 +1104,14 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintMethodTest001, TestSize.Level
     patternlockTheme->selectedColor_ = SELECTED_COLOR;
     patternlockTheme->activeColor_ = ACTIVE_COLOR;
     patternlockTheme->pathColor_ = PATH_COLOR;
+    patternlockTheme->circleRadius_ = CIRCLE_RADIUS;
+    patternlockTheme->pathStrokeWidth_ = PATH_STROKE_WIDTH;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
     /**
      * @tc.case: case1. call GetThemeProp with PatternLockTheme.
      */
     paintMethod.GetThemeProp();
-    EXPECT_EQ(paintMethod.sideLength_, SIDE_LENGTH);
+    EXPECT_EQ(paintMethod.sideLength_, .0f);
     EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
     EXPECT_EQ(paintMethod.pathStrokeWidth_, PATH_STROKE_WIDTH);
     EXPECT_EQ(paintMethod.regularColor_, REGULAR_COLOR);
@@ -686,7 +1123,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintMethodTest001, TestSize.Level
      */
     PaintWrapper paintWrapper(nullptr, geometryNode, patternLockPaintProperty);
     paintMethod.UpdateContentModifier(&paintWrapper);
-    EXPECT_EQ(paintMethod.sideLength_, SIDE_LENGTH);
+    EXPECT_EQ(paintMethod.sideLength_, paintWrapper.GetContentSize().Width());
     EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
     EXPECT_EQ(paintMethod.pathStrokeWidth_, PATH_STROKE_WIDTH);
     EXPECT_EQ(paintMethod.regularColor_, REGULAR_COLOR);
@@ -696,7 +1133,6 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintMethodTest001, TestSize.Level
     /**
      * @tc.case: case3. call UpdateContentModifier with valid PatternLockPaintProperty.
      */
-    patternLockPaintProperty->UpdateSideLength(Dimension(30.0));
     patternLockPaintProperty->UpdateCircleRadius(Dimension(20.0));
     patternLockPaintProperty->UpdatePathStrokeWidth(Dimension(10.0));
     patternLockPaintProperty->UpdateAutoReset(false);
@@ -705,7 +1141,6 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPaintMethodTest001, TestSize.Level
     patternLockPaintProperty->UpdateActiveColor(Color::BLACK);
     patternLockPaintProperty->UpdatePathColor(Color::WHITE);
     paintMethod.UpdateContentModifier(&paintWrapper);
-    EXPECT_EQ(paintMethod.sideLength_, patternLockPaintProperty->GetSideLengthValue());
     EXPECT_EQ(paintMethod.circleRadius_, patternLockPaintProperty->GetCircleRadiusValue());
     EXPECT_EQ(paintMethod.pathStrokeWidth_, patternLockPaintProperty->GetPathStrokeWidthValue());
     EXPECT_EQ(paintMethod.regularColor_, patternLockPaintProperty->GetRegularColorValue());
@@ -727,6 +1162,8 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(9);
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
     patternlockModifier.onDraw(context);
 }
 
@@ -761,6 +1198,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest003, TestSize.Level1)
     std::vector<PatternLockCell> vecCell;
     auto patternlockModifier1 = AceType::MakeRefPtr<PatternLockModifier>();
     patternlockModifier1->SetChoosePoint(vecCell);
+    EXPECT_CALL(canvas, Save()).Times(0);
     EXPECT_CALL(canvas, Restore()).Times(0);
     patternlockModifier1->PaintLockLine(canvas, offset);
     /**
@@ -770,6 +1208,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest003, TestSize.Level1)
     auto patternlockModifier2 = AceType::MakeRefPtr<PatternLockModifier>();
     patternlockModifier2->SetChoosePoint(vecCell2);
     patternlockModifier2->SetPathStrokeWidth(0.0);
+    EXPECT_CALL(canvas, Save()).Times(0);
     EXPECT_CALL(canvas, Restore()).Times(0);
     patternlockModifier2->PaintLockLine(canvas, offset);
     /**
@@ -780,8 +1219,9 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest003, TestSize.Level1)
     patternlockModifier3->SetChoosePoint(vecCell3);
     patternlockModifier3->SetPathStrokeWidth(Dimension(10.0).ConvertToPx());
     EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(vecCell3.size() - 1);
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(vecCell3.size() - 2);
     EXPECT_CALL(canvas, DetachPen()).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Save()).Times(1);
     EXPECT_CALL(canvas, Restore()).Times(1);
     patternlockModifier3->PaintLockLine(canvas, offset);
     /**
@@ -793,9 +1233,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest003, TestSize.Level1)
     patternlockModifier4->SetChoosePoint(vecCell4);
     patternlockModifier4->SetPathStrokeWidth(Dimension(10.0).ConvertToPx());
     patternlockModifier4->SetIsMoveEventValid(true);
+    patternlockModifier4->sideLength_->Set(SIDE_LENGTH.Value());
     EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawLine(_, _)).Times(vecCell4.size());
     EXPECT_CALL(canvas, DetachPen()).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Save()).Times(1);
     EXPECT_CALL(canvas, Restore()).Times(1);
     patternlockModifier4->PaintLockLine(canvas, offset);
 }
@@ -812,75 +1254,303 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest004, TestSize.Level1)
     std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0), PatternLockCell(0, 2), PatternLockCell(1, 2) };
     auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
     patternlockModifier->SetChoosePoint(vecCell);
-    patternlockModifier->SetSideLength(36.0);
+    patternlockModifier->SetSideLength(SIDE_LENGH);
     /**
      * @tc.case: case1. Current Point (x, y) is not checked.
      */
-    patternlockModifier->SetCircleRadius(-4.0);
+    patternlockModifier->SetCircleRadius(POINT_NOT_CHECK_FLOAT);
     EXPECT_FALSE(patternlockModifier->CheckChoosePoint(1, 4));
-    EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachBrush(_)).Times(1).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(1);
-    EXPECT_CALL(canvas, DetachBrush()).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).Times(1).WillRepeatedly(ReturnRef(canvas));
     patternlockModifier->PaintLockCircle(canvas, offset, 1, 4);
     /**
-     * @tc.case: case2. Current Point (x, y) is checked but the selected Point is not the last Point.
+     * @tc.case: case2. Current Point (x, y) is checked, isMoveEventValid_ is false, isHover_is false, hover index is
+     * current Point index and the selected Point is not the last Point.
      */
-    patternlockModifier->SetCircleRadius(10.0);
+    patternlockModifier->SetCircleRadius(POINT_CHECK_FLOAT);
+    patternlockModifier->SetHoverIndex(GetPointIndex(0, 0));
+    EXPECT_FALSE(patternlockModifier->isMoveEventValid_->Get());
+    EXPECT_FALSE(patternlockModifier->isHover_->Get());
+    EXPECT_EQ(patternlockModifier->hoverIndex_->Get(), GetPointIndex(0, 0));
     EXPECT_TRUE(patternlockModifier->CheckChoosePoint(0, 0));
-    EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(1);
-    EXPECT_CALL(canvas, DetachBrush()).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachBrush(_)).Times(2).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(2);
+    EXPECT_CALL(canvas, DetachBrush()).Times(2).WillRepeatedly(ReturnRef(canvas));
     patternlockModifier->PaintLockCircle(canvas, offset, 0, 0);
     /**
-     * @tc.case: case3. last Point (x, y) is checked and isMoveEventValid_ is false.
-     */
-    patternlockModifier->SetCircleRadius(3.0);
-    EXPECT_FALSE(patternlockModifier->isMoveEventValid_->Get());
-    EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(1);
-    EXPECT_CALL(canvas, DetachBrush()).WillOnce(ReturnRef(canvas));
-    patternlockModifier->PaintLockCircle(canvas, offset, 1, 2);
-    /**
-     * @tc.case: case4. last Point (x, y) is checked but isMoveEventValid_ is true.
+     * @tc.case: case3. Current Point (x, y) is checked, isMoveEventValid_ is true, isHover_is true, hover index is
+     * current Point index and the selected Point is not the last Point.
      */
     patternlockModifier->SetIsMoveEventValid(true);
+    patternlockModifier->SetIsHover(true);
     EXPECT_TRUE(patternlockModifier->isMoveEventValid_->Get());
+    EXPECT_TRUE(patternlockModifier->isHover_->Get());
+    EXPECT_EQ(patternlockModifier->hoverIndex_->Get(), GetPointIndex(0, 0));
+    EXPECT_TRUE(patternlockModifier->CheckChoosePoint(0, 0));
+    EXPECT_CALL(canvas, AttachBrush(_)).Times(3).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DetachBrush()).Times(3).WillRepeatedly(ReturnRef(canvas));
+    patternlockModifier->PaintLockCircle(canvas, offset, 0, 0);
+}
+
+/**
+ * @tc.name: PatternLockModifierTest005
+ * @tc.desc: Test PaintLockCircle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest005, TestSize.Level1)
+{
+    Testing::MockCanvas canvas;
+    OffsetF offset;
+    std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0), PatternLockCell(0, 2), PatternLockCell(1, 2) };
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    patternlockModifier->SetChoosePoint(vecCell);
+    patternlockModifier->SetSideLength(SIDE_LENGH);
+    /**
+     * @tc.case: case1. last Point (x, y) is checked, isHover_is false, hover index is not current Point,
+     * isMoveEventValid_ is false and challengeResult_ has value.
+     */
+    std::optional<NG::PatternLockChallengeResult> ngChallengeResult = NG::PatternLockChallengeResult::WRONG;
+    ngChallengeResult = NG::PatternLockChallengeResult::CORRECT;
+    patternlockModifier->SetChallengeResult(ngChallengeResult);
+    EXPECT_FALSE(patternlockModifier->isMoveEventValid_->Get());
+    EXPECT_FALSE(patternlockModifier->isHover_->Get());
+    EXPECT_NE(patternlockModifier->hoverIndex_->Get(), GetPointIndex(1, 2));
+    EXPECT_TRUE(patternlockModifier->challengeResult_.has_value());
     EXPECT_TRUE(patternlockModifier->CheckChoosePointIsLastIndex(1, 2, 1));
-    EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(1);
-    EXPECT_CALL(canvas, DetachBrush()).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachBrush(_)).Times(2).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(2);
+    EXPECT_CALL(canvas, DetachBrush()).Times(2).WillRepeatedly(ReturnRef(canvas));
+    patternlockModifier->PaintLockCircle(canvas, offset, 1, 2);
+    /**
+     * @tc.case: case2. last Point (x, y) is checked, isHover_is true, hover index is not current Point,
+     * isMoveEventValid_ is true and challengeResult_ has value.
+     */
+    patternlockModifier->SetIsMoveEventValid(true);
+    patternlockModifier->SetIsHover(true);
+    patternlockModifier->SetCircleRadius(LAST_POINT_CHECK_FLOAT);
+    patternlockModifier->SetChallengeResult(ngChallengeResult);
+    EXPECT_TRUE(patternlockModifier->isMoveEventValid_->Get());
+    EXPECT_TRUE(patternlockModifier->isHover_->Get());
+    EXPECT_NE(patternlockModifier->hoverIndex_->Get(), GetPointIndex(1, 2));
+    EXPECT_TRUE(patternlockModifier->challengeResult_.has_value());
+    EXPECT_TRUE(patternlockModifier->CheckChoosePointIsLastIndex(1, 2, 1));
+    EXPECT_CALL(canvas, AttachBrush(_)).Times(3).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DetachBrush()).Times(3).WillRepeatedly(ReturnRef(canvas));
     patternlockModifier->PaintLockCircle(canvas, offset, 1, 2);
 }
 
 /**
+ * @tc.name: PatternLockModifierTest006
+ * @tc.desc: Test ConnectedCircleAnimate and ConnectedLineAnimate functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create patternlockModifier and  Set ChoosePoint
+     */
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0) };
+    patternlockModifier->SetChoosePoint(vecCell);
+    /**
+     * @tc.steps: step2. call ConnectedCircleAnimate and ConnectedLineAnimate func
+     * @tc.expected:the value of Animatable Properties is updated
+     */
+    patternlockModifier->SetCircleRadius(CIRCLE_RADIUS.Value());
+    patternlockModifier->StartConnectedCircleAnimate(1, 1);
+    patternlockModifier->StartConnectedLineAnimate(1, 1);
+    EXPECT_NE(patternlockModifier->GetBackgroundCircleRadius(0), 0);
+    EXPECT_NE(patternlockModifier->GetActiveCircleRadius(0), 0);
+    EXPECT_NE(patternlockModifier->GetLightRingCircleRadius(0), 0);
+    EXPECT_EQ(patternlockModifier->GetLightRingAlphaF(0), 0);
+    OffsetF pointEnd = patternlockModifier->GetCircleCenterByXY(patternlockModifier->offset_->Get(), 1, 1);
+    EXPECT_TRUE(patternlockModifier->GetConnectedLineTailPoint() == pointEnd);
+    /**
+     * @tc.steps: step3. call SetConnectedLineTailPoint func
+     * @tc.expected:the value of connectedLineTailPoint_ is updated
+     */
+    patternlockModifier->connectedLineTailPoint_->Set(OffsetF());
+    patternlockModifier->isMoveEventValid_->Set(true);
+    patternlockModifier->isTouchDown_ = true;
+    patternlockModifier->SetConnectedLineTailPoint(1, 1);
+    pointEnd = patternlockModifier->GetCircleCenterByXY(patternlockModifier->offset_->Get(), 1, 1);
+    EXPECT_TRUE(patternlockModifier->GetConnectedLineTailPoint() == pointEnd);
+
+    /**
+     * @tc.steps: step4. call SetConnectedLineTailPoint func when choosePoint_ is empty
+     * @tc.expected:the value of connectedLineTailPoint_ is not updated
+     */
+    pointEnd = OffsetF();
+    patternlockModifier->choosePoint_.clear();
+    patternlockModifier->connectedLineTailPoint_->Set(pointEnd);
+    patternlockModifier->SetConnectedLineTailPoint(1, 1);
+    EXPECT_TRUE(patternlockModifier->GetConnectedLineTailPoint() == pointEnd);
+}
+
+/**
+ * @tc.name: PatternLockModifierTest007
+ * @tc.desc: Test StartCanceledAnimate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create patternlockModifier and  Set ChoosePoint
+     */
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0) };
+    patternlockModifier->SetChoosePoint(vecCell);
+    /**
+     * @tc.steps: step2. call StartCanceledAnimate func
+     * @tc.expected:the value of canceledLineTailPoint_ is updated
+     */
+    patternlockModifier->StartCanceledAnimate();
+    OffsetF pointEnd = patternlockModifier->GetCircleCenterByXY(patternlockModifier->offset_->Get(), 0, 0);
+    EXPECT_TRUE(patternlockModifier->GetCanceledLineTailPoint() == pointEnd);
+}
+
+/**
+ * @tc.name: PatternLockModifierTest008
+ * @tc.desc: Test PaintLightRing function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create patternlockModifier
+     */
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    /**
+     * @tc.steps: step2. call PaintLightRing func
+     * @tc.expected:Related function is called.
+     */
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(1);
+    patternlockModifier->PaintLightRing(canvas, 0, 0, CIRCLE_RADIUS.Value(), 1);
+}
+
+/**
+ * @tc.name: PatternLockModifierTest009
+ * @tc.desc: Test PaintCanceledLineTail and PaintConnectedLineTail function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create patternlockModifier
+     */
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0) };
+    patternlockModifier->SetChoosePoint(vecCell);
+    patternlockModifier->sideLength_->Set(SIDE_LENGTH.Value());
+    /**
+     * @tc.steps: step2. call PaintCanceledLineTail func
+     * @tc.expected:Related function is called.
+     */
+    patternlockModifier->needCanceledLine_ = true;
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(1);
+    patternlockModifier->PaintCanceledLineTail(canvas, patternlockModifier->offset_->Get());
+
+    /**
+     * @tc.steps: step3. call PaintConnectedLineTail func
+     * @tc.expected:Related function is not called.
+     */
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(0);
+    patternlockModifier->PaintConnectedLineTail(canvas, patternlockModifier->offset_->Get());
+
+    /**
+     * @tc.steps: step4. add one choosePoint then call PaintConnectedLineTail func
+     * @tc.expected:Related function is called.
+     */
+    patternlockModifier->choosePoint_.emplace_back(PatternLockCell(1, 1));
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(1);
+    patternlockModifier->PaintConnectedLineTail(canvas, patternlockModifier->offset_->Get());
+}
+
+/**
+ * @tc.name: PatternLockModifierTest010
+ * @tc.desc: Test SetHoverColor, SetPressColor, SetSelectColor and SetChallengeResult function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create patternlockModifier
+     */
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    /**
+     * @tc.steps: step2. call SetHoverColor func
+     */
+    patternlockModifier->SetHoverColor(HOVER_COLOR);
+    EXPECT_EQ(patternlockModifier->hoverColor_->Get(), HOVER_COLOR);
+    patternlockModifier->SetHoverColor(HOVER_COLOR);
+    EXPECT_EQ(patternlockModifier->hoverColor_->Get(), HOVER_COLOR);
+    /**
+     * @tc.steps: step3. call SetPressColor func
+     */
+    patternlockModifier->SetPressColor(PRESS_COLOR);
+    EXPECT_EQ(patternlockModifier->pressColor_->Get(), PRESS_COLOR);
+    patternlockModifier->SetPressColor(PRESS_COLOR);
+    EXPECT_EQ(patternlockModifier->pressColor_->Get(), PRESS_COLOR);
+    /**
+     * @tc.steps: step4. call SetSelectColor func
+     */
+    patternlockModifier->SetSelectColor(SELECTED_COLOR);
+    EXPECT_EQ(patternlockModifier->selectedColor_->Get(), SELECTED_COLOR);
+    patternlockModifier->SetSelectColor(SELECTED_COLOR);
+    EXPECT_EQ(patternlockModifier->selectedColor_->Get(), SELECTED_COLOR);
+    /**
+     * @tc.steps: step5. call SetChallengeResult func
+     */
+    std::optional<NG::PatternLockChallengeResult> ngChallengeResult = NG::PatternLockChallengeResult::WRONG;
+    patternlockModifier->SetChallengeResult(ngChallengeResult);
+    EXPECT_TRUE(patternlockModifier->challengeResult_.has_value());
+    patternlockModifier->SetChallengeResult(ngChallengeResult);
+    EXPECT_TRUE(patternlockModifier->challengeResult_.has_value());
+    ngChallengeResult.reset();
+    patternlockModifier->SetChallengeResult(ngChallengeResult);
+    EXPECT_FALSE(patternlockModifier->challengeResult_.has_value());
+}
+
+/**
  * @tc.name: PatternLockLayoutAlgorithmTest001
- * @tc.desc: Test GetCircleCenterByXY function can get correct offset.
+ * @tc.desc: Test MeasureContent function .
  * @tc.type: FUNC
  */
 HWTEST_F(PatternLockPatternTestNg, PatternLockLayoutAlgorithmTest001, TestSize.Level1)
 {
-    constexpr Dimension sideLength = Dimension(20.0);
-    PatternLockLayoutAlgorithm layoutAlgorithm(sideLength);
+    PatternLockLayoutAlgorithm layoutAlgorithm;
+    auto layoutProperty = AceType::MakeRefPtr<PatternLockLayoutProperty>();
+    LayoutWrapperNode layoutWrapper(nullptr, nullptr, layoutProperty);
     /**
-     * @tc.case: case1. selfIdealSize's width is null.
+     * @tc.case: case1.
      */
+    layoutProperty->UpdateSideLength(Dimension(DEFAULT_SIDE_LENGTH));
     LayoutConstraintF constraint1;
-    auto size1 = layoutAlgorithm.MeasureContent(constraint1, nullptr);
-    EXPECT_EQ(size1.value(), SizeF(20.0, 20.0));
+    auto size1 = layoutAlgorithm.MeasureContent(constraint1, &layoutWrapper);
+    EXPECT_EQ(size1.value(), SizeF(20.0f, 20.0f));
     /**
-     * @tc.case: case2. selfIdealSize's width is not null but selfIdealSize is invalid.
+     * @tc.case: case2.
      */
     LayoutConstraintF constraint2;
-    constraint2.selfIdealSize.width_ = 10.0;
-    auto size2 = layoutAlgorithm.MeasureContent(constraint2, nullptr);
-    EXPECT_EQ(size2.value(), SizeF(20.0, 20.0));
+    constraint2.maxSize = SizeF(10.0f, 25.0f);
+    constraint2.minSize = SizeF(15.0f, 20.0f);
+    auto size2 = layoutAlgorithm.MeasureContent(constraint2, &layoutWrapper);
+    EXPECT_EQ(size2.value(), SizeF(15.0f, 15.0f));
     /**
-     * @tc.case: case3. selfIdealSize's width is valid.
+     * @tc.case: case3.
      */
     LayoutConstraintF constraint3;
-    constraint3.selfIdealSize.width_ = 10.0;
-    constraint3.selfIdealSize.height_ = .0;
-    auto size3 = layoutAlgorithm.MeasureContent(constraint3, nullptr);
-    EXPECT_EQ(size3.value(), SizeF(10.0, 10.0));
+    constraint3.maxSize = SizeF(40.0f, 30.0f);
+    constraint3.minSize = SizeF(15.0f, 20.0f);
+    layoutProperty->UpdateSideLength(Dimension(30.0));
+    auto size3 = layoutAlgorithm.MeasureContent(constraint3, &layoutWrapper);
+    EXPECT_EQ(size3.value(), SizeF(30.0f, 30.0f));
 }
 } // namespace OHOS::Ace::NG

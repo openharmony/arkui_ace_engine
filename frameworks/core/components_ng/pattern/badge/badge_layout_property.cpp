@@ -27,6 +27,7 @@ const int DEFAULT_COUNT = 0;
 const int DEFAULT_MAX_COUNT = 99;
 const Color DEFAULT_TEXT_COLOR = Color::WHITE;
 const Color DEFAULT_BADGE_COLOR = Color::RED;
+const Dimension DEFAULT_POSITION_SIZE = 0.0_vp;
 const Dimension DEFAULT_FONT_SIZE = 10.0_vp;
 const Dimension DEFAULT_CIRCLE_SIZE = 16.0_vp;
 
@@ -46,6 +47,9 @@ void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("value", GetBadgeValue().value_or("").c_str());
 
     auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("x", GetBadgePositionX().value_or(DEFAULT_POSITION_SIZE).ToString().c_str());
+    jsonValue->Put("y", GetBadgePositionY().value_or(DEFAULT_POSITION_SIZE).ToString().c_str());
+
     jsonValue->Put("color", GetBadgeTextColor().value_or(DEFAULT_TEXT_COLOR).ColorToString().c_str());
     jsonValue->Put("fontSize", GetBadgeFontSize().value_or(DEFAULT_FONT_SIZE).ToString().c_str());
     jsonValue->Put("badgeColor", GetBadgeColor().value_or(DEFAULT_BADGE_COLOR).ColorToString().c_str());

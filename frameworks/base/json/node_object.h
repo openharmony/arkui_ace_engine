@@ -20,7 +20,7 @@
 #include "base/json/uobject.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT_WITH_PREVIEW NodeObject : public JsonValue {
+class ACE_FORCE_EXPORT NodeObject : public JsonValue {
 public:
     NodeObject();
     ~NodeObject() override = default;

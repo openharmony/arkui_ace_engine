@@ -83,7 +83,7 @@ HWTEST_F(ConnectServerManagerTest, ConnectServerManagerTest002, TestSize.Level1)
      * @tc.steps: step3. Call AddInstance id and name.
      * @tc.expected: step3. The instance internal instanceMap_ include instance with name .
      */
-    instance.AddInstance(1001, "TestDebugger");
+    instance.AddInstance(1001, "Chinese", "TestDebugger");
     EXPECT_EQ(instance.instanceMap_[1001], "TestDebugger");
 
     /**

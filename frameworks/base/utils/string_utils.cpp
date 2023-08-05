@@ -43,4 +43,14 @@ const std::string FormatString(const char* fmt, ...)
     return name;
 }
 
+bool IsAscii(const std::string& str)
+{
+    for (const auto& c : str) {
+        if (!isascii(c)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::StringUtils

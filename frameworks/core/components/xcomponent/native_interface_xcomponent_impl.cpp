@@ -80,6 +80,20 @@ int32_t OH_NativeXComponent::GetXComponentOffset(const void* window, double* x, 
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
+int32_t OH_NativeXComponent::GetHistoryPoints(const void* window,
+    int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    auto surfaceWindow = const_cast<void*>(xcomponentImpl_->GetSurface());
+    if (window != surfaceWindow) {
+        return OH_NATIVEXCOMPONENT_RESULT_FAILED;
+    }
+    xcomponentImpl_->GetHistoryPoints(size, historicalPoints);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
 int32_t OH_NativeXComponent::GetTouchEvent(const void* window, OH_NativeXComponent_TouchEvent* touchEvent)
 {
     if (xcomponentImpl_ == nullptr) {

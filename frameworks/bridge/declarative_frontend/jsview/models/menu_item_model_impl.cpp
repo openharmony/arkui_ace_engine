@@ -32,13 +32,21 @@ void MenuItemModelImpl::SetFontSize(const Dimension& fontSize) {}
 
 void MenuItemModelImpl::SetFontWeight(FontWeight weight) {}
 
+void MenuItemModelImpl::SetFontStyle(Ace::FontStyle style) {}
+
 void MenuItemModelImpl::SetFontColor(const std::optional<Color>& color) {}
+
+void MenuItemModelImpl::SetFontFamily(const std::vector<std::string> &families) {}
 
 void MenuItemModelImpl::SetLabelFontSize(const Dimension& fontSize) {}
 
 void MenuItemModelImpl::SetLabelFontWeight(FontWeight weight) {}
 
+void MenuItemModelImpl::SetLabelFontStyle(Ace::FontStyle style) {}
+
 void MenuItemModelImpl::SetLabelFontColor(const std::optional<Color>& color) {}
+
+void MenuItemModelImpl::SetLabelFontFamily(const std::vector<std::string> &families) {}
 
 void MenuItemModelImpl::SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent) {}
 } // namespace OHOS::Ace::Framework

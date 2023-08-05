@@ -14,11 +14,50 @@
  */
 
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
-
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+#include "core/components/list/list_item_theme.h"
 
 namespace OHOS::Ace::NG {
+
+void ListItemGroupPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
+        SetListItemGroupDefaultAttributes(host);
+    }
+}
+
+void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)
+{
+    auto renderContext = itemGroupNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = itemGroupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemGroupTheme);
+
+    renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
+
+    MarginProperty itemGroupMargin;
+    itemGroupMargin.left = CalcLength(listItemGroupTheme->GetItemGroupDefaultLeftMargin());
+    itemGroupMargin.right = CalcLength(listItemGroupTheme->GetItemGroupDefaultRightMargin());
+    layoutProperty->UpdateMargin(itemGroupMargin);
+
+    PaddingProperty itemGroupPadding;
+    itemGroupPadding.left = CalcLength(listItemGroupTheme->GetItemGroupDefaultPadding().Left());
+    itemGroupPadding.right = CalcLength(listItemGroupTheme->GetItemGroupDefaultPadding().Right());
+    itemGroupPadding.top = CalcLength(listItemGroupTheme->GetItemGroupDefaultPadding().Top());
+    itemGroupPadding.bottom = CalcLength(listItemGroupTheme->GetItemGroupDefaultPadding().Bottom());
+    layoutProperty->UpdatePadding(itemGroupPadding);
+
+    renderContext->UpdateBorderRadius(listItemGroupTheme->GetItemGroupDefaultBorderRadius());
+}
 
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
@@ -33,7 +72,8 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     V2::ItemDivider itemDivider;
     auto divider = layoutProperty->GetDivider().value_or(itemDivider);
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
-    return MakeRefPtr<ListItemGroupPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
+    ListItemGroupPaintInfo listItemGroupPaintInfo { drawVertical, lanes_, spaceWidth_, laneGutter_ };
+    return MakeRefPtr<ListItemGroupPaintMethod>(divider, listItemGroupPaintInfo, itemPosition_);
 }
 
 bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -49,6 +89,10 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
     lanes_ = layoutAlgorithm->GetLanes();
     axis_ = layoutAlgorithm->GetAxis();
+    laneGutter_ = layoutAlgorithm->GetLaneGutter();
+    itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
+    itemDiasplayStartIndex_ = layoutAlgorithm->GetStartIndex();
+    itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto accessibilityProperty = host->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();

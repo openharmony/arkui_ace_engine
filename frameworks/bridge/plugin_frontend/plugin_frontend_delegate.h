@@ -110,7 +110,7 @@ public:
     void FireAccessibilityEvent(const AccessibilityEvent& accessibilityEvent);
     void InitializeAccessibilityCallback();
 
-    void OnMediaQueryUpdate() override;
+    void OnMediaQueryUpdate(bool isSynchronous = false) override;
     void OnSurfaceChanged();
     // JSEventHandler delegate functions.
     void FireAsyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
@@ -195,6 +195,10 @@ public:
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override;
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
+
+    void GetSystemFontList(std::vector<std::string>& fontList) override;
+
+    bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) override;
 
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 

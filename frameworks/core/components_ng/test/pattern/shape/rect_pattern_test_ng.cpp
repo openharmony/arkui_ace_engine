@@ -15,6 +15,9 @@
 
 #include <array>
 
+#define private public
+#define protected public
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/radius.h"
 #include "base/memory/referenced.h"
@@ -181,6 +184,55 @@ HWTEST_F(RectPatternTestNg, RectPaintProperty003, TestSize.Level1)
     EXPECT_FLOAT_EQ(paintProperty->GetBottomLeftRadiusValue().GetX().ConvertToPx(), RADIUS_WIDTH.ConvertToPx());
     EXPECT_FLOAT_EQ(paintProperty->GetBottomLeftRadiusValue().GetY().ConvertToPx(), RADIUS_HEIGHT.ConvertToPx());
     Draw(frameNode);
+}
+
+/**
+ * @tc.name: RectPaintProperty004
+ * @tc.desc: create RefPtr<SHapeRect>()
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(RectPatternTestNg, RectPaintProperty004, TestSize.Level1)
+{
+    auto rect = AceType::MakeRefPtr<ShapeRect>();
+    auto rectModelNG01 = RectModelNG();
+    rectModelNG01.Create();
+    /**
+     * @tc.desc: Call SetShapeRectRadius(index = TOP_LEFT_RADIUS = 0)
+     */
+    rectModelNG01.SetShapeRectRadius(rect, Dimension(RADIUS.at(0).at(0)), Dimension(RADIUS.at(0).at(1)), 0);
+    auto newRadius01 = Ace::Radius(Dimension(RADIUS.at(0).at(0)), Dimension(RADIUS.at(0).at(1)));
+    EXPECT_EQ(rect->topLeftRadius_, newRadius01);
+    /**
+     * @tc.desc: Call SetShapeRectRadius(index = TOP_RIGHT_RADIUS = 1)
+     */
+    rectModelNG01.SetShapeRectRadius(rect, Dimension(RADIUS.at(1).at(0)), Dimension(RADIUS.at(1).at(1)), 1);
+    auto newRadius02 = Ace::Radius(Dimension(RADIUS.at(1).at(0)), Dimension(RADIUS.at(1).at(1)));
+    EXPECT_EQ(rect->topRightRadius_, newRadius02);
+    /**
+     * @tc.desc: Call SetShapeRectRadius(index = BOTTOM_RIGHT_RADIUS = 2)
+     */
+    rectModelNG01.SetShapeRectRadius(rect, Dimension(RADIUS.at(2).at(0)), Dimension(RADIUS.at(2).at(1)), 2);
+    auto newRadius03 = Ace::Radius(Dimension(RADIUS.at(2).at(0)), Dimension(RADIUS.at(2).at(1)));
+    EXPECT_EQ(rect->bottomRightRadius_, newRadius03);
+    /**
+     * @tc.desc: Call SetShapeRectRadius(index = BOTTOM_LEFT_RADIUS = 3)
+     */
+    rectModelNG01.SetShapeRectRadius(rect, Dimension(RADIUS.at(3).at(0)), Dimension(RADIUS.at(3).at(1)), 3);
+    auto newRadius04 = Ace::Radius(Dimension(RADIUS.at(3).at(0)), Dimension(RADIUS.at(3).at(1)));
+    EXPECT_EQ(rect->bottomLeftRadius_, newRadius04);
+    /**
+     * @tc.desc: Call SetShapeRectRadius(index, Values other than 0,1,2,3)
+     */
+    auto rect01 = rect->topLeftRadius_;
+    auto rect02 = rect->topRightRadius_;
+    auto rect03 = rect->bottomRightRadius_;
+    auto rect04 = rect->bottomLeftRadius_;
+    rectModelNG01.SetShapeRectRadius(rect, Dimension(RADIUS.at(3).at(0)), Dimension(RADIUS.at(3).at(1)), 4);
+    EXPECT_EQ(rect->topLeftRadius_, rect01);
+    EXPECT_EQ(rect->topRightRadius_, rect02);
+    EXPECT_EQ(rect->bottomRightRadius_, rect03);
+    EXPECT_EQ(rect->bottomLeftRadius_, rect04);
 }
 
 } // namespace OHOS::Ace::NG

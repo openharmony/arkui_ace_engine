@@ -38,13 +38,8 @@ inline bool IsAnchorContainer(const std::string& anchor)
 
 } // namespace
 
-void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
-        LOGD("RelativeContainerLayoutAlgorithm: No child in Relative container");
-        return;
-    }
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
     idNodeMap_.clear();
@@ -67,6 +62,29 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     TopologicalSort(renderList_);
+}
+
+void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
+        LOGD("RelativeContainerLayoutAlgorithm: No child in Relative container");
+        return;
+    }
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerLayoutProperty);
+    DetermineTopologicalOrder(layoutWrapper);
+    if (SystemProperties::GetDebugEnabled()) {
+        std::string result = "[";
+        for (const auto& nodeName : renderList_) {
+            result += nodeName + ",";
+        }
+        if (!renderList_.empty()) {
+            result = result.substr(0, result.length() - 1);
+        }
+        result += "]";
+        LOGD("RelativeContainer layout order %{public}s", result.c_str());
+    }
     for (const auto& nodeName : renderList_) {
         if (idNodeMap_.find(nodeName) == idNodeMap_.end()) {
             continue;
@@ -142,6 +160,8 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
                 LOGE("Component %{public}s ID is duplicated", childHostNode->GetInspectorIdValue().c_str());
             }
             idNodeMap_.emplace(childHostNode->GetInspectorIdValue(), childWrapper);
+        } else {
+            childWrapper->SetActive(false);
         }
     }
 }

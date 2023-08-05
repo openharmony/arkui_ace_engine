@@ -36,7 +36,6 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto dataPanelType_ = paintProperty->GetDataPanelType().value_or(0);
     auto effect_ = paintProperty->GetEffect().value_or(true);
     auto offset_ = paintWrapper->GetContentOffset();
-
     auto trackBackgroundColor = paintProperty->GetTrackBackground().value_or(theme->GetBackgroundColor());
     auto strokeWidth = paintProperty->GetStrokeWidth().value_or(theme->GetThickness()).ConvertToPx();
 
@@ -52,15 +51,18 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         }
     }
 
-    auto isShadowVisible = false;
+    DataPanelShadow shadowOption;
+    bool isHasShadowValue = false;
     if (paintProperty->HasShadowOption()) {
-        isShadowVisible = true;
+        isHasShadowValue = true;
+        shadowOption = paintProperty->GetShadowOptionValue();
     }
 
-    DataPanelShadow shadowDefault;
-    DataPanelShadow shadowOption = paintProperty->GetShadowOption().value_or(shadowDefault);
+    size_t shadowColorsLastLength = MAX_COUNT;
     if (shadowOption.colors.size() == 0) {
         shadowOption.colors = valuesColor;
+    } else {
+        shadowColorsLastLength = shadowOption.colors.size();
     }
 
     dataPanelModifier_->UpdateDate();
@@ -73,11 +75,12 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     dataPanelModifier_->SetValueColors(valuesColor);
     dataPanelModifier_->SetTrackBackground(trackBackgroundColor);
     dataPanelModifier_->SetStrokeWidth(strokeWidth);
-    dataPanelModifier_->SetShadowVisible(isShadowVisible);
+    dataPanelModifier_->SetIsHasShadowValue(isHasShadowValue);
+    dataPanelModifier_->SetShadowVisible(shadowOption.isShadowVisible);
     dataPanelModifier_->SetShadowRadius(shadowOption.radius);
     dataPanelModifier_->SetShadowOffsetX(shadowOption.offsetX);
     dataPanelModifier_->SetShadowOffsetY(shadowOption.offsetY);
-    dataPanelModifier_->SetShadowColors(shadowOption.colors);
+    dataPanelModifier_->SetShadowColors(shadowOption.colors, shadowColorsLastLength);
 }
 
 void DataPanelPaintMethod::CreateGradient(const std::pair<Color, Color>& itemParam, Gradient& gradient) const

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_PAN_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_PAN_RECOGNIZER_H
 
+#include <map>
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
@@ -55,6 +56,11 @@ public:
 
     void SetDirection(const PanDirection& direction);
 
+    void SetIsForDrag(bool isForDrag)
+    {
+        isForDrag_ = isForDrag;
+    }
+
 private:
     enum class GestureAcceptResult {
         ACCEPT,
@@ -72,6 +78,7 @@ private:
 
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
+    bool CalculateTruthFingers(bool isDirectionUp) const;
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     void ChangeFingers(int32_t fingers);
@@ -90,6 +97,7 @@ private:
     double distance_ = 0.0;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
+    std::map<int32_t, Offset> touchPointsDistance_;
     Offset delta_;
     double mainDelta_ = 0.0;
     VelocityTracker velocityTracker_;
@@ -107,6 +115,7 @@ private:
     PanDirection newDirection_;
     bool isFlushTouchEventsEnd_ = false;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
+    bool isForDrag_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -32,23 +32,19 @@ build_component("form") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:app_manager",
-      "ace_engine:ace_form_render",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "graphic_2d:librender_service_client",
+      "graphic_2d:surface",
       "input:libmmi-client",
       "ipc:ipc_core",
     ]
     include_dirs = [
-      "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
       "//foundation/arkui/ace_engine/interfaces/inner_api/form_render/include",
     ]
-    deps = [
-      "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render",
-      "//foundation/graphic/graphic_2d:libsurface",
-      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    ]
+    deps = [ "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render" ]
   }
   if (ace_use_new_skia) {
     sources -= [ "flutter_render_form.cpp" ]

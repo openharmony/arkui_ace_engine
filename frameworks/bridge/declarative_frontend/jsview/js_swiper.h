@@ -26,11 +26,12 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
 
+protected:
     static void SetAutoPlay(bool autoPlay);
     static void SetDuration(const JSCallbackInfo& info);
     static void SetIndex(const JSCallbackInfo& info);
     static void SetInterval(const JSCallbackInfo& info);
-    static void SetLoop(bool loop);
+    static void SetLoop(const JSCallbackInfo& info);
     static void SetVertical(bool isVertical);
     static void SetIndicator(const JSCallbackInfo& info);
     static void SetWidth(const JSCallbackInfo& info);
@@ -48,10 +49,11 @@ public:
     static void SetCachedCount(int32_t cachedCount);
     static void SetEnabled(const JSCallbackInfo& info);
     static void SetDisableSwipe(bool disableSwipe);
-    static void SetCurve(const std::string& curveStr);
+    static void SetCurve(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnAnimationStart(const JSCallbackInfo& info);
     static void SetOnAnimationEnd(const JSCallbackInfo& info);
+    static void SetOnGestureSwipe(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters);

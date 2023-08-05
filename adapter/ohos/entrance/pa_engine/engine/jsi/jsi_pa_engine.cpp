@@ -46,6 +46,7 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
+const char TASK_RUNNER[] = "PaEngineRunner";
 
 bool UnwrapRawImageDataMap(NativeEngine* engine, NativeValue* argv, std::map<std::string, int>& rawImageDataMap)
 {
@@ -179,21 +180,6 @@ void JsiPaEngine::RegisterUncaughtExceptionHandler()
     jsAbilityRuntime_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
 }
 
-void JsiPaEngine::RegisterConsoleModule()
-{
-    ACE_SCOPED_TRACE("JsiPaEngine::RegisterConsoleModule");
-    shared_ptr<JsValue> global = runtime_->GetGlobal();
-
-    // app log method
-    shared_ptr<JsValue> consoleObj = runtime_->NewObject();
-    consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
-    consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
-    consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
-    consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::AppWarnLogPrint));
-    consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::AppErrorLogPrint));
-    global->SetProperty(runtime_, "console", consoleObj);
-}
-
 void JsiPaEngine::RegisterConsoleModule(ArkNativeEngine* engine)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::RegisterConsoleModule");
@@ -249,7 +235,7 @@ void JsiPaEngine::EvaluateJsCode()
     ACE_SCOPED_TRACE("JsiPaEngine::EvaluateJsCode");
     CHECK_NULL_VOID(jsAbilityRuntime_);
     // load jsfwk
-    if (!jsAbilityRuntime_->LoadScript("/system/etc/strip.native.min.abc")) {
+    if (language_ == SrcLanguage::JS && !jsAbilityRuntime_->LoadScript("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
     }
     // load paMgmt.js
@@ -262,14 +248,21 @@ void JsiPaEngine::EvaluateJsCode()
 void JsiPaEngine::InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options)
 {
     options.lang = AbilityRuntime::Runtime::Language::JS;
+    options.eventRunner = eventRunner_;
     options.loadAce = false;
     options.preload = false;
     options.isStageModel = false;
     options.hapPath = GetHapPath();
+    options.isDebugVersion = GetDebugMode();
+    options.packagePathStr = GetWorkerPath()->packagePathStr;
+    options.assetBasePathStr = GetWorkerPath()->assetBasePathStr;
+    options.isJsFramework = language_ == SrcLanguage::JS;
 }
 
-bool JsiPaEngine::CreateJsRuntime(const AbilityRuntime::Runtime::Options& options)
+bool JsiPaEngine::CreateJsRuntime()
 {
+    AbilityRuntime::Runtime::Options options;
+    InitJsRuntimeOptions(options);
     jsAbilityRuntime_ = AbilityRuntime::JsRuntime::Create(options);
     if (jsAbilityRuntime_ == nullptr) {
         LOGE("Create js runtime failed.");
@@ -304,6 +297,7 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
 
 #if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
+        LOGD("Set property, key: %{public}s.", key.c_str());
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
@@ -311,7 +305,7 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
 
     // Register pa native functions
     RegisterPaModule();
-    RegisterConsoleModule();
+
     // load abc file
     EvaluateJsCode();
 
@@ -342,17 +336,8 @@ inline panda::ecmascript::EcmaVM* JsiPaEngine::GetEcmaVm() const
 void JsiPaEngine::StartDebugMode(bool debuggerMode)
 {
     if (debuggerMode && jsAbilityRuntime_ != nullptr) {
-        auto weak = AceType::WeakClaim(AceType::RawPtr(taskExecutor_));
-        auto&& postTask = [weak](std::function<void()>&& task) {
-            auto taskExecutor = weak.Upgrade();
-            if (taskExecutor == nullptr) {
-                LOGE("taskExecutor is nullptr");
-                return;
-            }
-            taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::JS);
-        };
 #ifdef OHOS_PLATFORM
-        jsAbilityRuntime_->StartDebugger(debuggerMode, postTask);
+        jsAbilityRuntime_->StartDebugger(debuggerMode, instanceId_);
 #endif
     }
 }
@@ -362,108 +347,70 @@ void JsiPaEngine::StartDebugMode(bool debuggerMode)
 // -----------------------
 JsiPaEngine::~JsiPaEngine()
 {
+    LOGI("JsiPaEngine destructor");
     UnloadLibrary();
-    if (taskExecutor_ != nullptr) {
-        taskExecutor_->RemoveTaskObserver();
-    }
-
-#if !defined(PREVIEW)
-    auto nativeEngine = GetNativeEngine();
-    if (nativeEngine != nullptr) {
-        nativeEngine->CancelCheckUVLoop();
-    }
-#endif
-
-#ifdef OHOS_PLATFORM
-    if (jsAbilityRuntime_ != nullptr) {
-        jsAbilityRuntime_->StopDebugger();
-    }
-#endif
 
     if (runtime_) {
-        runtime_->RegisterUncaughtExceptionHandler(nullptr);
         runtime_->Reset();
     }
     runtime_.reset();
     runtime_ = nullptr;
+
+    // To guarantee the jsruntime released in js thread
+    auto jsRuntime = std::move(jsAbilityRuntime_);
+    if (!eventHandler_->PostSyncTask([&jsRuntime] {
+            auto runtime = std::move(jsRuntime);
+        })) {
+        LOGE("Post sync task failed.");
+    }
+    LOGI("JsiPaEngine destructor finished.");
 }
 
-void JsiPaEngine::RegisterWorker()
-{
-    RegisterInitWorkerFunc();
-    RegisterAssetFunc();
-}
-
-void JsiPaEngine::RegisterInitWorkerFunc()
-{
-    auto nativeEngine = GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto&& initWorkerFunc = [weak = AceType::WeakClaim(this)](NativeEngine* nativeEngine) {
-        LOGI("WorkerCore RegisterInitWorkerFunc called");
-        auto paEngine = weak.Upgrade();
-        if (nativeEngine == nullptr) {
-            LOGE("nativeEngine is nullptr");
-            return;
-        }
-        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
-        if (arkNativeEngine == nullptr) {
-            LOGE("arkNativeEngine is nullptr");
-            return;
-        }
-
-        auto runtime = paEngine->GetJsRuntime();
-
-        paEngine->RegisterConsoleModule(arkNativeEngine);
-
-#if !defined(PREVIEW)
-        for (const auto& [key, value] : paEngine->GetExtraNativeObject()) {
-            shared_ptr<JsValue> nativeValue = runtime->NewNativePointer(value);
-            runtime->GetGlobal()->SetProperty(runtime, key, nativeValue);
-        }
-#endif
-        // load jsfwk
-        if (!arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
-            LOGE("Failed to load js framework!");
-        }
-    };
-    nativeEngine->SetInitWorkerFunc(initWorkerFunc);
-}
-
-void JsiPaEngine::RegisterAssetFunc()
-{
-    auto nativeEngine = GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto&& assetFunc = [weak = WeakPtr<JsBackendAssetManager>(jsBackendAssetManager_)](
-        const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
-        LOGI("WorkerCore RegisterAssetFunc called");
-        auto jsBackendAssetManager = weak.Upgrade();
-        CHECK_NULL_VOID(jsBackendAssetManager);
-        size_t index = uri.find_last_of(".");
-        if (index == std::string::npos) {
-            LOGE("invalid uri");
-        } else {
-            jsBackendAssetManager->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
-        }
-    };
-    nativeEngine->SetGetAssetFunc(assetFunc);
-}
-
-bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type)
+bool JsiPaEngine::Initialize(BackendType type, SrcLanguage language)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::Initialize");
-    LOGD("JsiPaEngine initialize");
+    LOGI("JsiPaEngine initialize");
     SetDebugMode(NeedDebugBreakPoint());
-    ACE_DCHECK(taskExecutor);
-    taskExecutor_ = taskExecutor;
     type_ = type;
+    language_ = language;
 
-    AbilityRuntime::Runtime::Options options;
-    InitJsRuntimeOptions(options);
-    if (!CreateJsRuntime(options)) {
-        LOGE("Create js runtime failed.");
+    eventRunner_ = EventRunner::Create(TASK_RUNNER + std::to_string(instanceId_));
+    if (eventRunner_ == nullptr) {
+        LOGE("Create runner failed.");
         return false;
     }
 
+    eventHandler_ = std::make_shared<EventHandler>(eventRunner_);
+    if (eventHandler_ == nullptr) {
+        LOGE("Create handler failed.");
+        return false;
+    }
+
+    bool ret = false;
+    eventHandler_->PostSyncTask([weakEngine = AceType::WeakClaim(this), &ret] {
+            auto paEngine = weakEngine.Upgrade();
+            if (paEngine != nullptr) {
+                ret = paEngine->CreateJsRuntime();
+            }
+        });
+    if (!ret) {
+        return false;
+    }
+
+    PostTask([weakEngine = AceType::WeakClaim(this), type, language] {
+            auto paEngine = weakEngine.Upgrade();
+            if (paEngine == nullptr) {
+                LOGE("Pa engine is invalid.");
+                return;
+            }
+            paEngine->InitializeInner(type, language);
+        });
+
+    return true;
+}
+
+bool JsiPaEngine::InitializeInner(BackendType type, SrcLanguage language)
+{
     bool result = InitJsEnv(GetDebugMode(), GetExtraNativeObject());
     if (!result) {
         LOGE("Init js env failed");
@@ -474,16 +421,10 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
 
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, false);
-    taskExecutor->AddTaskObserver([nativeEngine, id = instanceId_]() {
-        ContainerScope scope(id);
-        CHECK_NULL_VOID(nativeEngine);
-        nativeEngine->Loop(LOOP_NOWAIT);
-    });
-    JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine, taskExecutor);
-    SetPostTask(nativeEngine);
-#if !defined(PREVIEW)
-    nativeEngine->CheckUVLoop();
-#endif
+    if (language_ == SrcLanguage::JS) {
+        InitTimerModule(*nativeEngine);
+    }
+
     if (jsBackendAssetManager_) {
         std::vector<std::string> packagePath = jsBackendAssetManager_->GetLibPath();
         auto appLibPathKey = jsBackendAssetManager_->GetAppLibPathKey();
@@ -492,41 +433,12 @@ bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendTy
             arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
         }
     }
-    RegisterWorker();
     return true;
 }
 
 void JsiPaEngine::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
     jsBackendAssetManager_ = Referenced::MakeRefPtr<JsBackendAssetManager>(assetManager);
-}
-
-void JsiPaEngine::SetPostTask(NativeEngine* nativeEngine)
-{
-    LOGD("SetPostTask");
-    CHECK_NULL_VOID(nativeEngine);
-    auto weak = AceType::WeakClaim(AceType::RawPtr(taskExecutor_));
-    auto&& postTask = [weak, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
-        auto taskExecutor = weak.Upgrade();
-        if (taskExecutor == nullptr) {
-            LOGE("taskExecutor is nullptr");
-            return;
-        }
-        taskExecutor->PostTask([weakEngine, needSync, id]() {
-                auto paEngine = weakEngine.Upgrade();
-                if (paEngine == nullptr) {
-                    LOGW("PaEngine is nullptr");
-                    return;
-                }
-                auto nativeEngine = paEngine->GetNativeEngine();
-                if (nativeEngine == nullptr) {
-                    return;
-                }
-                ContainerScope scope(id);
-                nativeEngine->Loop(LOOP_NOWAIT, needSync);
-            }, TaskExecutor::TaskType::JS);
-    };
-    nativeEngine->SetPostTask(postTask);
 }
 
 void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
@@ -1176,13 +1088,10 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> JsiPaEngine::Query(const Ur
         LOGE("JsiPaEngine nativeValue is nullptr");
         return resultSet;
     }
-    auto nativeObject = rdbResultSetProxyGetNativeObject_(env, reinterpret_cast<napi_value>(nativeValue));
-    if (nativeObject == nullptr) {
+    resultSet = rdbResultSetProxyGetNativeObject_(env, reinterpret_cast<napi_value>(nativeValue));
+    if (resultSet == nullptr) {
         LOGE("JsiPaEngine AbsSharedResultSet from JS to Native failed");
-        return resultSet;
     }
-
-    resultSet.reset(nativeObject);
     return resultSet;
 }
 
@@ -1434,7 +1343,7 @@ void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
     auto func = GetPaFunc("onCreate");
     auto result = CallFuncWithDefaultThis(func, argv);
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    if (arkJSRuntime->HasPendingException()) {
+    if (arkJSRuntime->HasPendingException() || result->IsUndefined(runtime)) {
         LOGE("JsiPaEngine CallFunc FAILED!");
         return;
     }
@@ -1614,5 +1523,35 @@ bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 
     LOGD("JsiPaEngine OnShare, end");
     return true;
+}
+
+void JsiPaEngine::PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime)
+{
+    if (!jsAbilityRuntime_) {
+        LOGE("Ability runtime is invalid.");
+        return;
+    }
+
+    jsAbilityRuntime_->PostTask(task, name, delayTime);
+}
+
+void JsiPaEngine::PostSyncTask(const std::function<void()>& task, const std::string& name)
+{
+    if (!jsAbilityRuntime_) {
+        LOGE("Ability runtime is invalid.");
+        return;
+    }
+
+    jsAbilityRuntime_->PostSyncTask(task, name);
+}
+
+void JsiPaEngine::RemoveTask(const std::string& name)
+{
+    if (!jsAbilityRuntime_) {
+        LOGE("Ability runtime is invalid.");
+        return;
+    }
+
+    jsAbilityRuntime_->RemoveTask(name);
 }
 } // namespace OHOS::Ace

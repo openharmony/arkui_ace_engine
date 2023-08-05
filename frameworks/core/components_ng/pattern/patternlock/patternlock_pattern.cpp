@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,8 +31,6 @@ namespace {
 constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
 constexpr int32_t RADIUS_COUNT = 6;
-// the scale of selected circle radius and normal circle radius
-constexpr float SCALE_SELECTED_CIRCLE_RADIUS = 26.00 / 14.00;
 } // namespace
 
 void PatternLockPattern::OnAttachToFrameNode()
@@ -50,7 +48,10 @@ void PatternLockPattern::OnModifyDone()
 
     auto gestureHub = host->GetOrCreateGestureEventHub();
     InitTouchEvent(gestureHub, touchDownListener_);
+    InitPanEvent(gestureHub);
     InitPatternLockController();
+    InitFocusEvent();
+    InitMouseEvent();
 }
 
 void PatternLockPattern::InitTouchEvent(RefPtr<GestureEventHub>& gestureHub, RefPtr<TouchEventImpl>& touchDownListener)
@@ -67,6 +68,20 @@ void PatternLockPattern::InitTouchEvent(RefPtr<GestureEventHub>& gestureHub, Ref
     gestureHub->AddTouchEvent(touchDownListener);
 }
 
+void PatternLockPattern::SetChallengeResult(V2::PatternLockChallengeResult challengeResult)
+{
+    if (!isMoveEventValid_) {
+        CHECK_NULL_VOID(patternLockModifier_);
+        std::optional<NG::PatternLockChallengeResult> ngChallengeResult;
+        if (challengeResult == V2::PatternLockChallengeResult::CORRECT) {
+            ngChallengeResult = NG::PatternLockChallengeResult::CORRECT;
+        } else if (challengeResult == V2::PatternLockChallengeResult::WRONG) {
+            ngChallengeResult = NG::PatternLockChallengeResult::WRONG;
+        }
+        patternLockModifier_->SetChallengeResult(ngChallengeResult);
+    }
+}
+
 void PatternLockPattern::InitPatternLockController()
 {
     patternLockController_->SetResetImpl([weak = WeakClaim(this)]() {
@@ -74,6 +89,12 @@ void PatternLockPattern::InitPatternLockController()
         CHECK_NULL_VOID(patternLock);
         patternLock->HandleReset();
     });
+    patternLockController_->SetChallengeResultImpl(
+        [weak = WeakClaim(this)](V2::PatternLockChallengeResult challengeResult) {
+            auto patternLock = weak.Upgrade();
+            CHECK_NULL_VOID(patternLock);
+            patternLock->SetChallengeResult(challengeResult);
+        });
 }
 
 void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -83,37 +104,55 @@ void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
         OnTouchDown(info);
     } else if (touchType == TouchType::UP) {
         OnTouchUp();
-    } else if (touchType == TouchType::MOVE) {
-        OnTouchMove(info);
     }
 }
 
-bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_t y)
+bool PatternLockPattern::CheckInHotSpot(const OffsetF& offset, int32_t x, int32_t y)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
-    if (patternLockPaintProperty->HasSideLength()) {
-        sideLength_ = patternLockPaintProperty->GetSideLengthValue();
-    }
+    float sideLength = host->GetGeometryNode()->GetContentSize().Width();
+    OffsetF contentOffset = host->GetGeometryNode()->GetContentOffset();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_RETURN(patternLockTheme, false);
+    circleRadius_ = patternLockTheme->GetCircleRadius();
     if (patternLockPaintProperty->HasCircleRadius()) {
         circleRadius_ = patternLockPaintProperty->GetCircleRadiusValue();
     }
-    auto handleCircleRadius = std::min(circleRadius_ * SCALE_SELECTED_CIRCLE_RADIUS, sideLength_ / RADIUS_COUNT);
-
+    auto handleCircleRadius = static_cast<float>(circleRadius_.ConvertToPx());
+    auto hotSpotCircleRadius = patternLockTheme->GetHotSpotCircleRadius();
+    handleCircleRadius = std::max(
+        handleCircleRadius, std::min(static_cast<float>(hotSpotCircleRadius.ConvertToPx()) / RADIUS_TO_DIAMETER,
+                                     sideLength / RADIUS_COUNT));
     const int32_t scale = RADIUS_TO_DIAMETER;
-    float offsetX = sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT / scale * (scale * x - 1);
-    float offsetY = sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT / scale * (scale * y - 1);
+    float offsetX = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * x - 1);
+    float offsetY = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * y - 1);
+    offsetX += contentOffset.GetX();
+    offsetY += contentOffset.GetY();
     OffsetF centerOffset;
     centerOffset.SetX(offsetX);
     centerOffset.SetY(offsetY);
     auto X = (offset - centerOffset).GetX();
     auto Y = (offset - centerOffset).GetY();
     float distance = std::sqrt((X * X) + (Y * Y));
-    if (distance <= (handleCircleRadius.ConvertToPx())) {
+    return LessOrEqual(distance, handleCircleRadius);
+}
+
+bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_t y)
+{
+    if (CheckInHotSpot(offset, x, y)) {
         if (!CheckChoosePoint(x, y)) {
             AddPassPoint(x, y);
             choosePoint_.emplace_back(x, y);
+            StartModifierConnectedAnimate(x, y);
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, false);
+            auto eventHub = host->GetEventHub<PatternLockEventHub>();
+            CHECK_NULL_RETURN(eventHub, false);
+            eventHub->UpdateDotConnectedEvent(choosePoint_.back().GetCode());
         }
         return true;
     }
@@ -166,13 +205,17 @@ void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
     passPointCount_ = static_cast<int32_t>(passPointLength);
     if (nowCode > lastCode) {
         choosePoint_.emplace_back(passPointVec.front());
+        StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
         if (passPointLength > 1) {
             choosePoint_.emplace_back(passPointVec.back());
+            StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
         }
     } else {
         choosePoint_.emplace_back(passPointVec.back());
+        StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
         if (passPointLength > 1) {
             choosePoint_.emplace_back(passPointVec.front());
+            StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
         }
     }
 }
@@ -182,6 +225,9 @@ void PatternLockPattern::HandleReset()
     isMoveEventValid_ = false;
     choosePoint_.clear();
     cellCenter_.Reset();
+    if (patternLockModifier_) {
+        patternLockModifier_->Reset();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -219,17 +265,22 @@ void PatternLockPattern::OnTouchDown(const TouchEventInfo& info)
         }
     }
 
+    if (patternLockModifier_) {
+        patternLockModifier_->SetIsTouchDown(true);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     isMoveEventValid_ = true;
 }
 
-void PatternLockPattern::OnTouchMove(const TouchEventInfo& info)
+void PatternLockPattern::HandleGestureUpdate(const GestureEvent& info)
 {
-    const auto& locationInfo = info.GetTouches().front();
-    float moveDeltaX = locationInfo.GetLocalLocation().GetX();
-    float moveDeltaY = locationInfo.GetLocalLocation().GetY();
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        return;
+    }
+    auto moveDeltaX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto moveDeltaY = static_cast<float>(info.GetLocalLocation().GetY());
     OffsetF touchPoint;
     touchPoint.SetX(moveDeltaX);
     touchPoint.SetY(moveDeltaY);
@@ -250,7 +301,31 @@ void PatternLockPattern::OnTouchMove(const TouchEventInfo& info)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void PatternLockPattern::OnTouchUp()
+void PatternLockPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) { LOGD("Pan event start"); };
+
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleGestureUpdate(info);
+    };
+
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) { LOGD("Pan event End"); };
+
+    auto actionCancelTask = [weak = WeakClaim(this)]() { LOGD("Pan event cancel"); };
+    if (panEvent_) {
+        gestureHub->RemovePanEvent(panEvent_);
+    }
+
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    panEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+}
+
+void PatternLockPattern::AddPointEnd()
 {
     if (!CheckAutoReset()) {
         return;
@@ -264,9 +339,296 @@ void PatternLockPattern::OnTouchUp()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
+
     auto patternCompleteEvent = V2::PatternCompleteEvent(chooseCellVec);
     eventHub->UpdateCompleteEvent(&patternCompleteEvent);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void PatternLockPattern::OnTouchUp()
+{
+    CHECK_NULL_VOID(patternLockModifier_);
+    patternLockModifier_->SetIsTouchDown(false);
+    StartModifierCanceledAnimate();
+    AddPointEnd();
+}
+
+void PatternLockPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    auto keyTask = [weak = WeakClaim(this)](const KeyEvent& keyEvent) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(keyEvent);
+    };
+    focusHub->SetOnKeyEventInternal(keyTask);
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->GetInnerFocusPaintRect(paintRect);
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void PatternLockPattern::HandleFocusEvent()
+{
+    HandleReset();
+    currentPoint_ = {1, 1};
+    isMoveEventValid_ = true;
+}
+
+void PatternLockPattern::HandleBlurEvent()
+{
+    isMoveEventValid_ = false;
+}
+
+void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_VOID(patternLockTheme);
+    auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(patternLockPaintProperty);
+    float circleRadius =
+        patternLockPaintProperty->GetCircleRadius().value_or(patternLockTheme->GetCircleRadius()).ConvertToPx();
+    auto activeCircleRadiusScale = patternLockTheme->GetActiveCircleRadiusScale();
+    auto focusPaddingRadius = patternLockTheme->GetFocusPaddingRadius();
+    auto focusPaintWidth = patternLockTheme->GetFocusPaintWidth();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    OffsetF contentOffset = geometryNode->GetContentOffset();
+    float sideLength = geometryNode->GetContentSize().Width();
+    float offset = sideLength / PATTERN_LOCK_COL_COUNT;
+    if (NearZero(activeCircleRadiusScale)) {
+        return;
+    }
+    float foucusCircleRadius = std::min(circleRadius, offset / activeCircleRadiusScale / RADIUS_TO_DIAMETER) +
+                               (focusPaddingRadius).ConvertToPx() + focusPaintWidth.ConvertToPx() / RADIUS_TO_DIAMETER;
+    float outRadius = offset / RADIUS_TO_DIAMETER - foucusCircleRadius;
+    float offsetX = contentOffset.GetX() + (currentPoint_.first - 1) * offset + outRadius;
+    float offsetY = contentOffset.GetY() + (currentPoint_.second - 1) * offset + outRadius;
+
+    paintRect.SetRect(
+        { offsetX, offsetY, foucusCircleRadius * RADIUS_TO_DIAMETER, foucusCircleRadius * RADIUS_TO_DIAMETER });
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, foucusCircleRadius, foucusCircleRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, foucusCircleRadius, foucusCircleRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, foucusCircleRadius, foucusCircleRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, foucusCircleRadius, foucusCircleRadius);
+}
+
+void PatternLockPattern::OnFocusClick()
+{
+    if (!CheckAutoReset()) {
+        return;
+    }
+    if (!isMoveEventValid_) {
+        HandleReset();
+    }
+    if (CheckChoosePoint(currentPoint_.first, currentPoint_.second)) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    OffsetF touchPoint;
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    OffsetF contentOffset = geometryNode->GetContentOffset();
+    float sideLength = geometryNode->GetContentSize().Width();
+    float offset = sideLength / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER;
+    float offsetX = contentOffset.GetX() + offset * (currentPoint_.first * 2 - 1);
+    float offsetY = contentOffset.GetY() + offset * (currentPoint_.second * 2 - 1);
+    touchPoint.SetX(offsetX);
+    touchPoint.SetY(offsetY);
+    cellCenter_ = touchPoint;
+
+    AddPassPoint(currentPoint_.first, currentPoint_.second);
+    choosePoint_.emplace_back(currentPoint_.first, currentPoint_.second);
+    StartModifierConnectedAnimate(currentPoint_.first, currentPoint_.second);
+    auto eventHub = host->GetEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateDotConnectedEvent(choosePoint_.back().GetCode());
+    isMoveEventValid_ = true;
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void PatternLockPattern::PaintFocusState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->PaintFocusState(true);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void PatternLockPattern::OnKeyDrapUp()
+{
+    if (currentPoint_.second != 1) {
+        currentPoint_ = {currentPoint_.first, currentPoint_.second - 1};
+        PaintFocusState();
+    }
+}
+
+void PatternLockPattern::OnKeyDrapDown()
+{
+    if (currentPoint_.second != PATTERN_LOCK_COL_COUNT) {
+        currentPoint_ = {currentPoint_.first, currentPoint_.second + 1};
+        PaintFocusState();
+    }
+}
+
+void PatternLockPattern::OnKeyDrapLeft()
+{
+    if (currentPoint_.first != 1) {
+        currentPoint_ = {currentPoint_.first - 1, currentPoint_.second};
+        PaintFocusState();
+    }
+}
+
+void PatternLockPattern::OnKeyDrapRight()
+{
+    if (currentPoint_.first != PATTERN_LOCK_COL_COUNT) {
+        currentPoint_ = {currentPoint_.first + 1, currentPoint_.second};
+        PaintFocusState();
+    }
+}
+
+bool PatternLockPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    switch (event.code) {
+        case KeyCode::KEY_SPACE:
+            OnFocusClick();
+            return true;
+        case KeyCode::KEY_ENTER:
+            if (isMoveEventValid_) {
+                AddPointEnd();
+            }
+            return true;
+        case KeyCode::KEY_DPAD_UP:
+            OnKeyDrapUp();
+            return true;
+        case KeyCode::KEY_DPAD_DOWN:
+            OnKeyDrapDown();
+            return true;
+        case KeyCode::KEY_DPAD_LEFT:
+            OnKeyDrapLeft();
+            return true;
+        case KeyCode::KEY_DPAD_RIGHT:
+            OnKeyDrapRight();
+            return true;
+        case KeyCode::KEY_MOVE_HOME:
+            currentPoint_ = {1, 1};
+            PaintFocusState();
+            return true;
+        case KeyCode::KEY_MOVE_END:
+            currentPoint_ = {PATTERN_LOCK_COL_COUNT, PATTERN_LOCK_COL_COUNT};
+            PaintFocusState();
+            return true;
+        case KeyCode::KEY_ESCAPE:
+            HandleReset();
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
+void PatternLockPattern::InitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputEventHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleHoverEvent(isHover);
+    };
+    auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    CHECK_NULL_VOID(hoverEvent);
+    inputEventHub->AddOnHoverEvent(hoverEvent);
+
+    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleMouseEvent(info);
+    };
+    auto mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputEventHub->AddOnMouseEvent(mouseEvent_);
+}
+
+void PatternLockPattern::HandleHoverEvent(bool isHover)
+{
+    CHECK_NULL_VOID(patternLockModifier_);
+    patternLockModifier_->SetIsHover(isHover);
+}
+
+void PatternLockPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    OffsetF hoverPoint;
+    hoverPoint.SetX(info.GetLocalLocation().GetX());
+    hoverPoint.SetY(info.GetLocalLocation().GetY());
+    cellCenter_ = hoverPoint;
+    bool isPointHover = false;
+    for (int32_t i = 0; i < PATTERN_LOCK_COL_COUNT; i++) {
+        for (int32_t j = 0; j < PATTERN_LOCK_COL_COUNT; j++) {
+            if (CheckInHotSpot(hoverPoint, i + 1, j + 1)) {
+                CHECK_NULL_VOID(patternLockModifier_);
+                patternLockModifier_->SetHoverIndex(i * PATTERN_LOCK_COL_COUNT + j);
+                isPointHover = true;
+                break;
+            }
+        }
+    }
+    if (!isPointHover) {
+        patternLockModifier_->SetHoverIndex(-1);
+    }
+}
+
+void PatternLockPattern::StartModifierConnectedAnimate(int32_t x, int32_t y)
+{
+    CHECK_NULL_VOID(patternLockModifier_);
+    patternLockModifier_->StartConnectedCircleAnimate(x, y);
+    patternLockModifier_->StartConnectedLineAnimate(x, y);
+}
+
+void PatternLockPattern::StartModifierAddPassPointAnimate(int32_t x, int32_t y)
+{
+    CHECK_NULL_VOID(patternLockModifier_);
+    patternLockModifier_->StartConnectedCircleAnimate(x, y);
+}
+
+void PatternLockPattern::StartModifierCanceledAnimate()
+{
+    CHECK_NULL_VOID(patternLockModifier_);
+    if (isMoveEventValid_) {
+        patternLockModifier_->StartCanceledAnimate();
+    }
 }
 } // namespace OHOS::Ace::NG

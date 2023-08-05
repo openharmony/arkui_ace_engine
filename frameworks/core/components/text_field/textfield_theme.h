@@ -125,6 +125,7 @@ public:
                 return;
             }
             const double defaultErrorAlpha = 0.6;
+            const double defaultUnderlineAlpha = 0.6;
             const Color defaultUnderlineColor = Color(0x33182431);
             const Color defaultUnderlineTextColor = Color(0x99182431);
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
@@ -140,6 +141,7 @@ public:
             theme->errorUnderlineColor_ = pattern->GetAttr<Color>(ERROR_UNDERLINE_COLOR, Color());
             theme->underlineColor_ = pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor);
             theme->underlineTextColor_ = pattern->GetAttr<Color>(UNDERLINE_TEXT_COLOR, defaultUnderlineTextColor);
+            theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
 
@@ -158,21 +160,30 @@ public:
             theme->overCountTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(OVER_COUNT_TEXT_FONT_SIZE, 0.0_fp));
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color());
             theme->disableTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_DISABLED, Color());
-            theme->underlineActivedColor_ = pattern->GetAttr<Color>(PATTERN_UNDERLINE_ACTIVED_COLOR, Color());
-            theme->underlineTypingColor_ = pattern->GetAttr<Color>(PATTERN_UNDERLINE_TYPING_COLOR, Color());
+            theme->underlineActivedColor_ = pattern->GetAttr<Color>(PATTERN_UNDERLINE_ACTIVED_COLOR, Color())
+                .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
+            theme->underlineTypingColor_ = pattern->GetAttr<Color>(PATTERN_UNDERLINE_TYPING_COLOR, Color())
+                .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
             theme->textColorDisable_ = pattern->GetAttr<Color>(PATTERN_DISABLED_TEXT_COLOR, Color());
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 1.5_vp);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
-            theme->borderColor_ = pattern->GetAttr<Color>(PATTERN_BRODER_COLOR, Color());
             theme->borderRadiusSize_ = Radius(pattern->GetAttr<Dimension>(BORDER_RADIUS_SIZE, 20.0_vp));
             theme->disabledIconFillColor_ = theme->bgColor_.BlendOpacity(theme->disableOpacityRatio_);
-            theme->passwordErrorTextColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_CONTENT_COLOR, Color());
+            theme->passwordErrorTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->passwordErrorInputColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_INPUT_COLOR, Color());
-            theme->passwordErrorBorderColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_BORDER_COLOR, Color());
+            theme->passwordErrorBorderColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_BORDER_COLOR, Color())
+                .BlendOpacity(pattern->GetAttr<double>(ERROR_PASSWORD_BORDER_ALPHA, defaultErrorAlpha));
             theme->passwordErrorLableColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_TEXT_COLOR, Color());
-            theme->overCountBorderColor_ = pattern->GetAttr<Color>(OVER_COUNT_BORDER_COLOR, Color());
+            theme->overCountBorderColor_ = pattern->GetAttr<Color>(OVER_COUNT_BORDER_COLOR, Color())
+                .BlendOpacity(pattern->GetAttr<double>(OVER_COUNT_BORDER_COLOR_ALPHA, defaultErrorAlpha));
+            theme->inlineTextColor_ =  pattern->GetAttr<Color>(INLINE_TEXT_COLOR, Color());
+            theme->inlineRadiusSize_ = Radius(pattern->GetAttr<Dimension>(INLINE_RADIUS_SIZE, 4.0_vp));
+            theme->inlineBgColor_ = pattern->GetAttr<Color>(INLINE_BG_COLOR, Color());
+            theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
+            auto draggable = pattern->GetAttr<std::string>("draggable", "0");
+            theme->draggable_ = StringUtils::StringToInt(draggable);
         }
     };
 
@@ -191,6 +202,11 @@ public:
     const Dimension& GetFontSize() const
     {
         return fontSize_;
+    }
+
+    const Dimension& GetUnderlineFontSize() const
+    {
+        return underlineFontSize_;
     }
 
     const FontWeight& GetFontWeight() const
@@ -266,11 +282,6 @@ public:
     const Color& GetPressColor() const
     {
         return pressColor_;
-    }
-
-    const Color& GetBorderColor() const
-    {
-        return borderColor_;
     }
 
     const Radius& GetBorderRadiusSize() const
@@ -418,6 +429,36 @@ public:
         return overCountTextStyle_;
     }
 
+    const Color& GetInlineTextColor() const
+    {
+        return inlineTextColor_;
+    }
+
+    const Radius& GetInlineRadiusSize() const
+    {
+        return inlineRadiusSize_;
+    }
+
+    const Color& GetInlineBgColor() const
+    {
+        return inlineBgColor_;
+    }
+
+    const Color& GetInlineBorderColor() const
+    {
+        return inlineBorderColor_;
+    }
+
+    const Dimension& GetInlineBorderWidth() const
+    {
+        return inlineBorderWidth_;
+    }
+
+    bool GetDraggable() const
+    {
+        return draggable_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -425,11 +466,11 @@ private:
     Edge padding_;
     Dimension height_;
     Dimension fontSize_;
+    Dimension underlineFontSize_;
     FontWeight fontWeight_ = FontWeight::NORMAL;
     Radius borderRadius_;
 
     Color bgColor_;
-    Color borderColor_;
     Radius borderRadiusSize_;
     Color placeholderColor_;
     Color focusBgColor_;
@@ -462,6 +503,10 @@ private:
     TextStyle countTextStyleOuter_;
     TextStyle overCountStyleOuter_;
     TextStyle overCountTextStyle_;
+    Color inlineTextColor_;
+    Radius inlineRadiusSize_;
+    Color inlineBgColor_;
+    Color inlineBorderColor_;
 
     // UX::disable state: opacity is set to 38% of the default
     double disableOpacityRatio_ = 1.0;
@@ -478,8 +523,10 @@ private:
     // UX::icon size = 24, hotZoneSize = 36
     Dimension iconSize_;
     Dimension iconHotZoneSize_;
+    Dimension inlineBorderWidth_ = 2.0_vp;
 
     bool showEllipsis_ = true;
+    bool draggable_ = false;
 };
 
 } // namespace OHOS::Ace

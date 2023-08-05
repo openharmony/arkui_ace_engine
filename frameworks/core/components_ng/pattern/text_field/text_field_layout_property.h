@@ -60,6 +60,13 @@ public:
         ResetErrorText();
         ResetShowErrorText();
         ResetShowCounter();
+        ResetShowUnderline();
+        ResetShowPasswordSourceInfo();
+        ResetHidePasswordSourceInfo();
+        ResetTextAlignChanged();
+        ResetDisplayMode();
+        ResetMaxViewLines();
+        ResetSelectionMenuHidden();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -74,6 +81,7 @@ public:
         json->Put("errorText", propErrorText_.value_or("").c_str());
         json->Put("showErrorText", propShowErrorText_.value_or(false));
         json->Put("showCounter", propShowCounter_.value_or(false));
+        json->Put("showUnderline", propShowUnderline_.value_or(false));
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -118,9 +126,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputFilter, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordIcon, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCounter, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowUnderline, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextAlignChanged, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptions, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredNewLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredTextLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
@@ -131,6 +143,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretPosition, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectionMenuHidden, bool, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -153,6 +166,13 @@ protected:
         value->propErrorText_ = CloneErrorText();
         value->propShowErrorText_ = CloneShowErrorText();
         value->propShowCounter_ = CloneShowCounter();
+        value->propShowUnderline_ = CloneShowUnderline();
+        value->propShowPasswordSourceInfo_ = CloneShowPasswordSourceInfo();
+        value->propHidePasswordSourceInfo_ = CloneHidePasswordSourceInfo();
+        value->propTextAlignChanged_ = CloneTextAlignChanged();
+        value->propDisplayMode_ = CloneDisplayMode();
+        value->propMaxViewLines_ = CloneMaxViewLines();
+        value->propSelectionMenuHidden_ = CloneSelectionMenuHidden();
     }
 
 private:

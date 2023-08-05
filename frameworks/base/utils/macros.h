@@ -16,38 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 
-#define ACE_FORCE_EXPORT __attribute__((visibility("default")))
 #define ACE_WEAK_SYM     __attribute__((weak))
 
+#ifndef ACE_FORCE_EXPORT
+#ifndef WINDOWS_PLATFORM
+#define ACE_FORCE_EXPORT __attribute__((visibility("default")))
+#else
+#define ACE_FORCE_EXPORT __declspec(dllexport)
+#endif
+#endif
+
 #ifndef ACE_EXPORT
-#ifndef HIDDEN_SYMBOL
+#if !defined(HIDDEN_SYMBOL) && !defined(WINDOWS_PLATFORM)
 #define ACE_EXPORT ACE_FORCE_EXPORT
 #else
 #define ACE_EXPORT
-#endif
-#endif
-
-// The macro "ACE_FORCE_EXPORT_WITH_PREVIEW" is used to replace the macro "ACE_FORCE_EXPORT"
-// when adapting the napi to the previewer.
-#ifndef ACE_FORCE_EXPORT_WITH_PREVIEW
-#ifndef WINDOWS_PLATFORM
-#define ACE_FORCE_EXPORT_WITH_PREVIEW ACE_FORCE_EXPORT
-#else
-#define ACE_FORCE_EXPORT_WITH_PREVIEW __declspec(dllexport)
-#endif
-#endif
-
-// The macro "ACE_EXPORT_WITH_PREVIEW" is used to replace the macro "ACE_EXPORT"
-// when adapting the napi to the previewer.
-#ifndef ACE_EXPORT_WITH_PREVIEW
-#ifndef WINDOWS_PLATFORM
-#define ACE_EXPORT_WITH_PREVIEW ACE_EXPORT
-#else
-#ifndef WEARABLE_PRODUCT
-#define ACE_EXPORT_WITH_PREVIEW __declspec(dllexport)
-#else
-#define ACE_EXPORT_WITH_PREVIEW
-#endif
 #endif
 #endif
 

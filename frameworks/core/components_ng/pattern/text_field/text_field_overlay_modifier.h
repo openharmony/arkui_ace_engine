@@ -21,6 +21,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/property/property.h"
@@ -28,12 +29,11 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-class TextFieldOverlayModifier : public OverlayModifier {
-    DECLARE_ACE_TYPE(TextFieldOverlayModifier, OverlayModifier);
+class TextFieldOverlayModifier : public ScrollBarOverlayModifier {
+    DECLARE_ACE_TYPE(TextFieldOverlayModifier, ScrollBarOverlayModifier);
 
 public:
-    TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollBar>&& scrollBar,
-        WeakPtr<ScrollEdgeEffect>&& edgeEffect);
+    TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect);
     ~TextFieldOverlayModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -45,7 +45,6 @@ public:
     void SetContentSize(SizeF& value);
     void SetContentOffset(OffsetF& value);
     void SetCursorOffset(OffsetF& value);
-    void SetCursorOffsetX(float value);
     void SetInputStyle(InputStyle& value);
     void SetFrameSize(const SizeF& value);
     void SetCurrentOffset(float value);
@@ -53,12 +52,12 @@ public:
     void SetUnderlineColor(const Color& value);
     void SetUnderlineWidth(float underlineWidth);
     void SetShowCounter(bool value);
-    void SetSelectedAreaRedraw(bool value);
+    void SetRedrawFlag(int32_t value);
+    void SetScrollBar(const RefPtr<ScrollBar>& scrollBar);
 
 private:
     void PaintSelection(DrawingContext& context) const;
     void PaintCursor(DrawingContext& context) const;
-    void PaintScrollBar(RSCanvas& canvas);
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
 
     WeakPtr<Pattern> pattern_;
@@ -67,12 +66,12 @@ private:
     RefPtr<AnimatablePropertyColor> cursorColor_;
     RefPtr<AnimatablePropertyFloat> cursorWidth_;
     RefPtr<AnimatablePropertyColor> selectedColor_;
-    RefPtr<AnimatablePropertyFloat> cursorOffsetX_;
+    RefPtr<PropertyOffsetF> cursorOffset_;
     RefPtr<PropertyBool> cursorVisible_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertyFloat> currentOffset_;
-    RefPtr<PropertyBool> isSelectedAreaRedraw_;
+    RefPtr<PropertyInt> flag_;
     RefPtr<PropertyFloat> underlineWidth_;
     RefPtr<PropertyColor> underlineColor_;
     InputStyle inputStyle_ = InputStyle::DEFAULT;

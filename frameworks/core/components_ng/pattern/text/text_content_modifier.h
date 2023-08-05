@@ -34,6 +34,7 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
+    void SetFontFamilies(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
@@ -41,6 +42,8 @@ public:
     void SetTextDecoration(const TextDecoration& value);
     void SetTextDecorationColor(const Color& value);
     void SetBaselineOffset(const Dimension& value);
+    void SetContentOffset(OffsetF& value);
+    void SetContentSize(SizeF& value);
 
     void ContentChange();
 
@@ -59,7 +62,26 @@ public:
         paintOffset_ = paintOffset;
     }
 
+    void SetObscured(const std::vector<ObscuredReasons>& reasons)
+    {
+        obscuredReasons_ = reasons;
+    }
+
+    void SetIfHaveSpanItemChildren(bool value)
+    {
+        ifHaveSpanItemChildren_ = value;
+    }
+
+    void SetDrawObscuredRects(const std::vector<Rect>& drawObscuredRects)
+    {
+        drawObscuredRects_ = drawObscuredRects;
+    }
+
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
+
+    void SetClip(bool clip);
+
+    void SetFontReady(bool value);
 
 private:
     double NormalizeToPx(const Dimension& dimension);
@@ -87,6 +109,8 @@ private:
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
+    void DrawObscuration(DrawingContext& drawingContext);
+
 private:
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
@@ -103,7 +127,6 @@ private:
     RefPtr<AnimatablePropertyFloat> shadowOffsetYFloat_;
     RefPtr<AnimatablePropertyColor> shadowColor_;
 
-    TextDecoration oldTextDecoration_ = TextDecoration::NONE;
     float oldColorAlpha_ { 0.0f };
     std::optional<TextDecoration> textDecoration_;
     std::optional<Color> textDecorationColor_;
@@ -117,11 +140,20 @@ private:
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 
+    RefPtr<PropertyOffsetF> contentOffset_;
+    RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyBool> contentChange_;
+    RefPtr<PropertyBool> clip_;
+    RefPtr<PropertyString> fontFamilyString_;
+    RefPtr<PropertyBool> fontReady_;
 
     RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;
+
+    std::vector<ObscuredReasons> obscuredReasons_;
+    bool ifHaveSpanItemChildren_ = false;
+    std::vector<Rect> drawObscuredRects_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextContentModifier);
 };

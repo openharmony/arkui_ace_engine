@@ -34,6 +34,9 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     fontJsonObject->Put("size", GetFontSize().value_or(defaultFontSize).ToString().c_str());
     fontJsonObject->Put("weight",
         V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::REGULAR)).c_str());
+    fontJsonObject->Put("style",
+        V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
+    fontJsonObject->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
     json->Put("font", fontJsonObject);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

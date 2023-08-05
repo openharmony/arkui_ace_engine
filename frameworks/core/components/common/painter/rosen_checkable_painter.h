@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_CHECKABLE_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_CHECKABLE_PAINTER_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "core/pipeline/base/render_node.h"
 
@@ -28,7 +32,11 @@ public:
     RosenCheckablePainter() = default;
     ~RosenCheckablePainter() = default;
 
+#ifndef USE_ROSEN_DRAWING
     void SetStrokeWidth(double strokeWidth, SkPaint& paint) const;
+#else
+    void SetStrokeWidth(double strokeWidth, RSPen& pen) const;
+#endif
     float ConfigureOpacity(bool disabled);
 
 protected:

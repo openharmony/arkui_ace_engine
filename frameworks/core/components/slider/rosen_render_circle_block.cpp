@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include "core/components/slider/rosen_render_circle_block.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkRRect.h"
+#endif
 
 #include "base/utils/system_properties.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -57,6 +59,7 @@ void RosenRenderCircleBlock::SyncGeometryProperties()
     double radius = NormalizeToPx(blockSize_) * HALF * radiusScale_;
     double diameter = radius * 2.0;
     auto frame = rsNode->GetStagingProperties().GetFrame();
+#ifndef USE_ROSEN_DRAWING
     SkRect rect = SkRect::MakeXYWH(frame.x_ - radius, frame.y_ - radius, diameter, diameter);
 
     float elevationOfDefaultShadowXS = 4.0f;
@@ -88,6 +91,50 @@ void RosenRenderCircleBlock::SyncGeometryProperties()
         offsetX = shadowRect.width() * HALF;
         offsetY = shadowRect.height() * HALF;
     }
+#else
+    RSRect rect =
+        RSRect(frame.x_ - radius, frame.y_ - radius,
+            diameter + frame.x_ - radius, diameter + frame.y_ - radius);
+
+    float elevationOfDefaultShadowXS = 4.0f;
+    float transRatio = elevationOfDefaultShadowXS / (LIGHT_HEIGHT - elevationOfDefaultShadowXS);
+    float spotRatio = LIGHT_HEIGHT / (LIGHT_HEIGHT - elevationOfDefaultShadowXS);
+
+    auto spotRect = RSRect(rect.GetLeft() * spotRatio, rect.GetTop() * spotRatio,
+        rect.GetRight() * spotRatio, rect.GetBottom() * spotRatio);
+    spotRect.Offset(-transRatio * LIGHT_POSITION_X, -transRatio * LIGHT_POSITION_Y);
+    spotRect.SetLeft(spotRect.GetLeft() - transRatio * LIGHT_RADIUS);
+    spotRect.SetTop(spotRect.GetTop() - transRatio * LIGHT_RADIUS);
+    spotRect.SetRight(spotRect.GetRight() + transRatio * LIGHT_RADIUS);
+    spotRect.SetBottom(spotRect.GetBottom() + transRatio * LIGHT_RADIUS);
+
+    RSRect shadowRect(rect);
+    float ambientBlur = 2.0f;
+    shadowRect.SetLeft(shadowRect.GetLeft() - ambientBlur);
+    shadowRect.SetTop(shadowRect.GetTop() - ambientBlur);
+    shadowRect.SetRight(shadowRect.GetRight() + ambientBlur);
+    shadowRect.SetBottom(shadowRect.GetBottom() + ambientBlur);
+    shadowRect.Join(spotRect);
+    shadowRect.SetLeft(shadowRect.GetLeft() - 1);
+    shadowRect.SetTop(shadowRect.GetTop() - 1);
+    shadowRect.SetRight(shadowRect.GetRight() + 1);
+    shadowRect.SetBottom(shadowRect.GetBottom() + 1);
+
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+    if (isHover_) {
+        double hoverRadius = NormalizeToPx(HOVER_RADIUS);
+        offsetX = hoverRadius > shadowRect.GetWidth() * HALF ? hoverRadius : shadowRect.GetWidth() * HALF;
+        offsetY = hoverRadius > shadowRect.GetHeight() * HALF ? hoverRadius : shadowRect.GetHeight() * HALF;
+    } else if (isPress_) {
+        double pressRadius = NormalizeToPx(PRESS_RADIUS);
+        offsetX = pressRadius > shadowRect.GetWidth() * HALF ? pressRadius : shadowRect.GetWidth() * HALF;
+        offsetY = pressRadius > shadowRect.GetHeight() * HALF ? pressRadius : shadowRect.GetHeight() * HALF;
+    } else {
+        offsetX = shadowRect.GetWidth() * HALF;
+        offsetY = shadowRect.GetHeight() * HALF;
+    }
+#endif
     rsNode->SetFrame(frame.x_ - offsetX, frame.y_ - offsetY, frame.z_ + offsetX, frame.w_ + offsetY);
 }
 
@@ -101,6 +148,7 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     if (isHover_) {
         SkPaint hoverPaint;
         hoverPaint.setColor(HOVER_BORDER_COLOR);
@@ -114,11 +162,31 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
         double pressRadius = NormalizeToPx(PRESS_RADIUS);
         canvas->drawCircle(offset.GetX(), offset.GetY(), pressRadius, pressPaint);
     }
+#else
+    if (isHover_) {
+        RSPen hoverPen;
+        hoverPen.SetColor(HOVER_BORDER_COLOR);
+        double hoverRadius = NormalizeToPx(HOVER_RADIUS);
+        canvas->AttachPen(hoverPen);
+        canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), hoverRadius);
+        canvas->DetachPen();
+    }
+
+    if (isPress_) {
+        RSPen pressPen;
+        pressPen.SetColor(PRESS_BORDER_COLOR);
+        double pressRadius = NormalizeToPx(PRESS_RADIUS);
+        canvas->AttachPen(pressPen);
+        canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), pressRadius);
+        canvas->DetachPen();
+    }
+#endif
 
     double radius = NormalizeToPx(blockSize_) * HALF * radiusScale_;
 
     PaintShadow(context, offset, radius);
 
+#ifndef USE_ROSEN_DRAWING
     if (GetFocus() && GetMode() == SliderMode::OUTSET) {
         SkPaint focusPaint;
         focusPaint.setColor(FOCUS_BORDER_COLOR);
@@ -148,14 +216,61 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
     borderPaint.setAntiAlias(true);
     borderPaint.setStrokeWidth(BORDER_WEIGHT);
     canvas->drawCircle(offset.GetX(), offset.GetY(), radius, borderPaint);
+#else
+    if (GetFocus() && GetMode() == SliderMode::OUTSET) {
+        RSPen focusPen;
+        focusPen.SetColor(FOCUS_BORDER_COLOR);
+        focusPen.SetWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
+        focusPen.SetAntiAlias(true);
+        canvas->AttachPen(focusPen);
+        canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), radius + RADIUS_PADDING);
+        canvas->DetachPen();
+        RSPen blockPen;
+        blockPen.SetColor(RSColor::ColorQuadSetARGB(GetBlockColor().GetAlpha(),
+            GetBlockColor().GetRed(), GetBlockColor().GetGreen(), GetBlockColor().GetBlue()));
+        blockPen.SetAntiAlias(true);
+        canvas->AttachPen(blockPen);
+        canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), radius);
+        canvas->DetachPen();
+    } else {
+        RSPen blockPen;
+        blockPen.SetColor(RSColor::ColorQuadSetARGB(GetBlockColor().GetAlpha(),
+            GetBlockColor().GetRed(), GetBlockColor().GetGreen(), GetBlockColor().GetBlue()));
+        blockPen.SetAntiAlias(true);
+        canvas->AttachPen(blockPen);
+        canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), radius);
+        canvas->DetachPen();
+    }
+
+    // Draw block border
+    RSPen blockPen;
+    // use this color to reduce the loss at corner.
+    static const uint8_t alpha = 13;
+    blockPen.SetColor(RSColor::ColorQuadSetARGB(alpha, 0, 0, 0));
+    blockPen.SetAntiAlias(true);
+    blockPen.SetWidth(BORDER_WEIGHT);
+    canvas->AttachPen(blockPen);
+    canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), radius);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderCircleBlock::PaintShadow(RenderContext& context, const Offset& offset, double radius)
 {
     double diameter = radius * 2.0;
+#ifndef USE_ROSEN_DRAWING
     SkRect rect = SkRect::MakeXYWH(offset.GetX() - radius, offset.GetY() - radius, diameter, diameter);
     RosenDecorationPainter::PaintShadow(SkPath().addRRect(SkRRect::MakeRectXY(rect, radius, radius)),
         ShadowConfig::DefaultShadowXS, static_cast<RosenRenderContext*>(&context)->GetCanvas());
+#else
+    RSRect rect =
+        RSRect(offset.GetX() - radius, offset.GetY() - radius,
+            diameter + offset.GetX() - radius, diameter + offset.GetY() - radius);
+    RSRecordingPath path;
+    path.AddRoundRect(rect, radius, radius);
+    RosenDecorationPainter::PaintShadow(
+        path, ShadowConfig::DefaultShadowXS, static_cast<RosenRenderContext*>(&context)->GetCanvas());
+#endif
 }
 
 } // namespace OHOS::Ace

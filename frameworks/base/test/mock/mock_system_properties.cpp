@@ -13,23 +13,13 @@
  * limitations under the License.
  */
 
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
-namespace {
-constexpr int32_t PAGE_NODES = 1000;
-constexpr int32_t PAGE_DEPTH = 30;
-constexpr int32_t NODE_CHILDREN = 100;
-constexpr int32_t FUNCTION_TIMEOUT = 15;
-constexpr int32_t VSYNC_TIMEOUT = 500;
-constexpr int32_t NODE_TIMEOUT = 15;
-constexpr int32_t FOREACH_ITEMS = 50;
-constexpr int32_t FLEX_LAYOUTS = 8;
-} // namespace
-
-DeviceType SystemProperties::deviceType_ = DeviceType::UNKNOWN;
+DeviceType SystemProperties::deviceType_ = DeviceType::PHONE;
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
@@ -38,7 +28,15 @@ double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
-PerformancePtr SystemProperties::performanceProps_ = nullptr;
+
+int32_t AceChecker::pageNodes_ = 0;
+int32_t AceChecker::pageDepth_ = 0;
+int32_t AceChecker::nodeChildren_ = 0;
+int32_t AceChecker::functionTimeout_ = 0;
+int32_t AceChecker::vsyncTimeout_ = 0;
+int32_t AceChecker::nodeTimeout_ = 0;
+int32_t AceChecker::foreachItems_ = 0;
+int32_t AceChecker::flexLayouts_ = 0;
 
 // =================================================================================
 // resolve compile error temporarily and wait
@@ -70,6 +68,14 @@ AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& /* name 
 
 AceScopedPerformanceCheck::~AceScopedPerformanceCheck() {}
 
+bool AceChecker::IsPerformanceCheckEnabled()
+{
+    return false;
+}
+
+void AceChecker::NotifyCaution(const std::string& tag) {}
+
+void AceChecker::InitPerformanceParameters() {}
 // =================================================================================
 
 float SystemProperties::GetFontWeightScale()
@@ -80,7 +86,7 @@ float SystemProperties::GetFontWeightScale()
 
 DeviceType SystemProperties::GetDeviceType()
 {
-    return DeviceType::PHONE;
+    return deviceType_;
 }
 
 bool SystemProperties::GetDebugEnabled()
@@ -98,44 +104,4 @@ bool SystemProperties::GetIsUseMemoryMonitor()
     return false;
 }
 
-void SystemProperties::InitPerformanceParameters() {}
-
-bool SystemProperties::IsPerformanceCheckEnabled()
-{
-    return SystemProperties::performanceProps_ != nullptr;
-}
-
-int32_t SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType type)
-{
-    int32_t result = 0;
-    switch (type) {
-        case PerformanceParameterType::PAGE_NODES:
-            result = PAGE_NODES;
-            break;
-        case PerformanceParameterType::PAGE_DEPTH:
-            result = PAGE_DEPTH;
-            break;
-        case PerformanceParameterType::NODE_CHILDREN:
-            result = NODE_CHILDREN;
-            break;
-        case PerformanceParameterType::FUNCTION_TIMEOUT:
-            result = FUNCTION_TIMEOUT;
-            break;
-        case PerformanceParameterType::VSYNC_TIMEOUT:
-            result = VSYNC_TIMEOUT;
-            break;
-        case PerformanceParameterType::NODE_TIMEOUT:
-            result = NODE_TIMEOUT;
-            break;
-        case PerformanceParameterType::FOREACH_ITEMS:
-            result = FOREACH_ITEMS;
-            break;
-        case PerformanceParameterType::FLEX_LAYOUTS:
-            result = FLEX_LAYOUTS;
-            break;
-        default:
-            result = -1;
-    }
-    return result;
-}
 } // namespace OHOS::Ace

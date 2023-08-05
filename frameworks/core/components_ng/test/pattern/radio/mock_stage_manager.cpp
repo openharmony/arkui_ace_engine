@@ -37,4 +37,21 @@ RefPtr<FrameNode> StageManager::GetLastPage()
     stageNode_ = frameNode;
     return stageNode_;
 }
+
+RefPtr<FrameNode> StageManager::GetPageById(int32_t pageId)
+{
+    auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(0, "", "", "");
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PAGE_ETS_TAG, nodeId, [entryPageInfo]() { return AceType::MakeRefPtr<PagePattern>(entryPageInfo); });
+    stageNode_ = frameNode;
+    const auto& children = stageNode_->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetPageId() == pageId) {
+            return DynamicCast<FrameNode>(child);
+        }
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

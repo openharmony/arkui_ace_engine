@@ -32,7 +32,7 @@ void ListItemModelImpl::Create()
     JSInteractableView::SetFocusNode(true);
 }
 
-void ListItemModelImpl::Create(std::function<void(int32_t)>&& deepRenderFunc)
+void ListItemModelImpl::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle)
 {
     auto listItemComponent = AceType::MakeRefPtr<V2::ListItemComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(listItemComponent);

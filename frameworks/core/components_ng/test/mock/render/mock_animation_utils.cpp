@@ -20,7 +20,11 @@ class AnimationUtils::Animation {};
 
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
-{}
+{
+    if (wrapFinishCallback) {
+        wrapFinishCallback();
+    }
+}
 
 bool AnimationUtils::CloseImplicitAnimation()
 {
@@ -47,9 +51,16 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
 
 void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
 {
-    callback();
+    if (callback) {
+        callback();
+    }
 }
-void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback) {}
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback)
+{
+    if (callback) {
+        callback();
+    }
+}
 
 void AnimationUtils::AnimateWithCurrentOptions(
     const PropertyCallback& callback, const FinishCallback& finishCallback, bool timingSensitive)
@@ -64,8 +75,11 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
 
 void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
 
-bool AnimationUtils::IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
-{
-    return false;
-}
+void AnimationUtils::BlendBgColorAnimation(
+    RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
+{}
+
+void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
+
+void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
 } // namespace OHOS::Ace

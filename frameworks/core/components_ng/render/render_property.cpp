@@ -15,6 +15,9 @@
 
 #include "core/components_ng/render/render_property.h"
 
+#include "core/common/ace_application_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 std::string ImageRepeatToString(ImageRepeat type)
@@ -51,7 +54,7 @@ std::string BasicShapeTypeToString(BasicShapeType type)
 }
 } // namespace
 
-#define ACE_OFFSET_TO_JSON(name)                                     \
+#define ACE_OFFSET_API_NINE_TO_JSON(name)                            \
     auto json##name = JsonUtil::Create(true);                        \
     if (prop##name.has_value()) {                                    \
         json##name->Put("x", prop##name->GetX().ToString().c_str()); \
@@ -59,23 +62,43 @@ std::string BasicShapeTypeToString(BasicShapeType type)
     } else {                                                         \
         json##name->Put("x", "0.0px");                               \
         json##name->Put("y", "0.0px");                               \
-    }
+    }                                                                \
+
+
+#define ACE_OFFSET_API_TEN_TO_JSON(name)                             \
+    auto json##name = JsonUtil::Create(true);                        \
+    if (prop##name.has_value()) {                                    \
+        json##name->Put("x", prop##name->GetX().ToString().c_str()); \
+        json##name->Put("y", prop##name->GetY().ToString().c_str()); \
+    } else {                                                         \
+        json##name->Put("x", "");                                    \
+        json##name->Put("y", "");                                    \
+    }                                                                \
 
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    ACE_OFFSET_TO_JSON(Position);
+    ACE_OFFSET_API_TEN_TO_JSON(Position);
     json->Put("position", jsonPosition);
 
-    ACE_OFFSET_TO_JSON(Offset);
-    json->Put("offset", jsonOffset);
+    auto context = PipelineContext::GetCurrentContext();
+    // add version protection, null as default start from API 10 or higher
+    if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
+        ACE_OFFSET_API_TEN_TO_JSON(Offset);
+        json->Put("offset", jsonOffset);
 
-    ACE_OFFSET_TO_JSON(Anchor);
-    json->Put("markAnchor", jsonAnchor);
+        ACE_OFFSET_API_TEN_TO_JSON(Anchor);
+        json->Put("markAnchor", jsonAnchor);
+    } else {
+        ACE_OFFSET_API_NINE_TO_JSON(Offset);
+        json->Put("offset", jsonOffset);
+
+        ACE_OFFSET_API_NINE_TO_JSON(Anchor);
+        json->Put("markAnchor", jsonAnchor);
+    }
 }
 
 void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("blur", round(propFrontBlurRadius.value_or(0.0_vp).Value() * 100) / 100);
     json->Put("grayscale", propFrontGrayScale.has_value() ? propFrontGrayScale->Value() : 0.0);
     json->Put("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0);
     json->Put("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0);
@@ -132,9 +155,20 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
+void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    std::string backgroundPixelMap = "NONE";
+    if (propBackgroundPixelMap.has_value()) {
+        backgroundPixelMap = std::to_string(propBackgroundPixelMap.value()->GetWidth()) + ", " +
+                          std::to_string(propBackgroundPixelMap.value()->GetHeight());
+    }
+    json->Put("backgroundPixelMap", backgroundPixelMap.c_str());
+    json->Put("backgroundAlign", propBackgroundAlign.value().ToString().c_str());
+}
+
 void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("frontBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
+    json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -148,11 +182,7 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         }
         json->Put("clip", jsonClip->ToString().c_str());
     } else {
-        if (json->Contains("startIndex")) {
-            json->Put("clip", propClipEdge.value_or(true) ? "true" : "false");
-        } else {
-            json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
-        }
+        json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
     }
 
     auto jsonMask = JsonUtil::Create(true);
@@ -198,8 +228,14 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("y", std::to_string(propTransformRotate->y).c_str());
         jsonValue->Put("z", std::to_string(propTransformRotate->z).c_str());
         jsonValue->Put("angle", std::to_string(propTransformRotate->w).c_str());
+        jsonValue->Put("perspective", std::to_string(propTransformRotate->v).c_str());
         jsonValue->Put("centerX", center.GetX().ToString().c_str());
         jsonValue->Put("centerY", center.GetY().ToString().c_str());
+        if (center.GetZ().has_value()) {
+            jsonValue->Put("centerZ", center.GetZ().value().ToString().c_str());
+        } else {
+            json->Put("centerZ", JsonUtil::Create(true));
+        }
         json->Put("rotate", jsonValue);
     } else {
         json->Put("rotate", JsonUtil::Create(true));
@@ -225,5 +261,17 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("translate", JsonUtil::Create(true));
     }
+}
+
+void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto jsonBorder = JsonUtil::Create(true);
+
+    propBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonBorder);
+    propBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonBorder);
+    propBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonBorder);
+    propBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonBorder);
+
+    json->Put("border", jsonBorder->ToString().c_str());
 }
 } // namespace OHOS::Ace::NG

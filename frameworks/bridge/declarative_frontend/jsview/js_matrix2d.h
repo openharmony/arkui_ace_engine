@@ -87,6 +87,11 @@ public:
         return transform_;
     }
 
+    void SetTransform(const TransformParam& param)
+    {
+        transform_ = param;
+    }
+
     std::string ToString() const;
     ACE_DISALLOW_COPY_AND_MOVE(JSMatrix2d);
 

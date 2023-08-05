@@ -28,7 +28,7 @@
 namespace OHOS::Ace {
 class ContainerScope;
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW ScopedDelegate final {
+class ACE_FORCE_EXPORT ScopedDelegate final {
 public:
     ScopedDelegate(Framework::FrontendDelegate* delegate, int32_t id);
     ~ScopedDelegate();
@@ -53,7 +53,7 @@ private:
     ContainerScope* scope_;
 };
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW EngineHelper final {
+class ACE_FORCE_EXPORT EngineHelper final {
 public:
     static void AddEngine(int32_t id, WeakPtr<Framework::JsEngine> engine);
 

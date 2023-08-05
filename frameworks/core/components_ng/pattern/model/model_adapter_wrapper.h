@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/model/model_paint_property.h"
 #include "core/components_ng/pattern/model/model_touch_handler.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/scene_viewer_touch_event.h"
+#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/shader_input_buffer.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/ohos/texture_layer.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/scene_viewer_adapter.h"
 
@@ -52,10 +53,15 @@ struct SceneViewerAdapterProperties {
     Quaternion cameraRotation_ = Quaternion(MAX_INVALID,
         MAX_INVALID, MAX_INVALID, MAX_INVALID);
 
-    // Lights
     std::vector<RefPtr<OHOS::Render3D::SVLight>> lights_;
     std::vector<RefPtr<OHOS::Render3D::GLTFAnimation>> animations_;
     std::vector<RefPtr<OHOS::Render3D::SVGeometry>> geometries_;
+    std::vector<RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>> customRenders_;
+
+    // Shader properties.
+    std::string shaderPath_ = "";
+    std::vector<std::string> imageTexturePaths_;
+    std::vector<RefPtr<OHOS::Render3D::ShaderInputBuffer>> shaderInputBuffers_;
 };
 
 class ModelAdapterWrapper : public virtual AceType {
@@ -74,6 +80,7 @@ public:
     bool IsReady();
     bool NeedsRepaint();
     SkDrawable* GetDrawable(OffsetF offset);
+    std::shared_ptr<OHOS::Render3D::TextureLayer> GetTextureLayer(OffsetF offset);
     bool HandleTouchEvent(const TouchEventInfo& info);
 
 private:
@@ -93,6 +100,10 @@ private:
     void UpdateGLTFAnimations(const SceneViewerAdapterProperties& properties);
     void UpdateGeometries(const SceneViewerAdapterProperties& properties);
     void HandleCameraMove(const OHOS::Render3D::SceneViewerTouchEvent& event);
+    void UpdateCustomRenders(const SceneViewerAdapterProperties& properties);
+    void UpdateShaderPath(const SceneViewerAdapterProperties& properties);
+    void UpdateImageTexturePaths(const SceneViewerAdapterProperties& properties);
+    void UpdateShaderInputBuffers(const SceneViewerAdapterProperties& properties);
 
 private:
     uint32_t key_ = -1;
@@ -105,7 +116,7 @@ private:
     std::shared_ptr<OHOS::Render3D::TextureInfo> textureInfo_;
     std::shared_ptr<OHOS::Render3D::TextureLayer> textureLayer_;
     RefPtr<ModelTouchHandler> touchHandler_;
-
+    EGLContext eglContext_ = EGL_NO_CONTEXT;
     ACE_DISALLOW_COPY_AND_MOVE(ModelAdapterWrapper);
 };
 

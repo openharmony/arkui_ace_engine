@@ -27,6 +27,7 @@ const char SURFACE_ERRORCODE_CREATEFAIL[] = "error_video_000001";
 const char SURFACE_ERRORMSG_CREATEFAIL[] = "Unable to initialize video player.";
 
 const char SURFACE_METHOD_ONCREATE[] = "onCreate";
+const char SURFACE_METHOD_ONCHANGED[] = "onChanged";
 
 const char SET_SURFACE_BOUNDS[] = "setSurfaceBounds";
 const char SURFACE_ID[] = "surfaceId";
@@ -34,6 +35,8 @@ const char SURFACE_LEFT[] = "surfaceLeft";
 const char SURFACE_TOP[] = "surfaceTop";
 const char SURFACE_HEIGHT[] = "surfaceHeight";
 const char SURFACE_WIDTH[] = "surfaceWidth";
+const char SET_IS_FULLSCREEN[] = "setIsFullScreen";
+const char IS_FULLSCREEN[] = "isFullScreen";
 
 ExtSurface::~ExtSurface()
 {
@@ -90,9 +93,22 @@ void ExtSurface::CreateExtSurface(const std::function<void(int64_t)>& onCreate)
             }
         });
 
+    resRegister->RegisterEvent(
+        MakeEventHash(SURFACE_METHOD_ONCHANGED), [weak = WeakClaim(this)](const std::string& param) {
+            auto surface = weak.Upgrade();
+            if (surface) {
+                auto width = surface->GetIntParam(param, SURFACE_WIDTH);
+                auto height = surface->GetIntParam(param, SURFACE_HEIGHT);
+                surface->OnSurfaceChanged(width, height);
+            }
+        });
+
     if (onCreate) {
         onCreate(id_);
     }
+#if defined(IOS_PLATFORM)
+    OnSurfaceCreated();
+#endif
 }
 
 void ExtSurface::SetBounds(int64_t surfaceId, int32_t left, int32_t top, int32_t width, int32_t height)
@@ -105,10 +121,26 @@ void ExtSurface::SetBounds(int64_t surfaceId, int32_t left, int32_t top, int32_t
     CallResRegisterMethod(MakeMethodHash(SET_SURFACE_BOUNDS), param);
 }
 
+void ExtSurface::SetIsFullScreen(bool isFullScreen)
+{
+    std::stringstream paramStream;
+    paramStream << IS_FULLSCREEN << PARAM_EQUALS << isFullScreen;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(MakeMethodHash(SET_IS_FULLSCREEN), param);
+}
+
 void ExtSurface::OnSurfaceCreated()
 {
     if (onSurfaceCreated_) {
         onSurfaceCreated_();
+    }
+}
+
+void ExtSurface::OnSurfaceChanged(int32_t width, int32_t height)
+{
+    LOGI("OnSurfaceChanged. width: %{public}d height: %{public}d", width, height);
+    if (onSurfaceChanged_) {
+        onSurfaceChanged_(width, height);
     }
 }
 

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -30,13 +31,14 @@ namespace OHOS::Ace::NG {
 namespace {
 void NormalizeRadius(BorderRadiusArray& radius, const SizeF& size)
 {
+    auto maxRadius = std::min(size.Width(), size.Height()) / 2;
     // radius shouldn't be larger than half of image size
     for (auto&& corner : radius) {
-        if (corner.GetX() > size.Width() / 2) {
-            corner.SetX(size.Width() / 2);
+        if (corner.GetX() > maxRadius) {
+            corner.SetX(maxRadius);
         }
-        if (corner.GetY() > size.Height() / 2) {
-            corner.SetY(size.Height() / 2);
+        if (corner.GetY() > maxRadius) {
+            corner.SetY(maxRadius);
         }
     }
 }
@@ -93,16 +95,14 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
-    config.needFlipCanvasHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
+    config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     auto colorFilterMatrix = renderProps->GetColorFilter();
     if (colorFilterMatrix.has_value()) {
         config.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
     }
-    // scale for recordingCanvas: take padding into account
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto contentSize = paintWrapper->GetContentSize();
-    config.scaleX_ = contentSize.Width() / frameSize.Width();
-    config.scaleY_ = contentSize.Height() / frameSize.Height();
+    auto renderCtx = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderCtx);
+    config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper);
@@ -112,16 +112,18 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
 CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_RETURN(canvasImage_, nullptr);
-    auto offset = paintWrapper->GetContentOffset();
     auto contentSize = paintWrapper->GetContentSize();
 
     // update render props to ImagePaintConfig
     auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(props, nullptr);
     UpdatePaintConfig(props, paintWrapper);
+    auto&& fillColor = props->GetSvgFillColor();
+    if (InstanceOf<SvgCanvasImage>(canvasImage_) && fillColor) {
+        DynamicCast<SvgCanvasImage>(canvasImage_)->SetFillColor(fillColor);
+    }
     ImagePainter imagePainter(canvasImage_);
-    return
-        [imagePainter, offset, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, contentSize); };
+    return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };
 }
 
 CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)

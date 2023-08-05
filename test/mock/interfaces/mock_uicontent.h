@@ -22,31 +22,14 @@
 #include "ui_content.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-class Ability;
-class Configuration;
-class FormAshmem;
-} // namespace AppExecFwk
-namespace AAFwk {
-class Want;
-} // namespace AAFwk
-namespace MMI {
-class PointerEvent;
-class AxisEvent;
-} // namespace MMI
-namespace Media {
-class PixelMap;
-} // namespace Media
-} // namespace OHOS
-namespace OHOS {
 namespace Ace {
 class MockUIContent : public UIContent {
 public:
     MockUIContent() = default;
     ~MockUIContent() override = default;
     MOCK_METHOD3(Initialize, void(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage));
-    MOCK_METHOD3(
-        Initialize, void(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage));
+    MOCK_METHOD4(Initialize,
+        void(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowID));
     MOCK_METHOD0(Foreground, void());
     MOCK_METHOD0(Background, void());
     MOCK_METHOD0(Focus, void());
@@ -84,9 +67,14 @@ public:
     MOCK_METHOD0(GetFormHeight, float());
     MOCK_METHOD2(OnFormSurfaceChange, void(float width, float height));
     MOCK_METHOD1(SetActionEventHandler, void(std::function<void(const std::string& action)>&& actionCallback));
+    MOCK_METHOD1(SetFormLinkInfoUpdateHandler, void(std::function<void(const std::vector<std::string>&)>&& callback));
     MOCK_METHOD1(SetErrorEventHandler,
         void(std::function<void(const std::string& code, const std::string& msg)>&& actionCallback));
-    MOCK_METHOD0(ReloadForm, void());
+    MOCK_METHOD1(ReloadForm, void(const std::string& url));
+    MOCK_METHOD1(SetIsFocusActive, void(bool isFocusActive));
+
+    MOCK_METHOD2(CreateModalUIExtension, int32_t(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks));
+    MOCK_METHOD1(CloseModalUIExtension, void(int32_t sessionId));
 };
 } // namespace Ace
 } // namespace OHOS

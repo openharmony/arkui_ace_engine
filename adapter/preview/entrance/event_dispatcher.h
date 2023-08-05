@@ -16,11 +16,12 @@
 #ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_EVENT_DISPATCHER_H
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_EVENT_DISPATCHER_H
 
+#include "adapter/preview/external/multimodalinput/axis_event.h"
+#include "adapter/preview/external/multimodalinput/key_event.h"
+#include "adapter/preview/external/multimodalinput/pointer_event.h"
 #include "base/memory/referenced.h"
-#include "base/utils/singleton.h"
 #include "base/utils/macros.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
+#include "base/utils/singleton.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
@@ -28,19 +29,16 @@
 
 namespace OHOS::Ace::Platform {
 
-using CallbackGetKeyboardStatus = std::function< bool(void) >;
-
-class ACE_FORCE_EXPORT_WITH_PREVIEW EventDispatcher : public Singleton<EventDispatcher> {
+class ACE_FORCE_EXPORT EventDispatcher : public Singleton<EventDispatcher> {
     DECLARE_SINGLETON(EventDispatcher);
+
 public:
     void Initialize();
     void DispatchIdleEvent(int64_t deadline);
-    bool DispatchTouchEvent(const TouchEvent& event);
+    bool DispatchTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool DispatchBackPressedEvent();
-    bool DispatchInputMethodEvent(unsigned int code_point);
-    bool DispatchKeyEvent(const KeyEvent& event);
-    void RegisterCallbackGetCapsLockStatus(CallbackGetKeyboardStatus callback);
-    void RegisterCallbackGetNumLockStatus(CallbackGetKeyboardStatus callback);
+    bool DispatchInputMethodEvent(unsigned int codePoint);
+    bool DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 #ifndef ENABLE_ROSEN_BACKEND
     void SetGlfwWindowController(const FlutterDesktopWindowControllerRef& controller)
     {
@@ -50,9 +48,7 @@ public:
 
 private:
     // Process all printable characters. If the input method is used, this function is invalid.
-    bool HandleTextKeyEvent(const KeyEvent& event);
-    CallbackGetKeyboardStatus callbackGetCapsLockStatus_;
-    CallbackGetKeyboardStatus callbackGetNumLockStatus_;
+    bool HandleTextKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 #ifndef ENABLE_ROSEN_BACKEND
     FlutterDesktopWindowControllerRef controller_ = nullptr;
 #endif

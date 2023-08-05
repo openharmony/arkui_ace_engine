@@ -30,6 +30,7 @@ public:
     static void SetSticky(int32_t sticky);
     static void SetEditable(const JSCallbackInfo& args);
     static void SetSelectable(bool selectable);
+    static void SetSelected(const JSCallbackInfo& info);
     static void SetSwiperAction(const JSCallbackInfo& args);
     static void SelectCallback(const JSCallbackInfo& args);
     static void JsBorderRadius(const JSCallbackInfo& info);

@@ -12,3 +12,4 @@
 # limitations under the License.
 
 persist.sys.arkui.animationscale = accessibility:accessibility:0777
+persist.ace. = accessibility:accessibility:0777

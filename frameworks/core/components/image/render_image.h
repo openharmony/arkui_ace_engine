@@ -252,7 +252,7 @@ public:
     {
         return border_;
     }
-
+#ifndef USE_ROSEN_DRAWING
     virtual void* GetSkImage() {
         return nullptr;
     }
@@ -261,6 +261,17 @@ public:
     {
         return nullptr;
     }
+#else
+    virtual void* GetDrawingImage()
+    {
+        return nullptr;
+    }
+
+    virtual RefPtr<PixelMap> GetPixmapFromDrawingImage()
+    {
+        return nullptr;
+    }
+#endif
 
     void OnPaintFinish() override;
     void OnLongPress(const LongPressInfo& longPressInfo);

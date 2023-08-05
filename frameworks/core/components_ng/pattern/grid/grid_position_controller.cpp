@@ -17,38 +17,32 @@
 
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
-void GridPositionController::JumpTo(int32_t index, int32_t /* source */)
+void GridPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign align, int32_t /* source */)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    gridPattern->UpdateStartIndex(index);
-}
-
-bool GridPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    return gridPattern->AnimateTo(position.ConvertToPx(), duration, curve);
-}
-
-void GridPositionController::ScrollBy(double /* pixelX */, double /* pixelY */, bool /* smooth */) {}
-
-Axis GridPositionController::GetScrollDirection() const
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, Axis::NONE);
-    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    if (gridPattern) {
-        return gridPattern->GetGridLayoutInfo().axis_;
+    if (align == ScrollAlign::NONE) {
+        align = ScrollAlign::AUTO;
     }
-    return Axis::VERTICAL;
+    gridPattern->StopAnimate();
+    gridPattern->UpdateStartIndex(index, align);
+}
+
+void GridPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
+    CHECK_NULL_VOID(gridPattern);
+    auto offset = gridPattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
+    gridPattern->ScrollBy(static_cast<float>(offset));
 }
 
 void GridPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool /* smooth */)
@@ -56,14 +50,10 @@ void GridPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool /*
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-
-    if ((gridPattern->GetGridLayoutInfo().axis_ == Axis::VERTICAL && scrollEdgeType == ScrollEdgeType::SCROLL_TOP) ||
-        (gridPattern->GetGridLayoutInfo().axis_ == Axis::HORIZONTAL && scrollEdgeType == ScrollEdgeType::SCROLL_LEFT)) {
+    gridPattern->StopAnimate();
+    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         gridPattern->UpdateStartIndex(0);
-    } else if ((gridPattern->GetGridLayoutInfo().axis_ == Axis::VERTICAL &&
-                   scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) ||
-               (gridPattern->GetGridLayoutInfo().axis_ == Axis::HORIZONTAL &&
-                   scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT)) {
+    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
         gridPattern->UpdateStartIndex(gridPattern->GetGridLayoutInfo().childrenCount_ - 1);
     }
 }
@@ -78,21 +68,10 @@ void GridPositionController::ScrollPage(bool reverse, bool /* smooth */)
     }
 }
 
-Offset GridPositionController::GetCurrentOffset() const
+bool GridPositionController::IsAtEnd() const
 {
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, Offset::Zero());
-    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    auto axis = gridPattern->GetGridLayoutInfo().axis_;
-    if (axis == Axis::NONE) {
-        return Offset::Zero();
-    }
-
-    auto pxOffset = gridPattern->GetGridLayoutInfo().currentOffset_;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, Offset::Zero());
-    auto vpOffset = Dimension(pxOffset, DimensionUnit::PX).ConvertToVp();
-    return (axis == Axis::HORIZONTAL) ? Offset(vpOffset, 0) : Offset(0, vpOffset);
+    auto gridPattern = AceType::DynamicCast<GridPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN_NOLOG(gridPattern, false);
+    return gridPattern->IsAtBottom();
 }
-
 } // namespace OHOS::Ace::NG

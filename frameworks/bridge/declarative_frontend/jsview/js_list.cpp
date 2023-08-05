@@ -55,13 +55,20 @@ ListModel* ListModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+const std::vector<V2::ScrollSnapAlign> SCROLL_SNAP_ALIGN = { V2::ScrollSnapAlign::NONE, V2::ScrollSnapAlign::START,
+    V2::ScrollSnapAlign::CENTER, V2::ScrollSnapAlign::END };
+
 void JSList::SetDirection(int32_t direction)
 {
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
 }
 
-void JSList::SetScrollBar(int32_t scrollBar)
+void JSList::SetScrollBar(const JSCallbackInfo& info)
 {
+    // default value 1 represents scrollBar DisplayMode::AUTO.
+    int32_t scrollBar = 1;
+    ParseJsInteger<int32_t>(info[0], scrollBar);
+    scrollBar = scrollBar < 0 ? 1 : scrollBar;
     ListModel::GetInstance()->SetScrollBar(static_cast<DisplayMode>(scrollBar));
 }
 
@@ -142,18 +149,26 @@ void JSList::SetChainAnimationOptions(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsObject()) {
+        RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
+        CHECK_NULL_VOID(listTheme);
+        ChainAnimationOptions options = {
+            .minSpace = listTheme->GetChainMinSpace(),
+            .maxSpace = listTheme->GetChainMaxSpace(),
+            .conductivity = listTheme->GetChainConductivity(),
+            .intensity = listTheme->GetChainIntensity(),
+            .edgeEffect = 0,
+            .stiffness = listTheme->GetChainStiffness(),
+            .damping = listTheme->GetChainDamping(),
+        };
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-        CalcDimension minSpace = 10.0_vp;
-        ParseJsDimensionVp(jsObj->GetProperty("minSpace"), minSpace);
-        CalcDimension maxSpace = 40.0_vp;
-        ParseJsDimensionVp(jsObj->GetProperty("maxSpace"), maxSpace);
-        double conductivity = 0.7f;
-        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("conductivity"), conductivity);
-        double intensity = 0.3f;
-        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("intensity"), intensity);
-        int32_t edgeEffect = 0;
-        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("edgeEffect"), edgeEffect);
-        ListModel::GetInstance()->SetChainAnimationOptions(minSpace, maxSpace, conductivity, intensity, edgeEffect);
+        ParseJsDimensionVp(jsObj->GetProperty("minSpace"), options.minSpace);
+        ParseJsDimensionVp(jsObj->GetProperty("maxSpace"), options.maxSpace);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("conductivity"), options.conductivity);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("intensity"), options.intensity);
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("edgeEffect"), options.edgeEffect);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("stiffness"), options.stiffness);
+        JSViewAbstract::ParseJsDouble(jsObj->GetProperty("damping"), options.damping);
+        ListModel::GetInstance()->SetChainAnimationOptions(options);
     }
 }
 
@@ -179,6 +194,16 @@ void JSList::SetLanes(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
+    }
+
+    if (info.Length() >= 2 && !(info[1]->IsNull())) { /* 2: parameter count */
+        CalcDimension laneGutter;
+        if (JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
+            if (laneGutter.IsNegative()) {
+                laneGutter.Reset();
+            }
+        }
+        ListModel::GetInstance()->SetLaneGutter(laneGutter);
     }
 
     int32_t laneNum = 1;
@@ -215,6 +240,27 @@ void JSList::SetSticky(int32_t sticky)
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
 }
 
+void JSList::SetContentStartOffset(float startOffset)
+{
+    ListModel::GetInstance()->SetContentStartOffset(startOffset);
+}
+
+void JSList::SetContentEndOffset(float endOffset)
+{
+    ListModel::GetInstance()->SetContentEndOffset(endOffset);
+}
+
+void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
+{
+    V2::ScrollSnapAlign param;
+    if (scrollSnapAlign < 0 || scrollSnapAlign >= static_cast<int32_t>(SCROLL_SNAP_ALIGN.size())) {
+        param = V2::ScrollSnapAlign::NONE;
+    } else {
+        param = V2::ScrollSnapAlign(scrollSnapAlign);
+    }
+    ListModel::GetInstance()->SetScrollSnapAlign(param);
+}
+
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
@@ -242,6 +288,43 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSList::SetNestedScroll(const JSCallbackInfo& args)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        ListModel::GetInstance()->SetNestedScroll(nestedOpt);
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t froward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
+    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        froward = 0;
+    }
+    int32_t backward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
+    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        backward = 0;
+    }
+    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
+    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
+    ListModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
+
+void JSList::SetScrollEnabled(const JSCallbackInfo& args)
+{
+    ListModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
+}
+
 void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -254,6 +337,16 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
         ListModel::GetInstance()->SetOnScroll(std::move(onScroll));
     }
     args.ReturnSelf();
+}
+
+void JSList::SetFriction(const JSCallbackInfo& info)
+{
+    double friction = -1.0;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+        LOGW("Friction params invalid,can not convert to double");
+        friction = -1.0;
+    }
+    ListModel::GetInstance()->SetFriction(friction);
 }
 
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
@@ -340,9 +433,9 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
         auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                 const int32_t start, const int32_t end) {
+                                 const int32_t start, const int32_t end, const int32_t center) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(start, end);
+            auto params = ConvertToJSValues(start, end, center);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
         };
@@ -546,6 +639,12 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
+    JSClass<JSList>::StaticMethod("contentStartOffset", &JSList::SetContentStartOffset);
+    JSClass<JSList>::StaticMethod("contentEndOffset", &JSList::SetContentEndOffset);
+    JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
+    JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
+    JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
+    JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

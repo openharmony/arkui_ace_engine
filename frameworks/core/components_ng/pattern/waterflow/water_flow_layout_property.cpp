@@ -62,10 +62,11 @@ void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) cons
                                                 .value_or(CalcLength(Infinity<double>(), DimensionUnit::VP))
                                                 .ToString()
                                                 .c_str());
-        json->Put("constraintSize", jsonConstraintSize->ToString().c_str());
+        json->Put("itemConstraintSize", jsonConstraintSize->ToString().c_str());
     } else {
-        json->Put("constraintSize", "0");
+        json->Put("itemConstraintSize", "0");
     }
+    json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
 }
 
 std::string WaterFlowLayoutProperty::GetWaterflowDirectionStr() const
@@ -83,6 +84,7 @@ RefPtr<LayoutProperty> WaterFlowLayoutProperty::Clone() const
     value->propRowsGap_ = CloneRowsGap();
     value->propColumnsGap_ = CloneColumnsGap();
     value->propWaterflowDirection_ = CloneWaterflowDirection();
+    value->propScrollEnabled_ = CloneScrollEnabled();
     if (itemLayoutConstraint_) {
         value->itemLayoutConstraint_ = std::make_unique<MeasureProperty>(*itemLayoutConstraint_);
     }

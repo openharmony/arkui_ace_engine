@@ -21,6 +21,8 @@
 #define protected public
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/geometry/axis.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -28,12 +30,12 @@
 #include "core/components_ng/pattern/shape/circle_pattern.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
 #include "core/components_ng/test/pattern/shape/base_shape_pattern_test_ng.h"
-#include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -41,11 +43,18 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
 namespace {
+const float ZERO = 0.0;
 const float LEFT = -20.0f;
 const float TOP = -30.0f;
 const int32_t COLUMN = 2;
 const int32_t ROW = 3;
 std::vector<double> MESH = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
+const float CONTAINER_WIDTH = 300.0f;
+const float CONTAINER_HEIGHT = 300.0f;
+const float FIRST_ITEM_WIDTH = 150.0f;
+const float FIRST_ITEM_HEIGHT = 75.0f;
+const float MAIN_SIZE = 600.0f;
+const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 } // namespace
 
 class ShapePatternTestNg : public BaseShapePatternTestNg {
@@ -76,8 +85,8 @@ HWTEST_F(ShapePatternTestNg, LayoutAlgorithm001, TestSize.Level1)
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     EXPECT_EQ(frameNode == nullptr, false);
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     EXPECT_EQ(pattern == nullptr, false);
@@ -92,8 +101,8 @@ HWTEST_F(ShapePatternTestNg, LayoutAlgorithm001, TestSize.Level1)
     layoutConstraint.selfIdealSize.SetHeight(HEIGHT);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
-    auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(),
-                                            AccessibilityManager::RawPtr(layoutWrapper));
+    auto size = layoutAlgorithm->MeasureContent(
+        layoutProperty->CreateContentConstraint(), AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(size.has_value(), true);
     EXPECT_FLOAT_EQ(size.value().Width(), WIDTH);
     EXPECT_FLOAT_EQ(size.value().Height(), HEIGHT);
@@ -122,7 +131,7 @@ HWTEST_F(ShapePatternTestNg, ContainerPaintProperty001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetShapeViewBoxValue().Height().ConvertToPx(), HEIGHT);
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     EXPECT_EQ(paintProperty == nullptr, false);
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     EXPECT_EQ(layoutWrapper == nullptr, false);
     frameNode->SetActive(true);
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
@@ -222,7 +231,7 @@ HWTEST_F(ShapePatternTestNg, InheritedProperty001, TestSize.Level1)
 
 /**
  * @tc.name: MeasureContent001
- * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent when ShapeViewBox is invaild
  * @tc.type: FUNC
  */
 
@@ -239,14 +248,107 @@ HWTEST_F(ShapePatternTestNg, MeasureContent001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     LayoutConstraintF constrain;
     auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
     auto newSize = layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
-    paintProperty->propShapeViewBox_ = std::nullopt;
-    layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
+    LayoutConstraintF constrain2;
+    constrain2.selfIdealSize = OptionalSize<float>(std::nullopt, std::nullopt);
+    newSize = layoutAlgorithm->MeasureContent(constrain2, AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_TRUE(newSize);
+}
+
+/**
+ * @tc.name: MeasureContent002
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent when ShapeViewBox is vaild
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapePatternTestNg, MeasureContent002, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    /**
+     * @tc.desc: set HasShapeViewBox() == TRUE && GetShapeViewBoxValue().IsValid() == FALSE;
+     */
+    shapeModel.SetViewPort(Dimension(ZERO), Dimension(ZERO), Dimension(ZERO), Dimension(ZERO));
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    EXPECT_TRUE(paintProperty);
+    EXPECT_TRUE(paintProperty->HasShapeViewBox());
+    EXPECT_EQ(paintProperty->GetShapeViewBoxValue().IsValid(), false);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutConstraintF constrain;
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize != Null && selfIdealSize.IsValid == TRUE)
+     */
+    auto newSize = layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(newSize);
+}
+
+/**
+ * @tc.name: MeasureContent003
+ * @tc.desc: check ShapeContainerLayoutAlgorithm MeasureContent when selfIdealSize is vaild/invaild
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapePatternTestNg, MeasureContent003, TestSize.Level1)
+{
+    auto shapeModel = ShapeModelNG();
+    shapeModel.Create();
+    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
+    /**
+     * @tc.desc: set HasShapeViewBox() == TRUE && GetShapeViewBoxValue().IsValid() == TRUE;
+     */
+    shapeModel.SetViewPort(Dimension(LEFT), Dimension(TOP), Dimension(WIDTH), Dimension(HEIGHT));
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    EXPECT_TRUE(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    EXPECT_TRUE(paintProperty);
+    EXPECT_TRUE(paintProperty->HasShapeViewBox());
+    EXPECT_TRUE(paintProperty->GetShapeViewBoxValue().IsValid());
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize == Null && GreatNotEqual == TRUE)
+     */
+    LayoutConstraintF constrain;
+    constrain.selfIdealSize = OptionalSize<float>(std::nullopt, std::nullopt);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    auto newSize = layoutAlgorithm->MeasureContent(constrain, AccessibilityManager::RawPtr(layoutWrapper));
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize != Null && selfIdealSize.IsValid != TRUE)
+     */
+    LayoutConstraintF constrain2;
+    constrain2.selfIdealSize = OptionalSize<float>(0, 0);
+    newSize = layoutAlgorithm->MeasureContent(constrain2, AccessibilityManager::RawPtr(layoutWrapper));
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize != Null && selfIdealSize.IsValid == TRUE &&
+     * (hasDefineWidth && !hasDefineHeight && GreatNotEqual(portWidth, 0.0)))
+     */
+    LayoutConstraintF constrain3;
+    constrain3.selfIdealSize = OptionalSize<float>(-1, std::nullopt);
+    newSize = layoutAlgorithm->MeasureContent(constrain3, AccessibilityManager::RawPtr(layoutWrapper));
+    /**
+     * @tc.desc: Call MeasureContent(selfIdealSize != Null && selfIdealSize.IsValid != TRUE &&
+     * (!hasDefineWidth && hasDefineHeight && GreatNotEqual(portHeight, 0.0)))
+     */
+    LayoutConstraintF constrain4;
+    constrain4.selfIdealSize = OptionalSize<float>(std::nullopt, -1);
+    newSize = layoutAlgorithm->MeasureContent(constrain4, AccessibilityManager::RawPtr(layoutWrapper));
 }
 
 /**
@@ -268,44 +370,88 @@ HWTEST_F(ShapePatternTestNg, GetChildrenSize001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
     auto shapeContainerLayoutAlgorithm = AceType::DynamicCast<ShapeContainerLayoutAlgorithm>(layoutAlgorithm);
     auto childFrame =
-         shapeContainerLayoutAlgorithm->GetChildrenSize(AccessibilityManager::RawPtr(layoutWrapper), SizeF(0, 0));
+        shapeContainerLayoutAlgorithm->GetChildrenSize(AccessibilityManager::RawPtr(layoutWrapper), SizeF(0, 0));
     EXPECT_TRUE(childFrame.IsNonNegative());
 }
 
 /**
- * @tc.name: OnDirtyLayoutWrapperSwap
- * @tc.desc: check ShapeContainerPattern OnDirtyLayoutWrapperSwap
+ * @tc.name: GetChildrenSize
+ * @tc.desc: check ShapeContainerLayoutAlgorithm GetChildrenSize
  * @tc.type: FUNC
  */
-
-HWTEST_F(ShapePatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+HWTEST_F(ShapePatternTestNg, GetChildrenSize002, TestSize.Level1)
 {
-    auto shapeModel = ShapeModelNG();
-    shapeModel.Create();
-    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
-    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-    EXPECT_TRUE(frameNode);
+    ShapeModelNG().Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_FALSE(frameNode == nullptr);
+    CircleModelNG().Create();
+    auto firstItem = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_FALSE(firstItem == nullptr);
+    /**
+     * @tc.desc: create parent and child framenode
+     */
+    frameNode->AddChild(firstItem);
+
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_TRUE(geometryNode);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
-    auto flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_TRUE(layoutWrapper);
-    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
-    EXPECT_TRUE(paintProperty);
-    pattern->ViewPortTransform();
-    paintProperty->propShapeViewBox_ = std::nullopt;
-    pattern->ViewPortTransform();
-    pattern->OnModifyDone();
-    EXPECT_FALSE(flag);
+    EXPECT_FALSE(geometryNode == nullptr);
+    geometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    auto framePattern = frameNode->GetPattern<ShapeContainerPattern>();
+    EXPECT_FALSE(framePattern == nullptr);
+    auto layoutAlgorithm = framePattern->CreateLayoutAlgorithm();
+    auto shapeContainerLayoutAlgorithm = AceType::DynamicCast<ShapeContainerLayoutAlgorithm>(layoutAlgorithm);
+    layoutWrapper.SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(shapeContainerLayoutAlgorithm));
+    /**
+     * @tc.desc: Set Parent LayoutConstraint
+     */
+    LayoutConstraintF parentLayoutConstrain;
+    parentLayoutConstrain.selfIdealSize = OptionalSize<float>(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    parentLayoutConstrain.percentReference = SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    firstItem->GetGeometryNode()->SetParentLayoutConstraint(parentLayoutConstrain);
+    EXPECT_TRUE(firstItem->GetGeometryNode()->GetParentLayoutConstraint());
+
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+
+    /**
+     * @tc.desc: set child GeometryNode MarginFrameSize
+     * Call GetChildrenSize(childSize.Width() > 0 && childSize.Height() > 0)
+     */
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    firstGeometryNode->GetMarginFrameSize().SetMainSize(MAIN_SIZE, Axis::HORIZONTAL);
+
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstItem, firstGeometryNode, firstItem->GetLayoutProperty());
+    EXPECT_FALSE(firstLayoutWrapper == nullptr);
+    auto firstItemPattern = firstItem->GetPattern<CirclePattern>();
+    EXPECT_FALSE(firstItemPattern == nullptr);
+    firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(firstLayoutWrapper);
+
+    /**
+     * @tc.desc: set child2 GeometryNode MarginFrameSize == NULL
+     * Call GetChildrenSize(childSize.Width() == 0 && childSize.Height() == 0)
+     */
+    RefPtr<GeometryNode> secondGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    secondGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> secondLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstItem, secondGeometryNode, firstItem->GetLayoutProperty());
+    EXPECT_FALSE(secondLayoutWrapper == nullptr);
+    secondLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    secondLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(secondLayoutWrapper);
+    auto childFrame = shapeContainerLayoutAlgorithm->GetChildrenSize(&layoutWrapper, SizeF(0, 0));
+    EXPECT_TRUE(childFrame.IsNonNegative());
 }
-
-
 } // namespace OHOS::Ace::NG

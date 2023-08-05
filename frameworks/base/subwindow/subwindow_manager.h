@@ -62,23 +62,24 @@ public:
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
     const RefPtr<Subwindow>& GetCurrentWindow();
+    Rect GetParentWindowRect();
 
     void ShowMenu(const RefPtr<Component>& newComponent);
-    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset);
+    void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
+        const NG::OffsetF& offset, bool isAboveApps = false);
     void HideMenuNG(int32_t targetId);
     void HideMenuNG();
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo);
-    void HidePopupNG(int32_t targetId);
-    void HidePopupNG();
+    void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
     void ClearMenuNG(int32_t instanceId = -1);
-    RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode);
+    RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     void HideSubWindowNG();
 
-    void SetHotAreas(const std::vector<Rect>& rects);
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1, int32_t instanceId = -1);
 
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
@@ -95,6 +96,7 @@ public:
     void CloseDialog(int32_t instanceId);
     void RegisterOnShowMenu(const std::function<void()>& callback);
     void RegisterOnHideMenu(const std::function<void()>& callback);
+    void RequestFocusSubwindow(int32_t instanceId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();

@@ -34,10 +34,16 @@ RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
     return AceType::MakeRefPtr<PixelMapImage>(pixelMap);
 }
 
+RefPtr<CanvasImage> PixelMapImage::Clone()
+{
+    return MakeRefPtr<PixelMapImage>(pixelMap_);
+}
+
 int32_t PixelMapImage::GetWidth() const
 {
-    if (pixelMap_) {
-        return pixelMap_->GetWidth();
+    auto pixmap = GetPixelMap();
+    if (pixmap) {
+        return pixmap->GetWidth();
     }
     LOGW("pixelMap_ is nullptr, return width 0.");
     return 0;
@@ -45,8 +51,9 @@ int32_t PixelMapImage::GetWidth() const
 
 int32_t PixelMapImage::GetHeight() const
 {
-    if (pixelMap_) {
-        return pixelMap_->GetHeight();
+    auto pixmap = GetPixelMap();
+    if (pixmap) {
+        return pixmap->GetHeight();
     }
     LOGW("rsCanvas is nullptr, return height 0.");
     return 0;
@@ -55,26 +62,17 @@ int32_t PixelMapImage::GetHeight() const
 void PixelMapImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& /* dstRect */, const BorderRadiusArray& radiusXY)
 {
-    if (!pixelMap_) {
-        return;
-    }
+    auto pixmap = GetPixelMap();
+    CHECK_NULL_VOID_NOLOG(pixmap);
 
 #ifdef ENABLE_ROSEN_BACKEND
+#ifndef USE_ROSEN_DRAWING
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    if (rsCanvas == nullptr) {
-        LOGE("rsCanvas is nullptr.");
-        return;
-    }
+    CHECK_NULL_VOID(rsCanvas);
     auto skCanvas = rsCanvas->ExportSkCanvas();
-    if (skCanvas == nullptr) {
-        LOGE("skCanvas is nullptr.");
-        return;
-    }
+    CHECK_NULL_VOID(skCanvas);
     auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    if (recordingCanvas == nullptr) {
-        LOGE("recordingCanvas is nullptr.");
-        return;
-    }
+    CHECK_NULL_VOID(recordingCanvas);
     SkPaint paint;
     auto config = GetPaintConfig();
 #ifndef NEW_SKIA
@@ -87,15 +85,90 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas->ClipAdaptiveRRect(radii.get());
     recordingCanvas->scale(config.scaleX_, config.scaleY_);
 
-    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
+    Rosen::RsImageInfo rsImageInfo(
+        static_cast<int>(config.imageFit_), static_cast<int>(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
 
 #ifndef NEW_SKIA
-    recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
+    recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #else
-    // TODO:Haw to set SamplingOptions?
-    recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
+    recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
+#endif
+#else
+    RSBrush brush;
+    auto config = GetPaintConfig();
+    RSSamplingOptions options;
+    ImagePainterUtils::AddFilter(brush, options, config);
+    auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
+    auto recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
+    std::vector<RSPoint> radius;
+    for (int ii = 0; ii < 4; ii++) {
+        RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
+        radius.emplace_back(point);
+    }
+    recordingCanvas.ClipAdaptiveRoundRect(radius);
+    recordingCanvas.Scale(config.scaleX_, config.scaleY_);
+
+    CHECK_NULL_VOID_NOLOG(pixmap->GetPixelMapSharedPtr());
+    RSPoint pointRadius[4] = {};
+    for (int i = 0; i < 4; i++) {
+        pointRadius[i] = radius[i];
+    }
+    Rosen::Drawing::AdaptiveImageInfo rsImageInfo =
+        {static_cast<int32_t>(config.imageFit_), static_cast<int32_t>(config.imageRepeat_),
+         {pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3]}, 1.0, 0, 0, 0};
+    RSSamplingOptions smapling;
+    recordingCanvas.AttachBrush(brush);
+    recordingCanvas.DrawPixelMap(pixmap->GetPixelMapSharedPtr(), rsImageInfo, smapling);
+    recordingCanvas.DetachBrush();
 #endif
 #endif
 }
 
+void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
+{
+#ifndef USE_ROSEN_DRAWING
+#ifdef ENABLE_ROSEN_BACKEND
+#ifdef NEW_SKIA
+    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
+    CHECK_NULL_VOID(rsCanvas);
+    auto skCanvas = rsCanvas->ExportSkCanvas();
+    CHECK_NULL_VOID(skCanvas);
+    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
+    CHECK_NULL_VOID(recordingCanvas);
+    SkPaint paint;
+    SkSamplingOptions option;
+    SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
+
+    auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
+#endif
+#else
+    LOGE("Drawing is not supported");
+#endif
+#else
+    // TODO Drawing
+    LOGE("Drawing is not supported");
+#endif
+}
+
+void PixelMapImage::Cache(const std::string& key)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto cache = pipeline->GetImageCache();
+    CHECK_NULL_VOID(cache);
+    cache->CacheImageData(key, MakeRefPtr<PixmapCachedData>(GetPixelMap()));
+}
+
+RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto cache = pipeline->GetImageCache();
+    CHECK_NULL_RETURN(cache, nullptr);
+    auto data = DynamicCast<PixmapCachedData>(cache->GetCacheImageData(key));
+    CHECK_NULL_RETURN_NOLOG(data, nullptr);
+    LOGD("pixelMap cache found %{public}s", key.c_str());
+    return MakeRefPtr<PixelMapImage>(data->pixmap_);
+}
 } // namespace OHOS::Ace::NG

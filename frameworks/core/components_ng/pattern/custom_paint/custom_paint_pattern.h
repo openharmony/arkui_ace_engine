@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
 class OffscreenCanvasPattern;
+class RenderingContext2DModifier;
 // CustomPaintPattern is the base class for custom paint render node to perform paint canvas.
 class ACE_EXPORT CustomPaintPattern : public Pattern {
     DECLARE_ACE_TYPE(CustomPaintPattern, Pattern);
@@ -33,6 +34,11 @@ class ACE_EXPORT CustomPaintPattern : public Pattern {
 public:
     CustomPaintPattern() = default;
     ~CustomPaintPattern() override = default;
+
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
+    {
+        return RenderContext::ContextParam { RenderContext::ContextType::INCREMENTAL_CANVAS };
+    }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -73,8 +79,8 @@ public:
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
 
-    void FillText(const std::string& text, double x, double y);
-    void StrokeText(const std::string& text, double x, double y);
+    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
@@ -92,7 +98,7 @@ public:
     double GetWidth();
     double GetHeight();
 
-    const LineDashParam& GetLineDash() const;
+    LineDashParam GetLineDash() const;
     void UpdateLineDash(const std::vector<double>& segments);
 
     void Save();
@@ -130,10 +136,10 @@ public:
     void UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);
     void UpdateShadowColor(const Color& color);
     void UpdateStrokeGradient(const Ace::Gradient& grad);
-
     void SetTextDirection(TextDirection direction);
     void SetFilterParam(const std::string& filterStr);
-    
+    TransformParam GetTransform() const;
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -141,6 +147,8 @@ private:
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     bool isCanvasInit_ = false;
+
+    RefPtr<RenderingContext2DModifier> contentModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CustomPaintPattern);
 };

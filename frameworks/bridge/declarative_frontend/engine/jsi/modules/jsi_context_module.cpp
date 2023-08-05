@@ -35,6 +35,13 @@ std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRu
     const std::shared_ptr<JsValue>& thisObj, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc)
 {
     int32_t currentInstance = Container::CurrentId();
+    if (thisObj && thisObj->IsObject(runtime) && thisObj->HasProperty(runtime, "getInstanceId")) {
+        auto getIdFunc = thisObj->GetProperty(runtime, "getInstanceId");
+        auto retId = getIdFunc->Call(runtime, thisObj, {}, 0);
+        if (retId->IsInt32(runtime)) {
+            currentInstance = retId->ToInt32(runtime);
+        }
+    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (currentInstance >= MIN_PLUGIN_SUBCONTAINER_ID) {
         currentInstance = PluginManager::GetInstance().GetPluginParentContainerId(currentInstance);

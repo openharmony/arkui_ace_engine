@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    if (!divider_.strokeWidth.IsValid()) {
+    if (!divider_.strokeWidth.IsValid() || divider_.strokeWidth.Unit() == DimensionUnit::PERCENT) {
         return;
     }
     const auto& geometryNode = paintWrapper->GetGeometryNode();
@@ -32,12 +32,13 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
     float halfSpaceWidth = (spaceWidth_ + divider_.strokeWidth.ConvertToPx()) / 2.0f; /* 2.0f half */
     auto startMargin = std::max(0.0, divider_.startMargin.ConvertToPx());
     auto endMargin = std::max(0.0, divider_.endMargin.ConvertToPx());
-    float laneLen = crossSize / lanes - startMargin - endMargin;
+    float fSpacingTotal = (lanes - 1) * laneGutter_;
+    float laneLen = (crossSize - fSpacingTotal) / lanes - startMargin - endMargin;
     if (NearZero(laneLen)) return;
     if (LessNotEqual(laneLen, 0.0f)) {
         startMargin = 0.0f;
         endMargin = 0.0f;
-        laneLen = crossSize / lanes - startMargin - endMargin;
+        laneLen = (crossSize - fSpacingTotal) / lanes - startMargin - endMargin;
     }
     DividerPainter dividerPainter(constrainStrokeWidth, laneLen, vertical_, divider_.color, LineCap::SQUARE);
     int32_t laneIdx = 0;
@@ -45,7 +46,7 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
     for (const auto& child : itemPosition_) {
         if (!isFirstItem) {
             float mainPos = child.second.first - halfSpaceWidth;
-            float crossPos = startMargin + laneIdx * crossSize / lanes;
+            float crossPos = startMargin + laneIdx * ((crossSize - fSpacingTotal) / lanes + laneGutter_);
             OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
             dividerPainter.DrawLine(canvas, offset + paddingOffset);
         }

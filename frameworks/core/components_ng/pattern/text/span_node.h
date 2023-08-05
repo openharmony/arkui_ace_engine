@@ -24,6 +24,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/gestures/gesture_info.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
@@ -146,18 +147,28 @@ public:
     {
         children.clear();
     }
-    int32_t position;
+    int32_t position = -1;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle;
     std::unique_ptr<TextLineStyle> textLineStyle;
     GestureEventFunc onClick;
     std::list<RefPtr<SpanItem>> children;
     int32_t placeHolderIndex = -1;
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    int32_t selectedStart = -1;
+    int32_t selectedEnd = -1;
+#endif // ENABLE_DRAG_FRAMEWORK
     virtual int32_t UpdateParagraph(const RefPtr<Paragraph>& builder, double width = 0.0f, double height = 0.0f,
         VerticalAlign verticalAlign = VerticalAlign::BASELINE);
+    virtual void UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    std::string GetFont() const;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    virtual void StartDrag(int32_t start, int32_t end);
+    virtual void EndDrag();
+    virtual bool IsDragging();
+#endif // ENABLE_DRAG_FRAMEWORK
 };
 
 struct ImageSpanItem : public SpanItem {
@@ -170,6 +181,8 @@ public:
         const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
 
+    TextStyle textStyle;
+
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 };
 
@@ -180,7 +193,6 @@ enum class PropertyInfo {
     FONTWEIGHT,
     FONTFAMILY,
     TEXTDECORATION,
-    TEXTDECORATIONCOLOR,
     TEXTCASE,
     LETTERSPACE,
     LINEHEIGHT,
@@ -232,7 +244,6 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
 
-
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
 
@@ -277,7 +288,6 @@ public:
                                                                PropertyInfo::FONTWEIGHT,
                                                                PropertyInfo::FONTFAMILY,
                                                                PropertyInfo::TEXTDECORATION,
-                                                               PropertyInfo::TEXTDECORATIONCOLOR,
                                                                PropertyInfo::TEXTCASE,
                                                                PropertyInfo::LETTERSPACE,
                                                                PropertyInfo::LINEHEIGHT };
@@ -286,6 +296,7 @@ public:
                        inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
         return inheritPropertyInfo;
     }
+
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
     std::set<PropertyInfo> propertyInfo_;

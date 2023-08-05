@@ -49,6 +49,7 @@ public:
     virtual void SetElmtIdToAccountFor(int32_t elmtId) = 0;
     virtual void StopGetAccessRecording() = 0;
     virtual void ImplicitPopBeforeContinue() = 0;
+    virtual void GetAndPushFrameNode(const std::string& tag, int32_t elmtId) = 0;
 
 private:
     static std::unique_ptr<ViewStackModel> instance_;

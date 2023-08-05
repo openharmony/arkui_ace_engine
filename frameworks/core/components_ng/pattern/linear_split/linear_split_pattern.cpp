@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
 
-#include "base/geometry/axis.h"
-#include "base/geometry/offset.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
@@ -31,15 +29,10 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr std::size_t DEFAULT_DRAG_INDEX = -1;
+constexpr std::size_t SPLIT_INDEX_INC_TWO = 2;
+constexpr int32_t API10 = 10;
 
 } // namespace
-
-void LinearSplitPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
-}
 
 void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
@@ -75,18 +68,56 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
 {
-    auto xOffset = info.GetOffsetX();
-    auto yOffset = info.GetOffsetY();
-    const auto& globalLocation = info.GetGlobalLocation();
-    auto localOffset = OffsetF(static_cast<float>(globalLocation.GetX()) - parentOffset_.GetX(),
-        static_cast<float>(globalLocation.GetY()) - parentOffset_.GetY());
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
+        HandlePanStartBeforeAPI10(info);
+        return;
+    }
+    auto xOffset = static_cast<float>(info.GetOffsetX());
+    auto yOffset = static_cast<float>(info.GetOffsetY());
+    auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
     if (!resizeable_) {
         return;
     }
     isDraged_ = true;
 
     for (std::size_t i = 0; i < splitRects_.size(); i++) {
-        if (splitRects_[i].IsInRegion(Point(localOffset.GetX(), localOffset.GetY()))) {
+        if (splitRects_[i].IsInRegion(Point(gestureOffsetX, gestureOffsetY))) {
+            dragedSplitIndex_ = i;
+            break;
+        }
+    }
+
+    if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
+        return;
+    }
+
+    isDragedMoving_ = true;
+
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        preOffset_ = xOffset;
+        childrenDragPos_[dragedSplitIndex_ + 1] += xOffset;
+    } else {
+        preOffset_ = yOffset;
+        childrenDragPos_[dragedSplitIndex_ + 1] += yOffset;
+    }
+
+    ConstrainDragRange();
+}
+
+void LinearSplitPattern::HandlePanStartBeforeAPI10(const GestureEvent& info)
+{
+    auto xOffset = static_cast<float>(info.GetOffsetX());
+    auto yOffset = static_cast<float>(info.GetOffsetY());
+    auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    if (!resizeable_) {
+        return;
+    }
+    isDraged_ = true;
+
+    for (std::size_t i = 0; i < splitRects_.size(); i++) {
+        if (splitRects_[i].IsInRegion(Point(gestureOffsetX, gestureOffsetY))) {
             dragedSplitIndex_ = i;
             break;
         }
@@ -128,6 +159,58 @@ void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
     }
 }
 
+float LinearSplitPattern::GetMinPosFromIndex(std::size_t index)
+{
+    auto preMin = childrenConstrains_[index];
+    auto min = childrenDragPos_[index] + static_cast<float>(DEFAULT_SPLIT_HEIGHT) + preMin;
+    return min;
+}
+
+float LinearSplitPattern::GetMaxPosFromIndex(std::size_t index)
+{
+    auto curMin = childrenConstrains_[index + 1];
+    auto max = Infinity<float>();
+    if (index + SPLIT_INDEX_INC_TWO < childrenDragPos_.size()) {
+        max = childrenDragPos_[index + SPLIT_INDEX_INC_TWO] - static_cast<float>(DEFAULT_SPLIT_HEIGHT) - curMin;
+    }
+    return max;
+}
+
+void LinearSplitPattern::ConstrainDragRange()
+{
+    auto min = GetMinPosFromIndex(dragedSplitIndex_);
+    auto max = GetMaxPosFromIndex(dragedSplitIndex_);
+    auto &offset = childrenDragPos_[dragedSplitIndex_ + 1];
+    if (offset < min) {
+        offset = min;
+        isDragedMoving_ = false;
+    } else if (offset > max) {
+        offset = max;
+        isDragedMoving_ = false;
+    }
+}
+
+bool LinearSplitPattern::IsStuck()
+{
+    auto min = GetMinPosFromIndex(mouseDragedSplitIndex_);
+    auto max = GetMaxPosFromIndex(mouseDragedSplitIndex_);
+    return NearZero(max - min);
+}
+
+bool LinearSplitPattern::ReachStart()
+{
+    auto min = GetMinPosFromIndex(mouseDragedSplitIndex_);
+    auto offset = childrenDragPos_[mouseDragedSplitIndex_ + 1];
+    return NearZero(offset - min);
+}
+
+bool LinearSplitPattern::ReachEnd()
+{
+    auto max = GetMaxPosFromIndex(mouseDragedSplitIndex_);
+    auto offset = childrenDragPos_[mouseDragedSplitIndex_ + 1];
+    return NearZero(max - offset);
+}
+
 void LinearSplitPattern::GetdragedSplitIndexOrIsMoving(const Point& point)
 {
     for (std::size_t i = 0; i < splitRects_.size(); i++) {
@@ -145,19 +228,19 @@ void LinearSplitPattern::GetdragedSplitIndexOrIsMoving(const Point& point)
 
 void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
 {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
+        HandlePanUpdateBeforeAPI10(info);
+        return;
+    }
     if (!resizeable_) {
         return;
     }
-    auto xOffset = info.GetOffsetX();
-    auto yOffset = info.GetOffsetY();
-    const auto& globalLocation = info.GetGlobalLocation();
-    if (isOverParent_) {
-        isDragedMoving_ = false;
-    }
-    auto localOffset = OffsetF(static_cast<float>(globalLocation.GetX()) - parentOffset_.GetX(),
-        static_cast<float>(globalLocation.GetY()) - parentOffset_.GetY());
+    auto xOffset = static_cast<float>(info.GetOffsetX());
+    auto yOffset = static_cast<float>(info.GetOffsetY());
+    auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
     if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX || !isDragedMoving_) {
-        GetdragedSplitIndexOrIsMoving(Point(localOffset.GetX(), localOffset.GetY()));
+        GetdragedSplitIndexOrIsMoving(Point(gestureOffsetX, gestureOffsetY));
     }
 
     if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX || !isDragedMoving_) {
@@ -166,6 +249,42 @@ void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
         } else {
             preOffset_ = yOffset;
         }
+        return;
+    }
+
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        childrenDragPos_[dragedSplitIndex_ + 1] += xOffset - preOffset_;
+        preOffset_ = xOffset;
+    } else {
+        childrenDragPos_[dragedSplitIndex_ + 1] += yOffset - preOffset_;
+        preOffset_ = yOffset;
+    }
+
+    ConstrainDragRange();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void LinearSplitPattern::HandlePanUpdateBeforeAPI10(const GestureEvent& info)
+{
+    if (!resizeable_) {
+        return;
+    }
+    auto xOffset = info.GetOffsetX();
+    auto yOffset = info.GetOffsetY();
+    if (isOverParent_) {
+        isDragedMoving_ = false;
+    }
+    auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX || !isDragedMoving_) {
+        GetdragedSplitIndexOrIsMoving(Point(gestureOffsetX, gestureOffsetY));
+    }
+
+    if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX || !isDragedMoving_) {
+        preOffset_ = (splitType_ == SplitType::ROW_SPLIT) ? xOffset : yOffset;
         return;
     }
 
@@ -211,10 +330,9 @@ void LinearSplitPattern::HandlePanEnd(const GestureEvent& info)
     mouseDragedSplitIndex_ = DEFAULT_DRAG_INDEX;
 
     if (info.GetSourceDevice() == SourceType::MOUSE) {
-        const auto& globalLocation = info.GetGlobalLocation();
-        auto localOffset = OffsetF(static_cast<float>(globalLocation.GetX()) - parentOffset_.GetX(),
-            static_cast<float>(globalLocation.GetY()) - parentOffset_.GetY());
-        GetdragedSplitIndexOrIsMoving(Point(localOffset.GetX(), localOffset.GetY()));
+        auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+        auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+        GetdragedSplitIndexOrIsMoving(Point(gestureOffsetX, gestureOffsetY));
         if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
@@ -260,7 +378,6 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
     if (!resizeable_) {
         return;
     }
-    const auto& globalLocation = info.GetGlobalLocation();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -278,12 +395,12 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
         }
         return;
     }
-    auto localOffset = OffsetF(static_cast<float>(globalLocation.GetX()) - parentOffset_.GetX(),
-        static_cast<float>(globalLocation.GetY()) - parentOffset_.GetY());
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
 
     mouseDragedSplitIndex_ = DEFAULT_DRAG_INDEX;
     for (std::size_t i = 0; i < splitRects_.size(); i++) {
-        if (splitRects_[i].IsInRegion(Point(localOffset.GetX(), localOffset.GetY()))) {
+        if (splitRects_[i].IsInRegion(Point(mouseOffsetX, mouseOffsetY))) {
             mouseDragedSplitIndex_ = i;
             if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
                 dragedSplitIndex_ = i;
@@ -320,9 +437,41 @@ void LinearSplitPattern::HandleHoverEvent(bool isHovered)
 
 MouseFormat LinearSplitPattern::GetMouseFormat()
 {
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
+        return GetMouseFormatBeforeAPI10();
+    }
     MouseFormat format = MouseFormat::DEFAULT;
     if (splitType_ == SplitType::ROW_SPLIT) {
-        if (isOverParent_) {
+        if (IsStuck()) {
+            format = MouseFormat::DEFAULT;
+        } else if (ReachStart()) {
+            format = MouseFormat::EAST;
+        } else if (ReachEnd()) {
+            format = MouseFormat::WEST;
+        } else {
+            format = MouseFormat::WEST_EAST;
+        }
+    } else {
+        if (IsStuck()) {
+            format = MouseFormat::DEFAULT;
+        } else if (ReachStart()) {
+            format = MouseFormat::SOUTH;
+        } else if (ReachEnd()) {
+            format = MouseFormat::NORTH;
+        } else {
+            format = MouseFormat::NORTH_SOUTH;
+        }
+    }
+    return format;
+}
+
+MouseFormat LinearSplitPattern::GetMouseFormatBeforeAPI10()
+{
+    MouseFormat format = MouseFormat::DEFAULT;
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        if (isOverParent_ && NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::DEFAULT;
+        } else if (isOverParent_) {
             format = MouseFormat::WEST;
         } else if (NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
             format = MouseFormat::EAST;
@@ -330,7 +479,9 @@ MouseFormat LinearSplitPattern::GetMouseFormat()
             format = MouseFormat::WEST_EAST;
         }
     } else {
-        if (isOverParent_) {
+        if (isOverParent_ && NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::DEFAULT;
+        } else if (isOverParent_) {
             format = MouseFormat::NORTH;
         } else if (NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
             format = MouseFormat::SOUTH;
@@ -354,6 +505,7 @@ void LinearSplitPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<LinearSplitLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     resizeable_ = layoutProperty->GetResizeable().value_or(false);
+    childrenDragPos_.clear();
 
     InitPanEvent(gestureHub);
 
@@ -380,6 +532,8 @@ bool LinearSplitPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if (dragSplitOffset_.empty()) {
         dragSplitOffset_ = std::vector<float>(splitRects_.size(), 0.0);
     }
+    childrenDragPos_ = linearSplitLayoutAlgorithm->GetChildrenDragPos();
+    childrenConstrains_ = linearSplitLayoutAlgorithm->GetChildrenConstrains();
     isOverParent_ = linearSplitLayoutAlgorithm->GetIsOverParent();
     return true;
 }

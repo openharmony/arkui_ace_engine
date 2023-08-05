@@ -29,15 +29,13 @@ public:
     ~MockPattern() override = default;
 
     MOCK_CONST_METHOD0(IsAtomicNode, bool());
-    MOCK_CONST_METHOD0(GetSurfaceNodeName, std::optional<std::string>());
-    MOCK_CONST_METHOD0(UseExternalRSNode, bool());
+    MOCK_CONST_METHOD0(GetContextParam, std::optional<RenderContext::ContextParam>());
     MOCK_CONST_METHOD0(GetOverridePaintRect, std::optional<RectF>());
     MOCK_METHOD0(CreateAccessibilityProperty, RefPtr<AccessibilityProperty>());
     MOCK_METHOD0(CreatePaintProperty, RefPtr<PaintProperty>());
     MOCK_METHOD0(CreateLayoutProperty, RefPtr<LayoutProperty>());
     MOCK_METHOD0(CreateLayoutAlgorithm, RefPtr<LayoutAlgorithm>());
     MOCK_METHOD0(CreateNodePaintMethod, RefPtr<NodePaintMethod>());
-    MOCK_METHOD0(NeedOverridePaintRect, bool());
     MOCK_METHOD0(CreateEventHub, RefPtr<EventHub>());
     MOCK_METHOD0(OnContextAttached, void());
     MOCK_METHOD0(OnModifyDone, void());
@@ -65,6 +63,7 @@ public:
     MOCK_CONST_METHOD1(ToJsonValue, void(std::unique_ptr<JsonValue>& json));
     MOCK_METHOD0(ProvideRestoreInfo, std::string());
     MOCK_METHOD0(OnAreaChangedInner, void());
+    MOCK_METHOD3(OnWindowSizeChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type));
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PATTERN_H

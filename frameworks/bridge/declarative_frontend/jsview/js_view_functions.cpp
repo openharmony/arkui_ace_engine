@@ -215,6 +215,18 @@ void ViewFunctions::ExecuteRecycle(const std::string& viewName)
     }
 }
 
+void ViewFunctions::ExecuteSetActive(bool active)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsSetActive_.Lock();
+    if (!func->IsEmpty()) {
+        auto isActive = JSRef<JSVal>::Make(ToJSValue(active));
+        func->Call(jsObject_.Lock(), 1, &isActive);
+    } else {
+        LOGE("the set active func is null");
+    }
+}
+
 #else
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
@@ -270,6 +282,18 @@ void ViewFunctions::InitViewFunctions(
             jsRecycleFunc_ = JSRef<JSFunc>::Cast(jsRecycleFunc);
         } else {
             LOGD("View is not a recycle node");
+        }
+
+        JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycle");
+        if (jsAboutToRecycleFunc->IsFunction()) {
+            jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
+        }
+
+        JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActive");
+        if (jsSetActive->IsFunction()) {
+            jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
+        } else {
+            LOGD("View don't have the ability to prevent inactive update");
         }
     }
 
@@ -371,33 +395,6 @@ void ViewFunctions::InitViewFunctions(
         } else {
             LOGD("updateWithValueParams is not a function");
         }
-
-#ifdef UICAST_COMPONENT_SUPPORTED
-        JSRef<JSVal> jsCreateChildViewFunc = jsObject->GetProperty("createChildView");
-        if (jsCreateChildViewFunc->IsFunction()) {
-            LOGD("UICast createChildView is a function");
-            jsCreateChildViewFunc_ = JSRef<JSFunc>::Cast(jsCreateChildViewFunc);
-        } else {
-            LOGD("UICast createChildView is not a function");
-        }
-
-        JSRef<JSVal> jsRouterHandleFunc = jsObject->GetProperty("routerHandle");
-        if (jsRouterHandleFunc->IsFunction()) {
-            LOGD("UICast routerHandle is a function");
-            jsRouterHandleFunc_ = JSRef<JSFunc>::Cast(jsRouterHandleFunc);
-        } else {
-            LOGD("UICast routerHandle is not a function");
-        }
-
-        JSRef<JSVal> jsReplayOnEventFunc = jsObject->GetProperty("replayOnEvent");
-        if (jsReplayOnEventFunc->IsFunction()) {
-            LOGD("UICast replayOnEvent is a function");
-            jsReplayOnEventFunc_ = JSRef<JSFunc>::Cast(jsReplayOnEventFunc);
-        } else {
-            LOGD("UICast replayOnEvent is not a function");
-        }
-#endif
-
         jsRenderFunc_ = jsRenderFunction;
     }
 }
@@ -418,7 +415,11 @@ void ViewFunctions::ExecuteRender()
 
     auto func = jsRenderFunc_.Lock();
     JSRef<JSVal> jsThis = jsObject_.Lock();
-    jsRenderResult_ = func->Call(jsThis);
+    if (!jsThis->IsUndefined()) {
+        jsRenderResult_ = func->Call(jsThis);
+    } else {
+        LOGE("jsView Object is undefined and will not execute render function");
+    }
 }
 
 void ViewFunctions::ExecuteAppear()
@@ -428,7 +429,25 @@ void ViewFunctions::ExecuteAppear()
 
 void ViewFunctions::ExecuteDisappear()
 {
-    ExecuteFunction(jsDisappearFunc_, "aboutToDisappear");
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsDisappearFunc_.IsEmpty()) {
+        LOGD("View doesn't have %{public}s() method!", "aboutToDisappear");
+        return;
+    }
+    ACE_SCOPED_TRACE("%s", "aboutToDisappear");
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    std::string functionName("aboutToDisappear");
+    AceScopedPerformanceCheck scoped(functionName);
+    if (!jsObject->IsUndefined()) {
+        jsDisappearFunc_.Lock()->Call(jsObject);
+    } else {
+        LOGE("jsView Object is undefined and will not execute aboutToDisappear function");
+    }
+}
+
+void ViewFunctions::ExecuteAboutToRecycle()
+{
+    ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycle");
 }
 
 bool ViewFunctions::HasLayout() const
@@ -443,7 +462,20 @@ bool ViewFunctions::HasMeasure() const
 
 void ViewFunctions::ExecuteAboutToBeDeleted()
 {
-    ExecuteFunction(jsAboutToBeDeletedFunc_, "aboutToBeDeleted");
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsAboutToBeDeletedFunc_.IsEmpty()) {
+        LOGD("View doesn't have %{public}s() method!", "aboutToBeDeleted");
+        return;
+    }
+    ACE_SCOPED_TRACE("%s", "aboutToBeDeleted");
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    std::string functionName("aboutToBeDeleted");
+    AceScopedPerformanceCheck scoped(functionName);
+    if (!jsObject->IsUndefined()) {
+        jsAboutToBeDeletedFunc_.Lock()->Call(jsObject);
+    } else {
+        LOGE("jsView Object is undefined and will not execute aboutToBeDeleted function");
+    }
 }
 
 void ViewFunctions::ExecuteAboutToRender()
@@ -492,23 +524,6 @@ void ViewFunctions::ExecuteUpdateWithValueParams(const std::string& jsonData)
 {
     ExecuteFunctionWithParams(jsUpdateWithValueParamsFunc_, "updateWithValueParams", jsonData);
 }
-
-#ifdef UICAST_COMPONENT_SUPPORTED
-void ViewFunctions::ExecuteCreateChildView(const std::string& jsonData)
-{
-    ExecuteFunctionWithParams(jsCreateChildViewFunc_, "createChildView", jsonData);
-}
-
-void ViewFunctions::ExecuteRouterHandle(const std::string& jsonData)
-{
-    ExecuteFunctionWithParams(jsRouterHandleFunc_, "routerHandle", jsonData);
-}
-
-void ViewFunctions::ExecuteReplayOnEvent(const std::string& jsonData)
-{
-    ExecuteFunctionWithParams(jsReplayOnEventFunc_, "replayOnEvent", jsonData);
-}
-#endif
 
 bool ViewFunctions::ExecuteOnBackPress()
 {
@@ -640,7 +655,11 @@ void ViewFunctions::ExecuteRerender()
 
     auto func = jsRerenderFunc_.Lock();
     JSRef<JSVal> jsThis = jsObject_.Lock();
-    jsRenderResult_ = func->Call(jsThis);
+    if (!jsThis->IsUndefined()) {
+        jsRenderResult_ = func->Call(jsThis);
+    } else {
+        LOGE("jsView Object is undefined and will not execute rerender function");
+    }
 }
 
 // Partial update method

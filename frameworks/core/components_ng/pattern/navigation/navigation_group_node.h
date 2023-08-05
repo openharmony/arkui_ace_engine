@@ -19,10 +19,15 @@
 #include <cstdint>
 #include <list>
 
+#include "base/memory/referenced.h"
+#include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -35,7 +40,9 @@ public:
     {}
     ~NavigationGroupNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
-    void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
+
+    // remain child needs to keep to use pop animation
+    void UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild);
     static RefPtr<NavigationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -74,16 +81,6 @@ public:
         return dividerNode_;
     }
 
-    bool GetIsOnAnimation() const
-    {
-        return isOnAnimation_;
-    }
-
-    void SetIsOnAnimation(bool isOnAnimation)
-    {
-        isOnAnimation_ = isOnAnimation;
-    }
-
     bool GetIsModeChange() const
     {
         return isModeChange_;
@@ -94,16 +91,29 @@ public:
         isModeChange_ = isModeChange;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    RefPtr<FrameNode> GetNavDestinationNodeToHandleBack();
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
+    void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination,
+        const RefPtr<NavRouterPattern>& navRouterPattern = nullptr);
+    void AddBackButtonIconToNavDestination(const RefPtr<UINode>& navDestinationNode);
+    void SetBackButtonVisible(const RefPtr<UINode>& navDestinationNode, bool isVisible = true);
+
+    void ExitTransitionWithPop(const RefPtr<FrameNode>& node, bool isNavBar = false);
+    void ExitTransitionWithPush(const RefPtr<FrameNode>& node, bool isNavBar = false);
+    void EnterTransitionWithPop(const RefPtr<FrameNode>& node, bool isNavBar = false);
+    void EnterTransitionWithPush(const RefPtr<FrameNode>& node, bool isNavBar = false);
+    void BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
+    void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
+    void TitleOpacityAnimationOut(const RefPtr<RenderContext>& transitionOutNodeContext);
 
 private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
-    bool isOnAnimation_ {false};
-    bool isModeChange_ {false};
+    bool isOnAnimation_ { false };
+    bool isModeChange_ { false };
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

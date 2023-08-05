@@ -111,12 +111,11 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     geometryNode->SetFrameSize(idealSize.ConvertToSizeT());
 
     // Create layout constraint of children .
-    auto childCount = layoutWrapper->GetTotalChildCount();
-    if (childCount <= MASK_COUNT) {
+    auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
+    if (childCount <= 0) {
         LOGI("ChildCount is illegal.");
         return;
     }
-    childCount -= MASK_COUNT;
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(childLayoutConstraint, layoutProperty, idealSize.ConvertToSizeT(), childCount, axis);
 
@@ -153,6 +152,14 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
         return;
     }
+    if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED &&
+        tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
+        indicator_ = indicator;
+        currentOffset_ = 0.0f;
+        OffsetF childOffset = OffsetF(0.0f, 0.0f);
+        LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+        return;
+    }
     if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
         childrenMainSize_ <= frameSize.MainSize(axis)) {
         indicator_ = indicator;
@@ -161,7 +168,7 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
         return;
     }
-    if (indicator != indicator_ &&
+    if ((indicator != indicator_ || (indicator == indicator_ && needSetCentered_)) &&
         layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
         if (childrenMainSize_ > frameSize.MainSize(axis) && tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE &&
             axis == Axis::HORIZONTAL) {
@@ -173,6 +180,13 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         indicator_ = indicator;
         auto space = GetSpace(layoutWrapper, indicator, frameSize, axis);
         float frontChildrenMainSize = CalculateFrontChildrenMainSize(layoutWrapper, indicator, axis);
+        if (space < 0.0f) {
+            OffsetF childOffset = (axis == Axis::HORIZONTAL ? OffsetF(-frontChildrenMainSize, 0.0f)
+                                                            : OffsetF(0.0f, -frontChildrenMainSize));
+            currentOffset_ = -frontChildrenMainSize;
+            LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+            return;
+        }
         if (frontChildrenMainSize < space) {
             OffsetF childOffset = OffsetF(0.0f, 0.0f);
             currentOffset_ = 0.0f;
@@ -286,8 +300,8 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(unselectedMaskWrapper);
     for (int32_t i = 0; i < MASK_COUNT; i++) {
         auto currentWrapper = (i == 0 ? selectedMaskWrapper : unselectedMaskWrapper);
-        auto currentMask = (i == 0 ? layoutProperty->GetSelectedMask().value_or(-1) :
-            layoutProperty->GetUnselectedMask().value_or(-1));
+        auto currentMask = (i == 0 ? layoutProperty->GetSelectedMask().value_or(-1)
+                                   : layoutProperty->GetUnselectedMask().value_or(-1));
         if (currentMask < 0) {
             currentWrapper->GetGeometryNode()->SetFrameSize(SizeF());
         } else {

@@ -29,6 +29,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<NavigationModel> NavigationModel::instance_ = nullptr;
@@ -47,11 +48,11 @@ NavigationModel* NavigationModel::GetInstance()
             } else {
                 instance_.reset(new Framework::NavigationModelImpl());
             }
-        }
 #endif
         }
-        return instance_.get();
     }
+    return instance_.get();
+}
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -60,6 +61,9 @@ constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 200;
+constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
+constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 280.0_vp;
+constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
@@ -69,7 +73,7 @@ JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent&
 
 } // namespace
 
-void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items)
+void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items)
 {
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
@@ -148,6 +152,57 @@ void JSNavigation::ParseBarItems(
     }
 }
 
+void JSNavigation::ParseToolbarItemsConfiguration(
+    const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items)
+{
+    auto length = jsArray->Length();
+    for (size_t i = 0; i < length; i++) {
+        auto item = jsArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            continue;
+        }
+        NG::BarItem toolBarItem;
+        std::string text;
+        std::string icon;
+        std::string activeIcon;
+
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        auto itemValueObject = itemObject->GetProperty("value");
+        if (ParseJsString(itemValueObject, text)) {
+            toolBarItem.text = text;
+        }
+
+        auto itemIconObject = itemObject->GetProperty("icon");
+        if (ParseJsMedia(itemIconObject, icon)) {
+            toolBarItem.icon = icon;
+        }
+
+        auto itemActionValue = itemObject->GetProperty("action");
+        if (itemActionValue->IsFunction()) {
+            RefPtr<JsFunction> onClickFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(itemActionValue));
+            auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                if (func) {
+                    func->ExecuteJS();
+                }
+            };
+            toolBarItem.action = onItemClick;
+        }
+
+        auto itemStatusValue = itemObject->GetProperty("status");
+        if (itemStatusValue->IsNumber()) {
+            toolBarItem.status = static_cast<NG::NavToolbarItemStatus>(itemStatusValue->ToNumber<int32_t>());
+        }
+
+        auto itemActiveIconObject = itemObject->GetProperty("activeIcon");
+        if (ParseJsMedia(itemActiveIconObject, activeIcon)) {
+            toolBarItem.activeIcon = activeIcon;
+        }
+
+        items.push_back(toolBarItem);
+    }
+}
+
 bool JSNavigation::ParseCommonTitle(const JSRef<JSVal>& jsValue)
 {
     bool isCommonTitle = false;
@@ -182,6 +237,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
     NavigationModel::GetInstance()->Create();
     auto navigationStack = AceType::MakeRefPtr<JSNavigationStack>();
     navigationStack->SetDataSourceObj(obj);
+    NavigationModel::GetInstance()->SetNavigationStackProvided(true);
     NavigationModel::GetInstance()->SetNavigationStack(std::move(navigationStack));
 }
 
@@ -197,16 +253,22 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("hideBackButton", &JSNavigation::SetHideBackButton, opt);
     JSClass<JSNavigation>::StaticMethod("hideToolBar", &JSNavigation::SetHideToolBar, opt);
     JSClass<JSNavigation>::StaticMethod("toolBar", &JSNavigation::SetToolBar);
+    JSClass<JSNavigation>::StaticMethod("toolbarConfiguration", &JSNavigation::SetToolbarConfiguration);
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
     JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
     JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetUsrNavigationMode);
     JSClass<JSNavigation>::StaticMethod("navBarWidth", &JSNavigation::SetNavBarWidth);
+    JSClass<JSNavigation>::StaticMethod("minContentWidth", &JSNavigation::SetMinContentWidth);
+    JSClass<JSNavigation>::StaticMethod("navBarWidthRange", &JSNavigation::SetNavBarWidthRange);
     JSClass<JSNavigation>::StaticMethod("navBarPosition", &JSNavigation::SetNavBarPosition);
     JSClass<JSNavigation>::StaticMethod("hideNavBar", &JSNavigation::SetHideNavBar);
     JSClass<JSNavigation>::StaticMethod("backButtonIcon", &JSNavigation::SetBackButtonIcon);
     JSClass<JSNavigation>::StaticMethod("onNavBarStateChange", &JSNavigation::SetOnNavBarStateChange);
     JSClass<JSNavigation>::StaticMethod("navDestination", &JSNavigation::SetNavDestination);
+    JSClass<JSNavigation>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSNavigation>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -216,8 +278,14 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    if (info[0]->IsString()) {
-        NavigationModel::GetInstance()->SetTitle(info[0]->ToString());
+    if (info[0]->IsString() || info[0]->IsUndefined()) {
+        std::string title;
+        if (info[0]->IsUndefined()) {
+            title = "";
+        } else {
+            title = info[0]->ToString();
+        }
+        NavigationModel::GetInstance()->SetTitle(title);
     } else if (info[0]->IsObject()) {
         if (ParseCommonTitle(info[0])) {
             return;
@@ -249,7 +317,13 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
                 return;
             }
             CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
+                return;
+            }
+            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
+        } else {
+            CalcDimension titleHeight;
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
                 return;
             }
             NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
@@ -317,8 +391,12 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
+    if (!info[0]->IsObject() && !info[0]->IsUndefined()) {
+        LOGE("arg is not a object or is not undefined.");
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        NavigationModel::GetInstance()->SetToolBarItems({});
         return;
     }
     auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
@@ -341,9 +419,37 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         NavigationModel::GetInstance()->SetToolBarItems(std::move(toolBarItems));
         return;
     }
-    std::list<RefPtr<ToolBarItem>> items;
+    std::list<RefPtr<AceType>> items;
     NavigationModel::GetInstance()->GetToolBarItems(items);
     ParseToolBarItems(JSRef<JSArray>::Cast(itemsValue), items);
+}
+
+void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
+        if (NavigationModel::GetInstance()->NeedSetItems()) {
+            std::vector<NG::BarItem> toolbarItems;
+            if (info[0]->IsUndefined()) {
+                toolbarItems = {};
+            } else {
+                ParseToolbarItemsConfiguration(info, JSRef<JSArray>::Cast(info[0]), toolbarItems);
+            }
+            NavigationModel::GetInstance()->SetToolbarConfiguration(std::move(toolbarItems));
+            return;
+        }
+        std::list<RefPtr<AceType>> items;
+        NavigationModel::GetInstance()->GetToolBarItems(items);
+        ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
+    } else if (info[0]->IsObject()) {
+        auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+        if (builderFuncParam->IsFunction()) {
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(builderFuncParam);
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavigationModel::GetInstance()->SetCustomToolBar(customNode);
+        }
+    }
 }
 
 void JSNavigation::SetMenus(const JSCallbackInfo& info)
@@ -353,14 +459,18 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsArray()) {
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
         if (NavigationModel::GetInstance()->NeedSetItems()) {
             std::vector<NG::BarItem> menuItems;
-            ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+            if (info[0]->IsUndefined()) {
+                menuItems = {};
+            } else {
+                ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+            }
             NavigationModel::GetInstance()->SetMenuItems(std::move(menuItems));
             return;
         }
-        std::list<RefPtr<ToolBarItem>> items;
+        std::list<RefPtr<AceType>> items;
         NavigationModel::GetInstance()->GetMenuItems(items);
         ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
     } else if (info[0]->IsObject()) {
@@ -452,6 +562,63 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
     }
 
     NavigationModel::GetInstance()->SetNavBarWidth(navBarWidth);
+}
+
+void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    CalcDimension minContentWidth;
+    if (!ParseJsDimensionVp(info[0], minContentWidth)) {
+        NavigationModel::GetInstance()->SetMinContentWidth(DEFAULT_MIN_CONTENT_WIDTH);
+        return;
+    }
+
+    if (LessNotEqual(minContentWidth.Value(), 0.0)) {
+        minContentWidth = DEFAULT_MIN_CONTENT_WIDTH;
+    }
+
+    NavigationModel::GetInstance()->SetMinContentWidth(minContentWidth);
+}
+
+void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
+{
+
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsArray()) {
+        return;
+    }
+    auto rangeArray = JSRef<JSArray>::Cast(info[0]);
+    JSRef<JSVal> min = rangeArray->GetValueAt(0);
+    JSRef<JSVal> max = rangeArray->GetValueAt(1);
+
+    CalcDimension minNavBarWidth;
+    if (!ParseJsDimensionVp(min, minNavBarWidth)) {
+        minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
+    }
+
+    CalcDimension maxNavBarWidth;
+    if (!ParseJsDimensionVp(max, maxNavBarWidth)) {
+        maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
+    }
+
+    if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
+        minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
+    }
+
+    if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
+        maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
+    }
+
+    NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
+    NavigationModel::GetInstance()->SetMaxNavBarWidth(maxNavBarWidth);
+
 }
 
 void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)

@@ -319,13 +319,13 @@ template<typename Modifier, typename PropertyType>
 void PropertyTransitionEffectTemplate<Modifier, PropertyType>::OnAttach(
     const RefPtr<RosenRenderContext>& context, bool activeTransition)
 {
+    // record the current status
+    isActive_ = activeTransition;
     if (modifier_ != nullptr) {
-        LOGE("PropertyTransitionEffectImpl::OnAttach modifier_ is not null");
+        property_->Set(activeTransition ? activeValue_ : identityValue_);
         return;
     }
 
-    // record the current status
-    isActive_ = activeTransition;
     // create the property corresponding to current status
     property_ =
         std::make_shared<Rosen::RSAnimatableProperty<PropertyType>>(activeTransition ? activeValue_ : identityValue_);
@@ -343,14 +343,16 @@ void PropertyTransitionEffectTemplate<Modifier, PropertyType>::OnDetach(const Re
     modifier_.reset();
 }
 
-void RosenPivotTransitionEffect::SetPivot(Dimension centerX, Dimension centerY)
+void RosenPivotTransitionEffect::SetPivot(const Dimension& centerX, const Dimension& centerY, const Dimension& centerZ)
 {
     centerX_ = centerX;
     centerY_ = centerY;
+    centerZ_ = centerZ;
 }
 
-RosenPivotTransitionEffect::RosenPivotTransitionEffect(const Dimension& centerX, const Dimension& centerY)
-    : centerX_(centerX), centerY_(centerY)
+RosenPivotTransitionEffect::RosenPivotTransitionEffect(const Dimension& centerX, const Dimension& centerY,
+    const Dimension& centerZ)
+    : centerX_(centerX), centerY_(centerY), centerZ_(centerZ)
 {}
 
 void RosenPivotTransitionEffect::OnUpdateTransitionContext(
@@ -359,7 +361,8 @@ void RosenPivotTransitionEffect::OnUpdateTransitionContext(
     // calculate and set the pivot
     float xPivot = RosenRenderContext::ConvertDimensionToScaleBySize(centerX_, selfRect.Width());
     float yPivot = RosenRenderContext::ConvertDimensionToScaleBySize(centerY_, selfRect.Height());
-    context->SetPivot(xPivot, yPivot);
+    float zPivot = static_cast<float>(centerZ_.ConvertToPx());
+    context->SetPivot(xPivot, yPivot, zPivot);
 }
 
 RosenAsymmetricTransitionEffect::RosenAsymmetricTransitionEffect(
@@ -534,7 +537,8 @@ void RosenRotation3DTransitionEffect::SetRotateEffect(const RotateOptions& optio
     std::get<InternalRotationXEffect>(effects_).SetActiveValue(-options.angle * options.xDirection / norm);
     std::get<InternalRotationYEffect>(effects_).SetActiveValue(-options.angle * options.yDirection / norm);
     std::get<InternalRotationZEffect>(effects_).SetActiveValue(options.angle * options.zDirection / norm);
-    std::get<RosenPivotTransitionEffect>(effects_).SetPivot(options.centerX, options.centerY);
+    std::get<RosenPivotTransitionEffect>(effects_).SetPivot(options.centerX, options.centerY, options.centerZ);
+    std::get<InternalCameraDistanceEffect>(effects_).SetActiveValue(options.perspective);
 }
 
 RosenScaleTransitionEffect::RosenScaleTransitionEffect(const ScaleOptions& options)
@@ -570,6 +574,10 @@ InternalTranslateEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0
 
 template<>
 InternalScaleEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f, 1.0f), activeValue_(1.0f, 1.0f)
+{}
+
+template<>
+InternalCameraDistanceEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f), activeValue_(1.0f)
 {}
 
 RefPtr<RosenTransitionEffect> RosenTransitionEffect::CreateDefaultRosenTransitionEffect()

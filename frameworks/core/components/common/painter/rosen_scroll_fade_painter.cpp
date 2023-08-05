@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ constexpr double QUARTER_CIRCLE = 90.0;            // 3.1415926 / 2.0;
 
 } // namespace
 
+#ifndef USE_ROSEN_DRAWING
 void RosenScrollFadePainter::Paint(SkCanvas* canvas, const Size& size, const Offset& offset)
 {
     if (canvas == nullptr || NearZero(opacity_) || size.IsEmpty()) {
@@ -53,6 +54,38 @@ void RosenScrollFadePainter::Paint(SkCanvas* canvas, const Size& size, const Off
     canvas->drawCircle(center.GetX(), center.GetY(), radius, painter);
     canvas->restore();
 }
+#else
+void RosenScrollFadePainter::Paint(RSCanvas* canvas, const Size& size, const Offset& offset)
+{
+    if (canvas == nullptr || NearZero(opacity_) || size.IsEmpty()) {
+        return;
+    }
+
+    LOGD("ScrollFadePainter: opacity_(%{public}lf), scaleFactor(%{public}lf)", opacity_, scaleFactor_);
+    double baseGlowScale = size.Width() > size.Height() ? size.Height() / size.Width() : 1.0;
+    double radius = size.Width() * 3.0 / 2.0;
+    double height = std::min(size.Height(), size.Width() * WIDTH_TO_HEIGHT_FACTOR);
+    double scaleH = scaleFactor_ * baseGlowScale;
+    const auto& clipRect = Rect(Offset::Zero(), Size(size.Width(), height));
+    Offset center = Offset(size.Width() / 2.0, height - radius);
+    LOGD("center(%{public}lf, %{public}lf), radius(%{public}lf)", center.GetX(), center.GetY(), radius);
+
+    RSBrush brush;
+    brush.SetColor(color_.GetValue());
+    brush.SetAlpha(opacity_);
+    brush.SetBlendMode(RSBlendMode::SRC_OVER);
+
+    canvas->Save();
+    canvas->Scale(1.0, scaleH);
+    canvas->ClipRect(RSRect(clipRect.Left(), clipRect.Top(), clipRect.Right(), clipRect.Bottom()),
+        RSClipOp::INTERSECT);
+    canvas->AttachBrush(brush);
+    RSPoint point(center.GetX(), center.GetY());
+    canvas->DrawCircle(point, radius);
+    canvas->DetachBrush();
+    canvas->Restore();
+}
+#endif
 
 void RosenScrollFadePainter::PaintSide(RenderContext& context, const Size& size, const Offset& offset)
 {
@@ -64,6 +97,7 @@ void RosenScrollFadePainter::PaintSide(RenderContext& context, const Size& size,
     if (canvas == nullptr) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     switch (direction_) {
         case OverScrollDirection::UP:
             canvas->save();
@@ -98,6 +132,42 @@ void RosenScrollFadePainter::PaintSide(RenderContext& context, const Size& size,
         default:
             break;
     }
+#else
+    switch (direction_) {
+        case OverScrollDirection::UP:
+            canvas->Save();
+            canvas->Translate(offset.GetX(), offset.GetY());
+            Paint(canvas, size, offset);
+            canvas->Restore();
+            break;
+        case OverScrollDirection::DOWN:
+            canvas->Save();
+            canvas->Translate(offset.GetX(), offset.GetY());
+            canvas->Translate(0.0, size.Height());
+            canvas->Scale(1.0, -1.0);
+            Paint(canvas, size, offset);
+            canvas->Restore();
+            break;
+        case OverScrollDirection::LEFT:
+            canvas->Save();
+            canvas->Translate(offset.GetX(), offset.GetY());
+            canvas->Rotate(QUARTER_CIRCLE);
+            canvas->Scale(1.0, -1.0);
+            Paint(canvas, Size(size.Height(), size.Width()), offset);
+            canvas->Restore();
+            break;
+        case OverScrollDirection::RIGHT:
+            canvas->Save();
+            canvas->Translate(offset.GetX(), offset.GetY());
+            canvas->Translate(size.Width(), 0.0);
+            canvas->Rotate(QUARTER_CIRCLE);
+            Paint(canvas, Size(size.Height(), size.Width()), offset);
+            canvas->Restore();
+            break;
+        default:
+            break;
+    }
+#endif
 }
 
 } // namespace OHOS::Ace

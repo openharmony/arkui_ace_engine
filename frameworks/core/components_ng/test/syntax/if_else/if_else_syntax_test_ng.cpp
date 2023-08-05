@@ -18,7 +18,9 @@
 #include "gtest/gtest.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 #define private public
 #include "core/components_ng/syntax/if_else_node.h"
@@ -197,5 +199,38 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest006, TestSize.Level1)
     auto ifElseNode = IfElseNode::GetOrCreateIfElseNode(IF_ELSE_NODE_ID);
     auto anotherIfElseNode = IfElseNode::GetOrCreateIfElseNode(IF_ELSE_NODE_ID);
     EXPECT_TRUE(ifElseNode == anotherIfElseNode);
+}
+
+/**
+ * @tc.name: IfElseSyntaxCreateTest007
+ * @tc.desc: Test TryRetake function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add a node whose id is "node1" to the disappearingChildren of ifElseNode.
+     */
+    auto ifElseNode = IfElseNode::GetOrCreateIfElseNode(IF_ELSE_NODE_ID);
+    ASSERT_NE(ifElseNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetLayoutProperty(), nullptr);
+    frameNode->UpdateInspectorId("node1");
+    ifElseNode->AddDisappearingChild(frameNode);
+
+    /**
+     * @tc.steps: step2. Try to reuse "node1".
+     * @tc.expected: node1 can be reused, return value is true.
+     */
+    bool result1 = ifElseNode->TryRetake("node1");
+    EXPECT_TRUE(result1);
+
+    /**
+     * @tc.steps: step3. Try to reuse "node2".
+     * @tc.expected: node2 is not in disappearingChildren so it can't be reused, return value is false.
+     */
+    bool result2 = ifElseNode->TryRetake("node2");
+    EXPECT_FALSE(result2);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,15 @@ void PatternLockModelNG::SetPatternComplete(NG::PatternLockCompleteEvent&& onCom
     eventHub->SetOnComplete(std::move(onComplete));
 }
 
+void PatternLockModelNG::SetDotConnected(std::function<void(int32_t)>&& onConnected)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDotConnected(std::move(onConnected));
+}
+
 void PatternLockModelNG::SetSelectedColor(const Color& selectedColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, SelectedColor, selectedColor);
@@ -77,7 +86,7 @@ void PatternLockModelNG::SetCircleRadius(const Dimension& radius)
 
 void PatternLockModelNG::SetSideLength(const Dimension& sideLength)
 {
-    ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, SideLength, sideLength);
+    ACE_UPDATE_LAYOUT_PROPERTY(PatternLockLayoutProperty, SideLength, sideLength);
 }
 
 void PatternLockModelNG::SetStrokeWidth(const Dimension& lineWidth)

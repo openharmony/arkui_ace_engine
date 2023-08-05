@@ -18,8 +18,6 @@ group("fuzztest") {
   deps = [
     "acereskeyparser_fuzzer:AceResKeyParserFuzzTest",
     "arkressched_fuzzer:ArkResschedFuzzTest",
-
-    #"imageApi_fuzzer:ImageApiFuzzTest",
     "arkuiformrendergroup_fuzzer:ArkuiFormRenderGroupFuzzTest",
     "arkuiformrenderimpl_fuzzer:ArkuiFormRenderImplFuzzTest",
     "arkuiformrenderproxy_fuzzer:ArkuiFormRenderProxyFuzzTest",
@@ -30,7 +28,8 @@ group("fuzztest") {
     "sharedimagemanager_fuzzer:SharedImageManagerFuzzTest",
     "uiservice_fuzzer:UiServiceFuzzTest",
     "util_fuzzer:UtilFuzzTest",
-    "utilengine_fuzzer:UtilEngineFuzzTest",
+
+    #"utilengine_fuzzer:UtilEngineFuzzTest",
     "utilmost_fuzzer:UtilMostFuzzTest",
   ]
 }

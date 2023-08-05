@@ -52,6 +52,12 @@ void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string
 void EventReport::ANRShowDialog(int32_t uid, const std::string& packageName,
                                 const std::string& processName, const std::string& msg) {}
 
+void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std::vector<uint16_t>& jank,
+                                  const std::string& pageUrl, uint32_t jankStatusVersion) {}
+
 void EventReport::SendEventInner(const EventInfo& eventInfo) {}
 
+void EventReport::ReportEventComplete(DataBase& data) {}
+
+void EventReport::ReportEventJankFrame(DataBase& data) {}
 } // namespace OHOS::Ace

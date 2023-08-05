@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,9 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(patternlockModifier_);
     GetThemeProp();
     auto paintProperty = DynamicCast<PatternLockPaintProperty>(paintWrapper->GetPaintProperty());
+
     CHECK_NULL_VOID(paintProperty);
-    sideLength_ = paintProperty->GetSideLength().value_or(sideLength_);
+    sideLength_ = paintWrapper->GetContentSize().Width();
     circleRadius_ = paintProperty->GetCircleRadius().value_or(circleRadius_);
     regularColor_ = paintProperty->GetRegularColor().value_or(regularColor_);
     selectedColor_ = paintProperty->GetSelectedColor().value_or(selectedColor_);
@@ -38,17 +39,27 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     pathColor_ = paintProperty->GetPathColor().value_or(pathColor_);
     pathStrokeWidth_ = paintProperty->GetPathStrokeWidth().value_or(pathStrokeWidth_);
 
-    patternlockModifier_->SetSideLength(sideLength_.ConvertToPx());
+    patternlockModifier_->SetSideLength(sideLength_);
     patternlockModifier_->SetCircleRadius(circleRadius_.ConvertToPx());
-    patternlockModifier_->SetRegularColor(LinearColor(regularColor_));
-    patternlockModifier_->SetSelectColor(LinearColor(selectedColor_));
-    patternlockModifier_->SetActiveColor(LinearColor(activeColor_));
-    patternlockModifier_->SetPathColor(LinearColor(pathColor_));
+    patternlockModifier_->SetRegularColor(regularColor_);
+    patternlockModifier_->SetSelectColor(selectedColor_);
+    patternlockModifier_->SetActiveColor(activeColor_);
+    patternlockModifier_->SetPathColor(pathColor_);
+    patternlockModifier_->SetHoverColor(hoverColor_);
+    patternlockModifier_->SetWrongColor(wrongColor_);
+    patternlockModifier_->SetCorrectColor(correctColor_);
+    patternlockModifier_->SetPressColor(pressColor_);
     patternlockModifier_->SetPathStrokeWidth(pathStrokeWidth_.ConvertToPx());
     patternlockModifier_->SetIsMoveEventValid(isMoveEventValid_);
     patternlockModifier_->SetCellCenterOffset(cellCenter_);
     patternlockModifier_->SetContentOffset(paintWrapper->GetContentOffset());
     patternlockModifier_->SetChoosePoint(choosePoint_);
+    patternlockModifier_->SetActiveCircleRadiusScale(scaleActiveCircleRadius_);
+    patternlockModifier_->SetBackgroundCircleRadiusScale(scaleBackRoundCircleRadius_);
+    patternlockModifier_->SetLightRingRadiusStartScale(scaleWaveCircleRadiusStart_);
+    patternlockModifier_->SetLightRingRadiusEndScale(scaleWaveCircleRadiusEnd_);
+    patternlockModifier_->SetPressRadiusScale(pressRadiusScale_);
+    patternlockModifier_->SetHoverRadiusScale(hoverRadiusScale_);
 }
 
 void PatternLockPaintMethod::GetThemeProp()
@@ -61,5 +72,17 @@ void PatternLockPaintMethod::GetThemeProp()
     selectedColor_ = patternLockTheme->GetSelectedColor();
     activeColor_ = patternLockTheme->GetActiveColor();
     pathColor_ = patternLockTheme->GetPathColor();
+    hoverColor_ = patternLockTheme->GetHoverColor();
+    wrongColor_ = patternLockTheme->GetWrongColor();
+    correctColor_ = patternLockTheme->GetCorrectColor();
+    pressColor_ = patternLockTheme->GetPressColor();
+    circleRadius_ = patternLockTheme->GetCircleRadius();
+    pathStrokeWidth_ = patternLockTheme->GetPathStrokeWidth();
+    scaleActiveCircleRadius_ = patternLockTheme->GetActiveCircleRadiusScale();
+    scaleBackRoundCircleRadius_ = patternLockTheme->GetBackgroundRadiusScale();
+    scaleWaveCircleRadiusStart_ = patternLockTheme->GetLightRingCircleRadiusStartScale();
+    scaleWaveCircleRadiusEnd_ = patternLockTheme->GetLightRingCircleRadiusEndScale();
+    pressRadiusScale_ = patternLockTheme->GetPressRadiusScale();
+    hoverRadiusScale_ = patternLockTheme->GetHoverRadiusScale();
 }
 } // namespace OHOS::Ace::NG

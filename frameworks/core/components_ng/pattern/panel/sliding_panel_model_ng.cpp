@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,6 +125,11 @@ void SlidingPanelModelNG::SetHasDragBar(bool hasDragBar)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, hasDragBar);
 }
 
+void SlidingPanelModelNG::SetCustomHeight(const Dimension& customHeight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, customHeight);
+}
+
 void SlidingPanelModelNG::SetMiniHeight(const Dimension& miniHeight)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight);
@@ -143,6 +148,11 @@ void SlidingPanelModelNG::SetFullHeight(const Dimension& fullHeight)
 void SlidingPanelModelNG::SetIsShow(bool isShow)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
+}
+
+void SlidingPanelModelNG::SetShowCloseIcon(bool showCloseIcon)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, ShowCloseIcon, showCloseIcon);
 }
 
 void SlidingPanelModelNG::SetBackgroundMask(const Color& backgroundMask)
@@ -193,35 +203,6 @@ void SlidingPanelModelNG::SetOnHeightChange(HeightChangeEvent&& onHeightChange)
 
 void SlidingPanelModelNG::Pop()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto hasDragBar = layoutProperty->GetHasDragBar().value_or(true);
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(columnNode);
-
-    auto child = columnNode->GetChildren();
-    bool isFirstChildDragBar = false;
-    if (!child.empty()) {
-        auto firstNode = columnNode->GetChildren().front();
-        isFirstChildDragBar = firstNode->GetTag() == V2::DRAG_BAR_ETS_TAG;
-    }
-    if (hasDragBar) {
-        if (!isFirstChildDragBar) {
-            auto dragBarNode = FrameNode::GetOrCreateFrameNode(V2::DRAG_BAR_ETS_TAG,
-                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DragBarPattern>(); });
-            auto layoutProp = dragBarNode->GetLayoutProperty<DragBarPaintProperty>();
-            dragBarNode->MountToParent(columnNode, 0);
-            dragBarNode->MarkModifyDone();
-        }
-        NG::ViewStackProcessor::GetInstance()->PopContainer();
-        return;
-    }
-
-    if (isFirstChildDragBar) {
-        columnNode->RemoveChildAtIndex(0);
-    }
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
 

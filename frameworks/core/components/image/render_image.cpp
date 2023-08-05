@@ -349,7 +349,11 @@ void RenderImage::HandleOnCopy()
             break;
         }
         default: {
+#ifndef USE_ROSEN_DRAWING
             clipboard_->SetPixelMapData(renderImage->GetPixmapFromSkImage(), copyOption_);
+#else
+            clipboard_->SetPixelMapData(renderImage->GetPixmapFromDrawingImage(), copyOption_);
+#endif
             break;
         }
     }
@@ -969,7 +973,11 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
                 static_cast<uint32_t>(initRenderNode->GetPaintRect().Width()),
                 static_cast<uint32_t>(initRenderNode->GetPaintRect().Height()));
             dragWindow_->SetOffset(static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()));
+#ifndef USE_ROSEN_DRAWING
             auto image = initRenderNode->GetSkImage();
+#else
+            auto image = initRenderNode->GetDrawingImage();
+#endif
             dragWindow_->DrawImage(image);
         }
         if (dragWindow_) {

@@ -128,6 +128,10 @@ public:
         layoutAlgorithm->SetIndicator(indicator_);
         layoutAlgorithm->SetIsBuilder(IsContainsBuilder());
         layoutAlgorithm->SetTabBarStyle(tabBarStyle_);
+        if (needSetCentered_) {
+            layoutAlgorithm->SetNeedSetCentered();
+            needSetCentered_ = false;
+        }
         return layoutAlgorithm;
     }
 
@@ -269,6 +273,26 @@ public:
     bool IsAtTop() const;
 
     bool IsAtBottom() const;
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
+    void SetFirstFocus(bool isFirstFocus)
+    {
+        isFirstFocus_ = isFirstFocus;
+    }
+
+    void SetIsAnimating(bool isAnimating)
+    {
+        isAnimating_ = isAnimating;
+    }
+
+    bool GetTouchingSwiper() const
+    {
+        return isTouchingSwiper_;
+    }
 
 private:
     void OnModifyDone() override;
@@ -287,6 +311,7 @@ private:
     void HandleMoveAway(int32_t index);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    bool OnKeyEventWithoutClick(const KeyEvent& event);
     void HandleClick(const GestureEvent& info);
     void HandleTouchEvent(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
@@ -299,6 +324,7 @@ private:
     void GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>& selectedIndexes,
         int32_t maskIndex, float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
         OffsetF& originalUnselectedMaskOffset);
+    bool CheckSvg(int32_t index) const;
 
     void HandleTouchDown(int32_t index);
     void HandleTouchUp(int32_t index);
@@ -321,6 +347,13 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     bool IsOutOfBoundary();
     void SetAccessibilityAction();
+    void AdjustFocusPosition();
+    void TabBarClickEvent(int32_t index) const;
+    void ApplyTurnPageRateToIndicator(float turnPageRate);
+    bool CheckSwiperDisable() const;
+    void AdjustOffset(double& offset) const;
+    void InitTurnPageRateEvent();
+    void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -333,6 +366,7 @@ private:
     float currentOffset_ = 0.0f;
     float childrenMainSize_ = 0.0f;
     int32_t indicator_ = 0;
+    int32_t focusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     std::vector<OffsetF> tabItemOffsets_;
     std::unordered_map<int32_t, bool> tabBarType_;
@@ -352,11 +386,16 @@ private:
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
     std::vector<TabBarStyle> tabBarStyles_;
+    bool isFirstFocus_ = true;
+    bool isTouchingSwiper_ = false;
+    float turnPageRate_ = 0.0f;
+    int32_t swiperStartIndex_ = 0;
 
     RefPtr<TabBarModifier> tabBarModifier_;
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
+    bool needSetCentered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

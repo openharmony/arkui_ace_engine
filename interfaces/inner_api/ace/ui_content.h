@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "macros.h"
+#include "modal_ui_extension_callbacks.h"
 #include "serializeable_object.h"
 #include "viewport_config.h"
 
@@ -57,10 +58,6 @@ class KeyEvent;
 class AxisEvent;
 } // namespace MMI
 
-namespace Ace {
-class Window;
-} // namespace Ace
-
 namespace Media {
 class PixelMap;
 } // namespace Media
@@ -72,7 +69,7 @@ class NativeValue;
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW UIContent {
+class ACE_FORCE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(
         OHOS::AbilityRuntime::Context* context, NativeEngine* runtime, bool isFormRender);
@@ -84,7 +81,10 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
-    virtual void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) = 0;
+
+    // UIExtensionAbility initialize for focusWindow ID
+    virtual void Initialize(
+        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowID) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -103,6 +103,7 @@ public:
     virtual bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) = 0;
     virtual bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) = 0;
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
+    virtual void SetIsFocusActive(bool isFocusActive) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
@@ -135,11 +136,12 @@ public:
     virtual void SetFormHeight(const float height) = 0;
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
-    virtual void ReloadForm() {};
+    virtual void ReloadForm(const std::string& url) {};
     virtual void OnFormSurfaceChange(float width, float height) {}
 
-    virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) = 0;
-    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
+    virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
+    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
+    virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) {};
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
@@ -159,6 +161,27 @@ public:
         std::vector<std::string>& assetBasePaths, std::string& resFolderName) {};
     virtual void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) {};
+
+    virtual NativeValue* GetUIContext()
+    {
+        return nullptr;
+    }
+
+    /**
+     * @description: Create a full-window modal UIExtensionComponent.
+     * @param want Indicates the want of UIExtensionAbility.
+     * @param callbacks Indicates the UIExtensionComponent callbacks.
+     * @return The return value is the ID of the session held by the UIExtensionComponent
+     * if creation is not successful, it returns 0 by default.
+     */
+    virtual int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks) = 0;
+
+    /**
+     * @description: Close the full-window modal.
+     * @param sessionId Indicates the sessionId of UIExtensionAbility.
+     * If the sessionId is 0, refuse to close
+     */
+    virtual void CloseModalUIExtension(int32_t sessionId) = 0;
 };
 
 } // namespace OHOS::Ace

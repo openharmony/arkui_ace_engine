@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_ROSEN_RENDER_LIST_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_ROSEN_RENDER_LIST_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
+#endif
 
 #include "base/utils/noncopyable.h"
 #include "core/components_v2/list/render_list.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing_forward.h"
+#endif
 
 namespace OHOS::Ace::V2 {
 
@@ -37,8 +42,13 @@ private:
     void PaintSelectedZone(RenderContext& context);
     void PaintItemZone(RenderContext& context, const RefPtr<RenderListItem>& item);
     void PaintDivider(const std::shared_ptr<RSNode>& rsNode);
+#ifndef USE_ROSEN_DRAWING
     void DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, const SkPaint& paint, bool isVertical,
         double startCrossAxis, double mainAxis, double endCrossAxis);
+#else
+    void DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, const RSPen& pen, bool isVertical,
+        double startCrossAxis, double mainAxis, double endCrossAxis);
+#endif
     RefPtr<RenderListItem> prevStickyItem_;
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderList);
 };

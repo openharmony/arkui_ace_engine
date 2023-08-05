@@ -73,15 +73,6 @@ void FormFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, co
     }
 }
 
-void FormFrontendDeclarative::ClearEngineCache()
-{
-    auto jsEngine = GetJsEngine();
-    if (!jsEngine) {
-        return;
-    }
-    jsEngine->ClearCache();
-}
-
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)
 {
     LOGI("FormFrontendDeclarative::UpdateData dataList = %{public}s", dataList.c_str());

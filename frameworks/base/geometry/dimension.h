@@ -25,7 +25,6 @@
 #define NEAR_ZERO(value) ((value > 0.0) ? ((value - 0.0) <= 0.000001f) : ((0.0 - value) <= 0.000001f))
 
 namespace OHOS::Ace {
-
 enum class DimensionUnit {
     /*
      * Unit is invalid.
@@ -67,21 +66,13 @@ enum class DimensionUnit {
      * The value is expression.
      */
     CALC,
-    /*
-     * The value is viewport width.
-     */
-    VW,
-    /*
-     * The value is viewport height.
-     */
-    VH,
 };
 
 /*
  * Dimension contains a value and an unit to represent different
  * scales in one class.
  */
-class ACE_EXPORT Dimension {
+class ACE_FORCE_EXPORT Dimension {
 public:
     constexpr Dimension() = default;
     ~Dimension() = default;

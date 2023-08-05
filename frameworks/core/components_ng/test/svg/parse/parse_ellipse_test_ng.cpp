@@ -110,4 +110,21 @@ HWTEST_F(ParseEllipseTestNg, ParseTest003, TestSize.Level1)
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
+
+/**
+ * @tc.name: ParseTest004
+ * @tc.desc: parse ellipse label
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ParseEllipseTestNg, ParseTest004, TestSize.Level1)
+{
+    SvgEllipse *sEllipse = new SvgEllipse();
+    const Size viewPort = Size(0.0, 0.0);
+    EXPECT_EQ(viewPort.Width(), 0.0);
+    EXPECT_EQ(viewPort.Height(), 0.0);
+    auto svgEllipse1 = sEllipse->Create();
+    svgEllipse1->AsPath(viewPort);
+    delete sEllipse;
+}
 } // namespace OHOS::Ace::NG

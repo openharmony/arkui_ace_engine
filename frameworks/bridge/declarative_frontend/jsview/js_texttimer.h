@@ -29,9 +29,10 @@ protected:
     static void SetFormat(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(const std::string& value);
+    static void SetFontWeight(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
     static void SetFontFamily(const JSCallbackInfo& info);
+    static void SetFontDefault();
     static void OnTimer(const JSCallbackInfo& info);
 };
 

@@ -11,19 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
-import("//foundation/arkui/ace_engine/build/uicast.gni")
 
 base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
+abcuicontext_obj_path = base_output_path + "/abc_uicontext.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
 
-ts2abc_gen_abc("gen_stateMgmt_abc") {
+es2abc_gen_abc("gen_stateMgmt_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmt.js")
@@ -33,7 +33,7 @@ ts2abc_gen_abc("gen_stateMgmt_abc") {
   out_puts = [ base_output_path + "/stateMgmt.abc" ]
 }
 
-ts2abc_gen_abc("gen_jsEnumStyle_abc") {
+es2abc_gen_abc("gen_jsEnumStyle_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js")
@@ -43,8 +43,18 @@ ts2abc_gen_abc("gen_jsEnumStyle_abc") {
   out_puts = [ base_output_path + "/jsEnumStyle.abc" ]
 }
 
+es2abc_gen_abc("gen_jsUIContext_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsUIContext.js")
+  dst_file = rebase_path(base_output_path + "/jsUIContext.abc")
+
+  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsUIContext.js" ]
+  out_puts = [ base_output_path + "/jsUIContext.abc" ]
+}
+
 if (!is_cross_platform_build) {
-  ts2abc_gen_abc("gen_js_mock_system_plugin_abc") {
+  es2abc_gen_abc("gen_js_mock_system_plugin_abc") {
     extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
     src_js = rebase_path(
             "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js")
@@ -76,6 +86,15 @@ gen_obj("abc_enum_style") {
   snapshot_dep = [ ":gen_jsEnumStyle_abc" ]
 }
 
+gen_obj("abc_uicontext") {
+  input = base_output_path + "/jsUIContext.abc"
+  if (use_mac || use_mingw_win || use_linux || use_ios) {
+    abcuicontext_obj_path = base_output_path + "/jsUIContext.c"
+  }
+  output = abcuicontext_obj_path
+  snapshot_dep = [ ":gen_jsUIContext_abc" ]
+}
+
 if (!is_cross_platform_build) {
   gen_obj("abc_mock_system_plugin") {
     input = base_output_path + "/jsMockSystemPlugin.abc"
@@ -103,8 +122,6 @@ template("declarative_js_engine_ark") {
 
     configs = [ "$ace_root:ace_config" ]
 
-    configs += [ "${uicast_configs.ace_uicast}:uicast_jsi_config" ]
-
     sources = [
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
@@ -121,9 +138,6 @@ template("declarative_js_engine_ark") {
       "modules/jsi_syscap_module.cpp",
       "modules/jsi_timer_module.cpp",
     ]
-
-    defines += uicast_configs.uicast_defines
-    sources += uicast_configs.uicast_jsi_sources
 
     if (defined(vendor_configs.extra_view_register_sources)) {
       include_dirs = vendor_configs.ace_advance_dirs
@@ -153,11 +167,20 @@ template("declarative_js_engine_ark") {
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      public_deps = [ "//foundation/arkui/napi:ace_napi" ]
     } else {
-      external_deps += [ "ets_runtime:libark_jsruntime" ]
+      external_deps += [
+        "ets_runtime:libark_jsruntime",
+        "napi:ace_napi",
+        "napi:ace_napi_ark",
+      ]
     }
 
     deps = []
+    if (is_cross_platform_build) {
+      deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
+    }
+
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
       sources += [ "utils/jsi_module_searcher.cpp" ]
@@ -179,13 +202,10 @@ template("declarative_js_engine_ark") {
       ]
     }
 
-    # if napi support
-    deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
-    public_deps = [ "//foundation/arkui/napi:ace_napi" ]
-
     deps += [
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
+      ":gen_obj_src_abc_uicontext",
     ]
   }
 }

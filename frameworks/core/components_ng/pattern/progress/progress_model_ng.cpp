@@ -43,15 +43,20 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
+    auto progressFocusNode = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(progressFocusNode);
     if (type == ProgressType::CAPSULE) {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetCapsuleSelectColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, theme->GetBorderColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetCapsuleBgColor());
+        progressFocusNode->SetFocusable(true);
     } else if (type == ProgressType::RING) {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetRingProgressBgColor());
+        progressFocusNode->SetFocusable(false);
     } else {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetTrackBgColor());
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetTrackSelectedColor());
+        progressFocusNode->SetFocusable(false);
     }
 
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -62,11 +67,13 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         if (frameNode->GetChildren().empty()) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-            CHECK_NULL_VOID(textNode);
             textNode->SetInternal();
-            SetTextDefaultStyle(textNode, value, max);
             textNode->MountToParent(frameNode);
         }
+        auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textHost);
+        SetTextDefaultStyle(textHost, value, max);
+        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         eventHub->SetHoverEffect(HoverEffectType::SCALE);
     } else {
         if (!frameNode->GetChildren().empty()) {
@@ -87,13 +94,12 @@ void ProgressModelNG::SetValue(double value)
         LOGE("value is lager than total , set value equals total");
         value = maxValue.value_or(0);
     }
-
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     if (!pattern->IsTextFromUser()) {
         SetText(std::nullopt);
     }
-    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
 }
 
 void ProgressModelNG::SetColor(const Color& value)
@@ -184,14 +190,18 @@ void ProgressModelNG::SetText(const std::optional<std::string>& value)
     CHECK_NULL_VOID(pattern);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
     std::string context = "";
     if (!value.has_value()) {
-        auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
-        CHECK_NULL_VOID(progressPaintProperty);
         auto maxValue = progressPaintProperty->GetMaxValue();
         auto curValue = progressPaintProperty->GetValue();
         int32_t curPercent = curValue.value() * 100 / maxValue.value();
         std::string number = std::to_string(curPercent) + "%";
+        bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
+        if (!isShowText) {
+            number = "";
+        }
         textLayoutProperty->UpdateContent(number);
         context = number;
         pattern->SetTextFromUser(false);
@@ -247,10 +257,17 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateClipEdge(false);
     RefPtr<ProgressTheme> progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
     int32_t curPercent = 0;
     if (!NearZero(maxValue)) {
         curPercent = value * 100 / maxValue;
@@ -265,9 +282,14 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
     MarginProperty margin;
     margin.left = CalcLength(progressTheme->GetTextMargin());
     margin.right = CalcLength(progressTheme->GetTextMargin());
-    margin.top = CalcLength(progressTheme->GetTextMargin());
-    margin.bottom = CalcLength(progressTheme->GetTextMargin());
+    margin.top = CalcLength(0.0_vp);
+    margin.bottom = CalcLength(0.0_vp);
     textProps->UpdateMargin(margin);
+    bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
+    if (!isShowText) {
+        number = "";
+        textProps->UpdateContent(number);
+    }
     textNode->MarkModifyDone();
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Text, number);
 }
@@ -281,4 +303,25 @@ void ProgressModelNG::SetProgressStatus(ProgressStatus status)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ProgressStatus, status);
 }
+
+void ProgressModelNG::SetShowText(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableShowText, value);
+}
+
+void ProgressModelNG::SetRingSweepingEffect(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableRingScanEffect, value);
+}
+
+void ProgressModelNG::SetLinearSweepingEffect(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableLinearScanEffect, value);
+}
+
+void ProgressModelNG::SetSmoothEffect(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, value);
+}
+
 } // namespace OHOS::Ace::NG

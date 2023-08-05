@@ -54,10 +54,10 @@ public:
     virtual void DrawPath(const TestingPath& path) {}
     virtual void DrawArc(const TestingRect& oval, float startAngle, float sweepAngle) {}
     virtual void DrawRect(const TestingRect& rect) {}
-    virtual void ClipRoundRect(const TestingRoundRect& roundRect, ClipOp op) {}
+    virtual void ClipRoundRect(const TestingRoundRect& roundRect, ClipOp op, bool antiAlias = false) {}
     virtual void Rotate(float deg, float sx, float sy) {}
     virtual void Rotate(float deg) {}
-    virtual void Translate(float dx, float dy) {}
+    virtual void Translate(float tx, float ty) {}
     virtual void DrawBitmap(const TestingBitmap& bitmap, const float px, const float py) {}
     virtual void DrawShadow(const TestingPath& path, const TestingPoint3& planeParams, const TestingPoint3& devLightPos,
         float lightRadius, TestingColor /* ambientColor */, TestingColor /* spotColor */, TestingShadowFlags flag)
@@ -81,6 +81,12 @@ public:
     virtual TestingCanvas& DetachBrush()
     {
         return *this;
+    }
+
+    template<typename T>
+    const std::shared_ptr<T> GetImpl() const
+    {
+        return std::shared_ptr<T>();
     }
 
     virtual void Save() {}

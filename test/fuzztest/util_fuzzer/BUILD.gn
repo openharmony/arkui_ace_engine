@@ -44,12 +44,19 @@ ohos_fuzztest("UtilFuzzTest") {
     "$ace_root/frameworks",
     "$ace_root",
     cjson_root,
+    "$root_out_dir/arkui/framework",
   ]
   deps = [ "$ace_root/frameworks/base:ace_memory_monitor_ohos" ]
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 ###############################################################################

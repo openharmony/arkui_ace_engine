@@ -20,7 +20,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
-#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 
@@ -32,7 +31,6 @@ struct BorderRadiusPropertyT {
     std::optional<T> radiusTopRight;
     std::optional<T> radiusBottomRight;
     std::optional<T> radiusBottomLeft;
-    std::optional<bool> radiusFlag;
 
     void SetRadius(const T& borderRadius)
     {
@@ -40,12 +38,6 @@ struct BorderRadiusPropertyT {
         radiusTopRight = borderRadius;
         radiusBottomLeft = borderRadius;
         radiusBottomRight = borderRadius;
-    }
-
-    // This function is used when the input value is length
-    void SetRadiusFlag(bool flag)
-    {
-        radiusFlag = flag;
     }
 
     bool operator==(const BorderRadiusPropertyT& value) const
@@ -91,6 +83,33 @@ struct BorderRadiusPropertyT {
             .append("]");
         return str;
     }
+};
+
+template<>
+struct BorderRadiusPropertyT<Dimension> {
+    std::optional<Dimension> radiusTopLeft;
+    std::optional<Dimension> radiusTopRight;
+    std::optional<Dimension> radiusBottomRight;
+    std::optional<Dimension> radiusBottomLeft;
+    bool multiValued = true;
+
+    BorderRadiusPropertyT<Dimension>() = default;
+    explicit BorderRadiusPropertyT<Dimension>(Dimension radius)
+        : radiusTopLeft(radius), radiusTopRight(radius), radiusBottomRight(radius), radiusBottomLeft(radius)
+    {}
+    BorderRadiusPropertyT<Dimension>(
+        Dimension radiusTopLeft, Dimension radiusTopRight, Dimension radiusBottomRight, Dimension radiusBottomLeft)
+        : radiusTopLeft(radiusTopLeft), radiusTopRight(radiusTopRight), radiusBottomRight(radiusBottomRight),
+          radiusBottomLeft(radiusBottomLeft)
+    {}
+
+    bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
+
+    void SetRadius(const Dimension& borderRadius);
+
+    bool UpdateWithCheck(const BorderRadiusPropertyT<Dimension>& value);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const;
 };
 
 template<>
@@ -148,14 +167,14 @@ struct BorderRadiusPropertyT<float> {
     }
 };
 
-template<typename T>
-struct BorderColorPropertyT {
-    std::optional<T> leftColor;
-    std::optional<T> rightColor;
-    std::optional<T> topColor;
-    std::optional<T> bottomColor;
+struct BorderColorProperty {
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+    bool multiValued = false;
 
-    void SetColor(const T& borderColor)
+    void SetColor(const Color& borderColor)
     {
         leftColor = borderColor;
         rightColor = borderColor;
@@ -163,21 +182,15 @@ struct BorderColorPropertyT {
         bottomColor = borderColor;
     }
 
-    bool operator==(const BorderColorPropertyT& value) const
+    bool operator==(const BorderColorProperty& value) const
     {
         return (leftColor == value.leftColor) && (rightColor == value.rightColor) && (topColor == value.topColor) &&
                (bottomColor == value.bottomColor);
     }
 
-    std::string ToString() const
-    {
-        std::string str;
-        str.append("leftColor: [").append(leftColor.has_value() ? leftColor->ToString() : "NA").append("]");
-        str.append("rightColor: [").append(rightColor.has_value() ? rightColor->ToString() : "NA").append("]");
-        str.append("topColor: [").append(topColor.has_value() ? topColor->ToString() : "NA").append("]");
-        str.append("bottomColor: [").append(bottomColor.has_value() ? bottomColor->ToString() : "NA").append("]");
-        return str;
-    }
+    std::string ToString() const;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const;
 };
 
 template<typename T>
@@ -222,21 +235,25 @@ struct BorderWidthPropertyT {
         }
         return isModified;
     }
+};
 
-    std::string ToString() const
-    {
-        std::string str;
-        str.append("leftDimen: [").append(leftDimen.has_value() ? leftDimen->ToString() : "NA").append("]");
-        str.append("rightDimen: [").append(rightDimen.has_value() ? rightDimen->ToString() : "NA").append("]");
-        str.append("topDimen: [").append(topDimen.has_value() ? topDimen->ToString() : "NA").append("]");
-        str.append("bottomDimen: [").append(bottomDimen.has_value() ? bottomDimen->ToString() : "NA").append("]");
-        return str;
-    }
+template<>
+struct BorderWidthPropertyT<Dimension> {
+    std::optional<Dimension> leftDimen;
+    std::optional<Dimension> topDimen;
+    std::optional<Dimension> rightDimen;
+    std::optional<Dimension> bottomDimen;
+    bool multiValued = false;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
-    {
-        json->Put("borderWidth", leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-    }
+    void SetBorderWidth(const Dimension& borderWidth);
+
+    bool operator==(const BorderWidthPropertyT& value) const;
+
+    bool UpdateWithCheck(const BorderWidthPropertyT& value);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const;
+
+    std::string ToString() const;
 };
 
 template<>
@@ -290,44 +307,24 @@ struct BorderWidthPropertyT<float> {
     }
 };
 
-template<typename T>
-struct BorderStylePropertyT {
-    std::optional<T> styleLeft;
-    std::optional<T> styleRight;
-    std::optional<T> styleTop;
-    std::optional<T> styleBottom;
+struct BorderStyleProperty {
+    std::optional<BorderStyle> styleLeft;
+    std::optional<BorderStyle> styleRight;
+    std::optional<BorderStyle> styleTop;
+    std::optional<BorderStyle> styleBottom;
+    bool multiValued = false;
 
-    void SetBorderStyle(const T& borderStyle)
-    {
-        styleLeft = borderStyle;
-        styleRight = borderStyle;
-        styleTop = borderStyle;
-        styleBottom = borderStyle;
-    }
+    void SetBorderStyle(const BorderStyle& borderStyle);
 
-    bool operator==(const BorderStylePropertyT& value) const
-    {
-        return (styleLeft == value.styleLeft) && (styleRight == value.styleRight) && (styleTop == value.styleTop) &&
-               (styleBottom == value.styleBottom);
-    }
+    bool operator==(const BorderStyleProperty& value) const;
 
-    std::string ToString() const
-    {
-        std::string str;
-        str.append("styleLeft: [").append(styleLeft.has_value() ? styleLeft->ToString() : "NA").append("]");
-        str.append("styleRight: [").append(styleRight.has_value() ? styleRight->ToString() : "NA").append("]");
-        str.append("styleTop: [").append(styleTop.has_value() ? styleTop->ToString() : "NA").append("]");
-        str.append("styleBottom: [").append(styleBottom.has_value() ? styleBottom->ToString() : "NA").append("]");
-        return str;
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const;
 };
 
 using BorderRadiusPropertyF = BorderRadiusPropertyT<float>;
 using BorderRadiusProperty = BorderRadiusPropertyT<Dimension>;
-using BorderColorProperty = BorderColorPropertyT<Color>;
 using BorderWidthPropertyF = BorderWidthPropertyT<float>;
 using BorderWidthProperty = BorderWidthPropertyT<Dimension>;
-using BorderStyleProperty = BorderStylePropertyT<BorderStyle>;
 
 } // namespace OHOS::Ace::NG
 

@@ -26,6 +26,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT SpanModel {
@@ -34,6 +35,7 @@ public:
     virtual ~SpanModel() = default;
 
     virtual void Create(const std::string& content) = 0;
+    virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
@@ -45,6 +47,7 @@ public:
     virtual void SetLetterSpacing(const Dimension& value) = 0;
     virtual void SetLineHeight(const Dimension& value) = 0;
     virtual void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) = 0;
+    virtual void ClearOnClick() = 0;
 
 private:
     static std::unique_ptr<SpanModel> instance_;

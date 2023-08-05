@@ -103,8 +103,6 @@ LoadFailNotifyTask RatingPattern::CreateLoadFailCallback(int32_t imageFlag)
 
 void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (imageFlag == 0b001) {
         foregroundImageCanvas_ = foregroundImageLoadingCtx_->MoveCanvasImage();
         foregroundConfig_.srcRect_ = foregroundImageLoadingCtx_->GetSrcRect();
@@ -117,7 +115,6 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
         secondaryConfig_.dstRect_ = secondaryImageLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
-
     if (imageFlag == 0b100) {
         backgroundImageCanvas_ = backgroundImageLoadingCtx_->MoveCanvasImage();
         backgroundConfig_.srcRect_ = backgroundImageLoadingCtx_->GetSrcRect();
@@ -127,21 +124,41 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
     if (imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
         LOGD("Rating foreground, secondary and background image are loaded successfully.");
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
 void RatingPattern::OnImageDataReady(int32_t imageFlag)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     imageReadyStateCode_ = imageReadyStateCode_ | imageFlag;
 
     // 3 images are ready, invoke to update layout to calculate single star size.
     if (imageReadyStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
         LOGD("Rating foreground, secondary and background image are ready.");
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
+}
+
+void RatingPattern::UpdatePaintConfig()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto contentSize = geometryNode->GetContentSize();
+    foregroundConfig_.imageFit_ = ImageFit::FILL;
+    secondaryConfig_.imageFit_ = ImageFit::FILL;
+    backgroundConfig_.imageFit_ = ImageFit::FILL;
+    auto starsNum = layoutProperty->GetStarsValue(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
+    foregroundConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
+    foregroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
+    secondaryConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
+    secondaryConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
+    backgroundConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
+    backgroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
 }
 
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
@@ -153,9 +170,10 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto starNum =
         layoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
-    foregroundConfig_.imageFit_ = ImageFit::TOP_LEFT;
-    secondaryConfig_.imageFit_ = ImageFit::TOP_LEFT;
-    backgroundConfig_.imageFit_ = ImageFit::TOP_LEFT;
+    UpdatePaintConfig();
+    PrepareAnimation(foregroundImageCanvas_);
+    PrepareAnimation(secondaryImageCanvas_);
+    PrepareAnimation(backgroundImageCanvas_);
     if (!ratingModifier_) {
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
     }
@@ -164,7 +182,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     if (ratingModifier_->JudgeImageUri(
         layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),
         layoutProperty->GetSecondaryImageSourceInfo()->GetSrc(),
-        layoutProperty->GetBackgroundImageSourceInfo()->GetSrc(), foregroundConfig_.dstRect_) &&
+        layoutProperty->GetBackgroundImageSourceInfo()->GetSrc(), foregroundConfig_) &&
         imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
         ratingModifier_->UpdateImageUri(
             layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),
@@ -173,11 +191,25 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         ratingModifier_->UpdateCanvasImage(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
             foregroundConfig_, secondaryConfig_, backgroundConfig_);
     }
-    return MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_);
+    if (!(foregroundImageCanvas_->IsStatic() && secondaryImageCanvas_->IsStatic() &&
+            secondaryImageCanvas_->IsStatic())) {
+        ratingModifier_->SetNeedDraw(true);
+    }
+    auto paintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_);
+    paintMethod->UpdateFocusState(isfocus_, focusRatingScore_);
+    return paintMethod;
 }
 
 bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    std::optional<SizeF> contentSize = GetHostContentSize();
+    CHECK_NULL_RETURN(contentSize, false);
+    auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto starsNum = layoutProperty->GetStarsValue(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
+    singleStarWidth_ = contentSize->Width() / static_cast<float>(starsNum);
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
@@ -225,7 +257,7 @@ void RatingPattern::ConstrainsRatingScore()
     // if ratingScore < 0, assign the value defined in theme.
     if (ratingRenderProperty->HasRatingScore()) {
         if (LessOrEqual(ratingRenderProperty->GetRatingScore().value(), 0.0)) {
-            ratingRenderProperty->UpdateRatingScore(GetRatingScoreFromTheme().value_or(0.0));
+            UpdateRatingScore(GetRatingScoreFromTheme().value_or(0.0));
         }
     }
 
@@ -255,7 +287,7 @@ void RatingPattern::ConstrainsRatingScore()
     if (!hasInit_) {
         hasInit_ = true;
     }
-    ratingRenderProperty->UpdateRatingScore(drawScore);
+    UpdateRatingScore(drawScore);
     lastRatingScore_ = drawScore;
 }
 
@@ -265,19 +297,17 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     CHECK_NULL_VOID(ratingLayoutProperty);
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-
+    const int32_t starNum =
+        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     // step1: calculate the number of star which the touch point falls on.
     double wholeStarNum = 0.0;
-    const float singleWidth = foregroundConfig_.dstRect_.Width();
-    wholeStarNum = floor(eventPointX / singleWidth);
+    wholeStarNum = floor(eventPointX / singleStarWidth_);
 
     // step2: calculate relative position where the touch point falls on the wholeStarNum star.
     double posInSingle = 0.0;
-    posInSingle = (eventPointX - wholeStarNum * singleWidth) / singleWidth;
+    posInSingle = (eventPointX - wholeStarNum * singleStarWidth_) / singleStarWidth_;
     // step3: calculate the new ratingScore according to the touch point.
     double ratingScore = wholeStarNum + posInSingle;
-    const int32_t starNum =
-        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(0.5));
     // step3.1: constrain ratingScore which cannot be greater than starNum and be less than 0.0.
     ratingScore = ratingScore > starNum ? starNum : ratingScore;
@@ -290,13 +320,11 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     CHECK_NULL_VOID_NOLOG(!NearEqual(newDrawScore, oldDrawScore));
 
     // step4: Update the ratingScore saved in renderProperty and update render.
-    ratingRenderProperty->UpdateRatingScore(newDrawScore);
+    UpdateRatingScore(newDrawScore);
     if (isDrag) {
         ratingRenderProperty->UpdateTouchStar(static_cast<int32_t>(wholeStarNum));
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool RatingPattern::IsIndicator()
@@ -351,16 +379,12 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionCancelTask = [weak = WeakClaim(this)]() { LOGD("Pan event cancel"); };
 
-    float distance = DEFAULT_PAN_DISTANCE;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    distance = static_cast<float>(pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
     PanDirection panDirection;
     panDirection.type = PanDirection::HORIZONTAL;
 
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
 void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -388,9 +412,7 @@ void RatingPattern::HandleTouchUp()
 {
     CHECK_NULL_VOID_NOLOG(!IsIndicator());
     state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
@@ -399,11 +421,14 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-    // calculate the number of star the touch point falls on and trigger render update.
-    const int32_t touchStar = floor(localPosition.GetX() / foregroundConfig_.dstRect_.Width());
-    ratingRenderProperty->UpdateTouchStar(touchStar);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    const auto& content = host->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentOffset = content->GetRect().GetOffset();
+    // calculate the number of star the touch point falls on and trigger render update.
+    const int32_t touchStar = floor((localPosition.GetX() - contentOffset.GetX()) / singleStarWidth_);
+    ratingRenderProperty->UpdateTouchStar(touchStar);
     state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVERTOPRESS : RatingModifier::RatingAnimationType::PRESS;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -467,8 +492,10 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(host);
     auto property = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(property);
-    auto ratingScore = property->GetRatingScoreValue();
-    auto singleStarWith = foregroundConfig_.dstRect_.Width();
+    const auto& content = host->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto singleStarHeight = content->GetRect().Height();
+    auto ratingScore = focusRatingScore_;
     auto wholeStarNum = fmax(ceil(ratingScore) - 1, 0.0);
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -477,8 +504,8 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(ratingTheme);
     auto radius = ratingTheme->GetFocusBorderRadius();
 
-    paintRect.SetRect(RectF(
-        static_cast<float>(wholeStarNum) * singleStarWith, 0.0f, singleStarWith, foregroundConfig_.dstRect_.Height()));
+    paintRect.SetRect(
+        RectF(static_cast<float>(wholeStarNum) * singleStarWidth_, 0.0f, singleStarWidth_, singleStarHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
         static_cast<RSScalar>(radius.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
@@ -493,7 +520,8 @@ void RatingPattern::PaintFocusState(double ratingScore)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    isfocus_ = true;
+    focusRatingScore_ = ratingScore;
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
 
@@ -510,21 +538,35 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
-    double ratingScore = ratingRenderProperty->GetRatingScoreValue();
+    double ratingScore = focusRatingScore_;
+    auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    double starNum =
+        ratingLayoutProperty->GetStarsValue(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(
         GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE));
     if (event.code == KeyCode::KEY_DPAD_LEFT) {
         ratingScore = fmax(ratingScore - stepSize, 0.0);
-        ratingRenderProperty->UpdateRatingScore(ratingScore);
         PaintFocusState(ratingScore);
         return true;
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT) {
-        ratingScore =
-            fmin(ratingScore + stepSize, GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
-                                             GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)));
-        ratingRenderProperty->UpdateRatingScore(ratingScore);
+        ratingScore = fmin(ratingScore + stepSize, starNum);
         PaintFocusState(ratingScore);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_MOVE_HOME) {
+        ratingScore = 1;
+        PaintFocusState(ratingScore);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_MOVE_END) {
+        ratingScore = starNum;
+        PaintFocusState(ratingScore);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+        ratingRenderProperty->UpdateRatingScore(ratingScore);
+        FireChangeEvent();
         return true;
     }
     return false;
@@ -546,6 +588,30 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+
+    auto onBlur = [wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->OnBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(std::move(onBlur));
+}
+
+void RatingPattern::OnBlurEvent()
+{
+    isfocus_ = false;
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RatingPattern::UpdateRatingScore(double ratingScore)
+{
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    ratingRenderProperty->UpdateRatingScore(ratingScore);
+    focusRatingScore_ = ratingScore;
 }
 
 void RatingPattern::InitMouseEvent()
@@ -580,27 +646,28 @@ void RatingPattern::HandleHoverEvent(bool isHover)
 {
     isHover_ = isHover;
     state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVER : RatingModifier::RatingAnimationType::NONE;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RatingPattern::HandleMouseEvent(MouseInfo& info)
 {
     CHECK_NULL_VOID_NOLOG(!IsIndicator() && isHover_);
-
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& content = host->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentOffset = content->GetRect().GetOffset();
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(ratingLayoutProperty);
     // calculate the number of star the mouse moved on and trigger render update.
-    auto touchStar = static_cast<int32_t>(floor(info.GetLocalLocation().GetX() / foregroundConfig_.dstRect_.Width()));
+    auto touchStar =
+        static_cast<int32_t>(floor((info.GetLocalLocation().GetX() - contentOffset.GetX()) / singleStarWidth_));
     touchStar = std::clamp(touchStar, DEFAULT_RATING_TOUCH_STAR_NUMBER,
         ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)) -
             1);
     ratingRenderProperty->UpdateTouchStar(touchStar);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -736,5 +803,45 @@ void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
             ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
         json->Put("backgroundImageSourceInfo", backgroundImageSourceInfo.ToString().c_str());
     }
+}
+
+void RatingPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
+}
+
+void RatingPattern::MarkDirtyNode(const PropertyChangeFlag& flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(flag);
+}
+
+void RatingPattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
+{
+    if (image->IsStatic()) {
+        return;
+    }
+    SetRedrawCallback(image);
+    // RegisterVisibleAreaChange
+    auto layoutProps = GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    // pause animation if prop is initially set to invisible
+    if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        image->ControlAnimation(false);
+    }
+}
+
+void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
+{
+    CHECK_NULL_VOID_NOLOG(image);
+    // set animation flush function for svg / gif
+    image->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+        auto ratingNode = weak.Upgrade();
+        CHECK_NULL_VOID(ratingNode);
+        ratingNode->MarkNeedRenderOnly();
+    });
 }
 } // namespace OHOS::Ace::NG

@@ -35,6 +35,7 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/gestures/long_press_gesture.h"
+#include "core/image/image_source_info.h"
 
 // avoid windows build error about macro defined in winuser.h
 #ifdef GetMessage
@@ -278,7 +279,7 @@ void ViewAbstractModelImpl::SetBackgroundColor(const Color& color)
     }
 }
 
-void ViewAbstractModelImpl::SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant)
+void ViewAbstractModelImpl::SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant)
 {
     auto decoration = GetBackDecoration();
     auto image = decoration->GetImage();
@@ -287,9 +288,9 @@ void ViewAbstractModelImpl::SetBackgroundImage(const std::string& src, RefPtr<Th
     }
 
     if (themeConstant) {
-        image->SetSrc(src, themeConstant);
+        image->SetSrc(src.GetSrc(), themeConstant);
     } else {
-        image->SetParsedSrc(src);
+        image->SetParsedSrc(src.GetSrc());
     }
 
     decoration->SetImage(image);
@@ -670,12 +671,15 @@ void ViewAbstractModelImpl::SetTranslate(const Dimension& x, const Dimension& y,
     transform->Translate(x, y, z, option);
 }
 
-void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle)
+void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle, float perspective)
 {
     RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (!option.IsValid()) {
-        option = PipelineBase::GetCurrentContext()->GetSyncAnimationOption();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        if (pipeline) {
+            option = pipeline->GetSyncAnimationOption();
+        }
     }
 
     option.SetAllowRunningAsynchronously(false);
@@ -741,9 +745,13 @@ void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitio
     }
 }
 
-void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::optional<Alignment>& align,
-    const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY)
+void ViewAbstractModelImpl::SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
 {
+    if (buildFunc) {
+        return;
+    }
     auto coverageComponent = ViewStackProcessor::GetInstance()->GetCoverageComponent();
     coverageComponent->SetTextVal(text);
     coverageComponent->SetIsOverLay(true);
@@ -791,7 +799,7 @@ void ViewAbstractModelImpl::SetSharedTransition(
     }
 }
 
-void ViewAbstractModelImpl::SetGeometryTransition(const std::string& id)
+void ViewAbstractModelImpl::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
 {
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     boxComponent->SetGeometryTransitionId(id);
@@ -1080,7 +1088,7 @@ void ViewAbstractModelImpl::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     box->SetOnMouseId(onMouseId);
 }
 
-void ViewAbstractModelImpl::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
+void ViewAbstractModelImpl::SetOnHover(OnHoverFunc&& onHoverEventFunc)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetOnHoverId(onHoverEventFunc);
@@ -1428,6 +1436,8 @@ RefPtr<SelectTheme> GetSelectTheme()
     return context->GetTheme<SelectTheme>();
 }
 
+void ViewAbstractModelImpl::BindBackground(std::function<void()>&& buildFunc, const Alignment& align) {}
+
 GestureEventFunc CreateMenuEventWithParams(
     const WeakPtr<OHOS::Ace::MenuComponent>& weak, std::vector<NG::OptionParam>&& params)
 {
@@ -1522,7 +1532,7 @@ void ViewAbstractModelImpl::BindMenu(
     click->SetOnClick(tapGesture);
 }
 
-void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam&)
+void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);

@@ -53,7 +53,7 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (buttonLayoutProperty->HasLabel()) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_VOID(childWrapper);
-        auto childConstraint = childWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+        auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
         childWrapper->Measure(childConstraint);
         childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
         if (buttonLayoutProperty->HasFontSize()) {
@@ -65,15 +65,13 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             // Fonsize is not set. When the font width is greater than the button width, dynamically change the font
             // size to no less than 9sp.
-            if (GreatOrEqual(childSize_.Width(), layoutConstraint.maxSize.Width())) {
-                auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
-                textLayoutProperty->UpdateAdaptMaxFontSize(
-                    buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
-                textLayoutProperty->UpdateAdaptMinFontSize(
-                    buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
-                childWrapper->Measure(layoutConstraint);
-                childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
-            }
+            auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
+            textLayoutProperty->UpdateAdaptMaxFontSize(
+                buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
+            textLayoutProperty->UpdateAdaptMinFontSize(
+                buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
+            childWrapper->Measure(layoutConstraint);
+            childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
         }
     }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -89,46 +87,36 @@ std::optional<SizeF> ButtonLayoutAlgorithm::HandleLabelCircleButtonConstraint(La
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(buttonLayoutProperty, constraintSize);
     const auto& selfLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, constraintSize);
-    const auto& padding = buttonLayoutProperty->GetPaddingProperty();
-    CHECK_NULL_RETURN(padding, constraintSize);
-    auto top = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-    auto bottom = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-    auto left = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-    auto right = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-    auto defaultHeight = buttonTheme->GetHeight().ConvertToPx();
-    if (layoutConstraint.parentIdealSize.IsNull()) {
+    const auto& padding = buttonLayoutProperty->CreatePaddingAndBorder();
+    auto defaultHeight = static_cast<float>(buttonTheme->GetHeight().ConvertToPx());
+    float minLength = 0.0f;
+    if (selfLayoutConstraint->selfIdealSize.IsNull()) {
         // Width and height are not set.
-        auto width = defaultHeight - left - right;
-        auto height = defaultHeight - top - bottom;
-        auto minLength = std::min(width, height);
-        constraintSize.SetSizeT(SizeF(minLength, minLength));
-    } else if (layoutConstraint.parentIdealSize.Width().has_value() &&
-               !layoutConstraint.parentIdealSize.Height().has_value()) {
+        minLength = defaultHeight;
+    } else if (selfLayoutConstraint->selfIdealSize.Width().has_value() &&
+               !selfLayoutConstraint->selfIdealSize.Height().has_value()) {
         // Only width is set.
-        auto minLength = layoutConstraint.parentIdealSize.Width().value();
-        constraintSize.SetSizeT(SizeF(minLength, minLength));
-    } else if (layoutConstraint.parentIdealSize.Height().has_value() &&
-               !layoutConstraint.parentIdealSize.Width().has_value()) {
+        minLength = selfLayoutConstraint->selfIdealSize.Width().value();
+    } else if (selfLayoutConstraint->selfIdealSize.Height().has_value() &&
+               !selfLayoutConstraint->selfIdealSize.Width().has_value()) {
         // Only height is set.
-        auto minLength = layoutConstraint.parentIdealSize.Height().value();
-        constraintSize.SetSizeT(SizeF(minLength - left - right, minLength));
+        minLength = selfLayoutConstraint->selfIdealSize.Height().value();
     } else {
         // Both width and height are set.
         auto buttonWidth = selfLayoutConstraint->selfIdealSize.Width().value();
         auto buttonHeight = selfLayoutConstraint->selfIdealSize.Height().value();
-        auto minbuttonLength = std::min(buttonWidth, buttonHeight);
-        auto minLength = std::min(minbuttonLength - left - right, layoutConstraint.maxSize.Height() - top - bottom);
-        constraintSize.SetSizeT(SizeF(minLength, minLength));
+        minLength = std::min(buttonWidth, buttonHeight);
     }
-    if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
-        auto radius = buttonLayoutProperty->GetBorderRadiusValue().ConvertToPx();
-        auto minLength = std::min(2 * radius - left - right, 2 * radius - top - bottom);
-        constraintSize.SetSizeT(SizeF(minLength, minLength));
+    if (buttonLayoutProperty->HasBorderRadius() && selfLayoutConstraint->selfIdealSize.IsNull()) {
+        auto radius =
+            static_cast<float>(GetFirstValidRadius(buttonLayoutProperty->GetBorderRadius().value()).ConvertToPx());
+        minLength = 2 * radius;
     }
-    return constraintSize;
+    constraintSize.SetSizeT(SizeF(minLength, minLength));
+    MinusPaddingToSize(padding, constraintSize);
+    return ConstrainSize(constraintSize, selfLayoutConstraint->minSize, selfLayoutConstraint->maxSize);
 }
 
 // Called to perform measure current render node.
@@ -171,22 +159,25 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         }
     }
     Dimension radius;
+    auto renderContext = host->GetRenderContext();
     if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         auto minSize = std::min(frameSize.Height(), frameSize.Width());
         if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
-            minSize = buttonLayoutProperty->GetBorderRadiusValue().ConvertToPx() * 2;
+            minSize = GetFirstValidRadius(buttonLayoutProperty->GetBorderRadius().value()).ConvertToPx() * 2;
         }
         radius.SetValue(minSize / 2.0);
-        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(radius));
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(radius));
         MeasureCircleButton(layoutWrapper);
     } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
         radius.SetValue(frameSize.Height() / 2.0);
+        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(radius));
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(radius));
     } else {
-        radius = buttonLayoutProperty->GetBorderRadiusValue(Dimension());
+        auto normalRadius =
+            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
+        renderContext->UpdateBorderRadius(normalRadius);
     }
-    BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-    host->GetRenderContext()->UpdateBorderRadius(borderRadius);
 }
 
 void ButtonLayoutAlgorithm::HandleLabelCircleButtonFrameSize(
@@ -229,5 +220,22 @@ void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
     }
     frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+}
+
+Dimension ButtonLayoutAlgorithm::GetFirstValidRadius(const BorderRadiusProperty& borderRadius)
+{
+    if (borderRadius.radiusTopLeft.has_value()) {
+        return borderRadius.radiusTopLeft.value();
+    }
+    if (borderRadius.radiusTopRight.has_value()) {
+        return borderRadius.radiusTopRight.value();
+    }
+    if (borderRadius.radiusBottomLeft.has_value()) {
+        return borderRadius.radiusBottomLeft.value();
+    }
+    if (borderRadius.radiusBottomRight.has_value()) {
+        return borderRadius.radiusBottomRight.value();
+    }
+    return 0.0_vp;
 }
 } // namespace OHOS::Ace::NG

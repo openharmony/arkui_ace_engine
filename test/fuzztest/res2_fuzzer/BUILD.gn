@@ -27,9 +27,8 @@ ohos_fuzztest("Res2FuzzTest") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$cjson_root:cjson",
-
-    #    "//third_party/googletest:gtest_main",
   ]
+
   sources = [
     # base
     "$ace_root/frameworks/base/json/json_util.cpp",
@@ -56,6 +55,7 @@ ohos_fuzztest("Res2FuzzTest") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -102,14 +102,18 @@ ohos_fuzztest("Res2FuzzTest") {
     ]
   }
 
-  configs = [
-    ":config_theme_manager_test",
-    "$ace_root:ace_test_config",
-  ]
+  configs = [ ":config_theme_manager_test" ]
+
+  ldflags = []
+  cflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 
   if (is_ohos_standard_system) {
     external_deps = [
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "init:libbegetutil",
     ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
@@ -141,6 +145,7 @@ ohos_fuzztest("Res2FuzzTest") {
     "//third_party/flutter/engine",
     "//third_party",
     "//commonlibrary/c_utils/base/include",
+    "$root_out_dir/arkui/framework",
   ]
 }
 

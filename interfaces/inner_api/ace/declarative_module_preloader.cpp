@@ -46,7 +46,6 @@ void InitAceModule(void* runtime)
     }
 
     entry(runtime);
-    FREELIB(handle);
 }
 
 void DeclarativeModulePreloader::Preload(NativeEngine& runtime)
@@ -55,10 +54,11 @@ void DeclarativeModulePreloader::Preload(NativeEngine& runtime)
 }
 
 // ArkTsCard start
-using CreateFuncCard = void (*)(void*);
+using CreateFuncCard = void (*)(void*, const char*);
 constexpr char PRE_INIT_ACE_MODULE_FUNC_CARD[] = "OHOS_ACE_PreloadAceModuleCard";
+constexpr char RELOAD_ACE_MODULE_FUNC_CARD[] = "OHOS_ACE_ReloadAceModuleCard";
 
-void InitAceModuleCard(void* runtime)
+void InitAceModuleCard(void* runtime, const char* bundleName)
 {
     LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
     if (handle == nullptr) {
@@ -71,13 +71,33 @@ void InitAceModuleCard(void* runtime)
         return;
     }
 
-    entry(runtime);
-    FREELIB(handle);
+    entry(runtime, bundleName);
 }
 
-void DeclarativeModulePreloader::PreloadCard(NativeEngine& runtime)
+void DeclarativeModulePreloader::PreloadCard(NativeEngine& runtime, const std::string &bundleName)
 {
-    InitAceModuleCard(reinterpret_cast<void*>(&runtime));
+    InitAceModuleCard(reinterpret_cast<void*>(&runtime), bundleName.c_str());
+}
+
+void ReloadAceModuleCard(void* runtime, const char* bundleName)
+{
+    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
+    if (handle == nullptr) {
+        return;
+    }
+
+    auto entry = reinterpret_cast<CreateFuncCard>(LOADSYM(handle, RELOAD_ACE_MODULE_FUNC_CARD));
+    if (entry == nullptr) {
+        FREELIB(handle);
+        return;
+    }
+
+    entry(runtime, bundleName);
+}
+
+void DeclarativeModulePreloader::ReloadCard(NativeEngine& runtime, const std::string &bundleName)
+{
+    ReloadAceModuleCard(reinterpret_cast<void*>(&runtime), bundleName.c_str());
 }
 // ArkTsCard end
 } // namespace OHOS::Ace

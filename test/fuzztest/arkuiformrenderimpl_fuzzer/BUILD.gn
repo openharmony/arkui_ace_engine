@@ -24,7 +24,10 @@ ohos_fuzztest("ArkuiFormRenderImplFuzzTest") {
 
   fuzz_config_file = "$ace_root/test/fuzztest/arkuiformrenderimpl_fuzzer"
 
-  include_dirs = [ "$ace_root/interfaces/inner_api" ]
+  include_dirs = [
+    "$ace_root/interfaces/inner_api",
+    "$root_out_dir/arkui/framework",
+  ]
   cflags = [
     "-g",
     "-O0",
@@ -43,10 +46,16 @@ ohos_fuzztest("ArkuiFormRenderImplFuzzTest") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "form_fwk:form_manager",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
   ]
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 ###############################################################################

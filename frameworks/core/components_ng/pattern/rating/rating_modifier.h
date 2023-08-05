@@ -68,7 +68,7 @@ public:
     }
 
     bool JudgeImageUri(const std::string& foregroundUri, const std::string& secondaryUri,
-        const std::string& backgroundUri, const RectF& dstRect)
+        const std::string& backgroundUri, const ImagePaintConfig& foregroundConfig)
     {
         if (foregroundUri_ != foregroundUri) {
             return true;
@@ -80,7 +80,11 @@ public:
             return true;
         }
         CHECK_NULL_RETURN(foregroundImageCanvas_, true);
-        if (foregroundImageCanvas_->GetPaintConfig().dstRect_ != dstRect) {
+        if (foregroundImageCanvas_->GetPaintConfig().dstRect_ != foregroundConfig.dstRect_) {
+            return true;
+        }
+        if (foregroundImageCanvas_->GetPaintConfig().scaleX_ != foregroundConfig.scaleX_ ||
+            foregroundImageCanvas_->GetPaintConfig().scaleY_ != foregroundConfig.scaleY_) {
             return true;
         }
         // No need to update three CanvasImages
@@ -108,6 +112,13 @@ public:
     {
         if (contentOffset_) {
             contentOffset_->Set(contentOffset);
+        }
+    }
+
+    void SetContentSize(SizeF contentSize)
+    {
+        if (contentSize_) {
+            contentSize_->Set(contentSize);
         }
     }
 
@@ -191,6 +202,7 @@ private:
     RefPtr<PropertyFloat> drawScore_;
     RefPtr<PropertyFloat> stepSize_; 
     RefPtr<PropertyOffsetF> contentOffset_;
+    RefPtr<PropertySizeF> contentSize_;
     // animatable property
     RefPtr<AnimatablePropertyColor> boardColor_;
     ACE_DISALLOW_COPY_AND_MOVE(RatingModifier);

@@ -154,12 +154,18 @@ void NavigationModelImpl::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItem
     return;
 }
 
-void NavigationModelImpl::GetToolBarItems(std::list<RefPtr<ToolBarItem>>& items)
+void NavigationModelImpl::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) {}
+
+void NavigationModelImpl::GetToolBarItems(std::list<RefPtr<AceType>>& items)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
     CHECK_NULL_VOID(navigationContainer);
-    items = navigationContainer->GetDeclaration()->toolbarItems;
+    auto toolbarItems = navigationContainer->GetDeclaration()->toolbarItems;
+    items.clear();
+    for (auto item : toolbarItems) {
+        items.push_back(item);
+    }
 }
 
 void NavigationModelImpl::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
@@ -167,12 +173,16 @@ void NavigationModelImpl::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
     return;
 }
 
-void NavigationModelImpl::GetMenuItems(std::list<RefPtr<ToolBarItem>>& items)
+void NavigationModelImpl::GetMenuItems(std::list<RefPtr<AceType>>& items)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
     CHECK_NULL_VOID(navigationContainer);
-    items = navigationContainer->GetDeclaration()->menuItems;
+    auto toolbarItems = navigationContainer->GetDeclaration()->menuItems;
+    items.clear();
+    for (auto item : toolbarItems) {
+        items.push_back(item);
+    }
 }
 
 void NavigationModelImpl::SetCustomMenu(const RefPtr<AceType>& customMenu)
@@ -235,6 +245,11 @@ void NavigationModelImpl::SetNavigationStack()
 }
 
 void NavigationModelImpl::SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack)
+{
+    return;
+}
+
+void NavigationModelImpl::SetNavigationStackProvided(bool provided)
 {
     return;
 }

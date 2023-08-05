@@ -30,6 +30,16 @@ class LocalStorage extends NativeLocalStorage {
 
   protected storage_: Map<string, ObservedPropertyAbstract<any>>;
 
+  /*
+    get access to provded LocalStorage instance thru Stake model
+    @StageModelOnly
+    @form
+    @since 10
+  */
+  public static getShared(): LocalStorage {
+    return LocalStorage.GetShared();
+  }
+
   /**
    * Construct new instance of LocalStorage
    * initialzie with all properties and their values that Object.keys(params) returns
@@ -385,7 +395,7 @@ class LocalStorage extends NativeLocalStorage {
   public subscribeToChangesOf<T>(propName: string, subscriber: ISinglePropertyChangeSubscriber<T>): boolean {
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p) {
-      p.subscribeMe(subscriber);
+      p.addSubscriber(subscriber);
       return true;
     }
     return false;
@@ -402,7 +412,7 @@ class LocalStorage extends NativeLocalStorage {
   public unsubscribeFromChangesOf(propName: string, subscriberId: number): boolean {
     var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
     if (p) {
-      p.unlinkSuscriber(subscriberId);
+      p.removeSubscriber(null, subscriberId);
       return true;
     }
     return false;

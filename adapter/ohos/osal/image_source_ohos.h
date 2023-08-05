@@ -29,6 +29,10 @@ public:
     explicit ImageSourceOhos(std::unique_ptr<Media::ImageSource>&& source) : imageSource_(std::move(source)) {}
 
     std::string GetProperty(const std::string& key) override;
+    RefPtr<PixelMap> CreatePixelMap(const Size& size) override;
+    RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size) override;
+
+    Size GetImageSize() override;
 
 private:
     std::unique_ptr<Media::ImageSource> imageSource_;

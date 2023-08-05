@@ -37,10 +37,14 @@ public:
     void RemoveCallback(const WeakPtr<RenderNode>& node);
     void SetVariationChanged(const std::function<void()>& variationChanged);
 
+    void SetOnLoadedNG(const WeakPtr<NG::UINode>& node, const std::function<void()>& callback);
+    void RemoveCallbackNG(const WeakPtr<NG::UINode>& node);
+
 protected:
     std::string familyName_;
     std::string familySrc_;
     std::map<WeakPtr<RenderNode>, std::function<void()>> callbacks_;
+    std::map<WeakPtr<NG::UINode>, std::function<void()>> callbacksNG_;
     bool isLoaded_ = false;
     std::function<void()> variationChanged_;
 };

@@ -51,9 +51,7 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        auto paintProperty = MakeRefPtr<SwitchPaintProperty>();
-        paintProperty->UpdateCurrentOffset(currentOffset_);
-        return paintProperty;
+        return MakeRefPtr<SwitchPaintProperty>();
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -67,16 +65,17 @@ public:
             auto isSelect = paintProperty->GetIsOnValue(false);
             auto boardColor = isSelect ? paintProperty->GetSelectedColorValue(switchTheme->GetActiveColor())
                                        : switchTheme->GetInactivePointColor();
-            switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(isSelect, boardColor, currentOffset_);
+            switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(isSelect, boardColor, dragOffsetX_);
         }
         auto paintMethod = MakeRefPtr<SwitchPaintMethod>(switchModifier_);
-        paintMethod->SetIsSelect(isOnBeforeAnimate_.value_or(false));
+        paintMethod->SetIsSelect(isOn_.value_or(false));
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
         paintMethod->SetEnabled(enabled);
-        paintMethod->SetMainDelta(currentOffset_);
+        paintMethod->SetDragOffsetX(dragOffsetX_);
         paintMethod->SetTouchHoverAnimationType(touchHoverType_);
+        paintMethod->SetIsDragEvent(isDragEvent_);
         return paintMethod;
     }
 
@@ -105,21 +104,24 @@ public:
         return isOn_.value_or(false);
     }
 
+    std::string ProvideRestoreInfo() override;
+
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+    void OnColorConfigurationUpdate() override;
+
 private:
     void OnModifyDone() override;
-    void UpdateCurrentOffset(float offset);
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-    void PlayTranslateAnimation(float startPos, float endPos);
     RefPtr<Curve> GetCurve() const;
     int32_t GetDuration() const;
-    void StopTranslateAnimation();
     void UpdateChangeEvent() const;
     void OnChange();
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
     float GetSwitchWidth() const;
+    float GetSwitchContentOffsetX() const;
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -129,9 +131,9 @@ private:
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
 
+    void HandleDragStart();
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd();
 
@@ -142,13 +144,10 @@ private:
 
     RefPtr<PanEvent> panEvent_;
 
-    RefPtr<Animator> controller_;
     RefPtr<ClickEvent> clickListener_;
-    RefPtr<CurveAnimation<double>> translate_;
     std::optional<bool> isOn_;
-    std::optional<bool> isOnBeforeAnimate_;
-    bool changeFlag_ = false;
     float currentOffset_ = 0.0f;
+    float dragOffsetX_ = 0.0f;
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
@@ -163,9 +162,8 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
-
+    bool isDragEvent_ = false;
     RefPtr<SwitchModifier> switchModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
 };

@@ -15,6 +15,7 @@
 import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 module_output_path = "arkui/utilmost"
 
 ##############################fuzztest##########################################
@@ -35,10 +36,6 @@ ohos_fuzztest("UtilMostFuzzTest") {
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
-
-    #"$ace_root/frameworks/base/utils/resource_configuration.cpp",
-    #"$ace_root/frameworks/base/utils/string_expression.cpp",
-    #"$ace_root/frameworks/bridge/common/utils/source_map.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
@@ -49,9 +46,6 @@ ohos_fuzztest("UtilMostFuzzTest") {
     "$ace_root/frameworks/core/components/common/properties/clip_path.cpp",
     "//third_party/cJSON/cJSON.c",
     "utilmost_fuzzer.cpp",
-
-    #"$ace_root/frameworks/core/animation/curves.cpp",
-    #"$ace_root/frameworks/base/geometry/dimension.cpp",
   ]
   include_dirs = [
     "$ace_root/frameworks/base/utils",
@@ -60,11 +54,12 @@ ohos_fuzztest("UtilMostFuzzTest") {
     "$ace_root/frameworks",
     "$ace_root",
     cjson_root,
+    "$root_out_dir/arkui/framework",
   ]
   defines = [ "FUZZTEST" ]
   deps = [
-    #"$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
     "//third_party/icu/icu4c:shared_icui18n",
@@ -76,11 +71,17 @@ ohos_fuzztest("UtilMostFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "window_manager:libdm",
   ]
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 ###############################################################################

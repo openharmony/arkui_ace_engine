@@ -74,6 +74,7 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
+    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
@@ -156,6 +157,44 @@ void PageRouterManager::Push(const RouterPageInfo& target)
     StartPush(target);
 }
 
+void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
+{
+    CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGI("in router opt, post push named route router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent(
+            [weak = WeakClaim(this), target]() {
+                auto router = weak.Upgrade();
+                CHECK_NULL_VOID(router);
+                router->PushNamedRoute(target);
+            },
+            TaskExecutor::TaskType::JS);
+        return;
+    }
+    RouterOptScope scope(this);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
+        LOGE("router stack size is larger than max size 32.");
+        if (target.errorCallback != nullptr) {
+            target.errorCallback("The pages are pushed too much.", Framework::ERROR_CODE_PAGE_STACK_FULL);
+        }
+        return;
+    }
+    CleanPageOverlay();
+    if (target.routerMode == RouterMode::SINGLE) {
+        auto pageInfo = FindPageInStack(target.url);
+        if (pageInfo.second) {
+            // find page in stack, move postion and update params.
+            MovePageToFront(pageInfo.first, pageInfo.second, target, false);
+            return;
+        }
+    }
+    RouterPageInfo info = target;
+    info.isNamedRouterMode = true;
+    LoadPage(GenerateNextPageId(), info);
+}
+
 void PageRouterManager::Replace(const RouterPageInfo& target)
 {
     CHECK_RUN_ON(JS);
@@ -176,10 +215,42 @@ void PageRouterManager::Replace(const RouterPageInfo& target)
     StartReplace(target);
 }
 
+void PageRouterManager::ReplaceNamedRoute(const RouterPageInfo& target)
+{
+    CHECK_RUN_ON(JS);
+    if (inRouterOpt_) {
+        LOGI("in router opt, post replace named route router task");
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent(
+            [weak = WeakClaim(this), target]() {
+                auto router = weak.Upgrade();
+                CHECK_NULL_VOID(router);
+                router->ReplaceNamedRoute(target);
+            },
+            TaskExecutor::TaskType::JS);
+        return;
+    }
+    RouterOptScope scope(this);
+    CleanPageOverlay();
+    PopPage("", false, false);
+    if (target.routerMode == RouterMode::SINGLE) {
+        auto pageInfo = FindPageInStack(target.url);
+        if (pageInfo.second) {
+            // find page in stack, move postion and update params.
+            MovePageToFront(pageInfo.first, pageInfo.second, target, false);
+            return;
+        }
+    }
+    RouterPageInfo info = target;
+    info.isNamedRouterMode = true;
+    LoadPage(GenerateNextPageId(), info, false, false);
+}
+
 void PageRouterManager::BackWithTarget(const RouterPageInfo& target)
 {
     CHECK_RUN_ON(JS);
-    LOGD("router.Back path = %{private}s", target.url.c_str());
+    LOGI("router.Back path = %{private}s", target.url.c_str());
     if (inRouterOpt_) {
         LOGI("in router opt, post back router task");
         auto context = PipelineContext::GetCurrentContext();
@@ -223,9 +294,8 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_VOID(pageInfo);
-    ClearAlertCallback(pageInfo);
 
     DialogProperties dialogProperties = {
         .content = message,
@@ -233,10 +303,12 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
         .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
             { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
         .onSuccess =
-            [weak = AceType::WeakClaim(this), callback](int32_t successType, int32_t successIndex) {
+            [weak = AceType::WeakClaim(this), weakPageInfo = AceType::WeakClaim(AceType::RawPtr(pageInfo))](
+                int32_t successType, int32_t successIndex) {
                 LOGI("showDialog successType: %{public}d, successIndex: %{public}d", successType, successIndex);
-                if (!successType) {
-                    callback(successIndex);
+                auto pageInfo = weakPageInfo.Upgrade();
+                if (pageInfo && pageInfo->GetAlertCallback() && !successType) {
+                    pageInfo->GetAlertCallback()(successIndex);
                     if (successIndex) {
                         auto router = weak.Upgrade();
                         CHECK_NULL_VOID(router);
@@ -258,18 +330,7 @@ void PageRouterManager::DisableAlertBeforeBackPage()
     CHECK_NULL_VOID(pagePattern);
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
-    ClearAlertCallback(pageInfo);
     pageInfo->SetAlertCallback(nullptr);
-}
-
-void PageRouterManager::ClearAlertCallback(const RefPtr<PageInfo>& pageInfo)
-{
-    if (pageInfo->GetAlertCallback()) {
-        // notify to clear js reference
-        auto alertCallback = pageInfo->GetAlertCallback();
-        alertCallback(static_cast<int32_t>(Framework::AlertState::RECOVERY));
-        pageInfo->SetAlertCallback(nullptr);
-    }
 }
 
 void PageRouterManager::StartClean()
@@ -290,6 +351,7 @@ void PageRouterManager::StartClean()
 bool PageRouterManager::Pop()
 {
     CHECK_RUN_ON(JS);
+    LOGI("router pop be called");
     if (inRouterOpt_) {
         LOGE("in router opt, post Pop router task failed");
         return false;
@@ -358,6 +420,7 @@ void PageRouterManager::StartRestore(const RouterPageInfo& target)
     }
 
     restorePageStack_ = tempStack;
+    StartClean();
     PopPage("", false, false);
     StartPush(info);
 }
@@ -456,28 +519,33 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
             auto jsonPage = jsonPages->GetValue(judgePath)->ToString();
-            auto pageMap = MakeRefPtr<Framework::RevSourceMap>();
-            pageMap->Init(jsonPage);
-            entryPageInfo->SetPageMap(pageMap);
-            return pageMap;
+            auto stagePageMap = MakeRefPtr<Framework::RevSourceMap>();
+            stagePageMap->Init(jsonPage);
+            entryPageInfo->SetPageMap(stagePageMap);
+            return stagePageMap;
         }
-        LOGW("js source map load failed!");
-        return nullptr;
     } else {
         if (Framework::GetAssetContentImpl(assetManager, entryPageInfo->GetPagePath() + ".map", jsSourceMap)) {
-            auto pageMap = MakeRefPtr<Framework::RevSourceMap>();
-            pageMap->Init(jsSourceMap);
-            entryPageInfo->SetPageMap(pageMap);
-            return pageMap;
+            auto faPageMap = MakeRefPtr<Framework::RevSourceMap>();
+            faPageMap->Init(jsSourceMap);
+            entryPageInfo->SetPageMap(faPageMap);
+            return faPageMap;
         }
-        LOGW("js source map load failed!");
-        return nullptr;
     }
+    LOGW("js source map load failed!");
+    return nullptr;
 }
 
 std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()
 {
     auto jsonRouterStack = JsonUtil::CreateArray(false);
+    auto restoreIter = restorePageStack_.begin();
+    while (restoreIter != restorePageStack_.end()) {
+        auto jsonItem = JsonUtil::Create(false);
+        jsonItem->Put("url", restoreIter->c_str());
+        jsonRouterStack->Put(jsonItem);
+        ++restoreIter;
+    }
     auto iter = pageRouterStack_.begin();
     while (iter != pageRouterStack_.end()) {
         auto pageNode = iter->Upgrade();
@@ -531,17 +599,18 @@ int32_t PageRouterManager::GenerateNextPageId()
     return ++pageId_;
 }
 
-std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const std::string& url)
+std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const std::string& url, bool needIgnoreBegin)
 {
-    auto iter = std::find_if(pageRouterStack_.rbegin(), pageRouterStack_.rend(), [url](const WeakPtr<FrameNode>& item) {
-        auto pageNode = item.Upgrade();
-        CHECK_NULL_RETURN(pageNode, false);
-        auto pagePattern = pageNode->GetPattern<PagePattern>();
-        CHECK_NULL_RETURN(pagePattern, false);
-        auto entryPageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
-        CHECK_NULL_RETURN(entryPageInfo, false);
-        return entryPageInfo->GetPageUrl() == url;
-    });
+    auto iter = std::find_if(needIgnoreBegin ? ++pageRouterStack_.rbegin() : pageRouterStack_.rbegin(),
+        pageRouterStack_.rend(), [url](const WeakPtr<FrameNode>& item) {
+            auto pageNode = item.Upgrade();
+            CHECK_NULL_RETURN(pageNode, false);
+            auto pagePattern = pageNode->GetPattern<PagePattern>();
+            CHECK_NULL_RETURN(pagePattern, false);
+            auto entryPageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_RETURN(entryPageInfo, false);
+            return entryPageInfo->GetPageUrl() == url;
+        });
     if (iter == pageRouterStack_.rend()) {
         return { -1, nullptr };
     }
@@ -567,12 +636,20 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, info.params, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, info, false);
             return;
         }
     }
 
     LoadPage(GenerateNextPageId(), info);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
+        TaskExecutor::TaskType::BACKGROUND);
 }
 
 void PageRouterManager::StartPush(const RouterPageInfo& target)
@@ -632,16 +709,14 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         }
         return;
     }
-    if (info.errorCallback != nullptr) {
-        info.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
-    }
+
     CleanPageOverlay();
 
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, info.params, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, info, false);
             return;
         }
     }
@@ -662,12 +737,20 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, info.params, false, true, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
             return;
         }
     }
 
     LoadPage(GenerateNextPageId(), info, false, false);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
+        TaskExecutor::TaskType::BACKGROUND);
 }
 
 void PageRouterManager::StartReplace(const RouterPageInfo& target)
@@ -721,9 +804,6 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
         }
         return;
     }
-    if (info.errorCallback != nullptr) {
-        info.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
-    }
 
     PopPage("", false, false);
 
@@ -731,7 +811,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move position and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, info.params, false, true, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
             return;
         }
     }
@@ -757,7 +837,7 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
         return;
     }
 
-    auto pageInfo = FindPageInStack(target.url);
+    auto pageInfo = FindPageInStack(target.url, true);
     if (pageInfo.second) {
         // find page in stack, pop to specified index.
         RouterPageInfo info = target;
@@ -816,7 +896,7 @@ void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition)
 {
-    // TODO: isRestore function.
+    ACE_SCOPED_TRACE("PageRouterManager::LoadPage");
     CHECK_RUN_ON(JS);
     LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s.", pageId, target.url.c_str());
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, target.params);
@@ -828,6 +908,16 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
     auto result = loadJs_(target.path, target.errorCallback);
+    if (pageNode->GetChildren().empty()) {
+        // try to load named route
+        result = loadNamedRouter_(target.url, target.isNamedRouterMode);
+        if (!result && target.isNamedRouterMode && target.errorCallback) {
+            target.errorCallback("The named route is not exist.", Framework::ERROR_CODE_NAMED_ROUTE_ERROR);
+        }
+    }
+    if (target.errorCallback != nullptr) {
+        target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+    }
     if (!result) {
         LOGE("fail to load page file");
         pageRouterStack_.pop_back();
@@ -872,10 +962,14 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     }
 }
 
-void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params,
+void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const RouterPageInfo& target,
     bool needHideLast, bool forceShowCurrent, bool needTransition)
 {
     LOGD("MovePageToFront to index: %{public}d", index);
+    if (target.errorCallback != nullptr) {
+        target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+    }
+
     // update param first.
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
@@ -885,7 +979,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
 
     if (index == static_cast<int32_t>(pageRouterStack_.size() - 1)) {
         LOGD("already on the top");
-        pageInfo->ReplacePageParams(params);
+        pageInfo->ReplacePageParams(target.params);
         if (forceShowCurrent) {
             pageNode->GetRenderContext()->ResetPageTransitionEffect();
             StageManager::FirePageShow(pageNode, PageTransitionType::NONE);
@@ -908,7 +1002,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     // push pageNode to top.
     pageRouterStack_.emplace_back(pageNode);
     std::string tempParam;
-    tempParam = pageInfo->ReplacePageParams(params);
+    tempParam = pageInfo->ReplacePageParams(target.params);
     if (!stageManager->MovePageToFront(pageNode, needHideLast, needTransition)) {
         LOGE("fail to move page to front");
         // restore position and param.
@@ -1083,7 +1177,7 @@ void PageRouterManager::CleanPageOverlay()
         sharedManager->StopSharedTransition();
     }
 
-    if (overlayManager->RemoveOverlay()) {
+    if (overlayManager->RemoveOverlay(true, true)) {
         LOGI("clean page overlay.");
     }
 }

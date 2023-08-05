@@ -42,7 +42,7 @@ Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
 
 RefPtr<PipelineContext> MockRenderCommon::GetMockContext()
 {
-    auto platformWindow = PlatformWindow::Create(nullptr);
+    std::unique_ptr<PlatformWindow> platformWindow = nullptr;
     auto window = std::make_unique<Window>(std::move(platformWindow));
     auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();

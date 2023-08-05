@@ -43,6 +43,11 @@ public:
         return false;
     }
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<BoxLayoutAlgorithm>();
+    }
+
     void OnAttachToFrameNode() override
     {
         auto host = GetHost();
@@ -69,6 +74,11 @@ public:
         CHECK_NULL_VOID(stage);
         LOGI("SetAppBgColor in page node successfully, bgColor is %{public}u", color.GetValue());
         stage->GetRenderContext()->UpdateBackgroundColor(color);
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
     }
 
 private:

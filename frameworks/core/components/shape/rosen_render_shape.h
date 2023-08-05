@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SHAPE_ROSEN_RENDER_SHAPE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SHAPE_ROSEN_RENDER_SHAPE_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
+#endif
 
 #include "core/components/shape/render_shape.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -29,7 +34,11 @@ class RosenRenderShape : public RenderShape {
 public:
     void Paint(RenderContext& context, const Offset& offset) override;
     Size CalcSize() override;
+#ifndef USE_ROSEN_DRAWING
     void PaintOnCanvas(SkCanvas* skCanvas, const Offset& offset);
+#else
+    void PaintOnCanvas(RSCanvas* canvas, const Offset& offset);
+#endif
 
 private:
     Size CreateRect();
@@ -37,10 +46,18 @@ private:
     Size CreateEllipse();
     Size CreatePolygon(bool needClose);
     Size CreatePath();
+#ifndef USE_ROSEN_DRAWING
     void DrawStroke(SkCanvas* skCanvas, const SkPath& path);
+#else
+    void DrawStroke(RSCanvas* canvas, const RSPath& path);
+#endif
     float GetFloatRadiusValue(const Dimension& src, const Dimension& dest, bool isVertical);
 
+#ifndef USE_ROSEN_DRAWING
     SkPath path_;
+#else
+    RSRecordingPath path_;
+#endif
 };
 
 } // namespace OHOS::Ace

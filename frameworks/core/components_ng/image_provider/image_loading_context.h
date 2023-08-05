@@ -59,7 +59,6 @@ public:
     bool GetAutoResize() const;
     std::optional<SizeF> GetSourceSize() const;
     bool NeedAlt() const;
-    const std::optional<Color>& GetSvgFillColor() const;
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);

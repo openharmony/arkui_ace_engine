@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GRADIENT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GRADIENT_PROPERTY_H
 
+#include <array>
 #include <memory>
 #include <optional>
 #include <regex>
@@ -27,6 +28,7 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
@@ -514,6 +516,25 @@ private:
     std::string gradientTransform_;
     std::shared_ptr<LinearGradientInfo> linearGradientInfo_;
     std::shared_ptr<RadialGradientInfo> radialGradientInfo_;
+};
+
+
+class LinearGradientBlurPara final {
+public:
+    Dimension blurRadius_;
+    std::vector<std::pair<float, float>> fractionStops_;
+    GradientDirection direction_;
+
+    LinearGradientBlurPara(const Dimension blurRadius,
+        const std::vector<std::pair<float, float>>fractionStops, const GradientDirection direction)
+        : blurRadius_(blurRadius), fractionStops_(fractionStops), direction_(direction) {}
+    bool operator==(const LinearGradientBlurPara& other) const
+    {
+        return NearEqual(blurRadius_, other.blurRadius_) && NearEqual(fractionStops_, other.fractionStops_) &&
+                                                            NearEqual(direction_, other.direction_);
+    }
+
+    ~LinearGradientBlurPara() = default;
 };
 
 } // namespace OHOS::Ace::NG

@@ -34,16 +34,11 @@ ohos_fuzztest("UtilEngineFuzzTest") {
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
-    "$ace_root/frameworks/base/log/dump_log.cpp",
     "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
-
-    #"$ace_root/frameworks/base/utils/resource_configuration.cpp",
-    #"$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/bridge/common/utils/engine_helper.cpp",
-
-    #"$ace_root/frameworks/bridge/common/utils/source_map.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine_loader.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
     "//third_party/cJSON/cJSON.c",
     "utilengine_fuzzer.cpp",
   ]
@@ -54,10 +49,12 @@ ohos_fuzztest("UtilEngineFuzzTest") {
     "$ace_root/frameworks",
     "$ace_root",
     cjson_root,
+    "$root_out_dir/arkui/framework",
   ]
 
   deps = [
-    #"$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gmock_main",
@@ -70,11 +67,17 @@ ohos_fuzztest("UtilEngineFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "window_manager:libdm",
   ]
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 ###############################################################################

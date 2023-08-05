@@ -24,8 +24,8 @@ PanEventActuator::PanEventActuator(
     if (fingers_ < DEFAULT_PAN_FINGER) {
         fingers_ = DEFAULT_PAN_FINGER;
     }
-    if (LessOrEqual(distance_, DEFAULT_PAN_DISTANCE)) {
-        distance_ = DEFAULT_PAN_DISTANCE;
+    if (LessOrEqual(distance_, DEFAULT_PAN_DISTANCE.ConvertToPx())) {
+        distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();
     }
 }
 

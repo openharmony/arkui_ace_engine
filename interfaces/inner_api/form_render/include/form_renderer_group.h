@@ -40,6 +40,18 @@ namespace Ace {
 
 class FormRenderer;
 
+struct FormRequest {
+    std::string compId;
+    OHOS::AAFwk::Want want;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    bool isDynamic = true;
+    bool hasRelease = false;
+    bool operator() (const FormRequest& info) const
+    {
+        return compId == info.compId && formJsInfo.formId == info.formJsInfo.formId;
+    }
+};
+
 /**
  * @class FormRendererGroup
  * FormRendererGroup interface is used to form renderer group.
@@ -59,14 +71,11 @@ public:
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void DeleteForm();
     void DeleteForm(const std::string& compId);
-    void ReloadForm();
+    void ReloadForm(const AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+    bool IsFormRequestsEmpty();
+    const std::vector<FormRequest>& GetAllRendererFormRequests() const;
 private:
-    struct FormRequest {
-        std::string compId;
-        OHOS::AAFwk::Want want;
-        OHOS::AppExecFwk::FormJsInfo formJsInfo;
-    };
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     std::shared_ptr<FormRenderer> formRenderer_;

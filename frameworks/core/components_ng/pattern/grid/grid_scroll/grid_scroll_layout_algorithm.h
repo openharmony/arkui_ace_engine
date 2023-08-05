@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
@@ -63,16 +61,19 @@ private:
     float FillNewLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper, bool reverse);
 
     // Measure grid item which not exist in grid matrix already, need to place it and save to grid matrix.
-    int32_t MeasureChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
+    int32_t MeasureNewChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, bool reverse);
     // Measure grid item which exist in grid matrix already, needn't to place it again.
     int32_t MeasureChildPlaced(const SizeF& frameSize, int32_t itemIndex, int32_t crossStart,
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper);
+    void MeasureChild(LayoutWrapper* layoutWrapper, const SizeF& frameSize,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t crossStart, int32_t crossSpan);
 
     // Compote position of grid item in cross axis.
     float ComputeItemCrossPosition(LayoutWrapper* layoutWrapper, int32_t crossStart) const;
+    void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem);
     // Find next valid cell when current is not valid.
-    void GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
+    bool GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
     // Find a valid cell to place grid item and save to grid matrix.
     bool CheckGridPlaced(int32_t index, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan);
     LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
@@ -88,10 +89,30 @@ private:
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
         float mainSize, const SizeF& idealSize);
 
-    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex) const;
+    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex);
+
+    OffsetF CalculateLargeItemOffset(
+        OffsetF currOffset, int32_t itemIndex, int32_t currLineIndex, int32_t currentCrossIndex);
+    bool NeedAdjust(const RefPtr<GridItemLayoutProperty>& itemLayoutWrapper);
+    void AdjustRowColSpan(const RefPtr<LayoutWrapper>& itemLayoutWrapper);
+    void LargeItemNextLineHeight(int32_t currentLineIndex, LayoutWrapper* layoutWrapper);
+    void LargeItemForwardLineHeight(int32_t currentLineIndex, LayoutWrapper* LayoutWrapper);
+    int32_t CalculateLineIndexForLargeItem(std::map<int32_t, std::map<int32_t, int32_t>>::iterator gridMatrixIter,
+        int32_t currentIndex, int32_t lineIndex, LayoutWrapper* layoutWrapper);
+    void CalculateLineHeightForLargeItem(int32_t lineIndex, int32_t currentLineIndex,
+        std::map<int32_t, std::map<int32_t, int32_t>>::iterator gridMatrixIter, LayoutWrapper* layoutWrapper);
+    void ScrollToIndexStart(LayoutWrapper* layoutWrapper, int32_t targetIndex);
+    void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
+    void UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize);
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
+    int32_t currentItemRowSpan_ = 0;
+    int32_t currentItemColSpan_ = 0;
+    int32_t currentItemRowStart_ = -1;
+    int32_t currentItemColStart_ = -1;
+    int32_t currentItemRowEnd_ = -1;
+    int32_t currentItemColEnd_ = -1;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
@@ -100,11 +121,13 @@ private:
     float mainGap_ = 0;
     float crossGap_ = 0;
     float crossPaddingOffset_ = 0;
+    int32_t lastCross_ = 0;
+    bool isChildrenUpdated_ = false;
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
     bool canOverScroll_ = false;
-
+    float cellAveLength_ = -1.0f;
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };
 

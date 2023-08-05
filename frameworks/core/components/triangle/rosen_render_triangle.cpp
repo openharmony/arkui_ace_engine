@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,13 @@
 
 #include "core/components/triangle/rosen_render_triangle.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -36,6 +40,7 @@ void RosenRenderTriangle::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPath path;
     const auto& arc1 = data_.GetOutArc1();
     const auto& arc2 = data_.GetOutArc2();
@@ -55,6 +60,29 @@ void RosenRenderTriangle::Paint(RenderContext& context, const Offset& offset)
     paint.setARGB(color_.GetAlpha(), color_.GetRed(), color_.GetGreen(), color_.GetBlue());
     paint.setAntiAlias(true);
     canvas->drawPath(path, paint);
+#else
+    RSRecordingPath path;
+    const auto& arc1 = data_.GetOutArc1();
+    const auto& arc2 = data_.GetOutArc2();
+    const auto& arc3 = data_.GetOutArc3();
+    path.MoveTo(arc1.GetStartPoint().GetX(), arc1.GetStartPoint().GetY());
+    path.ArcTo(arc1.GetLeft(), arc1.GetTop(), arc1.GetRight(), arc1.GetBottom(),
+        arc1.GetStartAngle() * RADIAN_TO_DEGREE, arc1.GetSweepAngle() * RADIAN_TO_DEGREE);
+    path.LineTo(arc2.GetStartPoint().GetX(), arc2.GetStartPoint().GetY());
+    path.ArcTo(arc2.GetLeft(), arc2.GetTop(), arc2.GetRight(), arc2.GetBottom(),
+        arc2.GetStartAngle() * RADIAN_TO_DEGREE, arc2.GetSweepAngle() * RADIAN_TO_DEGREE);
+    path.LineTo(arc3.GetStartPoint().GetX(), arc3.GetStartPoint().GetY());
+    path.ArcTo(arc3.GetLeft(), arc3.GetTop(), arc3.GetRight(), arc3.GetBottom(),
+        arc3.GetStartAngle() * RADIAN_TO_DEGREE, arc3.GetSweepAngle() * RADIAN_TO_DEGREE);
+    path.Close();
+
+    RSPen pen;
+    pen.SetARGB(color_.GetRed(), color_.GetGreen(), color_.GetBlue(), color_.GetAlpha());
+    pen.SetAntiAlias(true);
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+#endif
 }
 
 } // namespace OHOS::Ace

@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_H
 
 #include "core/components/text/text_component_v2.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -31,6 +32,8 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetWidth(const JSCallbackInfo& info);
     static void SetHeight(const JSCallbackInfo& info);
+    static void SetFont(const JSCallbackInfo& info);
+    static void GetFontInfo(const JSCallbackInfo& info, Font& font);
     static void SetFontSize(const JSCallbackInfo& info);
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);

@@ -49,7 +49,7 @@ TabsModel* TabsModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-
+const static int32_t PLATFORM_VERSION_TEN = 10;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
 JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
@@ -81,6 +81,28 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
+void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
+                             const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            LOGE("SetTabBarClick tabsInfo is nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onTabBarClick");
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
+}
+
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
@@ -106,7 +128,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
     BarPosition barPosition = BarPosition::START;
     RefPtr<TabController> tabController;
     RefPtr<SwiperController> swiperController;
-    int32_t index = 0;
+    int32_t index = -1;
     JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -128,6 +150,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
         JSRef<JSVal> indexVal = obj->GetProperty("index");
         if (indexVal->IsNumber()) {
             index = indexVal->ToNumber<int32_t>();
+            index = index < 0 ? 0 : index;
             if (!tabController) {
                 tabController = JSTabsController::CreateController();
             }
@@ -139,6 +162,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
             auto indexValueProperty = indexObj->GetProperty("value");
             if (indexValueProperty->IsNumber()) {
                 index = indexValueProperty->ToNumber<int32_t>();
+                index = index < 0 ? 0 : index;
             }
             changeEventVal = indexObj->GetProperty("changeEvent");
         }
@@ -199,7 +223,13 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
     }
 
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
-    if (!ParseJsDimensionVp(info[0], width)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(info[0], width)) {
+            TabsModel::GetInstance()->SetTabBarWidth(width);
+            return;
+        }
+    } else if (!ParseJsDimensionVp(info[0], width)) {
         LOGE("The arg is wrong, fail to parse dimension");
     }
 
@@ -213,7 +243,13 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
-    if (!ParseJsDimensionVp(info[0], height)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(info[0], height)) {
+            TabsModel::GetInstance()->SetTabBarHeight(height);
+            return;
+        }
+    } else if (!ParseJsDimensionVp(info[0], height)) {
         LOGE("The arg is wrong, fail to parse dimension");
     }
 
@@ -275,6 +311,9 @@ void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
+    CalcDimension dividerStrokeWidth;
+    CalcDimension dividerStartMargin;
+    CalcDimension dividerEndMargin;
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
 
@@ -285,25 +324,41 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
         if (info[0]->IsNull()) {
             divider.isNull = true;
         } else {
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
-                divider.strokeWidth.Value() < 0.0f) {
+            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("strokeWidth"), dividerStrokeWidth) ||
+                dividerStrokeWidth.Value() < 0.0f || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
                 divider.strokeWidth.Reset();
+            } else {
+                divider.strokeWidth = dividerStrokeWidth;
             }
             if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
                 divider.color = tabTheme->GetDividerColor();
             }
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
-                divider.startMargin.Value() < 0.0f) {
+            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin) ||
+                dividerStartMargin.Value() < 0.0f || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.startMargin.Reset();
+            } else {
+                divider.startMargin = dividerStartMargin;
             }
-
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
-                divider.endMargin.Value() < 0.0f) {
+            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("endMargin"), dividerEndMargin) ||
+                dividerEndMargin.Value() < 0.0f || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.endMargin.Reset();
+            } else {
+                divider.endMargin = dividerEndMargin;
             }
         }
     }
     TabsModel::GetInstance()->SetDivider(divider);
+}
+
+void JSTabs::SetClip(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject() || !Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsClip(info);
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        TabsModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
 }
 
 void JSTabs::JSBind(BindingTarget globalObj)
@@ -321,6 +376,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
+    JSClass<JSTabs>::StaticMethod("onTabBarClick", &JSTabs::SetOnTabBarClick);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabs>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -332,6 +388,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("fadingEdge", &JSTabs::SetFadingEdge);
     JSClass<JSTabs>::StaticMethod("barOverlap", &JSTabs::SetBarOverlap);
     JSClass<JSTabs>::StaticMethod("barBackgroundColor", &JSTabs::SetBarBackgroundColor);
+    JSClass<JSTabs>::StaticMethod("clip", &JSTabs::SetClip);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

@@ -46,7 +46,6 @@ void InitAceModule()
     }
 
     entry();
-    FREELIB(handle);
 }
 
 void HotReloader::HotReload()

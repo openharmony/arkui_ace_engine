@@ -37,11 +37,11 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const char ELLIPSIS[] = "...";
-constexpr int32_t DEFAULT_WEEKS = 5;
 constexpr int32_t TEXT_MAX_LENGTH = 3;
 constexpr int32_t TEXT_END_INDEX = 2;
 constexpr int32_t WEEK_TEXT_END_INDEX = 3;
 constexpr double WEEKEND_TRANSPARENT = 0x7D;
+constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
 
 std::unique_ptr<RSParagraph> GetTextParagraph(const std::string& text, const RSTextStyle& textStyle)
 {
@@ -114,8 +114,8 @@ void CalendarPaintMethod::DrawWeekAndDates(RSCanvas& canvas, Offset offset)
     if (!obtainedMonth_.days.empty()) {
         calendarDays_.assign(obtainedMonth_.days.begin(), obtainedMonth_.days.end());
     }
-
-    offset += { touchCircleStrokeWidth_, 0 };
+    offset += (isCalendarDialog_ ? Offset(CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx(), 0)
+                                 : Offset(touchCircleStrokeWidth_, 0));
     DrawWeek(canvas, offset);
     if (!calendarDays_.empty()) {
         int32_t dateNumber = 0;
@@ -127,9 +127,23 @@ void CalendarPaintMethod::DrawWeekAndDates(RSCanvas& canvas, Offset offset)
             rowCount_ = (static_cast<int32_t>(calendarDays_.size()) / totalWeek);
         }
 
+        // Set dailyFourRowSpace_ for four line calendar.
         // Set dailyFiveRowSpace_ for five line calendar.
         // Set dailySixRowSpace_ for six line calendar.
-        dailyRowSpace = rowCount_ == DEFAULT_WEEKS ? dailyFiveRowSpace_ : dailySixRowSpace_;
+        switch (rowCount_) {
+            case 4: {
+                dailyRowSpace = dailyFourRowSpace_;
+                break;
+            }
+            case 6: {
+                dailyRowSpace = dailySixRowSpace_;
+                break;
+            }
+            case 5:
+            default:
+                dailyRowSpace = dailyFiveRowSpace_;
+                break;
+        }
         for (int32_t row = 0; row < rowCount_; row++) {
             double y = row * (dayHeight_ + dailyRowSpace) + dayNumberStartY;
             for (uint32_t column = 0; column < totalWeek; column++) {
@@ -152,11 +166,21 @@ void CalendarPaintMethod::DrawCalendar(
     dateTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     lunarTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
 
-    // First of all, check whether the day is current month or not, and set text style.
-    SetDayTextStyle(dateTextStyle, lunarTextStyle, day);
-
     auto x = dayOffset.GetX();
     auto y = dayOffset.GetY();
+
+    if (isCalendarDialog_) {
+        x += CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx();
+        SetCalendarPickerDayTextStyle(dateTextStyle, day);
+        DrawCalendarPickerBackgroundArea(day, canvas, x, y);
+
+        Offset dateNumberOffset = Offset(x, y + (dayHeight_ / 2 - gregorianDayHeight_ / 2));
+        PaintDay(canvas, dateNumberOffset, day, dateTextStyle);
+        return;
+    }
+
+    // First of all, check whether the day is current month or not, and set text style.
+    SetDayTextStyle(dateTextStyle, lunarTextStyle, day);
 
     if (day.focused && day.month.month == currentMonth_.month) {
         if (IsToday(day)) {
@@ -211,6 +235,49 @@ void CalendarPaintMethod::DrawFocusedArea(RSCanvas& canvas, const Offset& offset
         static_cast<float>(focusedAreaRadius_));
 }
 
+void CalendarPaintMethod::DrawCalendarPickerBackgroundArea(
+    const CalendarDay& day, RSCanvas& canvas, double x, double y) const
+{
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(ToRSColor(Color::TRANSPARENT));
+    if (day.month.year == obtainedMonth_.year && day.month.month == obtainedMonth_.month) {
+        if (day.isSelected) {
+            brush.SetColor(IsToday(day) ? backgroundSelectedTodayColor_ : backgroundSelectedNotTodayColor_);
+        } else if (day.isPressing) {
+            brush.SetColor(backgroundPressColor_);
+        } else if (day.isHovering) {
+            brush.SetColor(backgroundHoverColor_);
+        }
+    }
+
+    canvas.AttachBrush(brush);
+    RSRect rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(x + dayWidth_),
+        static_cast<float>(y + dayHeight_));
+    auto rrect = RSRoundRect(rect, dayRadius_, dayRadius_);
+    canvas.DrawRoundRect(rrect);
+    canvas.DetachBrush();
+
+    if (day.isKeyFocused) {
+        RSPen pen;
+        pen.SetAntiAlias(true);
+        pen.SetColor(backgroundKeyFocusedColor_);
+        pen.SetWidth(calendarDayKeyFocusedPenWidth_);
+        canvas.AttachPen(pen);
+
+        auto focusedX = x - (calendarDayKeyFocusedWidth_ - dayWidth_) / 2 - calendarDayKeyFocusedPenWidth_ / 2;
+        auto focusedY = y - (calendarDayKeyFocusedWidth_ - dayWidth_) / 2 - calendarDayKeyFocusedPenWidth_ / 2;
+        RSRect keyFocusedrect(static_cast<float>(focusedX), static_cast<float>(focusedY),
+            static_cast<float>(focusedX + calendarDayKeyFocusedWidth_ + calendarDayKeyFocusedPenWidth_),
+            static_cast<float>(focusedY + calendarDayKeyFocusedWidth_ + calendarDayKeyFocusedPenWidth_));
+        auto keyFocusedrrect = RSRoundRect(keyFocusedrect,
+            dayRadius_ / dayWidth_ * (calendarDayKeyFocusedWidth_ + calendarDayKeyFocusedPenWidth_),
+            dayRadius_ / dayWidth_ * (calendarDayKeyFocusedWidth_ + calendarDayKeyFocusedPenWidth_));
+        canvas.DrawRoundRect(keyFocusedrrect);
+        canvas.DetachPen();
+    }
+}
+
 void CalendarPaintMethod::InitTextStyle(RSTextStyle& dateTextStyle, RSTextStyle& lunarTextStyle)
 {
     dateTextStyle.fontSize_ = dayFontSize_;
@@ -237,6 +304,19 @@ void CalendarPaintMethod::SetDayTextStyle(
             (IsToday(day) && day.focused) ? focusedLunarColor_
             : IsToday(day)                ? todayLunarColor_
                            : (day.markLunarDay ? markLunarColor_ : (IsOffDay(day) ? weekendLunarColor_ : lunarColor_));
+    }
+}
+
+void CalendarPaintMethod::SetCalendarPickerDayTextStyle(RSTextStyle& dateTextStyle, const CalendarDay& day)
+{
+    if (day.month.month != currentMonth_.month) {
+        dateTextStyle.color_ = textNonCurrentMonthColor_;
+    } else {
+        if (IsToday(day)) {
+            dateTextStyle.color_ = day.isSelected ? textSelectedDayColor_ : textCurrentDayColor_;
+        } else {
+            dateTextStyle.color_ = textCurrentMonthColor_;
+        }
     }
 }
 
@@ -369,7 +449,7 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     lunarDayFontWeight_ = StringUtils::StringToFontWeight(theme->GetCalendarTheme().lunarDayFontWeight);
     workStateFontWeight_ = StringUtils::StringToFontWeight(theme->GetCalendarTheme().workStateFontWeight);
 
-    topPadding_ = theme->GetCalendarTheme().topPadding.ConvertToPx();
+    topPadding_ = isCalendarDialog_ ? 0.0 : theme->GetCalendarTheme().topPadding.ConvertToPx();
     weekFontSize_ = paintProperty->GetWeekFontSize().value_or(theme->GetCalendarTheme().weekFontSize).ConvertToPx();
     dayFontSize_ = paintProperty->GetDayFontSize().value_or(theme->GetCalendarTheme().dayFontSize).ConvertToPx();
     lunarDayFontSize_ =
@@ -396,13 +476,15 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
                     : paintProperty->GetDayWidthValue({}).ConvertToPx();
     weekAndDayRowSpace_ =
         paintProperty->GetWeekAndDayRowSpace().value_or(theme->GetCalendarTheme().weekAndDayRowSpace).ConvertToPx();
-    
+
     touchCircleStrokeWidth_ = theme->GetCalendarTheme().touchCircleStrokeWidth.ConvertToPx();
 
     colSpace_ = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
                     ? theme->GetCalendarTheme().colSpace.ConvertToPx()
                     : paintProperty->GetColSpaceValue({}).ConvertToPx();
-
+    dailyFourRowSpace_ = NonPositive(paintProperty->GetDailyFourRowSpaceValue({}).ConvertToPx())
+                             ? theme->GetCalendarTheme().dailySixRowSpace.ConvertToPx()
+                             : paintProperty->GetDailyFourRowSpaceValue({}).ConvertToPx();
     dailyFiveRowSpace_ = paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx() <= 0
                              ? theme->GetCalendarTheme().dailyFiveRowSpace.ConvertToPx()
                              : paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx();
@@ -432,6 +514,18 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     workStateVerticalMovingDistance_ = paintProperty->GetWorkStateVerticalMovingDistance()
                                            .value_or(theme->GetCalendarTheme().workStateVerticalMovingDistance)
                                            .ConvertToPx();
+    dayRadius_ = paintProperty->GetDayRadiusValue(theme->GetCalendarDayRadius()).ConvertToPx();
+    textNonCurrentMonthColor_ = ToRSColor(theme->GetTextNonCurrentMonthColor());
+    textSelectedDayColor_ = ToRSColor(theme->GetTextSelectedDayColor());
+    textCurrentDayColor_ = ToRSColor(theme->GetTextCurrentDayColor());
+    textCurrentMonthColor_ = ToRSColor(theme->GetTextCurrentMonthColor());
+    backgroundKeyFocusedColor_ = ToRSColor(theme->GetBackgroundKeyFocusedColor());
+    backgroundSelectedTodayColor_ = ToRSColor(theme->GetBackgroundSelectedTodayColor());
+    backgroundSelectedNotTodayColor_ = ToRSColor(theme->GetBackgroundSelectedNotTodayColor());
+    backgroundHoverColor_ = ToRSColor(theme->GetBackgroundHoverColor());
+    backgroundPressColor_ = ToRSColor(theme->GetBackgroundPressColor());
+    calendarDayKeyFocusedWidth_ = theme->GetCalendarDayKeyFocusedWidth().ConvertToPx();
+    calendarDayKeyFocusedPenWidth_ = theme->GetCalendarDayKeyFocusedPenWidth().ConvertToPx();
     if (paintProperty->HasShowLunar()) {
         showLunar_ = paintProperty->GetShowLunarValue();
     }
@@ -465,5 +559,4 @@ bool CalendarPaintMethod::IsOffDay(const CalendarDay& dayInfo) const
     }
     return false;
 }
-
 } // namespace OHOS::Ace::NG

@@ -27,7 +27,6 @@ template("ace_capability_ohos_source_set") {
 
     sources = [
       "clipboard/clipboard_impl.cpp",
-      "distributed/storage/distributed_storage.cpp",
       "environment/environment_impl.cpp",
       "environment/environment_proxy_impl.cpp",
       "preference/storage_impl.cpp",
@@ -35,7 +34,6 @@ template("ace_capability_ohos_source_set") {
     include_dirs = []
     external_deps = [
       "ability_base:want",
-      "data_object:distributeddataobject_impl",
       "ipc:ipc_core",
       "preferences:native_preferences",
     ]
@@ -43,6 +41,14 @@ template("ace_capability_ohos_source_set") {
         config.enable_system_clipboard) {
       external_deps += [ "pasteboard:pasteboard_client" ]
       defines += [ "SYSTEM_CLIPBOARD_SUPPORTED" ]
+    }
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      if (defined(global_parts_info.distributeddatamgr_udmf)) {
+        external_deps += [ "udmf:udmf_client" ]
+        external_deps += [ "udmf:udmf_data_napi" ]
+        sources += [ "udmf/udmf_impl.cpp" ]
+      }
+      external_deps += [ "kv_store:distributeddata_inner" ]
     }
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
@@ -57,13 +63,15 @@ template("ace_capability_ohos_source_set") {
         "bundle_framework:appexecfwk_base",
         "c_utils:utils",
         "eventhandler:libeventhandler",
-        "graphic_standard:surface",
-        "hiviewdfx_hilog_native:libhilog",
+        "graphic_2d:librender_service_client",
+        "graphic_2d:surface",
+        "hilog:libhilog",
         "input:libmmi-client",
         "ipc:ipc_core",
+        "napi:ace_napi",
         "window_manager:libwindow_extension_client",
+        "window_manager:scene_session",
       ]
-      deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
       sources += [
         "window_connection/window_extension_connection_ohos.cpp",
         "window_connection/window_extension_connection_proxy.cpp",

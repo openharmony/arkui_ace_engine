@@ -326,6 +326,7 @@ const char DOM_ANIMATION_TIMING_FUNCTION_SHARP[] = "sharp";
 const char DOM_ANIMATION_TIMING_FUNCTION_RHYTHM[] = "rhythm";
 const char DOM_ANIMATION_TIMING_FUNCTION_SMOOTH[] = "smooth";
 const char DOM_ANIMATION_TIMING_FUNCTION_STEPS[] = "steps";
+const char DOM_ANIMATION_TIMING_FUNCTION_CUSTOM[] = "customCallback";
 const char DOM_ANIMATION_TIMING_FUNCTION_CUBIC_BEZIER[] = "cubic-bezier";
 const char DOM_ANIMATION_TIMING_FUNCTION_SPRING[] = "spring";
 const char DOM_ANIMATION_FILL_MODE_NONE[] = "none";

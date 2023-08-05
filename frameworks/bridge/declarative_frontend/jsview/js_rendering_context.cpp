@@ -14,24 +14,48 @@
  */
 
 #include "js_rendering_context.h"
+
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/rendering_context_model_impl.h"
+#include "frameworks/core/components_ng/pattern/rendering_context/rendering_context_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<RenderingContextModel> RenderingContextModel::instance_ = nullptr;
+std::mutex RenderingContextModel::mutex_;
+RenderingContextModel* RenderingContextModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::RenderingContextModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RenderingContextModelNG());
+            } else {
+                instance_.reset(new Framework::RenderingContextModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
-JSRenderingContext::JSRenderingContext()
-{
-}
+JSRenderingContext::JSRenderingContext() {}
 
 void JSRenderingContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRenderingContext>::Declare("CanvasRenderingContext2D");
 
     JSClass<JSRenderingContext>::CustomMethod("toDataURL", &JSCanvasRenderer::JsToDataUrl);
-    JSClass<JSRenderingContext>::CustomProperty("width", &JSRenderingContext::JsGetWidth,
-                                                &JSRenderingContext::JsSetWidth);
-    JSClass<JSRenderingContext>::CustomProperty("height", &JSRenderingContext::JsGetHeight,
-                                                &JSRenderingContext::JsSetHeight);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "width", &JSRenderingContext::JsGetWidth, &JSRenderingContext::JsSetWidth);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "height", &JSRenderingContext::JsGetHeight, &JSRenderingContext::JsSetHeight);
     JSClass<JSRenderingContext>::CustomMethod("createRadialGradient", &JSCanvasRenderer::JsCreateRadialGradient);
     JSClass<JSRenderingContext>::CustomMethod("fillRect", &JSCanvasRenderer::JsFillRect);
     JSClass<JSRenderingContext>::CustomMethod("strokeRect", &JSCanvasRenderer::JsStrokeRect);
@@ -73,50 +97,48 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
     JSClass<JSRenderingContext>::CustomMethod("setPixelMap", &JSCanvasRenderer::JsSetPixelMap);
     JSClass<JSRenderingContext>::CustomMethod("drawBitmapMesh", &JSCanvasRenderer::JsDrawBitmapMesh);
-    JSClass<JSRenderingContext>::CustomProperty("filter", &JSCanvasRenderer::JsGetFilter,
-        &JSCanvasRenderer::JsSetFilter);
-    JSClass<JSRenderingContext>::CustomProperty("direction", &JSCanvasRenderer::JsGetDirection,
-        &JSCanvasRenderer::JsSetDirection);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "filter", &JSCanvasRenderer::JsGetFilter, &JSCanvasRenderer::JsSetFilter);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "direction", &JSCanvasRenderer::JsGetDirection, &JSCanvasRenderer::JsSetDirection);
 
-    JSClass<JSRenderingContext>::CustomProperty("fillStyle", &JSCanvasRenderer::JsGetFillStyle,
-                                                &JSCanvasRenderer::JsSetFillStyle);
-    JSClass<JSRenderingContext>::CustomProperty("strokeStyle", &JSCanvasRenderer::JsGetStrokeStyle,
-                                                &JSCanvasRenderer::JsSetStrokeStyle);
-    JSClass<JSRenderingContext>::CustomProperty("lineCap", &JSCanvasRenderer::JsGetLineCap,
-                                                &JSCanvasRenderer::JsSetLineCap);
-    JSClass<JSRenderingContext>::CustomProperty("lineJoin", &JSCanvasRenderer::JsGetLineJoin,
-                                                &JSCanvasRenderer::JsSetLineJoin);
-    JSClass<JSRenderingContext>::CustomProperty("miterLimit", &JSCanvasRenderer::JsGetMiterLimit,
-                                                &JSCanvasRenderer::JsSetMiterLimit);
-    JSClass<JSRenderingContext>::CustomProperty("lineWidth", &JSCanvasRenderer::JsGetLineWidth,
-                                                &JSCanvasRenderer::JsSetLineWidth);
-    JSClass<JSRenderingContext>::CustomProperty("font", &JSCanvasRenderer::JsGetFont,
-                                                &JSCanvasRenderer::JsSetFont);
-    JSClass<JSRenderingContext>::CustomProperty("textAlign", &JSCanvasRenderer::JsGetTextAlign,
-                                                &JSCanvasRenderer::JsSetTextAlign);
-    JSClass<JSRenderingContext>::CustomProperty("textBaseline", &JSCanvasRenderer::JsGetTextBaseline,
-                                                &JSCanvasRenderer::JsSetTextBaseline);
-    JSClass<JSRenderingContext>::CustomProperty("globalAlpha", &JSCanvasRenderer::JsGetGlobalAlpha,
-                                                &JSCanvasRenderer::JsSetGlobalAlpha);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "fillStyle", &JSCanvasRenderer::JsGetFillStyle, &JSCanvasRenderer::JsSetFillStyle);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "strokeStyle", &JSCanvasRenderer::JsGetStrokeStyle, &JSCanvasRenderer::JsSetStrokeStyle);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "lineCap", &JSCanvasRenderer::JsGetLineCap, &JSCanvasRenderer::JsSetLineCap);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "lineJoin", &JSCanvasRenderer::JsGetLineJoin, &JSCanvasRenderer::JsSetLineJoin);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "miterLimit", &JSCanvasRenderer::JsGetMiterLimit, &JSCanvasRenderer::JsSetMiterLimit);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "lineWidth", &JSCanvasRenderer::JsGetLineWidth, &JSCanvasRenderer::JsSetLineWidth);
+    JSClass<JSRenderingContext>::CustomProperty("font", &JSCanvasRenderer::JsGetFont, &JSCanvasRenderer::JsSetFont);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "textAlign", &JSCanvasRenderer::JsGetTextAlign, &JSCanvasRenderer::JsSetTextAlign);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "textBaseline", &JSCanvasRenderer::JsGetTextBaseline, &JSCanvasRenderer::JsSetTextBaseline);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "globalAlpha", &JSCanvasRenderer::JsGetGlobalAlpha, &JSCanvasRenderer::JsSetGlobalAlpha);
     JSClass<JSRenderingContext>::CustomProperty("globalCompositeOperation",
-                                                &JSCanvasRenderer::JsGetGlobalCompositeOperation,
-                                                &JSCanvasRenderer::JsSetGlobalCompositeOperation);
-    JSClass<JSRenderingContext>::CustomProperty("lineDashOffset", &JSCanvasRenderer::JsGetLineDashOffset,
-                                                &JSCanvasRenderer::JsSetLineDashOffset);
-    JSClass<JSRenderingContext>::CustomProperty("shadowBlur", &JSCanvasRenderer::JsGetShadowBlur,
-                                                &JSCanvasRenderer::JsSetShadowBlur);
-    JSClass<JSRenderingContext>::CustomProperty("shadowColor", &JSCanvasRenderer::JsGetShadowColor,
-                                                &JSCanvasRenderer::JsSetShadowColor);
-    JSClass<JSRenderingContext>::CustomProperty("shadowOffsetX", &JSCanvasRenderer::JsGetShadowOffsetX,
-                                                &JSCanvasRenderer::JsSetShadowOffsetX);
-    JSClass<JSRenderingContext>::CustomProperty("shadowOffsetY", &JSCanvasRenderer::JsGetShadowOffsetY,
-                                                &JSCanvasRenderer::JsSetShadowOffsetY);
+        &JSCanvasRenderer::JsGetGlobalCompositeOperation, &JSCanvasRenderer::JsSetGlobalCompositeOperation);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "lineDashOffset", &JSCanvasRenderer::JsGetLineDashOffset, &JSCanvasRenderer::JsSetLineDashOffset);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "shadowBlur", &JSCanvasRenderer::JsGetShadowBlur, &JSCanvasRenderer::JsSetShadowBlur);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "shadowColor", &JSCanvasRenderer::JsGetShadowColor, &JSCanvasRenderer::JsSetShadowColor);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "shadowOffsetX", &JSCanvasRenderer::JsGetShadowOffsetX, &JSCanvasRenderer::JsSetShadowOffsetX);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "shadowOffsetY", &JSCanvasRenderer::JsGetShadowOffsetY, &JSCanvasRenderer::JsSetShadowOffsetY);
     JSClass<JSRenderingContext>::CustomProperty("imageSmoothingEnabled", &JSCanvasRenderer::JsGetImageSmoothingEnabled,
-                                                &JSCanvasRenderer::JsSetImageSmoothingEnabled);
+        &JSCanvasRenderer::JsSetImageSmoothingEnabled);
     JSClass<JSRenderingContext>::CustomProperty("imageSmoothingQuality", &JSCanvasRenderer::JsGetImageSmoothingQuality,
-                                                &JSCanvasRenderer::JsSetImageSmoothingQuality);
-    JSClass<JSRenderingContext>::CustomMethod("transferFromImageBitmap",
-                                              &JSRenderingContext::JsTransferFromImageBitmap);
+        &JSCanvasRenderer::JsSetImageSmoothingQuality);
+    JSClass<JSRenderingContext>::CustomMethod(
+        "transferFromImageBitmap", &JSRenderingContext::JsTransferFromImageBitmap);
 
     JSClass<JSRenderingContext>::CustomMethod("createConicGradient", &JSCanvasRenderer::JsCreateConicGradient);
 
@@ -131,8 +153,8 @@ void JSRenderingContext::Constructor(const JSCallbackInfo& args)
 
     if (args.Length() != 0) {
         if (args[0]->IsObject()) {
-            JSRenderingContextSettings* jsContextSetting
-                = JSRef<JSObject>::Cast(args[0])->Unwrap<JSRenderingContextSettings>();
+            JSRenderingContextSettings* jsContextSetting =
+                JSRef<JSObject>::Cast(args[0])->Unwrap<JSRenderingContextSettings>();
             if (jsContextSetting == nullptr) {
                 LOGE("jsContextSetting is null");
                 return;
@@ -153,13 +175,8 @@ void JSRenderingContext::Destructor(JSRenderingContext* controller)
 void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
 {
     double width = 0.0;
-    if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_VOID(customPaintPattern_);
-        width = customPaintPattern_->GetWidth();
-    } else {
-        CHECK_NULL_VOID(pool_);
-        width = pool_->GetWidth();
-    }
+    RenderingContextModel::GetInstance()->GetWidth(canvasPattern_, width);
+
     width = SystemProperties::Px2Vp(width);
     auto returnValue = JSVal(ToJSValue(width));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
@@ -179,18 +196,14 @@ void JSRenderingContext::JsSetHeight(const JSCallbackInfo& info)
 void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 {
     double height = 0.0;
-    if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_VOID(customPaintPattern_);
-        height = customPaintPattern_->GetHeight();
-    } else {
-        CHECK_NULL_VOID(pool_);
-        height = pool_->GetHeight();
-    }
+    RenderingContextModel::GetInstance()->GetHeight(canvasPattern_, height);
+
     height = SystemProperties::Px2Vp(height);
     auto returnValue = JSVal(ToJSValue(height));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }
+
 void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
@@ -205,15 +218,8 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> widthId = obj->GetProperty("__id");
     JSViewAbstract::ParseJsInteger(widthId, id);
-    if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_VOID(customPaintPattern_);
-        auto offscreenCanvasPattern = JSOffscreenRenderingContext::GetOffscreenCanvasPattern(id);
-        customPaintPattern_->TransferFromImageBitmap(offscreenCanvasPattern);
-    } else {
-        CHECK_NULL_VOID(pool_);
-        RefPtr<OffscreenCanvas> offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
-        pool_->TransferFromImageBitmap(offscreenCanvas);
-    }
+    RefPtr<AceType> offscreenPattern = JSOffscreenRenderingContext::GetOffscreenPattern(id);
+    RenderingContextModel::GetInstance()->SetTransferFromImageBitmap(
+        canvasPattern_, offscreenPattern);
 }
-
 } // namespace OHOS::Ace::Framework

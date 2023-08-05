@@ -35,6 +35,7 @@
 #endif
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/flutter_image_cache.h"
 
@@ -44,6 +45,7 @@ constexpr double HANGING_PERCENT = 0.8;
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 const std::string UNSUPPORTED = "data:image/png";
 const std::string URL_PREFIX = "data:";
 const std::string URL_SYMBOL = ";base64,";
@@ -87,66 +89,45 @@ double GetQuality(const std::string& args)
 }
 } // namespace
 
-CanvasDrawFunction CanvasPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
-    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto customPaint = weak.Upgrade();
-        CHECK_NULL_VOID(customPaint);
-        customPaint->PaintCustomPaint(canvas, paintWrapper);
-    };
-
-    return paintFunc;
-}
-
-void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper)
-{
+    ACE_SCOPED_TRACE("CanvasPaintMethod::UpdateContentModifier");
+    CHECK_NULL_VOID(paintWrapper);
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
-    SkCanvas* skCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
+    auto viewScale = context->GetViewScale();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     if (lastLayoutSize_ != frameSize) {
-        CreateBitmap(frameSize);
+        UpdateRecordingCanvas(frameSize.Width() * viewScale, frameSize.Height() * viewScale);
         lastLayoutSize_.SetSizeT(frameSize);
     }
+#ifndef USE_ROSEN_DRAWING
     if (!skCanvas_) {
         LOGW("skCanvas_ is null");
         return;
     }
+#else
+    if (!rsCanvas_) {
+        LOGW("rsCanvas_ is null");
+        return;
+    }
+#endif
 
-    auto viewScale = context->GetViewScale();
+    if (tasks_.empty()) {
+        return;
+    }
+
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->scale(viewScale, viewScale);
-
+#else
+    rsCanvas_->Scale(viewScale, viewScale);
+#endif
     for (const auto& task : tasks_) {
         task(*this, paintWrapper);
     }
-    skCanvas_->scale(1.0 / viewScale, 1.0 / viewScale);
     tasks_.clear();
-
-    skCanvas->save();
-    skCanvas->scale(1.0 / viewScale, 1.0 / viewScale);
-#ifndef NEW_SKIA
-    skCanvas->drawBitmap(canvasCache_, 0.0f, 0.0f);
-#else
-    skCanvas->drawImage(canvasCache_.asImage(), 0.0f, 0.0f);
-#endif
-    skCanvas->restore();
-}
-
-void CanvasPaintMethod::CreateBitmap(SizeF frameSize)
-{
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    auto viewScale = context->GetViewScale();
-    auto imageInfo = SkImageInfo::Make(frameSize.Width() * viewScale, frameSize.Height() * viewScale,
-        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
-    canvasCache_.reset();
-    cacheBitmap_.reset();
-    canvasCache_.allocPixels(imageInfo);
-    cacheBitmap_.allocPixels(imageInfo);
-    canvasCache_.eraseColor(SK_ColorTRANSPARENT);
-    cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
-    skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
-    cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
+    CHECK_NULL_VOID(contentModifier_);
+    contentModifier_->MarkModifierDirty();
 }
 
 void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
@@ -182,14 +163,15 @@ void CanvasPaintMethod::DrawImage(
 
     auto image = GetImage(canvasImage.src);
     CHECK_NULL_VOID(image);
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     InitImagePaint(imagePaint_);
 #else
     InitImagePaint(imagePaint_, sampleOptions_);
 #endif
     InitPaintBlend(imagePaint_);
-    const auto skCanvas =
-        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+
+    const auto skCanvas = skCanvas_.get();
     if (HasImageShadow()) {
         SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
         SkPath path;
@@ -197,10 +179,19 @@ void CanvasPaintMethod::DrawImage(
         PaintShadow(path, *imageShadow_, skCanvas);
     }
 
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
+
     switch (canvasImage.flag) {
-        case 0:
+        case 0: {
+#ifndef NEW_SKIA
             skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
+#else
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
+#endif
             break;
+        }
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
 #ifndef NEW_SKIA
@@ -224,10 +215,54 @@ void CanvasPaintMethod::DrawImage(
         default:
             break;
     }
+#else
+    InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
+    InitPaintBlend(imageBrush_);
+
+    const auto rsCanvas = rsCanvas_.get();
+    if (HasImageShadow()) {
+        RSRect rsRect = RSRect(canvasImage.dx, canvasImage.dy,
+            canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+        RSPath path;
+        path.AddRect(rsRect);
+        PaintShadow(path, *imageShadow_, rsCanvas);
+    }
+
+    if (globalState_.HasGlobalAlpha()) {
+        imageBrush_.SetAlphaF(globalState_.GetAlpha());
+    }
+
+    switch (canvasImage.flag) {
+        case 0:
+            rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, RSSamplingOptions());
+            break;
+        case 1: {
+            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            rsCanvas_->AttachBrush(imageBrush_);
+            rsCanvas_->DrawImageRect(*image, rect, sampleOptions_);
+            rsCanvas_->DetachBrush();
+            break;
+        }
+        case 2: {
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
+            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy,
+                canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
+            rsCanvas_->AttachBrush(imageBrush_);
+            rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
+            rsCanvas_->DetachBrush();
+            break;
+        }
+        default:
+            break;
+    }
+#endif
 }
 
 void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
+#ifndef USE_ROSEN_DRAWING
     // get skImage form pixelMap
     auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
@@ -269,8 +304,12 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         default:
             break;
     }
+#else
+    LOGE("Drawing is not supported");
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
 {
     if (!imageCache_) {
@@ -290,6 +329,32 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
     return rasterizedImage;
 }
+#else
+std::shared_ptr<RSImage> CanvasPaintMethod::GetImage(const std::string& src)
+{
+    if (!imageCache_) {
+        imageCache_ = ImageCache::Create();
+        imageCache_->SetCapacity(IMAGE_CACHE_COUNT);
+    }
+    auto cacheImage = imageCache_->GetCacheImage(src);
+    if (cacheImage && cacheImage->imagePtr) {
+        return cacheImage->imagePtr;
+    }
+
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto image = Ace::ImageProvider::GetDrawingImage(src, context);
+    CHECK_NULL_RETURN(image, nullptr);
+    RSBitmapFormat rsBitmapFormat { image->GetColorType(), image->GetAlphaType() };
+    RSBitmap rsBitmap;
+    rsBitmap.Build(image->GetWidth(), image->GetHeight(), rsBitmapFormat);
+    CHECK_NULL_RETURN(image->ReadPixels(rsBitmap, 0, 0), nullptr);
+    auto rasterizedImage = std::make_shared<RSImage>();
+    rasterizedImage->BuildFromBitmap(rsBitmap);
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
+    return rasterizedImage;
+}
+#endif
 
 
 void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
@@ -301,34 +366,72 @@ void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
     }
 }
 
-std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
+std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(RefPtr<RosenRenderContext> renderContext,
     double left, double top, double width, double height)
 {
+    CHECK_NULL_RETURN(renderContext, nullptr);
     double viewScale = 1.0;
     auto context = context_.Upgrade();
     CHECK_NULL_RETURN(context, nullptr);
     viewScale = context->GetViewScale();
-    // copy the bitmap to tempCanvas
-    auto imageInfo =
-        SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-    SkBitmap tempCache;
+    double dirtyWidth = std::abs(width);
+    double dirtyHeight = std::abs(height);
     double scaledLeft = left * viewScale;
     double scaledTop = top * viewScale;
-    double dirtyWidth = width >= 0 ? width : 0;
-    double dirtyHeight = height >= 0 ? height : 0;
-    tempCache.allocPixels(imageInfo);
+    if (Negative(width)) {
+        scaledLeft += width * viewScale;
+    }
+    if (Negative(height)) {
+        scaledTop += height * viewScale;
+    }
+    // copy the bitmap to tempCanvas
+#ifndef USE_ROSEN_DRAWING
+    SkBitmap currentBitmap;
+    if (!DrawBitmap(renderContext, currentBitmap)) {
+        return nullptr;
+    }
+
+    SkBitmap tempCache;
+    tempCache.allocPixels(SkImageInfo::Make(dirtyWidth, dirtyHeight,
+        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType));
+    SkCanvas tempCanvas(tempCache);
     int32_t size = dirtyWidth * dirtyHeight;
     const uint8_t* pixels = nullptr;
-    SkCanvas tempCanvas(tempCache);
-    auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, width * viewScale, height * viewScale);
+    auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, dirtyWidth * viewScale, dirtyHeight * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
 #ifndef NEW_SKIA
-    tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
+    tempCanvas.drawBitmapRect(currentBitmap, srcRect, dstRect, nullptr);
 #else
     tempCanvas.drawImageRect(
-        canvasCache_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
+        currentBitmap.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kStrict_SrcRectConstraint);
 #endif
     pixels = tempCache.pixmap().addr8();
+#else
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmap tempCache;
+    tempCache.Build(width, height, format);
+
+    RSBitmap currentBitmap;
+    CHECK_NULL_RETURN(rsRecordingCanvas_, nullptr);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
+    if (!res || !currentBitmap.IsValid()) {
+        LOGE("Bitmap is empty");
+        return nullptr;
+    }
+    LOGE("Drawing is not supported");
+
+    int32_t size = dirtyWidth * dirtyHeight;
+    RSCanvas tempCanvas;
+    tempCanvas.Bind(tempCache);
+    auto srcRect = RSRect(scaledLeft, scaledTop,
+        dirtyWidth * viewScale + scaledLeft, dirtyHeight * viewScale + scaledTop);
+    auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
+    RSImage rsImage;
+    rsImage.BuildFromBitmap(currentBitmap);
+    tempCanvas.DrawImageRect(rsImage, srcRect, dstRect, RSSamplingOptions());
+    const uint8_t* pixels = static_cast<const uint8_t*>(tempCache.GetPixels());
+#endif
     CHECK_NULL_RETURN(pixels, nullptr);
     std::unique_ptr<Ace::ImageData> imageData = std::make_unique<Ace::ImageData>();
     imageData->dirtyWidth = dirtyWidth;
@@ -353,32 +456,34 @@ void CanvasPaintMethod::TransferFromImageBitmap(PaintWrapper* paintWrapper,
     PutImageData(paintWrapper, *imageData);
 }
 
-void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
+void CanvasPaintMethod::FillText(
+    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto offset = paintWrapper->GetContentOffset();
+    OffsetF offset = GetContentOffset(paintWrapper);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
     auto success = UpdateParagraph(offset, text, false, HasShadow());
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, false, HasShadow());
+    PaintText(offset, frameSize, x, y, maxWidth, false, HasShadow());
 }
 
-void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
+void CanvasPaintMethod::StrokeText(
+    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto offset = paintWrapper->GetContentOffset();
+    OffsetF offset = GetContentOffset(paintWrapper);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
     if (HasShadow()) {
         auto success = UpdateParagraph(offset, text, true, true);
         CHECK_NULL_VOID(success);
-        PaintText(offset, frameSize, x, y, true, true);
+        PaintText(offset, frameSize, x, y, maxWidth, true, true);
     }
 
     auto success = UpdateParagraph(offset, text, true);
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, true);
+    PaintText(offset, frameSize, x, y, maxWidth, true);
 }
 
 double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -458,30 +563,83 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
     return textMetrics;
 }
 
-void CanvasPaintMethod::PaintText(
-    const OffsetF& offset, const SizeF& frameSize, double x, double y, bool isStroke, bool hasShadow)
+void CanvasPaintMethod::PaintText(const OffsetF& offset, const SizeF& frameSize, double x, double y,
+    std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    paragraph_->Layout(frameSize.Width());
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        paragraph_->Layout(FLT_MAX);
+    } else {
+        paragraph_->Layout(frameSize.Width());
+    }
     auto width = paragraph_->GetMaxIntrinsicWidth();
     if (frameSize.Width() > width) {
         paragraph_->Layout(std::ceil(width));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
+#ifndef USE_ROSEN_DRAWING
     double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
+        if (scale.has_value()) {
+            if (!NearZero(scale.value())) {
+                dx /= scale.value();
+                shadowOffsetX /= scale.value();
+            }
+            skCanvas_->scale(scale.value(), 1.0);
+        }
         paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
     }
+#else
+    double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
 
-    paragraph_->Paint(skCanvas_.get(), dx, dy);
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
+    if (hasShadow) {
+        rsCanvas_->Save();
+        auto shadowOffsetX = shadow_.GetOffset().GetX();
+        if (scale.has_value()) {
+            if (!NearZero(scale.value())) {
+                dx /= scale.value();
+                shadowOffsetX /= scale.value();
+            }
+            rsCanvas_->Scale(scale.value(), 1.0);
+        }
+        LOGE("Drawing is not supported");
+        rsCanvas_->Restore();
+        return;
+    }
+#endif
+    if (scale.has_value()) {
+        if (!NearZero(scale.value())) {
+            dx /= scale.value();
+        }
+#ifndef USE_ROSEN_DRAWING
+        skCanvas_->save();
+        skCanvas_->scale(scale.value(), 1.0);
+        paragraph_->Paint(skCanvas_.get(), dx, dy);
+        skCanvas_->restore();
+    } else {
+        paragraph_->Paint(skCanvas_.get(), dx, dy);
+    }
+#else
+        rsCanvas_->Save();
+        rsCanvas_->Scale(scale.value(), 1.0);
+        LOGE("Drawing is not supported");
+        rsCanvas_->Restore();
+    } else {
+        LOGE("Drawing is not supported");
+    }
+#endif
 }
 
 double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -555,6 +713,7 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
 void CanvasPaintMethod::UpdateTextStyleForeground(
     const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
 {
+#ifndef USE_ROSEN_DRAWING
     using namespace Constants;
     if (!isStroke) {
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
@@ -615,9 +774,16 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
         txtStyle.foreground = paint;
         txtStyle.has_foreground = true;
     }
+#else
+    LOGE("Drawing is not supported");
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void CanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
+#else
+void CanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas)
+#endif
 {
 #ifdef ENABLE_ROSEN_BACKEND
     RosenDecorationPainter::PaintShadow(path, shadow, canvas);
@@ -630,7 +796,11 @@ void CanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
     double top = args.para2 + offset.GetY();
     double right = args.para3 + args.para1 + offset.GetX();
     double bottom = args.para4 + args.para2 + offset.GetY();
+#ifndef USE_ROSEN_DRAWING
     skPath2d_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
+#else
+    rsPath2d_.AddRect(RSRect(left, top, right, bottom));
+#endif
 }
 
 void CanvasPaintMethod::SetTransform(const TransformParam& param)
@@ -638,30 +808,58 @@ void CanvasPaintMethod::SetTransform(const TransformParam& param)
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     double viewScale = context->GetViewScale();
+#ifndef USE_ROSEN_DRAWING
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX * viewScale, param.skewX * viewScale, param.translateX * viewScale,
         param.skewY * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
     skCanvas_->setMatrix(skMatrix);
+#else
+    RSMatrix rsMatrix;
+    rsMatrix.SetMatrix(param.scaleX * viewScale, param.skewX * viewScale, param.translateX * viewScale,
+        param.skewY * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
+    rsCanvas_->SetMatrix(rsMatrix);
+#endif
 }
 
-std::string CanvasPaintMethod::ToDataURL(const std::string& args)
+std::string CanvasPaintMethod::ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args)
 {
+    CHECK_NULL_RETURN(renderContext, UNSUPPORTED);
     std::string mimeType = GetMimeType(args);
     double quality = GetQuality(args);
     double width = lastLayoutSize_.Width();
     double height = lastLayoutSize_.Height();
+
+    auto imageInfo = SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
+        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType);
     SkBitmap tempCache;
-    tempCache.allocPixels(SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
-        (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
+    tempCache.allocPixels(imageInfo);
+
+#ifndef USE_ROSEN_DRAWING
+    SkBitmap currentBitmap;
+    if (!DrawBitmap(renderContext, currentBitmap)) {
+        return UNSUPPORTED;
+    }
+
     bool success = false;
-    if (canvasCache_.empty()) {
+#ifndef NEW_SKIA
+    success = currentBitmap.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
+#else
+    success = currentBitmap.pixmap().scalePixels(
+        tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
+#endif
+#else
+    RSBitmap currentBitmap;
+    CHECK_NULL_RETURN(rsRecordingCanvas_, UNSUPPORTED);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, rsRecordingCanvas_->GetDrawCmdList());
+    if (!res || !currentBitmap.IsValid()) {
         LOGE("Bitmap is empty");
         return UNSUPPORTED;
     }
-#ifndef NEW_SKIA
-    success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
-#else
-    success = canvasCache_.pixmap().scalePixels(
+    LOGE("Drawing is not supported");
+    bool success = false;
+    auto& skBitmap = currentBitmap.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
+    success = skBitmap.pixmap().scalePixels(
         tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
 #endif
     CHECK_NULL_RETURN(success, UNSUPPORTED);
@@ -690,8 +888,37 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
     }
     SkString info(len);
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
+
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
+
+#ifndef USE_ROSEN_DRAWING
+bool CanvasPaintMethod::DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkBitmap& currentBitmap)
+{
+    CHECK_NULL_RETURN(rsRecordingCanvas_, false);
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    bool res = renderContext->GetBitmap(currentBitmap, drawCmdList);
+    if (res) {
+        rsRecordingCanvas_->Clear();
+        return true;
+    }
+    LOGD("GetBitmap failed.");
+    if (!drawCmdList) {
+        return false;
+    }
+    if (drawCmdList->GetSize() == 0) {
+        return false;
+    }
+    currentBitmap.reset();
+    auto imageInfo = SkImageInfo::Make(lastLayoutSize_.Width(), lastLayoutSize_.Height(),
+        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+    // tryAllocPixels is more safe than allocPixels
+    currentBitmap.allocPixels(imageInfo);
+    SkCanvas currentCanvas(currentBitmap);
+    drawCmdList->Playback(currentCanvas);
+    return true;
+}
+#endif
 
 std::string CanvasPaintMethod::GetJsonData(const std::string& path)
 {

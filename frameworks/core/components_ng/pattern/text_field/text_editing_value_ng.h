@@ -35,6 +35,11 @@ struct TextEditingValueNG {
         return !operator==(other);
     }
 
+    bool Empty() const
+    {
+        return text.empty();
+    }
+
     std::wstring GetWideText() const
     {
         return StringUtils::ToWstring(text);

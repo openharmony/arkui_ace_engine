@@ -48,7 +48,7 @@ std::string ScrollEventInfo::ToJSONString() const
     }
 }
 
-void ScrollPositionController::JumpTo(int32_t index, int32_t source)
+void ScrollPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
 {
     RefPtr<RenderNode> node = scroll_.Upgrade();
     if (node) {
@@ -84,7 +84,8 @@ bool ScrollPositionController::AnimateTo(double position, float duration, const 
     return false;
 }
 
-bool ScrollPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
+bool ScrollPositionController::AnimateTo(
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
     RefPtr<RenderNode> node = scroll_.Upgrade();
     if (node) {
@@ -211,5 +212,4 @@ Offset ScrollPositionController::GetCurrentOffset() const
 
     return offset;
 }
-
 } // namespace OHOS::Ace

@@ -54,13 +54,23 @@ void SvgFilter::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, co
 
 void SvgFilter::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->saveLayer(nullptr, &filterPaint_);
+#else
+    RSSaveLayerOps slo(nullptr, &filterBrush_);
+    rsCanvas_->SaveLayer(slo);
+#endif
 }
 
 void SvgFilter::OnAsPaint()
 {
+#ifndef USE_ROSEN_DRAWING
     filterPaint_.setAntiAlias(true);
     sk_sp<SkImageFilter> imageFilter = nullptr;
+#else
+    filterBrush_.SetAntiAlias(true);
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+#endif
     ColorInterpolationType currentColor = ColorInterpolationType::SRGB;
 
     for (const auto& item : children_) {
@@ -72,7 +82,13 @@ void SvgFilter::OnAsPaint()
     }
 
     SvgFe::ConverImageFilterColor(imageFilter, currentColor, ColorInterpolationType::SRGB);
+#ifndef USE_ROSEN_DRAWING
     filterPaint_.setImageFilter(imageFilter);
+#else
+    auto filter = filterBrush_.GetFilter();
+    filter.SetImageFilter(imageFilter);
+    filterBrush_.SetFilter(filter);
+#endif
 }
 
 } // namespace OHOS::Ace::NG

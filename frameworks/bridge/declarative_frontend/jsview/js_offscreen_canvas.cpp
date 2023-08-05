@@ -213,34 +213,17 @@ void JSOffscreenCanvas::JsSetHeight(const JSCallbackInfo& info)
 
 void JSOffscreenCanvas::JsTransferToImageBitmap(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline() && !offscreenCanvasPattern_) {
-        std::unique_ptr<ImageData> imageData =
-            offscreenCanvasPattern_->GetImageData(0.0, 0.0, GetWidth(), GetHeight());
-        if (imageData.get() == nullptr) {
-            return;
-        }
-        double final_height = static_cast<uint32_t>(imageData->dirtyHeight);
-        double final_width = static_cast<uint32_t>(imageData->dirtyWidth);
-
-        JSRef<JSArray> colorArray = JSRef<JSArray>::New();
-        uint32_t count = 0;
-        for (uint32_t i = 0; i < final_height; i++) {
-            for (uint32_t j = 0; j < final_width; j++) {
-                int32_t idx = i * imageData->dirtyWidth + j;
-                auto pixel = imageData->data[idx];
-
-                colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(pixel.GetRed())));
-                colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(pixel.GetGreen())));
-                colorArray->SetValueAt(count + 2, JSRef<JSVal>::Make(ToJSValue(pixel.GetBlue())));
-                colorArray->SetValueAt(count + 3, JSRef<JSVal>::Make(ToJSValue(pixel.GetAlpha())));
-                count += 4;
-            }
-        }
-        auto retObj = JSRef<JSObject>::New();
-        retObj->SetProperty("width", final_width);
-        retObj->SetProperty("height", final_height);
-        retObj->SetPropertyObject("data", colorArray);
-        info.SetReturnValue(retObj);
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(offscreenCanvasContext_);
+        CHECK_NULL_VOID(offscreenCanvasPattern_);
+        auto final_height = static_cast<uint32_t>(GetHeight());
+        auto final_width = static_cast<uint32_t>(GetWidth());
+        JSRef<JSObject> renderImage = JSRef<JSObject>::New();
+        renderImage->SetProperty("__type", "ImageBitmap");
+        renderImage->SetProperty("__id", offscreenCanvasContext_->GetId());
+        renderImage->SetProperty("height", final_height);
+        renderImage->SetProperty("width", final_width);
+        info.SetReturnValue(renderImage);
     }
 }
 
@@ -267,6 +250,10 @@ void JSOffscreenCanvas::JsGetContext(const JSCallbackInfo& info)
             if (contextObj->IsEmpty()) {
                 return;
             }
+            JSRef<JSVal> isSucceed = contextObj->GetProperty("__isSucceed");
+            if (isSucceed->IsBoolean() && !isSucceed->ToBoolean()) {
+                return;
+            }
             if (info[1]->IsObject()) {
                 offscreenCanvasSettings_ = JSRef<JSObject>::Cast(info[1])->Unwrap<JSRenderingContextSettings>();
                 CHECK_NULL_VOID(offscreenCanvasSettings_);
@@ -289,7 +276,13 @@ JSRef<JSObject> JSOffscreenCanvas::CreateContext2d(double width, double height)
     offscreenCanvasContext_ = Referenced::Claim(contextObj->Unwrap<JSOffscreenRenderingContext>());
     offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
         static_cast<int32_t>(width), static_cast<int32_t>(height));
-    offscreenCanvasContext_->SetOffscreenCanvasPattern(offscreenCanvasPattern_);
+    CHECK_NULL_RETURN(offscreenCanvasPattern_, contextObj);
+    if (!offscreenCanvasPattern_->IsSucceed()) {
+        contextObj->SetProperty("__isSucceed", false);
+        return contextObj;
+    }
+    contextObj->SetProperty("__isSucceed", true);
+    offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
     CHECK_NULL_RETURN(offscreenCanvasSettings_, contextObj);
     bool anti = offscreenCanvasSettings_->GetAntialias();

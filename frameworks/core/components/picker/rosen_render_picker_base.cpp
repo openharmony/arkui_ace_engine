@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,11 @@
 #include "core/components/picker/rosen_render_picker_base.h"
 
 #include "render_service_client/core/ui/rs_node.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/effects/SkGradientShader.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -60,8 +64,12 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     rsNode->SetPaintOrder(true);
 
 #ifdef OHOS_PLATFORM
+#ifndef USE_ROSEN_DRAWING
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     recordingCanvas->MultiplyAlpha((disabled_ ? 102.0 / 255 : 1));
+#else
+    LOGE("Drawing is not supported");
+#endif
 #endif
 
     RenderNode::Paint(context, offset);
@@ -84,8 +92,13 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     }
 
     // Draw two dividers on both sides of selected option.
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setColor(theme->GetDividerColor().GetValue());
+#else
+    RSPen pen;
+    pen.SetColor(theme->GetDividerColor().GetValue());
+#endif
     auto rect = GetOptionsRect(offset, anchorColumn);
     auto dividerSpacing = NormalizeToPx(theme->GetDividerSpacing());
     if (data_->GetDefaultHeight()) {
@@ -106,8 +119,15 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     double rightLine = rect.Right();
 
     if (!NearZero(dividerThickness) && !data_->GetSubsidiary()) {
+#ifndef USE_ROSEN_DRAWING
         canvas->drawRect({ leftLine, upperLine - dividerThickness, rightLine, upperLine }, paint);
         canvas->drawRect({ leftLine, downLine, rightLine, downLine + dividerThickness }, paint);
+#else
+        canvas->AttachPen(pen);
+        canvas->DrawRect(RSRect(leftLine, upperLine - dividerThickness, rightLine, upperLine));
+        canvas->DrawRect(RSRect(leftLine, downLine, rightLine, downLine + dividerThickness));
+        canvas->DetachPen();
+#endif
     }
     // Paint gradient at top and bottom.
     PaintGradient(canvas, offset, rect, theme);
@@ -116,8 +136,13 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     PaintFocusOptionBorder(canvas);
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderPickerBase::PaintGradient(
     SkCanvas* canvas, const Offset& offset, const Rect& rect, const RefPtr<PickerTheme>& theme)
+#else
+void RosenRenderPickerBase::PaintGradient(
+    RSCanvas* canvas, const Offset& offset, const Rect& rect, const RefPtr<PickerTheme>& theme)
+#endif
 {
     if (data_ && data_->SubsidiaryShowed()) {
         return;
@@ -128,10 +153,19 @@ void RosenRenderPickerBase::PaintGradient(
         return;
     }
     // Paint gradient rect over the picker content.
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(rect.Left()), SkDoubleToScalar(rect.Top()));
     SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(rect.Left()), SkDoubleToScalar(rect.Bottom()));
     SkPoint points[2] = { beginPoint, endPoint };
+#else
+    RSPen pen;
+    RSPoint beginPoint(
+        static_cast<RSScalar>(rect.Left()), static_cast<RSScalar>(rect.Top()));
+    RSPoint endPoint(
+        static_cast<RSScalar>(rect.Left()), static_cast<RSScalar>(rect.Bottom()));
+    std::vector<RSPoint> points = { beginPoint, endPoint };
+#endif
     auto backDecoration = theme->GetPopupDecoration(false);
     Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
 
@@ -141,6 +175,7 @@ void RosenRenderPickerBase::PaintGradient(
     }
 
     Color middleColor = endColor.ChangeAlpha(0);
+#ifndef USE_ROSEN_DRAWING
     SkColor colors[] = { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(), endColor.GetValue() };
     const float stopPositions[] = { 0.0f, gradientHeight / rect.Height(),
         (rect.Height() - gradientHeight) / rect.Height(), 1.0f };
@@ -152,9 +187,25 @@ void RosenRenderPickerBase::PaintGradient(
         SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kClamp));
 #endif
     canvas->drawRect({rect.Left(), rect.Top(), rect.Right(), rect.Bottom()}, paint);
+#else // USE_ROSEN_DRAWING
+    std::vector<RSColorQuad> colors = { endColor.GetValue(), middleColor.GetValue(),
+        middleColor.GetValue(), endColor.GetValue() };
+    const std::vector<RSScalar> stopPositions = { 0.0,
+        static_cast<RSScalar>(gradientHeight / rect.Height()),
+        static_cast<RSScalar>((rect.Height() - gradientHeight) / rect.Height()), 1.0f };
+    pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+        points.at(0), points.at(1), colors, stopPositions, RSTileMode::CLAMP));
+    canvas->AttachPen(pen);
+    canvas->DrawRect(RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()));
+    canvas->DetachPen();
+#endif // USE_ROSEN_DRAWING
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderPickerBase::PaintFocusOptionBorder(SkCanvas* canvas)
+#else
+void RosenRenderPickerBase::PaintFocusOptionBorder(RSCanvas* canvas)
+#endif
 {
     auto pipeline = context_.Upgrade();
     if (!pipeline || !pipeline->GetIsTabKeyPressed()) {
@@ -173,6 +224,7 @@ void RosenRenderPickerBase::PaintFocusOptionBorder(SkCanvas* canvas)
         double focusBorderWidth = focusBoxSize_.Width() + focusBorderThickness;
         double focusBorderHeight = focusBoxSize_.Height() + focusBorderThickness;
         double focusRadius = NormalizeToPx(FOCUS_RADIUS);
+#ifndef USE_ROSEN_DRAWING
         SkPaint paint;
         paint.setColor(FOCUS_BORDER_COLOR);
         paint.setStyle(SkPaint::Style::kStroke_Style);
@@ -182,6 +234,18 @@ void RosenRenderPickerBase::PaintFocusOptionBorder(SkCanvas* canvas)
         rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
         rRect.offset(focusOffsetX, focusOffsetY);
         canvas->drawRRect(rRect, paint);
+#else
+        RSPen pen;
+        pen.SetColor(FOCUS_BORDER_COLOR);
+        pen.SetWidth(focusBorderThickness);
+        pen.SetAntiAlias(true);
+        RSRoundRect rRect(
+            RSRect(0, 0, focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+        rRect.Offset(focusOffsetX, focusOffsetY);
+        canvas->AttachPen(pen);
+        canvas->DrawRoundRect(rRect);
+        canvas->DetachPen();
+#endif
         break;
     }
 }

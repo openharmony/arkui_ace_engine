@@ -48,10 +48,7 @@ public:
     void Create(const std::function<void(int64_t)>& onCreate);
     void CreatePlayer(const std::function<void(int64_t)>& onCreate);
 
-    void SetSource(const std::string& src)
-    {
-        src_ = src;
-    }
+    void SetSource(const std::string& src);
 
     void SetSurfaceId(int64_t id);
 
@@ -105,12 +102,15 @@ public:
     void Pause();
     void Stop();
     void SeekTo(uint32_t pos);
+    void SeekTo(uint32_t pos, uint32_t mode);
     void SetVolume(float volume);
     void EnterFullScreen();
     void EnableLooping(bool loop);
     void SetSpeed(float speed);
     void SetDirection(std::string& direction);
     void SetLandscape();
+    void SetFullScreenChange(bool isFullScreen);
+    void Release(const std::function<void(bool)>& onRelease = nullptr) override;
 
 private:
     void OnAddPreparedListener(PreparedListener&& listener);
@@ -121,6 +121,7 @@ private:
     void OnStarted();
     void OnPaused();
     void OnTimeGetted(const std::string& result);
+    void OnStop();
 
     void InitPlay();
     void OnPrepared(const std::string& param);
@@ -142,6 +143,7 @@ private:
     bool isAutoPlay_ = false;
     bool isPrepared_ = false;
     bool isNeedFreshForce_ = false;
+    bool isInit_ = false;
     Method getCurrentPosMethod_;
     Method playMethod_;
     Method pauseMethod_;

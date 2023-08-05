@@ -235,6 +235,25 @@ RefPtr<Frontend> Frontend::Create()
     return AceType::MakeRefPtr<JsFrontend>();
 }
 
+bool Frontend::MaybeRelease()
+{
+    CHECK_RUN_ON(JS);
+    CHECK_NULL_RETURN(taskExecutor_, (Destroy(), true));
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
+        LOGI("Destroy Frontend on JS thread.");
+        Destroy();
+        return true;
+    } else {
+        LOGI("Post Destroy Frontend Task to JS thread.");
+        return !taskExecutor_->PostTask(
+            [this]() {
+                Destroy();
+                delete this;
+            },
+            TaskExecutor::TaskType::JS);
+    }
+}
+
 JsFrontend::~JsFrontend() noexcept
 {
     LOG_DESTROY();
@@ -255,6 +274,7 @@ bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskE
 {
     LOGI("JsFrontend initialize begin.");
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::JS);
     InitializeFrontendDelegate(taskExecutor);
     auto weakEngine = AceType::WeakClaim(AceType::RawPtr(jsEngine_));
@@ -715,6 +735,20 @@ void JsFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
     if (delegate_) {
         delegate_->OnSurfaceChanged();
+    }
+}
+
+void JsFrontend::OnLayoutCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnLayoutCompleted(componentId);
+    }
+}
+
+void JsFrontend::OnDrawCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnDrawCompleted(componentId);
     }
 }
 

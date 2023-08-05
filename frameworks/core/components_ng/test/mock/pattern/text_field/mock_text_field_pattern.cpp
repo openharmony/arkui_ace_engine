@@ -114,6 +114,8 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     return true;
 }
+void TextFieldPattern::OnScrollEndCallback() {}
+
 void TextFieldPattern::UpdateScrollBarOffset() {}
 
 void TextFieldPattern::HandleBlurEvent() {}
@@ -140,5 +142,18 @@ bool TextFieldPattern::IsTextArea() const
     return {};
 }
 void TextFieldPattern::CreateHandles() {}
+void TextFieldPattern::StopEditing() {}
+void TextFieldPattern::TextIsEmptyRect(RectF& rect) {}
+void TextFieldPattern::TextAreaInputRectUpdate(RectF& rect) {}
+void TextFieldPattern::UpdateRectByAlignment(RectF& rect) {}
 
+bool TextFieldPattern::RequestCustomKeyboard()
+{
+    return true;
+}
+bool TextFieldPattern::CloseCustomKeyboard()
+{
+    return true;
+}
+void TextFieldPattern::DumpInfo() {}
 } // namespace OHOS::Ace::NG

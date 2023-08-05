@@ -15,8 +15,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_ITEM_MENU_ITEM_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_ITEM_MENU_ITEM_LAYOUT_ALGORITHM_H
 
+#include "base/memory/referenced.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuItemLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -30,6 +31,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
     float horInterval_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);

@@ -98,7 +98,7 @@ void ReplaceSignNumber(std::string& formula)
 
 void ReplaceSignNumberWithUnit(std::string& formula)
 {
-    std::regex pattern("(\\-|\\+)\\d+(\\.\\d+)?(px|vp|%|vw|vh|fp|lpx)");
+    std::regex pattern("(\\-|\\+)\\d+(\\.\\d+)?(px|vp|%|fp|lpx)");
     std::smatch result;
     std::string matchStr;
     std::string catStr;

@@ -27,6 +27,13 @@ ohos_unittest("MediaQueryTest") {
 
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
+
+  cflags = []
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 config("config_media_query_test") {

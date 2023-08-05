@@ -57,17 +57,23 @@ public:
     std::list<RefPtr<SpanItem>>&& GetSpanItemChildren();
 
     float GetBaselineOffset() const;
+    
+    size_t GetLineCount() const;
 
     std::optional<TextStyle> GetTextStyle() const;
     void ApplyIndents(const TextStyle& textStyle, double width);
 
 private:
+    void FontRegisterCallback(RefPtr<FrameNode> frameNode, const TextStyle& textStyle);
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper);
     bool DidExceedMaxLines(const SizeF& maxSize);
+    bool AddPropertiesAndAnimations(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
+        LayoutWrapper* layoutWrapper);
     static TextDirection GetTextDirection(const std::string& content);
     float GetTextWidth() const;
     SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const;
@@ -89,6 +95,17 @@ private:
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
     void UpdateParagraph(LayoutWrapper* layoutWrapper);
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) const;
+    bool CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool IncludeImageSpan(LayoutWrapper* layoutWrapper);
+    void SetImageSpanTextStyle(const TextStyle& textStyle);
+    void GetSpanAndImageSpanList(std::list<RefPtr<SpanItem>>& spanList,
+        std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList);
+    void SplitSpanContentByLines(const TextStyle& textStyle, const std::list<RefPtr<SpanItem>>& spanList,
+        std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+    void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
+        std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList,
+        std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     RefPtr<Paragraph> paragraph_;

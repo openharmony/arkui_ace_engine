@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,11 @@
 
 #include "core/components/search/rosen_render_search.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkRRect.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -41,6 +45,7 @@ void RosenRenderSearch::Paint(RenderContext& context, const Offset& offset)
 
     // Paint divider.
     if (renderSearchBox_) {
+#ifndef USE_ROSEN_DRAWING
         SkCanvas* canvas = GetSkCanvas(context);
         SkPaint paint;
         if (canvas != nullptr) {
@@ -56,6 +61,25 @@ void RosenRenderSearch::Paint(RenderContext& context, const Offset& offset)
             paint.setColor(SEARCH_DIVIDER_COLOR.GetValue());
             canvas->drawRect(SkRect::MakeXYWH(rect.Left(), rect.Top(), rect.Width(), rect.Height()), paint);
             canvas->restore();
+#else
+        RSCanvas* canvas = GetDrawingCanvas(context);
+        RSPen pen;
+        if (canvas != nullptr) {
+            double dividerVerticalOffset = (GetLayoutSize().Height() - NormalizeToPx(ICON_HEIGHT)) / 2.0;
+            Offset dividerOffset = Offset(searchTextRect_.GetOffset().GetX(), dividerVerticalOffset);
+            if (needReverse_) {
+                dividerOffset = searchTextRect_.GetOffset() +
+                                Offset(searchTextRect_.Width() - SEARCH_DIVIDER_WIDTH, dividerVerticalOffset);
+            }
+            dividerOffset += offset;
+            Rect rect(dividerOffset, Size(SEARCH_DIVIDER_WIDTH, NormalizeToPx(ICON_HEIGHT)));
+            canvas->Save();
+            pen.SetColor(SEARCH_DIVIDER_COLOR.GetValue());
+            canvas->AttachPen(pen);
+            canvas->DrawRect(RSRect(rect.Left(), rect.Top(), rect.Width() + rect.Left(), rect.Height() + rect.Top()));
+            canvas->DetachPen();
+            canvas->Restore();
+#endif
         }
 
         // Paint search text.
@@ -118,6 +142,7 @@ void RosenRenderSearch::PaintOverlayForHoverAndPress(RenderContext& context, con
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkCanvas* canvas = GetSkCanvas(context);
     if (canvas == nullptr) {
         LOGE("canvas is null!");
@@ -127,6 +152,17 @@ void RosenRenderSearch::PaintOverlayForHoverAndPress(RenderContext& context, con
     SkPaint paint;
     // Background overlay 10% opacity black when hover.
     paint.setColor(overlayColor_.GetValue());
+#else
+    RSCanvas* canvas = GetDrawingCanvas(context);
+    if (canvas == nullptr) {
+        LOGE("canvas is null!");
+        return;
+    }
+    canvas->Save();
+    RSPen pen;
+    // Background overlay 10% opacity black when hover.
+    pen.SetColor(overlayColor_.GetValue());
+#endif
 
     Offset rectOffset;
     Size rectSize;
@@ -141,10 +177,18 @@ void RosenRenderSearch::PaintOverlayForHoverAndPress(RenderContext& context, con
 
     Border border;
     border.SetBorderRadius(Radius(rectSize.Height() / 2.0));
+#ifndef USE_ROSEN_DRAWING
     canvas->drawRRect(MakeRRect(rectOffset + offset, rectSize, border), paint);
     canvas->restore();
+#else
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(MakeRRect(rectOffset + offset, rectSize, border));
+    canvas->DetachPen();
+    canvas->Restore();
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkRRect RosenRenderSearch::MakeRRect(const Offset& offset, const Size& size, const Border& border)
 {
     SkRect rect = SkRect::MakeXYWH(offset.GetX(), offset.GetY(), size.Width(), size.Height());
@@ -161,8 +205,32 @@ SkRRect RosenRenderSearch::MakeRRect(const Offset& offset, const Size& size, con
     rrect.setRectRadii(rect, rectRadii);
     return rrect;
 }
+#else
+RSRoundRect RosenRenderSearch::MakeRRect(const Offset& offset, const Size& size, const Border& border)
+{
+    RSRect rect(
+        offset.GetX(), offset.GetY(), offset.GetX() + size.Width(), offset.GetY() + size.Height());
 
+    std::vector<RSPoint> rectRadii(4);
+    rectRadii.at(RSRoundRect::CornerPos::TOP_LEFT_POS) = RSPoint(
+        NormalizeToPx(border.TopLeftRadius().GetX()), NormalizeToPx(border.TopLeftRadius().GetY()));
+    rectRadii.at(RSRoundRect::CornerPos::TOP_RIGHT_POS) = RSPoint(
+        NormalizeToPx(border.TopRightRadius().GetX()), NormalizeToPx(border.TopRightRadius().GetY()));
+    rectRadii.at(RSRoundRect::CornerPos::BOTTOM_RIGHT_POS) = RSPoint(
+        NormalizeToPx(border.BottomRightRadius().GetX()), NormalizeToPx(border.BottomRightRadius().GetY()));
+    rectRadii.at(RSRoundRect::CornerPos::BOTTOM_LEFT_POS) = RSPoint(
+        NormalizeToPx(border.BottomLeftRadius().GetX()), NormalizeToPx(border.BottomLeftRadius().GetY()));
+
+    RSRoundRect rrect(rect, rectRadii);
+    return rrect;
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 SkCanvas* RosenRenderSearch::GetSkCanvas(RenderContext& context)
+#else
+RSCanvas* RosenRenderSearch::GetDrawingCanvas(RenderContext& context)
+#endif
 {
     auto renderContext = AceType::DynamicCast<RosenRenderContext>(&context);
     if (!renderContext) {

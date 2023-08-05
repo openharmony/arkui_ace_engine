@@ -116,13 +116,20 @@ public:
         return pluginNode_;
     }
 
+    void FlushReload() const
+    {
+        auto pattern = pluginPattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FlushReload();
+    }
+
     void SetDeclarativeOnUpdateWithValueParamsCallback(onPluginUpdateWithValueParams&& callback)
     {
         if (frontend_) {
             frontend_->SetDeclarativeOnUpdateWithValueParamsCallback(std::move(callback));
         }
     }
-    
+
     void SetPluginBundleName(const std::string& pluginBundleName)
     {
         if (frontend_) {

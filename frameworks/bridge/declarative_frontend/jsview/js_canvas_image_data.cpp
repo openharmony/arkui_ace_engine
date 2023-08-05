@@ -52,9 +52,9 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
             return;
         }
 
-        for (uint32_t i = 0; i < height; ++i) {
-            for (uint32_t j = 0; j < width; ++j) {
-                uint32_t flag = j + width * i;
+        for (int32_t i = 0; i < height; ++i) {
+            for (int32_t j = 0; j < width; ++j) {
+                int32_t flag = j + width * i;
                 if (array.size() > static_cast<uint32_t>(4 * flag + 3)) {
                     colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(array[4 * flag])));
                     colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(array[4 * flag + 1])));

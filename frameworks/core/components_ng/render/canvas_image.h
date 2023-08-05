@@ -38,11 +38,11 @@ struct ImagePaintConfig {
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
-    bool needFlipCanvasHorizontally_ = false;
+    bool flipHorizontally_ = false;
     bool isSvg_ = false;
+    std::vector<ObscuredReasons> obscuredReasons_;
 };
 
-struct RenderTaskHolder;
 // CanvasImage is interface for drawing image.
 class CanvasImage : public virtual AceType {
     DECLARE_ACE_TYPE(CanvasImage, AceType)
@@ -55,12 +55,9 @@ public:
 
     static RefPtr<CanvasImage> Create(void* rawImage);
     static RefPtr<CanvasImage> Create();
-    // TODO: use [PixelMap] as data source when rs provides interface like
-    // DrawBitmapRect(Media::PixelMap* pixelMap, const Rect& dstRect, const Rect& srcRect, ...)
-    // now we make [SkImage] from [PixelMap] and use [drawImageRect] to draw image
     static RefPtr<CanvasImage> Create(const RefPtr<PixelMap>& pixelMap);
 
-    virtual RefPtr<PixelMap> GetPixelMap()
+    virtual RefPtr<PixelMap> GetPixelMap() const
     {
         return nullptr;
     }
@@ -73,15 +70,24 @@ public:
         return Claim(this);
     }
 
+    // cache this CanvasImage
+    virtual void Cache(const std::string& key) {}
+
     void SetPaintConfig(const ImagePaintConfig& config)
     {
         paintConfig_ = std::make_unique<ImagePaintConfig>(config);
+    }
+
+    void SetIsDrawAnimate(bool isDrawAnimate)
+    {
+        isDrawAnimate_ = isDrawAnimate;
     }
 
     inline ImagePaintConfig& GetPaintConfig()
     {
         if (!paintConfig_) {
             LOGW("image paint config is null");
+            paintConfig_ = std::make_unique<ImagePaintConfig>();
         }
         return *paintConfig_;
     }
@@ -95,6 +101,9 @@ public:
     virtual void ControlAnimation(bool play) {}
 
     virtual void SetRawCompressData(void* dataPtr, int32_t w, int32_t h) {}
+
+protected:
+    bool isDrawAnimate_ = false;
 
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;

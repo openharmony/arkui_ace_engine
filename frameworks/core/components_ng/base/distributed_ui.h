@@ -26,6 +26,12 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/event/touch_event.h"
 
+#define CHECK_NULL_BREAK(ptr)                                       \
+    if (!(ptr)) {                                                   \
+        LOGW(#ptr " is null, break on line %{public}d", __LINE__); \
+        break;                                                      \
+    }
+
 namespace OHOS::Ace::NG {
 class DistributedUI {
 public:
@@ -117,6 +123,7 @@ private:
 
     std::unordered_map<int32_t, int32_t> nodeIdMapping_;
     std::unordered_map<int32_t, std::size_t> nodeHashs_;
+    std::list<RefPtr<NG::UINode>> sinkPageChildren_;
 };
 } // namespace OHOS::Ace::NG
 

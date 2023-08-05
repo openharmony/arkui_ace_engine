@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,19 +48,19 @@ const testViewAppStorage = tsuite("@StorageLink - AppStorge", () => {
 
   /* @StorageLink(moveDistance) storeProp:number=  0;  */
   let __storeProp: SubscribedAbstractProperty<number> =
-    AppStorage.SetAndLink<number>('storeProp', /* default value */  7,  /* subscriber */ storeView, /* var name in View */ "viewVar");
+    AppStorage.setAndLink<number>('storeProp', /* default value */  7,  /* subscriber */ storeView, /* var name in View */ "viewVar");
 
 
   tcase("read back", () => {
-    test("readback from AppStorage", AppStorage.Get("storeProp") == 7);
+    test("readback from AppStorage", AppStorage.get("storeProp") == 7);
     test("readback from view variable", __storeProp.get() == 7);
   });
 
   tcase("modify via AppStore", () => {
     let spy = spyOn(storeView, "propertyHasChanged");
-    AppStorage.Set("storeProp", 47);
+    AppStorage.set("storeProp", 47);
 
-    test("readback from AppStorage", AppStorage.Get("storeProp") == 47);
+    test("readback from AppStorage", AppStorage.get("storeProp") == 47);
     test("readback from view variable", __storeProp.get() == 47);
     test("View.propertyHasChanged has been called", spy.called && spy.args[0] == "viewVar");
   });
@@ -68,7 +68,7 @@ const testViewAppStorage = tsuite("@StorageLink - AppStorge", () => {
   tcase("modify via @StorageLink", () => {
     let spy2 = spyOn(storeView, "propertyHasChanged");
     __storeProp.set(101);
-    test("readback from AppStorage", AppStorage.Get("storeProp") == 101);
+    test("readback from AppStorage", AppStorage.get("storeProp") == 101);
     test("readback from view variable", __storeProp.get() == 101);
     test("View.propertyHasChanged has been called", spy2.called && spy2.args[0] == "viewVar");
   });

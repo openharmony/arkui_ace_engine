@@ -35,6 +35,10 @@ void EventManager::TouchTest(
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
 {}
 
+void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
+    const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
+{}
+
 void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList) {}
 
 void EventManager::TouchTest(

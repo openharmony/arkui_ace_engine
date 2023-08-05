@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -232,11 +232,18 @@ void RosenRenderListItem::PaintItemDivider(RenderContext& context)
     double endPointX = isVertical ? position.GetX() + std::min(width, startOrigin + length) : startPointX;
     double endPointY = isVertical ? startPointY : position.GetY() + std::min(height, startOrigin + length);
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setStrokeWidth(dividerWidth);
     paint.setColor(dividerColor_.GetValue());
+#else
+    RSPen pen;
+    pen.SetWidth(dividerWidth);
+    pen.SetColor(dividerColor_.GetValue());
+#endif
 
     auto canvas = static_cast<RosenRenderContext&>(context).GetCanvas();
+#ifndef USE_ROSEN_DRAWING
     if (isVertical) {
         canvas->drawLine(startPointX, startPointY + dividerWidth / 2.0,
             endPointX, endPointY + dividerWidth / 2.0, paint);
@@ -244,6 +251,17 @@ void RosenRenderListItem::PaintItemDivider(RenderContext& context)
         canvas->drawLine(startPointX + dividerWidth / 2.0, startPointY,
             endPointX + dividerWidth / 2.0, endPointY, paint);
     }
+#else
+    canvas->AttachPen(pen);
+    if (isVertical) {
+        canvas->DrawLine(RSPoint(startPointX, startPointY + dividerWidth / 2.0),
+            RSPoint(endPointX, endPointY + dividerWidth / 2.0));
+    } else {
+        canvas->DrawLine(RSPoint(startPointX + dividerWidth / 2.0, startPointY),
+            RSPoint(endPointX + dividerWidth / 2.0, endPointY));
+    }
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderListItem::PaintStickyEffect(RenderContext& context, const Offset& offset)
@@ -254,17 +272,30 @@ void RosenRenderListItem::PaintStickyEffect(RenderContext& context, const Offset
         LOGE("Canvas is null, save failed.");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->save();
     Offset center;
     SkPaint paint;
+#else
+    canvas->Save();
+    Offset center;
+    RSPen pen;
+#endif
     double width = GetLayoutSize().Width() + offset.GetX();
     double height = GetLayoutSize().Height() + offset.GetY();
     if (offset.GetY() <= 0.0) {
         center.SetX((GetLayoutSize().Width() + offset.GetX()) / CENTER_POINT1);
         center.SetY(GetLayoutSize().Height() + offset.GetY() - GetStickyRadius());
+#ifndef USE_ROSEN_DRAWING
         paint.setColor(Color::FromRGBO(GREY_END1, GREY_END1, GREY_END1, OPACITY_END1).GetValue());
         canvas->clipRect({ 0, 0, width, height }, SkClipOp::kIntersect);
         canvas->drawCircle(center.GetX(), center.GetY(), GetStickyRadius(), paint);
+#else
+        pen.SetColor(Color::FromRGBO(GREY_END1, GREY_END1, GREY_END1, OPACITY_END1).GetValue());
+        canvas->ClipRect(RSRect(0, 0, width, height), RSClipOp::INTERSECT);
+        canvas->AttachPen(pen);
+        canvas->DrawCircle(RSPoint(center.GetX(), center.GetY()), GetStickyRadius());
+#endif
     } else {
         double radius =
             GetStickyRadius() + (RADIUS_START - GetStickyRadius()) * (offset.GetY() / GetLayoutSize().Height());
@@ -272,11 +303,24 @@ void RosenRenderListItem::PaintStickyEffect(RenderContext& context, const Offset
         double opacity = OPACITY_END1 + (OPACITY_START1 - OPACITY_END1) * (offset.GetY() / GetLayoutSize().Height());
         center.SetX((GetLayoutSize().Width() + offset.GetX()) / CENTER_POINT1);
         center.SetY(GetLayoutSize().Height() + offset.GetY() - radius);
+#ifndef USE_ROSEN_DRAWING
         paint.setColor(Color::FromRGBO(grey, grey, grey, opacity).GetValue());
         canvas->clipRect({ offset.GetX(), offset.GetY(), width, height }, SkClipOp::kIntersect);
         canvas->drawCircle(center.GetX(), center.GetY(), radius, paint);
+#else
+        pen.SetColor(Color::FromRGBO(grey, grey, grey, opacity).GetValue());
+        canvas->ClipRect(
+            RSRect(offset.GetX(), offset.GetY(), width, height), RSClipOp::INTERSECT);
+        canvas->AttachPen(pen);
+        canvas->DrawCircle(RSPoint(center.GetX(), center.GetY()), radius);
+#endif
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->restore();
+#else
+    canvas->DetachPen();
+    canvas->Restore();
+#endif
 }
 
 void RosenRenderListItem::PaintStickyEffectNoTransparent(RenderContext& context, const Offset& offset)

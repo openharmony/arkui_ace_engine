@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
@@ -83,11 +84,12 @@ public:
         const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
         auto geometryNode = dirty->GetGeometryNode();
-        offset_ = geometryNode->GetContentOffset();
-        size_ = geometryNode->GetContentSize();
-        if (isFirstAddhotZoneRect_) {
+        auto offset = geometryNode->GetContentOffset();
+        auto size = geometryNode->GetContentSize();
+        if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+            offset_ = offset;
+            size_ = size;
             AddHotZoneRect();
-            isFirstAddhotZoneRect_ = false;
         }
         return true;
     }
@@ -112,6 +114,11 @@ public:
         return preGroup_;
     }
 
+    int32_t GetPrePageId() const
+    {
+        return prePageId_;
+    }
+
     void SetPreName(const std::string& name)
     {
         preName_ = name;
@@ -120,6 +127,11 @@ public:
     void SetPreGroup(const std::string& group)
     {
         preGroup_ = group;
+    }
+
+    void SetPrePageId(int32_t pageId)
+    {
+        prePageId_ = pageId;
     }
 
     void SetLastSelect(bool select)
@@ -146,6 +158,10 @@ public:
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
 
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+    void OnColorConfigurationUpdate() override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -157,20 +173,23 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
+    void CheckPageNode();
     void UpdateState();
     void UpdateUnSelect();
     void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool isSelected);
+    void UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* frameNode,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap);
     void CheckBoxGroupIsTrue();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
+    int32_t prePageId_ = 0;
     bool lastSelect_ = false;
 
     RefPtr<ClickEvent> clickListener_;
@@ -186,7 +205,6 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;

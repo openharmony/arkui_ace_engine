@@ -18,24 +18,22 @@
 
 #include <functional>
 
-#include "core/components_ng/pattern/scroll/scroll_controller.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ListPositionController : public ScrollController {
-    DECLARE_ACE_TYPE(ListPositionController, ScrollController);
+class ACE_EXPORT ListPositionController : public ScrollableController {
+    DECLARE_ACE_TYPE(ListPositionController, ScrollableController);
 
 public:
     ListPositionController() = default;
     ~ListPositionController() override = default;
 
-    Axis GetScrollDirection() const override;
-    Offset GetCurrentOffset() const override;
     void ScrollBy(double pixelX, double pixelY, bool smooth) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollPage(bool reverse, bool smooth) override;
-    void JumpTo(int32_t index, int32_t source) override;
-    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
+    void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
+    bool IsAtEnd() const override;
 };
 
 } // namespace OHOS::Ace::NG

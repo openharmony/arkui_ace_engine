@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "adapter/preview/entrance/ace_run_args.h"
+#include "adapter/preview/entrance/ace_view_preview.h"
 #include "adapter/preview/osal/fetch_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
@@ -31,11 +32,13 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/platform_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
-#include "adapter/preview/external/ability/context.h"
-#include "adapter/preview/external/ability/fa/fa_context.h"
-#include "adapter/preview/external/ability/stage/stage_context.h"
 
-#include "adapter/preview/entrance/ace_view_preview.h"
+
+#include <refbase.h>
+
+namespace OHOS::Rosen {
+    class Window;
+}
 
 namespace OHOS::Ace::Platform {
 
@@ -45,6 +48,7 @@ namespace {
 constexpr int32_t ACE_INSTANCE_ID = 0;
 } // namespace
 
+using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<PipelineContext>& context)>;
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 
 // AceContainer is the instance have its own pipeline and thread models, it can contains multiple pages.
@@ -53,7 +57,7 @@ class AceContainer : public Container, public JsMessageDispatcher {
 
 public:
     static void CreateContainer(
-        int32_t instanceId, FrontendType type, const AceRunArgs& runArgs, bool useCurrentEventRunner = false);
+        int32_t instanceId, FrontendType type, bool useNewPipeline, bool useCurrentEventRunner = false);
     static void DestroyContainer(int32_t instanceId);
 
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
@@ -63,17 +67,16 @@ public:
 #ifndef ENABLE_ROSEN_BACKEND
     static void SetView(AceViewPreview* view, double density, int32_t width, int32_t height);
 #else
-    static void SetView(
-        AceViewPreview* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
+    static void SetView(AceViewPreview* view, sptr<Rosen::Window> rsWindow, double density, int32_t width,
+        int32_t height, UIEnvCallback callback);
 #endif
 
-    static void InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);
     static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
     static void NativeOnConfigurationUpdated(int32_t instanceId);
 
-    AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context, bool useCurrentEventRunner = false);
+    AceContainer(int32_t instanceId, FrontendType type, bool useNewPipeline, bool useCurrentEventRunner = false);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -149,6 +152,11 @@ public:
 
     void SetWindowId(uint32_t windowId) override {}
 
+    bool WindowIsShow() const override
+    {
+        return true;
+    }
+
     AceViewPreview* GetAceView() const
     {
         return aceView_;
@@ -212,7 +220,8 @@ public:
         pageProfile_ = pageProfile;
     }
 
-    void InitializeStageAppConfig(const std::string& assetPath, bool formsEnabled);
+    void InitializeStageAppConfig(const std::string& assetPath, const std::string& bundleName,
+        const std::string& moduleName, const std::string& compileMode, uint32_t minPlatformVersion);
 
     void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) override
     {
@@ -251,6 +260,30 @@ public:
         return it->second;
     }
 
+    static std::string GetContentInfo(int32_t instanceId);
+    void SetSharedRuntime(void* runtime) override
+    {
+        sharedRuntime_ = runtime;
+    }
+    void SetInstallationFree(bool installationFree)
+    {
+        installationFree_ = installationFree;
+    }
+
+    void SetLabelId(int32_t labelId)
+    {
+        labelId_ = labelId;
+    }
+    static void SetComponentModeFlag(bool isComponentMode)
+    {
+        isComponentMode_ = isComponentMode;
+    }
+
+    void SetContainerSdkPath(const std::string& containerSdkPath)
+    {
+        containerSdkPath_ = containerSdkPath;
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -259,8 +292,8 @@ private:
     void AttachView(
         std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height);
 #else
-    void AttachView(std::unique_ptr<Window> window,
-        AceViewPreview* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
+    void AttachView(std::unique_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height,
+        UIEnvCallback callback);
 #endif
 
     AceViewPreview* aceView_ = nullptr;
@@ -281,11 +314,13 @@ private:
     std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
-    RefPtr<Context> context_;
+    void* sharedRuntime_ = nullptr;
 
-    //app bar to use
+    // app bar to use
     bool installationFree_ = false;
     int32_t labelId_;
+    static bool isComponentMode_;
+    std::string containerSdkPath_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

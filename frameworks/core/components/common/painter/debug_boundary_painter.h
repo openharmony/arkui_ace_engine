@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,10 @@
 
 #include <cmath>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
+#endif
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -31,9 +33,16 @@ namespace OHOS::Ace {
 class DebugBoundaryPainter : public virtual AceType {
     DECLARE_ACE_TYPE(DebugBoundaryPainter, AceType);
 public:
+#ifndef USE_ROSEN_DRAWING
     static void PaintDebugBoundary(SkCanvas* canvas, const Offset& offset, const Size& layoutSize);
     static void PaintDebugMargin(SkCanvas* canvas, const Offset& offset, const Size& layoutSize, const EdgePx& margin);
     static void PaintDebugCorner(SkCanvas* canvas, const Offset& offset, const Size& layoutSize);
+#else
+    static void PaintDebugBoundary(RSCanvas* canvas, const Offset& offset, const Size& layoutSize);
+    static void PaintDebugMargin(RSCanvas* canvas, const Offset& offset,
+        const Size& layoutSize, const EdgePx& margin);
+    static void PaintDebugCorner(RSCanvas* canvas, const Offset& offset, const Size& layoutSize);
+#endif
 };
 }
 

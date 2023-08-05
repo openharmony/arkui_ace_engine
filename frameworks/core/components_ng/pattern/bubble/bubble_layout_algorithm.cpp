@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -25,24 +26,38 @@
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
 constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 6.0_vp;
 constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 
+// get main window's pipeline
+RefPtr<PipelineContext> GetMainPipelineContext()
+{
+    auto containerId = Container::CurrentId();
+    RefPtr<PipelineContext> context;
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        context = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+    } else {
+        context = PipelineContext::GetCurrentContext();
+    }
+    return context;
+}
 } // namespace
 
 void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -118,41 +133,66 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(bubbleProp);
-    InitTargetSizeAndPosition(bubbleProp);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
     }
-    selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // bubble's size
     auto child = children.front();
-    childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's child's size
-    childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's child's offset
-    bool useCustom = bubbleProp->GetUseCustom().value_or(false);
+    child->Layout();
+}
+
+/*
+    Because of bubble's position depends on targetNode,
+    The position of the bubble needs to be calculated after the targetNode layout is complete.
+*/
+OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, OffsetT<Dimension> {});
+    auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(bubbleProp, OffsetT<Dimension> {});
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, OffsetT<Dimension> {});
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_RETURN(bubblePattern, OffsetT<Dimension> {});
+    auto ShowInSubWindow = bubbleProp->GetShowInSubWindow().value_or(false);
+    if (!bubblePattern->IsExiting()) {
+        InitTargetSizeAndPosition(ShowInSubWindow);
+        // subtract the global offset of the overlay node,
+        // because the final node position is set relative to the overlay node.
+        auto overlayGlobalOffset = frameNode->GetPaintRectOffset();
+        targetOffset_ -= overlayGlobalOffset;
+    }
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    auto childWrapper = children.front();
+    if (children.empty()) {
+        return OffsetT<Dimension> {};
+    }
+    selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize();       // window's size
+    childSize_ = childWrapper->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
+    childOffset_ = GetChildPosition(childSize_, bubbleProp);            // bubble's offset
     UpdateChildPosition(bubbleProp);
     UpdateTouchRegion();
-    child->GetGeometryNode()->SetMarginFrameOffset(childOffset_);
-    child->Layout();
-    auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childLayoutWrapper);
-    const auto& columnChild = childLayoutWrapper->GetAllChildrenWithBuild();
-    if (columnChild.size() > 1 && !useCustom) {
-        auto buttonRow = columnChild.back();
-        buttonRowSize_ = buttonRow->GetGeometryNode()->GetMarginFrameSize();
-        buttonRowOffset_ = buttonRow->GetGeometryNode()->GetMarginFrameOffset() + childOffset_;
-    }
-    if (bubbleProp->GetShowInSubWindowValue(false)) {
+
+    // If bubble displayed in subwindow, set the hotarea of subwindow.
+    if (bubbleProp->GetShowInSubWindowValue(false) && (!bubblePattern->IsSkipHotArea())) {
         std::vector<Rect> rects;
         if (!bubbleProp->GetBlockEventValue(true)) {
             auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
             rects.emplace_back(rect);
         } else {
-            auto rect = Rect(0.0f, 0.0f, selfSize_.Width(), selfSize_.Height());
+            auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+            auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
+            rects.emplace_back(parentWindowRect);
             rects.emplace_back(rect);
         }
-        SubwindowManager::GetInstance()->SetHotAreas(rects);
+        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId(), bubblePattern->GetContainerId());
     }
+    bubblePattern->SetSkipHotArea(false);
+
+    Dimension childOffsetX(childOffset_.GetX());
+    Dimension childOffsetY(childOffset_.GetY());
+    OffsetT<Dimension> childRenderOffset(childOffsetX, childOffsetY);
+    return childRenderOffset;
 }
 
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp)
@@ -168,67 +208,94 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
     arrowHeight_ = static_cast<float>(popupTheme->GetArrowHeight().ConvertToPx());
+    positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
 }
 
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
-    float targetSpace = targetSpace_.ConvertToPx();
-    OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
-        targetOffset_.GetY() + targetSize_.Height() + targetSpace + arrowHeight_);
-    OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
-        targetOffset_.GetY() - childSize.Height() - targetSpace - arrowHeight_);
+    OffsetF bottomPosition;
+    OffsetF topPosition;
     OffsetF topArrowPosition;
     OffsetF bottomArrowPosition;
+    OffsetF fitPosition;
+    OffsetF originOffset;
+    OffsetF originArrowOffset;
+    OffsetF childPosition;
+    
     InitArrowTopAndBottomPosition(topArrowPosition, bottomArrowPosition, topPosition, bottomPosition, childSize);
-
-    OffsetF originOffset =
-        GetPositionWithPlacement(childSize, topPosition, bottomPosition, topArrowPosition, bottomArrowPosition);
-    OffsetF childPosition = originOffset;
+    GetPositionWithPlacement(originOffset, originArrowOffset, childSize, placement_);
+    originOffset = originOffset + positionOffset_;
+    originArrowOffset += positionOffset_;
     arrowPlacement_ = placement_;
 
     // Fit popup to screen range.
-    ErrorPositionType errorType = GetErrorPositionType(childPosition, childSize);
+    ErrorPositionType errorType = GetErrorPositionType(originOffset, childSize);
     if (errorType == ErrorPositionType::NORMAL) {
-        return childPosition;
+        arrowPosition_ = originArrowOffset;
+        return originOffset;
     }
-    // If childPosition is error, adjust bubble to bottom.
-    if (placement_ != Placement::TOP || errorType == ErrorPositionType::TOP_LEFT_ERROR) {
-        childPosition = FitToScreen(bottomPosition, childSize);
+
+    if (placement_ == Placement::TOP || placement_ == Placement::TOP_LEFT || placement_ == Placement::TOP_RIGHT) {
+        fitPosition = topPosition;
+        arrowPosition_ = topArrowPosition;
+        arrowPlacement_ = Placement::TOP;
+    } else {
+        fitPosition = bottomPosition;
         arrowPosition_ = bottomArrowPosition;
         arrowPlacement_ = Placement::BOTTOM;
-        if (GetErrorPositionType(childPosition, childSize) == ErrorPositionType::NORMAL) {
-            return childPosition;
-        }
     }
-    // If childPosition is error, adjust bubble to top.
-    childPosition = FitToScreen(topPosition, childSize);
-    arrowPosition_ = topArrowPosition;
-    arrowPlacement_ = Placement::TOP;
+
+    childPosition = FitToScreen(fitPosition, childSize);
+
     if (GetErrorPositionType(childPosition, childSize) == ErrorPositionType::NORMAL) {
         return childPosition;
     }
+
+    // Fit popup to opposite position
+    fitPosition = fitPosition == topPosition ? bottomPosition : topPosition;
+    arrowPosition_ = arrowPosition_ == topArrowPosition ? bottomArrowPosition : topArrowPosition;
+    arrowPlacement_ = arrowPlacement_ == Placement::TOP ? Placement::BOTTOM : Placement::TOP;
+
+    childPosition = FitToScreen(fitPosition, childSize);
+
+    if (GetErrorPositionType(childPosition, childSize) == ErrorPositionType::NORMAL) {
+        return childPosition;
+    }
+
     // If childPosition is error, adjust bubble to origin position.
     arrowPlacement_ = placement_;
-    arrowPosition_ = arrowPlacement_ == Placement::TOP ? topArrowPosition : bottomArrowPosition;
+    arrowPosition_ = originArrowOffset;
+
     return originOffset;
 }
 
 void BubbleLayoutAlgorithm::InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition,
     OffsetF& topPosition, OffsetF& bottomPosition, const SizeF& childSize)
 {
-    topArrowPosition =
-        topPosition + OffsetF(std::max(padding_.Left().ConvertToPx(), border_.TopLeftRadius().GetX().ConvertToPx()) +
-                                  BEZIER_WIDTH_HALF.ConvertToPx(),
-                          childSize.Height() + arrowHeight_);
-    bottomArrowPosition = bottomPosition + OffsetF(std::max(padding_.Left().ConvertToPx(),
-                                                       border_.BottomLeftRadius().GetX().ConvertToPx()) +
-                                                       BEZIER_WIDTH_HALF.ConvertToPx(), -arrowHeight_);
+    auto arrowCenter = targetOffset_.GetX() + targetSize_.Width() / 2.0;
+    auto horizonSpacing = static_cast<float>(HORIZON_SPACING_WITH_SCREEN.ConvertToPx());
+    double arrowWidth = ARROW_WIDTH.ConvertToPx();
+    float radius = borderRadius_.ConvertToPx();
+    auto safePosition = horizonSpacing + radius + arrowWidth / 2.0;
+
+    GetPositionWithPlacement(topPosition, topArrowPosition, childSize, Placement::TOP);
+    GetPositionWithPlacement(bottomPosition, bottomArrowPosition, childSize, Placement::BOTTOM);
+
+    // move the arrow to safe position while arrow too close to window
+    // In order not to separate the bubble from the arrow
+    if (arrowCenter < safePosition) {
+        topArrowPosition = topArrowPosition + OffsetF(safePosition - arrowCenter, 0);
+        bottomArrowPosition = bottomArrowPosition + OffsetF(safePosition - arrowCenter, 0);
+    }
+    if (arrowCenter > selfSize_.Width() - safePosition) {
+        topArrowPosition = topArrowPosition - OffsetF(arrowCenter + safePosition - selfSize_.Width(), 0);
+        bottomArrowPosition = bottomArrowPosition - OffsetF(arrowCenter + safePosition - selfSize_.Width(), 0);
+    }
 }
 
-OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition,
-    const OffsetF& bottomPosition, const OffsetF& topArrowPosition, const OffsetF& bottomArrowPosition)
+void BubbleLayoutAlgorithm::GetPositionWithPlacement(
+    OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement)
 {
-    OffsetF childPosition;
     float bubbleSpacing = scaledBubbleSpacing_;
     float marginRight = 0.0f;
     float marginBottom = 0.0f;
@@ -237,75 +304,79 @@ OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacement(const SizeF& childSize, 
     float arrowHalfWidth = ARROW_WIDTH.ConvertToPx() / 2.0;
     float radius = borderRadius_.ConvertToPx();
     float targetSpace = targetSpace_.ConvertToPx();
-    switch (placement_) {
+    switch (placement) {
         case Placement::TOP:
-            childPosition = topPosition;
-            arrowPosition_ = topArrowPosition;
+            childPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
+                targetOffset_.GetY() - childSize.Height() - targetSpace - arrowHeight_);
+            arrowPosition = childPosition + OffsetF(std::max(padding_.Left().ConvertToPx(),
+                border_.TopLeftRadius().GetX().ConvertToPx()) + BEZIER_WIDTH_HALF.ConvertToPx(),
+                    childSize.Height() + arrowHeight_);
             break;
         case Placement::TOP_LEFT:
             childPosition = OffsetF(targetOffset_.GetX() - marginRight,
                 targetOffset_.GetY() - childSize.Height() - bubbleSpacing - marginBottom - targetSpace);
-            arrowPosition_ = childPosition + OffsetF(radius + arrowHalfWidth, childSize.Height() + bubbleSpacing);
+            arrowPosition = childPosition + OffsetF(radius + arrowHalfWidth, childSize.Height() + bubbleSpacing);
             break;
         case Placement::TOP_RIGHT:
             childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() - childSize.Width() + marginLeft,
                 targetOffset_.GetY() - childSize.Height() - targetSpace - bubbleSpacing - marginBottom);
-            arrowPosition_ = childPosition + OffsetF(radius + arrowHalfWidth, childSize.Height() + bubbleSpacing);
+            arrowPosition = childPosition + OffsetF(radius + arrowHalfWidth, childSize.Height() + bubbleSpacing);
             break;
         case Placement::BOTTOM:
-            childPosition = bottomPosition;
-            arrowPosition_ = bottomArrowPosition;
+            childPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
+                targetOffset_.GetY() + targetSize_.Height() + targetSpace + arrowHeight_);
+            arrowPosition = childPosition + OffsetF(std::max(padding_.Left().ConvertToPx(),
+                border_.BottomLeftRadius().GetX().ConvertToPx()) + BEZIER_WIDTH_HALF.ConvertToPx(), -arrowHeight_);
             break;
         case Placement::BOTTOM_LEFT:
             childPosition = OffsetF(targetOffset_.GetX() - marginRight,
                 targetOffset_.GetY() + targetSize_.Height() + targetSpace + bubbleSpacing + marginTop);
-            arrowPosition_ = childPosition + OffsetF(radius + arrowHalfWidth, -bubbleSpacing);
+            arrowPosition = childPosition + OffsetF(radius + arrowHalfWidth, -bubbleSpacing);
             break;
         case Placement::BOTTOM_RIGHT:
             childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() - childSize.Width() + marginLeft,
                 targetOffset_.GetY() + targetSize_.Height() + targetSpace + bubbleSpacing + marginTop);
-            arrowPosition_ = childPosition + OffsetF(radius + arrowHalfWidth, -bubbleSpacing);
+            arrowPosition = childPosition + OffsetF(radius + arrowHalfWidth, -bubbleSpacing);
             break;
         case Placement::LEFT:
             childPosition =
                 OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight,
                     targetOffset_.GetY() + targetSize_.Height() / 2.0 - childSize.Height() / 2.0);
-            arrowPosition_ = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
+            arrowPosition = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::LEFT_TOP:
             childPosition =
                 OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight,
                     targetOffset_.GetY() - marginBottom);
-            arrowPosition_ = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
+            arrowPosition = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::LEFT_BOTTOM:
             childPosition =
                 OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight,
                     targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
-            arrowPosition_ = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
+            arrowPosition = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::RIGHT:
             childPosition =
                 OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft,
                     targetOffset_.GetY() + targetSize_.Height() / 2.0 - childSize.Height() / 2.0);
-            arrowPosition_ = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
+            arrowPosition = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::RIGHT_TOP:
             childPosition =
                 OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft,
                     targetOffset_.GetY() - marginBottom);
-            arrowPosition_ = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
+            arrowPosition = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::RIGHT_BOTTOM:
             childPosition =
                 OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft,
                     targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
-            arrowPosition_ = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
+            arrowPosition = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
             break;
         default:
             break;
     }
-    return childPosition;
 }
 
 BubbleLayoutAlgorithm::ErrorPositionType BubbleLayoutAlgorithm::GetErrorPositionType(
@@ -433,39 +504,29 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
     touchRegion_ = RectF(topLeft, topLeft + bottomRight);
 }
 
-void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutProperty>& layoutProp)
+void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
+    if (!targetNode->IsOnMainTree() || !targetNode->IsVisible()) {
+        return;
+    }
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     targetSize_ = geometryNode->GetFrameSize();
-    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-                            pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     targetOffset_ = targetNode->GetPaintRectOffset();
     // Show in SubWindow
     if (showInSubWindow) {
-        auto overlayManager = pipelineContext->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        auto displayWindowOffset = layoutProp->GetDisplayWindowOffset().value_or(OffsetF());
+        auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
+            pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
         targetOffset_ += displayWindowOffset;
         auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
         if (currentSubwindow) {
             auto subwindowRect = currentSubwindow->GetRect();
             targetOffset_ -= subwindowRect.GetOffset();
         }
-        auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
-    } else if (isContainerModal) {
-        // popup not show in subwindow need minus container modal.
-        auto newOffsetX = targetOffset_.GetX() - static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) -
-                          static_cast<float>(CONTENT_PADDING.ConvertToPx());
-        auto newOffsetY = targetOffset_.GetY() - static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
-        targetOffset_.SetX(newOffsetX);
-        targetOffset_.SetY(newOffsetY);
     }
 }
-
 } // namespace OHOS::Ace::NG

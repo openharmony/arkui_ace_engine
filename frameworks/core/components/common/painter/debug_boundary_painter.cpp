@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,13 @@
 #include <cmath>
 #include <functional>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/components/common/properties/color.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline/pipeline_context.h"
@@ -36,6 +40,7 @@ constexpr uint32_t BOUNDARY_CORNER_COLOR = 0xFF007DFF;
 constexpr uint32_t BOUNDARY_MARGIN_COLOR = 0x3FFF00AA;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void DebugBoundaryPainter::PaintDebugBoundary(SkCanvas* canvas, const Offset& offset, const Size& layoutSize)
 {
     SkPaint skpaint;
@@ -46,7 +51,23 @@ void DebugBoundaryPainter::PaintDebugBoundary(SkCanvas* canvas, const Offset& of
     skpaint.setStrokeWidth(BOUNDARY_STROKE_WIDTH);
     canvas->drawRect(layoutRect, skpaint);
 }
+#else
+void DebugBoundaryPainter::PaintDebugBoundary(RSCanvas* canvas, const Offset& offset,
+    const Size& layoutSize)
+{
+    RSPen pen;
+    auto layoutRect = RSRect(offset.GetX(), offset.GetY(),
+        layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET + offset.GetX(),
+        layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET + offset.GetY());
+    pen.SetColor(BOUNDARY_COLOR);
+    pen.SetWidth(BOUNDARY_STROKE_WIDTH);
+    canvas->AttachPen(pen);
+    canvas->DrawRect(layoutRect);
+    canvas->DetachPen();
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 void DebugBoundaryPainter::PaintDebugMargin(SkCanvas* canvas, const Offset& offset,
     const Size& layoutSize, const EdgePx& margin)
 {
@@ -73,7 +94,38 @@ void DebugBoundaryPainter::PaintDebugMargin(SkCanvas* canvas, const Offset& offs
         margin.RightPx(), verticalRectHeight);
     canvas->drawRect(layoutRect, skpaint);
 }
+#else
+void DebugBoundaryPainter::PaintDebugMargin(RSCanvas* canvas, const Offset& offset,
+    const Size& layoutSize, const EdgePx& margin)
+{
+    RSBrush brush;
+    auto startPointX = offset.GetX();
+    auto startPointY = offset.GetY();
+    auto verticalRectHeight = layoutSize.Height() - margin.TopPx() - margin.BottomPx();
+    brush.SetColor(BOUNDARY_MARGIN_COLOR);
 
+    auto layoutRect = RSRect(startPointX, startPointY,
+        layoutSize.Width() + startPointX, margin.TopPx() + startPointY);
+    canvas->AttachBrush(brush);
+    canvas->DrawRect(layoutRect);
+
+    layoutRect = RSRect(startPointX, startPointY + layoutSize.Height() - margin.BottomPx(),
+        layoutSize.Width() + startPointX, startPointY + layoutSize.Height());
+    canvas->DrawRect(layoutRect);
+
+    layoutRect = RSRect(startPointX, startPointY + margin.TopPx(),
+        margin.LeftPx() + startPointX, verticalRectHeight + startPointY + margin.TopPx());
+    canvas->DrawRect(layoutRect);
+
+    layoutRect = RSRect(startPointX + layoutSize.Width() - margin.RightPx(),
+        startPointY + margin.TopPx(), startPointX + layoutSize.Width(),
+        verticalRectHeight + startPointY + margin.TopPx());
+    canvas->DrawRect(layoutRect);
+    canvas->DetachBrush();
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void DebugBoundaryPainter::PaintDebugCorner(SkCanvas* canvas, const Offset& offset, const Size& layoutSize)
 {
     SkPaint skpaint;
@@ -106,4 +158,48 @@ void DebugBoundaryPainter::PaintDebugCorner(SkCanvas* canvas, const Offset& offs
         startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET,
         startPointY + layoutSize.Height(), skpaint);
 }
+#else
+void DebugBoundaryPainter::PaintDebugCorner(RSCanvas* canvas, const Offset& offset,
+    const Size& layoutSize)
+{
+    RSPen pen;
+    auto startPointX = offset.GetX();
+    auto startPointY = offset.GetY();
+    pen.SetColor(BOUNDARY_CORNER_COLOR);
+    pen.SetWidth(BOUNDARY_STROKE_WIDTH);
+    canvas->AttachPen(pen);
+    canvas->DrawLine(RSPoint(startPointX, startPointY),
+        RSPoint(startPointX + BOUNDARY_CORNER_LENGTH, startPointY));
+    canvas->DrawLine(
+        RSPoint(startPointX, startPointY),
+        RSPoint(startPointX, startPointY + BOUNDARY_CORNER_LENGTH));
+    canvas->DrawLine(
+        RSPoint(startPointX + layoutSize.Width() - BOUNDARY_CORNER_LENGTH, startPointY),
+        RSPoint(startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET, startPointY));
+    canvas->DrawLine(
+        RSPoint(startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET, startPointY),
+        RSPoint(startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET,
+            startPointY + BOUNDARY_CORNER_LENGTH));
+    canvas->DrawLine(
+        RSPoint(startPointX, startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET),
+        RSPoint(startPointX + BOUNDARY_CORNER_LENGTH,
+            startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET));
+    canvas->DrawLine(
+        RSPoint(startPointX,
+            startPointY + layoutSize.Height() - BOUNDARY_CORNER_LENGTH - HALF_STROKE_WIDTH_OFFSET),
+        RSPoint(startPointX,
+            startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET));
+    canvas->DrawLine(
+        RSPoint(startPointX + layoutSize.Width() - BOUNDARY_CORNER_LENGTH - HALF_STROKE_WIDTH_OFFSET,
+            startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET),
+        RSPoint(startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET,
+            startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET));
+    canvas->DrawLine(
+        RSPoint(startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET,
+            startPointY + layoutSize.Height() - BOUNDARY_CORNER_LENGTH),
+        RSPoint(startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET,
+            startPointY + layoutSize.Height()));
+    canvas->DetachPen();
+}
+#endif
 }

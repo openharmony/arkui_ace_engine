@@ -54,18 +54,19 @@ build_component("text_overlay_for_web") {
   if (!ace_use_new_skia) {
     sources += [ "flutter_render_text_overlay.cpp" ]
   }
-
+  external_deps = []
   if (is_ohos_standard_system) {
     deps = [
-      "//foundation/graphic/graphic_2d:libsurface",
       "//third_party/EGL:libEGL",
       "//third_party/openGLES:libGLES",
     ]
+
+    external_deps += [ "graphic_2d:surface" ]
   }
 
   rosen_sources = [ "rosen_render_text_overlay.cpp" ]
 
   standard_web_configs = [ ":ohos_text_overlay_web_config" ]
   standard_web_deps = [ "webview:libnweb" ]
-  external_deps = [ "ability_runtime:app_manager" ]
+  external_deps += [ "ability_runtime:app_manager" ]
 }

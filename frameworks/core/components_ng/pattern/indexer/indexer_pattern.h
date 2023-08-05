@@ -117,6 +117,7 @@ private:
     void OnPopupTouchDown(const TouchEventInfo& info);
     void AddListItemClickListener(RefPtr<FrameNode>& listItemNode, int32_t index);
     void OnListItemClick(int32_t index);
+    void ClearClickStatus();
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
     RefPtr<FrameNode> CreatePopupNode();
     void UpdateBubbleView();
@@ -141,6 +142,7 @@ private:
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void SetAccessibilityAction();
+    void RemoveBubble();
     
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -150,6 +152,7 @@ private:
     bool isKeyEventRegisted_ = false;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isPopup_ = false;
 
     std::vector<std::string> arrayValue_;
     int32_t itemCount_ = 0;
@@ -165,9 +168,11 @@ private:
     int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
     int32_t lastSelectProp_ = -1;
-    int32_t popupClickedIndex_ = -1;
+    uint32_t popupClickedIndex_ = -1;
     int32_t lastFireSelectIndex_ = -1;
     bool lastIndexFromPress_ = false;
+    bool isLayoutChange_ = false;
+    bool selectChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

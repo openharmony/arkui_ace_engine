@@ -26,6 +26,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 namespace OHOS::Ace {
 
@@ -76,6 +77,8 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("textAlign", &JSSearch::SetTextAlign, opt);
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
+    JSClass<JSSearch>::StaticMethod("onTextSelectionChange", &JSSearch::SetOnTextSelectionChange);
+    JSClass<JSSearch>::StaticMethod("onContentScroll", &JSSearch::SetOnScroll);
     JSClass<JSSearch>::StaticMethod("border", &JSSearch::JsBorder);
     JSClass<JSSearch>::StaticMethod("borderWidth", &JSSearch::JsBorderWidth);
     JSClass<JSSearch>::StaticMethod("borderColor", &JSSearch::JsBorderColor);
@@ -87,7 +90,8 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSearch>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::RequestKeyboardOnFocus);
+    JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
+    JSClass<JSSearch>::StaticMethod("enableKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
@@ -95,6 +99,8 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
+    JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
+    JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -125,15 +131,18 @@ void JSSearch::Create(const JSCallbackInfo& info)
         }
         std::string text;
         key = "";
-        if (param->GetProperty("value")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(param->GetProperty("value"));
+        JSRef<JSVal> textValue = param->GetProperty("value");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 key = text;
             }
         } else {
-            if (ParseJsString(param->GetProperty("value"), text)) {
+            if (ParseJsString(textValue, text)) {
                 key = text;
             }
         }
@@ -157,41 +166,32 @@ void JSSearch::Create(const JSCallbackInfo& info)
     }
 }
 
-void JSSearch::RequestKeyboardOnFocus(bool needToRequest)
+void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 {
-    SearchModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
+    if (info.Length() < 1) {
+        LOGW("EnableKeyboardOnFocus should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetEnableKeyboardOnFocus is not correct, using default");
+        SearchModel::GetInstance()->RequestKeyboardOnFocus(true);
+        return;
+    }
+    SearchModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
     std::string buttonValue;
-    if (info.Length() == 1) {
-        if (!ParseJsString(info[0], buttonValue)) {
-            LOGI("buttonValue is null");
-            return;
-        }
-        SearchModel::GetInstance()->SetSearchButton(buttonValue);
-        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-        SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
-    }
-
-    int32_t expect_argvs = 2;
-    if (info.Length() != expect_argvs) {
-        return;
-    }
-
     if (!ParseJsString(info[0], buttonValue)) {
-        LOGI("buttonValue is null");
         return;
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
+    SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
+    SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
+
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
@@ -236,14 +236,6 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
         }
         SearchModel::GetInstance()->SetSearchIconSize(size);
 
-        // set icon color
-        Color colorVal;
-        auto colorProp = param->GetProperty("color");
-        if (colorProp->IsUndefined() || colorProp->IsNull() || !ParseJsColor(colorProp, colorVal)) {
-            colorVal = theme->GetSearchIconColor();
-        }
-        SearchModel::GetInstance()->SetSearchIconColor(colorVal);
-
         // set icon src
         std::string src;
         auto srcPathProp = param->GetProperty("src");
@@ -251,6 +243,13 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
             src = "";
         }
         SearchModel::GetInstance()->SetSearchSrcPath(src);
+
+        // set icon color
+        Color colorVal;
+        auto colorProp = param->GetProperty("color");
+        if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal)) {
+            SearchModel::GetInstance()->SetSearchIconColor(colorVal);
+        }
     }
 }
 
@@ -299,13 +298,19 @@ void JSSearch::SetCancelButton(const JSCallbackInfo& info)
 
 void JSSearch::SetIconStyle(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto param = JSRef<JSObject>::Cast(info[0]);
-    auto theme = GetTheme<SearchTheme>();
-    auto iconParam = JSRef<JSObject>::Cast(param->GetProperty("icon"));
-
+    auto iconJsVal = param->GetProperty("icon");
+    if (!iconJsVal->IsObject()) {
+        return;
+    }
+    auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
     // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
+    auto theme = GetTheme<SearchTheme>();
     if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVp(iconSizeProp, iconSize)) {
         if (LessNotEqual(iconSize.Value(), 0.0)) {
             iconSize = theme->GetIconHeight();
@@ -315,14 +320,6 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     }
     SearchModel::GetInstance()->SetCancelIconSize(iconSize);
 
-    // set icon color
-    Color iconColor;
-    auto iconColorProp = iconParam->GetProperty("color");
-    if (iconColorProp->IsUndefined() || iconColorProp->IsNull() || !ParseJsColor(iconColorProp, iconColor)) {
-        iconColor = theme->GetSearchIconColor();
-    }
-    SearchModel::GetInstance()->SetCancelIconColor(iconColor);
-
     // set icon src
     std::string iconSrc;
     auto iconSrcProp = iconParam->GetProperty("src");
@@ -330,14 +327,17 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
         iconSrc = "";
     }
     SearchModel::GetInstance()->SetRightIconSrcPath(iconSrc);
+
+    // set icon color
+    Color iconColor;
+    auto iconColorProp = iconParam->GetProperty("color");
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+    }
 }
 
 void JSSearch::SetTextColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
 
@@ -391,7 +391,7 @@ void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
 
 void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
@@ -403,7 +403,6 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
-            LOGW("Parse to dimension FP failed.");
         } else {
             font.fontSize = size;
         }
@@ -448,7 +447,6 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         CalcDimension size;
         if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
-            LOGW("Parse to dimension FP failed.");
         } else {
             font.fontSize = size;
         }
@@ -571,13 +569,23 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetOnChange(std::move(callback));
 }
 
+void JSSearch::SetOnTextSelectionChange(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    SearchModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
+void JSSearch::SetOnScroll(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(float, float)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    SearchModel::GetInstance()->SetOnScroll(std::move(callback));
+}
+
 void JSSearch::SetHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGE("The arg is wrong, it is supposed to be a number arguments");
@@ -632,10 +640,42 @@ void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)
     }
 }
 
+void JSSearch::SetSelectionMenuHidden(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("SelectionMenuHidden should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetSelectionMenuHidden is not correct, using default");
+        SearchModel::GetInstance()->SetSelectionMenuHidden(false);
+        return;
+    }
+    SearchModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
+}
+
+void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && (info[0]->IsUndefined() || info[0]->IsNull())) {
+        SearchModel::GetInstance()->SetCustomKeyboard(nullptr);
+        return;
+    }
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    std::function<void()> buildFunc;
+    if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
+        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+    }
+}
+
 void JSSearchController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSearchController>::Declare("SearchController");
     JSClass<JSSearchController>::Method("caretPosition", &JSSearchController::CaretPosition);
+    JSClass<JSSearchController>::CustomMethod("getTextContentRect", &JSSearchController::GetTextContentRect);
+    JSClass<JSSearchController>::CustomMethod("getTextContentLineCount", &JSSearchController::GetTextContentLinesNum);
+    JSClass<JSSearchController>::Method("stopEditing", &JSSearchController::StopEditing);
     JSClass<JSSearchController>::Bind(globalObj, JSSearchController::Constructor, JSSearchController::Destructor);
 }
 
@@ -661,4 +701,46 @@ void JSSearchController::CaretPosition(int32_t caretPosition)
     }
 }
 
+JSRef<JSObject> JSSearchController::CreateRectangle(const Rect& info)
+{
+    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+    rectObj->SetProperty<double>("x", info.Left());
+    rectObj->SetProperty<double>("y", info.Top());
+    rectObj->SetProperty<double>("width", info.Width());
+    rectObj->SetProperty<double>("height", info.Height());
+    return rectObj;
+}
+
+void JSSearchController::GetTextContentRect(const JSCallbackInfo& info)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        auto rectObj = CreateRectangle(controller->GetTextContentRect());
+        JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
+        info.SetReturnValue(rect);
+    } else {
+        LOGE("GetTextContentRect: The JSSearchController is NULL");
+    }
+}
+
+void JSSearchController::GetTextContentLinesNum(const JSCallbackInfo& info)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        auto lines = controller->GetTextContentLinesNum();
+        auto linesNum = JSVal(ToJSValue(lines));
+        auto textLines = JSRef<JSVal>::Make(linesNum);
+        info.SetReturnValue(textLines);
+    } else {
+        LOGE("GetTextContentRect: The JSSearchController is NULL");
+    }
+}
+
+void JSSearchController::StopEditing()
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->StopEditing();
+    }
+}
 } // namespace OHOS::Ace::Framework

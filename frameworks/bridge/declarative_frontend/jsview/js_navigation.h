@@ -34,21 +34,26 @@ public:
     static void SetHideBackButton(bool hide);
     static void SetHideToolBar(bool hide);
     static void SetToolBar(const JSCallbackInfo& info);
+    static void SetToolbarConfiguration(const JSCallbackInfo& info);
     static void SetMenus(const JSCallbackInfo& info);
     static void SetMenuCount(int32_t menuCount);
     static void SetOnTitleModeChanged(const JSCallbackInfo& info);
     static void SetUsrNavigationMode(int32_t value);
     static void SetNavBarWidth(const JSCallbackInfo& info);
+    static void SetNavBarWidthRange(const JSCallbackInfo& info);
+    static void SetMinContentWidth(const JSCallbackInfo& info);
     static void SetNavBarPosition(int32_t value);
     static void SetHideNavBar(bool hide);
     static void SetBackButtonIcon(const JSCallbackInfo& info);
     static void SetOnNavBarStateChange(const JSCallbackInfo& info);
     static void SetNavDestination(const JSCallbackInfo& info);
 
-    static void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items);
+    static void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items);
     static void ParseBarItems(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
     static bool ParseCommonTitle(const JSRef<JSVal>& jsValue);
+    static void ParseToolbarItemsConfiguration(
+        const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
 };
 } // namespace OHOS::Ace::Framework
 

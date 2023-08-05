@@ -15,13 +15,18 @@
 
 #include "core/image/animated_image_player.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/codec/SkCodecAnimation.h"
 #include "include/core/SkPixelRef.h"
+#endif
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/render/canvas_image.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
@@ -52,6 +57,7 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
                 return;
             }
 
+#ifndef USE_ROSEN_DRAWING
             sk_sp<SkImage> skImage = player->DecodeFrameImage(index);
             if (dstWidth > 0 && dstHeight > 0) {
                 skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
@@ -61,6 +67,17 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
                 return;
             }
             auto canvasImage = NG::CanvasImage::Create(&skImage);
+#else
+            std::shared_ptr<RSImage> dImage = player->DecodeFrameImage(index);
+            if (dstWidth > 0 && dstHeight > 0) {
+                dImage = ImageProvider::ApplySizeToDrawingImage(dImage, dstWidth, dstHeight);
+            }
+            if (!dImage) {
+                LOGW("animated player cannot get the %{public}d dImage!", index);
+                return;
+            }
+            auto canvasImage = NG::CanvasImage::Create(&dImage);
+#endif
 #ifdef PREVIEW
             player->successCallback_(player->imageSource_, canvasImage);
         },
@@ -74,6 +91,7 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
 #endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
 {
     // first seek in cache
@@ -119,6 +137,13 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
     }
     return SkImage::MakeFromBitmap(bitmap);
 }
+#else
+std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
+{
+    LOGE("Drawing is not supported");
+    return std::make_shared<RSImage>();
+}
+#endif
 
 bool AnimatedImagePlayer::CopyTo(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src)
 {

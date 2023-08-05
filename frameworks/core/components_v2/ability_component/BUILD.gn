@@ -25,6 +25,6 @@ build_component("ability_v2") {
   rosen_sources = [ "rosen_render_ability_component.cpp" ]
 
   if (is_ohos_standard_system && !use_mingw_win && !use_mac) {
-    deps = [ "//foundation/graphic/graphic_2d:libsurface" ]
+    external_deps = [ "graphic_2d:surface" ]
   }
 }

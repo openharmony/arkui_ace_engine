@@ -13,13 +13,15 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("../../../build/uicast.gni")
+import("//foundation/arkui/ace_engine/build/uicast.gni")
+
+config("uicontent_public_config") {
+  include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
+}
 
 config("uicontent_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "${ace_root}/interfaces/frameworks",
-    "${ace_root}/interfaces/inner_api/ace",
     "//base/notification/common_event_service/interfaces/inner_api",
     "//foundation/graphic/graphic_2d/rosen/modules/platform/utils",
   ]
@@ -51,16 +53,20 @@ ohos_shared_library("ace_uicontent") {
       debug = ace_sanitize_debug
     }
   }
-  public_configs = [ ":uicontent_config" ]
 
-  configs = [ "$ace_root:ace_config" ]
+  public_configs = [ ":uicontent_public_config" ]
+
+  configs = [
+    ":uicontent_config",
+    "$ace_root:ace_config",
+    "$ace_root:ace_coverage_config",
+  ]
 
   sources = [
     "${ace_root}/interfaces/inner_api/ace/declarative_module_preloader.cpp",
     "${ace_root}/interfaces/inner_api/ace/hot_reloader.cpp",
     "${ace_root}/interfaces/inner_api/ace/serializeable_object.cpp",
     "${ace_root}/interfaces/inner_api/ace/ui_content.cpp",
-    "${ace_root}/interfaces/inner_api/ace/ui_window.cpp",
   ]
 
   if (!use_mingw_win && !use_mac && !use_linux &&
@@ -70,10 +76,11 @@ ohos_shared_library("ace_uicontent") {
     external_deps = [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
-      "hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   }
 
   subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
 }

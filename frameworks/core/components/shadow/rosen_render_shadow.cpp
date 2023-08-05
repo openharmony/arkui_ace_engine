@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,14 @@
 
 #include "core/components/shadow/rosen_render_shadow.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkRRect.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -44,15 +48,25 @@ void RosenRenderShadow::Paint(RenderContext& context, const Offset& offset)
     }
 
     if (isNeedClip_) {
+#ifndef USE_ROSEN_DRAWING
         canvas->clipRect(SkRect::MakeXYWH(clipRect_.GetOffset().GetX() - NormalizeToPx(SHADOW_OFFSET) / 2,
                              clipRect_.GetOffset().GetY(), clipRect_.Width() + NormalizeToPx(SHADOW_OFFSET),
                              clipRect_.Height() + NormalizeToPx(SHADOW_OFFSET)),
             true);
+#else
+        canvas->ClipRect(RSRect(
+            clipRect_.GetOffset().GetX() - NormalizeToPx(SHADOW_OFFSET) / 2,
+            clipRect_.GetOffset().GetY(),
+            clipRect_.Width() + NormalizeToPx(SHADOW_OFFSET) / 2 + clipRect_.GetOffset().GetX(),
+            clipRect_.Height() + NormalizeToPx(SHADOW_OFFSET) + clipRect_.GetOffset().GetY()),
+            RSClipOp::INTERSECT, true);
+#endif
     }
 
     double radiusX = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetX());
     double radiusY = NormalizeToPx(rrect_.GetCorner().bottomLeftRadius.GetY());
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setColor(SkColorSetARGB(SHADOW_COLOR_ALPHA, 0, 0, 0));
     paint.setStyle(SkPaint::Style::kStrokeAndFill_Style);
@@ -62,6 +76,27 @@ void RosenRenderShadow::Paint(RenderContext& context, const Offset& offset)
     rect = SkRect::MakeXYWH(
         offset_.GetX(), offset_.GetY() + NormalizeToPx(SHADOW_OFFSET), rrect_.Width(), rrect_.Height());
     canvas->drawRRect(SkRRect::MakeRectXY(rect, radiusX, radiusY), paint);
+#else
+    RSPen pen;
+    RSBrush brush;
+    pen.SetColor(RSColor::ColorQuadSetARGB(SHADOW_COLOR_ALPHA, 0, 0, 0));
+    brush.SetColor(RSColor::ColorQuadSetARGB(SHADOW_COLOR_ALPHA, 0, 0, 0));
+    RSFilter filter;
+    filter.SetMaskFilter(
+        RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, SHADOW_BLUR_RADIUS));
+    pen.SetFilter(filter);
+    brush.SetFilter(filter);
+    RSRect rect(
+        offset_.GetX(), offset_.GetY(), offset_.GetX() + rrect_.Width(), offset_.GetY() + rrect_.Height());
+    canvas->ClipRoundRect(RSRoundRect(rect, radiusX, radiusY), RSClipOp::DIFFERENCE, true);
+    rect = RSRect(offset_.GetX(), offset_.GetY() + NormalizeToPx(SHADOW_OFFSET),
+        rrect_.Width() + offset_.GetX(), rrect_.Height() +  offset_.GetY() + NormalizeToPx(SHADOW_OFFSET));
+    canvas->AttachPen(pen);
+    canvas->AttachBrush(brush);
+    canvas->DrawRoundRect(RSRoundRect(rect, radiusX, radiusY));
+    canvas->DetachPen();
+    canvas->DetachBrush();
+#endif
 }
 
 } // namespace OHOS::Ace

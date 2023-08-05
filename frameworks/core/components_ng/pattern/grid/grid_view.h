@@ -44,6 +44,7 @@ public:
     static void SetMultiSelectable(bool value);
     static void SetSupportAnimation(bool value);
     static void SetOnScrollToIndex(ScrollToIndexFunc&& value);
+    static void SetOnScrollBarUpdate(ScrollBarUpdateFunc&& value);
     static void SetOnItemDragStart(ItemDragStartFunc&& value);
     static void SetOnItemDragEnter(ItemDragEnterFunc&& value);
     static void SetOnItemDragMove(ItemDragMoveFunc&& value);

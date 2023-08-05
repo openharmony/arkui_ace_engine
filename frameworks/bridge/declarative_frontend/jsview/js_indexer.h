@@ -36,7 +36,9 @@ public:
     static void SetSelectedFont(const JSCallbackInfo& args);
     static void SetFont(const JSCallbackInfo& args);
     static void SetPopupFont(const JSCallbackInfo& args);
-    static void GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle);
+    static void GetFontContent(const JSCallbackInfo& args, std::optional<Dimension>& fontSize,
+        std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
+        std::optional<FontStyle>& fontStyle);
     static void SetItemSize(const JSCallbackInfo& args);
     static void SetAlignStyle(const JSCallbackInfo& args);
     static void SetSelected(const JSCallbackInfo& args);
@@ -47,6 +49,7 @@ public:
     static void SetPopupUnselectedColor(const JSCallbackInfo& args);
     static void SetPopupItemFont(const JSCallbackInfo& args);
     static void SetPopupItemBackgroundColor(const JSCallbackInfo& args);
+    static std::optional<Color> PaseColor(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_INDEXER_H

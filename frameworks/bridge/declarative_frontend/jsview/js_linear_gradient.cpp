@@ -58,6 +58,13 @@ void JSLinearGradient::Constructor(const JSCallbackInfo& args)
             return;
         }
 
+        if (Negative(offset.ConvertToVp())) {
+            offset = Dimension(0.0, DimensionUnit::VP);
+        }
+
+        if (GreatNotEqual(offset.ConvertToVp(), 1.0)) {
+            offset = Dimension(1.0, DimensionUnit::VP);
+        }
         jsLinearGradientPtr->gradient_.push_back(std::make_pair(color, offset));
     }
 }

@@ -47,19 +47,27 @@ public:
         CHECK_NULL_VOID(ratingTheme);
         auto paintProperty = DynamicCast<RatingRenderProperty>(paintWrapper->GetPaintProperty());
         ratingModifier_->SetContentOffset(paintWrapper->GetContentOffset());
+        ratingModifier_->SetContentSize(paintWrapper->GetContentSize());
         ratingModifier_->SetStartNum(starNum_);
         if (paintProperty) {
             constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
-            ratingModifier_->SetDrawScore(paintProperty->GetRatingScoreValue(0.f));
+            ratingModifier_->SetDrawScore(isfocus_ ? focusRatingScore_ : paintProperty->GetRatingScoreValue(0.f));
             ratingModifier_->SetStepSize(paintProperty->GetStepSize().value_or(ratingTheme->GetStepSize()));
             ratingModifier_->SetTouchStar(paintProperty->GetTouchStar().value_or(DEFAULT_RATING_TOUCH_STAR_NUMBER));
         }
         ratingModifier_->SetHoverState(state_);
     }
 
+    void UpdateFocusState(bool isfocus, double focusRatingScore)
+    {
+        isfocus_ = isfocus;
+        focusRatingScore_ = focusRatingScore;
+    }
+
 private:
     RefPtr<RatingModifier> ratingModifier_;
-
+    bool isfocus_;
+    double focusRatingScore_ = .0f;
     int32_t starNum_ = 0;
     RatingModifier::RatingAnimationType state_;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPaintMethod);

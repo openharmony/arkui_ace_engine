@@ -76,7 +76,20 @@ public:
         return it->second;
     }
 
+    /**
+     * return true of current Container uses new Pipeline
+     */
     static bool JsUsesNewPipeline();
+
+    /**
+     * return the API version specified in the manifest.json
+    */
+    static int32_t JsGetApiVersion();
+
+    /**
+     * Gets framenode and pushes to VSP.
+    */
+    static void JsGetAndPushFrameNode(const JSCallbackInfo& info);
 
 private:
     static void JSVisualState(const JSCallbackInfo& info);

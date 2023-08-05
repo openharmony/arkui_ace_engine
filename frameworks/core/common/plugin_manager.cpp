@@ -55,6 +55,29 @@ RefPtr<PluginSubContainer> PluginManager::GetPluginSubContainer(int64_t pluginId
     }
 }
 
+void PluginManager::UpdateConfigurationInPlugin(
+    const ResourceConfiguration& resConfig, const RefPtr<TaskExecutor>& taskExecutor)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (const auto& pluginSubContainerMap : pluginSubContainerMap_) {
+        auto pluginSubContainer = pluginSubContainerMap.second;
+        auto pluginPipeline = pluginSubContainer->GetPipelineContext();
+        auto pluginThemeManager = pluginPipeline->GetThemeManager();
+        pluginThemeManager->UpdateConfig(resConfig);
+        pluginThemeManager->LoadResourceThemes();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [instanceId = pluginSubContainerMap.first,
+                weak = AceType::WeakClaim(AceType::RawPtr(pluginSubContainer))]() {
+                ContainerScope scope(instanceId);
+                auto pluginSubContainer = weak.Upgrade();
+                CHECK_NULL_VOID(pluginSubContainer);
+                pluginSubContainer->FlushReload();
+            },
+            TaskExecutor::TaskType::JS);
+    }
+}
+
 void PluginManager::AddNonmatchedContainer(
     const std::string& pluginKey, const RefPtr<PluginSubContainer>& pluginSubContainer)
 {

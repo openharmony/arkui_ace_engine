@@ -119,9 +119,9 @@ struct BlurStyleOption {
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
-        static const char* STYLE[] = { "", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
-            "BlurStyle.BackgroundThin", "BlurStyle.BackgroundRegular", "BlurStyle.BackgroundThick",
-            "BlurStyle.BackgroundUltraThick" };
+        static const char* STYLE[] = { "BlurStyle.NONE", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
+            "BlurStyle.BACKGROUND_THIN", "BlurStyle.BACKGROUND_REGULAR", "BlurStyle.BACKGROUND_THICK",
+            "BlurStyle.BACKGROUND_ULTRA_THICK" };
         static const char* COLOR_MODE[] = { "ThemeColorMode.System", "ThemeColorMode.Light", "ThemeColorMode.Dark" };
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
         auto jsonBlurStyle = JsonUtil::Create(true);
@@ -132,6 +132,18 @@ struct BlurStyleOption {
         jsonBlurStyleOption->Put("scale", scale);
         jsonBlurStyle->Put("options", jsonBlurStyleOption);
         json->Put("backgroundBlurStyle", jsonBlurStyle);
+    }
+};
+
+struct EffectOption {
+    Dimension radius;
+    double saturation { 1.0f };
+    double brightness { 1.0f };
+    Color color { Color::TRANSPARENT };
+    bool operator == (const EffectOption& other) const
+    {
+        return radius == other.radius && NearEqual(saturation, other.saturation) &&
+            NearEqual(brightness, other.brightness) && color == other.color;
     }
 };
 
@@ -568,6 +580,22 @@ enum class ACE_EXPORT BackgroundImageSizeType {
     AUTO,
     LENGTH,
     PERCENT,
+};
+
+enum class ACE_EXPORT ClickEffectLevel {
+    UNDEFINED = -1,
+    LIGHT = 0,
+    MIDDLE,
+    HEAVY,
+};
+
+struct ClickEffectInfo {
+    ClickEffectLevel level = ClickEffectLevel::LIGHT;
+    float scaleNumber = 0.0f;
+    bool operator==(const ClickEffectInfo& other) const
+    {
+        return level == other.level && NearEqual(scaleNumber, other.scaleNumber);
+    }
 };
 
 class ACE_EXPORT BackgroundImageSize final {

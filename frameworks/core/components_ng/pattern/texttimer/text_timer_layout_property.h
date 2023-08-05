@@ -39,6 +39,11 @@ public:
         value->propFormat_ = CloneFormat();
         value->propIsCountDown_ = CloneIsCountDown();
         value->propInputCount_ = CloneInputCount();
+        value->propFontSize_ = CloneFontSize();
+        value->propTextColor_ = CloneTextColor();
+        value->propItalicFontStyle_ = CloneItalicFontStyle();
+        value->propFontWeight_ = CloneFontWeight();
+        value->propFontFamily_ = CloneFontFamily();
         return value;
     }
 
@@ -48,6 +53,11 @@ public:
         ResetFormat();
         ResetIsCountDown();
         ResetInputCount();
+        ResetFontSize();
+        ResetTextColor();
+        ResetItalicFontStyle();
+        ResetFontWeight();
+        ResetFontFamily();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -55,6 +65,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Format, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCountDown, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputCount, double, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextTimerLayoutProperty);

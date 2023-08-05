@@ -61,4 +61,124 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
 {
     return nullptr;
 }
+
+LayoutConstraintF LayoutProperty::CreateChildConstraint() const
+{
+    return {};
+}
+
+void BuildGridProperty(const RefPtr<FrameNode>& host) {}
+
+void UpdateContentConstraint() {}
+
+MarginPropertyF CreateMargin()
+{
+    return {};
+}
+
+PaddingPropertyF CreatePaddingAndBorder()
+{
+    return {};
+}
+
+bool LayoutProperty::HasFixedWidth() const
+{
+    return false;
+}
+
+bool LayoutProperty::HasFixedHeight() const
+{
+    return false;
+}
+
+bool LayoutProperty::HasAspectRatio() const
+{
+    return false;
+}
+
+float LayoutProperty::GetAspectRatio() const
+{
+    return 0.0f;
+}
+
+void LayoutProperty::UpdateAspectRatio(float ratio) {}
+
+void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition) {}
+
+void LayoutProperty::UpdateLayoutDirection(TextDirection value) {}
+
+void LayoutProperty::UpdateLayoutWeight(float value) {}
+
+void LayoutProperty::UpdateBorderWidth(const BorderWidthProperty& value) {}
+
+void LayoutProperty::UpdateAlignment(Alignment value) {}
+
+void LayoutProperty::UpdateMargin(const MarginProperty& value) {}
+
+void LayoutProperty::UpdatePadding(const PaddingProperty& value) {}
+
+void LayoutProperty::UpdateUserDefinedIdealSize(const CalcSize& value) {}
+
+void LayoutProperty::ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight) {}
+
+void LayoutProperty::UpdateCalcMinSize(const CalcSize& value) {}
+
+void LayoutProperty::UpdateCalcMaxSize(const CalcSize& value) {}
+
+void LayoutProperty::UpdateMarginSelfIdealSize(const SizeF& value) {}
+
+void LayoutProperty::ResetCalcMinSize() {}
+
+void LayoutProperty::UpdateFlexGrow(float flexGrow) {}
+
+void LayoutProperty::ResetFlexGrow() {}
+
+void LayoutProperty::UpdateFlexShrink(float flexShrink) {}
+
+void LayoutProperty::ResetFlexShrink() {}
+
+void LayoutProperty::UpdateFlexBasis(const Dimension& flexBasis) {}
+
+void LayoutProperty::UpdateAlignSelf(const FlexAlign& flexAlign) {}
+
+void LayoutProperty::ResetAlignSelf() {}
+
+void LayoutProperty::UpdateAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) {}
+
+void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex) {}
+
+LayoutConstraintF LayoutProperty::CreateContentConstraint() const
+{
+    return {};
+}
+
+void LayoutProperty::UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty) {}
+
+void LayoutProperty::UpdateVisibility(const VisibleType& value, bool allowTransition) {}
+
+void LayoutProperty::SetOverlayOffset(
+    const std::optional<Dimension>& overlayOffsetX, const std::optional<Dimension>& overlayOffsetY)
+{}
+
+void LayoutProperty::GetOverlayOffset(Dimension& overlayOffsetX, Dimension& overlayOffsetY) {}
+
+void LayoutProperty::UpdateAllGeometryTransition(const RefPtr<UINode>& parent) {}
+
+bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
+{
+    return false;
+}
+void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host) {}
+
+void LayoutProperty::UpdateContentConstraint() {}
+
+MarginPropertyF LayoutProperty::CreateMargin()
+{
+    return MarginPropertyF();
+}
+
+PaddingPropertyF LayoutProperty::CreatePaddingAndBorder()
+{
+    return PaddingPropertyF();
+}
 } // namespace OHOS::Ace::NG

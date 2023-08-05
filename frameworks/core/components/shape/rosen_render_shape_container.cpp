@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,10 @@
  */
 
 #include "frameworks/core/components/shape/rosen_render_shape_container.h"
+
+#ifdef USE_ROSEN_DRAWING
+#include "include/core/SkVertices.h"
+#endif
 
 #include "render_service_client/core/ui/rs_node.h"
 #include "securec.h"
@@ -71,6 +75,7 @@ void RosenRenderShapeContainer::PerformLayout()
 void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offset)
 {
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
+#ifndef USE_ROSEN_DRAWING
     skCanvas_ = renderContext->GetCanvas();
     if (!skCanvas_) {
         return;
@@ -113,6 +118,52 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
     } else {
         BitmapMesh(context, offset);
     }
+#else
+    canvas_ = renderContext->GetCanvas();
+    if (!canvas_) {
+        return;
+    }
+    auto tmpCanvas = std::make_unique<RSRecordingCanvas>(GetLayoutSize().Width(), GetLayoutSize().Height());
+    if (mesh_.size() == 0) {
+        double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
+        double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
+        double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
+        double viewBoxTop = NormalizePercentToPx(viewBox_.Top(), true);
+        if (!GetLayoutSize().IsInfinite() && GreatNotEqual(viewBoxWidth, 0.0) && GreatNotEqual(viewBoxHeight, 0.0)) {
+            double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
+            double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
+            double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
+            tmpCanvas->Scale(scale, scale);
+            tmpCanvas->Translate(tx, ty);
+        }
+        const auto& children = GetChildren();
+        for (const auto& item : SortChildrenByZIndex(children)) {
+            Offset childOffset = offset;
+            RefPtr<RosenRenderShape> renderShape = GetShapeChild(item, childOffset);
+            //type
+            if (renderShape) {
+                renderShape->PaintOnCanvas(tmpCanvas.get(), childOffset);
+                continue;
+            }
+            RenderNode::Paint(context, offset);
+        }
+        if (column_ == 0 && row_ == 0) {
+            RSBitmapFormat format {
+                RSColorType::COLORTYPE_RGBA_8888,
+                RSAlphaType::ALPHATYPE_UNPREMUL,
+            };
+            offBitmap_.Build(GetLayoutSize().Width(), GetLayoutSize().Height(), format);
+            offBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+            offCanvas_ = std::make_unique<RSCanvas>();
+            offCanvas_->Bind(offBitmap_);
+            auto cmdList = tmpCanvas->GetDrawCmdList();
+            cmdList->Playback(*offCanvas_);
+            canvas_->DrawBitmap(offBitmap_, 0, 0);
+        }
+    } else {
+        BitmapMesh(context, offset);
+    }
+#endif
 }
 
 RefPtr<RosenRenderShape> RosenRenderShapeContainer::GetShapeChild(const RefPtr<RenderNode>& node, Offset& offset)
@@ -133,6 +184,7 @@ RefPtr<RosenRenderShape> RosenRenderShapeContainer::GetShapeChild(const RefPtr<R
 
 void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset& offset)
 {
+#ifndef USE_ROSEN_DRAWING
     auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     skOffBitmap_.allocPixels(imageInfo);
@@ -144,6 +196,22 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
     if (!skCanvas_) {
         return;
     }
+#else
+    RSBitmapFormat format {
+        RSColorType::COLORTYPE_RGBA_8888,
+        RSAlphaType::ALPHATYPE_UNPREMUL,
+    };
+    offBitmap_.Build(GetLayoutSize().Width(), GetLayoutSize().Height(), format);
+    offBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    offCanvas_ = std::make_unique<RSCanvas>();
+    offCanvas_->Bind(offBitmap_);
+
+    const auto renderContext = static_cast<RosenRenderContext*>(&context);
+    canvas_ = renderContext->GetCanvas();
+    if (!canvas_) {
+        return;
+    }
+#endif
 
     // for the child
     double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
@@ -154,8 +222,13 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
         double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
         double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
         double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
+#ifndef USE_ROSEN_DRAWING
         skOffCanvas_->scale(scale, scale);
         skOffCanvas_->translate(tx, ty);
+#else
+        offCanvas_->Scale(scale, scale);
+        offCanvas_->Translate(tx, ty);
+#endif
     }
 
     const auto& children = GetChildren();
@@ -163,14 +236,22 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
         Offset childOffset = offset;
         RefPtr<RosenRenderShape> renderShape = GetShapeChild(item, childOffset);
         if (renderShape) {
+#ifndef USE_ROSEN_DRAWING
             renderShape->PaintOnCanvas(skOffCanvas_.get(), childOffset);
+#else
+            renderShape->PaintOnCanvas(offCanvas_.get(), childOffset);
+#endif
         }
     }
     if (column_ == 0 && row_ == 0) {
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
         skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
 #else
         skCanvas_->drawImage(skOffBitmap_.asImage(), 0, 0, SkSamplingOptions());
+#endif
+#else
+        canvas_->DrawBitmap(offBitmap_, 0, 0);
 #endif
         return;
     }
@@ -179,11 +260,20 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
     for (uint32_t i = 0; i < size; i++) {
         verts[i] = (float)mesh_[i];
     }
+#ifndef USE_ROSEN_DRAWING
     DrawBitmapMesh(skOffBitmap_, column_, row_, verts, 0, nullptr);
+#else
+    DrawBitmapMesh(offBitmap_, column_, row_, verts, 0, nullptr);
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, int row,
     const float* vertices, const int* colors, const SkPaint* paint)
+#else
+void RosenRenderShapeContainer::DrawBitmapMesh(RSBitmap& bitmap, int column, int row,
+    const float* vertices, const int* colors, const RSBrush* brush)
+#endif
 {
     const int vertCounts = (column + 1) * (row + 1);
     int32_t size = 6;
@@ -203,8 +293,13 @@ void RosenRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, int
     }
     SkPoint* texsPoint = builder.texCoords();
     uint16_t* indices = builder.indices();
+#ifndef USE_ROSEN_DRAWING
     const SkScalar height = SkIntToScalar(bitmap.height());
     const SkScalar width = SkIntToScalar(bitmap.width());
+#else
+    const SkScalar height = SkIntToScalar(bitmap.GetHeight());
+    const SkScalar width = SkIntToScalar(bitmap.GetWidth());
+#endif
 
     if (row == 0) {
         LOGE("row is zero");
@@ -250,7 +345,7 @@ void RosenRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, int
         }
         index += 1;
     }
-
+#ifndef USE_ROSEN_DRAWING
     SkPaint tempPaint;
     if (paint) {
         tempPaint = *paint;
@@ -266,6 +361,20 @@ void RosenRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, int
 #endif
     tempPaint.setShader(shader);
     skCanvas_->drawVertices(builder.detach(), SkBlendMode::kModulate, tempPaint);
+#else
+    RSBrush tempBrush;
+    if (brush) {
+        tempBrush = *brush;
+    }
+    auto image = std::make_shared<RSImage>();
+    image->BuildFromBitmap(bitmap);
+    auto shader = RSShaderEffect::CreateImageShader(
+        *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), RSMatrix());
+    tempBrush.SetShaderEffect(shader);
+    canvas_->AttachBrush(tempBrush);
+    LOGE("Drawing is not supported");
+    canvas_->DetachBrush();
+#endif // USE_ROSEN_DRAWING
 }
 
 } // namespace OHOS::Ace

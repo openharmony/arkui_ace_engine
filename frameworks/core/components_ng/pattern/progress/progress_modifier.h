@@ -61,6 +61,10 @@ public:
     void SetPaintShadow(bool paintShadow);
     void SetProgressStatus(ProgressStatus status);
     void SetVisible(bool isVisible);
+    void SetRingSweepEffect(bool value);
+    void SetLinearSweepEffect(bool value);
+    void SetIsItalic(bool isItalic);
+    void SetSmoothEffect(bool value);
 
 private:
     void ContentDrawWithFunction(DrawingContext& context);
@@ -82,12 +86,13 @@ private:
     void ProcessRingSweepingAnimation(float value);
     void ProcessLinearSweepingAnimation(float value);
     void StartRingSweepingAnimation(float value);
-    void StartRingSweepingAnimationImpl(float date);
+    void StartRingSweepingAnimationImpl(float date, float speed);
+    void StartContinuousSweepingAnimation(float currentDate, float newDate, float speed);
     void StartLinearSweepingAnimation(float value);
-    void StartLinearSweepingAnimationImpl(float date);
+    void StartLinearSweepingAnimationImpl(float date, float speed);
     void StartCapsuleSweepingAnimation(float value);
-    void StartCapsuleSweepingAnimationImpl(float value);
-    void StopSweepingAnimation();
+    void StartCapsuleSweepingAnimationImpl(float value, float speed);
+    void StopSweepingAnimation(float date = 0.0f);
     void StartRingLoadingAnimation();
     void StartRingLoadingHeadAnimation();
     void StartRingLoadingTailAnimation();
@@ -95,11 +100,12 @@ private:
     void StopRingLoadingTailAnimation();
     float CalcRingProgressAdditionalAngle() const;
     float TrailingCoefficient(float base, uint32_t index, uint32_t totalPoints) const;
-    Color GenerateTrailingPointColor(
-        const Color& headColor, const Color& tailColor, uint32_t index, uint32_t totalPoints) const;
+    Color GenerateTrailingPointColor(const Color& headColor, uint32_t index, uint32_t totalPoints) const;
     void GenerateLinearSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     Gradient CreateCapsuleGradient() const;
+    bool PostTask(const TaskExecutor::Task& task);
+    Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
@@ -121,15 +127,19 @@ private:
     RefPtr<PropertyInt> progressType_;
     RefPtr<PropertyFloat> capsuleBorderWidth_;
     RefPtr<PropertyBool> sweepEffect_;
+    RefPtr<PropertyBool> ringSweepEffect_;
+    RefPtr<PropertyBool> linearSweepEffect_;
     RefPtr<PropertyBool> paintShadow_;
     RefPtr<PropertyInt> progressStatus_;
+    RefPtr<PropertyBool> isItalic_;
+    RefPtr<PropertyBool> smoothEffect_;
 
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;
     bool isLoading_ = false;
     bool isSweeping_ = false;
     float sweepingDateBackup_ = 0.0f;
-    bool sweepingDateUpdated_ = false;
+    uint32_t continuousSweepingCounter_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };

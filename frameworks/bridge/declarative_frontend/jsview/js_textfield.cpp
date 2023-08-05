@@ -15,10 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -34,6 +36,7 @@
 #include "core/common/container.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
@@ -72,6 +75,7 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
+const uint32_t MAX_LINES = 3;
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -96,15 +100,18 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (paramObject->GetProperty("text")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+        JSRef<JSVal> textValue = paramObject->GetProperty("text");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         } else {
-            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         }
@@ -130,7 +137,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
     std::optional<std::string> placeholderSrc;
     std::optional<std::string> value;
     JSTextAreaController* jsController = nullptr;
-    JSRef<JSVal> changeEventVal;
+    JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
@@ -138,15 +145,18 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             placeholderSrc = placeholder;
         }
         std::string text;
-        if (paramObject->GetProperty("text")->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(paramObject->GetProperty("text"));
+        JSRef<JSVal> textValue = paramObject->GetProperty("text");
+        if (textValue->IsObject()) {
+            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
             changeEventVal = valueObj->GetProperty("changeEvent");
-            auto valueProperty = valueObj->GetProperty("value");
-            if (ParseJsString(valueProperty, text)) {
+            if (changeEventVal->IsFunction()) {
+                textValue = valueObj->GetProperty("value");
+            }
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         } else {
-            if (ParseJsString(paramObject->GetProperty("text"), text)) {
+            if (ParseJsString(textValue, text)) {
                 value = text;
             }
         }
@@ -187,13 +197,10 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
         return;
     }
 
-    Color color;
-    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor")) {
-        auto theme = GetTheme<TextFieldTheme>();
-        if (info[0]->IsUndefined() && theme) {
-            color = theme->GetPlaceholderColor();
-        }
-    }
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    Color color = theme->GetPlaceholderColor();
+    CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor");
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
 
@@ -317,11 +324,11 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         caretStyle.caretWidth = theme->GetCursorWidth();
     } else {
         CalcDimension width;
-        if (!ParseJsDimensionVp(caretWidth, width)) {
-            caretStyle.caretWidth = theme->GetCursorWidth();
+        if (!ParseJsDimensionVpNG(caretWidth, width, false)) {
+            width = theme->GetCursorWidth();
         }
         if (LessNotEqual(width.Value(), 0.0)) {
-            return;
+            width = theme->GetCursorWidth();
         }
         caretStyle.caretWidth = width;
     }
@@ -393,16 +400,13 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
+    if (!ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP, false)) {
         LOGI("Parse to dimension FP failed!");
-        return;
+        auto theme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        fontSize = theme->GetFontSize();
     }
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
-}
-
-void JSTextField::RequestKeyboardOnFocus(bool needToRequest)
-{
-    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
 }
 
 void JSTextField::SetFontWeight(const std::string& value)
@@ -644,7 +648,7 @@ NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
         // use default value.
         length.Reset();
     }
-    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : Dimension()));
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
     return padding;
 }
 
@@ -671,16 +675,16 @@ NG::PaddingProperty JSTextField::SetPaddings(const std::optional<CalcDimension>&
     }
     if (left.has_value()) {
         if (left.value().Unit() == DimensionUnit::CALC) {
-            paddings.left = NG::CalcLength(
-                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+            paddings.left =
+                NG::CalcLength(left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
         }
     }
     if (right.has_value()) {
         if (right.value().Unit() == DimensionUnit::CALC) {
-            paddings.right = NG::CalcLength(
-                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+            paddings.right =
+                NG::CalcLength(right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
         } else {
             paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
         }
@@ -787,6 +791,20 @@ void JSTextField::SetOnChange(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnChange(std::move(callback));
 }
 
+void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
+void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(float, float)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextFieldModel::GetInstance()->SetOnContentScroll(std::move(callback));
+}
+
 void JSTextField::SetOnCopy(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
@@ -845,6 +863,7 @@ void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
         LOGI("The info is wrong, it is supposed to be an boolean");
+        TextFieldModel::GetInstance()->SetShowUnderline(false);
         return;
     }
     TextFieldModel::GetInstance()->SetShowUnderline(info[0]->ToBoolean());
@@ -861,39 +880,42 @@ void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> showVal = jsObj->GetProperty("onIconSrc");
     JSRef<JSVal> hideVal = jsObj->GetProperty("offIconSrc");
-    PasswordIcon passwordicon;
+    PasswordIcon passwordIcon;
     if (showVal->IsString()) {
-        passwordicon.showResult = showVal->ToString();
+        passwordIcon.showResult = showVal->ToString();
     }
     if (hideVal->IsString()) {
-        passwordicon.hideResult = hideVal->ToString();
+        passwordIcon.hideResult = hideVal->ToString();
     }
     if (showVal->IsObject()) {
         JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(showVal)->GetProperty("bundleName");
         JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(showVal)->GetProperty("moduleName");
         if (bundleName->IsString()) {
-            passwordicon.showBundleName = bundleName->ToString();
+            passwordIcon.showBundleName = bundleName->ToString();
         }
         if (moduleName->IsString()) {
-            passwordicon.showModuleName = moduleName->ToString();
+            passwordIcon.showModuleName = moduleName->ToString();
         }
-        ParseJsMedia(JSRef<JSObject>::Cast(showVal), passwordicon.showResult);
+        ParseJsMedia(JSRef<JSObject>::Cast(showVal), passwordIcon.showResult);
     }
     if (hideVal->IsObject()) {
         JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("bundleName");
         JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("moduleName");
         if (bundleName->IsString()) {
-            passwordicon.hideBundleName = bundleName->ToString();
+            passwordIcon.hideBundleName = bundleName->ToString();
         }
         if (moduleName->IsString()) {
-            passwordicon.hideModuleName = moduleName->ToString();
+            passwordIcon.hideModuleName = moduleName->ToString();
         }
-        ParseJsMedia(JSRef<JSObject>::Cast(hideVal), passwordicon.hideResult);
+        ParseJsMedia(JSRef<JSObject>::Cast(hideVal), passwordIcon.hideResult);
     }
-    if (passwordicon.showResult.empty() && passwordicon.hideResult.empty()) {
-        return;
+    if (!showVal->IsString() && !showVal->IsObject()) {
+        passwordIcon.showResult = "";
     }
-    TextFieldModel::GetInstance()->SetPasswordIcon(passwordicon);
+    if (!hideVal->IsString() && !hideVal->IsObject()) {
+        passwordIcon.hideResult = "";
+    }
+    TextFieldModel::GetInstance()->SetPasswordIcon(passwordIcon);
 }
 
 void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
@@ -951,6 +973,7 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         if (!info[0]->IsUndefined() && !info[0]->IsString()) {
             LOGI("args need a string or undefined");
+            TextFieldModel::GetInstance()->SetShowError("", false);
             return;
         }
         TextFieldModel::GetInstance()->SetShowError(
@@ -969,4 +992,92 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
 }
 
+void JSTextField::SetBarState(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        LOGI("SetBarState create error, info is not number or non-valid");
+        TextFieldModel::GetInstance()->SetBarState(DisplayMode::AUTO);
+        return;
+    }
+    DisplayMode displayMode = static_cast<DisplayMode>(info[0]->ToNumber<int32_t>());
+    TextFieldModel::GetInstance()->SetBarState(displayMode);
+}
+
+void JSTextField::SetMaxLines(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        LOGI("SetMaxLines create error, info is not number or non-valid");
+        TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
+        return;
+    }
+    if (info[0]->ToNumber<int32_t>() <= 0) {
+        TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetMaxViewLines(info[0]->ToNumber<uint32_t>());
+}
+
+void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("EnableKeyboardOnFocus should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetEnableKeyboardOnFocus is not correct, using default");
+        TextFieldModel::GetInstance()->RequestKeyboardOnFocus(true);
+        return;
+    }
+    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
+}
+
+void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("SelectionMenuHidden should have at least 1 param");
+        return;
+    }
+    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+        LOGI("The info of SetSelectionMenuHidden is not correct, using default");
+        TextFieldModel::GetInstance()->SetSelectionMenuHidden(false);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
+}
+
+bool JSTextField::ParseJsCustomKeyboardBuilder(
+    const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc)
+{
+    if (info.Length() <= index) {
+        return false;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[index]);
+    auto builder = obj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        return false;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_RETURN(builderFunc, false);
+    buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("CustomKeyboard");
+        func->Execute();
+    };
+    return true;
+}
+
+void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && (info[0]->IsUndefined() || info[0]->IsNull())) {
+        TextFieldModel::GetInstance()->SetCustomKeyboard(nullptr);
+        return;
+    }
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    std::function<void()> buildFunc;
+    if (ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
+        TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+    }
+}
 } // namespace OHOS::Ace::Framework

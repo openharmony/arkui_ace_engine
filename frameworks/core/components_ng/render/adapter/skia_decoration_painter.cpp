@@ -915,13 +915,12 @@ void SkiaDecorationPainter::SkiaCreateRect(
     skPath.addRRect(roundRect);
 }
 
-void SkiaDecorationPainter::PaintGrayScale(const SizeF& frameSize, SkCanvas* canvas, float scale)
+void SkiaDecorationPainter::PaintGrayScale(const SkRRect& rRect, SkCanvas* canvas, float scale)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (GreatNotEqual(scale, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect, true);
+            canvas->clipRRect(rRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
             float matrix[20] = { 0.0f };
@@ -936,15 +935,14 @@ void SkiaDecorationPainter::PaintGrayScale(const SizeF& frameSize, SkCanvas* can
     }
 }
 
-void SkiaDecorationPainter::PaintBrightness(const SizeF& frameSize, SkCanvas* canvas, float bright)
+void SkiaDecorationPainter::PaintBrightness(const SkRRect& rRect, SkCanvas* canvas, float bright)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     // brightness range = (0, 2)
     // skip painting when brightness is normal
     CHECK_NULL_VOID_NOLOG(!NearEqual(bright, 1.0));
     if (canvas) {
         SkAutoCanvasRestore acr(canvas, true);
-        canvas->clipRRect(outerRRect, true);
+        canvas->clipRRect(rRect, true);
         SkPaint paint;
         paint.setAntiAlias(true);
         float matrix[20] = { 0.0f };
@@ -958,14 +956,13 @@ void SkiaDecorationPainter::PaintBrightness(const SizeF& frameSize, SkCanvas* ca
     }
 }
 
-void SkiaDecorationPainter::PaintContrast(const SizeF& frameSize, SkCanvas* canvas, float contrasts)
+void SkiaDecorationPainter::PaintContrast(const SkRRect& rRect, SkCanvas* canvas, float contrasts)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     // skip painting if contrast is normal
     CHECK_NULL_VOID_NOLOG(!NearEqual(contrasts, 1.0));
     if (canvas) {
         SkAutoCanvasRestore acr(canvas, true);
-        canvas->clipRRect(outerRRect, true);
+        canvas->clipRRect(rRect, true);
         SkPaint paint;
         paint.setAntiAlias(true);
         float matrix[20] = { 0.0f };
@@ -978,13 +975,12 @@ void SkiaDecorationPainter::PaintContrast(const SizeF& frameSize, SkCanvas* canv
     }
 }
 
-void SkiaDecorationPainter::PaintColorBlend(const SizeF& frameSize, SkCanvas* canvas, const Color& colorBlend)
+void SkiaDecorationPainter::PaintColorBlend(const SkRRect& rRect, SkCanvas* canvas, const Color& colorBlend)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (colorBlend.GetValue() != COLOR_MASK) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect, true);
+            canvas->clipRRect(rRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
             paint.setColorFilter(SkColorFilters::Blend(
@@ -996,13 +992,12 @@ void SkiaDecorationPainter::PaintColorBlend(const SizeF& frameSize, SkCanvas* ca
     }
 }
 
-void SkiaDecorationPainter::PaintSaturate(const SizeF& frameSize, SkCanvas* canvas, float saturates)
+void SkiaDecorationPainter::PaintSaturate(const SkRRect& rRect, SkCanvas* canvas, float saturates)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (!NearEqual(saturates, 1.0) && GreatOrEqual(saturates, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect, true);
+            canvas->clipRRect(rRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
             float matrix[20] = { 0.0f };
@@ -1020,16 +1015,15 @@ void SkiaDecorationPainter::PaintSaturate(const SizeF& frameSize, SkCanvas* canv
     }
 }
 
-void SkiaDecorationPainter::PaintSepia(const SizeF& frameSize, SkCanvas* canvas, float sepias)
+void SkiaDecorationPainter::PaintSepia(const SkRRect& rRect, SkCanvas* canvas, float sepias)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (sepias > 1.0) {
         sepias = 1.0;
     }
     if (GreatNotEqual(sepias, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect, true);
+            canvas->clipRRect(rRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
             float matrix[20] = { 0.0f };
@@ -1052,13 +1046,12 @@ void SkiaDecorationPainter::PaintSepia(const SizeF& frameSize, SkCanvas* canvas,
     }
 }
 
-void SkiaDecorationPainter::PaintInvert(const SizeF& frameSize, SkCanvas* canvas, float inverts)
+void SkiaDecorationPainter::PaintInvert(const SkRRect& rRect, SkCanvas* canvas, float inverts)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (GreatNotEqual(inverts, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect, true);
+            canvas->clipRRect(rRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
             float matrix[20] = { 0.0f };
@@ -1078,13 +1071,12 @@ void SkiaDecorationPainter::PaintInvert(const SizeF& frameSize, SkCanvas* canvas
     }
 }
 
-void SkiaDecorationPainter::PaintHueRotate(const SizeF& frameSize, SkCanvas* canvas, float hueRotate)
+void SkiaDecorationPainter::PaintHueRotate(const SkRRect& rRect, SkCanvas* canvas, float hueRotate)
 {
-    SkRRect outerRRect = SkRRect::MakeRect(SkRect::MakeLTRB(0.0f, 0.0f, frameSize.Width(), frameSize.Height()));
     if (GreatNotEqual(hueRotate, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect, true);
+            canvas->clipRRect(rRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
             while (GreatOrEqual(hueRotate, 360)) {

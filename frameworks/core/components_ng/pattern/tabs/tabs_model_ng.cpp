@@ -17,6 +17,7 @@
 
 #include <type_traits>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -36,9 +37,14 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension BAR_BLUR_RADIUS = 200.0_vp;
+constexpr Dimension BAR_SATURATE = 1.3_vp;
+} // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
     const RefPtr<SwiperController>& swiperController)
@@ -62,7 +68,6 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
         V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    swiperPaintProperty->UpdateLoop(false);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -70,11 +75,12 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     CHECK_NULL_VOID(tabTheme);
     swiperPaintProperty->UpdateDuration(tabTheme->GetTabContentAnimationDuration());
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    swiperLayoutProperty->UpdateLoop(false);
     swiperLayoutProperty->UpdateCachedCount(0);
     swiperLayoutProperty->UpdateShowIndicator(false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto controller = swiperController;
+    auto controller = swiperController ? swiperController : swiperPattern->GetSwiperController();
     if (!controller) {
         controller = AceType::MakeRefPtr<SwiperController>();
     }
@@ -130,12 +136,12 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
         CHECK_NULL_VOID(tabsFrameNode);
         auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
-        tabsLayoutProperty->UpdateIndex(index);
+        tabsLayoutProperty->UpdateIndex(index < 0 ? 0 : index);
         return;
     }
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     auto preIndex = tabsLayoutProperty->GetIndexValue(0);
-    if (index != preIndex) {
+    if ((index != preIndex) && (index >= 0)) {
         SetIndex(index);
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
         tabBarPattern->SetMaskAnimationByCreate(true);
@@ -165,7 +171,10 @@ void TabsModelNG::SetTabBarWidth(const Dimension& tabBarWidth)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    if (tabBarWidth.ConvertToPx() < 0.0) {
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto tabBarWidthToPx =
+        ConvertToPx(tabBarWidth, scaleProperty, tabBarLayoutProperty->GetLayoutConstraint()->percentReference.Width());
+    if (LessNotEqual(tabBarWidthToPx.value_or(0.0), 0.0)) {
         tabBarLayoutProperty->ClearUserDefinedIdealSize(true, false);
     } else {
         tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(tabBarWidth), std::nullopt));
@@ -182,7 +191,10 @@ void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    if (tabBarHeight.ConvertToPx() < 0.0) {
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto tabBarHeightToPx = ConvertToPx(
+        tabBarHeight, scaleProperty, tabBarLayoutProperty->GetLayoutConstraint()->percentReference.Height());
+    if (LessNotEqual(tabBarHeightToPx.value_or(0.0), 0.0)) {
         tabBarLayoutProperty->ClearUserDefinedIdealSize(false, true);
     } else {
         tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, NG::CalcLength(tabBarHeight)));
@@ -278,11 +290,11 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     if (barOverlap) {
-        BlurStyleOption option;
-        option.blurStyle = BlurStyle::REGULAR;
-        tabBarRenderContext->UpdateBackBlurStyle(option);
+        tabBarRenderContext->UpdateBackBlurRadius(BAR_BLUR_RADIUS);
+        tabBarRenderContext->UpdateFrontSaturate(BAR_SATURATE);
     } else {
-        tabBarRenderContext->ResetBackBlurStyle();
+        tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
+        tabBarRenderContext->ResetFrontSaturate();
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -306,6 +318,15 @@ void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChan
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetOnChangeEvent(std::move(onChange));
+}
+
+void TabsModelNG::SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnTabBarClickEvent(std::move(onTabBarClick));
 }
 
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
@@ -404,6 +425,16 @@ void TabsModelNG::Pop()
     CHECK_NULL_VOID(swiperNode);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
+
+    auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
+    auto tabsFocusNode = tabsNode->GetFocusHub();
+    CHECK_NULL_VOID(tabsFocusNode);
+    auto tabBarFocusNode = tabBarNode->GetFocusHub();
+    CHECK_NULL_VOID(tabBarFocusNode);
+    if (tabBarPosition == BarPosition::START) {
+        tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+    }
+
     auto tabContentNum = swiperNode->TotalChildCount();
     if (index > tabContentNum - 1 || index < 0) {
         index = 0;
@@ -474,5 +505,22 @@ void TabsModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& o
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetOnIndexChangeEvent(std::move(onChangeEvent));
+}
+
+void TabsModelNG::SetClipEdge(bool clipEdge)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsRenderContext = tabsNode->GetRenderContext();
+    CHECK_NULL_VOID(tabsRenderContext);
+    tabsRenderContext->UpdateClipEdge(clipEdge);
+    auto tabsChildren = tabsNode->GetChildren();
+    for (const auto& child : tabsChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childFrameNode);
+        auto renderContext = childFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(clipEdge);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -240,29 +240,8 @@ void DialogContainer::Destroy()
 {
     LOGI("DialogContainer::Destroy begin");
     ContainerScope scope(instanceId_);
-    if (pipelineContext_ && taskExecutor_) {
-        // 1. Destroy Pipeline on UI thread.
-        RefPtr<PipelineBase> context;
-        context.Swap(pipelineContext_);
-        if (GetSettings().usePlatformAsUIThread) {
-            context->Destroy();
-        } else {
-            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
-        }
-        // 2. Destroy Frontend on JS thread.
-        RefPtr<Frontend> frontend;
-        frontend_.Swap(frontend);
-        if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
-            frontend->UpdateState(Frontend::State::ON_DESTROY);
-            frontend->Destroy();
-        } else {
-            taskExecutor_->PostTask(
-                [frontend]() {
-                    frontend->UpdateState(Frontend::State::ON_DESTROY);
-                    frontend->Destroy();
-                },
-                TaskExecutor::TaskType::JS);
-        }
+    if (frontend_) {
+        frontend_->UpdateState(Frontend::State::ON_DESTROY);
     }
     resRegister_.Reset();
     assetManager_.Reset();
@@ -329,11 +308,7 @@ void DialogContainer::AttachView(
     // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
     flutterTaskExecutor->InitJsThread(false);
     InitializeFrontend();
-
-    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
-    if (parentContainerId == -1) {
-        SetUseNewPipeline();
-    }
+    SetUseNewPipeline();
 
     InitPipelineContext(std::move(window), instanceId, density, width, height, windowId);
     InitializeCallback();
@@ -506,6 +481,7 @@ bool DialogContainer::ShowToastDialogWindow(
     if (isToast) {
         window->SetTouchable(false);
     }
+    window->SetNeedDefaultAnimation(false);
     OHOS::Rosen::WMError ret = window->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         LOGE("DialogContainer::ShowToastDialogWindow Show window failed code: %{public}d", static_cast<int32_t>(ret));

@@ -30,20 +30,17 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+void OptionPattern::OnAttachToFrameNode()
+{
+    RegisterOnKeyEvent();
+    RegisterOnClick();
+    RegisterOnTouch();
+    RegisterOnHover();
+}
 
 void OptionPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    RegisterOnClick();
-    RegisterOnTouch();
-    RegisterOnHover();
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    RegisterOnKeyEvent(focusHub);
-
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     textTheme_ = context->GetTheme<TextTheme>();
@@ -51,6 +48,8 @@ void OptionPattern::OnModifyDone()
     selectTheme_ = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme_);
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
@@ -162,8 +161,12 @@ void OptionPattern::RegisterOnHover()
     inputHub->AddOnHoverEvent(mouseEvent);
 }
 
-void OptionPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+void OptionPattern::RegisterOnKeyEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN_NOLOG(pattern, false);
@@ -397,7 +400,7 @@ Color OptionPattern::GetFontColor()
     return props->GetTextColorValue(defaultColor);
 }
 
-const std::string& OptionPattern::GetText()
+std::string OptionPattern::GetText()
 {
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
@@ -420,8 +423,8 @@ void OptionPattern::UpdateIcon(const std::string& src)
     iconSrc_ = src;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    RefPtr<FrameNode> row = host->GetChildAtIndex(0)
-        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    RefPtr<FrameNode> row =
+        host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(row);
     if (src.empty()) {
         row->RemoveChild(icon_); // it's safe even if icon_ is nullptr

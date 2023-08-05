@@ -29,13 +29,12 @@ if (is_ohos_standard_system) {
 build_component_ng("window_scene") {
   sources = [
     "root/root_scene_model.cpp",
-    "scene/container/window_extension.cpp",
-    "scene/container/window_pattern.cpp",
-    "scene/host/host_window_extension.cpp",
-    "scene/host/host_window_node.cpp",
-    "scene/host/host_window_pattern.cpp",
-    "scene/host/host_window_scene.cpp",
-    "scene/host/host_window_scene_model.cpp",
+    "scene/system_window_scene.cpp",
+    "scene/window_event_process.cpp",
+    "scene/window_node.cpp",
+    "scene/window_pattern.cpp",
+    "scene/window_scene.cpp",
+    "scene/window_scene_model.cpp",
     "screen/screen_model.cpp",
     "screen/screen_pattern.cpp",
   ]
@@ -43,14 +42,10 @@ build_component_ng("window_scene") {
   if (is_ohos_standard_system) {
     configs = [ ":window_scene_config" ]
 
-    deps = [ "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client" ]
-
     external_deps = [
-      "ability_runtime:abilitykit_native",
-      "ace_engine:ace_uicontent",
+      "graphic_2d:librender_service_client",
       "input:libmmi-client",
       "ipc:ipc_single",
-      "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",

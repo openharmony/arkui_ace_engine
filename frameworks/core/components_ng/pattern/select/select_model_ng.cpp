@@ -15,17 +15,31 @@
 
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto layoutProperty = select->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
+}
+} // namespace
+
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
 {
     LOGI("creating select component");
@@ -35,6 +49,7 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
         V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
     ViewStackProcessor::GetInstance()->Push(select);
 
+    SetSelectDefaultSize(select);
     auto pattern = select->GetPattern<SelectPattern>();
     pattern->BuildChild();
     // create menu node
@@ -240,47 +255,85 @@ void SelectModelNG::SetSize(Dimension& width, Dimension& height)
     ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void SelectModelNG::SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
-    const std::optional<Dimension>& left, const std::optional<Dimension>& right)
+void SelectModelNG::SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+    const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right)
 {
     NG::PaddingProperty paddings;
     if (top.has_value()) {
-        paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : Dimension());
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            paddings.top =
+                NG::CalcLength(top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
+        }
     }
     if (bottom.has_value()) {
-        paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : Dimension());
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(
+                bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+        }
     }
     if (left.has_value()) {
-        paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : Dimension());
+        if (left.value().Unit() == DimensionUnit::CALC) {
+            paddings.left = NG::CalcLength(
+                left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
+        }
     }
     if (right.has_value()) {
-        paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : Dimension());
+        if (right.value().Unit() == DimensionUnit::CALC) {
+            paddings.right = NG::CalcLength(
+                right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
+        }
     }
     ViewAbstract::SetPadding(paddings);
 }
 
-void SelectModelNG::SetPadding(const Dimension& value)
+void SelectModelNG::SetPadding(const CalcDimension& value)
 {
-    ViewAbstract::SetPadding(NG::CalcLength(value.IsNonNegative() ? value : Dimension()));
+    if (value.Unit() == DimensionUnit::CALC) {
+        // padding must great or equal zero.
+        ViewAbstract::SetPadding(
+            NG::CalcLength(value.IsNonNegative() ? value.CalcValue() : CalcDimension().CalcValue()));
+    } else {
+        // padding must great or equal zero.
+        ViewAbstract::SetPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
+    }
 }
 
-void SelectModelNG::SetPaddingLeft(const Dimension& leftValue)
+void SelectModelNG::SetPaddingLeft(const CalcDimension& leftValue)
 {
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
+
     if (!NearEqual(leftValue.Value(), 0.0)) {
-        paddings.left = NG::CalcLength(leftValue.IsNonNegative() ? leftValue : Dimension());
+        if (leftValue.Unit() == DimensionUnit::CALC) {
+            paddings.left = NG::CalcLength(
+                leftValue.IsNonNegative() ? leftValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(leftValue.IsNonNegative() ? leftValue : CalcDimension());
+        }
     }
     paddings.right = std::nullopt;
     ViewAbstract::SetPadding(paddings);
 }
 
-void SelectModelNG::SetPaddingTop(const Dimension& topValue)
+void SelectModelNG::SetPaddingTop(const CalcDimension& topValue)
 {
     NG::PaddingProperty paddings;
     if (!NearEqual(topValue.Value(), 0.0)) {
-        paddings.top = NG::CalcLength(topValue.IsNonNegative() ? topValue : Dimension());
+        if (topValue.Unit() == DimensionUnit::CALC) {
+            paddings.top = NG::CalcLength(
+                topValue.IsNonNegative() ? topValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(topValue.IsNonNegative() ? topValue : CalcDimension());
+        }
     }
     paddings.bottom = std::nullopt;
     paddings.left = std::nullopt;
@@ -288,24 +341,35 @@ void SelectModelNG::SetPaddingTop(const Dimension& topValue)
     ViewAbstract::SetPadding(paddings);
 }
 
-void SelectModelNG::SetPaddingRight(const Dimension& rightValue)
+void SelectModelNG::SetPaddingRight(const CalcDimension& rightValue)
 {
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
     paddings.left = std::nullopt;
     if (!NearEqual(rightValue.Value(), 0.0)) {
-        paddings.right = NG::CalcLength(rightValue.IsNonNegative() ? rightValue : Dimension());
+        if (rightValue.Unit() == DimensionUnit::CALC) {
+            paddings.right = NG::CalcLength(
+                rightValue.IsNonNegative() ? rightValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(rightValue.IsNonNegative() ? rightValue : CalcDimension());
+        }
     }
     ViewAbstract::SetPadding(paddings);
 }
 
-void SelectModelNG::SetPaddingBottom(const Dimension& buttomValue)
+void SelectModelNG::SetPaddingBottom(const CalcDimension& buttomValue)
 {
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     if (!NearEqual(buttomValue.Value(), 0.0)) {
-        paddings.bottom = NG::CalcLength(buttomValue.IsNonNegative() ? buttomValue : Dimension());
+        if (buttomValue.Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(
+                buttomValue.IsNonNegative() ? buttomValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(
+                buttomValue.IsNonNegative() ? buttomValue : CalcDimension());
+        }
     }
     paddings.left = std::nullopt;
     paddings.right = std::nullopt;
@@ -347,4 +411,3 @@ void SelectModelNG::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent)
     hub->SetValueChangeEvent(std::move(valueChangeEvent));
 }
 } // namespace OHOS::Ace::NG
-

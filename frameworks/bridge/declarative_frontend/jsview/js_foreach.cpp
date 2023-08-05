@@ -55,7 +55,6 @@ namespace OHOS::Ace::Framework {
 void JSForEach::Create(const JSCallbackInfo& info)
 {
 
-    ACE_SCOPED_TRACE("JSForEach::Create");
     if (Container::IsCurrentUseNewPipeline()) {
         ForEachModel::GetInstance()->Create();
         return;
@@ -63,7 +62,7 @@ void JSForEach::Create(const JSCallbackInfo& info)
 
     if (info.Length() < 4 || !info[2]->IsObject() || !info[3]->IsFunction() ||
         (!info[0]->IsNumber() && !info[0]->IsString()) || info[1]->IsUndefined() || !info[1]->IsObject()) {
-        LOGE("Invalid arguments for ForEach");
+        LOGW("Invalid arguments for ForEach");
         return;
     }
 
@@ -96,16 +95,15 @@ void JSForEach::Pop()
 // returns bool, true on success
 void JSForEach::GetIdArray(const JSCallbackInfo& info)
 {
-    ACE_SCOPED_TRACE("JSForEach::GetIdArray");
     if ((info.Length() != 2) || !info[1]->IsArray() || info[0]->IsString()) {
-        LOGE("Invalid arguments for ForEach.GetIdArray");
+        LOGW("Invalid arguments for ForEach.GetIdArray");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
 
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
     if (jsArr->Length() > 0) {
-        LOGE("JS Array must be empty!");
+        LOGW("JS Array must be empty!");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
@@ -131,11 +129,10 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
 // no return value
 void JSForEach::SetIdArray(const JSCallbackInfo& info)
 {
-    ACE_SCOPED_TRACE("JSForEach::SetIdArray");
     if (info.Length() != 4 ||
         !info[0]->IsNumber() || !info[1]->IsArray() ||
         !info[2]->IsArray()  || !info[3]->IsArray()) {
-        LOGE("Invalid arguments for ForEach.SetIdArray");
+        LOGW("Invalid arguments for ForEach.SetIdArray");
         return;
     }
 
@@ -146,7 +143,7 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
     std::list<std::string> newIdArr;
 
     if (diffIds->Length() > 0 || duplicateIds->Length() > 0) {
-        LOGE("Invalid arguments for ForEach.SetIdArray output arrays must be empty!");
+        LOGW("Invalid arguments for ForEach.SetIdArray output arrays must be empty!");
         return;
     }
 
@@ -183,9 +180,8 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
 // parentView : JSView
 void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
 {
-    ACE_SCOPED_TRACE("JSForEach::CreateNewChildStart");
     if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
-        LOGE("Invalid arguments for ForEach.CreateNewChildStart");
+        LOGW("Invalid arguments for ForEach.CreateNewChildStart");
         return;
     }
 
@@ -198,9 +194,8 @@ void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
 // parentView : JSView
 void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
 {
-    ACE_SCOPED_TRACE("JSForEach::CreateNewChildFinish");
     if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
-        LOGE("Invalid arguments for ForEach.CreateNewChildFinish");
+        LOGW("Invalid arguments for ForEach.CreateNewChildFinish");
         return;
     }
 

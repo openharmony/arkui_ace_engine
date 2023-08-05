@@ -19,11 +19,9 @@
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -34,10 +32,13 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     auto menuItem = FrameNode::GetOrCreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CustomMenuItemPattern>(); });
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
 
+    auto layoutProps = menuItem->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdateAlignment(Alignment::CENTER_LEFT);
     // set border radius
     auto renderContext = menuItem->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -52,6 +53,16 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     menuItem->AddChild(customNode);
 }
 
+/*
+ * The structure of menu item is designed as follows :
+ * |--menu_item
+ *   |--left_row
+ *     |--icon
+ *     |--content
+ *   |--right_row
+ *     |--label
+ *     |--end_icon
+ */
 void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -77,7 +88,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     CHECK_NULL_VOID(leftRow);
     auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(leftRowLayoutProps);
-    leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 
@@ -146,6 +157,11 @@ void MenuItemModelNG::SetFontWeight(FontWeight weight)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontWeight, weight);
 }
 
+void MenuItemModelNG::SetFontStyle(Ace::FontStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, ItalicFontStyle, style);
+}
+
 void MenuItemModelNG::SetFontColor(const std::optional<Color>& color)
 {
     if (color.has_value()) {
@@ -153,6 +169,11 @@ void MenuItemModelNG::SetFontColor(const std::optional<Color>& color)
     } else {
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor);
     }
+}
+
+void MenuItemModelNG::SetFontFamily(const std::vector<std::string> &families)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontFamily, families);
 }
 
 void MenuItemModelNG::SetLabelFontSize(const Dimension& fontSize)
@@ -170,6 +191,11 @@ void MenuItemModelNG::SetLabelFontWeight(FontWeight weight)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, weight);
 }
 
+void MenuItemModelNG::SetLabelFontStyle(Ace::FontStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelItalicFontStyle, style);
+}
+
 void MenuItemModelNG::SetLabelFontColor(const std::optional<Color>& color)
 {
     if (color.has_value()) {
@@ -177,6 +203,11 @@ void MenuItemModelNG::SetLabelFontColor(const std::optional<Color>& color)
     } else {
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor);
     }
+}
+
+void MenuItemModelNG::SetLabelFontFamily(const std::vector<std::string> &families)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontFamily, families);
 }
 
 void MenuItemModelNG::SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent)

@@ -20,6 +20,7 @@
 #include <list>
 #include <utility>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
@@ -44,6 +45,7 @@
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace::NG {
@@ -51,10 +53,11 @@ class PipelineContext;
 class Pattern;
 class StateModifyTask;
 class UITask;
+class FramePorxy;
 
 // FrameNode will display rendering region in the screen.
-class ACE_EXPORT FrameNode : public UINode {
-    DECLARE_ACE_TYPE(FrameNode, UINode);
+class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
+    DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
 
 public:
     // create a new child element with new element tree.
@@ -82,6 +85,24 @@ public:
         return 1;
     }
 
+    void OnInspectorIdUpdate(const std::string& /*unused*/) override;
+    struct ZIndexComparator {
+        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
+        {
+            auto left = weakLeft.Upgrade();
+            auto right = weakRight.Upgrade();
+            if (left && right) {
+                return left->GetRenderContext()->GetZIndexValue(1) < right->GetRenderContext()->GetZIndexValue(1);
+            }
+            return false;
+        }
+    };
+
+    const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& GetFrameChildren() const
+    {
+        return frameChildren_;
+    }
+
     void InitializePatternAndContext();
 
     virtual void MarkModifyDone();
@@ -102,10 +123,10 @@ public:
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
+    RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
 
-    RefPtr<LayoutWrapper> UpdateLayoutWrapper(
-        RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
+    RefPtr<LayoutWrapperNode> UpdateLayoutWrapper(
+        RefPtr<LayoutWrapperNode> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
 
     std::optional<UITask> CreateLayoutTask(bool forceUseMainThread = false);
 
@@ -113,23 +134,27 @@ public:
 
     void SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty);
 
+    // Clear the user callback.
+    void ClearUserOnAreaChange();
+
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
+
     void TriggerOnAreaChangeCallback();
+
+    void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
 
     void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaUserCallbacks_[ratio] = callback;
     }
+
     void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaInnerCallbacks_[ratio] = callback;
     }
+
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
-    const RefPtr<GeometryNode>& GetGeometryNode() const
-    {
-        return geometryNode_;
-    }
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
     const RefPtr<RenderContext>& GetRenderContext() const
@@ -196,11 +221,6 @@ public:
         return type;
     }
 
-    const RefPtr<LayoutProperty>& GetLayoutProperty() const
-    {
-        return layoutProperty_;
-    }
-
     static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
@@ -213,14 +233,17 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
+    void CheckSecurityComponentStatus(std::vector<RectF>& rect);
+
+    bool HaveSecurityComponent();
+
+    bool IsSecurityComponent();
+
     void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
 
-    void MarkNeedSyncRenderTree() override
-    {
-        needSyncRenderTree_ = true;
-    }
+    void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void RebuildRenderContextTree() override;
 
@@ -271,14 +294,11 @@ public:
 
     OffsetF GetPaintRectOffsetToPage() const;
 
+    RectF GetPaintRectWithTransform() const;
+
+    VectorF GetTransformScale() const;
+
     void AdjustGridOffset();
-
-    void SetActive(bool active) override;
-
-    bool IsActive() const
-    {
-        return isActive_;
-    }
 
     bool IsInternal() const
     {
@@ -316,7 +336,8 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
+    bool CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -351,6 +372,12 @@ public:
         userSet_ = true;
     }
 
+    void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
+    {
+        builderFunc_ = buildFunc;
+        backgroundNode_ = nullptr;
+    }
+
     bool IsDraggable() const
     {
         return draggable_;
@@ -371,6 +398,16 @@ public:
         return allowDrop_;
     }
 
+    void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
+    {
+        overlayNode_ = overlayNode;
+    }
+
+    RefPtr<FrameNode> GetOverlayNode() const
+    {
+        return overlayNode_;
+    }
+
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
     void CreateAnimatablePropertyFloat(
@@ -380,21 +417,135 @@ public:
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
 
+    void SetHitTestMode(HitTestMode mode);
+    HitTestMode GetHitTestMode() const override;
+
     std::string ProvideRestoreInfo();
+
+    static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+
+    void SetViewPort(RectF viewPort)
+    {
+        viewPort_ = viewPort;
+    }
+
+    std::optional<RectF> GetViewPort() const;
+
+    enum class SceneStatus {
+        START,
+        RUNNING,
+        END,
+    };
+    // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
+    void AddFRCSceneInfo(const std::string& name, float speed, SceneStatus status);
+
+    OffsetF GetParentGlobalOffsetDuringLayout() const;
+    void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
+
+    // layoutwrapper function override
+    const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
+
+    void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
+
+    // Called to perform layout children.
+    void Layout() override;
+
+    int32_t GetTotalChildCount() const override
+    {
+        return UINode::TotalChildCount();
+    }
+
+    const RefPtr<GeometryNode>& GetGeometryNode() const override
+    {
+        return geometryNode_;
+    }
+
+    void SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty)
+    {
+        layoutProperty_ = layoutProperty;
+        layoutProperty_->SetHost(WeakClaim(this));
+    }
+
+    const RefPtr<LayoutProperty>& GetLayoutProperty() const override
+    {
+        return layoutProperty_;
+    }
+
+    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
+    const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
+    void RemoveChildInRenderTree(uint32_t index) override;
+    void RemoveAllChildInRenderTree() override;
+    void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
+    const std::string& GetHostTag() const override
+    {
+        return GetTag();
+    }
+
+    bool IsActive() const override
+    {
+        return isActive_;
+    }
+
+    void SetActive(bool active = true) override;
+
+    bool IsOutOfLayout() const override
+    {
+        return renderContext_->HasPosition();
+    }
+
+    bool SkipMeasureContent() const override;
+    float GetBaselineDistance() const override;
+    void SetCacheCount(
+        int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
+
+    void SyncGeometryNode();
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
+    bool CheckNeedForceMeasureAndLayout() override;
+
+    template<typename T>
+    RefPtr<T> FindFocusChildNodeOfClass()
+    {
+        const auto& children = GetChildren();
+        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+            auto& child = *iter;
+            auto target = DynamicCast<FrameNode>(child->FindChildNodeOfClass<T>());
+            if (target) {
+                auto focusEvent = target->eventHub_->GetFocusHub();
+                if (focusEvent && focusEvent->IsCurrentFocus()) {
+                    return AceType::DynamicCast<T>(target);
+                }
+            }
+        }
+
+        if (AceType::InstanceOf<T>(this)) {
+            auto target = DynamicCast<FrameNode>(this);
+            if (target) {
+                auto focusEvent = target->eventHub_->GetFocusHub();
+                if (focusEvent && focusEvent->IsCurrentFocus()) {
+                    return Claim(AceType::DynamicCast<T>(this));
+                }
+            }
+        }
+        return nullptr;
+    }
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
+    std::pair<float, float> ContextPositionConvertToPX(
+        const RefPtr<RenderContext>& context, const SizeF& percentReference) const;
     bool IsNeedRequestParentMeasure() const;
     void UpdateLayoutPropertyFlag() override;
+    void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
 
-    void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout);
-    void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
+    void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
+    void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
     LayoutConstraintF GetLayoutConstraint() const;
     OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
+    void LayoutOverlay();
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
     void OnGenerateOneDepthVisibleFrameWithTransition(
@@ -410,14 +561,15 @@ private:
     // dump self info.
     void DumpInfo() override;
 
+    void DumpOverlayInfo();
+
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
-    HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
-    std::vector<RectF> GetResponseRegionList(const RectF& rect);
+    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(
@@ -426,17 +578,11 @@ private:
         VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
-    struct ZIndexComparator {
-        bool operator()(const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) const
-        {
-            if (left && right) {
-                return left->GetRenderContext()->GetZIndexValue(1) < right->GetRenderContext()->GetZIndexValue(1);
-            }
-            return false;
-        }
-    };
+    // set costom background layoutConstraint
+    void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
+
     // sort in ZIndex.
-    std::multiset<RefPtr<FrameNode>, ZIndexComparator> frameChildren_;
+    std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
@@ -450,9 +596,17 @@ private:
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
 
+    RefPtr<FrameNode> backgroundNode_;
+    std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
+    std::optional<RectF> viewPort_;
+
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
+    RefPtr<GeometryNode> oldGeometryNode_;
+    std::optional<bool> skipMeasureContent_;
+    std::unique_ptr<FramePorxy> frameProxy_;
 
     bool needSyncRenderTree_ = false;
 
@@ -465,6 +619,7 @@ private:
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
+    bool bypass_ = false;
 
     double lastVisibleRatio_ = 0.0;
 
@@ -480,6 +635,8 @@ private:
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
 
     bool isRestoreInfoUsed_ = false;
+
+    RefPtr<FrameNode> overlayNode_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 // function type of recycle node update function
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
-// Nativeview
+// NativeView
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 abstract class ViewPU extends NativeViewPartialUpdate
@@ -57,6 +57,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // flag for initgial rendering or re-render on-going.
   private isRenderInProgress: boolean = false;
+
+  // flag if active of inActive
+  // inActive means updates are delayed
+  private isActive_ : boolean = true;
+
+  // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
+  private isDeleting_: boolean = false;
 
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
@@ -76,14 +83,22 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected updateFuncByElmtId: Map<number, UpdateFunc>
     = new Map<number, UpdateFunc>();
 
-  // my LocalStorge instance, shared with ancestor Views.
+  // set of all @Local/StorageLink/Prop variables owned by this ViwPU
+  private ownStorageLinksProps_ : Set<ObservedPropertyAbstractPU<any>> = new Set<ObservedPropertyAbstractPU<any>>();
+
+  // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
   protected localStoragebackStore_: LocalStorage = undefined;
 
   protected get localStorage_() {
+    if (!this.localStoragebackStore_ && this.parent_) {
+      stateMgmtConsole.debug(`${this.constructor.name} get localStorage_ : Using LocalStorage instance of the parent View.`);
+      this.localStoragebackStore_ = this.parent_.localStorage_;
+    }
+
     if (!this.localStoragebackStore_) {
       stateMgmtConsole.info(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
-      this.localStoragebackStore_ = new LocalStorage({ /* emty */ });
+      this.localStoragebackStore_ = new LocalStorage({ /* empty */ });
     }
     return this.localStoragebackStore_;
   }
@@ -126,9 +141,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.localStoragebackStore_ = undefined;
     if (parent) {
       // this View is not a top-level View
-      stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
       this.setCardId(parent.getCardId());
-      this.localStorage_ = parent.localStorage_;
+      // Call below will set this.parent_ to parent as well
       parent.addChild(this);
     } else if (localStorage) {
       this.localStorage_ = localStorage;
@@ -165,12 +179,71 @@ abstract class ViewPU extends NativeViewPartialUpdate
       removedElmtIds.push(key);
     });
     this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
+    if (this.hasRecycleManager()) {
+      this.getRecycleManager().purgeAllCachedRecycleNode();
+    }
 
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
+    this.ownStorageLinksProps_.clear();
     if (this.parent_) {
       this.parent_.removeChild(this);
+    }
+    this.localStoragebackStore_ = undefined;
+    this.isDeleting_ = true;
+  }
+
+  
+  /**
+ * ArkUI engine will call this function when the corresponding CustomNode's active status change.
+ * @param active true for active, false for inactive
+ */
+  public setActive(active: boolean): void {
+    if (this.isActive_ == active) {
+      stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active} with unchanged state - ignoring`);
+      return;
+    }
+    stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+    this.isActive_ = active;
+    if (this.isActive_) {
+      this.onActiveInternal()
+    } else {
+      this.onInactiveInternal();
+    }
+  }
+
+  private onActiveInternal(): void {
+    if (!this.isActive_) {
+      return;
+    }
+
+    stateMgmtConsole.debug(`${this.constructor.name}: onActive`);
+    this.performDelayedUpdate();
+    for (const child of this.childrenWeakrefMap_.values()) {
+      const childViewPU: ViewPU | undefined = child.deref();
+      if (childViewPU) {
+        childViewPU.setActive(this.isActive_);
+      }
+    }
+  }
+
+
+  private onInactiveInternal(): void {
+    if (this.isActive_) {
+      return;
+    }
+
+    stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}): onInactive`);
+    for (const storageProp of this.ownStorageLinksProps_) {
+      storageProp.enableDelayedNotification();
+    }
+
+    for (const child of this.childrenWeakrefMap_.values()) {
+      const childViewPU: ViewPU | undefined = child.deref();
+      if (childViewPU) {
+        childViewPU.setActive(this.isActive_);
+      }
     }
   }
 
@@ -250,7 +323,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
       stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
     } else {
-      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update function on elmtId ${elmtId} start ...`);
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update on elmtId ${elmtId} start ...`);
       this.isRenderInProgress = true;
       updateFunc(elmtId, /* isFirstRender */ false);
       // continue in native JSView
@@ -258,7 +331,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
       this.finishUpdateFunc(elmtId);
       this.isRenderInProgress = false;
-      stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update function on ElementId ${elmtId} done`);
+      stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update on elmtId ${elmtId} - DONE`);
     }
   }
 
@@ -343,7 +416,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
       if (dependentElmtIds.size && !this.isFirstRender()) {
         if (!this.dirtDescendantElementIds_.size) {
-          // mark Composedelement dirty when first elmtIds are added
+          // mark ComposedElement dirty when first elmtIds are added
           // do not need to do this every time
           this.markNeedUpdate();
         }
@@ -362,6 +435,40 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
       this.restoreInstanceId();
     }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+  }
+
+
+  private performDelayedUpdate(): void {
+    stateMgmtTrace.scopedTrace(() => {
+    stateMgmtConsole.debug(`${this.constructor.name}: performDelayedUpdate ...`);
+    this.syncInstanceId();
+
+    for (const storageProp of this.ownStorageLinksProps_) {
+      const changedElmtIds = storageProp.moveElmtIdsForDelayedUpdate();
+      if (changedElmtIds) {
+        const varName = storageProp.info();
+        if (changedElmtIds.size && !this.isFirstRender()) {
+          for (const elmtId of changedElmtIds) {
+            this.dirtDescendantElementIds_.add(elmtId);
+          }
+        }
+
+        stateMgmtConsole.debug(`${this.constructor.name}: performDelayedUpdate: all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
+
+        const cb = this.watchedProps.get(varName)
+        if (cb) {
+          stateMgmtConsole.debug(`   .. calling @Watch function`);
+          cb.call(this, varName);
+        }
+      }
+    } // for all ownStorageLinksProps_
+    this.restoreInstanceId();
+
+    if (this.dirtDescendantElementIds_.size) {
+      this.markNeedUpdate();
+    }
+
+    }, "ViewPU.performDelayedUpdate", this.constructor.name);
   }
 
   /**
@@ -393,31 +500,35 @@ abstract class ViewPU extends NativeViewPartialUpdate
   /**
    * Method for the sub-class to call from its constructor for resolving
    *       a @Consume variable and initializing its backing store
-   *       with the yncedPropertyTwoWay<T> object created from the
+   *       with the SyncedPropertyTwoWay<T> object created from the
    *       @Provide variable's backing store.
    * @param providedPropName the name of the @Provide'd variable.
-   *     This is either the @Consume decortor parameter, or variable name.
+   *     This is either the @Consume decorator parameter, or variable name.
    * @param consumeVarName the @Consume variable name (not the
-   *            @Consume decortor parameter)
-   * @returns initiaizing value of the @Consume backing store
+   *            @Consume decorator parameter)
+   * @returns initializing value of the @Consume backing store
    */
   protected initializeConsume<T>(providedPropName: string,
     consumeVarName: string): ObservedPropertyAbstractPU<T> {
-    let providedVarStore = this.providedVars_.get(providedPropName);
+    let providedVarStore : ObservedPropertyAbstractPU<any> = this.providedVars_.get(providedPropName);
     if (providedVarStore === undefined) {
       throw new ReferenceError(`${this.constructor.name}: missing @Provide property with name ${providedPropName}.
-     Fail to resolve @Consume(${providedPropName}).`);
+          Fail to resolve @Consume(${providedPropName}).`);
     }
 
-    return providedVarStore.createSync(
-      <T>(source: ObservedPropertyAbstract<T>) => (source instanceof ObservedPropertySimple)
-        ? new SynchedPropertySimpleTwoWayPU<T>(source, this, consumeVarName)
-        : new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName)) as ObservedPropertyAbstractPU<T>;
+    const factory = <T>(source: ObservedPropertyAbstract<T>) => {
+      const result : ObservedPropertyAbstractPU<T> = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
+          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName) 
+          : new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName);
+      stateMgmtConsole.error(`The @Consume is instance of ${result.constructor.name}`);
+      return result;
+    };
+    return providedVarStore.createSync(factory) as  ObservedPropertyAbstractPU<T>;
   }
 
 
   /**
-   * given the elmtid of a child or child of child within this custom component
+   * given the elmtId of a child or child of child within this custom component
    * remember this component needs a partial update
    * @param elmtId
    */
@@ -488,15 +599,43 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`   ... remaining update funcs for elmtIds ${JSON.stringify([... this.updateFuncByElmtId.keys()])} .`);
   }
 
-  // the current executed update function
+  // executed on first render only
+  // kept for backward compatibility with old ace-ets2bundle
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} start ....`);
-    compilerAssignedUpdateFunc(elmtId, /* is first rneder */ true);
+    compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
 
     this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} - DONE.`);
   }
+
+  // executed on first render only
+  // added July 2023, replaces observeComponentCreation
+  // classObject is the ES6 class object , mandatory to specify even the class lacks the pop function.
+  // - prototype : Object is present for every ES6 class
+  // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
+  public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype : Object, pop?: () => void }): void {
+    const _componentName : string =  (classObject && "name" in classObject) ? classObject.name as string : "unspecified UINode";
+    const _popFunc : () => void = (classObject && "pop" in classObject) ? classObject.pop! : () => {};
+    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+      stateMgmtConsole.debug(`${this.constructor.name}[elmtId: ${this.id__()}]: ${isFirstRender ? `First render` : `Re-render/update`} for ${_componentName} elmtId ${elmtId} start ....`);
+      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      compilerAssignedUpdateFunc(elmtId, isFirstRender);
+      if (!isFirstRender) {
+        _popFunc();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+      stateMgmtConsole.debug(`${this.constructor.name}[elmtId: ${this.id__()}]: ${isFirstRender ? `First render` : `Re-render/update`} for ${_componentName} elmtId ${elmtId} - DONE ....`);
+    };
+
+    const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for ${_componentName} elmtId ${elmtId} start ....`);
+
+    updateFunc(elmtId, /* is first render */ true );
+    this.updateFuncByElmtId.set(elmtId, updateFunc);
+  }
+
 
   getOrCreateRecycleManager(): RecycleManager {
     if (!this.recycleManager) {
@@ -545,7 +684,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
     // store the current id and origin id, used for dirty element sort in {compareNumber}
-    // this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
     recycleUpdateFunc(newElmtId, /* is first render */ true, node);
     this.updateFuncByElmtId.delete(oldElmtId);
     this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
@@ -556,7 +694,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // add current JS object to it's parent recycle manager
   public recycleSelf(name: string): void {
-    if (this.parent_) {
+    if (this.parent_ && !this.parent_.isDeleting_) {
       this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
     } else {
       this.resetRecycleCustomNode();
@@ -683,44 +821,52 @@ abstract class ViewPU extends NativeViewPartialUpdate
      * @returns SynchedPropertySimple/ObjectTwoWay/PU
      */
   public createStorageLink<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return AppStorage.__CreateSync<T>(storagePropName, defaultValue,
+    const appStorageLink = AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertySimpleTwoWayPU<T>(source, this, viewVariableName)
+          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    this.ownStorageLinksProps_.add(appStorageLink);
+    return appStorageLink;
   }
 
   public createStorageProp<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return AppStorage.__CreateSync<T>(storagePropName, defaultValue,
+    const appStorageProp = AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
+          ? new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    this.ownStorageLinksProps_.add(appStorageProp);
+    return appStorageProp;
   }
 
   public createLocalStorageLink<T>(storagePropName: string, defaultValue: T,
     viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return this.localStorage_.__createSync<T>(storagePropName, defaultValue,
+      const localStorageLink =  this.localStorage_.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertySimpleTwoWayPU<T>(source, this, viewVariableName)
+          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-  }
+    this.ownStorageLinksProps_.add(localStorageLink);
+    return localStorageLink;
+}
 
   public createLocalStorageProp<T>(storagePropName: string, defaultValue: T,
     viewVariableName: string): ObservedPropertyAbstractPU<T> {
-    return this.localStorage_.__createSync<T>(storagePropName, defaultValue,
+      const localStorageProp = this.localStorage_.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
+          ? new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
           : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
+    this.ownStorageLinksProps_.add(localStorageProp);
+    return localStorageProp;
   }
 }

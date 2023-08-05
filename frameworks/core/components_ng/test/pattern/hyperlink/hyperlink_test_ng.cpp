@@ -40,7 +40,7 @@ namespace {
 constexpr double RADIUS_DEFAULT = 300.0;
 const std::string HYPERLINK_ADDRESS = "https://www.baidu.com";
 const std::string HYPERLINK_CONTENT = "baidu";
-const std::string HYPERLINK_EXTRAINFO = "{\"url\":\"https://www.baidu.com\",\"title\":\"\"}";
+const std::string HYPERLINK_EXTRAINFO = "{\"url\":\"https://www.baidu.com\",\"title\":\"baidu\"}";
 } // namespace
 
 class HyperlinkTestNg : public testing::Test {
@@ -81,8 +81,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
     auto frameNode = HyperlinkTestNg::CreateHyperlinkNode(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::HYPERLINK_ETS_TAG);
-    auto pattern = frameNode->GetPattern<HyperlinkPattern>();
-    pattern->SetDraggable(true);
+    frameNode->SetDraggable(true);
     frameNode->MarkModifyDone();
 
     // emulate drag event
@@ -137,31 +136,22 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
     auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, stack->ClaimNodeId(),
         []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
     stack->Push(hyperlinkNode);
-    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
 
     HyperlinkModelNG hyperlinkModelNG;
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    hyperlinkPattern->SetDraggable(false);
     hyperlinkModelNG.SetDraggable(false);
-    EXPECT_FALSE(hyperlinkPattern->IsDraggable());
     EXPECT_FALSE(hyperlinkNode->IsDraggable());
     EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
 
-    hyperlinkPattern->SetDraggable(true);
     hyperlinkModelNG.SetDraggable(false);
-    EXPECT_FALSE(hyperlinkPattern->IsDraggable());
     EXPECT_FALSE(hyperlinkNode->IsDraggable());
     EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
 
-    hyperlinkPattern->SetDraggable(true);
     hyperlinkModelNG.SetDraggable(true);
-    EXPECT_TRUE(hyperlinkPattern->IsDraggable());
     EXPECT_TRUE(hyperlinkNode->IsDraggable());
-    EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
+    EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
 
-    hyperlinkPattern->SetDraggable(false);
     hyperlinkModelNG.SetDraggable(true);
-    EXPECT_TRUE(hyperlinkPattern->IsDraggable());
     EXPECT_TRUE(hyperlinkNode->IsDraggable());
     EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
 }

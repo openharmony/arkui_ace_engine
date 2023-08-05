@@ -108,10 +108,18 @@ public:
         }
     }
 
+    void ClearUserOnAppear()
+    {
+        if (onAppear_) {
+            onAppear_ = nullptr;
+        }
+    }
+
     void SetOnAppear(std::function<void()>&& onAppear)
     {
         onAppear_ = std::move(onAppear);
     }
+
     void FireOnAppear()
     {
         if (onAppear_) {
@@ -131,14 +139,29 @@ public:
         }
     }
 
+    void ClearUserOnDisAppear()
+    {
+        if (onDisappear_) {
+            onDisappear_ = nullptr;
+        }
+    }
+
     void SetOnDisappear(std::function<void()>&& onDisappear)
     {
         onDisappear_ = std::move(onDisappear);
     }
+
     void FireOnDisappear()
     {
         if (onDisappear_) {
             onDisappear_();
+        }
+    }
+
+    void ClearUserOnAreaChanged()
+    {
+        if (onAreaChanged_) {
+            onAreaChanged_ = nullptr;
         }
     }
 
@@ -184,6 +207,9 @@ public:
 
     void FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDragEnter");
+        }
         if (onDragEnter_) {
             onDragEnter_(info, extraParams);
         }
@@ -196,6 +222,9 @@ public:
 
     void FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDragLeave");
+        }
         if (onDragLeave_) {
             onDragLeave_(info, extraParams);
         }
@@ -208,9 +237,17 @@ public:
 
     void FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDragMove");
+        }
         if (onDragMove_) {
             onDragMove_(info, extraParams);
         }
+    }
+
+    bool HasOnDragMove() const
+    {
+        return static_cast<bool>(onDragMove_);
     }
 
     void SetOnDrop(OnDragFunc&& onDrop)
@@ -233,8 +270,21 @@ public:
         return static_cast<bool>(onDragEnd_);
     }
 
+    virtual bool HasOnItemDragMove()
+    {
+        return false;
+    }
+
+    virtual bool HasOnItemDrop()
+    {
+        return false;
+    }
+    
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDrop");
+        }
         if (onDrop_) {
             onDrop_(info, extraParams);
         }
@@ -262,13 +312,28 @@ public:
     void SetEnabled(bool enabled)
     {
         enabled_ = enabled;
+        developerEnabled_ = enabled;
     }
+
+    void SetEnabledInternal(bool enabled)
+    {
+        enabled_ = enabled;
+    }
+
+    // restore enabled value to what developer sets
+    void RestoreEnabled()
+    {
+        enabled_ = developerEnabled_;
+    }
+
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     void MarkModifyDone();
+
+    void SetCurrentUIState(UIState state, bool flag);
 
     void UpdateCurrentUIState(UIState state)
     {
@@ -348,6 +413,7 @@ private:
     OnNewDragFunc onDragEnd_;
 
     bool enabled_ { true };
+    bool developerEnabled_ { true };
     std::vector<KeyboardShortcut> keyboardShortcut_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);

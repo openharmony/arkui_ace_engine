@@ -35,6 +35,8 @@ FormRendererDelegateStub::FormRendererDelegateStub()
         &FormRendererDelegateStub::HandleOnError;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CHANGE)] =
         &FormRendererDelegateStub::HandleOnSurfaceChange;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORM_LINK_INFO_UPDATE)] =
+        &FormRendererDelegateStub::HandleOnFormLinkInfoUpdate;
 }
 
 FormRendererDelegateStub::~FormRendererDelegateStub()
@@ -43,10 +45,9 @@ FormRendererDelegateStub::~FormRendererDelegateStub()
 }
 
 int FormRendererDelegateStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+    uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    HILOG_DEBUG("FormRendererDelegateStub::OnReceived, code = %{public}u, flags= %{public}d.",
-        code, option.GetFlags());
+    HILOG_DEBUG("FormRendererDelegateStub::OnReceived, code = %{public}u, flags= %{public}d.", code, option.GetFlags());
     std::u16string descriptor = FormRendererDelegateStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
@@ -65,7 +66,7 @@ int FormRendererDelegateStub::OnRemoteRequest(
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel &data, MessageParcel &reply)
+int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, MessageParcel& reply)
 {
     auto surfaceNode = Rosen::RSSurfaceNode::Unmarshalling(data);
     if (surfaceNode == nullptr) {
@@ -94,7 +95,7 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel &data, Message
     return ERR_OK;
 }
 
-int32_t FormRendererDelegateStub::HandleOnSurfaceReuse(MessageParcel &data, MessageParcel &reply)
+int32_t FormRendererDelegateStub::HandleOnSurfaceReuse(MessageParcel& data, MessageParcel& reply)
 {
     uint64_t id = UINT64_MAX;
     data.ReadUint64(id);
@@ -129,7 +130,7 @@ int32_t FormRendererDelegateStub::HandleOnSurfaceReuse(MessageParcel &data, Mess
     return ERR_OK;
 }
 
-int32_t FormRendererDelegateStub::HandleOnSurfaceRelease(MessageParcel &data, MessageParcel &reply)
+int32_t FormRendererDelegateStub::HandleOnSurfaceRelease(MessageParcel& data, MessageParcel& reply)
 {
     uint64_t id = UINT64_MAX;
     data.ReadUint64(id);
@@ -146,7 +147,7 @@ int32_t FormRendererDelegateStub::HandleOnSurfaceRelease(MessageParcel &data, Me
     return ERR_OK;
 }
 
-int FormRendererDelegateStub::HandleOnActionEvent(MessageParcel &data, MessageParcel &reply)
+int FormRendererDelegateStub::HandleOnActionEvent(MessageParcel& data, MessageParcel& reply)
 {
     std::string action = data.ReadString();
     int32_t errCode = OnActionEvent(action);
@@ -154,7 +155,7 @@ int FormRendererDelegateStub::HandleOnActionEvent(MessageParcel &data, MessagePa
     return ERR_OK;
 }
 
-int32_t FormRendererDelegateStub::HandleOnError(MessageParcel &data, MessageParcel &reply)
+int32_t FormRendererDelegateStub::HandleOnError(MessageParcel& data, MessageParcel& reply)
 {
     std::string code = data.ReadString();
     std::string msg = data.ReadString();
@@ -171,5 +172,14 @@ int32_t FormRendererDelegateStub::HandleOnSurfaceChange(MessageParcel& data, Mes
     reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }
-}  // namespace Ace
-}  // namespace OHOS
+
+int32_t FormRendererDelegateStub::HandleOnFormLinkInfoUpdate(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<std::string> formLinkInfos;
+    data.ReadStringVector(&formLinkInfos);
+    int32_t errCode = OnFormLinkInfoUpdate(formLinkInfos);
+    reply.WriteInt32(errCode);
+    return ERR_OK;
+}
+} // namespace Ace
+} // namespace OHOS

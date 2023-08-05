@@ -14,6 +14,7 @@
  */
 
 #include "page_url_checker_ohos.h"
+
 #include <string>
 
 #include "ability_runtime/context/context.h"
@@ -219,12 +220,37 @@ void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function
             sptr<AtomicServiceStatusCallback> routerCallback = new AtomicServiceStatusCallback();
             routerCallback->SetActionEventHandler(callback);
             routerCallback->SetErrorEventHandler(silentInstallErrorCallBack);
-            if (bms->SilentInstall(want, appInfo->uid, routerCallback)) {
+            if (bms->SilentInstall(want, appInfo->uid / AppExecFwk::Constants::BASE_USER_RANGE, routerCallback)) {
                 LOGI("Begin to silent install");
             }
         } else {
             callback();
         }
+    }
+}
+
+void PageUrlCheckerOhos::CheckPreload(const std::string& url)
+{
+    if (url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+        return;
+    }
+
+    size_t bundleEndPos = url.find('/');
+    std::string bundleName = url.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
+    size_t moduleStartPos = bundleEndPos + 1;
+    size_t moduleEndPos = url.find('/', moduleStartPos);
+    std::string moduleName = url.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+
+    auto appInfo = context_->GetApplicationInfo();
+    CHECK_NULL_VOID(appInfo);
+    if (appInfo->CheckNeedPreload(moduleName)) {
+        auto bms = GetBundleManager();
+        CHECK_NULL_VOID(bms);
+        AAFwk::Want want;
+        // only need to Transfer bundleName and moduleName
+        want.SetElementName("", bundleName, "", moduleName);
+        want.SetParam("uid", appInfo->uid);
+        bms->ProcessPreload(want);
     }
 }
 } // namespace OHOS::Ace

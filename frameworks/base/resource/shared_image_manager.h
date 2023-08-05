@@ -54,25 +54,10 @@ public:
         return sharedImageMap_;
     }
 
-    bool Remove(const std::string& name)
-    {
-        int res = static_cast<int>(sharedImageMap_.erase(name));
-        return (res != 0);
-    }
+    bool Remove(const std::string& name);
 
     // return true if successfully registered
-    bool RegisterLoader(const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp)
-    {
-        std::lock_guard<std::mutex> lockProviderMap(providerMapMutex_);
-        auto providerMapIter = providerMapToReload_.find(name);
-        bool resourceInReloadMap = (providerMapIter != providerMapToReload_.end());
-        // if image data if [name] is waiting to be written, add [providerWp] to [providerMapToReload_]
-        // so that it will be notified to start loading image when data is ready
-        if (resourceInReloadMap) {
-            providerMapIter->second.emplace(providerWp);
-        }
-        return resourceInReloadMap;
-    }
+    bool RegisterLoader(const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp);
 
 private:
     void PostDelayedTaskToClearImageData(const std::string& name, size_t dataSize);

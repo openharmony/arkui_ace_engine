@@ -359,10 +359,18 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_PIP
 };
 
+enum class WindowType : uint32_t {
+    WINDOW_TYPE_UNDEFINED = 0,
+    WINDOW_TYPE_APP_BASE = 1,
+    WINDOW_TYPE_APP_END = 1003,
+    WINDOW_TYPE_FLOAT = 2106,
+};
+
 enum class PanelType {
     MINI_BAR,
     FOLDABLE_BAR,
     TEMP_DISPLAY,
+    CUSTOM,
 };
 
 enum class PanelMode {
@@ -370,6 +378,7 @@ enum class PanelMode {
     HALF,
     FULL,
     AUTO,
+    CUSTOM,
 };
 
 enum class ColorScheme : int32_t {
@@ -465,7 +474,7 @@ enum class CalendarType {
     SIMPLE,
 };
 
-enum class SideBarContainerType { EMBED, OVERLAY };
+enum class SideBarContainerType { EMBED, OVERLAY, AUTO };
 
 enum class SideBarPosition { START, END };
 
@@ -560,7 +569,7 @@ enum class PositionMode {
     BOTTOM,
 };
 
-enum class XComponentType { SURFACE = 0, COMPONENT };
+enum class XComponentType { SURFACE = 0, COMPONENT, TEXTURE };
 
 inline constexpr uint32_t STATE_NORMAL = 0;
 inline constexpr uint32_t STATE_PRESSED = 1;
@@ -597,6 +606,35 @@ enum class FunctionKey {
     F10 = 10,
     F11 = 11,
     F12 = 12,
+};
+
+enum class ObscuredReasons {
+    PLACEHOLDER = 0,
+};
+
+enum class MaximizeMode : uint32_t {
+    MODE_AVOID_SYSTEM_BAR,
+    MODE_FULL_FILL,
+    MODE_RECOVER,
+};
+
+enum class RenderFit : int32_t {
+    CENTER = 0,
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT,
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT,
+    RESIZE_FILL,
+    RESIZE_CONTAIN,
+    RESIZE_CONTAIN_TOP_LEFT,
+    RESIZE_CONTAIN_BOTTOM_RIGHT,
+    RESIZE_COVER,
+    RESIZE_COVER_TOP_LEFT,
+    RESIZE_COVER_BOTTOM_RIGHT,
 };
 
 } // namespace OHOS::Ace

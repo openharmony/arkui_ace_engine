@@ -22,6 +22,8 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_timer_model_impl.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/declaration/texttimer/texttimer_declaration.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
@@ -59,11 +61,12 @@ constexpr double MAX_COUNT_DOWN = 86400000.0;
 
 void JSTextTimer::Create(const JSCallbackInfo& info)
 {
+    auto controller = TextTimerModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("TextTimer create error, info is non-valid");
+        SetFontDefault();
+        LOGI("TextTimer create error, info is non-valid");
         return;
     }
-    auto controller = TextTimerModel::GetInstance()->Create();
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto tempIsCountDown = paramObject->GetProperty("isCountDown");
     if (tempIsCountDown->IsBoolean()) {
@@ -76,8 +79,13 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
                 if (inputCount > 0 && inputCount < MAX_COUNT_DOWN) {
                     TextTimerModel::GetInstance()->SetInputCount(inputCount);
                 } else {
+                    TextTimerModel::GetInstance()->SetInputCount(TIME_DEFAULT_COUNT);
                     LOGE("Parameter out of range, use default value.");
                 }
+            }
+            if (count->IsUndefined() || count->IsNull()) {
+                TextTimerModel::GetInstance()->SetInputCount(TIME_DEFAULT_COUNT);
+                LOGE("Parameter is undefined or null, use default value.");
             }
         }
     }
@@ -105,7 +113,19 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTimer", &JSTextTimer::OnTimer);
     JSClass<JSTextTimer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTextTimer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextTimer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSTextTimer::SetFontDefault()
+{
+    RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
+    TextTimerModel::GetInstance()->SetFontSize(textTheme->GetTextStyle().GetFontSize());
+    TextTimerModel::GetInstance()->SetTextColor(textTheme->GetTextStyle().GetTextColor());
+    TextTimerModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+    TextTimerModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+    TextTimerModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
 }
 
 void JSTextTimer::SetFormat(const JSCallbackInfo& info)
@@ -116,7 +136,8 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsString()) {
-        LOGE("arg is not string.");
+        LOGE("The arg is not string, it is supposed to be a string");
+        TextTimerModel::GetInstance()->SetFormat(DEFAULT_FORMAT);
         return;
     }
 
@@ -125,6 +146,13 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
     std::regex pattern("(([YyMdD]+))");
     if (std::regex_search(format, result, pattern)) {
         if (!result.empty()) {
+            format = DEFAULT_FORMAT;
+        }
+    }
+
+    std::string target = "HmsS:.";
+    for (auto ch : format) {
+        if (target.find(ch) == std::string::npos) {
             format = DEFAULT_FORMAT;
         }
     }
@@ -143,9 +171,22 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
         LOGE("JSTextInput::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+
     CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
-        return;
+        fontSize = theme->GetTextStyle().GetFontSize();
+    }
+
+    if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        fontSize = theme->GetTextStyle().GetFontSize();
     }
 
     TextTimerModel::GetInstance()->SetFontSize(fontSize);
@@ -159,15 +200,40 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        textColor = theme->GetTextStyle().GetTextColor();
     }
 
     TextTimerModel::GetInstance()->SetTextColor(textColor);
 }
 
-void JSTextTimer::SetFontWeight(const std::string& value)
+void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
 {
-    TextTimerModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    auto fontWeight = info[0];
+    if (fontWeight->IsUndefined()) {
+        TextTimerModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+        return;
+    }
+
+    if (!fontWeight->IsNull()) {
+        std::string weight;
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
+        }
+        TextTimerModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
+    } else {
+        TextTimerModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+    }
 }
 
 void JSTextTimer::SetFontStyle(int32_t value)

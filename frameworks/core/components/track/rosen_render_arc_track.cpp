@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,14 @@
 
 #include "core/components/track/rosen_render_arc_track.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkClipOp.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
 
@@ -41,6 +45,7 @@ void DrawGauge(RenderContext& context, const RenderRingInfo& trackInfo)
         return;
     }
     double thickness = trackInfo.thickness;
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(trackInfo.color.GetValue());
@@ -53,6 +58,22 @@ void DrawGauge(RenderContext& context, const RenderRingInfo& trackInfo)
                         trackInfo.center.GetX() + trackInfo.radius - (thickness / 2),
                         trackInfo.center.GetY() + trackInfo.radius - (thickness / 2) },
         trackInfo.startDegree - 90, trackInfo.sweepDegree, false, paint);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(trackInfo.color.GetValue());
+    pen.SetWidth(thickness);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+
+    canvas->AttachPen(pen);
+    canvas->DrawArc(
+        RSRect(trackInfo.center.GetX() + (thickness / 2) - trackInfo.radius,
+            trackInfo.center.GetY() + (thickness / 2) - trackInfo.radius,
+            trackInfo.center.GetX() + trackInfo.radius - (thickness / 2),
+            trackInfo.center.GetY() + trackInfo.radius - (thickness / 2)),
+        trackInfo.startDegree - 90, trackInfo.sweepDegree);
+    canvas->DetachPen();
+#endif
 }
 
 bool ShouldHighLight(const double start, const double interval, const double percent)
@@ -63,8 +84,13 @@ bool ShouldHighLight(const double start, const double interval, const double per
     return false;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void SetTextStyle(SkCanvas* canvas, const RenderRingInfo& trackInfo, const std::string& markedText,
     const Color markedColor, const Rect dataRegion)
+#else
+void SetTextStyle(RSCanvas* canvas, const RenderRingInfo& trackInfo, const std::string& markedText,
+    const Color markedColor, const Rect dataRegion)
+#endif
 {
     if (!canvas) {
         LOGE("Paint canvas is null");
@@ -75,6 +101,7 @@ void SetTextStyle(SkCanvas* canvas, const RenderRingInfo& trackInfo, const std::
         LOGW("PaintText: fontCollection is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     double pathStartVertexX = trackInfo.center.GetX();
     double pathStartVertexY = trackInfo.center.GetY() - trackInfo.radius + (trackInfo.thickness / 2);
     txt::ParagraphStyle style;
@@ -90,6 +117,9 @@ void SetTextStyle(SkCanvas* canvas, const RenderRingInfo& trackInfo, const std::
     auto paragraph = builder->Build();
     paragraph->Layout(dataRegion.Width());
     paragraph->Paint(canvas, pathStartVertexX - txtStyle.font_size, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
+#else
+    LOGE("Drawing is not supported");
+#endif
 }
 
 void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo, const std::string& markedText,
@@ -100,6 +130,7 @@ void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo, cons
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->save();
 
     SkPath path;
@@ -125,6 +156,38 @@ void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo, cons
     paint.setColor(Color::BLACK.GetValue());
     canvas->drawPath(path, paint);
     canvas->restore();
+#else
+    canvas->Save();
+
+    RSRecordingPath path;
+    double pathStartVertexX = trackInfo.center.GetX();
+    double pathStartVertexY = trackInfo.center.GetY() - trackInfo.radius + (trackInfo.thickness / 2);
+    path.MoveTo(pathStartVertexX, pathStartVertexY);
+    path.LineTo(pathStartVertexX - EDGE, pathStartVertexY + EDGE);
+    path.LineTo(pathStartVertexX - EDGE, pathStartVertexY + EDGE + HEIGHT_OFFSET);
+    path.LineTo(pathStartVertexX + EDGE, pathStartVertexY + EDGE + HEIGHT_OFFSET);
+    path.LineTo(pathStartVertexX + EDGE, pathStartVertexY + EDGE);
+    path.LineTo(pathStartVertexX, pathStartVertexY);
+
+    canvas->Rotate(trackInfo.startDegree + trackInfo.sweepDegree, trackInfo.center.GetX(), trackInfo.center.GetY());
+    RSBrush brush;
+    RSPen pen;
+
+    brush.SetColor(Color::WHITE.GetValue());
+    canvas->AttachBrush(brush);
+    canvas->DrawPath(path);
+    canvas->DetachBrush();
+    SetTextStyle(canvas, trackInfo, markedText, markedColor, dataRegion);
+
+    pen.SetCapStyle(RSPen::CapStyle::SQUARE_CAP);
+    pen.SetWidth(INDICATOR_STROKE_WIDTH);
+    pen.SetColor(Color::BLACK.GetValue());
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+
+    canvas->Restore();
+#endif
 }
 } // namespace
 

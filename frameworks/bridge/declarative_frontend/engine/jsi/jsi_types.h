@@ -54,9 +54,11 @@ public:
     {
         return JsiType<T>(that.GetHandle());
     }
-    static JsiType<T> New();
 
-    void SetWeak();
+    template<class... Args>
+    static JsiType<T> New(Args&&... args);
+
+    void SetWeakCallback(void *ref, panda::WeakRefClearCallBack callback);
     const panda::CopyableGlobal<T>& GetHandle() const;
     const panda::CopyableGlobal<T>& operator->() const;
     Local<T> GetLocalHandle() const;
@@ -85,6 +87,7 @@ public:
     bool IsBoolean() const;
     bool IsObject() const;
     bool IsArray() const;
+    bool IsUint8ClampedArray() const;
     bool IsUndefined() const;
     bool IsNull() const;
     std::string ToString() const;
@@ -129,6 +132,37 @@ public:
     size_t Length() const;
     bool IsArray() const;
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiArray)
+};
+
+/**
+ * @brief A wrapper around a panda::ArrayBufferRef
+ *
+ */
+class JsiArrayBuffer : public JsiType<panda::ArrayBufferRef> {
+public:
+    JsiArrayBuffer() = default;
+    explicit JsiArrayBuffer(panda::Local<panda::ArrayBufferRef> val);
+    explicit JsiArrayBuffer(const panda::CopyableGlobal<panda::ArrayBufferRef>& val);
+    int32_t ByteLength() const;
+    void* GetBuffer() const;
+    void Detach() const;
+    bool IsDetach() const;
+    ~JsiArrayBuffer() override = default;
+    FAKE_PTR_FOR_FUNCTION_ACCESS(JsiArrayBuffer)
+};
+
+/**
+ * @brief A wrapper around a panda::Uint8ClampedArrayRef
+ *
+ */
+class JsiUint8ClampedArray : public JsiType<panda::Uint8ClampedArrayRef> {
+public:
+    JsiUint8ClampedArray() = default;
+    explicit JsiUint8ClampedArray(panda::Local<panda::Uint8ClampedArrayRef> val);
+    explicit JsiUint8ClampedArray(const panda::CopyableGlobal<panda::Uint8ClampedArrayRef>& val);
+    ~JsiUint8ClampedArray() override = default;
+    JsiRef<JsiArrayBuffer> GetArrayBuffer() const;
+    FAKE_PTR_FOR_FUNCTION_ACCESS(JsiUint8ClampedArray)
 };
 
 /**
@@ -200,14 +234,13 @@ struct JsiExecutionContext {
 class JsiCallbackInfo {
 public:
     JsiCallbackInfo(panda::JsiRuntimeCallInfo* info);
-    JsiCallbackInfo() = default;
     ~JsiCallbackInfo() = default;
     JsiCallbackInfo(const JsiCallbackInfo&) = delete;
     JsiCallbackInfo& operator=(const JsiCallbackInfo&) = delete;
 
-    virtual JsiRef<JsiValue> operator[](size_t index) const;
-    virtual JsiRef<JsiObject> This() const;
-    virtual int Length() const;
+    JsiRef<JsiValue> operator[](size_t index) const;
+    JsiRef<JsiObject> This() const;
+    int Length() const;
 
     template<typename T>
     void SetReturnValue(T* instance) const;
@@ -215,28 +248,27 @@ public:
     template<typename T>
     void SetReturnValue(JsiRef<T> val) const;
 
-    virtual void ReturnSelf() const;
+    void ReturnSelf() const;
 
     std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> GetReturnValue()
     {
         return retVal_;
     }
 
-    virtual JsiExecutionContext GetExecutionContext() const
+    JsiExecutionContext GetExecutionContext() const
     {
         return JsiExecutionContext { info_->GetVM() };
     }
 
-    virtual panda::ecmascript::EcmaVM* GetVm() const
+    panda::ecmascript::EcmaVM* GetVm() const
     {
         return info_->GetVM();
     }
 
-protected:
-    mutable std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal_;
-
 private:
     panda::JsiRuntimeCallInfo* info_ = nullptr;
+
+    mutable std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal_;
 };
 
 class JsiGCMarkCallbackInfo {

@@ -73,10 +73,28 @@ public:
 
     virtual void CaretPosition(int32_t caretPosition) {}
     virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
+    virtual Rect GetTextContentRect() { return {}; }
+    virtual int32_t GetTextContentLinesNum() { return {}; }
+    virtual void StopEditing() {}
 
     void SetCaretPosition(std::function<void(const int32_t)>&& setCaretPosition)
     {
         setCaretPosition_ = std::move(setCaretPosition);
+    }
+
+    void SetGetTextContentRect(std::function<Rect()>&& getTextContentRect)
+    {
+        getTextContentRect_ = std::move(getTextContentRect);
+    }
+
+    void SetGetTextContentLinesNum(std::function<int32_t()>&& getTextContentLinesNum)
+    {
+        getTextContentLinesNum_ = std::move(getTextContentLinesNum);
+    }
+
+    void SetStopEditing(std::function<void(void)>&& stopEditing)
+    {
+        stopEditing_ = std::move(stopEditing);
     }
 
     static bool EscapeString(const std::string& value, std::string& result)
@@ -109,6 +127,9 @@ public:
 
 protected:
     std::function<void(const int32_t)> setCaretPosition_;
+    std::function<Rect(void)> getTextContentRect_;
+    std::function<int32_t(void)> getTextContentLinesNum_;
+    std::function<void(void)> stopEditing_;
 };
 
 class ACE_EXPORT TextFieldModel {
@@ -146,6 +167,8 @@ public:
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnChange(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
+    virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
@@ -163,11 +186,15 @@ public:
     virtual void SetPasswordIcon(const PasswordIcon& passwordIcon) {};
     virtual void SetShowUnit(std::function<void()>&& unitAction) {};
     virtual void SetShowError(const std::string& errorText, bool visible) {};
+    virtual void SetBarState(DisplayMode value) {};
+    virtual void SetMaxViewLines(uint32_t value) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetShowCounter(bool value) {};
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
-    virtual void SetFocusableAndFocusNode() {}
+    virtual void SetFocusableAndFocusNode() {};
+    virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
+    virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

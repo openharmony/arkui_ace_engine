@@ -268,7 +268,7 @@ bool SvgDom::IsStatic()
 }
 
 void SvgDom::DrawImage(
-    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color)
+    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>&)
 {
     CHECK_NULL_VOID_NOLOG(root_);
     canvas.Save();
@@ -276,19 +276,20 @@ void SvgDom::DrawImage(
     FitImage(canvas, imageFit, layout);
     FitViewPort(layout);
     // draw svg tree
-    root_->Draw(canvas, layout, color);
+    root_->Draw(canvas, layout, fillColor_);
     canvas.Restore();
 }
 
 void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
-    // abandon this function, if image component support function fitImage
+    // scale svg to layout_ with ImageFit applied
     double scaleX = 1.0;
     double scaleY = 1.0;
-    double scaleViewBox = 1.0;
-    double tx = 0.0;
-    double ty = 0.0;
-    double half = 0.5;
+
+    float scaleViewBox = 1.0;
+    float tx = 0.0;
+    float ty = 0.0;
+    constexpr float half = 0.5f;
 
     if (!layout.IsEmpty()) {
         layout_ = layout;
@@ -296,17 +297,27 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
     if (!layout_.IsEmpty() && (svgSize_.IsValid() && !svgSize_.IsInfinite())) {
         ApplyImageFit(imageFit, scaleX, scaleY);
     }
+    /*
+     * 1. viewBox_, svgSize_, and layout_ are on 3 different scales.
+     * 2. Elements are painted in viewBox_ scale but displayed in layout_ scale.
+     * 3. To center align svg content, we first align viewBox_ to svgSize_, then we align svgSize_ to layout_.
+     * 4. Canvas is initially in layout_ scale, so transformation (tx, ty) needs to be in that scale, too.
+     */
     if (viewBox_.IsValid()) {
         if (svgSize_.IsValid() && !svgSize_.IsInfinite()) {
-            // center align viewBox to svg
+            // center align viewBox_ to svg, need to map viewBox_ to the scale of svgSize_
             scaleViewBox = std::min(svgSize_.Width() / viewBox_.Width(), svgSize_.Height() / viewBox_.Height());
             tx = svgSize_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = svgSize_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
+            // map transformation to layout_ scale
+            tx *= scaleX;
+            ty *= scaleY;
+
             // center align svg to layout container
-            tx += layout_.Width() * half - svgSize_.Width() * half * scaleX;
-            ty += layout_.Height() * half - svgSize_.Height() * half * scaleY;
+            tx += (layout_.Width() - svgSize_.Width() * scaleX) * half;
+            ty += (layout_.Height() - svgSize_.Height() * scaleY) * half;
         } else if (!layout_.IsEmpty()) {
-            // no svg size, center align viewBox to layout container
+            // no svgSize_, center align viewBox to layout container
             scaleViewBox = std::min(layout_.Width() / viewBox_.Width(), layout_.Height() / viewBox_.Height());
             tx = layout_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = layout_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
@@ -338,79 +349,9 @@ void SvgDom::FitViewPort(const Size& layout)
     }
 }
 
-void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
-{
-    switch (imageFit) {
-        case ImageFit::FILL:
-            ApplyFill(scaleX, scaleY);
-            break;
-        case ImageFit::NONE:
-            break;
-        case ImageFit::COVER:
-            ApplyCover(scaleX, scaleY);
-            break;
-        case ImageFit::CONTAIN:
-            ApplyContain(scaleX, scaleY);
-            break;
-        case ImageFit::SCALE_DOWN:
-            if (svgSize_ > layout_ || svgSize_ == layout_) {
-                ApplyContain(scaleX, scaleY);
-            }
-            break;
-        default:
-            break;
-    }
-}
-
-void SvgDom::ApplyFill(double& scaleX, double& scaleY)
-{
-    if (!svgSize_.IsValid()) {
-        return;
-    }
-    scaleX = layout_.Width() / svgSize_.Width();
-    scaleY = layout_.Height() / svgSize_.Height();
-}
-
-void SvgDom::ApplyContain(double& scaleX, double& scaleY)
-{
-    if (!svgSize_.IsValid()) {
-        return;
-    }
-    if (Size::CalcRatio(svgSize_) > Size::CalcRatio(layout_)) {
-        scaleX = layout_.Width() / svgSize_.Width();
-        scaleY = scaleX;
-    } else {
-        scaleX = layout_.Height() / svgSize_.Height();
-        scaleY = scaleX;
-    }
-}
-
-void SvgDom::ApplyCover(double& scaleX, double& scaleY)
-{
-    if (!svgSize_.IsValid()) {
-        return;
-    }
-    if (Size::CalcRatio(svgSize_) > Size::CalcRatio(layout_)) {
-        scaleX = layout_.Height() / svgSize_.Height();
-        scaleY = scaleX;
-    } else {
-        scaleX = layout_.Width() / svgSize_.Width();
-        scaleY = scaleX;
-    }
-}
-
 SizeF SvgDom::GetContainerSize() const
 {
     return { static_cast<float>(svgSize_.Width()), static_cast<float>(svgSize_.Height()) };
-}
-
-void SvgDom::SetRadius(const BorderRadiusArray& radiusXY)
-{
-    if (!radius_) {
-        radius_ = std::make_unique<BorderRadiusArray>(radiusXY);
-    } else {
-        *radius_ = radiusXY;
-    }
 }
 
 void SvgDom::SetFillColor(const std::optional<Color>& color)

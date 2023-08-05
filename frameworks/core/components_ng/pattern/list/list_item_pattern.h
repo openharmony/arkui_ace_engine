@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components/list/list_item_theme.h"
 #include "core/components_ng/pattern/list/list_item_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
@@ -40,6 +41,9 @@ class ACE_EXPORT ListItemPattern : public Pattern {
 
 public:
     explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
+        : shallowBuilder_(shallowBuilder), listItemStyle_(listItemStyle)
+    {}
     ~ListItemPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -57,6 +61,16 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        if (listItemStyle_ == V2::ListItemStyle::CARD) {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(pipelineContext, FocusPattern());
+            auto listItemTheme = pipelineContext->GetTheme<ListItemTheme>();
+            CHECK_NULL_RETURN(listItemTheme, FocusPattern());
+            FocusPaintParam paintParam;
+            paintParam.SetPaintColor(listItemTheme->GetItemFocusBorderColor());
+            paintParam.SetPaintWidth(listItemTheme->GetItemFocusBorderWidth());
+            return { FocusType::SCOPE, true, FocusStyleType::INNER_BORDER, paintParam };
+        }
         return { FocusType::SCOPE, true };
     }
 
@@ -121,6 +135,11 @@ public:
         return isSelected_;
     }
 
+    void SetSelected(bool selected)
+    {
+        isSelected_ = selected;
+    }
+
     bool Selectable() const
     {
         return selectable_;
@@ -129,6 +148,9 @@ public:
     void SetSelectable(bool selectable)
     {
         selectable_ = selectable;
+        if (!selectable) {
+            MarkIsSelected(false);
+        }
     }
 
     void SetUseStartDefaultDeleteAnimation(bool useStartDefaultDeleteAnimation)
@@ -166,6 +188,11 @@ public:
         return MakeRefPtr<ListItemAccessibilityProperty>();
     }
 
+    V2::ListItemStyle GetListItemStyle()
+    {
+        return listItemStyle_;
+    }
+
 protected:
     void OnModifyDone() override;
 
@@ -174,10 +201,21 @@ private:
     float GetFriction();
     void ChangeDeleteAreaStage();
     void StartSpringMotion(float start, float end, float velocity);
+    void OnAttachToFrameNode() override;
+    void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
+    void InitListItemCardStyleForList();
+    void UpdateListItemAlignToCenter();
+    Color GetBlendGgColor();
+    void InitHoverEvent();
+    void HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode);
+    void InitPressEvent();
+    void HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode);
+    void InitDisableEvent();
     void SetAccessibilityAction();
-    void DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRightDelete);
+    void DoDeleteAnimation(bool isRightDelete);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
+    V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;
 
     int32_t indexInList_ = 0;
     int32_t indexInListItemGroup_ = -1;
@@ -208,6 +246,11 @@ private:
     // selectable
     bool selectable_ = true;
     bool isSelected_ = false;
+
+    RefPtr<InputEvent> hoverEvent_;
+    RefPtr<TouchEventImpl> touchListener_;
+    bool isHover_ = false;
+    bool isPressed_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };

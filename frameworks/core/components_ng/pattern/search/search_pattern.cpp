@@ -15,14 +15,17 @@
 
 #include "core/components_ng/pattern/search/search_pattern.h"
 
+#include <cstdint>
+
+#include "base/geometry/rect.h"
 #include "core/components/search/search_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_model.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -64,8 +67,7 @@ void SearchPattern::UpdateChangeEvent(const std::string& value)
     CHECK_NULL_VOID(imageEvent);
 
     auto style = layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
-    if ((style == CancelButtonStyle::CONSTANT)
-        || ((style == CancelButtonStyle::INPUT) && !value.empty())) {
+    if ((style == CancelButtonStyle::CONSTANT) || ((style == CancelButtonStyle::INPUT) && !value.empty())) {
         cancelButtonRenderContext->UpdateOpacity(1.0);
         cancelImageRenderContext->UpdateOpacity(1.0);
         cancelButtonEvent->SetEnabled(true);
@@ -88,6 +90,13 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(geometryNode, true);
     searchSize_ = geometryNode->GetContentSize();
     searchOffset_ = geometryNode->GetContentOffset();
+
+    auto textFieldLayoutWrapper = dirty->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    CHECK_NULL_RETURN(textFieldLayoutWrapper, true);
+    auto textFieldGeometryNode = textFieldLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(textFieldGeometryNode, true);
+    textFieldOffset_ = textFieldGeometryNode->GetFrameOffset();
+    textFieldSize_ = textFieldGeometryNode->GetFrameSize();
 
     auto buttonLayoutWrapper = dirty->GetOrCreateChildByIndex(BUTTON_INDEX);
     CHECK_NULL_RETURN(buttonLayoutWrapper, true);
@@ -243,6 +252,24 @@ void SearchPattern::InitSearchController()
         CHECK_NULL_VOID_NOLOG(search);
         search->HandleCaretPosition(caretPosition);
     });
+
+    searchController_->SetGetTextContentRect([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(search, Rect(0, 0, 0, 0));
+        return search->HandleTextContentRect();
+    });
+
+    searchController_->SetGetTextContentLinesNum([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(search, 0);
+        return search->HandleTextContentLines();
+    });
+
+    searchController_->SetStopEditing([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(search);
+        search->StopEditing();
+    });
 }
 
 void SearchPattern::HandleCaretPosition(int32_t caretPosition)
@@ -254,6 +281,63 @@ void SearchPattern::HandleCaretPosition(int32_t caretPosition)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->SetCaretPosition(caretPosition);
+}
+
+Rect SearchPattern::HandleTextContentRect()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Rect(0, 0, 0, 0));
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, Rect(0, 0, 0, 0));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, Rect(0, 0, 0, 0));
+    RectF rect = textFieldPattern->GetTextRect();
+    RectF frameRect = textFieldPattern->GetFrameRect();
+    textFieldPattern->TextIsEmptyRect(rect);
+    textFieldPattern->UpdateRectByAlignment(rect);
+    auto y = rect.GetY() + frameRect.GetY();
+    if (NearEqual(rect.GetY(), 0)) {
+        y = textFieldPattern->GetPaddingTop() + textFieldPattern->GetBorderTop() + frameRect.GetY();
+    }
+    if (!textFieldPattern->IsOperation()) {
+        return Rect(rect.GetX() + frameRect.GetX(), y, 0, 0);
+    }
+    if (NearEqual(rect.GetX(), -Infinity<float>())) {
+        return Rect(frameRect.GetX(), y, 0, 0);
+    }
+    return Rect(rect.GetX() + frameRect.GetX(), y, rect.Width(), rect.Height());
+}
+
+int32_t SearchPattern::HandleTextContentLines()
+{
+    int lines = 0;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, lines);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, lines);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, lines);
+    if (!textFieldPattern->IsOperation()) {
+        return lines;
+    }
+    RectF textRect = textFieldPattern->GetTextRect();
+
+    if ((int32_t)textFieldPattern->GetLineHeight() == 0) {
+        return lines;
+    }
+    lines = (int32_t)textRect.Height() / (int32_t)textFieldPattern->GetLineHeight();
+    return lines;
+}
+
+void SearchPattern::StopEditing()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->StopEditing();
 }
 
 void SearchPattern::OnClickButtonAndImage()
@@ -281,6 +365,9 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->InitEditingValueText("");
     textFieldPattern->InitCaretPosition("");
+    auto textRect = textFieldPattern->GetTextRect();
+    textRect.SetLeft(0.0f);
+    textFieldPattern->SetTextRect(textRect);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateValue("");
@@ -431,7 +518,7 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 FocusPattern SearchPattern::GetFocusPattern() const
 {
-    return { FocusType::NODE, true, FocusStyleType::MATCH_ACTIVE_CUSTOM_REGION };
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
 }
 
 void SearchPattern::RequestKeyboard()
@@ -664,10 +751,16 @@ void SearchPattern::HandleHoverEvent(bool isHover)
 
 void SearchPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto buttonSpace = searchTheme->GetSearchButtonSpace().ConvertToPx();
     const auto& mousePosition = info.GetLocalLocation();
     PointF mousePoint(mousePosition.GetX(), mousePosition.GetY());
-    RectF cancelRect(cancelButtonOffset_, cancelButtonSize_);
-    RectF searchRect(buttonOffset_, buttonSize_);
+    RectF cancelRect(cancelButtonOffset_.GetX() - buttonSpace, cancelButtonOffset_.GetY() - buttonSpace,
+        cancelButtonSize_.Width() + 2 * buttonSpace, cancelButtonSize_.Height() + 2 * buttonSpace);
+    RectF searchRect(buttonOffset_.GetX() - buttonSpace, buttonOffset_.GetY() - buttonSpace,
+        buttonSize_.Width() + 2 * buttonSpace, buttonSize_.Height() + 2 * buttonSpace);
     auto isMouseInCancelButton = cancelRect.IsInRegion(mousePoint);
     auto isMouseInSearchButton = searchRect.IsInRegion(mousePoint);
 
@@ -962,4 +1055,52 @@ void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ToJsonValueForSearchButtonOption(json);
 }
 
+void SearchPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetNeedCallChildrenUpdate(false);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    if (cancelButtonNode_) {
+        auto cancelButtonRenderContext = cancelButtonNode_->GetRenderContext();
+        CHECK_NULL_VOID(cancelButtonRenderContext);
+        cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(cancelButtonNode_->GetChildren().front());
+        CHECK_NULL_VOID(textFrameNode);
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        cancelButtonNode_->MarkModifyDone();
+        cancelButtonNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (buttonNode_) {
+        auto buttonRenderContext = buttonNode_->GetRenderContext();
+        CHECK_NULL_VOID(buttonRenderContext);
+        buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonNode_->GetChildren().front());
+        CHECK_NULL_VOID(textFrameNode);
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        buttonNode_->MarkModifyDone();
+        buttonNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (textField_) {
+        auto textFieldLayoutProperty = textField_->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(textFieldLayoutProperty);
+        textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
+        textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+        textField_->MarkModifyDone();
+        textField_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
 } // namespace OHOS::Ace::NG

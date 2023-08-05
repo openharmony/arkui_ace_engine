@@ -24,7 +24,7 @@ ohos_fuzztest("UiServiceFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file =
       "//foundation/arkui/ace_engine/test/fuzztest/uiservice_fuzzer"
-  include_dirs = []
+  include_dirs = [ "$root_out_dir/arkui/framework" ]
   cflags = [
     "-g",
     "-O0",
@@ -47,11 +47,17 @@ ohos_fuzztest("UiServiceFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "window_manager:libdm",
   ]
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 ###############################################################################

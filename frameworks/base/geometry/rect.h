@@ -413,28 +413,6 @@ private:
     double height_ = 0.0;
 };
 
-struct SafeAreaEdgeInserts {
-    SafeAreaEdgeInserts() = default;
-    void SetRect(Rect leftRect, Rect topRect, Rect rightRect, Rect bottomRect)
-    {
-        leftRect_ = leftRect;
-        topRect_ = topRect;
-        rightRect_ = rightRect;
-        bottomRect_ = bottomRect;
-    }
-
-    Rect leftRect_;
-    Rect topRect_;
-    Rect rightRect_;
-    Rect bottomRect_;
-
-    std::string ToString() const
-    {
-        return "SafeAreaEdgeInserts leftRect_: " + leftRect_.ToString() + ", topRect_: " + topRect_.ToString() +
-               ", rightRect_: " + rightRect_.ToString() + ", bottomRect_: " + bottomRect_.ToString();
-    }
-};
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_RECT_H

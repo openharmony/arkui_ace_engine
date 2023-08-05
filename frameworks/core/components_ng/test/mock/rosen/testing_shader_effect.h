@@ -26,6 +26,7 @@ enum class TileMode {
     CLAMP,
     REPEAT,
     MIRROR,
+    DECAL,
 };
 class TestingShaderEffect {
 public:

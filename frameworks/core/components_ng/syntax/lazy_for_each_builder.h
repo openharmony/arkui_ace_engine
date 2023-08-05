@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOREACH_LAZY_FOR_EACH_BUILDER_H
 
 #include <cstdint>
+#include <list>
 #include <map>
 #include <optional>
 #include <string>
@@ -25,6 +26,9 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/time_util.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 
@@ -43,16 +47,34 @@ public:
 
     std::pair<std::string, RefPtr<UINode>> CreateChildByIndex(int32_t index)
     {
+        auto keyIter = cachedItems_.find(index);
+        if (keyIter != cachedItems_.end()) {
+            {
+                auto iter = generatedItem_.find(keyIter->second);
+                if (iter != generatedItem_.end()) {
+                    return std::pair<std::string, RefPtr<NG::UINode>>(iter->first, iter->second);
+                }
+            }
+            {
+                auto iter = expiringItem_.find(keyIter->second);
+                if (iter != expiringItem_.end()) {
+                    generatedItem_.try_emplace(iter->first, iter->second);
+                    return std::pair<std::string, RefPtr<NG::UINode>>(iter->first, iter->second);
+                }
+            }
+        }
+
+        ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
+        auto itemInfo = OnGetChildByIndex(index, expiringItem_);
+        CHECK_NULL_RETURN(itemInfo.second, itemInfo);
         {
-            ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
-            auto itemInfo = OnGetChildByIndex(index, generatedItem_);
-            CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             auto result = generatedItem_.try_emplace(itemInfo.first, itemInfo.second);
             if (!result.second) {
                 LOGD("already has same key %{private}s child", itemInfo.first.c_str());
             }
-            return *(result.first);
         }
+        cachedItems_[index] = itemInfo.first;
+        return std::pair<std::string, RefPtr<NG::UINode>>(itemInfo.first, itemInfo.second);
     }
 
     RefPtr<UINode> GetChildByKey(const std::string& key)
@@ -66,53 +88,12 @@ public:
 
     void UpdateCachedItems(const std::list<std::optional<std::string>>& nodeIds,
         std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems)
-    {
-        // use active ids to update cached items.
-        std::unordered_map<std::string, RefPtr<UINode>> generatedItem;
-        std::swap(generatedItem, generatedItem_);
-        for (const auto& id : nodeIds) {
-            if (!id) {
-                continue;
-            }
-            auto iter = generatedItem.find(*id);
-            if (iter != generatedItem.end()) {
-                generatedItem_.try_emplace(iter->first, iter->second);
-                generatedItem.erase(iter);
-            }
-        }
-        // store cached items.
-        for (auto& [index, id] : cachedItems) {
-            if (!id) {
-                // get id from old cachedItems which stores the idle task generate result.
-                auto iter = cachedItems_.find(index);
-                if (iter == cachedItems_.end()) {
-                    continue;
-                }
-                id = iter->second;
-            }
-            if (id) {
-                auto iter = generatedItem.find(*id);
-                if (iter != generatedItem.end()) {
-                    iter->second->SetActive(false);
-                    generatedItem_.try_emplace(iter->first, iter->second);
-                }
-            }
-        }
-        std::swap(cachedItems_, cachedItems);
-        LOGD("LazyForEach cached size : %{public}d", static_cast<int32_t>(generatedItem_.size()));
-    }
+    {}
 
-    void SetCacheItemInfo(int32_t index, const std::string& info)
-    {
-        cachedItems_[index] = info;
-    }
+    void SetCacheItemInfo(int32_t index, const std::string& info) {}
 
     std::optional<std::string> GetCacheItemInfo(int32_t index) const
     {
-        auto iter = cachedItems_.find(index);
-        if (iter != cachedItems_.end()) {
-            return iter->second;
-        }
         return std::nullopt;
     }
 
@@ -131,21 +112,206 @@ public:
         OnExpandChildrenOnInitialInNG();
     }
 
+    void OnDataReloaded()
+    {
+        cachedItems_.clear();
+        expiringItem_.merge(generatedItem_);
+        generatedItem_.clear();
+    }
+
+    bool OnDataAdded(size_t index)
+    {
+        if (cachedItems_.empty()) {
+            return true;
+        }
+        if (index > static_cast<size_t>(cachedItems_.rbegin()->first) ||
+            index < static_cast<size_t>(cachedItems_.begin()->first)) {
+            return false;
+        }
+        decltype(cachedItems_) temp(std::move(cachedItems_));
+
+        for (auto& [oldindex, id] : temp) {
+            cachedItems_.try_emplace(index > static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
+        }
+        return true;
+    }
+
+    bool OnDataDeleted(size_t index)
+    {
+        if (cachedItems_.empty()) {
+            return false;
+        }
+        if (index > static_cast<size_t>(cachedItems_.rbegin()->first)) {
+            return false;
+        }
+        decltype(cachedItems_) temp(std::move(cachedItems_));
+
+        for (auto& [oldindex, id] : temp) {
+            cachedItems_.try_emplace(index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(id));
+        }
+        return true;
+    }
+
+    bool OnDataChanged(size_t index)
+    {
+        auto keyIter = cachedItems_.find(index);
+        if (keyIter != cachedItems_.end()) {
+            auto iter = generatedItem_.find(keyIter->second);
+            cachedItems_.erase(keyIter);
+            if (iter != generatedItem_.end()) {
+                expiringItem_.try_emplace(iter->first, std::move(iter->second));
+                generatedItem_.erase(iter);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool OnDataMoved(size_t from, size_t to)
+    {
+        return true;
+    }
+
+    void UpdateCachedItems(int start, int end) {}
+
+    std::map<int32_t, RefPtr<UINode>> GetItems() const
+    {
+        std::map<int32_t, RefPtr<UINode>> items;
+        for (auto& [index, key] : cachedItems_) {
+            auto itor = generatedItem_.find(key);
+            if (itor == generatedItem_.end()) {
+                continue;
+            }
+            items.try_emplace(index, itor->second);
+        }
+
+        return items;
+    }
+
+    void RemoveAllChild()
+    {
+        ACE_SCOPED_TRACE("RemoveAllChild");
+        expiringItem_.merge(generatedItem_);
+        for (const auto& iter : generatedItem_) {
+            iter.second->SetJSViewActive(false);
+        }
+        generatedItem_.clear();
+    }
+
+    RefPtr<UINode> RemoveChildByIndex(int32_t index)
+    {
+        ACE_SCOPED_TRACE("RemoveChildByIndex %d", index);
+        RefPtr<UINode> child;
+        auto keyIter = cachedItems_.find(index);
+        if (keyIter != cachedItems_.end()) {
+            auto iter = generatedItem_.find(keyIter->second);
+            if (iter != generatedItem_.end()) {
+                child = iter->second;
+                iter->second->SetJSViewActive(false);
+                expiringItem_.try_emplace(iter->first, std::move(iter->second));
+                generatedItem_.erase(iter);
+            }
+        }
+        return child;
+    }
+
+    void ClearExpiringItem()
+    {
+        expiringItem_.clear();
+    }
+
+    void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
+    {
+        for (const auto& item : generatedItem_) {
+            item.second->ForceUpdateLayoutPropertyFlag(propertyChangeFlag);
+        }
+    }
+
+    RefPtr<UINode> CacheItem(int32_t index, std::unordered_map<std::string, RefPtr<UINode>>& cache,
+        const std::optional<LayoutConstraintF>& itemConstraint)
+    {
+        auto keyIter = cachedItems_.find(index);
+        if (keyIter != cachedItems_.end()) {
+            auto iter = expiringItem_.find(keyIter->second);
+            if (iter != expiringItem_.end()) {
+                cache.try_emplace(iter->first, iter->second);
+                return iter->second;
+            }
+        }
+        ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
+        auto itemInfo = OnGetChildByIndex(index, expiringItem_);
+        CHECK_NULL_RETURN(itemInfo.second, nullptr);
+        cache.try_emplace(itemInfo.first, itemInfo.second);
+        cachedItems_[index] = itemInfo.first;
+        itemInfo.second->Build();
+        itemInfo.second->SetJSViewActive(false);
+        return itemInfo.second;
+    }
+
+    bool PreBuild(int32_t start, int32_t end, int32_t cacheCount, int64_t deadline,
+        const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
+    {
+        auto count = OnGetTotalCount();
+        std::unordered_map<std::string, RefPtr<UINode>> cache;
+        std::list<int32_t> idleIndexes;
+        if (start != -1 && end != -1) {
+            for (int32_t i = 1; i <= cacheCount; i++) {
+                if (start >= i) {
+                    idleIndexes.emplace_back(start - i);
+                }
+                if (end + i < count) {
+                    idleIndexes.emplace_back(end + i);
+                }
+            }
+        }
+
+        for (auto index : idleIndexes) {
+            if ((GetSysTimestamp() > deadline) || (itemConstraint && !canRunLongPredictTask)) {
+                expiringItem_.swap(cache);
+                return false;
+            }
+            auto uiNode = CacheItem(index, cache, itemConstraint);
+            if (uiNode && itemConstraint) {
+                RefPtr<FrameNode> frameNode = DynamicCast<FrameNode>(uiNode);
+                while (!frameNode) {
+                    uiNode = uiNode->GetFirstChild();
+                    if (!uiNode) {
+                        break;
+                    }
+                    frameNode = DynamicCast<FrameNode>(uiNode);
+                }
+                if (frameNode) {
+                    frameNode->GetGeometryNode()->SetParentLayoutConstraint(itemConstraint.value());
+                    FrameNode::ProcessOffscreenNode(frameNode);
+                }
+            }
+        }
+
+        expiringItem_.swap(cache);
+        return true;
+    }
+
     virtual void ReleaseChildGroupById(const std::string& id) = 0;
+
     virtual void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
+
     virtual void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
+
     virtual std::pair<std::string, RefPtr<UINode>> OnGetChildByIndex(
         int32_t index, const std::unordered_map<std::string, RefPtr<UINode>>& cachedItems) = 0;
+
     virtual void OnExpandChildrenOnInitialInNG() = 0;
 
 private:
     // [key, UINode]
     std::unordered_map<std::string, RefPtr<UINode>> generatedItem_;
     // [index, key]
-    std::unordered_map<int32_t, std::optional<std::string>> cachedItems_;
+    std::map<int32_t, std::string> cachedItems_;
+
+    std::unordered_map<std::string, RefPtr<UINode>> expiringItem_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };

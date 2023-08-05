@@ -30,12 +30,23 @@ shared_ptr<JsValue> CurvesInterpolate(const shared_ptr<JsRuntime>& runtime, cons
 {
     auto jsCurveString = thisObj->GetProperty(runtime, "__curveString");
     auto curveString = jsCurveString->ToString(runtime);
-
+    auto curveObjFunc = thisObj->GetProperty(runtime, "__curveCustomFunc");
     if (argv.size() == 0) {
         return runtime->NewNull();
     }
     double time = argv[0]->ToDouble(runtime);
+    time = std::clamp(time, 0.0, 1.0);
     auto animationCurve = CreateCurve(curveString, false);
+    if (curveObjFunc->IsFunction(runtime)) {
+        std::function<float(float)> customCallBack = [func = std::move(curveObjFunc),
+                    id = Container::CurrentId(), runtime] (float time)->float {
+                    ContainerScope scope(id);
+                    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(time) };
+                    auto result = func->Call(runtime, runtime->GetGlobal(), argv, 1);
+                    return result->IsNumber(runtime) ? static_cast<float>(result->ToDouble(runtime)) : 1.0f;
+                };
+        animationCurve = CreateCurve(customCallBack);
+    }
     if (!animationCurve) {
         LOGW("created animationCurve is null, curveString:%{public}s", curveString.c_str());
         return runtime->NewNull();
@@ -96,17 +107,24 @@ bool CreateSpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
         LOGE("Spring curve: the number of parameters is illegal");
         return false;
     }
-    double x0 = argv[0]->ToDouble(runtime);
-    double y0 = argv[1]->ToDouble(runtime);
-    double x1 = argv[2]->ToDouble(runtime);
-    double y1 = argv[3]->ToDouble(runtime);
-    if (y0 > 0 &&  x1 > 0 && y1 > 0) {
-        curve = AceType::MakeRefPtr<SpringCurve>(x0, y0, x1, y1);
-        return true;
-    } else {
-        LOGE("Spring curve: the value of the parameters are illegal");
-        return false;
+    double velocity = argv[0]->ToDouble(runtime);
+    double mass = argv[1]->ToDouble(runtime);
+    double stiffness = argv[2]->ToDouble(runtime);
+    double damping = argv[3]->ToDouble(runtime);
+    if (LessNotEqual(mass, 0)) {
+        LOGW("Spring curve: mass is illegal, value:%{public}f, use default", mass);
+        mass = 1.0;
     }
+    if (LessNotEqual(stiffness, 0)) {
+        LOGW("Spring curve: stiffness is illegal, value:%{public}f, use default", stiffness);
+        stiffness = 1.0;
+    }
+    if (LessNotEqual(damping, 0)) {
+        LOGW("Spring curve: damping is illegal, value:%{public}f, use default", damping);
+        damping = 1.0;
+    }
+    curve = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
+    return true;
 }
 
 bool CreateInterpolatingSpring(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -120,13 +138,20 @@ bool CreateInterpolatingSpring(const shared_ptr<JsRuntime>& runtime, const share
     float mass = static_cast<float>(argv[1]->ToDouble(runtime));
     float stiffness = static_cast<float>(argv[2]->ToDouble(runtime));
     float damping = static_cast<float>(argv[3]->ToDouble(runtime));
-    if (mass >= 0 && stiffness >= 0 && damping >= 0) {
-        curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
-        return true;
-    } else {
-        LOGE("interpolating Spring: the value of the parameters are illegal");
-        return false;
+    if (LessNotEqual(mass, 0)) {
+        LOGW("interpolating Spring: mass is illegal, value:%{public}f, use default", mass);
+        mass = 1.0;
     }
+    if (LessNotEqual(stiffness, 0)) {
+        LOGW("interpolating Spring: stiffness is illegal, value:%{public}f, use default", stiffness);
+        stiffness = 1.0;
+    }
+    if (LessNotEqual(damping, 0)) {
+        LOGW("interpolating Spring: damping is illegal, value:%{public}f, use default", damping);
+        damping = 1.0;
+    }
+    curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
+    return true;
 }
 
 bool CreateCubicCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -140,6 +165,8 @@ bool CreateCubicCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
     double y0 = argv[1]->ToDouble(runtime);
     double x1 = argv[2]->ToDouble(runtime);
     double y1 = argv[3]->ToDouble(runtime);
+    x0 = std::clamp(x0, 0.0, 1.0);
+    x1 = std::clamp(x0, 0.0, 1.0);
 
     curve = AceType::MakeRefPtr<CubicCurve>(x0, y0, x1, y1);
     return true;
@@ -152,13 +179,15 @@ bool CreateStepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
         LOGE("Steps curve: the number of parameters is illegal");
         return false;
     }
-    int32_t stepSize;
-    if (argc == 2) {
+    int32_t stepSize = 1;
+    if (argv[0]->IsNumber(runtime)) {
         stepSize = argv[0]->ToInt32(runtime);
-        if (stepSize < 0) {
-            LOGE("Steps curve: When two parameters, the value of the stepSize is illegal");
-            return false;
+        if (stepSize < 1) {
+            LOGW("Steps curve: the value of the stepSize is illegal, use default value");
+            stepSize = 1;
         }
+    }
+    if (argc == 2) {
         bool isEnd = argv[1]->ToBoolean(runtime);
         if (isEnd) {
             curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::END);
@@ -166,11 +195,6 @@ bool CreateStepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
             curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::START);
         }
     } else {
-        stepSize = argv[0]->ToInt32(runtime);
-        if (stepSize < 0) {
-            LOGE("Steps curve: When one parameter, the value of the stepSize is illegal");
-            return false;
-        }
         curve = AceType::MakeRefPtr<StepsCurve>(stepSize);
     }
     return true;
@@ -183,12 +207,30 @@ bool CreateSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_
         LOGW("SpringMotionCurve: the number of parameters is illegal");
         return false;
     }
-    float response = argc > 0 ? static_cast<float>(argv[0]->ToDouble(runtime))
-                        : ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
-    float dampingRatio = argc > 1 ? static_cast<float>(argv[1]->ToDouble(runtime))
-                            : ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
-    float blendDuration = argc > 2 ? static_cast<float>(argv[2]->ToDouble(runtime))
-                            : ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
+    float response = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
+    float dampingRatio = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
+    if (argc > 0) {
+        response = static_cast<float>(argv[0]->ToDouble(runtime));
+        if (LessNotEqual(response, 0)) {
+            response = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
+            LOGW("SpringMotion: response is illegal, use default value:%{public}f", response);
+        }
+    }
+    if (argc > 1) {
+        dampingRatio = static_cast<float>(argv[1]->ToDouble(runtime));
+        if (LessNotEqual(dampingRatio, 0)) {
+            dampingRatio = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
+            LOGW("SpringMotion: dampingRatio is illegal, use default value:%{public}f", dampingRatio);
+        }
+    }
+    if (argc > 2) {
+        blendDuration = static_cast<float>(argv[2]->ToDouble(runtime));
+        if (LessNotEqual(blendDuration, 0)) {
+            blendDuration = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
+            LOGW("SpringMotion: blendDuration is illegal, use default value:%{public}f", blendDuration);
+        }
+    }
     curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
     return true;
 }
@@ -200,12 +242,30 @@ bool CreateResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, con
         LOGW("ResponsiveSpringMotionCurve: the number of parameters is illegal");
         return false;
     }
-    float response = argc > 0 ? static_cast<float>(argv[0]->ToDouble(runtime))
-                        : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
-    float dampingRatio = argc > 1 ? static_cast<float>(argv[1]->ToDouble(runtime))
-                            : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
-    float blendDuration = argc > 2 ? static_cast<float>(argv[2]->ToDouble(runtime))
-                            : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+    float response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+    float dampingRatio = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+    if (argc > 0) {
+        response = static_cast<float>(argv[0]->ToDouble(runtime));
+        if (LessNotEqual(response, 0)) {
+            response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+            LOGW("ResponsiveSpringMotion: response is illegal, use default value:%{public}f", response);
+        }
+    }
+    if (argc > 1) {
+        dampingRatio = static_cast<float>(argv[1]->ToDouble(runtime));
+        if (LessNotEqual(dampingRatio, 0)) {
+            dampingRatio = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+            LOGW("ResponsiveSpringMotion: dampingRatio is illegal, use default value:%{public}f", dampingRatio);
+        }
+    }
+    if (argc > 2) {
+        blendDuration = static_cast<float>(argv[2]->ToDouble(runtime));
+        if (LessNotEqual(blendDuration, 0)) {
+            blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+            LOGW("ResponsiveSpringMotion: blendDuration is illegal, use default value:%{public}f", blendDuration);
+        }
+    }
     curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
     return true;
 }
@@ -229,6 +289,15 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
         curveCreated = CreateSpringMotionCurve(runtime, thisObj, argv, argc, curve);
     } else if (curveString == RESPONSIVE_SPRING_MOTION) {
         curveCreated = CreateResponsiveSpringMotionCurve(runtime, thisObj, argv, argc, curve);
+    } else if (curveString == CURVES_CUSTOM) {
+        curve = AceType::MakeRefPtr<CustomCurve>(nullptr);
+        curveCreated = true;
+        if (argv[0]->IsFunction(runtime)) {
+            curveObj->SetProperty(runtime, "__curveCustomFunc", argv[0]);
+        } else {
+            curveCreated = false;
+            LOGW("customCruve argv is not function argv[0] = %{public}s", argv[0]->ToString(runtime).c_str());
+        }
     } else {
         LOGE("curve params: %{public}s is illegal", curveString.c_str());
         return runtime->NewNull();
@@ -300,6 +369,12 @@ shared_ptr<JsValue> StepsCurve(const shared_ptr<JsRuntime>& runtime, const share
     std::string curveString(STEPS_CURVE);
     return ParseCurves(runtime, thisObj, argv, argc, curveString);
 }
+shared_ptr<JsValue> CustomCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(CURVES_CUSTOM);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
 
 shared_ptr<JsValue> SpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
@@ -328,6 +403,8 @@ void InitCurvesModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>&
     moduleObj->SetProperty(runtime, STEPS_CURVE, runtime->NewFunction(StepsCurve));
     moduleObj->SetProperty(runtime, SPRING_MOTION, runtime->NewFunction(SpringMotionCurve));
     moduleObj->SetProperty(runtime, RESPONSIVE_SPRING_MOTION, runtime->NewFunction(ResponsiveSpringMotionCurve));
+    moduleObj->SetProperty(runtime, CURVES_CUSTOM, runtime->NewFunction(CustomCurve));
+    
 }
 
 } // namespace OHOS::Ace::Framework

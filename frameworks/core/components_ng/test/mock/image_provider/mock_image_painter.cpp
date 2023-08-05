@@ -20,9 +20,9 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Size
 
 void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize) const {}
 
-void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset) const {}
+void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const {}
 
-void ImagePainter::FlipHorizontal(RSCanvas& canvas, double horizontalOffset, double drawRectWidth) {}
+void ImagePainter::FlipHorizontal(RSCanvas& canvas, const SizeF& contentSize) {}
 
 void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRect) const {}
 

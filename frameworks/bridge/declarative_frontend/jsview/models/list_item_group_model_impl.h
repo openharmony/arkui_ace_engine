@@ -25,7 +25,7 @@ public:
     ListItemGroupModelImpl() = default;
     ~ListItemGroupModelImpl() override = default;
 
-    void Create() override;
+    void Create(V2::ListItemGroupStyle listItemGroupStyle) override;
     void SetSpace(const Dimension& space) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetHeader(std::function<void()>&& header) override;

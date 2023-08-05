@@ -59,8 +59,59 @@ public:
 
     void OnModifyDone() override;
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
+    void SetActiveIconImageSourceInfo(const ImageSourceInfo& info)
+    {
+        info_ = info;
+    }
+
+    const ImageSourceInfo& GetActiveIconImageSourceInfo() const
+    {
+        return info_;
+    }
+
+    void SetInitialIconImageSourceInfo(const ImageSourceInfo& info)
+    {
+        initalInfo_ = info;
+    }
+
+    const ImageSourceInfo& GetInitialIconImageSourceInfo() const
+    {
+        return initalInfo_;
+    }
+
+    void SetToolbarItemStatus(NavToolbarItemStatus status)
+    {
+        status_ = status;
+    }
+
+    NavToolbarItemStatus GetToolbarItemStatus() const
+    {
+        return status_;
+    }
+
+    void SetCurrentIconStatus(ToolbarIconStatus iconStatus)
+    {
+        iconStatus_ = iconStatus;
+    }
+
+    ToolbarIconStatus GetCurrentIconStatus() const
+    {
+        return iconStatus_;
+    }
+
+    void UpdateBarItemActiveStatusResource();
+
 private:
     RefPtr<ClickEvent> clickListener_;
+    ImageSourceInfo info_;
+    ImageSourceInfo initalInfo_;
+    NavToolbarItemStatus status_ = NavToolbarItemStatus::NORMAL;
+    ToolbarIconStatus iconStatus_ = ToolbarIconStatus::INITIAL;
 };
 
 } // namespace OHOS::Ace::NG

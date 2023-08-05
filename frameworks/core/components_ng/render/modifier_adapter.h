@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ModifierAdapter final {
+class ACE_FORCE_EXPORT ModifierAdapter final {
 public:
     ModifierAdapter() = delete;
     ~ModifierAdapter() = delete;

@@ -16,12 +16,26 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H
 
+#include <mutex>
+
 #include "core/components/picker/picker_data.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace {
 using DateChangeEvent = std::function<void(const BaseEventInfo* info)>;
+struct PickerDialogInfo {
+    bool isLunar;
+    PickerDate parseStartDate;
+    PickerDate parseEndDate;
+    PickerDate parseSelectedDate;
+    PickerTime pickerTime;
+    bool isUseMilitaryTime;
+    bool isSelectedTime;
+    bool isStartDate;
+    bool isEndDate;
+    bool isSelectedDate;
+};
 class DatePickerModel {
 public:
     static DatePickerModel* GetInstance();
@@ -34,6 +48,7 @@ public:
     virtual void SetSelectedDate(const PickerDate& value) = 0;
     virtual void SetShowLunar(bool lunar) = 0;
     virtual void SetOnChange(DateChangeEvent&& onChange) = 0;
+    virtual void SetOnDateChange(DateChangeEvent&& onChange) = 0;
     virtual void SetSelectedTime(const PickerTime& selectedTime) = 0;
     virtual void SetHour24(bool value) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
@@ -44,6 +59,22 @@ public:
 
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
+    static std::mutex mutex_;
+};
+
+class DatePickerDialogModel {
+public:
+    static DatePickerDialogModel* GetInstance();
+    virtual ~DatePickerDialogModel() = default;
+
+    virtual void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
+        std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
+        std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onDateAccept,
+        std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType) = 0;
+
+private:
+    static std::unique_ptr<DatePickerDialogModel> datePickerDialogInstance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H

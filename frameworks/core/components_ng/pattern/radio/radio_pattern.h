@@ -94,6 +94,11 @@ public:
         return preGroup_;
     }
 
+    int32_t GetPrePageId() const
+    {
+        return prePageId_;
+    }
+
     void SetPreValue(const std::string& value)
     {
         preValue_ = value;
@@ -102,6 +107,11 @@ public:
     void SetPreGroup(const std::string& group)
     {
         preGroup_ = group;
+    }
+
+    void SetPrePageId(int32_t pageId)
+    {
+        prePageId_ = pageId;
     }
 
     FocusPattern GetFocusPattern() const override;
@@ -119,7 +129,8 @@ public:
         json->Put("value", value.c_str());
         json->Put("group", group.c_str());
     }
-
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -129,14 +140,14 @@ private:
     void InitMouseEvent();
     void OnClick();
     void UpdateState();
-    void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool check);
+    void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& pageNode, bool check);
     void OnTouchDown();
     void OnTouchUp();
+    void CheckPageNode();
     void HandleMouseEvent(bool isHover);
     void UpdateUIStatus(bool check);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
@@ -144,13 +155,12 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
-    RefPtr<Animator> onController_;
-    RefPtr<Animator> offController_;
 
     bool isFirstCreated_ = true;
     bool preCheck_ = false;
     std::optional<std::string> preValue_;
     std::optional<std::string> preGroup_;
+    int32_t prePageId_ = 0;
     bool isTouch_ = false;
     bool isHover_ = false;
     float totalScale_ = 1.0f;
@@ -164,7 +174,6 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool isGroupChanged_ = false;
-    bool isFirstAddhotZoneRect_ = true;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool isOnAnimationFlag_ = false;
 

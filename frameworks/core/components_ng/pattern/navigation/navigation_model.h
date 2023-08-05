@@ -20,7 +20,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
-#include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 
@@ -33,6 +32,7 @@ public:
     virtual void Create() = 0;
     virtual void SetNavigationStack() = 0;
     virtual void SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack) = 0;
+    virtual void SetNavigationStackProvided(bool provided) = 0;
     virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle = false) = 0;
@@ -48,15 +48,19 @@ public:
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual bool NeedSetItems() = 0;
     virtual void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) = 0;
-    virtual void GetToolBarItems(std::list<RefPtr<ToolBarItem>>& items) {};
+    virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) = 0;
-    virtual void GetMenuItems(std::list<RefPtr<ToolBarItem>>& items) {};
+    virtual void GetMenuItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) = 0;
     virtual void SetUsrNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavBarPosition(NG::NavBarPosition mode) = 0;
     virtual void SetNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMinNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMaxNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMinContentWidth(const Dimension& value) = 0;
     virtual void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) = 0;
     virtual void SetNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavDestination(std::function<void(std::string)>&& builder) = 0;

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #define private public
+#define protected public
 #include <cstddef>
 #include <optional>
 #include <string>
@@ -29,9 +30,11 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -77,8 +80,14 @@ protected:
     static RefPtr<FrameNode> CreateMarqueeParagraph(const TestProperty& testProperty);
 };
 
-void MarqueeTestNg::SetUpTestCase() {}
-void MarqueeTestNg::TearDownTestCase() {}
+void MarqueeTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+void MarqueeTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 void MarqueeTestNg::SetUp() {}
 void MarqueeTestNg::TearDown() {}
 
@@ -153,15 +162,16 @@ HWTEST_F(MarqueeTestNg, MarqueeTest001, TestSize.Level1)
     ASSERT_NE(textChild, nullptr);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-
+    auto marqueePaintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    ASSERT_NE(marqueePaintProperty, nullptr);
     /**
      * @tc.steps: step3. get the properties of all settings.
      * @tc.expected: step3. check whether the properties is correct.
      */
-    EXPECT_EQ(marqueeLayoutProperty->GetLoop(), MARQUEE_LOOP);
-    EXPECT_EQ(marqueeLayoutProperty->GetDirection(), MarqueeDirection::LEFT);
-    EXPECT_EQ(marqueeLayoutProperty->GetPlayerStatus(), false);
-    EXPECT_EQ(marqueeLayoutProperty->GetScrollAmount(), MARQUEE_SCROLL_AMOUNT);
+    EXPECT_EQ(marqueePaintProperty->GetLoop(), MARQUEE_LOOP);
+    EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::LEFT);
+    EXPECT_EQ(marqueePaintProperty->GetPlayerStatus(), false);
+    EXPECT_EQ(marqueePaintProperty->GetScrollAmount(), MARQUEE_SCROLL_AMOUNT);
     EXPECT_EQ(marqueeLayoutProperty->GetSrc(), MARQUEE_SRC);
     EXPECT_EQ(marqueeLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), TEXT_COLOR_VALUE);
@@ -196,12 +206,22 @@ HWTEST_F(MarqueeTestNg, MarqueeTest002, TestSize.Level1)
      */
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     ASSERT_NE(pattern, nullptr);
+    float start = 0.0f;
+    int32_t playCount = 0;
+    bool needSecondPlay = false;
+    pattern->PlayMarqueeAnimation(start, playCount, needSecondPlay);
+    pattern->OnAnimationFinish();
+    pattern->OnVisibleAreaChange(needSecondPlay);
+    pattern->ChangeAnimationPlayStatus();
+    pattern->StopMarqueeAnimation(needSecondPlay);
+    AnimationUtils::PauseAnimation(pattern->animation_);
     auto layoutProperty = pattern->CreateLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     auto event = pattern->CreateEventHub();
     ASSERT_NE(event, nullptr);
     auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgorithm, nullptr);
+    EXPECT_EQ(pattern->CalculateStart(), 0.0f);
 }
 
 /**
@@ -269,18 +289,16 @@ HWTEST_F(MarqueeTestNg, MarqueeTest004, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto marqueeLayoutProperty = AceType::DynamicCast<MarqueeLayoutProperty>(layoutProperty);
-    ASSERT_NE(marqueeLayoutProperty, nullptr);
+    auto marqueePaintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    ASSERT_NE(marqueePaintProperty, nullptr);
 
     /**
      * @tc.steps: step3. get the set playerStatus, loop and direction property.
      * @tc.expected: step3. check whether the properties is correct.
      */
-    EXPECT_TRUE(marqueeLayoutProperty->GetPlayerStatus());
-    EXPECT_EQ(marqueeLayoutProperty->GetLoop(), MARQUEE_LOOP);
-    EXPECT_EQ(marqueeLayoutProperty->GetDirection(), MarqueeDirection::LEFT);
+    EXPECT_TRUE(marqueePaintProperty->GetPlayerStatus());
+    EXPECT_EQ(marqueePaintProperty->GetLoop(), MARQUEE_LOOP);
+    EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::LEFT);
 
     /**
      * @tc.steps: step4. get marquee pattern and call OnDirtyLayoutWrapperSwap function.
@@ -296,8 +314,9 @@ HWTEST_F(MarqueeTestNg, MarqueeTest004, TestSize.Level1)
      * @tc.steps: step5. update the playerStatus of marquee to true and call OnDirtyLayoutWrapperSwap function.
      * @tc.expected: step5. check whether the call is correct.
      */
-    marqueeLayoutProperty->UpdatePlayerStatus(true);
-    EXPECT_TRUE(marqueeLayoutProperty->GetPlayerStatus());
+    marqueePaintProperty->UpdatePlayerStatus(true);
+    EXPECT_TRUE(marqueePaintProperty->GetPlayerStatus());
+    pattern->ChangeAnimationPlayStatus();
     pattern->OnModifyDone();
     dirtyLayoutWrapperSwap = pattern->OnDirtyLayoutWrapperSwap(nullptr, dirtySwapConfig);
     EXPECT_FALSE(dirtyLayoutWrapperSwap);
@@ -306,10 +325,13 @@ HWTEST_F(MarqueeTestNg, MarqueeTest004, TestSize.Level1)
      * @tc.steps: step6. update the loop and direction of marquee and call OnDirtyLayoutWrapperSwap function.
      * @tc.expected: step6. check whether the call is correct.
      */
-    marqueeLayoutProperty->UpdateLoop(-1);
-    marqueeLayoutProperty->UpdateDirection(MarqueeDirection::RIGHT);
-    EXPECT_EQ(marqueeLayoutProperty->GetLoop(), -1);
-    EXPECT_EQ(marqueeLayoutProperty->GetDirection(), MarqueeDirection::RIGHT);
+    marqueePaintProperty->UpdateLoop(-1);
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    EXPECT_EQ(marqueePaintProperty->GetLoop(), -1);
+    EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::RIGHT);
+    bool needSecondPlay = true;
+    pattern->OnVisibleAreaChange(needSecondPlay);
+    pattern->measureChanged_ = true;
     frameNode->MarkDirtyNode();
     dirtyLayoutWrapperSwap = pattern->OnDirtyLayoutWrapperSwap(nullptr, dirtySwapConfig);
     EXPECT_FALSE(dirtyLayoutWrapperSwap);
@@ -325,8 +347,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
     frameNode->MarkDirtyNode();
 
     /**
@@ -335,7 +357,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest005, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     ASSERT_NE(pattern, nullptr);
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -354,8 +376,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest005, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**
@@ -413,7 +435,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest005, TestSize.Level1)
     auto childLayoutWrapper = layoutWrapper.GetOrCreateChildByIndex(0);
     ASSERT_NE(childLayoutWrapper, nullptr);
     EXPECT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(CHILD_WIDTH_600, CHILD_HEIGHT_50));
-    EXPECT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), (DEVICE_WIDTH - CHILD_WIDTH_600) / 2);
+    EXPECT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
 }
 
 /**
@@ -426,8 +448,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
     frameNode->MarkDirtyNode();
 
     /**
@@ -436,7 +458,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest006, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     ASSERT_NE(pattern, nullptr);
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -455,8 +477,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest006, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**
@@ -516,15 +538,15 @@ HWTEST_F(MarqueeTestNg, MarqueeTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
 
     /**
      * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
      * @tc.expected: step2. related function is called.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(marqueeLayoutAlgorithm));
@@ -541,8 +563,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest007, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**
@@ -575,6 +597,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest007, TestSize.Level1)
     /**
      * @tc.steps: step8. test the StartMarquee function when no child is added.
      */
+
     pattern->StartMarqueeAnimation();
     /**
      * @tc.steps: step9. add child and calculate the size and offset.
@@ -608,6 +631,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest007, TestSize.Level1)
      * called.
      * @tc.expected: step13. check whether the animation status are correct.
      */
+    pattern->FireStartEvent();
+    pattern->FireBounceEvent();
     pattern->OnModifyDone();
 
     /**
@@ -631,8 +656,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
 
     /**
      * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
@@ -640,7 +665,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest008, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     ASSERT_NE(pattern, nullptr);
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -659,8 +684,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest008, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**
@@ -723,8 +748,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. create and get marquee frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
 
     /**
      * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
@@ -732,7 +757,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest009, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<MarqueePattern>();
     ASSERT_NE(pattern, nullptr);
     auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
@@ -751,8 +776,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest009, TestSize.Level1)
      */
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(textGeometryNode, nullptr);
-    RefPtr<LayoutWrapper> const textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
 
     /**
@@ -830,39 +855,23 @@ HWTEST_F(MarqueeTestNg, MarqueeTest0011, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
+    auto paintProperty = pattern->GetHost()->GetPaintProperty<MarqueePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    bool loop = true;
+    paintProperty->UpdateLoop(loop);
+    pattern->loop_ = false;
+    pattern->direction_ = MarqueeDirection::RIGHT;
+    EXPECT_FALSE(pattern->OnlyPlayStatusChange());
+    pattern->loop_ = true;
+    EXPECT_FALSE(pattern->OnlyPlayStatusChange());
+    pattern->direction_ = MarqueeDirection::LEFT;
+    EXPECT_FALSE(pattern->OnlyPlayStatusChange());
+    pattern->playStatus_ = true;
+    EXPECT_TRUE(pattern->OnlyPlayStatusChange());
+    pattern->StoreProperties();
+    EXPECT_EQ(pattern->direction_, MarqueeDirection::LEFT);
     pattern->OnModifyDone();
     EXPECT_TRUE(CheckMeasureFlag(marqueeLayoutProperty->GetPropertyChangeFlag()));
     EXPECT_TRUE(CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()));
-}
-
-/**
- * @tc.name: MarqueeTest012
- * @tc.desc: Test Stop Animation.
- * @tc.type: FUNC
- */
-HWTEST_F(MarqueeTestNg, MarqueeTest0012, TestSize.Level1)
-{
-    MarqueeModelNG marqueeModel;
-    marqueeModel.Create();
-    marqueeModel.SetValue(MARQUEE_SRC);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<MarqueePattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->lastStartStatus_ = false;
-    pattern->StopMarqueeAnimation(false, true);
-    EXPECT_TRUE(!pattern->lastStartStatus_);
-
-    pattern->lastStartStatus_ = true;
-    pattern->StopMarqueeAnimation(false, false);
-    EXPECT_TRUE(pattern->lastStartStatus_);
-
-    pattern->lastStartStatus_ = true;
-    pattern->StopMarqueeAnimation(true, false);
-    EXPECT_TRUE(pattern->lastStartStatus_);
-
-    pattern->lastStartStatus_ = true;
-    pattern->StopMarqueeAnimation(true, true);
-    EXPECT_TRUE(pattern->lastStartStatus_);
 }
 } // namespace OHOS::Ace::NG

@@ -37,8 +37,8 @@ MenuModel* MenuModel::GetInstance()
             } else {
                 instance_.reset(new Framework::MenuModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -84,6 +84,24 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 ParseJsString(jsWeight, weight);
             }
         }
+
+        auto jsStyle = obj->GetProperty("style");
+        if (!jsStyle->IsNull()) {
+            if (jsStyle->IsNumber()) {
+                MenuModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+            } else {
+                std::string style;
+                ParseJsString(jsStyle, style);
+                MenuModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
+            }
+        }
+
+        auto jsFamily = obj->GetProperty("family");
+        if (!jsFamily->IsNull() && jsFamily->IsString()) {
+            auto familyVal = jsFamily->ToString();
+            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+            MenuModel::GetInstance()->SetFontFamily(fontFamilies);
+        }
     }
     MenuModel::GetInstance()->SetFontSize(fontSize);
     MenuModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
@@ -108,10 +126,12 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::Declare("Menu");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSMenu>::StaticMethod("create", &JSMenu::Create, opt);
-
     JSClass<JSMenu>::StaticMethod("fontSize", &JSMenu::FontSize, opt);
     JSClass<JSMenu>::StaticMethod("font", &JSMenu::Font, opt);
     JSClass<JSMenu>::StaticMethod("fontColor", &JSMenu::FontColor, opt);
+    JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSMenu>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenu>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

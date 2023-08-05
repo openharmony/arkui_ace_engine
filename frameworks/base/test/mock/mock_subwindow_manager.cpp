@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/geometry/rect.h"
 #include "base/subwindow/subwindow_manager.h"
 namespace OHOS::Ace {
 namespace {
@@ -29,7 +30,7 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
     return instance_;
 }
 
-void SubwindowManager::HidePopupNG(int32_t targetId)
+void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
 {
     LOGI("SubwindowManager::HidePopupNG MOCK");
 }
@@ -40,10 +41,26 @@ void SubwindowManager::HideMenuNG(int32_t targetId) {}
 
 void SubwindowManager::HideMenuNG() {}
 
-void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects) {}
+void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId) {}
 
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {
     return g_currentWindow;
 }
+
+Rect SubwindowManager::GetParentWindowRect()
+{
+    return Rect();
+}
+
+int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
+{
+    return 0;
+}
+
+const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
+{
+    return nullptr;
+}
+
 } // namespace OHOS::Ace

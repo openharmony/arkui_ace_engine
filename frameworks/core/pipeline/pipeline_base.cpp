@@ -20,6 +20,9 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -28,6 +31,7 @@
 #include "core/common/manager_interface.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
@@ -158,15 +162,22 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height)
 {
     ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
     density_ = density;
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), density, width, height]() {
-            auto context = weak.Upgrade();
-            if (!context) {
-                return;
-            }
-            context->SetRootRect(width, height);
-        },
-        TaskExecutor::TaskType::UI);
+    auto task = [weak = AceType::WeakClaim(this), density, width, height]() {
+        auto context = weak.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->SetRootRect(width, height);
+    };
+#ifdef NG_BUILD
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        task();
+    } else {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+    }
+#else
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)
@@ -216,6 +227,21 @@ void PipelineBase::RegisterFont(const std::string& familyName, const std::string
     if (fontManager_) {
         fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
     }
+}
+
+void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    if (fontManager_) {
+        fontManager_->GetSystemFontList(fontList);
+    }
+}
+
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    if (fontManager_) {
+        return fontManager_->GetSystemFont(fontName, fontInfo);
+    }
+    return false;
 }
 
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const
@@ -304,9 +330,9 @@ void PipelineBase::NotifyDestroyEventDismiss() const
 void PipelineBase::NotifyDispatchTouchEventDismiss(const TouchEvent& event) const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
-        if (iterDispatchTouchEventHander) {
-            iterDispatchTouchEventHander(event);
+    for (auto& iterDispatchTouchEventHandler : dispatchTouchEventHandler_) {
+        if (iterDispatchTouchEventHandler) {
+            iterDispatchTouchEventHandler(event);
         }
     }
 }
@@ -464,7 +490,9 @@ void PipelineBase::PrepareOpenImplicitAnimation()
     pendingImplicitRender_.push(false);
 
     // flush ui tasks before open implict animation
-    FlushUITasks();
+    if (!isReloading_) {
+        FlushUITasks();
+    }
 #endif
 }
 
@@ -479,7 +507,9 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     // layout or render the views immediately to animate all related views, if layout or render updates are pending in
     // the animation closure
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
-        FlushUITasks();
+        if (!isReloading_) {
+            FlushUITasks();
+        }
     }
     if (!pendingImplicitLayout_.empty()) {
         pendingImplicitLayout_.pop();
@@ -502,10 +532,18 @@ void PipelineBase::OpenImplicitAnimation(
             return;
         }
         context->GetTaskExecutor()->PostTask(
-            [finishCallback]() {
-                if (finishCallback) {
+            [finishCallback, weak]() {
+                auto context = weak.Upgrade();
+                CHECK_NULL_VOID(context);
+                CHECK_NULL_VOID_NOLOG(finishCallback);
+                if (context->IsFormRender()) {
+                    context->SetEnableImplicitAnimation(false);
                     finishCallback();
+                    context->FlushBuild();
+                    context->SetEnableImplicitAnimation(true);
+                    return;
                 }
+                finishCallback();
             },
             TaskExecutor::TaskType::UI);
     };
@@ -565,14 +603,38 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
 void PipelineBase::OnVirtualKeyboardAreaChange(
     Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        return;
+    auto currentContainer = Container::Current();
+    if (currentContainer && !currentContainer->IsSubContainer()) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
+        if (subwindow && subwindow->GetShown()) {
+            // subwindow is shown, main window no need to handle the keyboard event
+            return;
+        }
     }
     double keyboardHeight = keyboardArea.Height();
+    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        if (windowManager_->GetWindowType() == WindowType::WINDOW_TYPE_UNDEFINED ||
+            (windowManager_->GetWindowType() > WindowType::WINDOW_TYPE_APP_END &&
+                windowManager_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT)) {
+            LOGW("this window type: %{public}d do not need avoid virtual keyboard.",
+                static_cast<int32_t>(windowManager_->GetWindowMode()));
+            return;
+        }
+        keyboardHeight = ModifyKeyboardHeight(keyboardHeight);
+    }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
+}
+
+double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
+{
+    auto windowRect = GetCurrentWindowRect();
+    auto deviceHeight = SystemProperties::GetDeviceHeight();
+    return keyboardHeight > 0.0 && keyboardHeight - (deviceHeight - windowRect.Bottom()) > 0.0
+               ? keyboardHeight - (deviceHeight - windowRect.Bottom())
+               : 0.0;
 }
 
 void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
@@ -588,6 +650,13 @@ Rect PipelineBase::GetCurrentWindowRect() const
         return window_->GetCurrentWindowRect();
     }
     return {};
+}
+
+bool PipelineBase::HasFloatTitle() const
+{
+    CHECK_NULL_RETURN_NOLOG(windowManager_, false);
+    return GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+           windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 }
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
@@ -617,13 +686,13 @@ void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_
     }
 }
 
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback)
+void PipelineBase::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEventCallback&& callback)
 {
-    if (!callback || ponitId < 0) {
+    if (!callback || pointId < 0) {
         return;
     }
 
-    etsCardTouchEventCallback_[ponitId] = std::move(callback);
+    etsCardTouchEventCallback_[pointId] = std::move(callback);
 }
 
 void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
@@ -642,13 +711,13 @@ void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
     }
 }
 
-void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t ponitId)
+void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t pointId)
 {
-    if (ponitId < 0) {
+    if (pointId < 0) {
         return;
     }
 
-    auto iter = etsCardTouchEventCallback_.find(ponitId);
+    auto iter = etsCardTouchEventCallback_.find(pointId);
     if (iter == etsCardTouchEventCallback_.end()) {
         return;
     }
@@ -659,6 +728,25 @@ void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t ponitId)
 void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
 {
     subWindowVsyncCallbacks_.erase(subWindowId);
+}
+
+bool PipelineBase::MaybeRelease()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_RETURN(taskExecutor_, (Destroy(), true));
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        LOGI("Destroy Pipeline on UI thread.");
+        Destroy();
+        return true;
+    } else {
+        LOGI("Post Destroy Pipeline Task to UI thread.");
+        return !taskExecutor_->PostTask(
+            [this]() {
+                Destroy();
+                delete this;
+            },
+            TaskExecutor::TaskType::UI);
+    }
 }
 
 void PipelineBase::Destroy()
@@ -682,6 +770,7 @@ void PipelineBase::Destroy()
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
+    formLinkInfoMap_.clear();
     LOGI("PipelineBase::Destroy end.");
 }
 } // namespace OHOS::Ace

@@ -22,21 +22,26 @@ namespace OHOS::Ace::Framework {
 class IndexerModelImpl : public OHOS::Ace::IndexerModel {
 public:
     void Create(std::vector<std::string>& indexerArray, int32_t selectedVal) override;
-    void SetSelectedColor(const Color& color) override;
-    void SetColor(const Color& color) override;
-    void SetPopupColor(const Color& color) override;
-    void SetSelectedBackgroundColor(const Color& color) override;
-    void SetPopupBackground(const Color& color) override;
+    void SetSelectedColor(const std::optional<Color>& color) override;
+    void SetColor(const std::optional<Color>& color) override;
+    void SetPopupColor(const std::optional<Color>& color) override;
+    void SetSelectedBackgroundColor(const std::optional<Color>& color) override;
+    void SetPopupBackground(const std::optional<Color>& color) override;
     void SetUsingPopup(bool state) override;
-    void SetSelectedFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) override;
-    void SetPopupFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) override;
-    void SetFont(std::function<void(TextStyle& textStyle)>&& getTextStyleFunc) override;
+    void SetSelectedFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) override;
+    void SetPopupFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) override;
+    void SetFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle) override;
     void SetItemSize(const Dimension& value) override;
     void SetAlignStyle(int32_t value) override;
     void SetOnSelected(std::function<void(const int32_t selected)>&& onSelect) override;
     void SetOnRequestPopupData(
         std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData) override;
     void SetOnPopupSelected(std::function<void(const int32_t selected)>&& onPopupSelected) override;
+    void SetTextStyle(TextStyle& textStyle, std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_FORM_MODEL_IMPL_H

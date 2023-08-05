@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,13 @@
 
 #include "core/components/track/rosen_render_scale_ring_track.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
 #include "include/effects/Sk1DPathEffect.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -33,6 +37,7 @@ void DrawScaleArc(RenderContext& context, const RenderRingInfo& trackInfo)
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     SkPath path;
     path.addRRect(SkRRect::MakeRectXY(SkRect::MakeWH(trackInfo.scaleStrokeWidth, trackInfo.thickness),
@@ -46,18 +51,44 @@ void DrawScaleArc(RenderContext& context, const RenderRingInfo& trackInfo)
     paint.setStrokeWidth(trackInfo.thickness);
     paint.setAntiAlias(true);
     paint.setColor(trackInfo.color.GetValue());
+#else
+    RSPen pen;
+    RSRecordingPath path;
+    path.AddRoundRect(RSRect(0, 0, trackInfo.scaleStrokeWidth, trackInfo.thickness),
+        trackInfo.thickness / 2.0, trackInfo.thickness / 2.0);
+    double pathDistance = 2.0 * M_PI *
+                          (trackInfo.radius + (NearEqual(trackInfo.clockwise, 1.0) ? trackInfo.thickness : 0.0)) /
+                          trackInfo.totalScaleNumber;
+    pen.SetPathEffect(RSPathEffect::CreatePathDashEffect(
+        path, static_cast<RSScalar>(pathDistance), 0.0f, RSPathDashStyle::ROTATE));
+    pen.SetWidth(trackInfo.thickness);
+    pen.SetAntiAlias(true);
+    pen.SetColor(trackInfo.color.GetValue());
+#endif
 
     static int32_t totalDegree = 360;
     double radiusPrecision = trackInfo.thickness;
     if (trackInfo.clockwise != 1) {
         radiusPrecision = 0.0;
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->drawArc({ trackInfo.center.GetX() - trackInfo.radius - radiusPrecision,
                         trackInfo.center.GetY() - trackInfo.radius - radiusPrecision,
                         trackInfo.center.GetX() + trackInfo.radius + radiusPrecision,
                         trackInfo.center.GetY() + trackInfo.radius + radiusPrecision },
         180 * (trackInfo.clockwise * (trackInfo.startDegree / (totalDegree / 2.0)) - 0.5),
         360 * (trackInfo.clockwise * trackInfo.sweepDegree / totalDegree), false, paint);
+#else
+    canvas->AttachPen(pen);
+    canvas->DrawArc(
+        RSRect(trackInfo.center.GetX() - trackInfo.radius - radiusPrecision,
+            trackInfo.center.GetY() - trackInfo.radius - radiusPrecision,
+            trackInfo.center.GetX() + trackInfo.radius + radiusPrecision,
+            trackInfo.center.GetY() + trackInfo.radius + radiusPrecision),
+        180 * (trackInfo.clockwise * (trackInfo.startDegree / (totalDegree / 2.0)) - 0.5),
+        360 * (trackInfo.clockwise * trackInfo.sweepDegree / totalDegree));
+    canvas->DetachPen();
+#endif
 }
 } // namespace
 

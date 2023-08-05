@@ -15,9 +15,11 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 
+#include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/jsview/models/divider_model_impl.h"
 #include "core/components/divider/divider_theme.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -77,15 +79,10 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color dividerColor;
-    if (!ParseJsColor(info[0], dividerColor)) {
-        auto theme = GetTheme<DividerTheme>();
-        if (theme) {
-            dividerColor = theme->GetColor();
-        }
-        DividerModel::GetInstance()->DividerColor(dividerColor);
-        return;
-    }
+    auto theme = GetTheme<DividerTheme>();
+    CHECK_NULL_VOID(theme);
+    Color dividerColor = theme->GetColor();
+    ParseJsColor(info[0], dividerColor);
     DividerModel::GetInstance()->DividerColor(dividerColor);
 }
 
@@ -95,10 +92,16 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    CalcDimension strokeWidth;
-    if (!ParseJsDimensionVp(info[0], strokeWidth)) {
-        return;
+    auto theme = GetTheme<DividerTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension strokeWidth = theme->GetStokeWidth();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        strokeWidth = 1.0_px;
     }
+    ParseJsDimensionVp(info[0], strokeWidth);
     DividerModel::GetInstance()->StrokeWidth(strokeWidth);
 }
 

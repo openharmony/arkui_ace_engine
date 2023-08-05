@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,14 @@ class MockRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(MockRenderContext, RenderContext)
 public:
     ~MockRenderContext() override = default;
+    
     MOCK_METHOD4(SetBounds, void(float, float, float, float));
     MOCK_METHOD0(GetPaintRectWithTransform, RectF());
     MOCK_METHOD1(GetPointWithTransform, void(PointF&));
+    MOCK_METHOD2(AddChild, void(const RefPtr<RenderContext>& renderContext, int index));
+    MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
+    MOCK_METHOD1(SetVisible, void(bool));
+    MOCK_METHOD1(BlendBgColor, void(const Color&));
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

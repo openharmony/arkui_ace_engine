@@ -81,11 +81,12 @@ public:
         const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
         auto geometryNode = dirty->GetGeometryNode();
-        offset_ = geometryNode->GetContentOffset();
-        size_ = geometryNode->GetContentSize();
-        if (isFirstAddhotZoneRect_) {
+        auto offset = geometryNode->GetContentOffset();
+        auto size = geometryNode->GetContentSize();
+        if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+            offset_ = offset;
+            size_ = size;
             AddHotZoneRect();
-            isFirstAddhotZoneRect_ = false;
         }
         return true;
     }
@@ -133,6 +134,7 @@ public:
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
     void UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -154,7 +156,6 @@ private:
         bool select);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
@@ -177,7 +178,6 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

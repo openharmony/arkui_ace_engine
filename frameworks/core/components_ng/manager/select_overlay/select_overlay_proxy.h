@@ -44,9 +44,11 @@ public:
 
     void UpdateShowArea(const RectF& area) const;
 
+    void SetHandleReverse(bool reverse);
+
     bool IsClosed() const;
 
-    void Close() const;
+    void Close(bool animation = false) const;
 
     int32_t GetSelectOverlayId() const
     {
@@ -54,6 +56,8 @@ public:
     }
 
     void SetSelectInfo(const std::string& selectInfo) const;
+    void ShowOrHiddenMenu(bool isHidden);
+    void DisableMenu(bool isDisabled);
 
 private:
     int32_t selectOverlayId_ = 0;

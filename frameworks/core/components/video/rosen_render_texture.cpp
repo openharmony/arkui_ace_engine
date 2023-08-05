@@ -15,8 +15,10 @@
 
 #include "core/components/video/rosen_render_texture.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
+#endif
 #include "core/components/common/layout/constants.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -135,8 +137,13 @@ void RosenRenderTexture::AddGaussianFuzzy(RenderContext& context, const Offset& 
         return;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
+#else
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+#endif
 }
 
 void RosenRenderTexture::UpdateOpacity(uint8_t opacity)

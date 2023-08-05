@@ -17,11 +17,13 @@ import(
 build_component_ng("property_ng") {
   sources = [
     "accessibility_property.cpp",
+    "border_property.cpp",
     "calc_length.cpp",
     "gradient_property.cpp",
     "grid_property.cpp",
     "measure_utils.cpp",
     "property.cpp",
+    "safe_area_insets.cpp",
     "templates_parser.cpp",
   ]
 }

@@ -31,7 +31,9 @@ void GridLayoutProperty::ResetGridLayoutInfoAndMeasure() const
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetGridLayoutInfo();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (host->GetParent()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -42,11 +44,11 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str());
     json->Put("rowsGap", propRowsGap_.value_or(0.0_vp).ToString().c_str());
     json->Put("cachedCount", propCachedCount_.value_or(1));
-    json->Put("editMode ", propEditable_.value_or(false) ? "true" : "false");
-    json->Put("layoutDirection ", GetGridDirectionStr().c_str());
-    json->Put("maxCount ", propMaxCount_.value_or(Infinity<int32_t>()));
-    json->Put("minCount ", propMinCount_.value_or(1));
-    json->Put("cellLength ", propCellLength_.value_or(0));
+    json->Put("editMode", propEditable_.value_or(false) ? "true" : "false");
+    json->Put("layoutDirection", GetGridDirectionStr().c_str());
+    json->Put("maxCount", propMaxCount_.value_or(Infinity<int32_t>()));
+    json->Put("minCount", propMinCount_.value_or(1));
+    json->Put("cellLength", propCellLength_.value_or(0));
     auto edgeEffect = propEdgeEffect_.value_or(EdgeEffect::NONE);
     if (edgeEffect == EdgeEffect::SPRING) {
         json->Put("edgeEffect", "EdgeEffect.Spring");
@@ -55,6 +57,7 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("edgeEffect", "EdgeEffect.None");
     }
+    json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
 }
 
 std::string GridLayoutProperty::GetGridDirectionStr() const

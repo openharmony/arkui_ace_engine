@@ -28,8 +28,6 @@ ohos_fuzztest("ManifestFuzzTest") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$cjson_root:cjson",
-
-    #    "//third_party/googletest:gtest_main",
   ]
   sources = [
     # base
@@ -48,8 +46,6 @@ ohos_fuzztest("ManifestFuzzTest") {
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
-
-    #"$ace_root/frameworks/core/components/theme/theme_manager.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
 
@@ -59,6 +55,7 @@ ohos_fuzztest("ManifestFuzzTest") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -77,11 +74,7 @@ ohos_fuzztest("ManifestFuzzTest") {
     #"theme_constants_test.cpp",
     "$ace_root/frameworks/core/components/test/unittest/theme/theme_mock.cpp",
 
-    # mock
-    #"$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
-
     #fuzz
-    "$ace_root/test/mock/base/mock_event_report.cpp",
     "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
     "$ace_root/adapter/ohos/osal/system_properties.cpp",
     "$ace_root/frameworks/base/resource/ace_res_config.cpp",
@@ -93,6 +86,7 @@ ohos_fuzztest("ManifestFuzzTest") {
     "$ace_root/frameworks/bridge/common/manifest/manifest_window.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_asset_manager.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
+    "$ace_root/test/mock/base/mock_event_report.cpp",
     "manifest_fuzzer.cpp",
   ]
 
@@ -109,14 +103,18 @@ ohos_fuzztest("ManifestFuzzTest") {
     ]
   }
 
-  configs = [
-    ":config_theme_manager_test",
-    "$ace_root:ace_test_config",
-  ]
+  configs = [ ":config_theme_manager_test" ]
+
+  ldflags = []
+  cflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 
   if (is_ohos_standard_system) {
     external_deps = [
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "init:libbegetutil",
     ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
@@ -144,6 +142,7 @@ ohos_fuzztest("ManifestFuzzTest") {
     "$ace_root/frameworks/base/log",
     "$ace_root/frameworks",
     "$ace_root",
+    "$root_out_dir/arkui/framework",
     "//third_party/flutter/engine/flutter/assets",
     "//third_party/flutter/engine",
     "//third_party",

@@ -20,6 +20,8 @@
 
 #include "abs_shared_result_set.h"
 #include "data_ability_predicates.h"
+#include "event_handler.h"
+#include "event_runner.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
@@ -40,9 +42,10 @@ namespace OHOS::Ace {
 using namespace OHOS::Ace::Framework;
 using RdbValueBucketNewInstance = napi_value (*)(napi_env env, OHOS::NativeRdb::ValuesBucket& valueBucket);
 using RdbValueBucketGetNativeObject = OHOS::NativeRdb::ValuesBucket* (*)(napi_env env, napi_value& value);
-using RdbResultSetProxyNewInstance = napi_value (*)(napi_env env, OHOS::NativeRdb::AbsSharedResultSet* resultSet);
-using RdbResultSetProxyGetNativeObject = OHOS::NativeRdb::AbsSharedResultSet* (*)(const napi_env& env,
-    const napi_value& arg);
+using RdbResultSetProxyNewInstance =
+    napi_value (*)(napi_env env, std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> resultSet);
+using RdbResultSetProxyGetNativeObject = std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> (*)(napi_env env,
+    napi_value arg);
 using DataAbilityPredicatesNewInstance = napi_value (*)(
     napi_env env, OHOS::NativeRdb::DataAbilityPredicates* predicates);
 using DataAbilityPredicatesGetNativeObject = OHOS::NativeRdb::DataAbilityPredicates* (*)(const napi_env env,
@@ -50,10 +53,16 @@ using DataAbilityPredicatesGetNativeObject = OHOS::NativeRdb::DataAbilityPredica
 
 class JsiPaEngine : public JsBackendEngine {
 public:
+    using EventRunner = AppExecFwk::EventRunner;
+    using EventHandler = AppExecFwk::EventHandler;
+
     explicit JsiPaEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiPaEngine() override;
 
-    bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type) override;
+    bool Initialize(BackendType type, SrcLanguage language) override;
+
+    bool InitializeInner(BackendType type, SrcLanguage language) override;
+
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
     // Load and initialize a JS bundle into the JS Framework
@@ -99,6 +108,10 @@ public:
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want) override;
     bool OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams) override;
 
+    void PostTask(const std::function<void()>& task, const std::string& name = "", int64_t delayTime = 0) override;
+    void PostSyncTask(const std::function<void()>& task, const std::string& name = "") override;
+    void RemoveTask(const std::string& name) override;
+
     std::shared_ptr<JsRuntime> GetJsRuntime() const;
     NativeEngine* GetNativeEngine() const;
 
@@ -131,8 +144,8 @@ public:
     {
         return isDebugMode_;
     }
+
 private:
-    void SetPostTask(NativeEngine* nativeEngine);
     void LoadLibrary();
     void UnloadLibrary();
     shared_ptr<JsValue> GetPaFunc(const std::string& funcName);
@@ -151,19 +164,15 @@ private:
     void StartData();
     void StartForm(const OHOS::AAFwk::Want& want);
 
-    void RegisterWorker();
-    void RegisterInitWorkerFunc();
-    void RegisterAssetFunc();
     bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject);
     void RegisterPaModule();
-    void RegisterConsoleModule();
     void RegisterConsoleModule(ArkNativeEngine* engine);
     void RegisterUncaughtExceptionHandler();
     void EvaluateJsCode();
     void StartDebugMode(bool debuggerMode);
     panda::ecmascript::EcmaVM* GetEcmaVm() const;
     void InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options);
-    bool CreateJsRuntime(const AbilityRuntime::Runtime::Options& options);
+    bool CreateJsRuntime();
 
     std::string ExcludeTag(const std::string& jsonString, const std::string& tagString);
     std::string IncludeTag(const std::string& jsonString, const std::string& tagString);
@@ -175,10 +184,12 @@ private:
 
     int32_t instanceId_ = 0;
     std::unique_ptr<AbilityRuntime::JsRuntime> jsAbilityRuntime_ = nullptr;
+    std::shared_ptr<EventRunner> eventRunner_ = nullptr;
+    std::shared_ptr<EventHandler> eventHandler_ = nullptr;
     std::shared_ptr<JsRuntime> runtime_ = nullptr;
-    RefPtr<TaskExecutor> taskExecutor_ = nullptr;
     RefPtr<JsBackendAssetManager> jsBackendAssetManager_ = nullptr;
     BackendType type_ = BackendType::SERVICE;
+    SrcLanguage language_ = SrcLanguage::ETS;
     bool blockWaiting_ = false;
     shared_ptr<JsValue> asyncResult_ = nullptr;
     bool isDebugMode_ = true;

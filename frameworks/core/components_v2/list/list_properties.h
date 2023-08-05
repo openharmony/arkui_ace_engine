@@ -57,9 +57,26 @@ enum class StickyMode {
     OPACITY,
 };
 
+enum class ScrollSnapAlign {
+    NONE = 0,
+    START,
+    CENTER,
+    END,
+};
+
 enum class SwipeEdgeEffect {
     Spring = 0,
     None,
+};
+
+enum class ListItemStyle {
+    NONE = 0,
+    CARD,
+};
+
+enum class ListItemGroupStyle {
+    NONE = 0,
+    CARD,
 };
 
 struct EditMode {
@@ -84,13 +101,16 @@ struct ItemDivider final {
 };
 } // namespace V2
 
-using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
-using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
-using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
-using OnScrollStartEvent = std::function<void()>;
-using OnScrollStopEvent = std::function<void()>;
-using OnScrollIndexEvent = std::function<void(int32_t, int32_t)>;
-using OnReachEvent = std::function<void()>;
+struct ChainAnimationOptions {
+    CalcDimension minSpace;
+    CalcDimension maxSpace;
+    double conductivity = 0;
+    double intensity = 0;
+    int32_t edgeEffect = 0;
+    double stiffness = 0;
+    double damping = 0;
+};
+
 using OnItemDeleteEvent = std::function<bool(int32_t)>;
 using OnItemMoveEvent = std::function<bool(int32_t, int32_t)>;
 using OnItemDragStartFunc = std::function<RefPtr<AceType>(const ItemDragInfo&, int32_t)>;

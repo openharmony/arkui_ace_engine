@@ -23,7 +23,6 @@ build_component_ng("form_pattern_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
     external_deps = [
       "ability_base:want",
       "ability_runtime:app_manager",
@@ -31,6 +30,7 @@ build_component_ng("form_pattern_ng") {
       "bundle_framework:appexecfwk_core",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "graphic_2d:librender_service_client",
       "input:libmmi-client",
       "ipc:ipc_core",
     ]

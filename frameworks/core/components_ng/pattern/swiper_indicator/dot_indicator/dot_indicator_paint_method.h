@@ -91,6 +91,11 @@ public:
         turnPageRate_ = turnPageRate;
     }
 
+    void SetTouchBottomRate(float touchBottomRate)
+    {
+        touchBottomRate_ = touchBottomRate;
+    }
+
     void SetMouseClickIndex(const std::optional<int32_t>& mouseClickIndex)
     {
         mouseClickIndex_ = mouseClickIndex;
@@ -109,6 +114,10 @@ private:
     };
     void CalculatePointCenterX(const StarAndEndPointCenter& starAndEndPointCenter,
         const LinearVector<float>& startVectorBlackPointCenterX, const LinearVector<float>& endVectorBlackPointCenterX);
+    void ForwardCalculation(
+        const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
+    void BackwardCalculation(
+        const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
         auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -126,6 +135,7 @@ private:
     int32_t currentIndex_ = 0;
     int32_t itemCount_ = 0;
     float turnPageRate_ = 0.0f;
+    float touchBottomRate_ = 0.0f;
     bool isHover_ = false;
     bool isPressed_ = false;
     bool longPointIsHover_ = false;

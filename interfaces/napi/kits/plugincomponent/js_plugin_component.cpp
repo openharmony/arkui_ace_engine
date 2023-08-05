@@ -22,6 +22,7 @@
 #include "js_plugin_want.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "tokenid_kit.h"
 
 #include "core/components/plugin/plugin_component_manager.h"
 
@@ -177,15 +178,9 @@ bool UnwrapParamForPush(napi_env env, size_t argc, napi_value* argv, ACEAsyncJSC
     return true;
 }
 
-void JSPushWork(napi_env env, void* data)
+void JSPushCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
-}
-
-void JSPushCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
     if (asyncCallbackInfo == nullptr) {
         HILOG_INFO("%{public}s called. asyncCallbackInfo is null", __func__);
         return;
@@ -197,14 +192,12 @@ void JSPushCompleteAsyncCallbackWork(napi_env env, napi_status status, void* dat
         asyncCallbackInfo->jsParamList.paramList.GetStringValue("extraData"));
 
     asyncCallbackInfo->error_code = 0;
-    AceCompleteAsyncCallbackWork(env, status, data);
+    AceCompleteAsyncCallbackWork(env, asyncCallbackInfo);
 }
 
-void JSPushCompletePromiseCallbackWork(napi_env env, napi_status status, void* data)
+void JSPushCompletePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
-
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
     if (asyncCallbackInfo == nullptr) {
         HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
@@ -217,14 +210,14 @@ void JSPushCompletePromiseCallbackWork(napi_env env, napi_status status, void* d
         asyncCallbackInfo->jsParamList.paramList.GetStringValue("extraData"));
 
     asyncCallbackInfo->error_code = 0;
-    AceCompletePromiseCallbackWork(env, status, data);
+    AceCompletePromiseCallbackWork(env, asyncCallbackInfo);
 }
 
 napi_value NAPI_JSPushWrap(napi_env env, napi_callback_info info, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
     size_t argc = ACE_ARGS_MAX_COUNT;
-    napi_value args[ACE_ARGS_MAX_COUNT] = {nullptr};
+    napi_value args[ACE_ARGS_MAX_COUNT] = { nullptr };
     napi_value jsthis = 0;
     void* data = nullptr;
 
@@ -233,26 +226,29 @@ napi_value NAPI_JSPushWrap(napi_env env, napi_callback_info info, ACEAsyncJSCall
         HILOG_INFO("%{public}s called. Invoke UnwrapParamForPush fail", __func__);
         return nullptr;
     }
-    ACEAsyncParamEx asyncParamEx;
+
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
         HILOG_INFO("%{public}s called. asyncCallback.", __func__);
-        asyncParamEx.resource = "NAPI_JSPushCallback";
-        asyncParamEx.execute = JSPushWork;
-        asyncParamEx.complete = JSPushCompleteAsyncCallbackWork;
-
-        return AceExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
+        JSPushCompleteAsyncCallbackWork(env, asyncCallbackInfo);
+        return AceWrapVoidToJS(env);
     } else {
         HILOG_INFO("%{public}s called. promise.", __func__);
-        asyncParamEx.resource = "NAPI_JSPushPromise";
-        asyncParamEx.execute = JSPushWork;
-        asyncParamEx.complete = JSPushCompletePromiseCallbackWork;
-        return AceExecutePromiseCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
+        napi_value promise = 0;
+        NAPI_CALL(env, napi_create_promise(env, &asyncCallbackInfo->deferred, &promise));
+        JSPushCompletePromiseCallbackWork(env, asyncCallbackInfo);
+        return promise;
     }
 }
 
 static napi_value JSPush(napi_env env, napi_callback_info info)
 {
     HILOG_INFO("%{public}s called.", __func__);
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        HILOG_INFO("This application is not system-app, can not use system-api");
+        return nullptr;
+    }
 
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
@@ -322,21 +318,9 @@ bool UnwrapParamForRequest(napi_env env, size_t argc, napi_value* argv,
     return true;
 }
 
-void JSRequestWork(napi_env env, void* data)
+void AceRequestCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
-}
-
-void JSRequestPromiseWork(napi_env env, void* data)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-}
-
-void AceRequestCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
     if (asyncCallbackInfo == nullptr) {
         HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
@@ -372,7 +356,6 @@ void AceRequestCompleteAsyncCallbackWork(napi_env env, napi_status status, void*
         asyncCallbackInfo->jsParamList.paramList.GetStringValue("jsonPath"),
         asyncCallbackInfo->jsParamList.paramList.GetStringValue("data"));
 
-    napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
     AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
 }
 
@@ -437,10 +420,9 @@ napi_value TransferRequestCallBackData(napi_env env, ACEAsyncJSCallbackInfo* asy
     return jsResult;
 }
 
-void AceRequestPromiseAsyncCallbackWork(napi_env env, napi_status status, void* data)
+void AceRequestPromiseAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
     if (asyncCallbackInfo == nullptr) {
         HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
@@ -481,7 +463,7 @@ void AceRequestPromiseAsyncCallbackWork(napi_env env, napi_status status, void* 
         AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
     } else {
         asyncCallbackInfo->error_code = NAPI_ACE_ERR_ERROR;
-        AceCompletePromiseCallbackWork(env, status, data);
+        AceCompletePromiseCallbackWork(env, asyncCallbackInfo);
     }
 }
 
@@ -500,25 +482,28 @@ napi_value NAPI_JSRequestWrap(napi_env env, napi_callback_info info, ACEAsyncJSC
         return nullptr;
     }
 
-    ACEAsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
         HILOG_INFO("%{public}s called. asyncCallback.", __func__);
-        asyncParamEx.resource = "NAPI_JSRequestCallback";
-        asyncParamEx.execute = JSRequestWork;
-        asyncParamEx.complete = AceRequestCompleteAsyncCallbackWork;
-        return AceExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
+        AceRequestCompleteAsyncCallbackWork(env, asyncCallbackInfo);
+        return AceWrapVoidToJS(env);
     } else {
         HILOG_INFO("%{public}s called. promise.", __func__);
-        asyncParamEx.resource = "NAPI_JSRequestPromise";
-        asyncParamEx.execute = JSRequestPromiseWork;
-        asyncParamEx.complete = AceRequestPromiseAsyncCallbackWork;
-        return AceExecutePromiseCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
+        napi_value promise = 0;
+        NAPI_CALL(env, napi_create_promise(env, &asyncCallbackInfo->deferred, &promise));
+        AceRequestPromiseAsyncCallbackWork(env, asyncCallbackInfo);
+        return promise;
     }
 }
 
 static napi_value JSRequest(napi_env env, napi_callback_info info)
 {
     HILOG_INFO("%{public}s called.", __func__);
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        HILOG_INFO("This application is not system-app, can not use system-api");
+        return nullptr;
+    }
 
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
@@ -579,16 +564,9 @@ bool UnwrapParamForOn(napi_env env, size_t argc, napi_value* argv,
     return true;
 }
 
-void JSOnWork(napi_env env, void* data)
+void AceOnCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
-}
-
-void AceOnCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
     if (asyncCallbackInfo == nullptr) {
         HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
@@ -613,7 +591,6 @@ void AceOnCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data
     if (ret) {
         asyncCallbackInfo->cbInfo.callback = nullptr;
     }
-    napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
     AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
 }
 
@@ -632,17 +609,12 @@ napi_value NAPI_JSOnWrap(napi_env env, napi_callback_info info, ACEAsyncJSCallba
         return nullptr;
     }
 
-    ACEAsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
         HILOG_INFO("%{public}s called. asyncCallback.", __func__);
-        asyncParamEx.resource = "NAPI_JSOCallback";
-        asyncParamEx.execute = JSOnWork;
-        asyncParamEx.complete = AceOnCompleteAsyncCallbackWork;
-
-        return AceExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
+        AceOnCompleteAsyncCallbackWork(env, asyncCallbackInfo);
+        return AceWrapVoidToJS(env);
     } else {
         HILOG_INFO("%{public}s called. promise.", __func__);
-        asyncParamEx.resource = "NAPI_JSOnPromise";
         return nullptr;
     }
 }
@@ -688,23 +660,15 @@ bool UnwrapParamForOff(napi_env env, size_t argc, napi_value* argv,
     return true;
 }
 
-void JSOffWork(napi_env env, void* data)
+void AceOffCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
-}
-
-void AceOffCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
     if (asyncCallbackInfo == nullptr) {
         HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
     }
 
     JSPluginCallbackMgr::Instance().UnregisterCallBack(env, asyncCallbackInfo->wantStage);
-    napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
     AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
 }
 
@@ -723,17 +687,12 @@ napi_value NAPI_JSOffWrap(napi_env env, napi_callback_info info, ACEAsyncJSCallb
         return nullptr;
     }
 
-    ACEAsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
         HILOG_INFO("%{public}s called. asyncCallback.", __func__);
-        asyncParamEx.resource = "NAPI_JSOffCallback";
-        asyncParamEx.execute = JSOffWork;
-        asyncParamEx.complete = AceOffCompleteAsyncCallbackWork;
-
-        return AceExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
+        AceOffCompleteAsyncCallbackWork(env, asyncCallbackInfo);
+        return AceWrapVoidToJS(env);
     } else {
         HILOG_INFO("%{public}s called. promise.", __func__);
-        asyncParamEx.resource = "NAPI_JSOffPromise";
         return nullptr;
     }
 }

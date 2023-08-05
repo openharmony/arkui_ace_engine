@@ -115,6 +115,7 @@ void SharedOverlayManager::PrepareSharedTransition(const RefPtr<FrameNode>& page
     CHECK_NULL_VOID(patternDest);
     auto patternSrc = pageSrc->GetPattern<PagePattern>();
     CHECK_NULL_VOID(patternSrc);
+    pageOffset_ = pageDest->GetRenderContext()->GetPaintRectWithoutTransform().GetOffset();
     const auto& srcMap = patternSrc->GetSharedTransitionMap();
     const auto& destMap = patternDest->GetSharedTransitionMap();
     std::list<RefPtr<SharedTransitionEffect>> effects;
@@ -235,15 +236,19 @@ void SharedOverlayManager::PassengerAboard(
     const RefPtr<SharedTransitionEffect>& effect, const RefPtr<FrameNode>& passenger)
 {
     auto ticket = passenger->GetPaintRectOffsetToPage();
+    // Get offset relative to stage(or overlay), for safeArea
+    ticket += pageOffset_;
+    LOGI("passenger offset is %{public}s, id = %{public}s", ticket.ToString().c_str(), effect->GetShareId().c_str());
     auto initialPosition = passenger->GetRenderContext()->GetPosition();
     // save initialFrameOffset for static type sharedTransition
     auto initialFrameOffset = passenger->GetGeometryNode()->GetFrameOffset();
-    auto initialEventEnabled = passenger->GetEventHub<EventHub>()->IsEnabled();
+    const auto& initialMarginPtr = passenger->GetLayoutProperty()->GetMarginProperty();
+    auto initialMargin = initialMarginPtr ? std::make_optional<MarginProperty>(*initialMarginPtr) : std::nullopt;
     auto zIndex = passenger->GetRenderContext()->GetZIndex();
     effect->SetPassengerInitZIndex(zIndex);
     effect->SetPassengerInitPos(initialPosition);
     effect->SetPassengerInitFrameOffset(initialFrameOffset);
-    effect->SetPassengerInitEventEnabled(initialEventEnabled);
+    effect->SetPassengerInitMargin(initialMargin);
     bool isPassengerCurrentFocused = false;
     auto passengerFocusHub = passenger->GetFocusHub();
     if (passengerFocusHub) {
@@ -256,12 +261,14 @@ void SharedOverlayManager::PassengerAboard(
     effect->SetPassengerHolder(passengerHolder);
     sharedManager_->AddChild(passenger);
     auto offset = OffsetT<Dimension>(Dimension(ticket.GetX()), Dimension(ticket.GetY()));
-    LOGD("offset is (%{public}s, %{public}s), id = %{public}s", offset.GetX().ToString().c_str(),
-        offset.GetY().ToString().c_str(), effect->GetShareId().c_str());
+    if (initialMargin) {
+        passenger->GetLayoutProperty()->UpdateMargin(MarginProperty());
+        passenger->GetLayoutProperty()->CleanDirty();
+    }
     passenger->GetRenderContext()->UpdateZIndex(effect->GetZIndex());
     passenger->GetRenderContext()->UpdatePosition(offset);
     passenger->GetRenderContext()->OnModifyDone();
-    passenger->GetEventHub<EventHub>()->SetEnabled(false);
+    passenger->GetEventHub<EventHub>()->SetEnabledInternal(false);
 }
 
 bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& effect)
@@ -314,10 +321,14 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
             passenger->GetRenderContext()->ResetZIndex();
             passenger->GetRenderContext()->OnZIndexUpdate(0);
         }
+        if (effect->GetPassengerInitMargin().has_value()) {
+            passenger->GetLayoutProperty()->UpdateMargin(effect->GetPassengerInitMargin().value());
+            passenger->MarkDirtyNode();
+        }
         // restore initialFrameOffset for static type sharedTransition, because it may not layout again
         passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
-        passenger->GetEventHub<EventHub>()->SetEnabled(effect->GetPassengerInitEventEnabled());
         ReplaceFrameNode(passengerHolder, passenger);
+        passenger->GetEventHub<EventHub>()->RestoreEnabled();
         auto isPassengerCurrentFocused = effect->GetPassengerCurrentFocused();
         if (isPassengerCurrentFocused) {
             auto passengerFocusHub = passenger->GetFocusHub();

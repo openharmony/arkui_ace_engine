@@ -71,7 +71,7 @@ void ScrollModelNG::SetAxis(Axis axis)
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollPaintProperty, Axis, axis);
 }
 
-void ScrollModelNG::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
+void ScrollModelNG::SetOnScrollBegin(OnScrollBeginEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -80,7 +80,7 @@ void ScrollModelNG::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
     eventHub->SetOnScrollBegin(std::move(event));
 }
 
-void ScrollModelNG::SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event)
+void ScrollModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -89,7 +89,7 @@ void ScrollModelNG::SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event)
     eventHub->SetOnScrollFrameBegin(std::move(event));
 }
 
-void ScrollModelNG::SetOnScroll(NG::OnScrollEvent&& event)
+void ScrollModelNG::SetOnScroll(NG::ScrollEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -116,7 +116,7 @@ void ScrollModelNG::SetOnScrollEnd(NG::ScrollEndEvent&& event)
     eventHub->SetOnScrollEnd(std::move(event));
 }
 
-void ScrollModelNG::SetOnScrollStart(NG::ScrollStartEvent&& event)
+void ScrollModelNG::SetOnScrollStart(OnScrollStartEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -125,7 +125,7 @@ void ScrollModelNG::SetOnScrollStart(NG::ScrollStartEvent&& event)
     eventHub->SetOnScrollStart(std::move(event));
 }
 
-void ScrollModelNG::SetOnScrollStop(NG::ScrollStopEvent&& event)
+void ScrollModelNG::SetOnScrollStop(OnScrollStopEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -170,4 +170,42 @@ void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, EdgeEffect, edgeEffect);
 }
 
+void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
+void ScrollModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
+void ScrollModelNG::SetFriction(double friction)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFriction(friction);
+}
+
+void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+    const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetScrollSnapAlign() != scrollSnapAlign) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
+        pattern->SetScrollSnapUpdate(true);
+    }
+    pattern->SetIntervalSize(intervalSize);
+    pattern->SetSnapPaginations(snapPaginations);
+    pattern->SetEnableSnapToSide(enableSnapToSide);
+}
 } // namespace OHOS::Ace::NG

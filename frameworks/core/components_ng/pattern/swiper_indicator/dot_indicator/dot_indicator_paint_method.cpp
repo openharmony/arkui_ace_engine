@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 namespace {
 // for indicator
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
+constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 
@@ -42,6 +42,10 @@ constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t ITEM_HALF_HEIGHT = 1;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
+constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
+constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
+
+constexpr int TWOFOLD = 2;
 } // namespace
 
 void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
@@ -238,81 +242,23 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
 void DotIndicatorPaintMethod::CalculatePointCenterX(
     const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index)
 {
-    auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
-    // Calculate the data required for the current pages
-    LinearVector<float> startVectorBlackPointCenterX(itemCount_);
-    float startLongPointLeftCenterX = 0.0f;
-    float startLongPointRightCenterX = 0.0f;
-    float startCenterX = margin + padding + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5;
-    if (index != 0) {
-        startCenterX = margin + padding + itemHalfSizes[ITEM_HALF_WIDTH];
-    }
-    int32_t startCurrentIndex = index;
-    // Calculate the data required for subsequent pages
-    LinearVector<float> endVectorBlackPointCenterX(itemCount_);
-    float endLongPointLeftCenterX = 0.0f;
-    float endLongPointRightCenterX = 0.0f;
-    float endCenterX = margin + padding + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5;
-    if (index != itemCount_ - 1) {
-        endCenterX = margin + padding + itemHalfSizes[ITEM_HALF_WIDTH];
-    }
-    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || turnPageRate_ <= -1.0f || turnPageRate_ >= 1.0f ?
-        endCurrentIndex = index : (turnPageRate_ < 0.0f ? index + 1 : index - 1);
-    if (endCurrentIndex == -1) {
-        endCurrentIndex = itemCount_ - 1;
-    } else if (endCurrentIndex == itemCount_) {
-        endCurrentIndex = 0;
-    }
-    for (int32_t i = 0; i < itemCount_; ++i) {
-        if (i != startCurrentIndex) {
-            startVectorBlackPointCenterX[i] = startCenterX;
-            startCenterX += space + itemWidth;
-        } else {
-            if (IsCustomSizeValue_) {
-                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5;
-                startLongPointLeftCenterX =
-                    NearEqual(itemHalfSizes[SELECTED_ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])
-                        ? startVectorBlackPointCenterX[i] : startCenterX;
-                startLongPointRightCenterX =
-                    NearEqual(itemHalfSizes[SELECTED_ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])
-                        ? startVectorBlackPointCenterX[i] : startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                startCenterX += space + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] +
-                    itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5 + itemHalfSizes[ITEM_HALF_WIDTH];
-            } else {
-                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
-                startLongPointLeftCenterX = startCenterX;
-                startLongPointRightCenterX = startCenterX + itemWidth;
-                startCenterX += space + itemWidth * 2;
-            }
+    float startCenterX = margin + padding;
+    float endCenterX = margin + padding;
+    if (Positive(turnPageRate_)) {
+        auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * TWOFOLD;
+        auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * TWOFOLD;
+        float allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
+        if (IsCustomSizeValue_) {
+            allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
         }
-        if (i != endCurrentIndex) {
-            endVectorBlackPointCenterX[i] = endCenterX;
-            endCenterX += space + itemWidth;
-        } else {
-            if (IsCustomSizeValue_) {
-                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5;
-                endLongPointLeftCenterX =
-                    NearEqual(itemHalfSizes[SELECTED_ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])
-                        ? endVectorBlackPointCenterX[i] : endCenterX;
-                endLongPointRightCenterX =
-                    NearEqual(itemHalfSizes[SELECTED_ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])
-                        ? endVectorBlackPointCenterX[i] : endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                endCenterX += space + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5 +
-                    itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] + itemHalfSizes[ITEM_HALF_WIDTH];
-            } else {
-                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
-                endLongPointLeftCenterX = endCenterX;
-                endLongPointRightCenterX = endCenterX + itemWidth;
-                endCenterX += space + itemWidth * 2;
-            }
-        }
+        auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount_ - 1));
+        float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
+        startCenterX = rectWidth - startCenterX;
+        endCenterX = rectWidth - endCenterX;
+        BackwardCalculation(itemHalfSizes, startCenterX, endCenterX, space, index);
+        return;
     }
-    StarAndEndPointCenter starAndEndPointCenter;
-    starAndEndPointCenter.startLongPointLeftCenterX = startLongPointLeftCenterX;
-    starAndEndPointCenter.endLongPointLeftCenterX = endLongPointLeftCenterX;
-    starAndEndPointCenter.startLongPointRightCenterX = startLongPointRightCenterX;
-    starAndEndPointCenter.endLongPointRightCenterX = endLongPointRightCenterX;
-    CalculatePointCenterX(starAndEndPointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
+    ForwardCalculation(itemHalfSizes, startCenterX, endCenterX, space, index);
 }
 
 void DotIndicatorPaintMethod::CalculatePointCenterX(const StarAndEndPointCenter& starAndEndPointCenter,
@@ -409,22 +355,138 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
         float allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount_ - 1);
         float padding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
         float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
-        float newRectWidth = rectWidth * (1.225f - 0.0125f * itemCount_);
+        float newRectWidth =
+            rectWidth * (TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE - TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE * itemCount_);
+        auto changeValue = (newRectWidth - rectWidth) * touchBottomRate_;
+
         float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
         if (itemCount_ > 1) {
-            space = (newRectWidth - padding * 2 - allPointDiameterSum) / (itemCount_ - 1);
+            space = (rectWidth + changeValue - padding * 2 - allPointDiameterSum) / (itemCount_ - 1);
         }
         CalculatePointCenterX(itemHalfSizes, 0, padding, space, currentIndex_);
         if (touchBottomType_ == TouchBottomType::START) {
-            float distance = newRectWidth - rectWidth;
             for (size_t index = 0; index < vectorBlackPointCenterX_.size(); index++) {
-                vectorBlackPointCenterX_[index] = vectorBlackPointCenterX_[index] - distance;
+                vectorBlackPointCenterX_[index] = vectorBlackPointCenterX_[index] - changeValue;
             }
-            longPointCenterX_.first = longPointCenterX_.first - distance;
-            longPointCenterX_.second = longPointCenterX_.second - distance;
+            longPointCenterX_.first = longPointCenterX_.first - changeValue;
+            longPointCenterX_.second = longPointCenterX_.second - changeValue;
         }
     }
-    dotIndicatorModifier_->UpdateTouchBottomAnimation(touchBottomType_, vectorBlackPointCenterX_, longPointCenterX_);
+    dotIndicatorModifier_->UpdateTouchBottomAnimation(
+        touchBottomType_, vectorBlackPointCenterX_, longPointCenterX_, touchBottomRate_);
+}
+
+void DotIndicatorPaintMethod::ForwardCalculation(
+    const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index)
+{
+    int32_t startCurrentIndex = index;
+    auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * TWOFOLD;
+    auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * TWOFOLD;
+    StarAndEndPointCenter pointCenter;
+    // Calculate the data required for the current pages
+    LinearVector<float> startVectorBlackPointCenterX(itemCount_);
+    // Calculate the data required for subsequent pages
+    LinearVector<float> endVectorBlackPointCenterX(itemCount_);
+    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || turnPageRate_ <= -1.0f || turnPageRate_ >= 1.0f
+        ? endCurrentIndex = index : (turnPageRate_ < 0.0f ? index + 1 : index - 1);
+    if (endCurrentIndex == -1) {
+        endCurrentIndex = itemCount_ - 1;
+    } else if (endCurrentIndex == itemCount_) {
+        endCurrentIndex = 0;
+    }
+    for (int32_t i = 0; i < itemCount_; ++i) {
+        if (i != startCurrentIndex) {
+            startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
+            startCenterX += itemWidth;
+        } else {
+            if (IsCustomSizeValue_) {
+                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.startLongPointLeftCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.startLongPointRightCenterX = pointCenter.startLongPointLeftCenterX;
+                startCenterX += selectedItemWidth;
+            } else {
+                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.startLongPointLeftCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.startLongPointRightCenterX = pointCenter.startLongPointLeftCenterX + selectedItemWidth;
+                startCenterX += selectedItemWidth * TWOFOLD;
+            }
+        }
+        if (i != endCurrentIndex) {
+            endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
+            endCenterX += itemWidth;
+        } else {
+            if (IsCustomSizeValue_) {
+                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.endLongPointLeftCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.endLongPointRightCenterX = pointCenter.endLongPointLeftCenterX;
+                endCenterX += selectedItemWidth;
+            } else {
+                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.endLongPointLeftCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.endLongPointRightCenterX = pointCenter.endLongPointLeftCenterX + selectedItemWidth;
+                endCenterX += selectedItemWidth * TWOFOLD;
+            }
+        }
+        startCenterX += space;
+        endCenterX += space;
+    }
+    CalculatePointCenterX(pointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
+}
+
+void DotIndicatorPaintMethod::BackwardCalculation(
+    const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index)
+{
+    int32_t startCurrentIndex = index;
+    auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * TWOFOLD;
+    auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * TWOFOLD;
+    StarAndEndPointCenter pointCenter;
+    // Calculate the data required for the current pages
+    LinearVector<float> startVectorBlackPointCenterX(itemCount_);
+    // Calculate the data required for subsequent pages
+    LinearVector<float> endVectorBlackPointCenterX(itemCount_);
+    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || turnPageRate_ <= -1.0f || turnPageRate_ >= 1.0f
+        ? endCurrentIndex = index : (turnPageRate_ < 0.0f ? index + 1 : index - 1);
+    if (endCurrentIndex == -1) {
+        endCurrentIndex = itemCount_ - 1;
+    } else if (endCurrentIndex == itemCount_) {
+        endCurrentIndex = 0;
+    }
+    for (int32_t i = itemCount_ - 1; i >= 0; --i) {
+        if (i != startCurrentIndex) {
+            startVectorBlackPointCenterX[i] = startCenterX - itemHalfSizes[ITEM_HALF_WIDTH];
+            startCenterX -= itemWidth;
+        } else {
+            if (IsCustomSizeValue_) {
+                startVectorBlackPointCenterX[i] = startCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.startLongPointLeftCenterX = startCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.startLongPointRightCenterX = pointCenter.startLongPointLeftCenterX;
+                startCenterX -= selectedItemWidth;
+            } else {
+                startVectorBlackPointCenterX[i] = startCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.startLongPointRightCenterX = startCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.startLongPointLeftCenterX = pointCenter.startLongPointRightCenterX - selectedItemWidth;
+                startCenterX -= selectedItemWidth * TWOFOLD;
+            }
+        }
+        if (i != endCurrentIndex) {
+            endVectorBlackPointCenterX[i] = endCenterX - itemHalfSizes[ITEM_HALF_WIDTH];
+            endCenterX -= itemWidth;
+        } else {
+            if (IsCustomSizeValue_) {
+                endVectorBlackPointCenterX[i] = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.endLongPointLeftCenterX = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.endLongPointRightCenterX = pointCenter.endLongPointLeftCenterX;
+                endCenterX -= selectedItemWidth;
+            } else {
+                endVectorBlackPointCenterX[i] = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.endLongPointRightCenterX = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                pointCenter.endLongPointLeftCenterX = pointCenter.endLongPointLeftCenterX - selectedItemWidth;
+                endCenterX -= selectedItemWidth * TWOFOLD;
+            }
+        }
+        startCenterX -= space;
+        endCenterX -= space;
+    }
+    CalculatePointCenterX(pointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
 }
 } // namespace OHOS::Ace::NG
-

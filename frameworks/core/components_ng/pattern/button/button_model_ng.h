@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/button/button_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ButtonModelNG: public OHOS::Ace::ButtonModel {
+class ACE_EXPORT ButtonModelNG : public OHOS::Ace::ButtonModel {
 public:
     void SetFontSize(const Dimension& fontSize) override;
     void SetFontWeight(const Ace::FontWeight& fontWeight) override;
@@ -37,13 +37,14 @@ public:
     void BackgroundColor(const Color& color, const bool& colorFlag) override;
     void SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height) override;
     void SetBorderRadius(const Dimension& radius) override;
+    void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
+        const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
     void SetHoverEffect(const int32_t& hoverEffectNum) override;
 
 private:
     static void CreateWithLabel(const std::string& label);
     static void Create(const std::string& tagName);
-    static void SetTypeAndStateEffect(const std::optional<ButtonType>& type,
-        const std::optional<bool>& stateEffect);
+    static void SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect);
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label);
 };
 } // namespace OHOS::Ace::NG

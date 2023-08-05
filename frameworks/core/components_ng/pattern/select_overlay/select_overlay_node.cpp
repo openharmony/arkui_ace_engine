@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 #include <optional>
+#include <securec.h>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -58,22 +59,20 @@ constexpr int32_t OPTION_INDEX_CUT = 0;
 constexpr int32_t OPTION_INDEX_COPY = 1;
 constexpr int32_t OPTION_INDEX_PASTE = 2;
 constexpr int32_t OPTION_INDEX_COPY_ALL = 3;
+constexpr int32_t OPTION_INDEX_SHARE = 4;
+constexpr int32_t OPTION_INDEX_TRANSLATE = 5;
+constexpr int32_t OPTION_INDEX_SEARCH = 6;
 constexpr int32_t ANIMATION_DURATION1 = 350;
 constexpr int32_t ANIMATION_DURATION2 = 150;
 
-constexpr int32_t DEFAULT_EXTENSION_INDEX_SHARE = 0;
-constexpr int32_t DEFAULT_EXTENSION_INDEX_TRANSLATE = 1;
-constexpr int32_t DEFAULT_EXTENSION_INDEX_SEARCH = 2;
-
 constexpr Dimension MORE_MENU_TRANSLATE = -7.5_vp;
-constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
 constexpr Dimension MAX_DIAMETER = 3.5_vp;
 constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
 
 RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void()>& callback, int32_t overlayId,
-    float width, bool isSelectAll = false)
+    float& buttonWidth, bool isSelectAll = false)
 {
     auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -90,6 +89,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    textLayoutProperty->UpdateMaxLines(1);
     if (callback) {
         textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     } else {
@@ -106,7 +106,18 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
-    auto buttonWidth = width + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
+    MeasureContext content;
+    content.textContent = data;
+    content.fontSize = textStyle.GetFontSize();
+    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
+    content.fontWeight = fontweight;
+#ifdef ENABLE_ROSEN_BACKEND
+    buttonWidth = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
+#else
+    buttonWidth = 0.0f;
+#endif
+    // Calculate the width of default option include button padding.
+    buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         { CalcLength(buttonWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
     buttonLayoutProperty->UpdateFlexShrink(0);
@@ -115,16 +126,22 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     if (callback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
             [callback, overlayId, isSelectAll](GestureEvent& /*info*/) {
-                if (callback) {
-                    callback();
-                }
-                // close text overlay.
                 auto pipeline = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetSelectOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
+                auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
+                CHECK_NULL_VOID(selectOverlay);
+                auto isDoingAnimation = selectOverlay->GetAnimationStatus();
+                CHECK_NULL_VOID(!isDoingAnimation);
+                auto isExtensionMenu = selectOverlay->GetIsExtensionMenu();
+                CHECK_NULL_VOID(!isExtensionMenu);
+                if (callback) {
+                    callback();
+                }
+                // close text overlay.
                 if (!isSelectAll) {
-                    overlayManager->DestroySelectOverlay(overlayId);
+                    overlayManager->DestroySelectOverlay(overlayId, true);
                 }
             });
     } else {
@@ -163,10 +180,12 @@ RefPtr<FrameNode> BuildButton(
     MeasureContext content;
     content.textContent = data;
     content.fontSize = textStyle.GetFontSize();
+    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
+    content.fontWeight = fontweight;
 #ifdef ENABLE_ROSEN_BACKEND
     contentWidth = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
 #else
-    contentWidth = 0.0;
+    contentWidth = 0.0f;
 #endif
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
@@ -228,6 +247,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
         auto top = CalcLength(padding.Top().ConvertToPx());
         auto bottom = CalcLength(padding.Bottom().ConvertToPx());
         buttonLayoutProperty->UpdateMargin({ left, right, top, bottom });
+        buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -241,7 +261,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
         // When click button , change to extensionMenu or change to the default menu(selectMenu_).
         selectOverlay->MoreOrBackAnimation(isMore);
     });
-
+    button->MarkModifyDone();
     return button;
 }
 
@@ -304,7 +324,140 @@ void SetOptionsAction(const std::vector<RefPtr<FrameNode>>& options)
 
 SelectOverlayNode::SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
     : FrameNode("SelectOverlay", ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<SelectOverlayPattern>(info))
-{}
+{
+    stateFuncs_[FrameNodeStatus::VISIBLE] = &SelectOverlayNode::DispatchVisibleState;
+    stateFuncs_[FrameNodeStatus::VISIBLETOGONE] = &SelectOverlayNode::DispatchVisibleToGoneState;
+    stateFuncs_[FrameNodeStatus::GONE] = &SelectOverlayNode::DispatchGoneState;
+    stateFuncs_[FrameNodeStatus::GONETOVISIBLE] = &SelectOverlayNode::DispatchGoneToVisibleState;
+}
+
+void SelectOverlayNode::DispatchVisibleState(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    AnimationOption option;
+    option.SetDuration(MENU_HIDE_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+
+    switch (trigger) {
+        case FrameNodeTrigger::HIDE:
+            SetFrameNodeStatus(type, FrameNodeStatus::VISIBLETOGONE);
+            AnimationUtils::Animate(
+                option,
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->SetFrameNodeOpacity(type, 0.0);
+                },
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
+                });
+            break;
+        case FrameNodeTrigger::SHOW:
+        case FrameNodeTrigger::SHOWN:
+        case FrameNodeTrigger::HIDDEN:
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::DispatchVisibleToGoneState(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    AnimationOption option;
+    option.SetDuration(MENU_SHOW_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+
+    switch (trigger) {
+        case FrameNodeTrigger::SHOW:
+            SetFrameNodeStatus(type, FrameNodeStatus::GONETOVISIBLE);
+            SetFrameNodeVisibility(type, VisibleType::VISIBLE);
+            AnimationUtils::Animate(
+                option,
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->SetFrameNodeOpacity(type, 1.0);
+                },
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->ExecuteOverlayStatus(type, FrameNodeTrigger::SHOWN);
+                });
+            break;
+        case FrameNodeTrigger::HIDDEN:
+            SetFrameNodeStatus(type, FrameNodeStatus::GONE);
+            SetFrameNodeVisibility(type, VisibleType::GONE);
+            break;
+        case FrameNodeTrigger::SHOWN:
+        case FrameNodeTrigger::HIDE:
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::DispatchGoneState(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    AnimationOption option;
+    option.SetDuration(MENU_SHOW_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+
+    switch (trigger) {
+        case FrameNodeTrigger::SHOW:
+            SetFrameNodeStatus(type, FrameNodeStatus::GONETOVISIBLE);
+            SetFrameNodeVisibility(type, VisibleType::VISIBLE);
+            AnimationUtils::Animate(
+                option,
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->SetFrameNodeOpacity(type, 1.0);
+                },
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->ExecuteOverlayStatus(type, FrameNodeTrigger::SHOWN);
+                });
+            break;
+        case FrameNodeTrigger::SHOWN:
+        case FrameNodeTrigger::HIDE:
+        case FrameNodeTrigger::HIDDEN:
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::DispatchGoneToVisibleState(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    AnimationOption option;
+    option.SetDuration(MENU_HIDE_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+
+    switch (trigger) {
+        case FrameNodeTrigger::SHOWN:
+            SetFrameNodeStatus(type, FrameNodeStatus::VISIBLE);
+            break;
+        case FrameNodeTrigger::HIDE:
+            SetFrameNodeStatus(type, FrameNodeStatus::VISIBLETOGONE);
+            AnimationUtils::Animate(
+                option,
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->SetFrameNodeOpacity(type, 0.0);
+                },
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
+                });
+            break;
+        case FrameNodeTrigger::SHOW:
+        case FrameNodeTrigger::HIDDEN:
+            break;
+        default:
+            break;
+    }
+}
 
 RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
@@ -322,6 +475,10 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_p
 void SelectOverlayNode::MoreOrBackAnimation(bool isMore)
 {
     CHECK_NULL_VOID(!isDoingAnimation_);
+    CHECK_NULL_VOID(selectMenu_);
+    CHECK_NULL_VOID(selectMenuInner_);
+    CHECK_NULL_VOID(extensionMenu_);
+    CHECK_NULL_VOID(backButton_);
     if (isMore && !isExtensionMenu_) {
         MoreAnimation();
     } else if (!isMore && isExtensionMenu_) {
@@ -342,6 +499,8 @@ void SelectOverlayNode::MoreAnimation()
     CHECK_NULL_VOID(selectProperty);
     auto selectMenuInnerProperty = selectMenuInner_->GetLayoutProperty();
     CHECK_NULL_VOID(selectMenuInnerProperty);
+    auto backButtonProperty = backButton_->GetLayoutProperty();
+    CHECK_NULL_VOID(backButtonProperty);
 
     auto pattern = GetPattern<SelectOverlayPattern>();
     CHECK_NULL_VOID(pattern);
@@ -373,18 +532,19 @@ void SelectOverlayNode::MoreAnimation()
     modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f);
     modifier->SetLineEndOffset(true);
 
-    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, id = Container::CurrentId(),
-                                  weak = WeakClaim(this)]() {
+    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
+                                  id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(
-            [selectMenuInnerProperty, extensionProperty, id, weak]() {
+            [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
                 ContainerScope scope(id);
                 selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
                 extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
+                backButtonProperty->UpdateVisibility(VisibleType::VISIBLE);
                 auto selectOverlay = weak.Upgrade();
                 CHECK_NULL_VOID(selectOverlay);
                 selectOverlay->SetAnimationStatus(false);
@@ -418,6 +578,8 @@ void SelectOverlayNode::BackAnimation()
     CHECK_NULL_VOID(selectProperty);
     auto selectMenuInnerProperty = selectMenuInner_->GetLayoutProperty();
     CHECK_NULL_VOID(selectMenuInnerProperty);
+    auto backButtonProperty = backButton_->GetLayoutProperty();
+    CHECK_NULL_VOID(backButtonProperty);
 
     auto pattern = GetPattern<SelectOverlayPattern>();
     CHECK_NULL_VOID(pattern);
@@ -452,18 +614,19 @@ void SelectOverlayNode::BackAnimation()
     auto toolbarHeight = textOverlayTheme->GetMenuToolbarHeight();
     auto frameSize = CalcSize(CalcLength(meanuWidth), CalcLength(toolbarHeight.ConvertToPx()));
 
-    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, id = Container::CurrentId(),
-                                  weak = WeakClaim(this)]() {
+    FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
+                                  id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(
-            [selectMenuInnerProperty, extensionProperty, id, weak]() {
+            [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
                 ContainerScope scope(id);
                 selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
                 extensionProperty->UpdateVisibility(VisibleType::GONE);
+                backButtonProperty->UpdateVisibility(VisibleType::GONE);
                 auto selectOverlay = weak.Upgrade();
                 CHECK_NULL_VOID(selectOverlay);
                 selectOverlay->SetAnimationStatus(false);
@@ -484,31 +647,10 @@ void SelectOverlayNode::BackAnimation()
     AnimationUtils::CloseImplicitAnimation();
 }
 
-void SelectOverlayNode::CreateExtensionToolBar()
-{
-    extensionMenu_ = FrameNode::GetOrCreateFrameNode("SelectMoreMenu", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    extensionMenu_->GetLayoutProperty<LinearLayoutProperty>()->UpdateCrossAxisAlign(FlexAlign::FLEX_END);
-
-    auto weak = Claim(this);
-    extensionMenu_->MountToParent(weak);
-    extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-    auto id = GetId();
-    auto button = BuildMoreOrBackButton(id, false);
-    button->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    button->MountToParent(extensionMenu_);
-}
-
 void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index)
 {
-    CHECK_NULL_VOID(extensionMenu_);
+    CHECK_NULL_VOID(!extensionMenu_);
     std::vector<OptionParam> params;
-    isShowInExtension_[DEFAULT_EXTENSION_INDEX_SEARCH] = isShowInExtension_[DEFAULT_EXTENSION_INDEX_SEARCH] |
-                                                         isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE] |
-                                                         isShowInExtension_[DEFAULT_EXTENSION_INDEX_SHARE];
-    isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE] =
-        isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE] | isShowInExtension_[DEFAULT_EXTENSION_INDEX_SHARE];
-    auto extensionMenuContext = extensionMenu_->GetRenderContext();
     auto id = GetId();
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -521,17 +663,35 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DestroySelectOverlay(overlayId);
     };
-    if (isShowInExtension_[DEFAULT_EXTENSION_INDEX_SHARE]) {
+    if (!isShowInDefaultMenu_[OPTION_INDEX_CUT]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_CUT_SVG) : "";
+        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), iconPath, defaultOptionCallback);
+    }
+    if (!isShowInDefaultMenu_[OPTION_INDEX_COPY]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_COPY_SVG) : "";
+        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), iconPath, defaultOptionCallback);
+    }
+    if (!isShowInDefaultMenu_[OPTION_INDEX_PASTE]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_PASTE_SVG) : "";
+        params.emplace_back(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), iconPath, defaultOptionCallback);
+    }
+    if (!isShowInDefaultMenu_[OPTION_INDEX_COPY_ALL]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SELECT_ALL_SVG) : "";
+        params.emplace_back(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), iconPath, defaultOptionCallback);
+    }
+    if (!isShowInDefaultMenu_[OPTION_INDEX_SHARE]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SHARE_SVG) : "";
         params.emplace_back(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), iconPath, defaultOptionCallback);
     }
-    if (isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE]) {
+    if (!isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_TRANSLATE_SVG) : "";
         params.emplace_back(
             Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), iconPath, defaultOptionCallback);
     }
-    if (isShowInExtension_[DEFAULT_EXTENSION_INDEX_SEARCH]) {
+    if (!isShowInDefaultMenu_[OPTION_INDEX_SEARCH]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SEARCH_SVG) : "";
         params.emplace_back(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), iconPath, defaultOptionCallback);
@@ -555,37 +715,44 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
         }
         itemNum++;
     }
-    auto menuWrapper =
-        MenuView::Create(std::move(params), -1, "ExtensionMenu", MenuType::SELECT_OVERLAY_EXTENSION_MENU);
-    CHECK_NULL_VOID(menuWrapper);
-    auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
-    CHECK_NULL_VOID(menu);
-    menuWrapper->RemoveChild(menu);
-    menuWrapper.Reset();
+    if (!params.empty()) {
+        auto menuWrapper =
+            MenuView::Create(std::move(params), -1, "ExtensionMenu", MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+        CHECK_NULL_VOID(menuWrapper);
+        auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+        CHECK_NULL_VOID(menu);
+        menuWrapper->RemoveChild(menu);
+        menuWrapper.Reset();
 
-    // set click position to menu
-    auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
-    auto context = menu->GetRenderContext();
-    CHECK_NULL_VOID(props);
-    auto offsetY = 0.0f;
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-    if (textOverlayTheme) {
-        offsetY = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx();
+        // set click position to menu
+        auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
+        auto context = menu->GetRenderContext();
+        CHECK_NULL_VOID(props);
+        auto offsetY = 0.0f;
+        auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+        if (textOverlayTheme) {
+            offsetY = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx();
+        }
+        props->UpdateMenuOffset(GetPageOffset());
+        context->UpdateBackShadow(ShadowConfig::NoneShadow);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto options = menuPattern->GetOptions();
+        SetOptionsAction(options);
+        ElementRegister::GetInstance()->AddUINode(menu);
+        menu->MountToParent(Claim(this));
+
+        extensionMenu_ = menu;
+        auto extensionMenuContext = extensionMenu_->GetRenderContext();
+        CHECK_NULL_VOID(extensionMenuContext);
+
+        extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        extensionMenuContext->UpdateOpacity(0.0);
+
+        extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
+        extensionMenu_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        extensionMenu_->MarkModifyDone();
     }
-    props->UpdateMenuOffset(OffsetF(0.0f, offsetY + MORE_MENU_INTERVAL.ConvertToPx()) + GetPageOffset());
-    context->UpdateBackShadow(ShadowConfig::NoneShadow);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
-    SetOptionsAction(options);
-    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ElementRegister::GetInstance()->AddUINode(menu);
-    menu->MountToParent(extensionMenu_);
-
-    extensionMenuContext->UpdateOpacity(0.0);
-    extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
-
-    extensionMenu_->MarkModifyDone();
 }
 
 void SelectOverlayNode::CreateToolBar()
@@ -608,6 +775,7 @@ void SelectOverlayNode::CreateToolBar()
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
+    selectMenu_->GetRenderContext()->UpdateOpacity(0.0);
     selectMenu_->GetRenderContext()->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
     selectMenuInner_->GetRenderContext()->UpdateOpacity(1.0);
     selectMenuInner_->GetRenderContext()->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
@@ -647,10 +815,8 @@ void SelectOverlayNode::CreateToolBar()
     selectMenu_->MarkModifyDone();
 }
 
-void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, float& fontWidth, float& maxWidth)
+void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
 {
-    MeasureContext content;
-    content.textContent = Localization::GetInstance()->GetEntryLetters(BUTTON_COPY);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
@@ -661,49 +827,108 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, 
 
     maxWidth = selectOverlayMaxWidth - menuPadding.Left().ConvertToPx() - menuPadding.Right().ConvertToPx() -
                textOverlayTheme->GetMoreButtonHeight().ConvertToPx();
-
-    auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
-    content.fontSize = textStyle.GetFontSize();
-#ifdef ENABLE_ROSEN_BACKEND
-    auto size = RosenRenderCustomPaint::MeasureTextSizeInner(content);
-#else
-    auto size = Size(0.0, 0.0);
-#endif
-    fontWidth = size.Width();
-    const auto& buttonPadding = textOverlayTheme->GetMenuButtonPadding();
-    defaultOptionWidth = fontWidth + buttonPadding.Left().ConvertToPx() + buttonPadding.Right().ConvertToPx();
 }
 
-bool SelectOverlayNode::AddSystemDefaultOptions(
-    float defaultOptionWidth, float fontWidth, float maxWidth, float& allocatedSize)
+bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocatedSize)
 {
-    if (maxWidth - allocatedSize >= defaultOptionWidth) {
-        auto buttonTranslase =
-            BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), nullptr, GetId(), fontWidth, false);
-        buttonTranslase->MountToParent(selectMenuInner_);
-        allocatedSize += defaultOptionWidth;
+    auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
+    memset_s(isShowInDefaultMenu_, sizeof(isShowInDefaultMenu_), 0, sizeof(isShowInDefaultMenu_));
+    if (info->menuInfo.showCut) {
+        float buttonWidth = 0.0f;
+        auto button = BuildButton(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut, GetId(), buttonWidth);
+        if (maxWidth - allocatedSize >= buttonWidth) {
+            button->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_CUT] = true;
+        } else {
+            button.Reset();
+        }
     } else {
-        isShowInExtension_[DEFAULT_EXTENSION_INDEX_SHARE] = true;
-        return true;
+        isShowInDefaultMenu_[OPTION_INDEX_CUT] = true;
     }
-    if (maxWidth - allocatedSize >= defaultOptionWidth) {
-        auto buttonShare = BuildButton(
-            Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), nullptr, GetId(), fontWidth, false);
-        buttonShare->MountToParent(selectMenuInner_);
-        allocatedSize += defaultOptionWidth;
+    if (info->menuInfo.showCopy) {
+        float buttonWidth = 0.0f;
+        auto button = BuildButton(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy, GetId(), buttonWidth);
+        if (maxWidth - allocatedSize >= buttonWidth) {
+            button->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_COPY] = true;
+        } else {
+            button.Reset();
+            return true;
+        }
     } else {
-        isShowInExtension_[DEFAULT_EXTENSION_INDEX_TRANSLATE] = true;
-        return true;
+        isShowInDefaultMenu_[OPTION_INDEX_COPY] = true;
+    }
+    if (info->menuInfo.showPaste) {
+        float buttonWidth = 0.0f;
+        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
+            info->menuCallback.onPaste, GetId(), buttonWidth);
+        if (maxWidth - allocatedSize >= buttonWidth) {
+            button->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_PASTE] = true;
+        } else {
+            button.Reset();
+            return true;
+        }
+    } else {
+        isShowInDefaultMenu_[OPTION_INDEX_PASTE] = true;
+    }
+    if (info->menuInfo.showCopyAll) {
+        float buttonWidth = 0.0f;
+        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
+            info->menuCallback.onSelectAll, GetId(), buttonWidth, true);
+        if (maxWidth - allocatedSize >= buttonWidth) {
+            button->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_COPY_ALL] = true;
+        } else {
+            button.Reset();
+            return true;
+        }
+    } else {
+        isShowInDefaultMenu_[OPTION_INDEX_COPY_ALL] = true;
     }
 
-    if (maxWidth - allocatedSize >= defaultOptionWidth) {
+    if (info->menuInfo.showCopy) {
+        float buttonWidth = 0.0f;
         auto buttonShare = BuildButton(
-            Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), nullptr, GetId(), fontWidth, false);
-        buttonShare->MountToParent(selectMenuInner_);
-        allocatedSize += defaultOptionWidth;
+            Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), nullptr, GetId(), buttonWidth, false);
+        if (maxWidth - allocatedSize >= buttonWidth) {
+            buttonShare->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_SHARE] = true;
+        } else {
+            buttonShare.Reset();
+            return true;
+        }
+        auto buttonTranslase = BuildButton(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), nullptr, GetId(), buttonWidth, false);
+        if (maxWidth - allocatedSize >= buttonWidth) {
+            buttonTranslase->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
+        } else {
+            buttonTranslase.Reset();
+            return true;
+        }
+        auto buttonSearch = BuildButton(
+            Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), nullptr, GetId(), buttonWidth, false);
+        if (maxWidth - allocatedSize >= buttonWidth) {
+            buttonSearch->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_SEARCH] = true;
+        } else {
+            buttonSearch.Reset();
+            return true;
+        }
     } else {
-        isShowInExtension_[DEFAULT_EXTENSION_INDEX_SEARCH] = true;
-        return true;
+        isShowInDefaultMenu_[OPTION_INDEX_SHARE] = true;
+        isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
+        isShowInDefaultMenu_[OPTION_INDEX_SEARCH] = true;
     }
     return false;
 }
@@ -713,43 +938,18 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
     if (menuItemChanged) {
         selectMenuInner_->Clean();
-
-        float defaultOptionWidth = 0.0f;
-        float fontWidth = 0.0f;
-        float maxWidth = 0.0f;
-        float allocatedSize = 0.0f;
-
-        GetDefaultButtonAndMenuWidth(defaultOptionWidth, fontWidth, maxWidth);
-
-        if (info->menuInfo.showCut) {
-            auto button = BuildButton(
-                Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut, GetId(), fontWidth);
-            button->MountToParent(selectMenuInner_);
-            allocatedSize += defaultOptionWidth;
+        selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (isExtensionMenu_) {
+            MoreOrBackAnimation(false);
         }
-        if (info->menuInfo.showCopy) {
-            auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY),
-                info->menuCallback.onCopy, GetId(), fontWidth);
-            button->MountToParent(selectMenuInner_);
-            allocatedSize += defaultOptionWidth;
-        }
-        if (info->menuInfo.showPaste) {
-            auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
-                info->menuCallback.onPaste, GetId(), fontWidth);
-            button->MountToParent(selectMenuInner_);
-            allocatedSize += defaultOptionWidth;
-        }
-        if (info->menuInfo.showCopyAll) {
-            auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
-                info->menuCallback.onSelectAll, GetId(), fontWidth, true);
-            button->MountToParent(selectMenuInner_);
-            allocatedSize += defaultOptionWidth;
-        }
-
+        auto selectProperty = selectMenu_->GetLayoutProperty();
+        CHECK_NULL_VOID(selectProperty);
+        selectProperty->ClearUserDefinedIdealSize(true, false);
         bool isDefaultOverMaxWidth = false;
-        if (info->menuInfo.showCopy) {
-            isDefaultOverMaxWidth = AddSystemDefaultOptions(defaultOptionWidth, fontWidth, maxWidth, allocatedSize);
-        }
+        float allocatedSize = 0.0f;
+        float maxWidth = 0.0f;
+        GetDefaultButtonAndMenuWidth(maxWidth);
+        isDefaultOverMaxWidth = AddSystemDefaultOptions(maxWidth, allocatedSize);
         auto itemNum = -1;
         auto extensionOptionStartIndex = -1;
         if (!info->menuOptionItems.empty()) {
@@ -766,21 +966,60 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
                 button->MountToParent(selectMenuInner_);
             }
         }
+        if (backButton_) {
+            isExtensionMenu_ = false;
+            RemoveChild(backButton_);
+            backButton_.Reset();
+        }
+        if (extensionMenu_) {
+            RemoveChild(extensionMenu_);
+            extensionMenu_.Reset();
+        }
         if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
             auto backButton = BuildMoreOrBackButton(GetId(), true);
             backButton->MountToParent(selectMenuInner_);
-            CreateExtensionToolBar();
+            // add back button
+            auto id = GetId();
+            if (!backButton_) {
+                backButton_ = BuildMoreOrBackButton(id, false);
+                CHECK_NULL_VOID(backButton_);
+                backButton_->GetRenderContext()->UpdateOpacity(0.0);
+                backButton_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                backButton_->MountToParent(Claim(this));
+            }
         }
         AddExtensionMenuOptions(info->menuOptionItems, extensionOptionStartIndex);
     }
     if (info->menuInfo.menuDisable) {
-        selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
     } else if (info->menuInfo.menuIsShow) {
-        selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
     } else {
-        selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
     }
     selectMenu_->MarkModifyDone();
+    if (isExtensionMenu_ && extensionMenu_) {
+        if (info->menuInfo.menuDisable) {
+            ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, FrameNodeTrigger::HIDE);
+            if (backButton_) {
+                ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, FrameNodeTrigger::HIDE);
+            }
+        } else if (info->menuInfo.menuIsShow) {
+            ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, FrameNodeTrigger::SHOW);
+            if (backButton_) {
+                ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, FrameNodeTrigger::SHOW);
+            }
+        } else {
+            ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, FrameNodeTrigger::HIDE);
+            if (backButton_) {
+                ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, FrameNodeTrigger::HIDE);
+            }
+        }
+        extensionMenu_->MarkModifyDone();
+        if (backButton_) {
+            backButton_->MarkModifyDone();
+        }
+    }
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -790,13 +1029,20 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     auto menuWrapper = MenuView::Create(std::move(params), -1);
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
-    menuWrapper->RemoveChild(menu);
-    menuWrapper.Reset();
     // set click position to menu
     CHECK_NULL_RETURN(menu, nullptr);
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
-    props->UpdateMenuOffset(info->rightClickOffset + GetPageOffset());
+    OffsetF pageOffset;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        pageOffset = GetPageOffset();
+    }
+    props->UpdateMenuOffset(info->rightClickOffset + pageOffset);
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
@@ -806,7 +1052,203 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ElementRegister::GetInstance()->AddUINode(menu);
 
-    return menu;
+    auto gestureEventHub = menuWrapper->GetOrCreateGestureEventHub();
+    if (gestureEventHub) {
+        gestureEventHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+    }
+    return menuWrapper;
+}
+
+bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
+{
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+
+    std::vector<RectF> rects;
+    auto offset = GetGeometryNode() ? GetGeometryNode()->GetFrameOffset() : OffsetF();
+    rects.emplace_back(pattern->GetHandleRegion(true) + offset);
+    rects.emplace_back(pattern->GetHandleRegion(false) + offset);
+    if (selectMenu_ && selectMenu_->GetGeometryNode()) {
+        rects.emplace_back(selectMenu_->GetGeometryNode()->GetFrameRect() + offset);
+    }
+    if (extensionMenu_ && extensionMenu_->GetGeometryNode()) {
+        rects.emplace_back(extensionMenu_->GetGeometryNode()->GetFrameRect() + offset);
+    }
+
+    for (const auto& rect : rects) {
+        if (rect.IsInRegion(point)) {
+            LOGD("point is in select overlay rects");
+            return true;
+        }
+    }
+    return false;
+}
+
+void SelectOverlayNode::SetClosedByGlobalEvent(bool closedByGlobalEvent)
+{
+    auto selectOverlayPattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(selectOverlayPattern);
+    selectOverlayPattern->SetClosedByGlobalTouchEvent(closedByGlobalEvent);
+}
+
+void SelectOverlayNode::ShowSelectOverlay(bool animation)
+{
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    if (animation) {
+        AnimationOption option;
+        option.SetDuration(MENU_SHOW_ANIMATION_DURATION);
+        option.SetCurve(Curves::SHARP);
+
+        AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            node->SetSelectMenuOpacity(1.0);
+            node->SetExtensionMenuOpacity(1.0);
+            node->SetBackButtonOpacity(1.0);
+        });
+    } else {
+        SetSelectMenuOpacity(1.0);
+        SetExtensionMenuOpacity(1.0);
+        SetBackButtonOpacity(1.0);
+    }
+
+    pattern->SetHasShowAnimation(animation);
+}
+
+void SelectOverlayNode::HideSelectOverlay(const std::function<void()>& callback)
+{
+    AnimationOption handleOption;
+    handleOption.SetDuration(HANDLE_ANIMATION_DURATION);
+    handleOption.SetCurve(Curves::SHARP);
+
+    AnimationUtils::Animate(handleOption, [weak = WeakClaim(this)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pattern = node->GetPattern<SelectOverlayPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto contentModifier = pattern->GetContentModifier();
+        CHECK_NULL_VOID(contentModifier);
+        contentModifier->SetHandleOpacity(0.0);
+    });
+
+    AnimationOption overlayOption;
+    overlayOption.SetDuration(MENU_HIDE_ANIMATION_DURATION);
+    overlayOption.SetCurve(Curves::SHARP);
+
+    AnimationUtils::Animate(
+        overlayOption,
+        [weak = WeakClaim(this)]() {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            node->SetSelectMenuOpacity(0.0);
+            node->SetExtensionMenuOpacity(0.0);
+            node->SetBackButtonOpacity(0.0);
+            auto pattern = node->GetPattern<SelectOverlayPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto overlayModifier = pattern->GetOverlayModifier();
+            CHECK_NULL_VOID(overlayModifier);
+            overlayModifier->SetCirclesAndBackArrowOpacity(0.0);
+        },
+        callback);
+}
+
+void SelectOverlayNode::ExecuteOverlayStatus(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    FrameNodeStatus status = FrameNodeStatus::VISIBLE;
+    switch (type) {
+        case FrameNodeType::SELECTMENU:
+            status = selectMenuStatus_;
+            break;
+        case FrameNodeType::EXTENSIONMENU:
+            status = extensionMenuStatus_;
+            break;
+        case FrameNodeType::BACKBUTTON:
+            status = backButtonStatus_;
+            break;
+        default:
+            break;
+    }
+
+    auto stateFuncIter = stateFuncs_.find(status);
+    if (stateFuncIter != stateFuncs_.end()) {
+        auto stateFunc = stateFuncIter->second;
+        CHECK_NULL_VOID(stateFunc);
+        (this->*stateFunc)(type, trigger);
+    }
+}
+
+void SelectOverlayNode::SetFrameNodeStatus(FrameNodeType type, FrameNodeStatus status)
+{
+    switch (type) {
+        case FrameNodeType::SELECTMENU:
+            selectMenuStatus_ = status;
+            break;
+        case FrameNodeType::EXTENSIONMENU:
+            extensionMenuStatus_ = status;
+            break;
+        case FrameNodeType::BACKBUTTON:
+            backButtonStatus_ = status;
+            break;
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::SetFrameNodeVisibility(FrameNodeType type, VisibleType visibleType)
+{
+    switch (type) {
+        case FrameNodeType::SELECTMENU:
+            selectMenu_->GetLayoutProperty()->UpdateVisibility(visibleType);
+            break;
+        case FrameNodeType::EXTENSIONMENU:
+            extensionMenu_->GetLayoutProperty()->UpdateVisibility(visibleType);
+            break;
+        case FrameNodeType::BACKBUTTON:
+            backButton_->GetLayoutProperty()->UpdateVisibility(visibleType);
+            break;
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::SetFrameNodeOpacity(FrameNodeType type, float opacity)
+{
+    switch (type) {
+        case FrameNodeType::SELECTMENU:
+            SetSelectMenuOpacity(opacity);
+            break;
+        case FrameNodeType::EXTENSIONMENU:
+            SetExtensionMenuOpacity(opacity);
+            break;
+        case FrameNodeType::BACKBUTTON:
+            SetBackButtonOpacity(opacity);
+            break;
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::SetSelectMenuOpacity(float value)
+{
+    CHECK_NULL_VOID(selectMenu_);
+    CHECK_NULL_VOID(selectMenu_->GetRenderContext());
+    selectMenu_->GetRenderContext()->UpdateOpacity(value);
+}
+
+void SelectOverlayNode::SetExtensionMenuOpacity(float value)
+{
+    CHECK_NULL_VOID(extensionMenu_);
+    CHECK_NULL_VOID(extensionMenu_->GetRenderContext());
+    extensionMenu_->GetRenderContext()->UpdateOpacity(value);
+}
+
+void SelectOverlayNode::SetBackButtonOpacity(float value)
+{
+    CHECK_NULL_VOID(backButton_);
+    CHECK_NULL_VOID(backButton_->GetRenderContext());
+    backButton_->GetRenderContext()->UpdateOpacity(value);
 }
 
 } // namespace OHOS::Ace::NG

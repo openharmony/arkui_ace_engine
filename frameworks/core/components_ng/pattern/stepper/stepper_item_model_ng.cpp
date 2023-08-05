@@ -45,4 +45,14 @@ void StepperItemModelNG::SetStatus(const std::string& labelStatus)
     ACE_UPDATE_LAYOUT_PROPERTY(StepperItemLayoutProperty, LabelStatus, labelStatus);
 }
 
+void StepperItemModelNG::ResetPrevLabel()
+{
+    ACE_RESET_LAYOUT_PROPERTY(StepperItemLayoutProperty, LeftLabel);
+}
+
+void StepperItemModelNG::ResetNextLabel()
+{
+    ACE_RESET_LAYOUT_PROPERTY(StepperItemLayoutProperty, RightLabel);
+}
+
 } // namespace OHOS::Ace::NG

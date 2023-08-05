@@ -37,7 +37,10 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     textContentModifier_->SetParagraph(paragraph_);
 
+    SizeF contentSize = paintWrapper->GetContentSize();
+    textContentModifier_->SetContentSize(contentSize);
     auto offset = paintWrapper->GetContentOffset();
+    textContentModifier_->SetContentOffset(offset);
     auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     textContentModifier_->SetPrintOffset(paintOffset);
 
@@ -47,6 +50,10 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
 
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
@@ -60,6 +67,20 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
 
     textContentModifier_->ContentChange();
+
+    auto reasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+    textContentModifier_->SetObscured(reasons);
+    auto spanItemChildren = pattern->GetSpanItemChildren();
+    textContentModifier_->SetIfHaveSpanItemChildren(!spanItemChildren.empty());
+    auto wideTextLength = pattern->GetDisplayWideTextLength();
+    std::vector<Rect> drawObscuredRects;
+    if (wideTextLength != 0) {
+        paragraph_->GetRectsForRange(0, wideTextLength, drawObscuredRects);
+    }
+    textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
+    if (renderContext->GetClipEdge().has_value()) {
+        textContentModifier_->SetClip(renderContext->GetClipEdge().value());
+    }
 
     PropertyChangeFlag flag = 0;
     if (textContentModifier_->NeedMeasureUpdate(flag)) {
@@ -84,6 +105,10 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
     const auto& selection = textPattern->GetTextSelector();
     auto textValue = textPattern->GetTextForDisplay();
     std::vector<Rect> selectedRects;
@@ -100,5 +125,8 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto theme = themeManager->GetTheme<TextTheme>();
     auto selectedColor = theme->GetSelectedColor().GetValue();
     textOverlayModifier_->SetSelectedColor(selectedColor);
+    if (context->GetClipEdge().has_value()) {
+        textOverlayModifier_->SetIsClip(context->GetClipEdge().value());
+    }
 }
 } // namespace OHOS::Ace::NG

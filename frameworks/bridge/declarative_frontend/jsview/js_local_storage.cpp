@@ -14,6 +14,7 @@
  */
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/core/common/container.h"
 
@@ -23,14 +24,31 @@ thread_local std::unordered_map<int32_t, JSRef<JSObject>> JSLocalStorage::storag
 
 JSLocalStorage::JSLocalStorage()
 {
-    LOGD("JSLocalStorage ctor");
+    LOGD("JSLocalStorage: JSLocalStorage()");
+}
+
+JSLocalStorage::~JSLocalStorage()
+{
+    LOGD("JSLocalStorage: ~JSLocalStorage()");
 }
 
 void JSLocalStorage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLocalStorage>::Declare("NativeLocalStorage");
     JSClass<JSLocalStorage>::StaticMethod("GetShared", JSLocalStorage::GetShared);
-    JSClass<JSLocalStorage>::Bind<>(globalObj);
+    JSClass<JSLocalStorage>::Bind(globalObj, ConstructorCallback, DestructorCallback);
+}
+
+void JSLocalStorage::ConstructorCallback(const JSCallbackInfo& info)
+{
+    auto* instance = new JSLocalStorage();
+    instance->IncRefCount();
+    info.SetReturnValue(instance);
+}
+
+void JSLocalStorage::DestructorCallback(JSLocalStorage* instance)
+{
+    instance->DecRefCount();
 }
 
 void JSLocalStorage::AddStorage(int32_t key, const JSRef<JSObject>& value)
@@ -56,6 +74,9 @@ void JSLocalStorage::RemoveStorage(int32_t key)
 void JSLocalStorage::GetShared(const JSCallbackInfo& info)
 {
     int32_t currentInstance = Container::CurrentId();
+    if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
+        currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
+    }
     LOGD("Current ID is %{public}d", currentInstance);
     auto it = storages_.find(currentInstance);
     if (it == storages_.end()) {

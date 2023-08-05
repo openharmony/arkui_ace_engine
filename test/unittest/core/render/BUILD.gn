@@ -1,0 +1,28 @@
+# Copyright (c) 2023 iSoftStone Information Technology (Group) Co.,Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+group("render_unittest") {
+  testonly = true
+  deps = [
+    "border_image_painter:border_image_painter_test_ng",
+    "circle_painter:circle_painter_test_ng",
+    "drawing_prop_convertor:drawing_prop_convertor_test_ng",
+    "ellipse_painter:ellipse_painter_test_ng",
+    "image_painter:image_painter_test_ng",
+    "line_painter:line_painter_test_ng",
+    "polygon_painter:polygon_painter_test_ng",
+    "render_context:render_context_test_ng",
+    "render_property:render_property_test_ng",
+    "shape_painter:shape_painter_test_ng",
+  ]
+}

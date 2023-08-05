@@ -20,13 +20,11 @@
 #include "core/image/image_provider.h"
 #include "core/pipeline/pipeline_context.h"
 
-#ifndef USE_ROSEN_DRAWING
 #ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
 #else
 #include "experimental/svg/model/SkSVGDOM.h"
 #endif
-#endif // USE_ROSEN_DRAWING
 
 namespace OHOS::Rosen {
     class RSMask;
@@ -80,11 +78,7 @@ protected:
     double dipScale_ = 1.0f;
 
     // svg image draw object
-#ifndef USE_ROSEN_DRAWING
     sk_sp<SkSVGDOM> skiaDom_;
-#else
-    std::shared_ptr<RSSVGDOM> svgDom_;
-#endif
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
 };

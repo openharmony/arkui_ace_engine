@@ -51,30 +51,6 @@ enum class ScreenShape : int32_t {
     SCREEN_SHAPE_UNDEFINED,
 };
 
-enum class PerformanceParameterType {
-    PAGE_NODES = 0,
-    PAGE_DEPTH,
-    NODE_CHILDREN,
-    FUNCTION_TIMEOUT,
-    VSYNC_TIMEOUT,
-    NODE_TIMEOUT,
-    FOREACH_ITEMS,
-    FLEX_LAYOUTS,
-};
-
-struct PerformanceCheckParameter {
-    int32_t pageNodes;
-    int32_t pageDepth;
-    int32_t nodeChildren;
-    int32_t functionTimeout;
-    int32_t vsyncTimeout;
-    int32_t nodeTimeout;
-    int32_t foreachItems;
-    int32_t flexLayouts;
-};
-
-using PerformancePtr = std::unique_ptr<PerformanceCheckParameter>;
-
 class ACE_FORCE_EXPORT SystemProperties final {
 public:
     /*
@@ -208,6 +184,8 @@ public:
     static std::string GetPartialUpdatePkg();
 
     static int32_t GetSvgMode();
+
+    static bool GetImageFrameworkEnabled();
 
     static bool GetRosenBackendEnabled()
     {
@@ -368,12 +346,6 @@ public:
 
     static bool GetIsUseMemoryMonitor();
 
-    static void InitPerformanceParameters();
-
-    static bool IsPerformanceCheckEnabled();
-
-    static int32_t GetPerformanceParameterWithType(PerformanceParameterType type);
-
     static bool IsFormAnimationLimited();
 
 private:
@@ -411,7 +383,6 @@ private:
     static int32_t astcPsnr_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
-    static PerformancePtr performanceProps_;
 };
 
 } // namespace OHOS::Ace

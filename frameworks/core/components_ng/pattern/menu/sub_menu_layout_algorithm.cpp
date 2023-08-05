@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
 namespace OHOS::Ace::NG {
+
 void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -32,8 +33,8 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(parentMenuItem);
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
 
-    float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize) - pageOffset_.GetX();
-    float y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize) - pageOffset_.GetY();
+    float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
+    float y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
 
     const auto& geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -74,7 +75,7 @@ float SubMenuLayoutAlgorithm::HorizontalLayoutSubMenu(const SizeF& size, float p
 {
     float wrapperWidth = wrapperSize_.Width();
     float rightSpace = wrapperWidth - position;
-    float leftSpace = position - pageOffset_.GetX() - menuItemSize.Width();
+    float leftSpace = position - menuItemSize.Width();
     // can fit subMenu on the right side of menuItem
     if (rightSpace >= size.Width()) {
         return position;

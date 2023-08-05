@@ -36,7 +36,7 @@ void JSContextMenu::Close(const JSCallbackInfo& args)
     } else {
         SubwindowManager::GetInstance()->CloseMenu();
     }
-#else
+#elif !defined(NG_BUILD)
     // Close context menu.
     auto container = Container::Current();
     if (container) {

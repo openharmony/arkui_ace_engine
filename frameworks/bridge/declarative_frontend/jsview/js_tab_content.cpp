@@ -183,33 +183,45 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
     IndicatorStyle indicator;
+    CalcDimension indicatorHeight;
+    CalcDimension indicatorWidth;
+    CalcDimension indicatorBorderRadius;
+    CalcDimension indicatorMarginTop;
     if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), indicator.color)) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             indicator.color = tabTheme->GetActiveIndicatorColor();
         }
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("height"), indicator.height) ||
-        indicator.height.Value() < 0.0f) {
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("height"), indicatorHeight) ||
+        indicatorHeight.Value() < 0.0f || indicatorHeight.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             indicator.height = tabTheme->GetActiveIndicatorWidth();
         }
+    } else {
+        indicator.height = indicatorHeight;
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("width"), indicator.width) ||
-        indicator.width.Value() < 0.0f) {
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("width"), indicatorWidth) ||
+        indicatorWidth.Value() < 0.0f || indicatorWidth.Unit() == DimensionUnit::PERCENT) {
         indicator.width = 0.0_vp;
+    } else {
+        indicator.width = indicatorWidth;
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), indicator.borderRadius) ||
-        indicator.borderRadius.Value() < 0.0f) {
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), indicatorBorderRadius) ||
+        indicatorBorderRadius.Value() < 0.0f || indicatorBorderRadius.Unit() == DimensionUnit::PERCENT) {
         indicator.borderRadius = 0.0_vp;
+    } else {
+        indicator.borderRadius = indicatorBorderRadius;
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("marginTop"), indicator.marginTop) ||
-        indicator.marginTop.Value() < 0.0f) {
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("marginTop"), indicatorMarginTop) ||
+        indicatorMarginTop.Value() < 0.0f || indicatorMarginTop.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             indicator.marginTop = tabTheme->GetSubTabIndicatorGap();
         }
+    } else {
+        indicator.marginTop = indicatorMarginTop;
     }
     TabContentModel::GetInstance()->SetIndicator(indicator);
 }
@@ -218,12 +230,15 @@ void JSTabContent::SetBoard(const JSRef<JSVal>& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
     BoardStyle board;
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), board.borderRadius) ||
-        board.borderRadius.Value() < 0.0f) {
+    CalcDimension borderRadius;
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), borderRadius)
+        || borderRadius.Value() < 0.0f || borderRadius.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             board.borderRadius = tabTheme->GetFocusIndicatorRadius();
         }
+    } else {
+        board.borderRadius = borderRadius;
     }
     TabContentModel::GetInstance()->SetBoard(board);
 }
@@ -243,10 +258,11 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
     CalcDimension fontSize;
-    if (ParseJsDimensionFp(size, fontSize)) {
+    if (ParseJsDimensionFp(size, fontSize) && NonNegative(fontSize.Value()) &&
+        fontSize.Unit() != DimensionUnit::PERCENT) {
         labelStyle.fontSize = fontSize;
     }
-    
+
     JSRef<JSVal> weight = obj->GetProperty("weight");
     if (weight->IsString() || weight->IsNumber()) {
         labelStyle.fontWeight = ConvertStrToFontWeight(weight->ToString());
@@ -277,8 +293,7 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
         JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
         if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
             auto overflow = overflowValue->ToNumber<int32_t>();
-            if (overflow >= 0 &&
-                overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+            if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
                 labelStyle.textOverflow = TEXT_OVERFLOWS[overflow];
             }
         }
@@ -290,13 +305,15 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
 
         JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
         CalcDimension minFontSize;
-        if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
+        if (ParseJsDimensionFp(minFontSizeValue, minFontSize) && NonNegative(minFontSize.Value()) &&
+            minFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.minFontSize = minFontSize;
         }
 
         JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
         CalcDimension maxFontSize;
-        if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
+        if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize) && NonNegative(maxFontSize.Value()) &&
+            maxFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.maxFontSize = maxFontSize;
         }
 
@@ -311,7 +328,6 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
 
         JSRef<JSVal> font = obj->GetProperty("font");
         if (!font->IsNull() && font->IsObject()) {
-            TextStyle textStyle;
             GetFontContent(font, labelStyle);
         }
     }
@@ -367,21 +383,17 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
         contentOpt = content;
     }
     JSRef<JSVal> indicatorParam = paramObject->GetProperty("indicator");
-    if (!indicatorParam->IsUndefined()) {
-        SetIndicator(indicatorParam);
-    }
+    SetIndicator(indicatorParam);
+
     JSRef<JSVal> selectedModeParam = paramObject->GetProperty("selectedMode");
-    if (!selectedModeParam->IsUndefined()) {
-        SetSelectedMode(selectedModeParam);
-    }
+    SetSelectedMode(selectedModeParam);
+
     JSRef<JSVal> boardParam = paramObject->GetProperty("board");
-    if (!boardParam->IsUndefined()) {
-        SetBoard(boardParam);
-    }
+    SetBoard(boardParam);
+
     JSRef<JSVal> labelStyleParam = paramObject->GetProperty("labelStyle");
-    if (!labelStyleParam->IsUndefined()) {
-        SetLabelStyle(labelStyleParam);
-    }
+    SetLabelStyle(labelStyleParam);
+
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, nullptr, false);
 }

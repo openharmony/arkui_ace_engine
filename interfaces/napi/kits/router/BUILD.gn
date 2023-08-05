@@ -26,7 +26,6 @@ template("napi_router_static") {
 
     include_dirs = [
       "//foundation/arkui",
-      "//third_party/libuv/include",
       "$ace_root",
       "$ace_root/frameworks",
       "$root_out_dir/arkui/framework",
@@ -35,16 +34,11 @@ template("napi_router_static") {
     sources = [ "js_router.cpp" ]
 
     deps = []
+    external_deps = []
     if (platform != "" && is_cross_platform_build) {
-      deps += [
-        "//plugins/libs/napi:napi_$platform",
-        "//plugins/libs/uv:uv_$platform",
-      ]
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
     } else {
-      deps += [
-        "//foundation/arkui/napi/:ace_napi",
-        "//third_party/libuv:uv",
-      ]
+      external_deps += [ "napi:ace_napi" ]
     }
 
     if (defined(config.libace_target)) {

@@ -28,6 +28,7 @@ public:
     explicit RosenRenderSceneViewer(uint32_t key);
     ~RosenRenderSceneViewer() override = default;
     void PrepareTextureLayer(const OHOS::Render3D::TextureInfo& info) override;
+    OHOS::Render3D::TextureInfo CreateRenderTarget(uint32_t width, uint32_t height) override;
     EGLContext GetRenderContext() override;
     void PaintTextureLayer(RenderContext& context, const Offset& offset) override;
 

@@ -40,6 +40,7 @@ ohos_fuzztest("ResFuzzTest") {
     "$ace_root/frameworks/base/",
     "$ace_root/frameworks",
     "$ace_root",
+    "$root_out_dir/arkui/framework",
     cjson_root,
   ]
 
@@ -57,11 +58,17 @@ ohos_fuzztest("ResFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "window_manager:libdm",
   ]
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 ###############################################################################

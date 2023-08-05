@@ -28,14 +28,6 @@ class JSWeb : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-    static void CreateInNewPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
-        std::optional<std::string> dstSrc);
-    static void CreateInOldPipeline(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
-        std::optional<std::string> dstSrc);
-    static void CreateWithWebController(JSRef<JSObject> controller,
-        RefPtr<WebComponent>& webComponent);
-    static void CreateWithWebviewController(JSRef<JSObject> controller, JSRef<JSVal> setWebIdFunction,
-        RefPtr<WebComponent>& webComponent);
     static void OnAlert(const JSCallbackInfo& args);
     static void OnBeforeUnload(const JSCallbackInfo& args);
     static void OnConfirm(const JSCallbackInfo& args);
@@ -94,6 +86,8 @@ public:
     static void OnSslErrorRequest(const JSCallbackInfo& args);
     static void OnSslSelectCertRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
+    static void OnScreenCaptureRequest(const JSCallbackInfo& args);
+    static void OnContextMenuHide(const JSCallbackInfo& args);
     static void OnContextMenuShow(const JSCallbackInfo& args);
     static void OnSearchResultReceive(const JSCallbackInfo& args);
     static void MediaPlayGestureAccess(bool isNeedGestureAccess);
@@ -132,9 +126,11 @@ public:
     static void MediaOptions(const JSCallbackInfo& args);
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
     static void OnControllerAttached(const JSCallbackInfo& args);
+    static void OnOverScroll(const JSCallbackInfo& args);
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
+
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
 };

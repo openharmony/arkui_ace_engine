@@ -20,6 +20,7 @@
 
 #include "unistd.h"
 
+#include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "core/common/ace_page.h"
@@ -162,23 +163,35 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
     return currentSubwindow_;
 }
 
-void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
+Rect SubwindowManager::GetParentWindowRect()
+{
+    std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
+    Rect rect;
+    CHECK_NULL_RETURN(currentSubwindow_, rect);
+    return currentSubwindow_->GetParentWindowRect();
+}
+
+void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
+    const NG::OffsetF& offset, bool isAboveApps)
 {
     auto containerId = Container::CurrentId();
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [containerId, menuNode, targetId, offset] {
+        [containerId, weakMenu = AceType::WeakClaim(AceType::RawPtr(menuNode)), targetId, offset, isAboveApps] {
             auto manager = SubwindowManager::GetInstance();
             CHECK_NULL_VOID(manager);
+            auto menu = weakMenu.Upgrade();
+            CHECK_NULL_VOID(menu);
             auto subwindow = manager->GetSubwindow(containerId);
             if (!subwindow) {
                 LOGI("Subwindow is null, add a new one.");
                 subwindow = Subwindow::CreateSubwindow(containerId);
+                subwindow->SetAboveApps(isAboveApps);
                 subwindow->InitContainer();
                 manager->AddSubwindow(containerId, subwindow);
             }
-            subwindow->ShowMenuNG(menuNode, targetId, offset);
+            subwindow->ShowMenuNG(menu, targetId, offset);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -234,19 +247,18 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void SubwindowManager::HidePopupNG(int32_t targetId)
+void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
 {
-    auto subwindow = GetCurrentWindow();
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
     if (subwindow) {
         subwindow->HidePopupNG(targetId);
-    }
-}
-
-void SubwindowManager::HidePopupNG()
-{
-    auto subwindow = GetCurrentWindow();
-    if (subwindow) {
-        subwindow->HidePopupNG();
     }
 }
 
@@ -317,16 +329,23 @@ void SubwindowManager::ClearMenu()
     }
 }
 
-void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects)
+void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
 {
-    auto subwindow = GetCurrentWindow();
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
     if (subwindow) {
-        subwindow->SetHotAreas(rects);
+        subwindow->SetHotAreas(rects, overlayId);
     }
 }
 
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
-    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindow(containerId);
@@ -336,7 +355,7 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }
-    return subwindow->ShowDialogNG(dialogProps, customNode);
+    return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
 
 void SubwindowManager::AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow)
@@ -535,6 +554,20 @@ void SubwindowManager::RegisterOnHideMenu(const std::function<void()>& callback)
         auto overlayManager = currentSubwindow_->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->RegisterOnHideMenu(callback);
+    }
+}
+
+void SubwindowManager::RequestFocusSubwindow(int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+    if (subwindow) {
+        subwindow->RequestFocus();
     }
 }
 } // namespace OHOS::Ace

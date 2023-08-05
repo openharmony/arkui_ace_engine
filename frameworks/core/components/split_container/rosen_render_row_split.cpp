@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,11 @@
 
 #include "core/components/split_container/rosen_render_row_split.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -37,7 +41,7 @@ void RosenRenderRowSplit::Paint(RenderContext& context, const Offset& offset)
         if (!item->GetVisible()) {
             continue;
         }
-        
+
         if (displayNodes_.find(item) == displayNodes_.end() &&
             disableHideNodes_.find(item) == disableHideNodes_.end()) {
             continue;
@@ -57,6 +61,7 @@ void RosenRenderRowSplit::PaintDivider(RenderContext& context, const Offset& off
     double startPointY = offset.GetY();
     double endPointX = startPointX;
     double endPointY = startPointY + height;
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
@@ -66,6 +71,19 @@ void RosenRenderRowSplit::PaintDivider(RenderContext& context, const Offset& off
     paint.setColor(ROW_SPLIT_COLOR);
     paint.setStrokeWidth(DEFAULT_SPLIT_HEIGHT);
     canvas->drawLine(startPointX, startPointY, endPointX, endPointY, paint);
+#else
+    RSPen pen;
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    pen.SetColor(ROW_SPLIT_COLOR);
+    pen.SetWidth(DEFAULT_SPLIT_HEIGHT);
+    canvas->AttachPen(pen);
+    canvas->DrawLine(RSPoint(startPointX, startPointY), RSPoint(endPointX, endPointY));
+    canvas->DetachPen();
+#endif
 }
 
 } // namespace OHOS::Ace

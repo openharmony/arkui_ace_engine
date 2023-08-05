@@ -60,14 +60,6 @@ public:
         }
     }
 
-    void FromJson(const std::unique_ptr<JsonValue>& json) override
-    {
-        if (json->Contains("indicator")) {
-            UpdateIndicator(RectF::FromString(json->GetString("indicator")));
-        }
-        PaintProperty::FromJson(json);
-    }
-
     /* Need to render when indicator has animation */
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, RectF, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FadingEdge, bool, PROPERTY_UPDATE_RENDER);

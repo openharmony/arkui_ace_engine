@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #include "core/components/tool_bar/rosen_render_tool_bar_item.h"
 
 #include "render_service_client/core/ui/rs_node.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkMaskFilter.h"
+#endif
 
 #include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"
@@ -44,7 +46,11 @@ void RosenRenderToolBarItem::Paint(RenderContext& context, const Offset& offset)
         LOGE("Render context is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkCanvas* canvas = renderContext->GetCanvas();
+#else
+    RSCanvas* canvas = renderContext->GetCanvas();
+#endif
     if (canvas == nullptr) {
         LOGE("Paint canvas is null");
         return;
@@ -73,6 +79,7 @@ void RosenRenderToolBarItem::DrawFocus()
     RequestFocusAnimation(globalOffset, Rect(offset, layoutSize), Radius(rrectRadius_));
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderToolBarItem::DrawShape(
     SkCanvas& canvas, const Rect& paintRect, const Color& color, double radius)
 {
@@ -84,4 +91,18 @@ void RosenRenderToolBarItem::DrawShape(
     rRect.offset(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY());
     canvas.drawRRect(rRect, paint);
 }
+#else
+void RosenRenderToolBarItem::DrawShape(
+    RSCanvas& canvas, const Rect& paintRect, const Color& color, double radius)
+{
+    RSPen pen;
+
+    pen.SetColor(color.GetValue());
+    RSRoundRect rRect(RSRect(0, 0, paintRect.Width(), paintRect.Height()), radius, radius);
+    rRect.Offset(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY());
+    canvas.AttachPen(pen);
+    canvas.DrawRoundRect(rRect);
+    canvas.DetachPen();
+}
+#endif
 } // namespace OHOS::Ace

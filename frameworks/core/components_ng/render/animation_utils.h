@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
 
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace {
 
@@ -50,7 +52,10 @@ public:
         const PropertyCallback& callback, const FinishCallback& finishCallback = nullptr,
         const RepeatCallback& repeatCallback = nullptr);
     static void StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
-    static bool IsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    static void BlendBgColorAnimation(
+        RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
+    static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
 };
 } // namespace OHOS::Ace
 

@@ -69,12 +69,18 @@ const std::map<GridColumnType, std::vector<SystemGridInfo>> SYSTEM_GRID_TYPES = 
     { GridColumnType::PANEL, { SystemGridInfo(GridSizeType::SM, SMALL_GUTTER, SMALL_MARGIN, 4),
                                  SystemGridInfo(GridSizeType::MD, SMALL_GUTTER, SMALL_MARGIN, 6),
                                  SystemGridInfo(GridSizeType::LG, SMALL_GUTTER, SMALL_MARGIN, 6) } },
-    { GridColumnType::DIALOG, { SystemGridInfo(GridSizeType::SM, LARGE_GUTTER, LARGE_MARGIN, 3),
-                                  SystemGridInfo(GridSizeType::MD, LARGE_GUTTER, LARGE_MARGIN, 4),
-                                  SystemGridInfo(GridSizeType::LG, LARGE_GUTTER, LARGE_MARGIN, 5) } },
+    { GridColumnType::DIALOG, { SystemGridInfo(GridSizeType::SM, SMALL_GUTTER, SMALL_MARGIN, 3),
+                                  SystemGridInfo(GridSizeType::MD, SMALL_GUTTER, SMALL_MARGIN, 4),
+                                  SystemGridInfo(GridSizeType::LG, SMALL_GUTTER, SMALL_MARGIN, 5) } },
     { GridColumnType::CAR_DIALOG, { SystemGridInfo(GridSizeType::SM, CAR_SMALL_GUTTER, CAR_SMALL_MARGIN, 4),
                                       SystemGridInfo(GridSizeType::MD, CAR_SMALL_GUTTER, CAR_SMALL_MARGIN, 8),
                                       SystemGridInfo(GridSizeType::LG, CAR_SMALL_GUTTER, CAR_SMALL_MARGIN, 12) } },
+    { GridColumnType::LIST_CARD, { SystemGridInfo(GridSizeType::SM, SMALL_GUTTER, SMALL_MARGIN, 4),
+                                   SystemGridInfo(GridSizeType::MD, SMALL_GUTTER, SMALL_MARGIN, 8),
+                                   SystemGridInfo(GridSizeType::LG, SMALL_GUTTER, SMALL_MARGIN, 12) } },
+    { GridColumnType::NAVIGATION_TOOLBAR, { SystemGridInfo(GridSizeType::SM, LARGE_GUTTER, LARGE_MARGIN, 4),
+                                            SystemGridInfo(GridSizeType::MD, LARGE_GUTTER, LARGE_MARGIN, 8),
+                                            SystemGridInfo(GridSizeType::LG, LARGE_GUTTER, LARGE_MARGIN, 12) } },
 };
 
 } // namespace

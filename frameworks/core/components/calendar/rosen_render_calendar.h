@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CALENDAR_ROSEN_RENDER_CALENDAR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CALENDAR_ROSEN_RENDER_CALENDAR_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
+#endif
 #include "third_party/txt/src/txt/text_style.h"
 
 #include "core/components/calendar/render_calendar.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Rosen {
     class DrawCmdList;
@@ -41,26 +46,58 @@ public:
     void PerformLayout() override;
 
 private:
+#ifndef USE_ROSEN_DRAWING
     void DrawWeekAndDates(SkCanvas* canvas, Offset offset);
     void DrawFocusedArea(SkCanvas* canvas, const Offset& offset, const CalendarDay& day, double x, double y) const;
     void DrawWeek(SkCanvas* canvas, const Offset& offset) const;
     void DrawBlurArea(SkCanvas* canvas, const Offset& offset, double x, double y) const;
+#else
+    void DrawWeekAndDates(RSCanvas* canvas, Offset offset);
+    void DrawFocusedArea(
+        RSCanvas* canvas, const Offset& offset, const CalendarDay& day, double x, double y) const;
+    void DrawWeek(RSCanvas* canvas, const Offset& offset) const;
+    void DrawBlurArea(RSCanvas* canvas, const Offset& offset, double x, double y) const;
+#endif
     void DrawTouchedArea(RenderContext& context, Offset offset) const;
+#ifndef USE_ROSEN_DRAWING
     void PaintDay(SkCanvas* canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const;
     void PaintLunarDay(
         SkCanvas* canvas, const Offset& offset, const CalendarDay& day, const txt::TextStyle& textStyle) const;
+#else
+    void PaintDay(
+        RSCanvas* canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const;
+    void PaintLunarDay(RSCanvas* canvas, const Offset& offset, const CalendarDay& day,
+        const txt::TextStyle& textStyle) const;
+#endif
     void SetNonFocusStyle(const CalendarDay& day, txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
+#ifndef USE_ROSEN_DRAWING
     void DrawCardCalendar(
         SkCanvas* canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day, int32_t dateNumber);
     void DrawTvCalendar(
         SkCanvas* canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day, int32_t dateNumber);
+#else
+    void DrawCardCalendar(RSCanvas* canvas, const Offset& offset, const Offset& dayOffset,
+        const CalendarDay& day, int32_t dateNumber);
+    void DrawTvCalendar(RSCanvas* canvas, const Offset& offset, const Offset& dayOffset,
+        const CalendarDay& day, int32_t dateNumber);
+#endif
     void InitTextStyle(txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
+#ifndef USE_ROSEN_DRAWING
     void PaintUnderscore(SkCanvas* canvas, const Offset& offset, const CalendarDay& day);
     void PaintScheduleMarker(SkCanvas* canvas, const Offset& offset, const CalendarDay& day);
+#else
+    void PaintUnderscore(RSCanvas* canvas, const Offset& offset, const CalendarDay& day);
+    void PaintScheduleMarker(RSCanvas* canvas, const Offset& offset, const CalendarDay& day);
+#endif
     void InitWorkStateStyle(
         const CalendarDay& day, const Offset& offset, txt::TextStyle& workStateStyle, Rect& boxRect) const;
+#ifndef USE_ROSEN_DRAWING
     void SetWorkStateStyle(
         const CalendarDay& day, SkColor workColor, SkColor offColor, txt::TextStyle& workStateStyle) const;
+#else
+    void SetWorkStateStyle(const CalendarDay& day, RSColorQuad workColor,
+        RSColorQuad offColor, txt::TextStyle& workStateStyle) const;
+#endif
     void SetCalendarTheme();
     bool IsOffDay(const CalendarDay& day) const;
     void AddContentLayer(RenderContext& context);
@@ -81,6 +118,7 @@ private:
     double workStateVerticalMovingDistance_ = 0.0;
     double touchCircleStrokeWidth_ = 0.0;
 
+#ifndef USE_ROSEN_DRAWING
     SkColor weekColor_;
     SkColor touchColor_;
     SkColor dayColor_;
@@ -100,12 +138,37 @@ private:
     SkColor focusedAreaBackgroundColor_;
     SkColor blurAreaBackgroundColor_;
     SkColor markLunarColor_;
+#else
+    RSColorQuad weekColor_;
+    RSColorQuad touchColor_;
+    RSColorQuad dayColor_;
+    RSColorQuad lunarColor_;
+    RSColorQuad weekendDayColor_;
+    RSColorQuad weekendLunarColor_;
+    RSColorQuad todayDayColor_;
+    RSColorQuad todayLunarColor_;
+    RSColorQuad nonCurrentMonthDayColor_;
+    RSColorQuad nonCurrentMonthLunarColor_;
+    RSColorQuad workDayMarkColor_;
+    RSColorQuad offDayMarkColor_;
+    RSColorQuad nonCurrentMonthWorkDayMarkColor_;
+    RSColorQuad nonCurrentMonthOffDayMarkColor_;
+    RSColorQuad focusedDayColor_;
+    RSColorQuad focusedLunarColor_;
+    RSColorQuad focusedAreaBackgroundColor_;
+    RSColorQuad blurAreaBackgroundColor_;
+    RSColorQuad markLunarColor_;
+#endif
 
     Size lastLayoutSize_;
     FontWeight dayFontWeight_ = FontWeight::W500;
     FontWeight lunarDayFontWeight_ = FontWeight::W500;
     FontWeight workStateFontWeight_ = FontWeight::W400;
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<Rosen::DrawCmdList> drawCmdList_;
+#else
+    std::shared_ptr<RSDrawCmdList> drawCmdList_;
+#endif
 };
 
 } // namespace OHOS::Ace

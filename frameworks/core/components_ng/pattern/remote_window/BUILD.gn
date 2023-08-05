@@ -23,6 +23,6 @@ build_component_ng("remote_window_pattern_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+    external_deps = [ "graphic_2d:librender_service_client" ]
   }
 }

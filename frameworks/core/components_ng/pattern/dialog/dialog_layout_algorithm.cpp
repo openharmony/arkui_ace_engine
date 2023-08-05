@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 
+#include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
@@ -28,8 +29,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -43,7 +47,7 @@ namespace {
 constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
-constexpr int listPaddingHeight = 72;
+constexpr Dimension listPaddingHeight = 48.0_vp;
 
 } // namespace
 
@@ -75,8 +79,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
 
-    // scroll for alert
-    AnalysisHeightOfChild(layoutWrapper);
+    if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
+        AnalysisHeightOfChild(layoutWrapper);
+    }
 }
 
 void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
@@ -103,11 +108,16 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
         }
     }
 
+    if (scroll != nullptr) {
+        AnalysisLayoutOfContent(layoutWrapper, scroll);
+    }
+
     if (scroll != nullptr && list != nullptr) {
         Distribute(scrollHeight, listHeight, restHeight);
         auto childConstraint = CreateDialogChildConstraint(layoutWrapper, scrollHeight, restWidth);
         scroll->Measure(childConstraint);
-        childConstraint = CreateDialogChildConstraint(layoutWrapper, listHeight + listPaddingHeight, restWidth);
+        childConstraint =
+            CreateDialogChildConstraint(layoutWrapper, listHeight + listPaddingHeight.ConvertToPx(), restWidth);
         list->Measure(childConstraint);
     } else {
         if (scroll != nullptr) {
@@ -117,9 +127,28 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
         }
         if (list != nullptr) {
             auto childConstraint = CreateDialogChildConstraint(
-                layoutWrapper, std::min(restHeight, listHeight + listPaddingHeight), restWidth);
+                layoutWrapper, std::min(restHeight, listHeight + (float)listPaddingHeight.ConvertToPx()), restWidth);
             list->Measure(childConstraint);
         }
+    }
+}
+
+void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll)
+{
+    auto text = scroll->GetAllChildrenWithBuild().front();
+    CHECK_NULL_VOID(text);
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(text->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(textLayoutAlgorithm);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
+        scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    } else {
+        scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);
     }
 }
 
@@ -138,13 +167,15 @@ void DialogLayoutAlgorithm::Distribute(float& scrollHeight, float& listHeight, f
 }
 
 LayoutConstraintF DialogLayoutAlgorithm::CreateDialogChildConstraint(
-    LayoutWrapper* layoutWrapper, float Height, float Width)
+    LayoutWrapper* layoutWrapper, float height, float width)
 {
     auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childConstraint.maxSize.SetHeight(Height);
-    childConstraint.percentReference.SetHeight(Height);
-    childConstraint.maxSize.SetWidth(Width);
-    childConstraint.percentReference.SetWidth(Width);
+    childConstraint.minSize.SetHeight(height);
+    childConstraint.maxSize.SetHeight(height);
+    childConstraint.percentReference.SetHeight(height);
+    childConstraint.minSize.SetWidth(width);
+    childConstraint.maxSize.SetWidth(width);
+    childConstraint.percentReference.SetWidth(width);
     return childConstraint;
 }
 
@@ -188,55 +219,58 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
 double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
     const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType)
 {
+    auto parentColumns = info->GetParent()->GetColumns();
     if (gridCount_ >= 0) {
-        return info->GetWidth(std::min(gridCount_, info->GetParent()->GetColumns()));
+        return info->GetWidth(std::min(gridCount_, parentColumns));
     }
 
+    int32_t deviceColumns;
     if (deviceType == DeviceType::WATCH) {
         if (type == GridSizeType::SM) {
-            return info->GetWidth(3);
+            deviceColumns = 3;
         } else if (type == GridSizeType::MD) {
-            return info->GetWidth(4);
+            deviceColumns = 4;
         } else if (type == GridSizeType::LG) {
-            return info->GetWidth(5);
+            deviceColumns = 5;
         } else {
             LOGD("GetMaxWidthBasedOnGridType is undefined");
-            return info->GetWidth(5);
+            deviceColumns = 5;
         }
     } else if (deviceType == DeviceType::PHONE) {
         if (type == GridSizeType::SM) {
-            return info->GetWidth(4);
+            deviceColumns = 4;
         } else if (type == GridSizeType::MD) {
-            return info->GetWidth(5);
+            deviceColumns = 5;
         } else if (type == GridSizeType::LG) {
-            return info->GetWidth(6);
+            deviceColumns = 6;
         } else {
             LOGD("GetMaxWidthBasedOnGridType is undefined");
-            return info->GetWidth(6);
+            deviceColumns = 6;
         }
     } else if (deviceType == DeviceType::CAR) {
         if (type == GridSizeType::SM) {
-            return info->GetWidth(4);
+            deviceColumns = 4;
         } else if (type == GridSizeType::MD) {
-            return info->GetWidth(6);
+            deviceColumns = 6;
         } else if (type == GridSizeType::LG) {
-            return info->GetWidth(8);
+            deviceColumns = 8;
         } else {
             LOGD("GetMaxWidthBasedOnGridType is undefined");
-            return info->GetWidth(8);
+            deviceColumns = 8;
         }
     } else {
         if (type == GridSizeType::SM) {
-            return info->GetWidth(2);
+            deviceColumns = 2;
         } else if (type == GridSizeType::MD) {
-            return info->GetWidth(3);
+            deviceColumns = 3;
         } else if (type == GridSizeType::LG) {
-            return info->GetWidth(4);
+            deviceColumns = 4;
         } else {
             LOGD("GetMaxWidthBasedOnGridType is undefined");
-            return info->GetWidth(4);
+            deviceColumns = 4;
         }
     }
+    return info->GetWidth(std::min(deviceColumns, parentColumns));
 }
 
 void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -263,7 +297,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         std::vector<Rect> rects;
         auto rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
         rects.emplace_back(rect);
-        SubwindowManager::GetInstance()->SetHotAreas(rects);
+        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId());
     }
 }
 
@@ -332,12 +366,34 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(
         }
         return true;
     }
+
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+            topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+            return true;
+        }
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+            topLeftPoint = OffsetF((maxSize.Width() - childSize.Width()) / 2.0,
+                maxSize.Height() - childSize.Height() - GetPaddingBottom());
+            return true;
+        }
+    }
     return false;
 }
 
 void DialogLayoutAlgorithm::UpdateTouchRegion()
 {
     // TODO: update touch region is not completed.
+}
+
+double DialogLayoutAlgorithm::GetPaddingBottom() const
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, 0);
+    auto bottom = dialogTheme->GetDefaultPaddingBottomFixed();
+    return pipelineContext->NormalizeToPx(bottom);
 }
 
 } // namespace OHOS::Ace::NG

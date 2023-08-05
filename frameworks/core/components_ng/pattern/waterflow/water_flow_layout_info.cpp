@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 
+#include <algorithm>
+
 namespace OHOS::Ace::NG {
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex)
 {
@@ -98,6 +100,21 @@ float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex)
     return result;
 }
 
+float WaterFlowLayoutInfo::GetStartMainPos(int32_t crossIndex, int32_t itemIndex)
+{
+    float result = 0.0f;
+    auto cross = waterFlowItems_.find(crossIndex);
+    if (cross == waterFlowItems_.end()) {
+        return result;
+    }
+    auto item = cross->second.find(itemIndex);
+    if (item == cross->second.end()) {
+        return result;
+    }
+    result = item->second.first;
+    return result;
+}
+
 bool WaterFlowLayoutInfo::IsAllCrossReachend(float mainSize) const
 {
     bool result = true;
@@ -116,15 +133,16 @@ bool WaterFlowLayoutInfo::IsAllCrossReachend(float mainSize) const
     return result;
 }
 
-FlowItemPosition WaterFlowLayoutInfo::GetCrossIndexForNextItem() const
+FlowItemIndex WaterFlowLayoutInfo::GetCrossIndexForNextItem() const
 {
-    FlowItemPosition position;
+    FlowItemIndex position = { 0, -1 };
     auto minHeight = 0.0f;
     auto crossSize = static_cast<int32_t>(waterFlowItems_.size());
     for (int32_t i = 0; i < crossSize; ++i) {
         const auto& crossItems = waterFlowItems_.at(i);
         if (crossItems.empty()) {
             position.crossIndex = i;
+            position.lastItemIndex = -1;
             break;
         }
         auto lastItem = crossItems.rbegin();
@@ -138,6 +156,10 @@ FlowItemPosition WaterFlowLayoutInfo::GetCrossIndexForNextItem() const
             position.crossIndex = i;
             position.lastItemIndex = lastItem->first;
             minHeight = lastOffset;
+            // first item height in this cross is 0
+            if (NearZero(minHeight)) {
+                break;
+            }
         }
     }
 
@@ -155,5 +177,40 @@ void WaterFlowLayoutInfo::Reset()
     startIndex_ = 0;
     endIndex_ = 0;
     waterFlowItems_.clear();
+}
+
+int32_t WaterFlowLayoutInfo::GetCrossCount() const
+{
+    return static_cast<int32_t>(waterFlowItems_.size());
+}
+
+int32_t WaterFlowLayoutInfo::GetMainCount() const
+{
+    int32_t maxMainCount = 0;
+    for (const auto& crossItems : waterFlowItems_) {
+        if (crossItems.second.empty()) {
+            continue;
+        }
+        auto mainCount = static_cast<int32_t>(std::count_if(crossItems.second.begin(), crossItems.second.end(),
+            [start = startIndex_, end = endIndex_](const std::pair<const int, std::pair<float, float>>& crossItem) {
+                return crossItem.first >= start && crossItem.first <= end;
+            }));
+        maxMainCount = std::max(maxMainCount, mainCount);
+    }
+    return maxMainCount;
+}
+
+void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
+{
+    for (auto& crossItems : waterFlowItems_) {
+        if (crossItems.second.empty()) {
+            continue;
+        }
+        auto clearFrom = std::find_if(crossItems.second.begin(), crossItems.second.end(),
+            [currentIndex](const std::pair<const int, std::pair<float, float>>& crossItem) {
+                return crossItem.first > currentIndex;
+            });
+        crossItems.second.erase(clearFrom, crossItems.second.end());
+    }
 }
 } // namespace OHOS::Ace::NG

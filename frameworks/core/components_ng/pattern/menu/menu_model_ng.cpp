@@ -24,7 +24,7 @@ void MenuModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
 }
@@ -44,6 +44,11 @@ void MenuModelNG::SetFontWeight(FontWeight weight)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight);
 }
 
+void MenuModelNG::SetFontStyle(Ace::FontStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItalicFontStyle, style);
+}
+
 void MenuModelNG::SetFontColor(const std::optional<Color>& color)
 {
     if (color.has_value()) {
@@ -51,5 +56,10 @@ void MenuModelNG::SetFontColor(const std::optional<Color>& color)
     } else {
         ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
     }
+}
+
+void MenuModelNG::SetFontFamily(const std::vector<std::string> &families)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families);
 }
 } // namespace OHOS::Ace::NG

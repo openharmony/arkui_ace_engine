@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 stateMgmtConsole.info("ACE State Management component is initiaizing ...")
 
-PersistentStorage.ConfigureBackend(new Storage());
+PersistentStorage.configureBackend(new Storage());
 
-Environment.ConfigureBackend(new EnvironmentSetting());
+Environment.configureBackend(new EnvironmentSetting());
 

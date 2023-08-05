@@ -88,6 +88,10 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
     if (fontWeight.has_value()) {
         textLayoutProps->UpdateFontWeight(fontWeight.value());
     }
+    auto fontStyle = param->GetFontStyle();
+    if (fontStyle.has_value()) {
+        textLayoutProps->UpdateItalicFontStyle(fontStyle.value());
+    }
 }
 } // namespace
 
@@ -115,6 +119,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    popupProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
     if (param->GetTargetSpace().has_value()) {
         popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
@@ -137,19 +142,19 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     auto bubbleAccessibilityProperty = popupNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(bubbleAccessibilityProperty, nullptr);
     bubbleAccessibilityProperty->SetText(message);
-
+    auto bobblePattern = popupNode->GetPattern<BubblePattern>();
     // Create child
     RefPtr<FrameNode> child;
     if (primaryButton.showButton || secondaryButton.showButton) {
-        child = CreateCombinedChild(param, popupId, targetId);
+        child = CreateCombinedChild(param, popupId, targetId, popupNode);
         popupPaintProp->UpdatePrimaryButtonShow(primaryButton.showButton);
         popupPaintProp->UpdateSecondaryButtonShow(secondaryButton.showButton);
         popupPaintProp->UpdateAutoCancel(false);
     } else {
         auto textNode = CreateMessage(message, useCustom);
+        bobblePattern->SetMessageNode(textNode);
         auto popupTheme = GetPopupTheme();
         auto padding = popupTheme->GetPadding();
-
         auto layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();
         PaddingProperty textPadding;
         textPadding.left = CalcLength(padding.Left());
@@ -182,6 +187,8 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (bubbleHub) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
+    auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    popupPattern->SetCustomPopupTag(true);
     // update bubble props
     auto layoutProps = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     layoutProps->UpdateUseCustom(param->IsUseCustom());
@@ -191,6 +198,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdateBlockEvent(param->IsBlockEvent());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
+    layoutProps->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->GetTargetSpace().has_value()) {
         layoutProps->UpdateTargetSpace(param->GetTargetSpace().value());
     }
@@ -276,6 +284,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
+    popupLayoutProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->IsMaskColorSetted()) {
         popupPaintProp->UpdateMaskColor(param->GetMaskColor());
     }
@@ -301,14 +310,17 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     return textNode;
 }
 
-RefPtr<FrameNode> BubbleView::CreateCombinedChild(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId)
+RefPtr<FrameNode> BubbleView::CreateCombinedChild(
+    const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId, const RefPtr<FrameNode>& bobbleNode)
 {
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto layoutProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START); // mainAxisAlign
     auto message = BubbleView::CreateMessage(param->GetMessage(), param->IsUseCustom());
-
+    auto bubblePattern = bobbleNode->GetPattern<BubblePattern>();
+    CHECK_NULL_RETURN(bubblePattern, nullptr);
+    bubblePattern->SetMessageNode(message);
     auto popupTheme = GetPopupTheme();
     auto padding = popupTheme->GetPadding();
     auto textLayoutProps = message->GetLayoutProperty<TextLayoutProperty>();

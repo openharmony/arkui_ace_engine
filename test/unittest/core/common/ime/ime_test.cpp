@@ -251,13 +251,32 @@ HWTEST_F(ImeTest, MoveLeftTest003, TestSize.Level1)
 HWTEST_F(ImeTest, MoveRightTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Use the default extentOffset value.
-     * @tc.expected: step1. ExtentOffset and baseOffset are both set to zero.
+     * @tc.steps: step1. When the member text of the selection is empty.
+     * @tc.expected: step1. Calling the MoveRight method, both ExtentOffset and baseOffset are negative ones.
      */
     TextEditingValue textEditingValue;
     textEditingValue.MoveRight();
-    EXPECT_EQ(textEditingValue.selection.baseOffset, 0);
-    EXPECT_EQ(textEditingValue.selection.extentOffset, 0);
+    EXPECT_EQ(textEditingValue.selection.baseOffset, -1);
+    EXPECT_EQ(textEditingValue.selection.extentOffset, -1);
+
+    /**
+     * @tc.steps: step2. When the length of the member text variable of TextEditingValue is greater than 0.
+     * @tc.expected: step2. ExtentOffset and baseOffset are both is textEditingValue.text.length().
+     */
+    textEditingValue.text = "textEditingValue";
+    textEditingValue.MoveRight();
+    EXPECT_EQ(textEditingValue.selection.baseOffset, textEditingValue.text.length());
+    EXPECT_EQ(textEditingValue.selection.extentOffset, textEditingValue.text.length());
+
+    /**
+     * @tc.steps: step3. When the length of the member text variable of TextEditingValue is greater than 0.
+     *                  and textEditingValue.selection.baseOffset greater than length of text.
+     * @tc.expected: step3. ExtentOffset and baseOffset are both is textEditingValue.text.length().
+     */
+    textEditingValue.text = "textEdit";
+    textEditingValue.MoveRight();
+    EXPECT_EQ(textEditingValue.selection.baseOffset, textEditingValue.text.length());
+    EXPECT_EQ(textEditingValue.selection.extentOffset, textEditingValue.text.length());
 }
 
 /**

@@ -18,11 +18,29 @@
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 namespace OHOS::Ace::NG {
-void WaterFlowPositionController::JumpTo(int32_t index, int32_t /* source */)
+void WaterFlowPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */,
+    int32_t /* source */)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto waterFlowPattern = AceType::DynamicCast<WaterFlowPattern>(pattern);
     waterFlowPattern->UpdateStartIndex(index);
+}
+
+void WaterFlowPositionController::ScrollPage(bool reverse, bool /* smooth */)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto waterFlowPattern = AceType::DynamicCast<WaterFlowPattern>(pattern);
+    if (waterFlowPattern && waterFlowPattern->GetAxis() != Axis::NONE) {
+        waterFlowPattern->ScrollPage(reverse);
+    }
+}
+
+bool WaterFlowPositionController::IsAtEnd() const
+{
+    auto waterFlowPattern = AceType::DynamicCast<WaterFlowPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN_NOLOG(waterFlowPattern, false);
+    return waterFlowPattern->IsAtBottom();
 }
 } // namespace OHOS::Ace::NG

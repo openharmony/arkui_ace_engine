@@ -34,13 +34,15 @@ public:
     virtual ~ListItemModel() = default;
 
     virtual void Create() = 0;
-    virtual void Create(std::function<void(int32_t)>&& deepRenderFunc) = 0;
+    virtual void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle) = 0;
     virtual void SetBorderRadius(const Dimension& borderRadius) = 0;
     virtual void SetType(const std::string& type) = 0;
     virtual void SetIsLazyCreating(bool isLazy) = 0;
     virtual void SetSticky(V2::StickyMode stickyMode) = 0;
     virtual void SetEditMode(uint32_t editMode) = 0;
     virtual void SetSelectable(bool selectable) = 0;
+    virtual void SetSelected(bool selected) = 0;
+    virtual void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
     virtual void SetSwiperAction(
         std::function<void()>&& startAction, std::function<void()>&& endAction, V2::SwipeEdgeEffect edgeEffect) = 0;
     virtual void SetSelectCallback(OnSelectFunc&& selectCallback) = 0;

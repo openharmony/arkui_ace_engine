@@ -60,8 +60,12 @@ void Scheduler::OnFrame(uint64_t nanoTimestamp)
     }
 
     // Refresh the startup time every frame.
-    uint64_t elapsedTimeMs = (nanoTimestamp - startupTimestamp_) / 1000000;
-    startupTimestamp_ += elapsedTimeMs * 1000000;
+    uint64_t elapsedTimeMs = 0;
+    if (nanoTimestamp > startupTimestamp_) {
+        static const uint64_t milliToNano = 1000000;
+        elapsedTimeMs = (nanoTimestamp - startupTimestamp_) / milliToNano;
+        startupTimestamp_ += elapsedTimeMs * milliToNano;
+    }
 
     // Consume previous schedule as default.
     scheduleId_ = 0;

@@ -64,14 +64,15 @@ public:
     static float SkiaGetFloatRadiusValue(
         const Dimension& src, const Dimension& dest, const SizeF& size, LengthMode type);
 
-    static void PaintGrayScale(const SizeF& frameSize, SkCanvas* canvas, float grayscale);
-    static void PaintBrightness(const SizeF& frameSize, SkCanvas* canvas, float brightness);
-    static void PaintContrast(const SizeF& frameSize, SkCanvas* canvas, float contrast);
-    static void PaintColorBlend(const SizeF& frameSize, SkCanvas* canvas, const Color& colorBlend);
-    static void PaintSaturate(const SizeF& frameSize, SkCanvas* canvas, float saturate);
-    static void PaintSepia(const SizeF& frameSize, SkCanvas* canvas, float sepia);
-    static void PaintInvert(const SizeF& frameSize, SkCanvas* canvas, float invert);
-    static void PaintHueRotate(const SizeF& frameSize, SkCanvas* canvas, float hueRotate);
+    static void PaintGrayScale(const SkRRect& rRect, SkCanvas* canvas, float grayscale);
+    static void PaintBrightness(const SkRRect& rRect, SkCanvas* canvas, float brightness);
+    static void PaintContrast(const SkRRect& rRect, SkCanvas* canvas, float contrast);
+    static void PaintColorBlend(
+        const SkRRect& rRect, SkCanvas* canvas, const Color& colorBlend);
+    static void PaintSaturate(const SkRRect& rRect, SkCanvas* canvas, float saturate);
+    static void PaintSepia(const SkRRect& rRect, SkCanvas* canvas, float sepia);
+    static void PaintInvert(const SkRRect& rRect, SkCanvas* canvas, float invert);
+    static void PaintHueRotate(const SkRRect& rRect, SkCanvas* canvas, float hueRotate);
     static SkPaint CreateMaskSkPaint(const RefPtr<BasicShape>& basicShape);
     static RSImage CreateBorderImageGradient(const NG::Gradient& gradients, const SizeF& paintSize);
 };

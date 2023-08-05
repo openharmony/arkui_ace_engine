@@ -57,27 +57,20 @@ void JSCircle::Create(const JSCallbackInfo& info)
 
 void JSCircle::ConstructorCallback(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("The arg is not Object");
-        return;
-    }
     auto circle = AceType::MakeRefPtr<Circle>();
-    JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> width = params->GetProperty("width");
-    CalcDimension dimWidth;
-    if (ParseJsDimensionVp(width, dimWidth)) {
-        circle->SetWidth(dimWidth);
+    if (info.Length() == 1 && info[0]->IsObject()) {
+        JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> width = params->GetProperty("width");
+        CalcDimension dimWidth;
+        if (ParseJsDimensionVp(width, dimWidth)) {
+            circle->SetWidth(dimWidth);
+        }
+        JSRef<JSVal> height = params->GetProperty("height");
+        CalcDimension dimHeight;
+        if (ParseJsDimensionVp(height, dimHeight)) {
+            circle->SetHeight(dimHeight);
+        }
     }
-    JSRef<JSVal> height = params->GetProperty("height");
-    CalcDimension dimHeight;
-    if (ParseJsDimensionVp(height, dimHeight)) {
-        circle->SetHeight(dimHeight);
-    }
-
     auto jsCircle = AceType::MakeRefPtr<JSCircle>();
     jsCircle->SetBasicShape(circle);
     jsCircle->IncRefCount();

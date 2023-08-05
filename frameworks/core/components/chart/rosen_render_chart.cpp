@@ -209,11 +209,9 @@ void RosenRenderChart::PaintText(RSCanvas* canvas, const Rect& paintRegion, cons
         }
 #else
         if (text.GetPlacement() == Placement::TOP) {
-            paragraph->Paint(canvas->GetCanvasData()->ExportSkCanvas(), pointPosition.GetX() - textSize.Width() / 2,
-                pointPosition.GetY() - textSize.Height() - TEXT_PADDING);
+            LOGE("Drawing is not supported");
         } else if (text.GetPlacement() == Placement::BOTTOM) {
-            paragraph->Paint(canvas->GetCanvasData()->ExportSkCanvas(),
-                pointPosition.GetX() - textSize.Width() / 2, pointPosition.GetY() + TEXT_PADDING);
+            LOGE("Drawing is not supported");
         }
 #endif
     }
@@ -626,7 +624,7 @@ void RosenRenderChart::PaintLineEdge(RSCanvas* canvas, RSPath& path,
             RSPoint(end, 0.0f) };
         std::vector<RSColorQuad> colors = { segmentInfo.GetSegmentColor().GetValue(),
             targetColor_.GetValue() };
-        std::vector<RSscalar> pos = { 0.0f };
+        std::vector<RSScalar> pos = { 0.0f };
         pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
             points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
     }
@@ -635,7 +633,7 @@ void RosenRenderChart::PaintLineEdge(RSCanvas* canvas, RSPath& path,
             RSPoint(endGradientPoint_.GetX(), 0.0f) };
         std::vector<RSColorQuad> colors = { segmentInfo.GetSegmentColor().ChangeAlpha(0).GetValue(),
             segmentInfo.GetSegmentColor().GetValue() };
-        std::vector<RSscalar> pos = { 0.0f };
+        std::vector<RSScalar> pos = { 0.0f };
         pen.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
             points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
     }
@@ -695,7 +693,7 @@ std::shared_ptr<RSShaderEffect> RosenRenderChart::CreateFillGradientShader(
     std::vector<RSPoint> points = { RSPoint(paintRect.GetOffset().GetX(), top),
         RSPoint(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() + paintRect.Height()) };
     std::vector<RSColorQuad> colors = { fillColor.GetValue(), fillColor.ChangeAlpha(0).GetValue() };
-    std::vector<RSscalar> pos = { 0.0f };
+    std::vector<RSScalar> pos = { 0.0f };
 
     return RSShaderEffect::CreateLinearGradient(
         points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP);

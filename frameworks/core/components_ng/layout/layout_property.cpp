@@ -25,6 +25,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -107,7 +108,6 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
-    ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
 
     if (padding_) {
@@ -182,15 +182,23 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->flexItemProperty_) {
         flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
     }
+    if (layoutProperty->safeAreaInsets_) {
+        safeAreaInsets_ = std::make_unique<SafeAreaInsets>(*layoutProperty->safeAreaInsets_);
+    }
+    if (layoutProperty->safeAreaExpandOpts_) {
+        safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>(*layoutProperty->safeAreaExpandOpts_);
+    }
     geometryTransition_ = layoutProperty->geometryTransition_;
     propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
-    safeArea_ = layoutProperty->safeArea_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     propIsBindOverlay_ = layoutProperty->propIsBindOverlay_;
 #endif // ENABLE_DRAG_FRAMEWORK
+    isOverlayNode_ = layoutProperty->isOverlayNode_;
+    overlayOffsetX_ = layoutProperty->overlayOffsetX_;
+    overlayOffsetY_ = layoutProperty->overlayOffsetY_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
@@ -214,6 +222,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     layoutConstraint_ = parentConstraint;
     if (margin_) {
         // TODO: add margin is negative case.
+        marginResult_.reset();
         auto margin = CreateMargin();
         MinusPaddingToSize(margin, layoutConstraint_->maxSize);
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
@@ -224,18 +233,18 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
             layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
             LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
                 calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
             layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
-                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), layoutConstraint_->scaleProperty,
-                    layoutConstraint_->percentReference));
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
+                    parentConstraint.percentReference));
         }
     }
 
@@ -347,6 +356,9 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
     }
 
     RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame();
+    if (!parent) {
+        return false;
+    }
     auto parentOffset = parent->GetOffsetRelativeToWindow();
     auto globalOffset = gridProperty_->GetContainerPosition();
 
@@ -413,12 +425,12 @@ void LayoutProperty::UpdateContentConstraint()
     if (padding_) {
         auto paddingF = ConvertToPaddingPropertyF(
             *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPaddingOnBothSize(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
             *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPaddingOnBothSize(
+        contentConstraint_->MinusPadding(
             borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
     }
 }
@@ -486,13 +498,18 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 
 MarginPropertyF LayoutProperty::CreateMargin()
 {
-    if (layoutConstraint_.has_value()) {
-        return ConvertToMarginPropertyF(
-            margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    CHECK_NULL_RETURN_NOLOG(margin_, MarginPropertyF());
+    if (!marginResult_.has_value() && margin_) {
+        if (layoutConstraint_.has_value()) {
+            marginResult_ = ConvertToMarginPropertyF(
+                margin_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+        } else {
+            // root node
+            marginResult_ = ConvertToMarginPropertyF(
+                margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+        }
     }
-
-    return ConvertToMarginPropertyF(
-        margin_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    return marginResult_.value_or(MarginPropertyF());
 }
 
 void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)
@@ -516,16 +533,17 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
     if (allowTransition) {
-        if (preVisible == VisibleType::VISIBLE && visible == VisibleType::INVISIBLE) {
+        if (preVisible == VisibleType::VISIBLE && (visible == VisibleType::INVISIBLE || visible == VisibleType::GONE)) {
             // only trigger transition when visibility changes between visible and invisible.
             host->GetRenderContext()->OnNodeDisappear(false);
-        } else if (preVisible == VisibleType::INVISIBLE && visible == VisibleType::VISIBLE) {
+        } else if ((preVisible == VisibleType::INVISIBLE || preVisible == VisibleType::GONE) &&
+                   visible == VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeAppear(false);
         }
     }
 
     auto parent = host->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID(parent);
+    CHECK_NULL_VOID_NOLOG(parent);
     // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
     if (preVisible != VisibleType::GONE && visible != VisibleType::GONE) {
         parent->MarkNeedSyncRenderTree();
@@ -537,4 +555,439 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void LayoutProperty::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
+{
+    if (!safeAreaExpandOpts_) {
+        safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>();
+    }
+    if (*safeAreaExpandOpts_ != opts) {
+        *safeAreaExpandOpts_ = opts;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateSafeAreaInsets(const SafeAreaInsets& safeArea)
+{
+    if (!safeAreaInsets_) {
+        safeAreaInsets_ = std::make_unique<SafeAreaInsets>();
+    }
+    if (*safeAreaInsets_ != safeArea) {
+        *safeAreaInsets_ = safeArea;
+    }
+}
+
+bool LayoutProperty::HasFixedWidth() const
+{
+    CHECK_NULL_RETURN_NOLOG(calcLayoutConstraint_, false);
+    auto&& idealSize = calcLayoutConstraint_->selfIdealSize;
+    return (idealSize && idealSize->WidthFixed());
+}
+
+bool LayoutProperty::HasFixedHeight() const
+{
+    CHECK_NULL_RETURN_NOLOG(calcLayoutConstraint_, false);
+    auto&& idealSize = calcLayoutConstraint_->selfIdealSize;
+    return (idealSize && idealSize->HeightFixed());
+}
+
+bool LayoutProperty::HasAspectRatio() const
+{
+    if (!magicItemProperty_) {
+        return false;
+    }
+    return magicItemProperty_->HasAspectRatio();
+}
+
+float LayoutProperty::GetAspectRatio() const
+{
+    if (magicItemProperty_ && magicItemProperty_->HasAspectRatio()) {
+        return magicItemProperty_->GetAspectRatioValue();
+    }
+    return 0.0f;
+}
+
+void LayoutProperty::UpdateAspectRatio(float ratio)
+{
+    if (!magicItemProperty_) {
+        magicItemProperty_ = std::make_unique<MagicItemProperty>();
+    }
+    if (magicItemProperty_->UpdateAspectRatio(ratio)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto geometryTransitionOld = GetGeometryTransition();
+    auto geometryTransitionNew =
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_, followWithoutTransition);
+    CHECK_NULL_VOID_NOLOG(geometryTransitionOld != geometryTransitionNew);
+    if (geometryTransitionOld) {
+        geometryTransitionOld->OnFollowWithoutTransition();
+        // unregister node from old geometry transition
+        geometryTransitionOld->Update(host_, nullptr);
+        // register node into new geometry transition
+        if (geometryTransitionNew) {
+            geometryTransitionNew->Update(nullptr, host_);
+        }
+    } else if (geometryTransitionNew) {
+        geometryTransitionNew->Build(host_, true);
+    }
+    geometryTransition_ = geometryTransitionNew;
+
+    LOGD("GeometryTransition: node: %{public}d update id, old id: %{public}s, new id: %{public}s", host->GetId(),
+        geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
+        geometryTransitionNew ? id.c_str() : "empty");
+    ElementRegister::GetInstance()->DumpGeometryTransition();
+}
+
+void LayoutProperty::UpdateLayoutDirection(TextDirection value)
+{
+    if (layoutDirection_ == value) {
+        return;
+    }
+    layoutDirection_ = value;
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+}
+
+void LayoutProperty::UpdateLayoutWeight(float value)
+{
+    if (!magicItemProperty_) {
+        magicItemProperty_ = std::make_unique<MagicItemProperty>();
+    }
+    if (magicItemProperty_->UpdateLayoutWeight(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateBorderWidth(const BorderWidthProperty& value)
+{
+    if (!borderWidth_) {
+        borderWidth_ = std::make_unique<BorderWidthProperty>();
+    }
+    if (borderWidth_->UpdateWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateAlignment(Alignment value)
+{
+    if (!positionProperty_) {
+        positionProperty_ = std::make_unique<PositionProperty>();
+    }
+    if (positionProperty_->UpdateAlignment(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
+    }
+}
+
+void LayoutProperty::UpdateMargin(const MarginProperty& value)
+{
+    if (!margin_) {
+        margin_ = std::make_unique<MarginProperty>();
+    }
+    if (margin_->UpdateWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdatePadding(const PaddingProperty& value)
+{
+    if (!padding_) {
+        padding_ = std::make_unique<PaddingProperty>();
+    }
+    if (padding_->UpdateWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateUserDefinedIdealSize(const CalcSize& value)
+{
+    if (!calcLayoutConstraint_) {
+        calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    }
+    if (calcLayoutConstraint_->UpdateSelfIdealSizeWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight)
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    if (calcLayoutConstraint_->ClearSelfIdealSize(clearWidth, clearHeight)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateCalcMinSize(const CalcSize& value)
+{
+    if (!calcLayoutConstraint_) {
+        calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    }
+    if (calcLayoutConstraint_->UpdateMinSizeWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateCalcMaxSize(const CalcSize& value)
+{
+    if (!calcLayoutConstraint_) {
+        calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    }
+    if (calcLayoutConstraint_->UpdateMaxSizeWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateMarginSelfIdealSize(const SizeF& value)
+{
+    if (!layoutConstraint_.has_value()) {
+        layoutConstraint_ = LayoutConstraintF();
+    }
+    if (layoutConstraint_->UpdateSelfMarginSizeWithCheck(OptionalSizeF(value))) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::ResetCalcMinSize()
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    if (calcLayoutConstraint_->minSize.has_value()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    calcLayoutConstraint_->minSize.reset();
+}
+
+void LayoutProperty::ResetCalcMaxSize()
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    if (calcLayoutConstraint_->maxSize.has_value()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    calcLayoutConstraint_->maxSize.reset();
+}
+
+void LayoutProperty::ResetCalcMinSize(bool resetWidth)
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    CHECK_NULL_VOID(calcLayoutConstraint_->minSize.has_value());
+    bool resetSizeHasValue = resetWidth ? calcLayoutConstraint_->minSize.value().Width().has_value()
+                                        : calcLayoutConstraint_->minSize.value().Height().has_value();
+    CHECK_NULL_VOID(resetSizeHasValue);
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    if (resetWidth) {
+        calcLayoutConstraint_->minSize.value().SetWidth(std::nullopt);
+    } else {
+        calcLayoutConstraint_->minSize.value().SetHeight(std::nullopt);
+    }
+}
+
+void LayoutProperty::ResetCalcMaxSize(bool resetWidth)
+{
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    CHECK_NULL_VOID(calcLayoutConstraint_->maxSize.has_value());
+    bool resetSizeHasValue = resetWidth ? calcLayoutConstraint_->maxSize.value().Width().has_value()
+                                        : calcLayoutConstraint_->maxSize.value().Height().has_value();
+    CHECK_NULL_VOID(resetSizeHasValue);
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    if (resetWidth) {
+        calcLayoutConstraint_->maxSize.value().SetWidth(std::nullopt);
+    } else {
+        calcLayoutConstraint_->maxSize.value().SetHeight(std::nullopt);
+    }
+}
+
+void LayoutProperty::UpdateFlexGrow(float flexGrow)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (flexItemProperty_->UpdateFlexGrow(flexGrow)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::ResetFlexGrow()
+{
+    if (!flexItemProperty_) {
+        return;
+    }
+    if (flexItemProperty_->HasFlexGrow()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    flexItemProperty_->ResetFlexGrow();
+}
+
+void LayoutProperty::UpdateFlexShrink(float flexShrink)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (flexItemProperty_->UpdateFlexShrink(flexShrink)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::ResetFlexShrink()
+{
+    if (!flexItemProperty_) {
+        return;
+    }
+    if (flexItemProperty_->HasFlexShrink()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    flexItemProperty_->ResetFlexShrink();
+}
+
+void LayoutProperty::UpdateFlexBasis(const Dimension& flexBasis)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (flexItemProperty_->UpdateFlexBasis(flexBasis)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateAlignSelf(const FlexAlign& flexAlign)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (flexItemProperty_->UpdateAlignSelf(flexAlign)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::ResetAlignSelf()
+{
+    if (!flexItemProperty_) {
+        return;
+    }
+    if (flexItemProperty_->HasAlignSelf()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    flexItemProperty_->ResetAlignSelf();
+}
+
+void LayoutProperty::UpdateAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (flexItemProperty_->UpdateAlignRules(alignRules)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (flexItemProperty_->UpdateDisplayIndex(displayIndex)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+LayoutConstraintF LayoutProperty::CreateContentConstraint() const
+{
+    auto layoutConstraint = contentConstraint_.value_or(LayoutConstraintF());
+    layoutConstraint.maxSize.UpdateSizeWhenSmaller(layoutConstraint.selfIdealSize.ConvertToSizeT());
+    return layoutConstraint;
+}
+
+void LayoutProperty::UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    layoutConstraint_ = layoutProperty->layoutConstraint_;
+    contentConstraint_ = layoutProperty->contentConstraint_;
+    gridProperty_ =
+        (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
+}
+
+void LayoutProperty::UpdateVisibility(const VisibleType& value, bool allowTransition)
+{
+    if (propVisibility_.has_value()) {
+        if (NearEqual(propVisibility_.value(), value)) {
+            LOGD("the Visibility is same, just ignore");
+            return;
+        }
+    }
+    OnVisibilityUpdate(value, allowTransition);
+}
+
+void LayoutProperty::SetOverlayOffset(
+    const std::optional<Dimension>& overlayOffsetX, const std::optional<Dimension>& overlayOffsetY)
+{
+    bool xChanged = true;
+    bool yChanged = false;
+    if ((!overlayOffsetX.has_value() && overlayOffsetX_.Value() == 0) ||
+        (overlayOffsetX.has_value() && overlayOffsetX.value() == overlayOffsetX_)) {
+        xChanged = false;
+    }
+
+    if ((!overlayOffsetY.has_value() && overlayOffsetY_.Value() == 0) ||
+        (overlayOffsetY.has_value() && overlayOffsetY.value() == overlayOffsetY_)) {
+        yChanged = false;
+    }
+
+    if (!xChanged && !yChanged) {
+        return;
+    }
+
+    if (overlayOffsetX.has_value()) {
+        overlayOffsetX_ = overlayOffsetX.value();
+    } else {
+        overlayOffsetX_.Reset();
+    }
+
+    if (overlayOffsetY.has_value()) {
+        overlayOffsetY_ = overlayOffsetY.value();
+    } else {
+        overlayOffsetY_.Reset();
+    }
+
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+}
+
+void LayoutProperty::GetOverlayOffset(Dimension& overlayOffsetX, Dimension& overlayOffsetY)
+{
+    overlayOffsetX = overlayOffsetX_;
+    overlayOffsetY = overlayOffsetY_;
+}
+
+void LayoutProperty::UpdateAllGeometryTransition(const RefPtr<UINode>& parent)
+{
+    std::queue<RefPtr<UINode>> q;
+    q.push(parent);
+    while (!q.empty()) {
+        auto node = q.front();
+        q.pop();
+        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        if (frameNode) {
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            if (layoutProperty && layoutProperty->GetGeometryTransition()) {
+                auto geometryTransitionId = layoutProperty->GetGeometryTransition()->GetId();
+                layoutProperty->UpdateGeometryTransition("");
+                layoutProperty->UpdateGeometryTransition(geometryTransitionId);
+            }
+        }
+        const auto& children = node->GetChildren();
+        for (const auto& child : children) {
+            q.push(child);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

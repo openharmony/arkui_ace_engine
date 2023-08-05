@@ -144,23 +144,22 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
 
     Offset position;
-    Dimension indicatorPositionDefault = 0.0_vp;
-    if (left.has_value() && !NearEqual(left->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
-        auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(left->Value()));
+    if (left.has_value() && !NearZero(left.value().Value())) {
+        auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, left.value());
         position.SetX(leftValue + swiperPaddingLeft);
-    } else if (right.has_value() && !NearEqual(right->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
-        auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(right->Value()));
+    } else if (right.has_value() && !NearZero(right.value().Value())) {
+        auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, right.value());
         position.SetX(swiperWidth - indicatorWidth_ - rightValue - swiperPaddingRight);
     } else {
         position.SetX(direction == Axis::HORIZONTAL
                           ? (swiperWidth - swiperPaddingRight + swiperPaddingLeft - indicatorWidth_) * 0.5f
                           : swiperWidth - indicatorWidth_ - swiperPaddingRight);
     }
-    if (top.has_value() && !NearEqual(top->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
-        auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(top->Value()));
+    if (top.has_value() && !NearZero(top.value().Value())) {
+        auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, top.value());
         position.SetY(topValue + swiperPaddingTop);
-    } else if (bottom.has_value() && !NearEqual(bottom->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
-        auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(bottom->Value()));
+    } else if (bottom.has_value() && !NearZero(bottom.value().Value())) {
+        auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, bottom.value());
         position.SetY(swiperHeight - indicatorHeight_ - bottomValue - swiperPaddingBottom);
     } else {
         if (direction == Axis::HORIZONTAL) {

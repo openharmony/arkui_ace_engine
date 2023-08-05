@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 
+#include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 
 namespace OHOS::Ace::NG {
@@ -26,6 +27,15 @@ namespace OHOS::Ace::NG {
 enum class SplitType {
     ROW_SPLIT,
     COLUMN_SPLIT,
+};
+
+struct ItemDivider final {
+    Dimension startMargin = 0.0_vp;
+    Dimension endMargin = 0.0_vp;
+    bool operator==(const ItemDivider& itemDivider) const
+    {
+        return (startMargin == itemDivider.startMargin) && (endMargin == itemDivider.endMargin);
+    }
 };
 
 } // namespace OHOS::Ace::NG
@@ -39,6 +49,7 @@ public:
 
     virtual void Create(NG::SplitType splitType) = 0;
     virtual void SetResizeable(NG::SplitType splitType, bool resizeable) = 0;
+    virtual void SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider) = 0;
 
 private:
     static std::unique_ptr<LinearSplitModel> instance_;

@@ -32,6 +32,7 @@ public:
     ~SwiperArrowLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_SWIPER_ARROW_LAYOUT_ALGORITHM_H

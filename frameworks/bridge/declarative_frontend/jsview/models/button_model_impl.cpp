@@ -400,4 +400,14 @@ void ButtonModelImpl::SetDefaultAttributes(const RefPtr<ButtonComponent>& button
     buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(buttonTheme->GetClickedColor()));
     buttonComponent->SetHoverColor(buttonTheme->GetHoverColor());
 }
+
+void ButtonModelImpl::SetRemoteMessage(RemoteCallback&& remoteCallback)
+{
+    EventMarker remoteMessageEventId(std::move(remoteCallback));
+    auto stack = ViewStackProcessor::GetInstance();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (buttonComponent) {
+        buttonComponent->SetRemoteMessageEventId(remoteMessageEventId);
+    }
+}
 } // namespace OHOS::Ace::Framework

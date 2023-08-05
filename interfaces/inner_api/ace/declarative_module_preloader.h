@@ -25,12 +25,13 @@ class NativeEngine;
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW DeclarativeModulePreloader {
+class ACE_FORCE_EXPORT DeclarativeModulePreloader {
 public:
     static void Preload(NativeEngine& runtime);
 
     // ArkTsCard start
-    static void PreloadCard(NativeEngine& runtime);
+    static void PreloadCard(NativeEngine& runtime, const std::string &bundleName);
+    static void ReloadCard(NativeEngine& runtime, const std::string &bundleName); // For card upgrade condition
     // ArkTsCard end
 };
 

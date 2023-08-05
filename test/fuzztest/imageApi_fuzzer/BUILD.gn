@@ -35,8 +35,6 @@ ohos_fuzztest("ImageApiFuzzTest") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$cjson_root:cjson",
-
-    #    "//third_party/googletest:gtest_main",
   ]
   sources = [
     # base
@@ -55,8 +53,6 @@ ohos_fuzztest("ImageApiFuzzTest") {
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
-
-    #"$ace_root/frameworks/core/components/theme/theme_manager.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
 
@@ -66,6 +62,7 @@ ohos_fuzztest("ImageApiFuzzTest") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -84,30 +81,18 @@ ohos_fuzztest("ImageApiFuzzTest") {
     #"theme_constants_test.cpp",
     "$ace_root/adapter/ohos/osal/frame_trace_adapter_fake_impl.cpp",
 
-    # mock
-    #"$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
-
     #fuzz
     "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
     "$ace_root/adapter/ohos/osal/system_properties.cpp",
-
-    #"$ace_root/frameworks/base/resource/ace_res_config.cpp",
-    #"$ace_root/frameworks/base/resource/ace_res_key_parser.cpp",
-    "$ace_root/frameworks/core/common/flutter/flutter_asset_manager.cpp",
-
-    #"$ace_root/frameworks/base/log/ace_trace.cpp",
-    "$ace_root/frameworks/base/thread/background_task_executor.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
-
-    #"$ace_root/frameworks/base/resource/internal_resource.cpp",
     "$ace_root/frameworks/base/log/ace_tracker.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
+    "$ace_root/frameworks/base/thread/background_task_executor.cpp",
+    "$ace_root/frameworks/core/common/flutter/flutter_asset_manager.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
     "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
     "$ace_root/frameworks/core/image/image_compressor.cpp",
-
-    #"$ace_root/frameworks/core/image/image_loader.cpp",
-    "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
     "$ace_root/frameworks/core/image/image_object.cpp",
     "$ace_root/frameworks/core/image/image_provider.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
@@ -128,14 +113,15 @@ ohos_fuzztest("ImageApiFuzzTest") {
     ]
   }
 
-  configs = [
-    #    ":config_theme_manager_test",
-    "$ace_root:ace_test_config",
-  ]
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 
   if (is_ohos_standard_system) {
     external_deps = [
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "init:libbegetutil",
     ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
@@ -168,6 +154,7 @@ ohos_fuzztest("ImageApiFuzzTest") {
     "//third_party/flutter/engine",
     "//third_party",
     "//commonlibrary/c_utils/base/include",
+    "$root_out_dir/arkui/framework",
   ]
 }
 

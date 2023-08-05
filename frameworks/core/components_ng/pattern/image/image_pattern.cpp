@@ -17,24 +17,19 @@
 
 #include <array>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/image/image_theme.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-#include "image.h"
-#include "system_defined_pixelmap.h"
-#include "unified_data.h"
-#include "unified_record.h"
-
 #include "core/common/ace_engine_ext.h"
+#include "core/common/udmf/udmf_client.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -70,7 +65,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        LOGI("Image Load Success %{private}s", sourceInfo.ToString().c_str());
+        LOGI("Image Load Success %{public}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
 }
@@ -92,20 +87,26 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     };
 }
 
-void ImagePattern::PrepareAnimation()
+void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
 {
-    if (image_->IsStatic()) {
+    if (image->IsStatic()) {
         return;
     }
-    SetRedrawCallback();
+    SetRedrawCallback(image);
     RegisterVisibleAreaChange();
+    auto layoutProps = GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    // pause animation if prop is initially set to invisible
+    if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        image->ControlAnimation(false);
+    }
 }
 
-void ImagePattern::SetRedrawCallback()
+void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 {
-    CHECK_NULL_VOID_NOLOG(image_);
+    CHECK_NULL_VOID_NOLOG(image);
     // set animation flush function for svg / gif
-    image_->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+    image->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkNeedRenderOnly();
@@ -129,25 +130,55 @@ void ImagePattern::RegisterVisibleAreaChange()
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 }
 
+RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode)
+{
+    RectF paintSize;
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, paintSize);
+    ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+    bool imageRepeatX = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_X;
+    bool imageRepeatY = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_Y;
+
+    if (loadingCtx_->GetSourceInfo().IsSvg()) {
+        const float invalidValue = -1;
+        paintSize.SetWidth(dstRect_.IsValid() ? dstRect_.Width() : invalidValue);
+        paintSize.SetHeight(dstRect_.IsValid() ? dstRect_.Height() : invalidValue);
+        paintSize.SetLeft(dstRect_.IsValid() ? dstRect_.GetX() + geometryNode->GetContentOffset().GetX() :
+            invalidValue);
+        paintSize.SetTop(dstRect_.IsValid() ? dstRect_.GetY() + geometryNode->GetContentOffset().GetY() :
+            invalidValue);
+    } else {
+        paintSize.SetWidth(imageRepeatX ? geometryNode->GetContentSize().Width() : dstRect_.Width());
+        paintSize.SetHeight(imageRepeatY ? geometryNode->GetContentSize().Height() : dstRect_.Height());
+        paintSize.SetLeft((imageRepeatX ? 0 : dstRect_.GetX()) + geometryNode->GetContentOffset().GetX());
+        paintSize.SetTop((imageRepeatY ? 0 : dstRect_.GetY()) + geometryNode->GetContentOffset().GetY());
+    }
+    return paintSize;
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto imageEventHub = GetEventHub<ImageEventHub>();
-    CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
-        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 1);
-    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
-    // update src data
+
     image_ = loadingCtx_->MoveCanvasImage();
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
 
+    RectF paintRect = CalcImageContentPaintSize(geometryNode);
+    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(),
+        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
+        geometryNode->GetFrameSize().Height(), 1, paintRect.Width(), paintRect.Height(),
+        paintRect.GetX(), paintRect.GetY());
+    auto eventHub = GetEventHub<ImageEventHub>();
+    if (eventHub) {
+        eventHub->FireCompleteEvent(event);
+    }
+
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
-    PrepareAnimation();
+    PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
     }
@@ -156,8 +187,7 @@ void ImagePattern::OnImageLoadSuccess()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    // TODO: only do paint task when the pattern is active
-    // figure out why here is always inactive
+
     host->MarkNeedRenderOnly();
 }
 
@@ -169,13 +199,13 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(geometryNode);
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
+    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(),
         loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 0);
-    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
-    if (!host->IsActive()) {
-        return;
-    }
+        geometryNode->GetFrameSize().Height(), 0, geometryNode->GetContentSize().Width(),
+        geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
+        geometryNode->GetContentOffset().GetY());
+    imageEventHub->FireCompleteEvent(event);
+
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -220,6 +250,10 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     if (altImage_ && altDstRect_ && altSrcRect_) {
         return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
     }
+    CreateObscuredImage();
+    if (obscuredImage_) {
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_);
+    }
     return nullptr;
 }
 
@@ -231,6 +265,24 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     return image_;
 }
 
+void ImagePattern::CreateObscuredImage()
+{
+    auto props = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto layoutConstraint = props->GetLayoutConstraint();
+    CHECK_NULL_VOID_NOLOG(layoutConstraint);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sourceInfo = props->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    auto reasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
+    if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
+        if (!obscuredImage_) {
+            obscuredImage_ = MakeRefPtr<ObscuredImage>();
+            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo.IsSvg());
+        }
+    }
+}
+
 void ImagePattern::LoadImageDataIfNeed()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
@@ -239,13 +291,8 @@ void ImagePattern::LoadImageDataIfNeed()
     CHECK_NULL_VOID(imageRenderProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
-    std::optional<Color> svgFillColorOpt = std::nullopt;
-    if (src.IsSvg()) {
-        svgFillColorOpt = src.GetFillColor();
-    }
 
-    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src ||
-        (src.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
 
         loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
@@ -254,15 +301,9 @@ void ImagePattern::LoadImageDataIfNeed()
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        std::optional<Color> altSvgFillColorOpt = std::nullopt;
-        if (altImageSourceInfo.IsSvg()) {
-            altSvgFillColorOpt = imageRenderProperty->GetSvgFillColor() ? imageRenderProperty->GetSvgFillColor()
-                                                                        : altImageSourceInfo.GetFillColor();
-        }
         LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
         if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
-            (altLoadingCtx_ && altImageSourceInfo.IsSvg() && altSvgFillColorOpt.has_value() &&
-                altLoadingCtx_->GetSvgFillColor() != altSvgFillColorOpt)) {
+            (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
             altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, std::move(altLoadNotifier));
             altLoadingCtx_->LoadImageData();
         }
@@ -275,23 +316,35 @@ void ImagePattern::OnModifyDone()
     LoadImageDataIfNeed();
 
     if (copyOption_ != CopyOptions::None) {
-        InitCopy();
-    } else {
-        // remove long press and mouse events
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-
-        auto gestureHub = host->GetOrCreateGestureEventHub();
-        gestureHub->SetLongPressEvent(nullptr);
-        longPressEvent_ = nullptr;
-
-        gestureHub->RemoveClickEvent(clickEvent_);
-        clickEvent_ = nullptr;
-
-        auto inputHub = host->GetOrCreateInputEventHub();
-        inputHub->RemoveOnMouseEvent(mouseEvent_);
-        mouseEvent_ = nullptr;
+        bool hasObscured = false;
+        if (host->GetRenderContext()->GetObscured().has_value()) {
+            auto obscuredReasons = host->GetRenderContext()->GetObscured().value();
+            hasObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+                [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+        }
+        if (!hasObscured) {
+            InitCopy();
+            return;
+        }
     }
+
+    CloseSelectOverlay();
+    // remove long press and mouse events
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    gestureHub->SetLongPressEvent(nullptr);
+    longPressEvent_ = nullptr;
+
+    gestureHub->RemoveClickEvent(clickEvent_);
+    clickEvent_ = nullptr;
+
+    auto inputHub = host->GetOrCreateInputEventHub();
+    inputHub->RemoveOnMouseEvent(mouseEvent_);
+    mouseEvent_ = nullptr;
 }
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
@@ -332,22 +385,25 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->altLoadingCtx_);
-        auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
-        auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        if (currentAltSourceInfo != sourceInfo) {
+        auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
+        if (currentAltSrc != sourceInfo) {
             LOGW("alt image sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: "
                  "%{public}s",
-                currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
+                currentAltSrc.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         pattern->altImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
             pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
+
+        pattern->PrepareAnimation(pattern->altImage_);
+
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     };
 }
 
@@ -414,16 +470,21 @@ void ImagePattern::OnVisibleChange(bool visible)
     if (!visible) {
         CloseSelectOverlay();
     }
-    CHECK_NULL_VOID_NOLOG(image_);
     // control svg / gif animation
-    image_->ControlAnimation(visible);
+    if (image_) {
+        image_->ControlAnimation(visible);
+    } else if (altImage_) {
+        altImage_->ControlAnimation(visible);
+    }
 }
 
 void ImagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(false);
+    auto renderCtx = host->GetRenderContext();
+    renderCtx->SetClipToBounds(false);
+    renderCtx->SetUsingContentRectForRenderFrame(true);
 
     // register image frame node to pipeline context to receive memory level notification and window state change
     // notification
@@ -431,6 +492,16 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    // set draggable for framenode
+    auto theme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    auto draggable = theme->GetDraggable();
+    if (draggable && !host->IsDraggable()) {
+        auto gestureHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    host->SetDraggable(draggable);
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -464,6 +535,14 @@ void ImagePattern::EnableDrag()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(std::move(dragStart));
+}
+
+bool ImagePattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto globalRect = host->GetTransformRectRelativeToWindow();
+    return globalRect.IsInRegion(PointF { globalOffset.GetX(), globalOffset.GetY() });
 }
 
 void ImagePattern::BeforeCreatePaintWrapper()
@@ -530,12 +609,19 @@ void ImagePattern::OpenSelectOverlay()
         pattern->HandleCopy();
         pattern->CloseSelectOverlay();
     };
+    info.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
+        if (closedByGlobalEvent) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CloseSelectOverlay();
+        }
+    };
 
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     LOGI("Opening select overlay");
-    selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info);
+    selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info, WeakClaim(this));
 
     // paint selected mask effect
     host->MarkNeedRenderOnly();
@@ -543,16 +629,18 @@ void ImagePattern::OpenSelectOverlay()
 
 void ImagePattern::CloseSelectOverlay()
 {
-    if (selectOverlay_ && !selectOverlay_->IsClosed()) {
+    if (!selectOverlay_) {
+        return;
+    }
+    if (!selectOverlay_->IsClosed()) {
         LOGI("closing select overlay");
         selectOverlay_->Close();
-        selectOverlay_ = nullptr;
-
-        // remove selected mask effect
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkNeedRenderOnly();
     }
+    selectOverlay_ = nullptr;
+    // remove selected mask effect
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::HandleCopy()
@@ -616,7 +704,7 @@ void ImagePattern::DumpInfo()
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
 #ifdef ENABLE_DRAG_FRAMEWORK
-    std::shared_ptr<UDMF::UnifiedRecord> record = nullptr;
+    RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     CHECK_NULL_VOID(loadingCtx_ && image_);
     if (loadingCtx_->GetSourceInfo().IsPixmap()) {
         auto pixelMap = image_->GetPixelMap();
@@ -625,13 +713,21 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         CHECK_NULL_VOID(pixels);
         int32_t length = pixelMap->GetByteCount();
         std::vector<uint8_t> data(pixels, pixels + length);
-        record = std::make_shared<UDMF::SystemDefinedPixelMap>(data);
+        UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data);
     } else {
-        record = std::make_shared<UDMF::Image>(loadingCtx_->GetSourceInfo().GetSrc());
+        UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }
-    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
-    unifiedData->AddRecord(record);
     event->SetData(unifiedData);
 #endif
+}
+
+void ImagePattern::OnLanguageConfigurationUpdate()
+{
+    CHECK_NULL_VOID_NOLOG(loadingCtx_);
+    auto&& src = loadingCtx_->GetSourceInfo();
+    // Resource image needs to reload when Language changes
+    if (src.GetSrcType() == SrcType::RESOURCE) {
+        loadingCtx_.Reset();
+    }
 }
 } // namespace OHOS::Ace::NG

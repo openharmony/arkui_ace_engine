@@ -46,6 +46,13 @@ public:
     JSNavigationStack() = default;
     ~JSNavigationStack() override = default;
 
+    void UpdateStackInfo(const RefPtr<NavigationStack>& newStack) override
+    {
+        auto newJsStack = AceType::DynamicCast<JSNavigationStack>(newStack);
+        if (newJsStack) {
+            SetDataSourceObj(newJsStack->GetDataSourceObj());
+        }
+    }
     void SetDataSourceObj(const JSRef<JSObject>& dataSourceObj);
     const JSRef<JSObject>& GetDataSourceObj();
     void SetNavDestBuilderFunc(const JSRef<JSFunc>& navDestBuilderFunc);
@@ -70,7 +77,7 @@ protected:
 private:
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
-    RefPtr<NG::CustomNode> BuildCustomNodeFromUINode(RefPtr<NG::UINode> node);
+    bool CheckNavDestinationNodeInUINode(RefPtr<NG::UINode> node);
 };
 } // namespace OHOS::Ace::Framework
 

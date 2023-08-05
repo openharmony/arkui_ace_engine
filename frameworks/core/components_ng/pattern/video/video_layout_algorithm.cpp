@@ -47,7 +47,6 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
     auto contentOffset = layoutWrapper->GetGeometryNode()->GetContentOffset();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Layout();
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             child->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
@@ -56,6 +55,7 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             child->GetGeometryNode()->SetMarginFrameOffset(
                 { contentOffset.GetX(), contentOffset.GetY() + contentSize.Height() - controlBarHeight });
         }
+        child->Layout();
     }
 }
 

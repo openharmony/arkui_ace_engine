@@ -21,14 +21,22 @@ namespace {
 constexpr int32_t SELECT_OVERLAY_ID = 143;
 } // namespace
 
-RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(const SelectOverlayInfo& info)
+RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
+    const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host, bool animation)
 {
     return MakeRefPtr<SelectOverlayProxy>(0);
 }
 
-void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy) {}
+void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy, bool animation) {}
 
-void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId) {}
+void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId, bool animation) {}
+
+void SelectOverlayManager::DestroySelectOverlay(bool animation) {}
+
+bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
+{
+    return true;
+}
 
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 {
@@ -43,4 +51,6 @@ RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t ove
     auto selectOverlayNode = DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
     return selectOverlayNode;
 }
+
+void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset) {}
 } // namespace OHOS::Ace::NG

@@ -19,8 +19,17 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr Dimension LISTITEM_MARGIN_PADDING = 12.0_vp;
+constexpr Dimension LISTITEM_LISTITEMGROUP_INTERVAL = 4.0_vp;
+constexpr Dimension LISTITEMGROUP_PADDING = 4.0_vp;
+constexpr Dimension LISTITEM_PADDING = 8.0_vp;
+constexpr double SELECTED_ALPHA = 0.1;
+} // namespace
 
 /**
  * ListItemTheme defines styles of list or grid item. ListItemTheme should be built
@@ -57,7 +66,40 @@ public:
             theme->itemSize_ = themeConstants->GetDimension(THEME_ITEM_SIZE);
             theme->paddingInPercent_ = themeConstants->GetDouble(THEME_ITEM_PADDING_IN_PERCENT);
             theme->groupImageSize_ = themeConstants->GetDimension(THEME_ITEM_GROUP_IMAGE_SIZE);
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
+        }
+
+    private:
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ListItemTheme>& theme) const
+        {
+            if (!themeStyle) {
+                return;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("list_item_pattern", nullptr);
+            if (!pattern) {
+                LOGE("Pattern of checkbox is null, please check!");
+                return;
+            }
+            theme->defaultColor_ = pattern->GetAttr<Color>("item_normal_color", Color::WHITE);
+            theme->itemDefaultColor_ = pattern->GetAttr<Color>("item_normal_color", Color::WHITE);
+            theme->defaultLeftMargin_ = pattern->GetAttr<Dimension>("item_margin_left", LISTITEM_MARGIN_PADDING);
+            theme->defaultRightMargin_ = pattern->GetAttr<Dimension>("item_margin_right", LISTITEM_MARGIN_PADDING);
+            theme->defaultPadding_ = Edge(LISTITEMGROUP_PADDING);
+            theme->borderRadiusValue_ = pattern->GetAttr<Dimension>("item_border_radius", 0.0_vp);
+            theme->defaultBorderRadius_.SetRadius(theme->borderRadiusValue_);
+            theme->itemBorderRadius_.SetRadius(theme->borderRadiusValue_ - LISTITEM_LISTITEMGROUP_INTERVAL);
+            theme->itemLeftPadding_ = LISTITEM_PADDING;
+            theme->itemRightPadding_ = LISTITEM_PADDING;
+            theme->focusBorderColor_ = pattern->GetAttr<Color>("item_focus_color", Color::WHITE);
+            theme->hoverColor_ = pattern->GetAttr<Color>("item_hover_color", Color::WHITE);
+            theme->pressColor_ = pattern->GetAttr<Color>("item_press_color", Color::WHITE);
+            theme->disabledAlpha_ = pattern->GetAttr<double>("item_disabled_alpha", 0.0);
+            theme->selectedColor_ = pattern->GetAttr<Color>("item_select_color", Color::WHITE);
+            theme->selectedColorWithAlpha_ =
+                theme->selectedColor_.BlendOpacity(pattern->GetAttr<double>("item_selected_alpha", SELECTED_ALPHA));
+            theme->hoverAnimationDuration_ = 250;
+            theme->hoverToPressAnimationDuration_ = 100;
         }
     };
 
@@ -151,6 +193,82 @@ public:
     {
         return swipeSpringDamping_;
     }
+    const Dimension& GetDeleteDistance() const
+    {
+        return deleteDistance_;
+    }
+    const Color& GetItemGroupDefaultColor() const
+    {
+        return defaultColor_;
+    }
+    const Color& GetItemDefaultColor() const
+    {
+        return itemDefaultColor_;
+    }
+    const Dimension& GetItemDefaultHeight() const
+    {
+        return defaultHeight_;
+    }
+    const NG::BorderRadiusProperty& GetItemGroupDefaultBorderRadius() const
+    {
+        return defaultBorderRadius_;
+    }
+    const NG::BorderRadiusProperty& GetItemDefaultBorderRadius() const
+    {
+        return itemBorderRadius_;
+    }
+    const Dimension& GetItemGroupDefaultLeftMargin() const
+    {
+        return defaultLeftMargin_;
+    }
+    const Dimension& GetItemGroupDefaultRightMargin() const
+    {
+        return defaultRightMargin_;
+    }
+    const Edge& GetItemGroupDefaultPadding() const
+    {
+        return defaultPadding_;
+    }
+    const Dimension& GetItemDefaultLeftPadding() const
+    {
+        return itemLeftPadding_;
+    }
+    const Dimension& GetItemDefaultRightPadding() const
+    {
+        return itemRightPadding_;
+    }
+    const Color& GetItemFocusBorderColor() const
+    {
+        return focusBorderColor_;
+    }
+    const Dimension& GetItemFocusBorderWidth() const
+    {
+        return focusBorderWidth_;
+    }
+    const Color& GetItemHoverColor() const
+    {
+        return hoverColor_;
+    }
+    const Color& GetItemPressColor() const
+    {
+        return pressColor_;
+    }
+    int32_t GetHoverAnimationDuration() const
+    {
+        return hoverAnimationDuration_;
+    }
+    int32_t GetHoverToPressAnimationDuration() const
+    {
+        return hoverToPressAnimationDuration_;
+    }
+    double GetItemDisabledAlpha() const
+    {
+        return disabledAlpha_;
+    }
+    const Color& GetItemSelectedColor() const
+    {
+        return selectedColorWithAlpha_;
+    }
 
 protected:
     ListItemTheme() = default;
@@ -178,6 +296,27 @@ private:
     double swipeSpringDamping_ = 30;
     Dimension itemSize_;
     Dimension groupImageSize_;
+    Dimension deleteDistance_ = 56.0_vp;
+    Color defaultColor_;
+    Color itemDefaultColor_;
+    Dimension defaultHeight_ = 48.0_vp;
+    NG::BorderRadiusProperty defaultBorderRadius_;
+    NG::BorderRadiusProperty itemBorderRadius_;
+    Dimension defaultLeftMargin_;
+    Dimension defaultRightMargin_;
+    Dimension itemLeftPadding_;
+    Dimension itemRightPadding_;
+    Edge defaultPadding_;
+    Color focusBorderColor_;
+    Dimension focusBorderWidth_ = 2.0_vp;
+    Color hoverColor_;
+    Color pressColor_;
+    int32_t hoverAnimationDuration_ = 0;
+    int32_t hoverToPressAnimationDuration_ = 0;
+    double disabledAlpha_ = 0.4;
+    Color selectedColor_;
+    Color selectedColorWithAlpha_;
+    Dimension borderRadiusValue_;
 };
 
 } // namespace OHOS::Ace

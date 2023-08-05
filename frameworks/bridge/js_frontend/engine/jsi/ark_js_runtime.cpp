@@ -108,15 +108,17 @@ bool ArkJSRuntime::StartDebugger()
     bool ret = false;
 #if !defined(PREVIEW)
     if (!libPath_.empty()) {
+    JSNApi::DebugOption debugOption = {libPath_.c_str(), isDebugMode_};
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ConnectServerManager::Get().AddInstance(instanceId_, language_);
-        ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
+        ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
 #elif defined(ANDROID_PLATFORM)
-        ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
+        ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
 #endif
     }
 #if defined(IOS_PLATFORM)
-    ret = JSNApi::StartDebugger(nullptr, vm_, isDebugMode_, instanceId_, debuggerPostTask_);
+    JSNApi::DebugOption debugOption = {nullptr, isDebugMode_};
+    ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
 #endif
 #endif
     return ret;
@@ -279,8 +281,7 @@ void ArkJSRuntime::HandleUncaughtException(
 
     Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
     if (!exception.IsEmpty() && !exception->IsHole() && errorCallback != nullptr) {
-        errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
-        return;
+        errorCallback("loading js file has crash or the uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
     }
 
     if (!exception.IsEmpty() && !exception->IsHole()) {

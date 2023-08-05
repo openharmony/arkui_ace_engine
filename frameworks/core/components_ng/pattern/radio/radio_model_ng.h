@@ -27,7 +27,7 @@ public:
     void SetOnChange(ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
-    void SetPadding(const NG::PaddingPropertyF& args) override;
+    void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
     void SetCheckedBackgroundColor(const Color& color) override;
     void SetUncheckedBorderColor(const Color& color) override;
     void SetIndicatorColor(const Color& color) override;

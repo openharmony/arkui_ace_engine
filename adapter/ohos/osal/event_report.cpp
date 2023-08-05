@@ -40,6 +40,29 @@ constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 constexpr char EVENT_NAME_JS_ERROR[] = "JS_ERROR";
 constexpr char STATISTIC_DURATION[] = "DURATION";
+constexpr char EVENT_KEY_STARTTIME[] = "STARTTIME";
+constexpr char EVENT_KEY_VERSION_CODE[] = "VERSION_CODE";
+constexpr char EVENT_KEY_VERSION_NAME[] = "VERSION_NAME";
+constexpr char EVENT_KEY_BUNDLE_NAME[] = "BUNDLE_NAME";
+constexpr char EVENT_KEY_ABILITY_NAME[] = "ABILITY_NAME";
+constexpr char EVENT_KEY_PAGE_URL[] = "PAGE_URL";
+constexpr char EVENT_KEY_JANK_STATS[] = "JANK_STATS";
+constexpr char EVENT_KEY_JANK_STATS_VER[] = "JANK_STATS_VER";
+constexpr char EVENT_KEY_APP_PID[] = "APP_PID";
+constexpr char EVENT_KEY_SCENE_ID[] = "SCENE_ID";
+constexpr char EVENT_KEY_INPUT_TIME[] = "INPUT_TIME";
+constexpr char EVENT_KEY_ANIMATION_START_LATENCY[] = "ANIMATION_START_LATENCY";
+constexpr char EVENT_KEY_ANIMATION_END_LATENCY[] = "ANIMATION_END_LATENCY";
+constexpr char EVENT_KEY_E2E_LATENCY[] = "E2E_LATENCY";
+constexpr char EVENT_KEY_UNIQUE_ID[] = "UNIQUE_ID";
+constexpr char EVENT_KEY_MODULE_NAME[] = "MODULE_NAME";
+constexpr char EVENT_KEY_DURITION[] = "DURITION";
+constexpr char EVENT_KEY_TOTAL_FRAMES[] = "TOTAL_FRAMES";
+constexpr char EVENT_KEY_TOTAL_MISSED_FRAMES[] = "TOTAL_MISSED_FRAMES";
+constexpr char EVENT_KEY_MAX_FRAMETIME[] = "MAX_FRAMETIME";
+constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
+constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
+constexpr char EVENT_KEY_NOTE[] = "NOTE";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
@@ -247,6 +270,27 @@ void EventReport::ANRShowDialog(int32_t uid, const std::string& packageName,
         EVENT_KEY_MESSAGE, msg);
 }
 
+void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std::vector<uint16_t>& jank,
+    const std::string& pageUrl, uint32_t jankStatusVersion)
+{
+    std::string eventName = "JANK_STATS_APP";
+    auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        EVENT_KEY_STARTTIME, startTime,
+        STATISTIC_DURATION, duration,
+        EVENT_KEY_VERSION_CODE, app_version_code,
+        EVENT_KEY_VERSION_NAME, app_version_name,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_JANK_STATS, jank,
+        EVENT_KEY_JANK_STATS_VER, jankStatusVersion);
+}
+
 void EventReport::SendEventInner(const EventInfo& eventInfo)
 {
     auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
@@ -257,4 +301,77 @@ void EventReport::SendEventInner(const EventInfo& eventInfo)
             EVENT_KEY_PACKAGE_NAME, packageName);
 }
 
+void EventReport::ReportEventComplete(DataBase& data)
+{
+    std::string eventName = "INTERACTION_COMPLETED_LATENCY";
+    const auto& appPid = data.baseInfo.pid;
+    const auto& bundleName = data.baseInfo.bundleName;
+    const auto& processName = data.baseInfo.processName;
+    const auto& abilityName = data.baseInfo.abilityName;
+    const auto& pageUrl = data.baseInfo.pageUrl;
+    const auto& versionCode = data.baseInfo.versionCode;
+    const auto& versionName = data.baseInfo.versionName;
+    const auto& sceneId = data.sceneId;
+    const auto& sourceType = GetSourceTypeName(data.sourceType);
+    auto inputTime = data.inputTime;
+    ConvertRealtimeToSystime(data.inputTime, inputTime);
+    const auto& animationStartLantency = (data.beginVsyncTime - data.inputTime) / NS_TO_MS;
+    const auto& animationEndLantency = (data.endVsyncTime - data.beginVsyncTime) / NS_TO_MS;
+    const auto& e2eLatency = animationStartLantency + animationEndLantency;
+    const auto& note = data.baseInfo.note;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        EVENT_KEY_APP_PID, appPid,
+        EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_VERSION_CODE, versionCode,
+        EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_SCENE_ID, sceneId,
+        EVENT_KEY_SOURCE_TYPE, sourceType,
+        EVENT_KEY_INPUT_TIME, static_cast<uint64_t>(inputTime),
+        EVENT_KEY_ANIMATION_START_LATENCY, static_cast<uint64_t>(animationStartLantency),
+        EVENT_KEY_ANIMATION_END_LATENCY, static_cast<uint64_t>(animationEndLantency),
+        EVENT_KEY_E2E_LATENCY, static_cast<uint64_t>(e2eLatency),
+        EVENT_KEY_NOTE, note);
+}
+
+void EventReport::ReportEventJankFrame(DataBase& data)
+{
+    std::string eventName = "INTERACTION_APP_JANK";
+    const auto& uniqueId = data.beginVsyncTime / NS_TO_MS;
+    const auto& sceneId = data.sceneId;
+    const auto& bundleName = data.baseInfo.bundleName;
+    const auto& processName = data.baseInfo.processName;
+    const auto& abilityName = data.baseInfo.abilityName;
+    const auto& pageUrl = data.baseInfo.pageUrl;
+    const auto& versionCode = data.baseInfo.versionCode;
+    const auto& versionName = data.baseInfo.versionName;
+    auto startTime = data.beginVsyncTime;
+    ConvertRealtimeToSystime(data.beginVsyncTime, startTime);
+    const auto& durition = (data.endVsyncTime - data.beginVsyncTime) / NS_TO_MS;
+    const auto& totalFrames = data.totalFrames;
+    const auto& totalMissedFrames = data.totalMissed;
+    const auto& maxFrameTime = data.maxFrameTime / NS_TO_MS;
+    const auto& maxSeqMissedFrames = data.maxSuccessiveFrames;
+    const auto& note = data.baseInfo.note;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        EVENT_KEY_UNIQUE_ID, static_cast<int32_t>(uniqueId),
+        EVENT_KEY_SCENE_ID, sceneId,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_MODULE_NAME, bundleName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_VERSION_CODE, versionCode,
+        EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_STARTTIME, static_cast<uint64_t>(startTime),
+        EVENT_KEY_DURITION, static_cast<uint64_t>(durition),
+        EVENT_KEY_TOTAL_FRAMES, totalFrames,
+        EVENT_KEY_TOTAL_MISSED_FRAMES, totalMissedFrames,
+        EVENT_KEY_MAX_FRAMETIME, static_cast<uint64_t>(maxFrameTime),
+        EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames,
+        EVENT_KEY_NOTE, note);
+}
 } // namespace OHOS::Ace

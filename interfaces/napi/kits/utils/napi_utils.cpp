@@ -14,6 +14,7 @@
  */
 
 #include "napi_utils.h"
+#include "js_native_api_types.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -113,25 +114,27 @@ size_t GetParamLen(napi_value param)
     return len;
 }
 
-bool GetNapiString(napi_env env, napi_value value, std::string& retStr)
+bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_valuetype& valueType)
 {
     size_t ret = 0;
-    napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
     if (valueType == napi_string) {
         size_t valueLen = GetParamLen(value) + 1;
         std::unique_ptr<char[]> buffer = std::make_unique<char[]>(valueLen);
         napi_get_value_string_utf8(env, value, buffer.get(), valueLen, &ret);
         retStr = buffer.get();
-    } else if (valueType == napi_object) {
+        return true;
+    }
+    if (valueType == napi_object) {
         int32_t id = 0;
         int32_t type = 0;
         std::vector<std::string> params;
         if (ParseResourceParam(env, value, id, type, params)) {
             ParseString(id, type, params, retStr);
+            return true;
         }
     }
-    return !retStr.empty();
+    return false;
 }
 
 RefPtr<ThemeConstants> GetThemeConstants()
@@ -229,6 +232,9 @@ bool ParseString(int32_t resId, int32_t type, std::vector<std::string>& params, 
         }
         ReplaceHolder(originStr, params, 1);
         result = originStr;
+    } else if (type == static_cast<int>(ResourceType::RAWFILE)) {
+        auto fileName = params[0];
+        result = themeConstants->GetRawfile(fileName);
     } else {
         auto originStr = themeConstants->GetString(resId);
         ReplaceHolder(originStr, params, 0);

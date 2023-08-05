@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SEARCH_ROSEN_RENDER_SEARCH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SEARCH_ROSEN_RENDER_SEARCH_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#endif
 
 #include "core/components/search/render_search.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -32,8 +34,13 @@ public:
 private:
     void PaintFocus();
     void PaintOverlayForHoverAndPress(RenderContext& context, const Offset& offset);
+#ifndef USE_ROSEN_DRAWING
     SkRRect MakeRRect(const Offset& offset, const Size& size, const Border& border);
     SkCanvas* GetSkCanvas(RenderContext& context);
+#else
+    RSRoundRect MakeRRect(const Offset& offset, const Size& size, const Border& border);
+    RSCanvas* GetDrawingCanvas(RenderContext& context);
+#endif
 };
 
 } // namespace OHOS::Ace

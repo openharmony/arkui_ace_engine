@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,14 @@
 
 #include "core/components/track/rosen_render_circular_track.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkPaint.h"
 #include "include/effects/SkGradientShader.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -26,7 +30,9 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr double COLOR_STOP = 0.4;
+#ifndef USE_ROSEN_DRAWING
 constexpr int32_t COLOR_NUM = 3;
+#endif
 
 void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
 {
@@ -36,6 +42,7 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
         return;
     }
     double thickness = trackInfo.thickness;
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     if (trackInfo.gradient.IsValid()) {
@@ -67,6 +74,38 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
                         trackInfo.center.GetY() + trackInfo.radius - (thickness / 2) },
         trackInfo.clockwise * trackInfo.startDegree + degreeOffset,
         trackInfo.clockwise * trackInfo.sweepDegree, false, paint);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+
+    if (trackInfo.gradient.IsValid()) {
+        RSColorQuad colors[trackInfo.gradient.GetColors().size() + 1];
+        // size cannot be larger than uint32_t.
+        for (uint32_t index = 0; index < trackInfo.gradient.GetColors().size(); index++) {
+            colors[index] = trackInfo.gradient.GetColors()[index].GetColor().GetValue();
+        }
+        colors[trackInfo.gradient.GetColors().size()] = trackInfo.gradient.GetColors()[0].GetColor().GetValue();
+        RSScalar position[] = { COLOR_STOP, 2.0 * COLOR_STOP, 1.0 };
+
+        std::vector<RSColorQuad> vecColor(colors, colors + sizeof(colors) / sizeof(RSColorQuad));
+        std::vector<RSScalar> vecPos(position, position + sizeof(position) / sizeof(RSScalar));
+
+        LOGE("Drawing is not supported");
+    } else {
+        pen.SetColor(trackInfo.color.GetValue());
+    }
+    pen.SetWidth(thickness);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+
+    canvas->AttachPen(pen);
+    canvas->DrawArc(
+        RSRect(trackInfo.center.GetX() + (thickness / 2) - trackInfo.radius,
+            trackInfo.center.GetY() + (thickness / 2) - trackInfo.radius,
+            trackInfo.center.GetX() + trackInfo.radius - (thickness / 2),
+            trackInfo.center.GetY() + trackInfo.radius - (thickness / 2)),
+        trackInfo.clockwise * trackInfo.startDegree, trackInfo.clockwise * trackInfo.sweepDegree);
+    canvas->DetachPen();
+#endif
 }
 } // namespace
 
@@ -81,7 +120,11 @@ void RosenRenderCircularTrack::Paint(RenderContext& context, const Offset& offse
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->save();
+#else
+    canvas->Save();
+#endif
 
     // draw background
     data.color = GetBackgroundColor();
@@ -98,7 +141,11 @@ void RosenRenderCircularTrack::Paint(RenderContext& context, const Offset& offse
     data.sweepDegree = paintData_.sweepDegree * GetTotalRatio();
     DrawArc(context, data);
 
+#ifndef USE_ROSEN_DRAWING
     canvas->restore();
+#else
+    canvas->Restore();
+#endif
 }
 
 } // namespace OHOS::Ace

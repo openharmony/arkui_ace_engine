@@ -857,7 +857,10 @@ bool JsCardParser::GetI18nData(std::string& value)
     std::vector<std::string> fileNameList;
     for (const auto& file : files) {
         if (EndWith(file, FILE_TYPE_JSON)) {
-            fileNameList.emplace_back(file.substr(0, file.size() - (sizeof(FILE_TYPE_JSON) - 1)));
+            std::string filename = file.substr(0, file.size() - (sizeof(FILE_TYPE_JSON) - 1));
+            size_t pos = filename.find_last_of("/");
+            pos = (pos == std::string::npos) ? 0 : (pos + 1);
+            fileNameList.emplace_back(filename.substr(pos, filename.size() - pos));
         }
     }
     auto localeTag = AceApplicationInfo::GetInstance().GetLocaleTag();

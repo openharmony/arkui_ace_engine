@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,8 @@
  */
 
 class PersistentStorage implements IMultiPropertiesChangeSubscriber {
-  private static Storage_: IStorage;
-  private static Instance_: PersistentStorage = undefined;
+  private static storage_: IStorage;
+  private static instance_: PersistentStorage = undefined;
 
   private id_: number;
   private links_: Map<string, SubscribedAbstractProperty<any>>;
@@ -36,89 +36,117 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
    * internal function, not part of the SDK
    *
    */
-  public static ConfigureBackend(storage: IStorage): void {
-    PersistentStorage.Storage_ = storage;
+  public static configureBackend(storage: IStorage): void {
+    PersistentStorage.storage_ = storage;
   }
 
   /**
    * private, use static functions!
    */
-  private static GetOrCreate(): PersistentStorage {
-    if (PersistentStorage.Instance_) {
+  private static getOrCreate(): PersistentStorage {
+    if (PersistentStorage.instance_) {
       // already initialized
-      return PersistentStorage.Instance_;
+      return PersistentStorage.instance_;
     }
 
-    PersistentStorage.Instance_ = new PersistentStorage();
-    return PersistentStorage.Instance_;
+    PersistentStorage.instance_ = new PersistentStorage();
+    return PersistentStorage.instance_;
   }
 
   /**
    * 
    * internal function, not part of the SDK
    */
-  public static AboutToBeDeleted(): void {
-    if (!PersistentStorage.Instance_) {
+  public static aboutToBeDeleted(): void {
+    if (!PersistentStorage.instance_) {
       return;
     }
 
-    PersistentStorage.GetOrCreate().aboutToBeDeleted();
-    PersistentStorage.Instance_ = undefined;
+    PersistentStorage.getOrCreate().aboutToBeDeleted();
+    PersistentStorage.instance_ = undefined;
   }
 
 
   /**
    * Add property 'key' to AppStorage properties whose current value will be 
-   * persistemt.
+   * persistent.
    * If AppStorage does not include this property it will be added and initializes 
    * with given value
    * 
-   * @since 9
+   * @since 10
    * 
    * @param key property name
    * @param defaultValue If AppStorage does not include this property it will be initialized with this value
    * 
    */
-  public static PersistProp<T>(key: string, defaultValue: T): void {
-    PersistentStorage.GetOrCreate().persistProp(key, defaultValue);
+  public static persistProp<T>(key: string, defaultValue: T): void {
+    PersistentStorage.getOrCreate().persistProp(key, defaultValue);
   }
 
   /**
-   * Reverse of @see PersistProp
+   * @see persistProp
+   * @deprecated
+   */
+  public static PersistProp<T>(key: string, defaultValue: T): void {
+    PersistentStorage.getOrCreate().persistProp(key, defaultValue);
+  }
+
+
+  /**
+   * Reverse of @see persistProp
    * @param key no longer persist the property named key
    * 
-   * @since 9
+   * @since 10
+   */
+  public static deleteProp(key: string): void {
+    PersistentStorage.getOrCreate().deleteProp(key);
+  }
+
+  /**
+   * @see deleteProp
+   * @deprecated
    */
   public static DeleteProp(key: string): void {
-    PersistentStorage.GetOrCreate().deleteProp(key);
+    PersistentStorage.getOrCreate().deleteProp(key);
   }
 
   /**
    * Persist given AppStorage properties with given names.
    * If a property does not exist in AppStorage, add it and initialize it with given value
-   * works as @see PersistProp for multiple properties.
+   * works as @see persistProp for multiple properties.
    * 
    * @param properties 
    * 
-   * @since 9
+   * @since 10
    * 
+   */
+  public static persistProps(properties: {
+    key: string,
+    defaultValue: any
+  }[]): void {
+    PersistentStorage.getOrCreate().persistProps(properties);
+  }
+
+  /**
+   * @see persistProps
+   * @deprecated
    */
   public static PersistProps(properties: {
     key: string,
     defaultValue: any
   }[]): void {
-    PersistentStorage.GetOrCreate().persistProps(properties);
+    PersistentStorage.getOrCreate().persistProps(properties);
   }
 
   /**
    * Inform persisted AppStorage property names
    * @returns array of AppStorage keys
    * 
-   * @since 9
+   * @since 10
    */
-  public static Keys(): Array<string> {
+  public static keys(): Array<string> {
     let result = [];
-    const it = PersistentStorage.GetOrCreate().keys();
+    const it = PersistentStorage.getOrCreate().keys();
     let val = it.next();
 
     while (!val.done) {
@@ -127,6 +155,14 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     }
 
     return result;
+  }
+
+  /**
+   * @see keys
+   * @deprecated
+   */
+  public static Keys(): Array<string> {
+    return PersistentStorage.keys();
   }
 
 /**
@@ -139,15 +175,27 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   * 
   * @param key property that has changed
   * 
-  * @since 9
+  * @since 10
   * 
   */
- public static NotifyHasChanged(propName: string) {
+  public static notifyHasChanged(propName: string) {
   stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
-      '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
-  PersistentStorage.Storage_.set(propName,
-    PersistentStorage.GetOrCreate().links_.get(propName).get());
-}
+      '${PersistentStorage.getOrCreate().links_.get(propName)}' to storage`);
+  PersistentStorage.storage_.set(propName,
+    PersistentStorage.getOrCreate().links_.get(propName).get());
+  }
+
+ /**
+  * @see notifyHasChanged
+  * @deprecated
+  */
+  public static NotifyHasChanged(propName: string) {
+    stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
+        '${PersistentStorage.getOrCreate().links_.get(propName)}' to storage`);
+    PersistentStorage.storage_.set(propName,
+      PersistentStorage.getOrCreate().links_.get(propName).get());
+  }
+
   /**
    * all following methods are framework internal
    */
@@ -166,7 +214,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     if (this.persistProp1(propName, defaultValue)) {
       // persist new prop
       stateMgmtConsole.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
-      PersistentStorage.Storage_.set(propName, this.links_.get(propName).get());
+      PersistentStorage.storage_.set(propName, this.links_.get(propName).get());
     }
   }
 
@@ -174,6 +222,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   // helper function to persist a property
   // does everything except writing prop to disk
   private persistProp1<T>(propName: string, defaultValue: T): boolean {
+    stateMgmtConsole.debug(`PersistentStorage: persistProp1 ${propName} ${defaultValue}`);
     if (defaultValue == null || defaultValue == undefined) {
       stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
       return false;
@@ -184,21 +233,21 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
       return false;
     }
 
-    let link = AppStorage.Link(propName, this);
+    let link = AppStorage.link(propName, this);
     if (link) {
       stateMgmtConsole.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
       this.links_.set(propName, link);
     } else {
-      let newValue: T = PersistentStorage.Storage_.get(propName);
+      let newValue: T = PersistentStorage.storage_.get(propName);
       let returnValue: T;
-      if (!newValue) {
+      if (newValue == undefined || newValue == null) {
         stateMgmtConsole.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
         returnValue = defaultValue;
       }
       else {
         returnValue = newValue;
       }
-      link = AppStorage.SetAndLink(propName, returnValue, this);
+      link = AppStorage.setAndLink(propName, returnValue, this);
       this.links_.set(propName, link);
       stateMgmtConsole.debug(`PersistentStorage: created new persistent prop for ${propName}`);
     }
@@ -218,7 +267,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     if (link) {
       link.aboutToBeDeleted();
       this.links_.delete(propName);
-      PersistentStorage.Storage_.delete(propName);
+      PersistentStorage.storage_.delete(propName);
       stateMgmtConsole.debug(`PersistentStorage: deleteProp: no longer persisting '${propName}'.`);
     } else {
       stateMgmtConsole.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
@@ -228,7 +277,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   private write(): void {
     this.links_.forEach((link, propName, map) => {
       stateMgmtConsole.debug(`PersistentStorage: writing ${propName} to storage`);
-      PersistentStorage.Storage_.set(propName, link.get());
+      PersistentStorage.storage_.set(propName, link.get());
     });
   }
 
@@ -252,7 +301,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
 
     this.links_.clear();
     SubscriberManager.Delete(this.id__());
-    PersistentStorage.Storage_.clear();
+    PersistentStorage.storage_.clear();
   }
 
   public id__(): number {

@@ -21,7 +21,7 @@
 
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -44,12 +44,12 @@ RefPtr<LazyLayoutWrapperBuilder> CreateWrapperBuilder()
     return wrapperBuilder;
 }
 
-RefPtr<LayoutWrapper> CreateLayoutWrapper()
+RefPtr<LayoutWrapperNode> CreateLayoutWrapper()
 {
     auto rowFrameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
     return layoutWrapper;
 }
 } // namespace

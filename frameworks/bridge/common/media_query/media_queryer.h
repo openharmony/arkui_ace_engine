@@ -26,7 +26,7 @@ namespace OHOS::Ace::Framework {
 
 using MediaFeature = std::unique_ptr<JsonValue>;
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW MediaQueryer {
+class ACE_FORCE_EXPORT MediaQueryer {
 public:
     bool MatchCondition(const std::string& condition, const MediaFeature& mediaFeature);
     std::unique_ptr<JsonValue> GetMediaFeature() const;

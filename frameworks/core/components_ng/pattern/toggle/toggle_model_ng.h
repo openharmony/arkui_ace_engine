@@ -30,7 +30,7 @@ public:
     void SetHeight(const Dimension& height) override;
     void SetBackgroundColor(const Color& color) override;
     bool IsToggle() override;
-    void SetPadding(const NG::PaddingPropertyF& args) override;
+    void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
 
 private:

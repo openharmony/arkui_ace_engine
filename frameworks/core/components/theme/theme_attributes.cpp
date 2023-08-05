@@ -32,6 +32,7 @@ const char THEME_PATTERN_TOGGLE[] = "toggle_pattern";
 const char THEME_PATTERN_TOAST[] = "toast_pattern";
 const char THEME_PATTERN_DIALOG[] = "dialog_pattern";
 const char THEME_PATTERN_DRAG_BAR[] = "drag_bar_pattern";
+const char THEME_PATTERN_CLOSE_ICON[] = "close_icon_pattern";
 const char THEME_PATTERN_SEMI_MODAL[] = "semi_modal_pattern";
 const char THEME_PATTERN_BADGE[] = "badge_pattern";
 const char THEME_PATTERN_CALENDAR[] = "calendar_pattern";
@@ -41,6 +42,7 @@ const char THEME_PATTERN_COUNTER[] = "counter_pattern";
 const char THEME_PATTERN_DIVIDER[] = "divider_pattern";
 const char THEME_PATTERN_FOCUS_ANIMATION[] = "focus_animation_pattern";
 const char THEME_PATTERN_GRID[] = "grid_pattern";
+const char THEME_PATTERN_HYPERLINK[] = "hyperlink_pattern";
 const char THEME_PATTERN_ICON[] = "icon_pattern";
 const char THEME_PATTERN_IMAGE[] = "image_pattern";
 const char THEME_PATTERN_LIST[] = "list_pattern";
@@ -62,6 +64,7 @@ const char THEME_PATTERN_SELECT[] = "select_pattern";
 const char THEME_PATTERN_SLIDER[] = "slider_pattern";
 const char THEME_PATTERN_TEXT[] = "text_pattern";
 const char THEME_PATTERN_TEXTFIELD[] = "textfield_pattern";
+const char THEME_PATTERN_RICH_EDITOR[] = "rich_editor_pattern";
 const char THEME_PATTERN_TEXT_OVERLAY[] = "text_overlay_pattern";
 const char THEME_PATTERN_VIDEO[] = "video_pattern";
 const char THEME_PATTERN_INDEXER[] = "indexer_pattern";
@@ -69,11 +72,12 @@ const char THEME_PATTERN_APP_BAR[] = "app_bar_pattern";
 const char THEME_PATTERN_ADVANCED_PATTERN[] = "advanced_pattern";
 const char THEME_PATTERN_SECURITY_COMPONENT[] = "security_component_pattern";
 const char THEME_PATTERN_FORM[] = "form_pattern";
+const char THEME_PATTERN_SIDE_BAR[] = "side_bar_pattern";
+const char THEME_PATTERN_PATTERN_LOCK[] = "pattern_lock_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
 const char PATTERN_BG_COLOR[] = "bg_color";
-const char PATTERN_BRODER_COLOR[] = "focus_broder_color";
 const char PATTERN_UNDERLINE_ACTIVED_COLOR[] = "underline_actived_color";
 const char PATTERN_UNDERLINE_TYPING_COLOR[] = "underline_typing_color";
 const char PATTERN_BG_COLOR_HOVERED[] = "bg_color_hovered";
@@ -157,9 +161,18 @@ const char DIALOG_MAX_BUTTON_WIDTH[] = "dialog_max_button_width";
 const char DIALOG_MIN_BUTTON_WIDTH[] = "dialog_min_button_width";
 const char DIALOG_ACTIONS_TOP_PADDING[] = "dialog_actions_top_padding";
 const char DIALOG_MASK_COLOR_END[] = "dialog_mask_color_end";
+const char DIALOG_DIVIDER_LENGTH[] = "dialog_divider_length";
+const char DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH[] = "dialog_divider_between_button_width";
 
 // pattern attributes for drag bar
 const char DRAG_BAR_COLOR[] = "drag_bar_color";
+
+// pattern attributes for close icon
+const char CLOSE_ICON_WIDTH[] = "close_icon_width";
+const char CLOSE_ICON_Height[] = "close_icon_height";
+const char CLOSE_ICON_MARGIN_TOP[] = "close_icon_margin_top";
+const char CLOSE_ICON_MARGIN_RIGHT[] = "close_icon_margin_right";
+const char CLOSE_ICON_RADIUS[] = "close_icon_radius";
 
 // pattern attributes for popup
 const char POPUP_BORDER_RADIUS[] = "popup_border_radius";
@@ -178,6 +191,7 @@ const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
 const char ERROR_TEXT_UNDERLINE_COLOR[] = "error_text_underline_color";
 const char UNDERLINE_COLOR[] = "underline_color";
 const char UNDERLINE_TEXT_COLOR[] = "underline_text_color";
+const char UNDERLINE_FONT_SIZE[] = "text_font_size";
 const char BORDER_RADIUS_SIZE[] = "border_radius_size";
 // swiper attributes for arrow
 const char ARROW_COLOR_BOARDCOLOR_HOVER[] = "arrow_color_boardColor_hover";
@@ -200,4 +214,17 @@ const char ERROR_PASSWORD_TEXT_COLOR[] = "error_password_text_color";
 const char OVER_COUNT_TEXT_COLOR[] = "over_count_text_color";
 const char OVER_COUNT_TEXT_FONT_SIZE[] = "over_count_text_font_size";
 const char OVER_COUNT_BORDER_COLOR[] = "over_count_border_color";
+const char ERROR_PASSWORD_BORDER_ALPHA[] = "error_password_border_alpha";
+const char OVER_COUNT_BORDER_COLOR_ALPHA[] = "over_count_border_color_alpha";
+const char UNDERLINE_COLOR_ALPHA[] = "underline_color_alpha";
+const char INLINE_TEXT_COLOR[] = "inline_text_color";
+const char INLINE_RADIUS_SIZE[] = "inline_radius_size";
+const char INLINE_BG_COLOR[] = "inline_bg_color";
+const char INLINE_BORDER_COLOR[] = "inline_border_color";
+
+// linear split attributes
+const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";
+
+// stepper attributes
+const char STEPPER_FOCUS_COLOR[] = "stepper_focus_color";
 } // namespace OHOS::Ace

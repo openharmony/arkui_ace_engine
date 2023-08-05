@@ -16,18 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_PAINT_PROPERTY_H
 
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/components_v2/pattern_lock/pattern_lock_theme.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-
-const Dimension DEFAULT_SIDE_LENGTH = 300.0_vp;
-const Dimension DEFAULT_CIRCLE_RADIUS = 14.0_vp;
-const Color DEFAULT_REGULAR_COLOR = Color::BLACK;
-const Color DEFAULT_SELECTED_COLOR = Color::BLACK;
-const Color DEFAULT_ACTIVE_COLOR = Color::BLACK;
-const Color DEFAULT_PATH_COLOR = Color::BLUE;
-const Dimension DEFAULT_PATH_STROKE_WIDTH = 34.0_vp;
 
 class PatternLockPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(PatternLockPaintProperty, PaintProperty)
@@ -40,7 +33,6 @@ public:
     {
         auto paintProperty = MakeRefPtr<PatternLockPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
-        paintProperty->propSideLength_ = CloneSideLength();
         paintProperty->propCircleRadius_ = CloneCircleRadius();
         paintProperty->propRegularColor_ = CloneRegularColor();
         paintProperty->propSelectedColor_ = CloneSelectedColor();
@@ -54,7 +46,6 @@ public:
     void Reset() override
     {
         PaintProperty::Reset();
-        ResetSideLength();
         ResetCircleRadius();
         ResetRegularColor();
         ResetSelectedColor();
@@ -67,18 +58,25 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);
-
-        json->Put("sideLength", GetSideLength().value_or(DEFAULT_SIDE_LENGTH).ToString().c_str());
-        json->Put("circleRadius", GetCircleRadius().value_or(DEFAULT_CIRCLE_RADIUS).ToString().c_str());
-        json->Put("regularColor", GetRegularColor().value_or(DEFAULT_REGULAR_COLOR).ColorToString().c_str());
-        json->Put("selectedColor", GetSelectedColor().value_or(DEFAULT_SELECTED_COLOR).ColorToString().c_str());
-        json->Put("activeColor", GetActiveColor().value_or(DEFAULT_ACTIVE_COLOR).ColorToString().c_str());
-        json->Put("pathColor", GetPathColor().value_or(DEFAULT_PATH_COLOR).ColorToString().c_str());
-        json->Put("pathStrokeWidth", GetPathStrokeWidth().value_or(DEFAULT_PATH_STROKE_WIDTH).ToString().c_str());
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_VOID(patternLockTheme);
+        json->Put("circleRadius",
+            GetCircleRadius().value_or(patternLockTheme->GetCircleRadius()).ToString().c_str());
+        json->Put("regularColor",
+            GetRegularColor().value_or(patternLockTheme->GetRegularColor()).ColorToString().c_str());
+        json->Put("selectedColor",
+            GetSelectedColor().value_or(patternLockTheme->GetSelectedColor()).ColorToString().c_str());
+        json->Put("activeColor",
+            GetActiveColor().value_or(patternLockTheme->GetActiveColor()).ColorToString().c_str());
+        json->Put("pathColor",
+            GetPathColor().value_or(patternLockTheme->GetPathColor()).ColorToString().c_str());
+        json->Put("pathStrokeWidth",
+            GetPathStrokeWidth().value_or(patternLockTheme->GetPathStrokeWidth()).ToString().c_str());
         json->Put("autoReset", GetAutoReset().value_or(true) ? "true" : "false");
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SideLength, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CircleRadius, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RegularColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedColor, Color, PROPERTY_UPDATE_RENDER);

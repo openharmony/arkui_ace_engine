@@ -26,6 +26,7 @@ ohos_fuzztest("ArkuiFormRenderGroupFuzzTest") {
   include_dirs = [
     "$ace_root",
     "$ace_root/interfaces/inner_api",
+    "$root_out_dir/arkui/framework",
   ]
 
   cflags = [
@@ -36,7 +37,10 @@ ohos_fuzztest("ArkuiFormRenderGroupFuzzTest") {
   ]
   sources = [ "arkuiformrendergroup_fuzzer.cpp" ]
 
-  deps = [ "$ace_root/interfaces/inner_api/form_render:ace_form_render" ]
+  deps = [
+    "$ace_root/interfaces/inner_api/form_render:ace_form_render",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
+  ]
 
   external_deps = [
     "ability_base:want",
@@ -46,12 +50,18 @@ ohos_fuzztest("ArkuiFormRenderGroupFuzzTest") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "form_fwk:form_manager",
-    "graphic_standard:surface",
-    "hiviewdfx_hilog_native:libhilog",
+    "graphic_2d:surface",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
+
+  ldflags = []
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
 }
 
 ###############################################################################

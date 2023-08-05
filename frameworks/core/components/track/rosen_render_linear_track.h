@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TRACK_ROSEN_RENDER_LINEAR_TRACK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TRACK_ROSEN_RENDER_LINEAR_TRACK_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkPoint.h"
 #include "include/core/SkShader.h"
+#endif
 
 #include "base/geometry/offset.h"
 #include "core/components/track/render_track.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -36,10 +41,18 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
     void PaintSliderTrack(RenderContext& context, const Offset& offset);
     void PaintSliderSteps(RenderContext& context, const Offset& offset);
+#ifndef USE_ROSEN_DRAWING
     void PaintBackgroundTrack(SkCanvas* canvas, const Offset& offset, double trackHeight) const;
+#else
+    void PaintBackgroundTrack(RSCanvas* canvas, const Offset& offset, double trackHeight) const;
+#endif
 
 private:
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkShader> BlendSkShader(const SkPoint pts, const SkColor color, bool useAnimator = false);
+#else
+    std::shared_ptr<RSShaderEffect> BlendSkShader(const RSPoint pts, const RSColorQuad color, bool useAnimator = false);
+#endif
 };
 
 } // namespace OHOS::Ace

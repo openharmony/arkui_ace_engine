@@ -33,11 +33,20 @@ public:
     void SetSelectedTime(const PickerTime& selectedTime) override;
     void SetHour24(bool value) override;
     void SetOnChange(DateChangeEvent&& onChange) override;
+    void SetOnDateChange(DateChangeEvent&& onChange) override {}
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
-    void SetBackgroundColor(const Color& color) override {};
+    void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(DateChangeEvent&& onChange) override {};
+};
+
+class DatePickerDialogModelImpl : public DatePickerDialogModel {
+public:
+    void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
+        std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
+        std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onDateAccept,
+        std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_PICKER_MODEL_IMPL_H

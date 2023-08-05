@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -356,6 +356,7 @@ void RosenRenderSlider::PaintTrackFocus(RenderContext& context, const Offset& of
         trackFocusHeight = track->GetTrackThickness() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
         trackFocusRadius = trackFocusHeight * HALF;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setColor(FOCUS_BORDER_COLOR);
     paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
@@ -371,6 +372,26 @@ void RosenRenderSlider::PaintTrackFocus(RenderContext& context, const Offset& of
             track->GetTrackThickness() * HALF - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
     }
     canvas->drawRRect(rRect, paint);
+#else
+    RSPen pen;
+    pen.SetColor(FOCUS_BORDER_COLOR);
+    pen.SetWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    pen.SetAntiAlias(true);
+    RSRoundRect rRect(
+        RSRect(0, 0, trackFocusWidth, trackFocusHeight), trackFocusRadius, trackFocusRadius);
+    if (direction_ == Axis::VERTICAL) {
+        rRect.Offset(offset.GetX() + track->GetTrackThickness() * HALF -
+                         NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+            offset.GetY() + NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF));
+    } else {
+        rRect.Offset(offset.GetX() + NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF),
+            offset.GetY() + track->GetTrackThickness() * HALF -
+                NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
+    }
+    canvas->AttachPen(pen);
+    canvas->DrawRoundRect(rRect);
+    canvas->DetachPen();
+#endif
 }
 
 } // namespace OHOS::Ace

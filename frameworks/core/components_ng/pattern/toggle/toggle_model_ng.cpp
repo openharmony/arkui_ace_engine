@@ -213,9 +213,15 @@ void ToggleModelNG::OnChange(ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
-void ToggleModelNG::SetWidth(const Dimension& width) {}
+void ToggleModelNG::SetWidth(const Dimension& width)
+{
+    NG::ViewAbstract::SetWidth(NG::CalcLength(width));
+}
 
-void ToggleModelNG::SetHeight(const Dimension& height) {}
+void ToggleModelNG::SetHeight(const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(NG::CalcLength(height));
+}
 
 void ToggleModelNG::SetBackgroundColor(const Color& color)
 {
@@ -227,7 +233,10 @@ bool ToggleModelNG::IsToggle()
     return false;
 }
 
-void ToggleModelNG::SetPadding(const NG::PaddingPropertyF& args) {}
+void ToggleModelNG::SetPadding(const NG::PaddingPropertyF& /*args*/, const NG::PaddingProperty& newArgs) 
+{
+    NG::ViewAbstract::SetPadding(newArgs);
+}
 
 void ToggleModelNG::CreateCheckbox(int32_t nodeId)
 {
@@ -251,7 +260,6 @@ void ToggleModelNG::CreateButton(int32_t nodeId)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ToggleButtonPattern>(); });
     stack->Push(frameNode);
-    NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
 }
 
 void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index)

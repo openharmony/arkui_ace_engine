@@ -29,28 +29,27 @@ class ACE_EXPORT SecurityComponentModelNG {
 public:
     virtual ~SecurityComponentModelNG() = default;
     virtual void Create(int32_t text, int32_t icon,
-        SecurityComponentBackgroundType backgroundType) = 0;
+        int32_t backgroundType) = 0;
     void CreateCommon(const std::string& tag, int32_t text, int32_t icon,
-        SecurityComponentBackgroundType backgroundType,
+        int32_t backgroundType,
         const std::function<RefPtr<Pattern>(void)>& patternCreator);
-    virtual void SetIconSize(const Dimension& value);
-    virtual void SetIconColor(const Color& value);
-    virtual void SetFontSize(const Dimension& value);
-    virtual void SetFontStyle(const Ace::FontStyle& value);
-    virtual void SetFontWeight(const FontWeight& value);
-    virtual void SetFontFamily(const std::vector<std::string>& fontFamilies);
-    virtual void SetFontColor(const Color& value);
-    virtual void SetBackgroundColor(const Color& value);
-    virtual void SetBackgroundBorderWidth(const Dimension& value);
-    virtual void SetBackgroundBorderColor(const Color& value);
-    virtual void SetBackgroundBorderStyle(const BorderStyle& value);
-    virtual void SetBackgroundBorderRadius(const Dimension& value);
-    virtual void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+    static void SetIconSize(const Dimension& value);
+    static void SetIconColor(const Color& value);
+    static void SetFontSize(const Dimension& value);
+    static void SetFontStyle(const Ace::FontStyle& value);
+    static void SetFontWeight(const FontWeight& value);
+    static void SetFontFamily(const std::vector<std::string>& fontFamilies);
+    static void SetFontColor(const Color& value);
+    static void SetBackgroundColor(const Color& value);
+    static void SetBackgroundBorderWidth(const Dimension& value);
+    static void SetBackgroundBorderColor(const Color& value);
+    static void SetBackgroundBorderStyle(const BorderStyle& value);
+    static void SetBackgroundBorderRadius(const Dimension& value);
+    static void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
-    virtual void SetBackgroundPadding(const std::optional<Dimension>& padding);
-    virtual void SetTextIconPadding(const Dimension& value);
-    virtual void SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value);
-    virtual void SetlayoutOrder(const SecSecurityComponentLayoutOrder& value);
+    static void SetBackgroundPadding(const std::optional<Dimension>& padding);
+    static void SetTextIconSpace(const Dimension& value);
+    static void SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value);
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {
@@ -63,15 +62,18 @@ public:
     }
 
 protected:
-    RefPtr<SecurityComponentTheme> GetTheme();
+    static RefPtr<SecurityComponentTheme> GetTheme();
 
 private:
-    void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id);
-    void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
-        SecurityComponentBackgroundType type);
-    void SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text);
-    void InitLayoutProperty(RefPtr<FrameNode>& node, int32_t text, int32_t icon,
-        SecurityComponentBackgroundType backgroundType);
+    static void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
+        bool isButtonVisible);
+    static void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
+    static bool IsBackgroundVisible();
+    static void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
+        int32_t type);
+    static void SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text, bool isButtonVisible);
+    static void InitLayoutProperty(RefPtr<FrameNode>& node, int32_t text, int32_t icon,
+        int32_t backgroundType);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_SECURITY_COMPONENT_MODEL_NG_H

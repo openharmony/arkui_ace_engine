@@ -36,7 +36,7 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    static bool CheckInShowArea(const std::shared_ptr<SelectOverlayInfo>& info);
+    static bool CheckInShowArea(const SelectOverlayInfo& info);
 
     const OffsetF& GetDefaultMenuEndOffset() const
     {
@@ -48,21 +48,21 @@ public:
         return menuWidth_;
     }
 
-    bool GetHasExtensitonMenu() const
+    bool GetHasExtensionMenu() const
     {
-        return hasExtensitonMenu_;
+        return hasExtensionMenu_;
     }
 
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
     OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);
-    void RemeasureExtensionMenu(LayoutWrapper* layoutWrapper, const OffsetF& offset);
+    bool IsTextAreaSelectAll();
 
     std::shared_ptr<SelectOverlayInfo> info_;
 
     OffsetF defaultMenuEndOffset_;
     std::optional<float> menuWidth_;
-    bool hasExtensitonMenu_ = false;
+    bool hasExtensionMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayLayoutAlgorithm);
 };

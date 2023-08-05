@@ -34,6 +34,8 @@ void SpanModelImpl::Create(const std::string& content)
     spanComponent->SetTextStyle(textStyle);
 }
 
+void SpanModelImpl::SetFont(const Font& value) {}
+
 void SpanModelImpl::SetFontSize(const Dimension& value)
 {
     auto component = GetComponent();

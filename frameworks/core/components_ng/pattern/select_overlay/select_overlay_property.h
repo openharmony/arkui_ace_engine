@@ -27,8 +27,14 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr int32_t MENU_SHOW_ANIMATION_DURATION = 250;
+constexpr int32_t MENU_HIDE_ANIMATION_DURATION = 200;
+constexpr int32_t HANDLE_ANIMATION_DURATION = 150;
+
 struct SelectHandleInfo {
     bool isShow = true;
+    bool needLayout = false;
+    // in Global coordinates.
     RectF paintRect;
 
     bool operator==(const SelectHandleInfo& info) const
@@ -51,6 +57,7 @@ struct SelectMenuInfo {
     bool showPaste = true;
     bool showCopyAll = true;
     bool showCut = true;
+    std::optional<OffsetF> menuOffset;
 
     bool IsIconChanged(const SelectMenuInfo& info) const
     {
@@ -101,7 +108,9 @@ struct SelectOverlayInfo {
     std::vector<MenuOptionsParam> menuOptionItems;
 
     // force hide callback, which may be called when other textOverlay shows.
-    std::function<void()> onClose;
+    std::function<void(bool)> onClose;
+
+    OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
 };
 
 } // namespace OHOS::Ace::NG

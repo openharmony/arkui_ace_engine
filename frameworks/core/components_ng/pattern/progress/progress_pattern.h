@@ -79,7 +79,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
     void SetTextFromUser(bool value)
@@ -99,9 +99,13 @@ private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void InitTouchEvent();
+    void RemoveTouchEvent();
     void OnPress(const TouchEventInfo& info);
     void HandleEnabled();
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
     void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json) const;
     static std::string ConvertProgressStatusToString(const ProgressStatus status);
 
     double strokeWidth_ = 2;

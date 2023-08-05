@@ -18,14 +18,19 @@
 
 #include <vector>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
+#endif
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/svg_animate.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
 #include "core/components_ng/render/drawing_forward.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/components_ng/svg/svg_context.h"
 
 namespace OHOS::Ace::NG {
@@ -68,7 +73,11 @@ public:
         }
     }
 
+#ifndef USE_ROSEN_DRAWING
     virtual SkPath AsPath(const Size& viewPort) const
+#else
+    virtual RSRecordingPath AsPath(const Size& viewPort) const
+#endif
     {
         return {};
     }
@@ -77,8 +86,13 @@ public:
 
     Rect AsBounds(const Size& viewPort) const
     {
+#ifndef USE_ROSEN_DRAWING
         auto bounds = AsPath(viewPort).getBounds();
         return { bounds.left(), bounds.top(), bounds.width(), bounds.height() };
+#else
+        auto bounds = AsPath(viewPort).GetBounds();
+        return { bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight() };
+#endif
     }
 
     void SetContext(const WeakPtr<SvgContext>& svgContext)
@@ -129,7 +143,7 @@ protected:
     void AnimateOnAttribute(const RefPtr<SvgAnimation>& animate, const T& originalValue);
     // animate a transformation attribute
     void AnimateTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
-    void AnimateValueTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
+    void AnimateFromToTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
     void AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
 
     // update svg attribute in animation
@@ -166,7 +180,11 @@ protected:
     bool inheritStyle_ = true;  // inherit style attributes from parent node, TAGS mask/defs/pattern/filter = false
     bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
 
+#ifndef USE_ROSEN_DRAWING
     SkCanvas* skCanvas_ = nullptr;
+#else
+    RSCanvas* rsCanvas_ = nullptr;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(SvgNode);
 };

@@ -26,6 +26,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void Pop();
 
+protected:
     static void CreateForNG(const JSCallbackInfo& info);
     static void SetIndex(int32_t index);
     static void SetVertical(const std::string& value);
@@ -35,11 +36,13 @@ public:
     static void SetBarWidth(const JSCallbackInfo& info);
     static void SetBarHeight(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnTabBarClick(const JSCallbackInfo& info);
     static void SetAnimationDuration(float value);
     static void SetFadingEdge(const JSCallbackInfo& info);
     static void SetDivider(const JSCallbackInfo& info);
     static void SetBarOverlap(const JSCallbackInfo& info);
     static void SetBarBackgroundColor(const JSCallbackInfo& info);
+    static void SetClip(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

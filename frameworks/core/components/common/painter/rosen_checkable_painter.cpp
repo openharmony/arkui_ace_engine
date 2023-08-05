@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "core/components/common/painter/rosen_checkable_painter.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -25,12 +27,20 @@ constexpr uint8_t DISABLED_ALPHA = 102;
 
 } // namespace
 
+#ifndef USE_ROSEN_DRAWING
 void RosenCheckablePainter::SetStrokeWidth(double strokeWidth, SkPaint& skPaint) const
 {
     skPaint.setAntiAlias(true);
     skPaint.setStyle(SkPaint::Style::kStroke_Style);
     skPaint.setStrokeWidth(strokeWidth);
 }
+#else
+void RosenCheckablePainter::SetStrokeWidth(double strokeWidth, RSPen& pen) const
+{
+    pen.SetAntiAlias(true);
+    pen.SetWidth(strokeWidth);
+}
+#endif
 
 float RosenCheckablePainter::ConfigureOpacity(bool disabled)
 {

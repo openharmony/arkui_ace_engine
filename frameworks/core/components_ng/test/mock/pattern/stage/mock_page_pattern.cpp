@@ -43,6 +43,8 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     return false;
 }
 
+void PagePattern::BeforeCreateLayoutWrapper() {}
+
 RefPtr<PageTransitionEffect> PagePattern::FindPageTransitionEffect(PageTransitionType type)
 {
     return nullptr;
@@ -51,5 +53,12 @@ RefPtr<PageTransitionEffect> PagePattern::FindPageTransitionEffect(PageTransitio
 RefPtr<PageTransitionEffect> PagePattern::GetTopTransition() const
 {
     return nullptr;
+}
+
+void PagePattern::AddJsAnimator(const std::string& animatorId, const RefPtr<Framework::AnimatorInfo>& animatorInfo) {}
+
+RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& animatorId)
+{
+    return AceType::MakeRefPtr<Framework::AnimatorInfo>();
 }
 } // namespace OHOS::Ace::NG

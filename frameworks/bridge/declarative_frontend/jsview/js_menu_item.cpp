@@ -38,8 +38,8 @@ MenuItemModel* MenuItemModel::GetInstance()
             } else {
                 instance_.reset(new Framework::MenuItemModelImpl());
             }
-        }
 #endif
+        }
     }
     return instance_.get();
 }
@@ -129,6 +129,9 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItem>::StaticMethod("contentFontColor", &JSMenuItem::ContentFontColor, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFont", &JSMenuItem::LabelFont, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFontColor", &JSMenuItem::LabelFontColor, opt);
+    JSClass<JSMenuItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenuItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSMenuItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenuItem>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -224,6 +227,24 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
                 ParseJsString(jsWeight, weight);
             }
         }
+
+        auto jsStyle = obj->GetProperty("style");
+        if (!jsStyle->IsNull()) {
+            if (jsStyle->IsNumber()) {
+                MenuItemModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+            } else {
+                std::string style;
+                ParseJsString(jsStyle, style);
+                MenuItemModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
+            }
+        }
+
+        auto jsFamily = obj->GetProperty("family");
+        if (!jsFamily->IsNull() && jsFamily->IsString()) {
+            auto familyVal = jsFamily->ToString();
+            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+            MenuItemModel::GetInstance()->SetFontFamily(fontFamilies);
+        }
     }
     MenuItemModel::GetInstance()->SetFontSize(fontSize);
     MenuItemModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
@@ -263,6 +284,24 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
             } else {
                 ParseJsString(jsWeight, weight);
             }
+        }
+
+        auto jsStyle = obj->GetProperty("style");
+        if (!jsStyle->IsNull()) {
+            if (jsStyle->IsNumber()) {
+                MenuItemModel::GetInstance()->SetLabelFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+            } else {
+                std::string style;
+                ParseJsString(jsStyle, style);
+                MenuItemModel::GetInstance()->SetLabelFontStyle(ConvertStrToFontStyle(style));
+            }
+        }
+
+        auto jsFamily = obj->GetProperty("family");
+        if (!jsFamily->IsNull() && jsFamily->IsString()) {
+            auto familyVal = jsFamily->ToString();
+            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+            MenuItemModel::GetInstance()->SetLabelFontFamily(fontFamilies);
         }
     }
     MenuItemModel::GetInstance()->SetLabelFontSize(fontSize);

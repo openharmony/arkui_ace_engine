@@ -16,40 +16,49 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/models/canvas_model_impl.h"
 #include "core/common/container.h"
-#include "core/components/custom_paint/custom_paint_component.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
 
+namespace OHOS::Ace {
+std::unique_ptr<CanvasModel> CanvasModel::instance_ = nullptr;
+std::mutex CanvasModel::mutex_;
+CanvasModel* CanvasModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::CanvasModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::CanvasModelNG());
+            } else {
+                instance_.reset(new Framework::CanvasModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 void JSCanvas::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto pattern = NG::CustomPaintView::Create();
-        if (info[0]->IsObject()) {
-            JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
-            if (jsContext) {
-                jsContext->SetCustomPaintPattern(pattern);
-                LOGI("SetCustomPaintPattern successfully");
-                jsContext->SetAntiAlias();
-            }
-        }
-        return;
-    }
-
-    RefPtr<OHOS::Ace::CustomPaintComponent> paintChild = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
-    if (info[0]->IsObject()) {
+    auto pattern = CanvasModel::GetInstance()->Create();
+    CHECK_NULL_VOID(pattern);
+    auto canvasPattern = CanvasModel::GetInstance()->GetTaskPool(pattern);
+    if (info.Length() > 0 && info[0]->IsObject()) {
         JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
         if (jsContext) {
-            jsContext->SetComponent(paintChild->GetTaskPool());
-            LOGI("SetComponent successfully");
+            jsContext->SetCanvasPattern(canvasPattern);
+            LOGI("SetCanvasPattern successfully");
             jsContext->SetAntiAlias();
         }
     }
-
-    ViewStackProcessor::GetInstance()->ClaimElementId(paintChild);
-    ViewStackProcessor::GetInstance()->Push(paintChild);
+    CanvasModel::GetInstance()->PushCanvasPattern(pattern);
 }
 
 void JSCanvas::JSBind(BindingTarget globalObj)
@@ -70,56 +79,33 @@ void JSCanvas::JSBind(BindingTarget globalObj)
 
 void JSCanvas::OnReady(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
+            "and the first argument must be a function.");
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto readyEvent_ = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    std::function<void(uint32_t)> readyEvent;
+    if (Container::IsCurrentUsePartialUpdate()) {
+        readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                         uint32_t accountableCanvasElement) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Canvas.onReady");
+            LOGD("Canvas elmtId %{public}d executing JS onReady function - start", accountableCanvasElement);
+            ViewStackModel::GetInstance()->StartGetAccessRecordingFor(accountableCanvasElement);
+            func->Execute();
+            ViewStackModel::GetInstance()->StopGetAccessRecording();
+            LOGD("Canvas elmtId %{public}d executing JS onReady function - end", accountableCanvasElement);
+        };
+    } else {
+        readyEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                         uint32_t accountableCanvasElement) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Canvas.onReady");
             func->Execute();
         };
-        NG::CustomPaintView::SetOnReady(std::move(readyEvent_));
-        return;
     }
-
-    auto container = Container::Current();
-    if (!container) {
-        LOGE("No container");
-        return;
-    }
-    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!context) {
-        LOGE("No PipelineContext");
-        return;
-    }
-    auto component = AceType::DynamicCast<CustomPaintComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        LOGE("No CustomPaintComponent");
-        return;
-    }
-
-    auto elmtId = component->GetElementId();
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto readyEvent_ =
-        Container::IsCurrentUsePartialUpdate()
-            ? EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                              accountableCanvasElement = elmtId]() {
-                  JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                  ACE_SCORING_EVENT("Canvas.onReady");
-                  LOGD("Canvas elmtId %{public}d executing JS onReady function - start", accountableCanvasElement);
-                  ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(accountableCanvasElement);
-                  func->Execute();
-                  ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-                  LOGD("Canvas elmtId %{public}d executing JS onReady function - end", accountableCanvasElement);
-              })
-            : EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-                  JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                  ACE_SCORING_EVENT("Canvas.onReady");
-                  func->Execute();
-              });
-    component->SetOnReadyEvent(readyEvent_, context);
+    CanvasModel::GetInstance()->SetOnReady(std::move(readyEvent));
 }
 } // namespace OHOS::Ace::Framework

@@ -20,16 +20,26 @@
 #include <optional>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
 
+struct SwiperItemInfo {
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    RefPtr<FrameNode> node;
+    OffsetF finialOffset;
+};
+
 class ACE_EXPORT SwiperLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(SwiperLayoutAlgorithm, LayoutAlgorithm);
 
 public:
+    using PositionMap = std::map<int32_t, SwiperItemInfo>;
+
     SwiperLayoutAlgorithm() = default;
     ~SwiperLayoutAlgorithm() override = default;
 
@@ -37,19 +47,86 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    const std::set<int32_t>& GetItemRange()
+    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t startIndex, float startPos);
+    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t endIndex, float endPos);
+    bool LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& currentIndex, float startPos, float& endPos);
+    bool LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        int32_t& currentIndex, float endPos, float& startPos);
+    float GetChildMaxSize(LayoutWrapper* layoutWrapper, Axis axis, bool isMainAxis) const;
+    int32_t GetLoopIndex(int32_t originalIndex) const;
+
+    void SetItemsPosition(const PositionMap& itemPosition)
     {
-        return itemRange_;
+        itemPosition_ = itemPosition;
     }
 
-    void SetMaxChildSize(const SizeF& maxChildSize)
+    PositionMap&& GetItemPosition()
     {
-        maxChildSize_ = maxChildSize;
+        return std::move(itemPosition_);
     }
 
-    void SetItemRange(const std::set<int32_t>& itemRange)
+    void SetJumpIndex(int32_t index)
     {
-        itemRange_ = itemRange;
+        jumpIndex_ = index;
+    }
+
+    void SetCurrentDelta(float offset)
+    {
+        currentDelta_ = offset;
+        currentOffset_ = offset;
+    }
+
+    void SetOverScrollFeature()
+    {
+        overScrollFeature_ = true;
+    }
+
+    void SetCanOverScroll(bool canOverScroll)
+    {
+        canOverScroll_ = canOverScroll;
+    }
+
+    void SetTotalItemCount(int32_t totalItemCount)
+    {
+        totalItemCount_ = totalItemCount;
+    }
+
+    float GetContentMainSize() const
+    {
+        return contentMainSize_;
+    }
+
+    void SetContentMainSize(float contentMainSize)
+    {
+        contentMainSize_ = contentMainSize;
+    }
+
+    float GetContentCrossSize() const
+    {
+        return contentCrossSize_;
+    }
+
+    void SetContentCrossSize(float contentCrossSize)
+    {
+        contentCrossSize_ = contentCrossSize;
+    }
+
+    void SetCurrentOffset(float offset)
+    {
+        currentOffset_ = offset;
+    }
+
+    float GetCurrentOffset() const
+    {
+        return currentOffset_;
+    }
+
+    void SetTargetIndex(std::optional<int32_t> targetIndex)
+    {
+        targetIndex_ = targetIndex;
     }
 
     void SetIsLoop(bool isLoop)
@@ -57,64 +134,109 @@ public:
         isLoop_ = isLoop;
     }
 
-    void SetCurrentOffsetTimes(float currentOffsetTimes)
+    int32_t GetStartIndex() const
     {
-        currentOffsetTimes_ = currentOffsetTimes;
+        return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
     }
 
-    void SetTotalCount(int32_t totalCount)
+    int32_t GetEndIndex() const
     {
-        totalCount_ = totalCount;
+        return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
     }
 
-    void SetDisplayCount(int32_t displayCount)
+    float GetStartPosition() const
     {
-        displayCount_ = displayCount;
+        if (itemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetStartIndex() == 0) {
+            return itemPosition_.begin()->second.startPos;
+        }
+        return itemPosition_.begin()->second.startPos - spaceWidth_;
     }
 
-    SizeF GetMaxChildSize() const
+    float GetEndPosition() const
     {
-        return maxChildSize_;
+        if (itemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetEndIndex() == totalItemCount_ - 1) {
+            return itemPosition_.rbegin()->second.endPos;
+        }
+        return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
-    void SetOnlyNeedMeasurePages(bool onlyNeedMeasurePages)
+    int32_t GetAutoPlayCurrentIndex() const
     {
-        onlyNeedMeasurePages_ = onlyNeedMeasurePages;
+        return autoPlayCurrentIndex_;
     }
 
-    bool GetOnlyNeedMeasurePages() const
+    void SetMainSizeIsMeasured(bool mainSizeIsMeasured)
     {
-        return onlyNeedMeasurePages_;
+        mainSizeIsMeasured_ = mainSizeIsMeasured;
     }
 
-    void SetHoverRatio(float hoverRatio)
+    bool GetMainSizeIsMeasured() const
     {
-        hoverRatio_ = hoverRatio;
+        return mainSizeIsMeasured_;
     }
+
+    int32_t GetCurrentIndex() const
+    {
+        return currentIndex_;
+    }
+
+    void SetIsNeedResetPrevMarginAndNextMargin()
+    {
+        isNeedResetPrevMarginAndNextMargin_ = false;
+    }
+
+    bool GetIsNeedResetPrevMarginAndNextMargin() const
+    {
+        return isNeedResetPrevMarginAndNextMargin_;
+    }
+
 private:
-    void MeasureAllPagesToGetMaxChildSize(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
-    void MeasurePages(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
-    void MeasureIndicator(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
-
-    float GetPagesOffsetTimes(int32_t index) const;
-    bool IsVisiblePages(int32_t index) const;
+    void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void SetInactive(
+        LayoutWrapper* layoutWrapper, float startMainPos, float endMainPos, std::optional<int32_t> targetIndex);
 
     void PlaceDigitChild(const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty);
     double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
-    void MeasureArrow(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint) const;
-    void ArrowLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper) const;
-
-    std::set<int32_t> itemRange_;
+    void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
+    void ArrowLayout(
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper, const PaddingPropertyF padding) const;
     bool isLoop_ = true;
-    float currentOffsetTimes_ = 0;
-    int32_t totalCount_ = 0;
-    int32_t displayCount_ = 0;
-    // Arrow default hover ratio
-    float hoverRatio_ = 1.0f;
+    float prevMargin_ = 0.0f;
+    float nextMargin_ = 0.0f;
 
-    SizeF maxChildSize_ { 0, 0 };
-    bool onlyNeedMeasurePages_ = false;
+    PositionMap itemPosition_;
+    int32_t autoPlayCurrentIndex_ = 0;
+    float currentOffset_ = 0.0f;
+    float currentDelta_ = 0.0f;
+    float startMainPos_ = 0.0f;
+    float endMainPos_ = 0.0f;
+
+    float paddingBeforeContent_ = 0.0f;
+    float paddingAfterContent_ = 0.0f;
+    float contentMainSize_ = 0.0f;
+    float contentCrossSize_ = 0.0f;
+    int32_t totalItemCount_ = 0;
+    bool mainSizeIsDefined_ = false;
+
+    float spaceWidth_ = 0.0f;
+    bool overScrollFeature_ = false;
+    bool canOverScroll_ = false;
+
+    bool mainSizeIsMeasured_ = false;
+
+    std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> currentTargetIndex_;
+    int32_t currentIndex_ = 0;
+    bool targetIsSameWithStartFlag_ = false;
+    bool isNeedResetPrevMarginAndNextMargin_ = false;
 };
 
 } // namespace OHOS::Ace::NG

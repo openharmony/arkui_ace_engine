@@ -63,14 +63,17 @@ void RestorePageNode(const RefPtr<NG::FrameNode>& pageNode)
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     pagePattern->SetOnBackPressed([]() { return true; });
-    std::function<void()> emptyFunc;
-    pagePattern->SetPageTransitionFunc(std::move(emptyFunc));
 }
 } // namespace
 
 SerializeableObjectArray DistributedUI::DumpUITree()
 {
-    LOGD("UITree DumpUITree start");
+    LOGD("UITree interface start");
+#ifdef ACE_DEBUG_LOG
+    auto timeStart = std::chrono::high_resolution_clock::now();
+#endif
+
+    ResetDirtyNodes();
 
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN_NOLOG(context, SerializeableObjectArray());
@@ -86,6 +89,12 @@ SerializeableObjectArray DistributedUI::DumpUITree()
     }
 
     status_ = StateMachine::SOURCE_START;
+
+#ifdef ACE_DEBUG_LOG
+    auto timeEnd = std::chrono::high_resolution_clock::now();
+    LOGD("UITree process use %{public}lld ms",
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+#endif
     return objectArray;
 }
 
@@ -99,11 +108,15 @@ void DistributedUI::UnSubscribeUpdate()
 {
     onUpdateCb_ = nullptr;
     status_ = StateMachine::STOP;
-    ResetDirtyNodes();
 }
 
 void DistributedUI::ProcessSerializeableInputEvent(const SerializeableObjectArray& array)
 {
+    LOGD("UITree interface start");
+#ifdef ACE_DEBUG_LOG
+    auto timeStart = std::chrono::high_resolution_clock::now();
+#endif
+
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
 
@@ -113,20 +126,36 @@ void DistributedUI::ProcessSerializeableInputEvent(const SerializeableObjectArra
     bool isSubPipe = json->GetBool("sub");
 
     context->OnTouchEvent(event, isSubPipe);
+
+#ifdef ACE_DEBUG_LOG
+    auto timeEnd = std::chrono::high_resolution_clock::now();
+    LOGD("UITree process use %{public}lld ms",
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+#endif
 }
 
 void DistributedUI::RestoreUITree(const SerializeableObjectArray& array)
 {
-    LOGI("UITree RestoreUITree start");
+    LOGD("UITree interface start");
+#ifdef ACE_DEBUG_LOG
+    auto timeStart = std::chrono::high_resolution_clock::now();
+#endif
+
     status_ = StateMachine::SINK_START;
     RestoreUITreeInner(array);
+
+#ifdef ACE_DEBUG_LOG
+    auto timeEnd = std::chrono::high_resolution_clock::now();
+    LOGD("UITree process use %{public}lld ms",
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+#endif
 }
 
 void DistributedUI::UpdateUITree(const SerializeableObjectArray& array)
 {
-    LOGI("UITree UpdateUITree start");
-
+    LOGD("UITree interface start");
     if (status_ != StateMachine::SINK_START) {
+        LOGE("UpdateUITree failed. status=%{public}d", static_cast<uint8_t>(status_));
         return;
     }
     pendingUpdates_.emplace_back(std::move((SerializeableObjectArray&)array));
@@ -195,7 +224,11 @@ void DistributedUI::OnTreeUpdate()
         return;
     }
 
-    auto tp = std::chrono::high_resolution_clock::now();
+    LOGD("UITree interface start");
+#ifdef ACE_DEBUG_LOG
+    auto timeStart = std::chrono::high_resolution_clock::now();
+#endif
+
     DistributedUI::UpdateType updateType;
     SerializeableObjectArray update;
     if (pageChangeFlag_) {
@@ -207,18 +240,28 @@ void DistributedUI::OnTreeUpdate()
     } else {
         update = DumpUpdate();
         if (update.empty()) {
+            LOGD("UITree no need to update");
             return;
         }
         updateType = UpdateType::PAGE_UPDATE;
     }
+
+#ifdef ACE_DEBUG_LOG
+    auto timeEnd = std::chrono::high_resolution_clock::now();
     LOGD("UITree process use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count());
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+    timeStart = timeEnd;
+#endif
 
     if (onUpdateCb_) {
         onUpdateCb_(updateType, update);
     }
-    LOGD("UITree process OnTreeUpdate use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count());
+
+#ifdef ACE_DEBUG_LOG
+    timeEnd = std::chrono::high_resolution_clock::now();
+    LOGD("UITree send process use %{public}lld ms",
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+#endif
 }
 
 void DistributedUI::OnPageChanged(int32_t pageId)
@@ -237,15 +280,33 @@ int32_t DistributedUI::GetCurrentPageId()
 
 void DistributedUI::BypassEvent(const TouchEvent& point, bool isSubPipe)
 {
+    LOGD("UITree interface start");
+#ifdef ACE_DEBUG_LOG
+    auto timeStart = std::chrono::high_resolution_clock::now();
+#endif
+
     std::unique_ptr<JsonValue> json = NodeObject::Create();
     point.ToJsonValue(json);
     json->Put("sub", isSubPipe);
     SerializeableObjectArray eventArray;
     eventArray.push_back(std::move((std::unique_ptr<NodeObject>&)json));
 
+#ifdef ACE_DEBUG_LOG
+    auto timeEnd = std::chrono::high_resolution_clock::now();
+    LOGD("UITree process use %{public}lld ms",
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+    timeStart = timeEnd;
+#endif
+
     if (onEventCb_) {
         onEventCb_(eventArray);
     }
+
+#ifdef ACE_DEBUG_LOG
+    timeEnd = std::chrono::high_resolution_clock::now();
+    LOGD("UITree send process use %{public}lld ms",
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+#endif
 }
 
 bool DistributedUI::IsSinkMode()
@@ -258,7 +319,11 @@ bool DistributedUI::IsSinkMode()
 
 void DistributedUI::ApplyOneUpdate()
 {
+    LOGD("UITree interface start");
+#ifdef ACE_DEBUG_LOG
     auto timeStart = std::chrono::high_resolution_clock::now();
+#endif
+
     LOGD("UITree pendingUpdates.size=%{public}zu", pendingUpdates_.size());
     for (int i = 0; i < HANDLE_UPDATE_PER_VSYNC; i++) {
         if (pendingUpdates_.empty()) {
@@ -269,9 +334,12 @@ void DistributedUI::ApplyOneUpdate()
         pendingUpdates_.pop_front();
         UpdateUITreeInner(update);
     }
+
+#ifdef ACE_DEBUG_LOG
+    auto timeEnd = std::chrono::high_resolution_clock::now();
     LOGD("UITree process use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - timeStart)
-            .count());
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+#endif
 }
 
 void DistributedUI::DumpDirtyRenderNodes(SerializeableObjectArray& objectArray)
@@ -350,7 +418,9 @@ SerializeableObjectArray DistributedUI::DumpUpdate()
     if (newNodes_.size() + dirtyRenderNodes_.size() + deletedNodes_.size() + dirtyLayoutNodes_.size() == 0) {
         return SerializeableObjectArray();
     }
-    auto tp = std::chrono::high_resolution_clock::now();
+#ifdef ACE_DEBUG_LOG
+    auto timeStart = std::chrono::high_resolution_clock::now();
+#endif
     SerializeableObjectArray objectArray;
 
     DumpDirtyRenderNodes(objectArray);
@@ -359,8 +429,11 @@ SerializeableObjectArray DistributedUI::DumpUpdate()
     DumpDelNodes(objectArray);
     ResetDirtyNodes();
 
+#ifdef ACE_DEBUG_LOG
+    auto timeEnd = std::chrono::high_resolution_clock::now();
     LOGD("UITree process use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count());
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+#endif
     return objectArray;
 }
 
@@ -487,8 +560,8 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                 } },
             { V2::LIST_ITEM_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
-                    return FrameNode::GetOrCreateFrameNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
+                    return FrameNode::GetOrCreateFrameNode(type, nodeId,
+                        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
                 } },
             { V2::LIST_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
@@ -671,7 +744,9 @@ void DistributedUI::DelNode(const std::unique_ptr<NodeObject>& nodeObject)
 
 void DistributedUI::UpdateUITreeInner(SerializeableObjectArray& nodeArray)
 {
+#ifdef ACE_DEBUG_LOG
     auto timeStart = std::chrono::high_resolution_clock::now();
+#endif
 
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
@@ -691,9 +766,11 @@ void DistributedUI::UpdateUITreeInner(SerializeableObjectArray& nodeArray)
     }
 
     context->RequestFrame();
+#ifdef ACE_DEBUG_LOG
+    auto timeEnd = std::chrono::high_resolution_clock::now();
     LOGD("UITree process use %{public}lld ms",
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - timeStart)
-            .count());
+        static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()));
+#endif
 }
 
 void DistributedUI::RestoreUITreeInner(const SerializeableObjectArray& nodeArray)
@@ -708,8 +785,8 @@ void DistributedUI::RestoreUITreeInner(const SerializeableObjectArray& nodeArray
     auto pageRootNode = context->GetStageManager()->GetLastPage();
     CHECK_NULL_VOID_NOLOG(pageRootNode);
     RestorePageNode(pageRootNode);
-    auto children = pageRootNode->GetChildren();
-    for (const auto& child : children) {
+    sinkPageChildren_ = pageRootNode->GetChildren();
+    for (const auto& child : sinkPageChildren_) {
         pageRootNode->RemoveChild(child);
     }
 

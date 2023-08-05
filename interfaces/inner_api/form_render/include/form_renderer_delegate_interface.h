@@ -43,19 +43,16 @@ public:
      * @param formJsInfo The formJsInfo.
      * @param want The want.
      */
-    virtual int32_t OnSurfaceCreate(
-        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
-        const AAFwk::Want& want) = 0;
+    virtual int32_t OnSurfaceCreate(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+        const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want) = 0;
     /**
      * @brief OnSurfaceReuse.
      * @param surfaceId The surfaceNode ID.
      * @param formJsInfo The formJsInfo.
      * @param want The want.
      */
-    virtual int32_t OnSurfaceReuse(uint64_t surfaceId,
-        const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
-        const AAFwk::Want& want)
+    virtual int32_t OnSurfaceReuse(
+        uint64_t surfaceId, const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want)
     {
         return ERR_OK;
     }
@@ -84,6 +81,11 @@ public:
      * @param height
      */
     virtual int32_t OnSurfaceChange(float width, float height) = 0;
+    /**
+     * @brief OnFormLinkInfoUpdate.
+     * @param formLinkInfos
+     */
+    virtual int32_t OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) = 0;
 
     enum Message : uint32_t {
         ON_SURFACE_CREATE = 1,
@@ -92,8 +94,9 @@ public:
         ON_ACTION_CREATE,
         ON_ERROR,
         ON_SURFACE_CHANGE,
+        ON_FORM_LINK_INFO_UPDATE,
     };
 };
-}  // namespace Ace
-}  // namespace OHOS
-#endif  // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_INTERFACE_H
+} // namespace Ace
+} // namespace OHOS
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_INTERFACE_H

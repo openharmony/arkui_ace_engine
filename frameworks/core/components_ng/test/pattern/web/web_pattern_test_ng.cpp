@@ -15,16 +15,36 @@
 
 #include "gtest/gtest.h"
 #define private public
+#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
-#include "core/components_ng/pattern/web/web_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace;
+
+namespace OHOS::NWeb {
+class NWebDateTimeChooserCallbackMock : public NWebDateTimeChooserCallback {
+public:
+
+    void Continue(bool success, const DateTime& value) override
+    {}
+};
+
+class NWebSelectPopupMenuCallbackMock : public NWebSelectPopupMenuCallback {
+public:
+
+    void Continue(const std::vector<int32_t>& indices) override
+    {}
+
+    void Cancel() override
+    {}
+};
+}
 
 namespace OHOS::Ace::NG {
 class WebPatternTestNg : public testing::Test {
@@ -39,7 +59,6 @@ void WebPatternTestNg::SetUpTestCase() {}
 void WebPatternTestNg::TearDownTestCase() {}
 void WebPatternTestNg::SetUp() {}
 void WebPatternTestNg::TearDown() {}
-
 
 /**
  * @tc.name: WebPatternTestNg_001
@@ -235,6 +254,143 @@ HWTEST_F(WebPatternTestNg, OnScrollBarColorUpdate005, TestSize.Level1)
     webpattern.InitEnhanceSurfaceFlag();
     SystemProperties::SetExtSurfaceEnabled(false);
     webpattern.InitEnhanceSurfaceFlag();
+#endif
+}
+
+/**
+ * @tc.name: InitDragEvent006
+ * @tc.desc: InitDragEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_NE(gestureHub, nullptr);
+    bool rerult = webPattern->NotifyStartDragTask();
+    EXPECT_FALSE(rerult);
+    webPattern->isDisableDrag_ = true;
+    rerult = webPattern->NotifyStartDragTask();
+    EXPECT_FALSE(rerult);
+    webPattern->InitDragEvent(gestureHub);
+    webPattern->InitDragEvent(gestureHub);
+    EXPECT_NE(webPattern->dragEvent_, nullptr);
+    OHOS::NWeb::NWebCursorInfo info;
+    rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CROSS, info);
+    EXPECT_FALSE(rerult);
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params =
+        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParam>();
+    EXPECT_NE(params, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallbackMock> callback =
+        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
+    EXPECT_NE(callback, nullptr);
+    webPattern->OnSelectPopupMenu(params, callback);
+    NWeb::DateTimeChooser chooser;
+    std::vector<NWeb::DateTimeSuggestion> suggestions;
+    NWeb::DateTimeSuggestion dateTime;
+    suggestions.push_back(dateTime);
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackMock> chooserCallback =
+        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackMock>();
+    EXPECT_NE(chooserCallback, nullptr);
+    webPattern->OnDateTimeChooserPopup(chooser, suggestions, chooserCallback);
+    suggestions.clear();
+    chooser.type = NWeb::DTC_TIME;
+    webPattern->OnDateTimeChooserPopup(chooser, suggestions, chooserCallback);
+    chooser.type = NWeb::DTC_DATE;
+    webPattern->OnDateTimeChooserPopup(chooser, suggestions, chooserCallback);
+#endif
+}
+
+/**
+ * @tc.name: ShowDateTimeDialog007
+ * @tc.desc: ShowDateTimeDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, ShowDateTimeDialog007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    DialogTheme::Builder builder;
+    RefPtr<DialogTheme> theme = builder.Build(nullptr);
+    EXPECT_NE(theme, nullptr);
+    SystemProperties::InitDeviceType(DeviceType::PHONE);
+    webPattern->GetDialogProperties(theme);
+    SystemProperties::InitDeviceType(DeviceType::TV);
+    webPattern->GetDialogProperties(theme);
+    NWeb::DateTimeChooser chooser;
+    std::vector<NWeb::DateTimeSuggestion> suggestions;
+    NWeb::DateTimeSuggestion dateTime = {
+        .value = {
+            .year = 1,
+            .month = 1,
+            .day = 1,
+            .hour = 1,
+            .minute = 1,
+            .second = 1,
+        },
+        .localizedValue = "test",
+        .label = "test",
+    };
+    suggestions.push_back(dateTime);
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackMock> chooserCallback =
+        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackMock>();
+    EXPECT_NE(chooserCallback, nullptr);
+    webPattern->ShowDateTimeDialog(chooser, suggestions, chooserCallback);
+    webPattern->ShowTimeDialog(chooser, suggestions, chooserCallback);
+    chooser.hasSelected = true;
+    webPattern->ShowDateTimeDialog(chooser, suggestions, chooserCallback);
+    webPattern->ShowTimeDialog(chooser, suggestions, chooserCallback);
+    webPattern->ShowDateTimeSuggestionDialog(chooser, suggestions, chooserCallback);
+    webPattern->OnDateTimeChooserClose();
+    OHOS::NWeb::SelectMenuBound bounds;
+    webPattern->GetSelectPopupPostion(bounds);
+#endif
+}
+
+/**
+ * @tc.name: GetSelectPopupPostion008
+ * @tc.desc: GetSelectPopupPostion.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, GetSelectPopupPostion008, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallbackMock> callback =
+        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
+    EXPECT_NE(callback, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params =
+        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParam>();
+    EXPECT_NE(params, nullptr);
+    webPattern->RegisterSelectPopupCallback(frameNode, callback, params);
 #endif
 }
 } // namespace OHOS::Ace::NG

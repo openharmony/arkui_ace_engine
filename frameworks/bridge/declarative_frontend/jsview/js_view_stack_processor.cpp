@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/pipeline/base/element_register.h"
+#include "foundation/arkui/ace_engine/frameworks/core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
 
@@ -88,6 +89,8 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     JSClass<JSViewStackProcessor>::StaticMethod("visualState", JSVisualState, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("MakeUniqueId", &JSViewStackProcessor::JSMakeUniqueId, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("UsesNewPipeline", &JSViewStackProcessor::JsUsesNewPipeline, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod("getApiVersion", &JSViewStackProcessor::JsGetApiVersion, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod("GetAndPushFrameNode", &JSViewStackProcessor::JsGetAndPushFrameNode);
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
 }
 
@@ -107,6 +110,9 @@ VisualState JSViewStackProcessor::StringToVisualState(const std::string& stateSt
     }
     if (stateString == "hover") {
         return VisualState::HOVER;
+    }
+    if (stateString == "selected") {
+        return VisualState::SELECTED;
     }
     LOGE("Unknown visual state \"%{public}s\", resetting to UNDEFINED", stateString.c_str());
     return VisualState::NOTSET;
@@ -142,12 +148,34 @@ void JSViewStackProcessor::JSMakeUniqueId(const JSCallbackInfo& info)
     const auto result = ElementRegister::GetInstance()->MakeUniqueId();
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
+
 /**
  * return true of current Container uses new Pipeline
  */
 bool JSViewStackProcessor::JsUsesNewPipeline()
 {
     return Container::IsCurrentUseNewPipeline();
+}
+
+/**
+ * return the API version specified in the manifest.json
+ */
+int32_t JSViewStackProcessor::JsGetApiVersion()
+{
+    return AceApplicationInfo::GetInstance().GetApiTargetVersion();
+}
+
+void JSViewStackProcessor::JsGetAndPushFrameNode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 2) {
+        LOGE("The arg is wrong, it is supposed to have 2 arguments");
+        return;
+    }
+    if (!info[0]->IsString() || !info[1]->IsNumber()) {
+        LOGE("JsGetAndPushFrameNode() invalid args.");
+        return;
+    }
+    ViewStackModel::GetInstance()->GetAndPushFrameNode(info[0]->ToString(), info[1]->ToNumber<int32_t>());
 }
 
 } // namespace OHOS::Ace::Framework

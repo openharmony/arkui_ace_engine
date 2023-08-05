@@ -255,7 +255,7 @@ V2::GridRowDirection ParserDirection(const JSRef<JSVal>& jsValue)
 
 void JSGridRow::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsObject()) {
+    if (info[0]->IsObject()) {
         auto gridRow = JSRef<JSObject>::Cast(info[0]);
         auto columns = gridRow->GetProperty("columns");
         auto gutter = gridRow->GetProperty("gutter");
@@ -274,8 +274,7 @@ void JSGridRow::Create(const JSCallbackInfo& info)
 
 void JSGridRow::JsBreakpointEvent(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGW("No breakpoint event info.");
+    if (!info[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -291,20 +290,12 @@ void JSGridRow::JsBreakpointEvent(const JSCallbackInfo& info)
 
 void JSGridRow::Height(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     JSViewAbstract::JsHeight(info[0]);
     GridRowModel::GetInstance()->SetHeight();
 }
 
 void JSGridRow::AlignItems(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     if (info[0]->IsNumber()) {
         auto value = info[0]->ToNumber<int32_t>();
         ParseAlignItems(value);
@@ -317,8 +308,8 @@ void JSGridRow::ParseAlignItems(int32_t alignItem)
         alignItem == static_cast<int32_t>(FlexAlign::FLEX_END) ||
         alignItem == static_cast<int32_t>(FlexAlign::CENTER) || alignItem == static_cast<int32_t>(FlexAlign::STRETCH)) {
         GridRowModel::GetInstance()->SetAlignItems(static_cast<FlexAlign>(alignItem));
-    } else {
-        LOGI("invalid value for alignItems");
+    } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        GridRowModel::GetInstance()->SetAlignItems(FlexAlign::FLEX_START);
     }
 }
 
@@ -329,6 +320,9 @@ void JSGridRow::JSBind(BindingTarget globalObj)
     JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent);
     JSClass<JSGridRow>::StaticMethod("height", &JSGridRow::Height);
     JSClass<JSGridRow>::StaticMethod("alignItems", &JSGridRow::AlignItems);
+    JSClass<JSGridRow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSGridRow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSGridRow>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGridRow>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

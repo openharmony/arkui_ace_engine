@@ -57,6 +57,7 @@ template("libace_static") {
         ]
       }
     }
+    configs = [ "$ace_root:ace_coverage_config" ]
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem
   }
@@ -67,7 +68,7 @@ template("ace_bridge_engine") {
   forward_variables_from(invoker, "*")
 
   ohos_shared_library(target_name) {
-    configs = []
+    configs = [ "$ace_root:ace_coverage_config" ]
     deps = []
 
     assert(defined(platform) && platform == "ohos",

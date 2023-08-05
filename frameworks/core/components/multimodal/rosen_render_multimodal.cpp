@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,11 @@
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
 #include "include/core/SkPoint.h"
 #include "include/core/SkRRect.h"
+#endif
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
@@ -61,25 +63,43 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
     auto height = NormalizeToPx(Dimension(DEFAULT_SIZE, DimensionUnit::VP));
     auto corner = NormalizeToPx(Dimension(CORNER_RADIUS, DimensionUnit::VP));
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(Color::FromARGB(230, 0, 0, 0).GetValue());
+#else
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(Color::FromARGB(230, 0, 0, 0).GetValue());
+#endif
 
     UpdateParagraph(offset, subscript_.GetVoiceContent());
     paragraph_->Layout(GetLayoutSize().Width());
     if (paragraph_->GetLongestLine() > NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP))) {
         width = height + (paragraph_->GetLongestLine() - NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP)));
     }
-
+#ifndef USE_ROSEN_DRAWING
     SkVector radii[] = { { corner, corner }, { 0, 0 }, { corner, corner }, { 0, 0 } };
     SkRRect rrect;
     rrect.setRectRadii(SkRect::MakeXYWH(offset.GetX(), offset.GetY(), width, height), radii);
     canvas->drawRRect(rrect, paint);
+#else
+    std::vector<RSPoint> radii = { { corner, corner }, { 0, 0 }, { corner, corner }, { 0, 0 } };
+    RSRoundRect rrect(
+        RSRect(offset.GetX(), offset.GetY(), offset.GetX() + width, offset.GetY() + height), radii);
+    canvas->AttachBrush(brush);
+    canvas->DrawRoundRect(rrect);
+    canvas->DetachBrush();
+#endif
 
+#ifndef USE_ROSEN_DRAWING
     auto leftOffset = paragraph_->GetLongestLine() / 2;
     auto centerX = offset.GetX() + width / 2;
     auto centerY = offset.GetY() + height / 2;
     paragraph_->Paint(canvas, centerX - leftOffset, centerY - paragraph_->GetHeight() / 2);
+#else
+    LOGE("Drawing is not supported");
+#endif
 }
 
 void RosenRenderMultimodal::UpdateParagraph(const Offset& offset, const std::string& text)

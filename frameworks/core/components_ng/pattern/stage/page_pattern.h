@@ -143,6 +143,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
 

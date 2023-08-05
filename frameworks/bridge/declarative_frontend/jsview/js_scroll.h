@@ -41,6 +41,10 @@ public:
     static void SetEdgeEffect(const JSCallbackInfo& args);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
+    static void SetNestedScroll(const JSCallbackInfo& args);
+    static void SetScrollEnabled(const JSCallbackInfo& args);
+    static void SetFriction(const JSCallbackInfo& info);
+    static void SetScrollSnap(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

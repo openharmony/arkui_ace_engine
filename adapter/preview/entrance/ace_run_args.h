@@ -42,7 +42,7 @@ enum class ProjectModel {
     STAGE,
 };
 
-struct ACE_FORCE_EXPORT_WITH_PREVIEW AceRunArgs {
+struct ACE_FORCE_EXPORT AceRunArgs {
     // the adopted project model
     ProjectModel projectModel = ProjectModel::FA;
     // stores routing information
@@ -92,6 +92,7 @@ struct ACE_FORCE_EXPORT_WITH_PREVIEW AceRunArgs {
 
     // Container sdk path.
     std::string containerSdkPath = "";
+    bool isComponentMode = false;
 };
 
 } // namespace OHOS::Ace::Platform

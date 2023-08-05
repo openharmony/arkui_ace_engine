@@ -1,0 +1,12 @@
+{
+    "process": "ui_service",
+    "systemability": [
+        {
+            "name": 7001,
+            "libpath": "libuiservice.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump_level": 1
+        }
+    ]
+}

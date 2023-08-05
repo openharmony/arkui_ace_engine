@@ -54,7 +54,7 @@ public:
         return builder_ ? builder_->GetTotalCount() : 0;
     }
 
-    void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
+    void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
     void UpdateLazyForEachItems(int32_t newStartIndex, int32_t newEndIndex,
         std::list<std::optional<std::string>>&& nodeIds,
@@ -66,13 +66,51 @@ public:
     void OnDataChanged(size_t index) override;
     void OnDataMoved(size_t from, size_t to) override;
 
-    void PostIdleTask(std::list<int32_t>&& items);
+    void PostIdleTask(std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt,
+        bool longPredictTask = false);
+
+    void SetRequestLongPredict(bool requestLongPredict)
+    {
+        requestLongPredict_ = requestLongPredict;
+    }
+
+    void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
+    {
+        builder_->SetFlagForGeneratedItem(propertyChangeFlag);
+    }
+
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+
+    bool GetIsLoop() const
+    {
+        return isLoop_;
+    }
+    void PostIdleTask();
+    void MarkNeedSyncRenderTree(bool needRebuild = false) override;
+
+    void BuildAllChildren();
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
+    void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
+
+    const std::list<RefPtr<UINode>>& GetChildren() const override;
+    void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
+    {
+        cacheCount_ = cacheCount;
+        itemConstraint_ = itemConstraint;
+    }
 
 private:
     void OnAttachToMainTree(bool recursive) override
     {
+        UINode::OnAttachToMainTree(recursive);
         CHECK_NULL_VOID(builder_);
-        builder_->RegisterDataChangeListener(Claim(this));
+        if (!isRegisterListener_) {
+            builder_->RegisterDataChangeListener(Claim(this));
+            isRegisterListener_ = true;
+        }
     }
 
     void OnDetachFromMainTree(bool recursive) override
@@ -81,14 +119,32 @@ private:
         builder_->UnregisterDataChangeListener(Claim(this));
     }
 
+    void OnOffscreenProcess(bool recursive) override
+    {
+        UINode::OnOffscreenProcess(recursive);
+        CHECK_NULL_VOID(builder_);
+        if (!isRegisterListener_) {
+            builder_->RegisterDataChangeListener(Claim(this));
+            isRegisterListener_ = true;
+        }
+    }
+
     void NotifyDataCountChanged(int32_t index);
 
     // The index values of the start and end of the current children nodes and the corresponding keys.
-    int32_t startIndex_ = -1;
-    int32_t endIndex_ = -1;
+    mutable int32_t startIndex_ = -1;
+    mutable int32_t endIndex_ = -1;
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
-    bool needPredict = false;
+    std::optional<LayoutConstraintF> itemConstraint_;
+    bool requestLongPredict_ = false;
+    bool isRegisterListener_ = false;
+    bool isLoop_ = false;
+
+    mutable std::list<RefPtr<UINode>> children_;
+    mutable bool needPredict_ = false;
+    bool needMarkParent_ = true;
+    int32_t cacheCount_ = 1;
 
     RefPtr<LazyForEachBuilder> builder_;
 

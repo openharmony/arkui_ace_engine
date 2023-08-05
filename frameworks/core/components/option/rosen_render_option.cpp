@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,13 @@
 
 #include "core/components/option/rosen_render_option.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPath.h"
 #include "include/core/SkRRect.h"
 #include "include/core/SkRect.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -52,7 +56,7 @@ void RosenRenderOption::PaintBackground(RenderContext& context, const Offset& of
         auto theme = data_->GetTheme();
         diff = NormalizeToPx(theme->GetOptionInterval());
     }
-
+#ifndef USE_ROSEN_DRAWING
     SkPath path;
     auto tempRect = SkRect::MakeXYWH(
         offset.GetX() + diff, offset.GetY() + diff, size.Width() - 2.0 * diff, size.Height() - 2.0 * diff);
@@ -69,6 +73,29 @@ void RosenRenderOption::PaintBackground(RenderContext& context, const Offset& of
     canvas->drawPath(path, paint);
     paint.setColor(GetEventEffectColor().GetValue());
     canvas->drawPath(path, paint);
+#else
+    RSRecordingPath path;
+    auto tempRect = RSRect(offset.GetX() + diff, offset.GetY() + diff,
+        size.Width() - 2.0 * diff + offset.GetX() + diff, size.Height() - 2.0 * diff + offset.GetY() + diff);
+    path.AddRoundRect(tempRect, radius, radius);
+    if (hovered_) {
+        RSPen pen;
+        pen.SetColor(HOVER_BORDER_COLOR);
+        canvas->AttachPen(pen);
+        canvas->DrawPath(path);
+        canvas->DetachPen();
+    }
+
+    RSPen pen;
+    pen.SetARGB(backColor_.GetAlpha(), backColor_.GetRed(), backColor_.GetGreen(), backColor_.GetBlue());
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+    pen.SetColor(GetEventEffectColor().GetValue());
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+#endif
     if (SystemProperties::GetDebugBoundaryEnabled()) {
         if (canvas == nullptr) {
             LOGE("Paint canvas is null.");
@@ -111,6 +138,7 @@ void RosenRenderOption::PaintLine(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPath path;
     path.addRect(
         static_cast<float>(left), static_cast<float>(top), static_cast<float>(right), static_cast<float>(bottom));
@@ -119,6 +147,18 @@ void RosenRenderOption::PaintLine(RenderContext& context, const Offset& offset)
     paint.setARGB(lineColor_.GetAlpha(), lineColor_.GetRed(), lineColor_.GetGreen(), lineColor_.GetBlue());
     paint.setAntiAlias(true);
     canvas->drawPath(path, paint);
+#else
+    RSRecordingPath path;
+    path.AddRect(RSRect(
+        static_cast<float>(left), static_cast<float>(top), static_cast<float>(right), static_cast<float>(bottom)));
+
+    RSPen pen;
+    pen.SetARGB(lineColor_.GetAlpha(), lineColor_.GetRed(), lineColor_.GetGreen(), lineColor_.GetBlue());
+    pen.SetAntiAlias(true);
+    canvas->AttachPen(pen);
+    canvas->DrawPath(path);
+    canvas->DetachPen();
+#endif
 }
 
 void RosenRenderOption::AnimateMouseHoverEnter()

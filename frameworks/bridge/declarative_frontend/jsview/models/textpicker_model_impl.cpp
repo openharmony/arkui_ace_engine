@@ -55,8 +55,59 @@ void TextPickerModelImpl::SetRange(const std::vector<NG::RangeContent>& value)
     JSViewSetProperty(&PickerTextComponent::SetRange, textRange);
 }
 
-void TextPickerModelImpl::SetOnChange(TextChangeEvent&& onChange)
+void TextPickerModelImpl::SetOnCascadeChange(TextCascadeChangeEvent&& onChange)
 {
-    JSViewSetProperty(&PickerBaseComponent::SetOnTextChange, std::move(onChange));
+    auto func = onChange;
+    auto onChangeEvent = [func](const std::string& value, const double& index) {
+        std::vector<std::string> changeValue { value };
+        std::vector<double> changeIndex { index };
+        func(changeValue, changeIndex);
+    };
+    JSViewSetProperty(&PickerBaseComponent::SetOnTextChange, std::move(onChangeEvent));
+}
+
+void TextPickerModelImpl::SetBackgroundColor(const Color& color)
+{
+    auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!pickerBase) {
+        LOGE("PickerBaseComponent is null");
+        return;
+    }
+
+    pickerBase->SetHasBackgroundColor(true);
+}
+
+RefPtr<AceType> TextPickerDialogModelImpl::CreateObject()
+{
+    return AceType::MakeRefPtr<PickerTextComponent>();
+}
+
+void TextPickerDialogModelImpl::SetTextPickerDialogShow(RefPtr<AceType>& PickerText,
+    NG::TextPickerSettingData& settingData, std::function<void()>&& onCancel,
+    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
+    TextPickerDialog& textPickerDialog)
+{
+    auto pickerText = AceType::DynamicCast<PickerTextComponent>(PickerText);
+    pickerText->SetIsDialog(true);
+    pickerText->SetIsCreateDialogComponent(true);
+    if (textPickerDialog.isDefaultHeight == true) {
+        pickerText->SetColumnHeight(textPickerDialog.height);
+        pickerText->SetDefaultHeight(true);
+    }
+    pickerText->SetSelected(textPickerDialog.selectedValue);
+    pickerText->SetRange(textPickerDialog.getRangeVector);
+
+    DialogProperties properties {};
+    properties.alignment = DialogAlignment::CENTER;
+    properties.customComponent = pickerText;
+    properties.customStyle = true;
+    auto acceptId = EventMarker(std::move(onAccept));
+    pickerText->SetDialogAcceptEvent(acceptId);
+    auto cancelId = EventMarker(std::move(onCancel));
+    pickerText->SetDialogCancelEvent(cancelId);
+    auto changeId = EventMarker(std::move(onChange));
+    pickerText->SetDialogChangeEvent(changeId);
+    pickerText->SetDialogName("pickerTextDialog");
+    pickerText->OpenDialog(properties);
 }
 } // namespace OHOS::Ace::Framework

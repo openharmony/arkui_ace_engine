@@ -39,6 +39,8 @@ constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
     auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
@@ -49,7 +51,9 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
     CHECK_NULL_VOID(stackNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
-    windowMode_ = PipelineContext::GetCurrentContext()->GetWindowManager()->GetWindowMode();
+    auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    windowMode_ = windowManager->GetWindowMode();
     hasDeco_ = hasDeco;
     LOGI("ShowTitle isShow: %{public}d, windowMode: %{public}d, hasDeco: %{public}d", isShow, windowMode_, hasDeco_);
     if (!hasDeco_) {
@@ -57,7 +61,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
     }
 
     // set container window show state to RS
-    PipelineContext::GetCurrentContext()->SetContainerWindow(isShow);
+    pipelineContext->SetContainerWindow(isShow);
 
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
@@ -75,7 +79,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(CONTAINER_BACKGROUND_COLOR);
+    renderContext->UpdateBackgroundColor(isFocus_ ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
     renderContext->UpdateBorderRadius(borderRadius);
@@ -101,7 +105,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 
     auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);
-    ChangeFloatingTitle(floatingTitleNode);
+    ChangeFloatingTitle(floatingTitleNode, isFocus_);
     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
 }
 
@@ -191,7 +195,8 @@ void ContainerModalPattern::InitContainerEvent()
                                      MouseInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
-        if (info.GetAction() != MouseAction::MOVE || !container->hasDeco_) {
+        auto action = info.GetAction();
+        if ((action != MouseAction::MOVE && action != MouseAction::WINDOW_LEAVE) || !container->hasDeco_) {
             return;
         }
         if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && container->CanShowFloatingTitle()) {
@@ -200,7 +205,7 @@ void ContainerModalPattern::InitContainerEvent()
             AnimationUtils::Animate(option, [context]() { context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f }); });
         }
 
-        if (info.GetLocalLocation().GetY() >= titlePopupDistance &&
+        if ((info.GetLocalLocation().GetY() >= titlePopupDistance || action == MouseAction::WINDOW_LEAVE) &&
             floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
             AnimationUtils::Animate(
                 option,
@@ -236,6 +241,7 @@ void ContainerModalPattern::OnWindowUnfocused()
 
 void ContainerModalPattern::WindowFocus(bool isFocus)
 {
+    isFocus_ = isFocus;
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
 
@@ -269,32 +275,41 @@ void ContainerModalPattern::ChangeTitle(const RefPtr<FrameNode>& titleNode, bool
 {
     CHECK_NULL_VOID(titleNode);
     // update title label
-    auto titleLabel = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(TITLE_LABEL_INDEX));
+    auto titleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, TITLE_LABEL_INDEX));
     auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
     titleLabel->MarkModifyDone();
     titleLabel->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     // update leftSplit button
-    auto leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
+    auto leftSplitButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, LEFT_SPLIT_BUTTON_INDEX));
     ChangeTitleButtonIcon(leftSplitButton,
         isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT, isFocus);
 
     // update maximize button
-    auto maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
-    ChangeTitleButtonIcon(maximizeButton,
-        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE
-                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE, isFocus);
+    auto maximizeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, MAX_RECOVER_BUTTON_INDEX));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto windowManager = pipeline->GetWindowManager();
+    MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
+    InternalResource::ResourceId maxId = InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
+    if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        maxId = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
+            : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER;
+    } else {
+        maxId = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE
+            : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
+    }
 
+    ChangeTitleButtonIcon(maximizeButton, maxId, isFocus);
     // update minimize button
-    auto minimizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
+    auto minimizeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, MINIMIZE_BUTTON_INDEX));
     ChangeTitleButtonIcon(minimizeButton,
         isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE, isFocus);
 
     // update close button
-    auto closeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(CLOSE_BUTTON_INDEX));
+    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, CLOSE_BUTTON_INDEX));
     ChangeTitleButtonIcon(closeButton,
         isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, isFocus);
@@ -305,21 +320,21 @@ void ContainerModalPattern::ChangeFloatingTitle(const RefPtr<FrameNode>& floatin
     CHECK_NULL_VOID(floatingNode);
 
     // update title label
-    auto titleLabel = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(TITLE_LABEL_INDEX));
+    auto titleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, TITLE_LABEL_INDEX));
     auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
     titleLabel->MarkModifyDone();
     titleLabel->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     // update leftSplit button
-    auto leftSplitButton = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
+    auto leftSplitButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, LEFT_SPLIT_BUTTON_INDEX));
     ChangeTitleButtonIcon(leftSplitButton,
         isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT, isFocus);
 
-    // hide leftSplit button when window mode is WINDOW_MODE_SPLIT_PRIMARY type
-    leftSplitButton->GetLayoutProperty()->UpdateVisibility(
-        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+    // hide leftSplit button when window mode is WINDOW_MODE_SPLIT_PRIMARY type or split button can not show
+    bool hideLeftSplit = hideSplitButton_ || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    leftSplitButton->GetLayoutProperty()->UpdateVisibility(hideLeftSplit ? VisibleType::GONE : VisibleType::VISIBLE);
 
     // update maxRecover button
     auto maxRecoverIconFocused = windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
@@ -328,17 +343,17 @@ void ContainerModalPattern::ChangeFloatingTitle(const RefPtr<FrameNode>& floatin
     auto maxRecoverIconUnfocused = windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
                                        ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER
                                        : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
-    auto maxRecover = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
+    auto maxRecover = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, MAX_RECOVER_BUTTON_INDEX));
     ChangeTitleButtonIcon(maxRecover, isFocus ? maxRecoverIconFocused : maxRecoverIconUnfocused, isFocus);
 
     // update minimize button
-    auto minimizeButton = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
+    auto minimizeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, MINIMIZE_BUTTON_INDEX));
     ChangeTitleButtonIcon(minimizeButton,
         isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE, isFocus);
 
     // update close button
-    auto closeButton = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(CLOSE_BUTTON_INDEX));
+    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, CLOSE_BUTTON_INDEX));
     ChangeTitleButtonIcon(closeButton,
         isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, isFocus);
@@ -385,14 +400,14 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
     LOGI("SetAppTitle successfully, title is %{public}s", title.c_str());
     auto titleNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().front()->GetChildren().front());
     CHECK_NULL_VOID(titleNode);
-    auto titleLabel = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(TITLE_LABEL_INDEX));
+    auto titleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, TITLE_LABEL_INDEX));
     titleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
     titleLabel->MarkModifyDone();
     titleLabel->MarkDirtyNode();
 
     auto floatingNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().back());
     CHECK_NULL_VOID(floatingNode);
-    auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(TITLE_LABEL_INDEX));
+    auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, TITLE_LABEL_INDEX));
     floatingTitleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
     floatingTitleLabel->MarkModifyDone();
     floatingTitleLabel->MarkDirtyNode();
@@ -415,6 +430,41 @@ void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
     auto floatingTitleIcon = AceType::DynamicCast<FrameNode>(floatingNode->GetChildren().front());
     floatingTitleIcon->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
     floatingTitleIcon->MarkModifyDone();
+}
+
+void ContainerModalPattern::SetTitleButtonHide(
+    const RefPtr<FrameNode>& titleNode, bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    auto leftSplitButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
+    CHECK_NULL_VOID(leftSplitButton);
+    leftSplitButton->GetLayoutProperty()->UpdateVisibility(hideSplit ? VisibleType::GONE : VisibleType::VISIBLE);
+    leftSplitButton->MarkDirtyNode();
+
+    auto maximizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
+    CHECK_NULL_VOID(maximizeButton);
+    maximizeButton->GetLayoutProperty()->UpdateVisibility(hideMaximize ? VisibleType::GONE : VisibleType::VISIBLE);
+    maximizeButton->MarkDirtyNode();
+
+    auto minimizeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
+    CHECK_NULL_VOID(minimizeButton);
+    minimizeButton->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
+    minimizeButton->MarkDirtyNode();
+}
+
+void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    SetTitleButtonHide(titleNode, hideSplit, hideMaximize, hideMinimize);
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
+    CHECK_NULL_VOID(floatingTitleNode);
+    SetTitleButtonHide(floatingTitleNode, hideSplit, hideMaximize, hideMinimize);
+    hideSplitButton_ = hideSplit;
+    LOGI("Set containerModal button status successfully, hideSplit: %{public}d, hideMaximize: %{public}d, "
+         "hideMinimize: %{public}d",
+        hideSplit, hideMaximize, hideMinimize);
 }
 
 } // namespace OHOS::Ace::NG

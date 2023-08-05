@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ListItemModelNG : public ListItemModel {
 public:
-    void Create(std::function<void(int32_t)>&& deepRenderFunc) override;
+    void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle) override;
     void Create() override;
     void SetBorderRadius(const Dimension& borderRadius) override {}
     void SetType(const std::string& type) override {}
@@ -32,6 +32,8 @@ public:
     void SetSticky(V2::StickyMode stickyMode) override;
     void SetEditMode(uint32_t editMode) override;
     void SetSelectable(bool selectable) override;
+    void SetSelected(bool selected) override;
+    void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) override;
     void SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
         V2::SwipeEdgeEffect edgeEffect) override;
     void SetSelectCallback(OnSelectFunc&& selectCallback) override;
