@@ -143,5 +143,8 @@ bool TextFieldPattern::IsTextArea() const
 }
 void TextFieldPattern::CreateHandles() {}
 void TextFieldPattern::StopEditing() {}
+void TextFieldPattern::TextIsEmptyRect(RectF &rect) {}
+void TextFieldPattern::TextAreaInputRectUpdate(RectF &rect) {}
+void TextFieldPattern::UpdateRectByAlignment(RectF &rect) {}
 
 } // namespace OHOS::Ace::NG

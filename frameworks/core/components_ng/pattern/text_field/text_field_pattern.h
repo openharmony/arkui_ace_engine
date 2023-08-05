@@ -941,6 +941,9 @@ public:
     }
 
     bool IsNormalInlineState() const;
+    void TextIsEmptyRect(RectF &rect);
+    void TextAreaInputRectUpdate(RectF &rect);
+    void UpdateRectByAlignment(RectF &rect);
 
 private:
     bool HasFocus() const;
