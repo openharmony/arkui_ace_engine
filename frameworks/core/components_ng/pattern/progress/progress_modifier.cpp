@@ -853,6 +853,22 @@ void ProgressModifier::PaintRingProgressOrShadow(
     std::vector<float> pos;
     auto gradient = SortGradientColorsByOffset(ringProgressColors_->Get().GetGradient());
     auto gradientColors = gradient.GetColors();
+    // Fault protection processing, if gradientColors is empty, set to default colors.
+    if (gradientColors.empty()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(theme);
+        GradientColor endColor;
+        GradientColor beginColor;
+        endColor.SetLinearColor(LinearColor(theme->GetRingProgressEndSideColor()));
+        endColor.SetDimension(0.0);
+        beginColor.SetLinearColor(LinearColor(theme->GetRingProgressBeginSideColor()));
+        beginColor.SetDimension(1.0);
+        gradientColors.emplace_back(endColor);
+        gradientColors.emplace_back(beginColor);
+    }
+
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
