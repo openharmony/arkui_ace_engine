@@ -864,9 +864,6 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("finishUpdateFunc", &JSViewPartialUpdate::JsFinishUpdateFunc);
     JSClass<JSViewPartialUpdate>::Method("setCardId", &JSViewPartialUpdate::JsSetCardId);
     JSClass<JSViewPartialUpdate>::CustomMethod("getCardId", &JSViewPartialUpdate::JsGetCardId);
-    JSClass<JSViewPartialUpdate>::CustomMethod("getDeletedElemtIds", &JSViewPartialUpdate::JsGetDeletedElemtIds);
-    JSClass<JSViewPartialUpdate>::CustomMethod(
-        "deletedElmtIdsHaveBeenPurged", &JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged);
     JSClass<JSViewPartialUpdate>::Method("elmtIdExists", &JSViewPartialUpdate::JsElementIdExists);
     JSClass<JSViewPartialUpdate>::CustomMethod("isLazyItemRender", &JSViewPartialUpdate::JSGetProxiedItemRenderState);
     JSClass<JSViewPartialUpdate>::CustomMethod("isFirstRender", &JSViewPartialUpdate::IsFirstRender);
@@ -926,38 +923,6 @@ void JSViewPartialUpdate::JsFinishUpdateFunc(int32_t elmtId)
         });
 }
 
-void JSViewPartialUpdate::JsGetDeletedElemtIds(const JSCallbackInfo& info)
-{
-    LOGD("JSView, getting elmtIds of all deleted Elements from ElementRegister:");
-    if (!info[0]->IsArray()) {
-        LOGE("info[0] is not array.");
-        return;
-    }
-    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
-    if (isRecycleRerender_) {
-        return;
-    }
-    std::unordered_set<int32_t>& removedElements = ElementRegister::GetInstance()->GetRemovedItems();
-    size_t index = jsArr->Length();
-    for (const auto& rmElmtId : removedElements) {
-        LOGD("  array removed elmtId %{public}d", rmElmtId);
-        JSRef<JSVal> jsRmElmtId = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(rmElmtId)));
-        jsArr->SetValueAt(index++, jsRmElmtId);
-    }
-}
-
-void JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsArray()) {
-        LOGE("info[0] is not array.");
-        return;
-    }
-    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
-    for (size_t i = 0; i < jsArr->Length(); i++) {
-        const JSRef<JSVal> strId = jsArr->GetValueAt(i);
-        ElementRegister::GetInstance()->ClearRemovedItems(strId->ToNumber<int32_t>());
-    }
-}
 
 bool JSViewPartialUpdate::JsElementIdExists(int32_t elmtId)
 {

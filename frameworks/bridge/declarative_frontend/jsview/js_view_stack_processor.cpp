@@ -91,6 +91,7 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     JSClass<JSViewStackProcessor>::StaticMethod("UsesNewPipeline", &JSViewStackProcessor::JsUsesNewPipeline, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("getApiVersion", &JSViewStackProcessor::JsGetApiVersion, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("GetAndPushFrameNode", &JSViewStackProcessor::JsGetAndPushFrameNode);
+    JSClass<JSViewStackProcessor>::StaticMethod("moveDeletedElmtIds", &JSViewStackProcessor::JsMoveDeletedElmtIds);
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
 }
 
@@ -148,6 +149,27 @@ void JSViewStackProcessor::JSMakeUniqueId(const JSCallbackInfo& info)
     const auto result = ElementRegister::GetInstance()->MakeUniqueId();
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
+void JSViewStackProcessor::JsMoveDeletedElmtIds(const JSCallbackInfo& info)
+{
+    LOGD("JSViewStackProcessor, moving elmtIds of all deleted Elements from ElementRegister to JS caller:");
+    if (!info[0]->IsArray()) {
+        LOGE("info[0] is not array.");
+        return;
+    }
+    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
+    
+    RemovedElementsType removedElements;
+    ElementRegister::GetInstance()->MoveRemovedItems(removedElements);
+    size_t index = jsArr->Length();
+    for (const auto& rmElmtId : removedElements) {
+        // TS Object of type RemovedElementInfo:
+        JSRef<JSObject> jsObject = JSRef<JSObject>::New();
+        jsObject->SetPropertyObject("elmtId", JSRef<JSVal>::Make(ToJSValue(rmElmtId.first)));
+        jsObject->SetPropertyObject("tag", JSRef<JSVal>::Make(ToJSValue(rmElmtId.second)));
+        jsArr->SetValueAt(index++, jsObject);
+    }
+}
+
 
 /**
  * return true of current Container uses new Pipeline

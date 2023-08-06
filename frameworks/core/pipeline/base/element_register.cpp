@@ -137,7 +137,7 @@ bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
     return AddReferenced(node->GetId(), node);
 }
 
-bool ElementRegister::RemoveItem(ElementIdType elementId)
+bool ElementRegister::RemoveItem(ElementIdType elementId, const std::string& tag)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
@@ -151,7 +151,7 @@ bool ElementRegister::RemoveItem(ElementIdType elementId)
             return true;
         }
         LOGD("ElmtId %{public}d successfully removed from registry, added to list of removed Elements.", elementId);
-        removedItems_.insert(elementId);
+        removedItems_.insert(std::pair(elementId, tag));
         LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
     } else {
         LOGD("ElmtId %{public}d not found. Cannot be removed.", elementId);
@@ -175,22 +175,11 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
     return removed;
 }
 
-std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
+void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
     LOGD("return set of %{public}d elmtIds", static_cast<int32_t>(removedItems_.size()));
-    return removedItems_;
-}
-
-void ElementRegister::ClearRemovedItems(ElementIdType elmtId)
-{
-    auto iter = removedItems_.find(elmtId);
-    if (iter != removedItems_.end()) {
-        removedItems_.erase(elmtId);
-        return;
-    }
-    // When the custom component is destroyed, the child component may be temporarily referenced by other objects, and
-    // removeItem will delay the call, which needs to be cached first here.
-    deletedCachedItems_.emplace(elmtId);
+    removedItems = removedItems_;
+    removedItems_ = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>();
 }
 
 void ElementRegister::Clear()

@@ -90,6 +90,11 @@ public:
      * Gets framenode and pushes to VSP.
     */
     static void JsGetAndPushFrameNode(const JSCallbackInfo& info);
+/*
+     move deleted elmtIds from C+ ElementRegistry to this component.
+     JS caller must allocate empty Array<number> and provide as param
+     */
+    static void JsMoveDeletedElmtIds(const JSCallbackInfo& info);
 
 private:
     static void JSVisualState(const JSCallbackInfo& info);

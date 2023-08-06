@@ -139,6 +139,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       : new Map<string, ObservedPropertyAbstractPU<any>>();
 
     this.localStoragebackStore_ = undefined;
+    stateMgmtConsole.log(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}}'`);
     if (parent) {
       // this View is not a top-level View
       this.setCardId(parent.getCardId());
@@ -170,19 +171,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
-    // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
-    // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the
-    // updateDirtyElements function.
-    let removedElmtIds: number[] = [];
-    this.updateFuncByElmtId.forEach((value: UpdateFunc, key: number) => {
-      this.purgeVariableDependenciesOnElmtId(key);
-      removedElmtIds.push(key);
-    });
-    this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
-    if (this.hasRecycleManager()) {
-      this.getRecycleManager().purgeAllCachedRecycleNode();
-    }
+    // tell UINodeRegisterProxy that all elmtIds under 
+    // this ViewPU should be treated as already unregistered
+    UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
 
+    // unregister the elmtId of this ViewPU / its CustomNode object
+    UINodeRegisterProxy.consume(this.id__());
+    
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
@@ -346,13 +341,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   public forceCompleteRerender(deep: boolean = false): void {
     stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - start.`);
 
-    // request list of all (gloabbly) deleted elmtIds;
-    let deletedElmtIds: number[] = [];
-    this.getDeletedElemtIds(deletedElmtIds);
-
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them
-    this.purgeDeletedElmtIds(deletedElmtIds);
+    this.purgeDeletedElmtIds();
 
     Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
 
@@ -375,13 +366,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
    * framework internal functions, apps must not call
    */
   public forceRerenderNode(elmtId: number): void {
-    // request list of all (gloabbly) deleted elmtIds;
-    let deletedElmtIds: number[] = [];
-    this.getDeletedElemtIds(deletedElmtIds);
-
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them
-    this.purgeDeletedElmtIds(deletedElmtIds);
+    this.purgeDeletedElmtIds();
     this.UpdateElement(elmtId);
 
     // remove elemtId from dirtDescendantElementIds.
@@ -548,13 +535,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
     do {
         stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
 
-        // request list of all (gloabbly) deleteelmtIds;
-        let deletedElmtIds: number[] = [];
-        this.getDeletedElemtIds(deletedElmtIds);
-
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
-        this.purgeDeletedElmtIds(deletedElmtIds);
+        this.purgeDeletedElmtIds();
 
         // process all elmtIds marked as needing update in ascending order.
         // ascending order ensures parent nodes will be updated before their children
@@ -572,31 +555,35 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
-  purgeDeletedElmtIds(rmElmtIds: number[]) {
-    if (rmElmtIds.length == 0) {
+  protected purgeDeletedElmtIds(): void {
+
+    stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) `)
+    // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
+    UINodeRegisterProxy.obtainDeletedElmtIds();
+    if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
+      stateMgmtConsole.debug(`@Component '${this.constructor.name}' (id: ${this.id__()}) purgeDeletedElmtIds = no elmtIds to unregister (globally) - done!`)
       return;
     }
 
-    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}.purgeDeletedElmtIds -  start.`);
+    stateMgmtConsole.debug(`@Component '${this.constructor.name}' (id: ${this.id__()}) purgeDeletedElmtIds - start ....`);
+    UINodeRegisterProxy.dump();
 
-    // rmElmtIds is the array of ElemntIds that
-    let removedElmtIds: number[] = [];
-    rmElmtIds.forEach((elmtId: number) => {
-      // remove entry from Map elmtId -> update function
-      if (this.updateFuncByElmtId.delete(elmtId)) {
+    const elmtIdsOfThisView = this.updateFuncByElmtId.keys();
+    for (const rmElmtId of elmtIdsOfThisView) {
+      if (UINodeRegisterProxy.consume(rmElmtId)) {
+        stateMgmtConsole.debug(`   ... purging elmtId ${rmElmtId}.`);
+        // remove entry from Map elmtId -> update function
+        this.updateFuncByElmtId.delete(rmElmtId);
 
         // for each state var, remove dependent elmtId (if present)
         // purgeVariableDependenciesOnElmtId needs to be generated by the compiler
-        this.purgeVariableDependenciesOnElmtId(elmtId);
+        this.purgeVariableDependenciesOnElmtId(rmElmtId);
+      } // for all elmtIds that need to unregister
 
-        // keep track of elmtId that has been de-registered
-        removedElmtIds.push(elmtId);
-      }
-    });
+    }
 
-    this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
-    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}.purgeDeletedElmtIds: removed elemntIds  ${JSON.stringify(removedElmtIds)}.`);
-    stateMgmtConsole.debug(`   ... remaining update funcs for elmtIds ${JSON.stringify([... this.updateFuncByElmtId.keys()])} .`);
+    stateMgmtConsole.debug(`@Component '${this.constructor.name}' (id: ${this.id__()}) purgeDeletedElmtIds - done`);
+    UINodeRegisterProxy.dump();
   }
 
   // executed on first render only

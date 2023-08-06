@@ -38,6 +38,18 @@ namespace OHOS::Ace {
 using ElementIdType = int32_t;
 class Element;
 
+// removed_items is a Set of elmtId and UINode TAG
+// The TAG aims easier analysis for DFX and debug
+// This std::pair needs a custom has function
+struct deleted_element_hash {
+    inline std::size_t operator()(const std::pair<ElementIdType, std::string>& v) const
+    {
+        return v.first;
+    }
+};
+
+using RemovedElementsType = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>;
+
 class ACE_EXPORT ElementRegister {
 public:
     static constexpr ElementIdType UndefinedElementId = static_cast<ElementIdType>(-1);
@@ -76,7 +88,7 @@ public:
      * means GetElementById on this elmtId no longer returns an Element
      * method adds the elmtId to the removed Element Set
      */
-    bool RemoveItem(ElementIdType elementId);
+    bool RemoveItem(ElementIdType elementId, const std::string& tag = std::string("undefined TAG"));
 
     /**
      * remove Element with given elmtId from the Map
@@ -91,8 +103,7 @@ public:
      * return  removed elements set to the caller
      * should be followed by ClearRemovedElements() call
      */
-    std::unordered_set<ElementIdType>& GetRemovedItems();
-    void ClearRemovedItems(ElementIdType elmtId);
+    void MoveRemovedItems(RemovedElementsType& removedItems);
 
     /**
      * does a complete reset
@@ -133,10 +144,10 @@ private:
     std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;
 
     // Set of removed Elements (not in itemMap_ anymore)
-    std::unordered_set<ElementIdType> removedItems_;
+    RemovedElementsType removedItems_;
 
     // Cache IDs that are referenced by other object
-    // which causes delayed destruction  when custom node is destoryed.
+    // which causes delayed destruction  when custom node is destroyed.
     std::unordered_set<ElementIdType> deletedCachedItems_;
 
     std::unordered_map<std::string, RefPtr<NG::GeometryTransition>> geometryTransitionMap_;

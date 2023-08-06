@@ -69,7 +69,7 @@ UINode::~UINode()
 #endif
 
     if (!removeSilently_) {
-        ElementRegister::GetInstance()->RemoveItem(nodeId_);
+        ElementRegister::GetInstance()->RemoveItem(nodeId_, tag_);
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }

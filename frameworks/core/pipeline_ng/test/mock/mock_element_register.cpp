@@ -84,7 +84,7 @@ bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
     return AddReferenced(node->GetId(), node);
 }
 
-bool ElementRegister::RemoveItem(ElementIdType /*elementId*/)
+bool ElementRegister::RemoveItem(ElementIdType /*elementId*/, const std::string& /* tag */)
 {
     return true;
 }
@@ -97,12 +97,11 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
     return itemMap_.erase(elementId);
 }
 
-std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
+void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
-    return removedItems_;
+    removedItems = removedItems_;
+    removedItems_ = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>();
 }
-
-void ElementRegister::ClearRemovedItems(ElementIdType elementId) {}
 
 void ElementRegister::Clear()
 {
