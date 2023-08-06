@@ -231,6 +231,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 LOGI("In setThumbnailPixelMap callback, set DragWindowVisible true.");
             }
             Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+            dragDropManager->SetIsDragWindowShow(true);
         };
         auto gestureHub = gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -380,6 +381,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (gestureHub->GetTextDraggable()) {
+            actuator->SetIsNotInPreviewState(false);
             if (gestureHub->GetIsTextDraggable()) {
                 actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
             }
@@ -757,6 +759,7 @@ void DragEventActuator::GetTextPixelMap(bool startDrag)
         LOGI("In function getTextPixelMap, set DragWindowVisible true.");
     }
     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+    dragDropManager->SetIsDragWindowShow(true);
     gestureHub->SetPixelMap(nullptr);
 }
 
