@@ -298,6 +298,9 @@ void SwiperPattern::InitSurfaceChangedCallback()
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
             [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
                 WindowSizeChangeReason type) {
+                if (type == WindowSizeChangeReason::UNDEFINED) {
+                    return;
+                }
                 auto swiper = weak.Upgrade();
                 if (!swiper) {
                     return;
