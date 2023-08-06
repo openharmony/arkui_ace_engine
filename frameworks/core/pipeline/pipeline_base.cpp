@@ -667,6 +667,13 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     return frontend->GetAccessibilityManager();
 }
 
+bool PipelineBase::HasFloatTitle() const
+{
+    CHECK_NULL_RETURN_NOLOG(windowManager_, false);
+    return GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+           windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+}
+
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent)
 {
     auto accessibilityManager = GetAccessibilityManager();
