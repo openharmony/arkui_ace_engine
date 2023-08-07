@@ -151,7 +151,7 @@ std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const 
     return std::move(createSourceInfoFunc);
 }
 
-int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, int32_t index)
+int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool isPaste, int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
@@ -194,9 +194,11 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, int32_t
             imageLayoutProperty->UpdateImageFit(options.imageAttribute.value().objectFit.value());
         }
     }
-    isTextChange_ = true;
-    moveDirection_ = MoveDirection::FORWARD;
-    moveLength_ += 1;
+    if (isPaste) {
+        isTextChange_ = true;
+        moveDirection_ = MoveDirection::FORWARD;
+        moveLength_ += 1;
+    }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2276,9 +2278,9 @@ void RichEditorPattern::HandleOnPaste()
         int32_t index = 0;
         if (richEditor->GetCaretSpanIndex() == -1) {
             imageOption.offset = richEditor->GetCaretPosition() + richEditor->moveLength_;
-            index = richEditor->AddImageSpan(imageOption);
+            index = richEditor->AddImageSpan(imageOption, true);
         } else {
-            index = richEditor->AddImageSpan(imageOption, richEditor->GetCaretSpanIndex() + 1);
+            index = richEditor->AddImageSpan(imageOption, true, richEditor->GetCaretSpanIndex() + 1);
         }
         if (isLastRecord) {
             richEditor->ResetAfterPaste();
@@ -2303,9 +2305,9 @@ void RichEditorPattern::HandleOnPaste()
         int32_t index = 0;
         if (richEditor->GetCaretSpanIndex() == -1) {
             imageOption.offset = richEditor->GetCaretPosition() + richEditor->moveLength_;
-            index = richEditor->AddImageSpan(imageOption);
+            index = richEditor->AddImageSpan(imageOption, true);
         } else {
-            index = richEditor->AddImageSpan(imageOption, richEditor->GetCaretSpanIndex() + 1);
+            index = richEditor->AddImageSpan(imageOption, true, richEditor->GetCaretSpanIndex() + 1);
         }
         if (isLastRecord) {
             richEditor->SetCaretSpanIndex(-1);
