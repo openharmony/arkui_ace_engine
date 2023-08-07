@@ -1834,10 +1834,8 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
 #ifdef ENABLE_DRAG_FRAMEWORK
-        if (manager->GetExtraInfo().empty()) {
-            manager->GetExtraInfoFromClipboard(extraInfo);
-            manager->SetExtraInfo(extraInfo);
-        }
+        manager->GetExtraInfoFromClipboard(extraInfo);
+        manager->SetExtraInfo(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
         manager->OnDragEnd(Point(x, y, x, y), extraInfo);
         manager->RestoreClipboardData();
