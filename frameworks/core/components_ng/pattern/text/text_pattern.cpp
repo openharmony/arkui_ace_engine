@@ -531,6 +531,29 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
     }
 }
 
+void TextPattern::InitTouchEvent()
+{
+    CHECK_NULL_VOID_NOLOG(!touchEventInitialized_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleTouchEvent(info);
+    };
+    auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gesture->AddTouchEvent(touchListener_);
+    touchEventInitialized_ = true;
+}
+
+void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    return;
+}
+
 void TextPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID_NOLOG(!panEventInitialized_);
@@ -807,6 +830,7 @@ void TextPattern::OnModifyDone()
 #endif
         }
         InitMouseEvent();
+        InitTouchEvent();
         SetAccessibilityAction();
     }
     if (onClick_ || copyOption_ != CopyOptions::None) {
