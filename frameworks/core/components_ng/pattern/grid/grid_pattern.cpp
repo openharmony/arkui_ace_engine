@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -149,9 +150,10 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::list<RefPtr<FrameNode>> children;
-    host->GenerateOneDepthVisibleFrame(children);
-    for (const auto& itemFrameNode : children) {
+    auto& children = host->GetFrameChildren();
+    for (const auto& weak : children) {
+        auto itemFrameNode = weak.Upgrade();
+        CHECK_NULL_VOID(itemFrameNode);
         auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(itemEvent);
         if (!itemEvent->IsEnabled()) {
@@ -169,11 +171,27 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
         CHECK_NULL_VOID(context);
 
         auto itemRect = itemGeometry->GetFrameRect();
+        auto iter = itemToBeSelected_.find(itemFrameNode->GetId());
+        if (iter == itemToBeSelected_.end()) {
+            auto result = itemToBeSelected_.emplace(itemFrameNode->GetId(), ItemSelectedStatus());
+            iter = result.first;
+            iter->second.onSelected = itemPattern->GetEventHub<GridItemEventHub>()->GetOnSelect();
+            iter->second.selectChangeEvent = itemPattern->GetEventHub<GridItemEventHub>()->GetSelectChangeEvent();
+            auto startMainOffset = mouseStartOffset_.GetMainOffset(gridLayoutInfo_.axis_);
+            if (gridLayoutInfo_.axis_ == Axis::VERTICAL) {
+                iter->second.rect = itemRect + OffsetF(0, totalOffsetOfMousePressed_ - startMainOffset);
+            } else {
+                iter->second.rect = itemRect + OffsetF(totalOffsetOfMousePressed_ - startMainOffset, 0);
+            }
+        }
+
         if (!selectedZone.IsIntersectWith(itemRect)) {
             itemPattern->MarkIsSelected(false);
+            iter->second.selected = false;
             context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         } else {
             itemPattern->MarkIsSelected(true);
+            iter->second.selected = true;
             context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         }
     }
@@ -195,6 +213,10 @@ void GridPattern::ClearMultiSelect()
         auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
         auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
         CHECK_NULL_VOID(itemPattern);
+        auto selectedStatus = itemToBeSelected_.find(itemFrameNode->GetId());
+        if (selectedStatus != itemToBeSelected_.end()) {
+            selectedStatus->second.selected = false;
+        }
         itemPattern->MarkIsSelected(false);
         auto renderContext = itemFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -1480,5 +1502,17 @@ void GridPattern::SetAccessibilityAction()
         }
         pattern->ScrollPage(true);
     });
+}
+
+void GridPattern::DumpInfo()
+{
+    LOGI("reachStart:%{public}d,reachEnd:%{public}d,offsetEnd:%{public}d", gridLayoutInfo_.reachStart_,
+        gridLayoutInfo_.reachEnd_, gridLayoutInfo_.offsetEnd_);
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID_NOLOG(property);
+    LOGI("startIndex:%{public}d,endIndex:%{public}d,startMainLine:%{public}d,endMainLine:%{public}d,cachedCount:%{"
+         "public}d",
+        gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.startMainLineIndex_,
+        gridLayoutInfo_.endMainLineIndex_, property->GetCachedCountValue(1));
 }
 } // namespace OHOS::Ace::NG

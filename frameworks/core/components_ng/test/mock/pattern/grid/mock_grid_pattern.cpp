@@ -114,4 +114,6 @@ bool GridPattern::IsItemSelected(const MouseInfo& info)
 {
     return false;
 }
+
+void GridPattern::DumpInfo() {}
 } // namespace OHOS::Ace::NG

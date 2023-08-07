@@ -84,6 +84,24 @@ public:
         return 1;
     }
 
+    struct ZIndexComparator {
+        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
+        {
+            auto left = weakLeft.Upgrade();
+            auto right = weakRight.Upgrade();
+            if (left && right) {
+                return left->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE) <
+                    right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+            }
+            return false;
+        }
+    };
+
+    const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& GetFrameChildren() const
+    {
+        return frameChildren_;
+    }
+
     void InitializePatternAndContext();
 
     virtual void MarkModifyDone();
@@ -503,18 +521,6 @@ private:
     // set costom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
 
-    struct ZIndexComparator {
-        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
-        {
-            auto left = weakLeft.Upgrade();
-            auto right = weakRight.Upgrade();
-            if (left && right) {
-                return left->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE) <
-                    right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
-            }
-            return false;
-        }
-    };
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();

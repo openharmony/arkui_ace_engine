@@ -185,6 +185,8 @@ public:
     float EstimateHeight() const;
     float GetAverageHeight() const;
 
+    void DumpInfo() override;
+
 private:
     float GetMainGap();
     float GetAllDelta();
