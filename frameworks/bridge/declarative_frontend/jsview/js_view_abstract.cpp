@@ -2070,7 +2070,7 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
-        saturation = (saturation > 0.0f || NearZero(saturation))? saturation : 1.0f;
+        saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
     }
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
@@ -2204,10 +2204,13 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
+    BackgroundImageSize bgImgSize;
     if (!CheckJSCallbackInfo("JsBackgroundImageSize", info, checkList)) {
+        bgImgSize.SetSizeTypeX(BackgroundImageSizeType::AUTO);
+        bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
+        ViewAbstractModel::GetInstance()->SetBackgroundImageSize(bgImgSize);
         return;
     }
-    BackgroundImageSize bgImgSize;
     if (info[0]->IsNumber()) {
         auto sizeType = static_cast<BackgroundImageSizeType>(info[0]->ToNumber<int32_t>());
         bgImgSize.SetSizeTypeX(sizeType);
@@ -2247,10 +2250,12 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
+    BackgroundImagePosition bgImgPosition;
     if (!CheckJSCallbackInfo("JsBackgroundImagePosition", info, checkList)) {
+        SetBgImgPosition(DimensionUnit::PX, DimensionUnit::PX, 0.0, 0.0, bgImgPosition);
+        ViewAbstractModel::GetInstance()->SetBackgroundImagePosition(bgImgPosition);
         return;
     }
-    BackgroundImagePosition bgImgPosition;
     if (info[0]->IsNumber()) {
         int32_t align = info[0]->ToNumber<int32_t>();
         switch (align) {
