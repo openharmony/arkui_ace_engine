@@ -164,6 +164,7 @@ void SubwindowOhos::InitContainer()
         CHECK_NULL_VOID(subPipelineContextNG);
         subPipelineContextNG->SetParentPipeline(parentContainer->GetPipelineContext());
         subPipelineContextNG->SetupSubRootElement();
+        subPipelineContextNG->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
         return;
     }
     auto subPipelineContext =
@@ -171,6 +172,7 @@ void SubwindowOhos::InitContainer()
     CHECK_NULL_VOID(subPipelineContext);
     subPipelineContext->SetParentPipeline(parentContainer->GetPipelineContext());
     subPipelineContext->SetupSubRootElement();
+    subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
 }
 
 RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
