@@ -633,9 +633,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     const factory = <T>(source: ObservedPropertyAbstract<T>) => {
-      const result : ObservedPropertyAbstractPU<T> = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
-          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName) 
-          : new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName);
+      const result : ObservedPropertyAbstractPU<T> = new SynchedPropertyTwoWayPU<T>(source, this, consumeVarName);
+      stateMgmtConsole.debug(`The @Consume is instance of ${result.constructor.name}`);
       return result;
     };
     return providedVarStore.createSync(factory) as  ObservedPropertyAbstractPU<T>;
@@ -1055,9 +1054,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const appStorageLink = AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
-        : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
-          : new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
+        : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
     this.ownStorageLinksProps_.add(appStorageLink);
     return appStorageLink;
@@ -1067,9 +1064,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const appStorageProp = AppStorage.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
-        : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
-          : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
+        : new SynchedPropertyOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
     this.ownStorageLinksProps_.add(appStorageProp);
     return appStorageProp;
@@ -1080,9 +1075,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       const localStorageLink =  this.localStorage_.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
-        : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
-          : new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
+        : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
     this.ownStorageLinksProps_.add(localStorageLink);
     return localStorageLink;
@@ -1093,9 +1086,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       const localStorageProp = this.localStorage_.__createSync<T>(storagePropName, defaultValue,
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
-        : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
-          : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
+        : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
     this.ownStorageLinksProps_.add(localStorageProp);
     return localStorageProp;

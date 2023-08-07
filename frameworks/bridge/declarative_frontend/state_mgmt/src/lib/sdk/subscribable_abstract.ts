@@ -91,21 +91,22 @@ abstract class SubscribableAbstract {
     stateMgmtConsole.debug(`SubscribableAbstract: notifyPropertyHasChanged '${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
-      if (owningProperty) {
-        if ('objectPropertyHasChangedPU' in owningProperty) {
-          // PU code path
-          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
-        }
-
-        // FU code path
-        if ('hasChanged' in owningProperty) {
-          (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
-        }
-        if ('propertyHasChanged' in owningProperty) {
-          (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
-        }
-      } else {
+      if (!owningProperty) {
         stateMgmtConsole.error(`SubscribableAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+        return;
+      }
+      // PU Code path
+      if ('objectPropertyHasChangedPU' in owningProperty) {
+      // PU code path
+        (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
+        return;
+      }
+      // FU code path
+      if ('hasChanged' in owningProperty) {
+        (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
+      }
+      if ('propertyHasChanged' in owningProperty) {
+        (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
       }
     });
   }

@@ -68,14 +68,10 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
     }
   }
 
-  public abstract get(): T;
-
   // Partial Update "*PU" classes will overwrite
   public getUnmonitored(): T {
     return this.get();
   }
-
-  public abstract set(newValue: T): void;
 
   // update the element id for recycle custom component
   public updateElmtId(oldElmtId: number, newElmtId: number): void {
@@ -120,6 +116,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
     }
   }
 
+  // FU code path callback
   protected notifyHasChanged(newValue: T) {
     stateMgmtProfiler.begin("ObservedPropertyAbstract.notifyHasChanged");
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
@@ -132,12 +129,6 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
         }
         if ('propertyHasChanged' in subscriber) {
           (subscriber as IMultiPropertiesChangeSubscriber).propertyHasChanged(this.info_);
-        }
-
-        // PU code path, only used for ObservedPropertySimple/Object stored inside App/LocalStorage
-        // ObservedPropertySimplePU/ObjectPU  used in all other PU cases, has its own notifyPropertyHasChangedPU()
-        if ('syncPeerHasChanged' in subscriber) {
-          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this as unknown as ObservedPropertyAbstractPU<T>);
         }
       } else {
         stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
