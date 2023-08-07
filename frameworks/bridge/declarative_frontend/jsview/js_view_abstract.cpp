@@ -2554,7 +2554,8 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderWidth", info, checkList)) {
-        LOGE("args need a string or number or object");
+        LOGW("args need a string or number or object");
+        ViewAbstractModel::GetInstance()->SetBorderWidth({});
         return;
     }
     ParseBorderWidth(info[0]);
@@ -2946,7 +2947,8 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderRadius", info, checkList)) {
-        LOGE("args need a string or number or object");
+        LOGW("args need a string or number or object");
+        ViewAbstractModel::GetInstance()->SetBorderRadius({});
         return;
     }
     ParseBorderRadius(info[0]);
