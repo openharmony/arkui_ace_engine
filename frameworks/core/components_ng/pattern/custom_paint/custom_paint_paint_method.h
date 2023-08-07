@@ -416,7 +416,7 @@ protected:
     void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
 #ifndef USE_ROSEN_DRAWING
     virtual SkCanvas* GetRawPtrOfSkCanvas() = 0;
-    virtual void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) = 0;
+    virtual void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint) = 0;
 #else
     virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
     virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas) = 0;

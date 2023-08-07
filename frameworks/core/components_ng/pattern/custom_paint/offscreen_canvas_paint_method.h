@@ -72,7 +72,7 @@ private:
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
 #ifndef USE_ROSEN_DRAWING
-    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
+    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint) override;
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
     SkCanvas* GetRawPtrOfSkCanvas() override
     {
