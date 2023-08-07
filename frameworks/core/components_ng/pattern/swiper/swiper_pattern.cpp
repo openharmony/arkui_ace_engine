@@ -1373,6 +1373,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     }
 
     UpdateCurrentOffset(static_cast<float>(mainDelta));
+    UpdateItemRenderGroup(true);
 }
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
@@ -1586,6 +1587,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
 
     // enable lazy load feature.
     SetLazyLoadFeature(true);
+    UpdateItemRenderGroup(true);
 }
 
 void SwiperPattern::UpdateOffsetAfterPropertyAnimation(float offset)
@@ -2744,6 +2746,17 @@ bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper()
     return false;
 }
 
+void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
+{
+    for (auto& item : itemPosition_) {
+        if (auto frameNode = item.second.node) {
+            auto context = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->UpdateRenderGroup(itemRenderGroup);
+        }
+    }
+}
+
 void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool forceStop)
 {
     if (forceStop && !isFinishAnimation_) {
@@ -2769,6 +2782,7 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
         PostTranslateTask(delayTime);
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::OnWindowShow()

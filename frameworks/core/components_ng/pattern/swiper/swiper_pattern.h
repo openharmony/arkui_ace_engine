@@ -548,6 +548,7 @@ private:
     void StopAndResetSpringAnimation();
     void OnLoopChange();
     void StopSpringAnimationAndFlushImmediately();
+    void UpdateItemRenderGroup(bool itemRenderGroup);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
