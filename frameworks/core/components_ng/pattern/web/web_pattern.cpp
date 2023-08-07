@@ -1735,6 +1735,7 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
     selectInfo.onHandleMoveStart = [weak = AceType::WeakClaim(this)](bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
+        webPattern->SetCurrentStartHandleDragging(isFirst);
         webPattern->SetSelectOverlayDragging(true);
     };
 }
@@ -1789,6 +1790,51 @@ void WebPattern::OnQuickMenuDismissed()
     CloseSelectOverlay();
 }
 
+void WebPattern::UpdateSelectHandleInfo()
+{
+    bool needReverse = IsSelectHandleReverse();
+    SelectHandleInfo handleInfo;
+    if (!needReverse) {
+        if (!isCurrentStartHandleDragging_) {
+            handleInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
+            handleInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
+            selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
+        } else {
+            handleInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
+            handleInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+            selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
+        }
+    } else {
+        if (!isCurrentStartHandleDragging_) {
+            handleInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
+            handleInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+            selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
+        } else {
+            handleInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
+            handleInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
+            selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
+        }
+    }
+}
+
+bool WebPattern::IsSelectHandleReverse()
+{
+    if (startSelectionHandle_->GetTouchHandleType() ==
+        OHOS::NWeb::NWebTouchHandleState::SELECTION_BEGIN_HANDLE &&
+        endSelectionHandle_->GetTouchHandleType() ==
+        OHOS::NWeb::NWebTouchHandleState::SELECTION_BEGIN_HANDLE) {
+        LOGI("The left handle is reversed");
+        return true;
+    } else if (startSelectionHandle_->GetTouchHandleType() ==
+        OHOS::NWeb::NWebTouchHandleState::SELECTION_END_HANDLE &&
+        endSelectionHandle_->GetTouchHandleType() ==
+        OHOS::NWeb::NWebTouchHandleState::SELECTION_END_HANDLE) {
+        LOGI("The right handle is reversed");
+        return true;
+    }
+    return false;
+}
+
 void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
@@ -1823,6 +1869,8 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     } else {
         if (overlayType == INSERT_OVERLAY) {
             UpdateTouchHandleForOverlay();
+        } else {
+            UpdateSelectHandleInfo();
         }
     }
 }
