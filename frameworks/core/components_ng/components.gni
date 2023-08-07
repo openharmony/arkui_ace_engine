@@ -100,6 +100,7 @@ template("build_component_ng") {
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/",
         "//third_party/bounds_checking_function/include",
       ]
 
