@@ -48,16 +48,16 @@ constexpr int32_t WRONG_ANIMATION_DURATION_FLASH_ONCE =
     WRONG_ANIMATION_DURATION_DIMMING + WRONG_ANIMATION_DURATION_BRIGHTENING;
 constexpr int32_t WRONG_ANIMATION_DURATION_FLASH_TWICE =
     WRONG_ANIMATION_DURATION_FLASH_ONCE + WRONG_ANIMATION_DURATION_FLASH_ONCE;
-constexpr float BACKROUND_RADIUS_SPRING_RESPONSE = 0.347f;
-constexpr float BACKROUND_RADIUS_SPRING_DAMPING = 0.55f;
+constexpr float BACKGROUND_RADIUS_SPRING_RESPONSE = 0.347f;
+constexpr float BACKGROUND_RADIUS_SPRING_DAMPING = 0.55f;
 constexpr Dimension LIGHT_RING_LINE_WIDTH = 2.5_vp;
 constexpr Dimension LIGHT_RING_MASK_RADIUS = 10.0_vp;
 constexpr float LIGHT_RING_ALPHAF_START = 0.0f;
 constexpr float LIGHT_RING_ALPHAF_END = 0.5f;
-constexpr float CONNECTED_LINE_SPRING_RESPONSE = 0.55f;
-constexpr float CONNECTED_LINE_SPRING_DAMPING = 0.88F;
-constexpr float CANCELED_LINE_SPRING_RESPONSE = 0.347f;
-constexpr float CANCELED_LINE_SPRING_DAMPING = 0.99f;
+constexpr float CONNECTED_LINE_SPRING_RESPONSE = 0.22f;
+constexpr float CONNECTED_LINE_SPRING_DAMPING = 0.88f;
+constexpr float CANCELED_LINE_SPRING_RESPONSE = 0.22f;
+constexpr float CANCELED_LINE_SPRING_DAMPING = 0.88f;
 constexpr int32_t ANIMATABLE_POINT_COUNT = 2;
 } // namespace
 
@@ -79,7 +79,7 @@ void PatternLockModifier::CreateProperties()
     wrongColor_ = AceType::MakeRefPtr<PropertyColor>(Color::RED);
     correctColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLUE);
     pressColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLACK);
-    pathColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLUE);
+    pathColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::BLUE));
     pointAnimateColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::BLACK));
     pathStrokeWidth_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     offset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
@@ -387,7 +387,7 @@ void PatternLockModifier::SetActiveColor(const Color& activeColor)
     activeColor_->Set(activeColor);
 }
 
-void PatternLockModifier::SetPathColor(const Color& pathColor)
+void PatternLockModifier::SetPathColor(const LinearColor& pathColor)
 {
     CHECK_NULL_VOID(pathColor_);
     pathColor_->Set(pathColor);
@@ -472,6 +472,7 @@ void PatternLockModifier::StartChallengeResultAnimate()
         AnimationUtils::Animate(option, [&]() { pointAnimateColor_->Set(LinearColor(correctColor_->Get())); });
     } else if (challengeResult_.value() == NG::PatternLockChallengeResult::WRONG) {
         pointAnimateColor_->Set(LinearColor(wrongColor_->Get()));
+        auto pathColor = pathColor_->Get();
         AnimationOption option = AnimationOption();
         option.SetDuration(WRONG_ANIMATION_DURATION_FLASH_TWICE);
         option.SetCurve(Curves::SHARP);
@@ -480,11 +481,13 @@ void PatternLockModifier::StartChallengeResultAnimate()
             CHECK_NULL_VOID(modifier);
             modifier->pointAnimateColor_->Set(
                 LinearColor(modifier->wrongColor_->Get().BlendOpacity(FLASH_POINT_OPACITY)));
+            modifier->SetPathColor(LinearColor(modifier->pathColor_->Get().BlendOpacity(FLASH_POINT_OPACITY)));
         };
-        auto brighteningAnimation = [weak = WeakClaim(this)]() {
+        auto brighteningAnimation = [weak = WeakClaim(this), pathColor]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
             modifier->pointAnimateColor_->Set(LinearColor(modifier->wrongColor_->Get()));
+            modifier->SetPathColor(pathColor);
         };
         AnimationUtils::OpenImplicitAnimation(option, Curves::SHARP, nullptr);
         AnimationUtils::AddKeyFrame(((float)WRONG_ANIMATION_DURATION_DIMMING / WRONG_ANIMATION_DURATION_FLASH_TWICE),
@@ -551,9 +554,10 @@ void PatternLockModifier::SetHoverRadiusScale(float scale)
 void PatternLockModifier::SetBackgroundCircleRadius(int32_t index)
 {
     if (index < static_cast<int32_t>(backgroundCircleRadius_.size()) && index >= 0) {
+        backgroundCircleRadius_.at(index)->Set(0.0f);
         AnimationOption option = AnimationOption();
         auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(
-            BACKROUND_RADIUS_SPRING_RESPONSE, BACKROUND_RADIUS_SPRING_DAMPING);
+            BACKGROUND_RADIUS_SPRING_RESPONSE, BACKGROUND_RADIUS_SPRING_DAMPING);
         option.SetCurve(curve);
         AnimationUtils::Animate(option,
             [&]() { backgroundCircleRadius_.at(index)->Set(circleRadius_->Get() * scaleBackgroundCircleRadius_); });
