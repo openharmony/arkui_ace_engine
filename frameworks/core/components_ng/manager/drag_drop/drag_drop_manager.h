@@ -162,6 +162,7 @@ private:
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
+    void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
 
     std::set<WeakPtr<FrameNode>> dragFrameNodes_;
     std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;
