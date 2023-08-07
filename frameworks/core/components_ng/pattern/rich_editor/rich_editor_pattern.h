@@ -151,6 +151,8 @@ public:
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();
     void CloseSelectOverlay() override;
+    void OnAreaChangedInner() override;
+    void CreateHandles() override;
 
 private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -234,6 +236,7 @@ private:
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
     long long timestamp_ = 0;
+    OffsetF parentGlobalOffset_;
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;

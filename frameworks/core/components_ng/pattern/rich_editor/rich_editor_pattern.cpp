@@ -54,6 +54,7 @@ void RichEditorPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
+    context->AddOnAreaChangeNode(host->GetId());
     instanceId_ = context->GetInstanceId();
     InitMouseEvent();
     auto focusHub = host->GetOrCreateFocusHub();
@@ -79,6 +80,12 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto richEditorLayoutAlgorithm =
+        DynamicCast<RichEditorLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(richEditorLayoutAlgorithm, false);
+    parentGlobalOffset_ = richEditorLayoutAlgorithm->GetParentGlobalOffset();
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     if (!isRichEditorInit_) {
         auto eventHub = GetEventHub<RichEditorEventHub>();
@@ -2147,5 +2154,43 @@ RefPtr<SpanItem> RichEditorPattern::GetSpanItemByIndex(int32_t index) const
 void RichEditorPattern::CloseSelectOverlay()
 {
     TextPattern::CloseSelectOverlay();
+}
+void RichEditorPattern::CreateHandles()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    float selectLineHeight = 0.0f;
+    auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight);
+    OffsetF firstHandleOffset(firstHandlePosition.GetX() + parentGlobalOffset_.GetX(),
+        firstHandlePosition.GetY() + parentGlobalOffset_.GetY());
+    textSelector_.firstHandleOffset_ = firstHandleOffset;
+    auto secondHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight);
+    OffsetF secondHandleOffset(secondHandlePosition.GetX() + parentGlobalOffset_.GetX(),
+        secondHandlePosition.GetY() + parentGlobalOffset_.GetY());
+    textSelector_.secondHandleOffset_ = secondHandleOffset;
+    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), selectLineHeight };
+    RectF firstHandle = RectF(firstHandleOffset, handlePaintSize);
+    RectF secondHandle = RectF(secondHandleOffset, handlePaintSize);
+    ShowSelectOverlay(firstHandle, secondHandle);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void RichEditorPattern::OnAreaChangedInner()
+{
+    float selectLineHeight = 0.0f;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    if (parentGlobalOffset != parentGlobalOffset_) {
+        parentGlobalOffset_ = parentGlobalOffset;
+        CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
+        textSelector_.selectionBaseOffset.SetX(
+            CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight).GetX());
+        textSelector_.selectionDestinationOffset.SetX(
+            CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
+        CreateHandles();
+    }
 }
 } // namespace OHOS::Ace::NG
