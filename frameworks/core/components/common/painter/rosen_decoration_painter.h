@@ -63,7 +63,7 @@ public:
     ~RosenDecorationPainter() override = default;
 
 #ifndef USE_ROSEN_DRAWING
-    static void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas);
+    static void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint = nullptr);
 
     static void PaintShadow(const SkPath& path, const Shadow& shadow, const std::shared_ptr<RSNode>& rsNode);
 
