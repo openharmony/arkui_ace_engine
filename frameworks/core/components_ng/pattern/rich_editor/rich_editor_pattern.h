@@ -140,7 +140,7 @@ public:
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
-    int32_t AddImageSpan(const ImageSpanOptions& options, int32_t index = -1);
+    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, int32_t index = -1);
     void AddSpanItem(RefPtr<SpanItem> item, int32_t offset);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
