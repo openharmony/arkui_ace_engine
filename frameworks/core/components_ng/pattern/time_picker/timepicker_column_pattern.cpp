@@ -728,7 +728,7 @@ void TimePickerColumnPattern::CreateAnimation()
 RefPtr<CurveAnimation<double>> TimePickerColumnPattern::CreateAnimation(double from, double to)
 {
     auto weak = AceType::WeakClaim(this);
-    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::LINEAR_OUT_SLOW_IN);
+    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FAST_OUT_SLOW_IN);
     curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
