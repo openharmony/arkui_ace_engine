@@ -1221,11 +1221,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
         return AcceptFocusByRectOfLastFocusNode(rect);
     }
     if (focusType_ == FocusType::SCOPE) {
-        SetScopeFocusAlgorithm();
-        if (focusAlgorithm_.scopeType == ScopeType::FLEX) {
-            return AcceptFocusByRectOfLastFocusFlex(rect);
-        }
-        return AcceptFocusByRectOfLastFocusScope(rect);
+        return AcceptFocusByRectOfLastFocusFlex(rect);
     }
     return false;
 }
