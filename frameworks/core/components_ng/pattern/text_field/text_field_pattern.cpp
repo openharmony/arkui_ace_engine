@@ -5437,18 +5437,6 @@ void TextFieldPattern::SaveInlineStates()
     }
 }
 
-void TextFieldPattern::TextRectSetOffset(RefPtr<TextFieldLayoutProperty> layoutProperty)
-{
-    BorderWidthProperty currentBorderWidth;
-    if (layoutProperty->GetBorderWidthProperty() != nullptr) {
-        currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
-    } else {
-        currentBorderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
-    }
-    textRect_.SetOffset(OffsetF(GetPaddingLeft() + (float)(currentBorderWidth.leftDimen->ConvertToPx()),
-        GetPaddingTop() + (float)(currentBorderWidth.topDimen->ConvertToPx())));
-}
-
 void TextFieldPattern::TextIsEmptyRect(RectF& rect)
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -5550,7 +5538,7 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     layoutProperty->UpdatePadding(
         { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
     ProcessInnerPadding();
-    TextRectSetOffset(layoutProperty);
+    textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     MarginProperty margin;
     margin.bottom =
         CalcLength(inlineState_.padding.bottom->GetDimension() + inlineState_.margin.bottom->GetDimension());
