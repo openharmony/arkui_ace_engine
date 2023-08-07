@@ -1651,6 +1651,7 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
                 }
                 text = StringUtils::ToString(textTemp);
                 spanNode->UpdateContent(text);
+                spanItem->position -= it.GetEraseLength();
                 break;
             }
             case SpanResultType::IMAGE:
