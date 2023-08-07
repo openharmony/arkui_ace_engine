@@ -610,7 +610,7 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
     auto layoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     bool needControlBar = layoutProperty->GetControlsValue(true);
-    if (!needControlBar && pos == CURRENT_POS) {
+    if (!needControlBar) {
         return;
     }
 
@@ -972,7 +972,12 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    std::string label = IntTimeToText(time);
+    auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_RETURN(videoLayoutProperty, nullptr);
+    std::string label = "";
+    if (videoLayoutProperty->GetControlsValue(true)) {
+        label = IntTimeToText(time);
+    }
     textLayoutProperty->UpdateContent(label);
     auto textEdge = videoTheme->GetTextEdge();
     PaddingProperty padding;
