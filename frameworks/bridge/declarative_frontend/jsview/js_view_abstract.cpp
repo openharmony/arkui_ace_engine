@@ -2069,7 +2069,7 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
-        saturation = (saturation > 0.0f || NearZero(saturation))? saturation : 1.0f;
+        saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
     }
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
@@ -6038,6 +6038,9 @@ void JSViewAbstract::SetDirection(const std::string& dir)
     } else if (dir == "Rtl") {
         direction = TextDirection::RTL;
     } else if (dir == "Auto") {
+        direction = TextDirection::AUTO;
+    } else if (dir == "undefined" && PipelineBase::GetCurrentContext() &&
+               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         direction = TextDirection::AUTO;
     }
     ViewAbstractModel::GetInstance()->SetLayoutDirection(direction);

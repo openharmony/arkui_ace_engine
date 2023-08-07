@@ -100,7 +100,7 @@ void JSRow::SetJustifyContent(int32_t value)
         (value == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
         RowModel::GetInstance()->SetJustifyContent(static_cast<FlexAlign>(value));
     } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
-        RowModel::GetInstance()->SetAlignItems(FlexAlign::FLEX_START);
+        RowModel::GetInstance()->SetJustifyContent(FlexAlign::FLEX_START);
         LOGE("invalid value for justifyContent");
     }
 }
