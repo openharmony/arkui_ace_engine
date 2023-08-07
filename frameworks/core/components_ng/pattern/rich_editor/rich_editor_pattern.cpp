@@ -57,8 +57,8 @@ RichEditorPattern::~RichEditorPattern()
 
 void RichEditorPattern::OnModifyDone()
 {
-    copyOption_ = CopyOptions::Distributed;
     TextPattern::OnModifyDone();
+    copyOption_ = CopyOptions::Distributed;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
