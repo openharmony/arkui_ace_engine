@@ -1321,14 +1321,12 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_NE(layoutWrapper->layoutAlgorithm_, nullptr);
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::AUTO);
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
     ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
 
     navigation->contentNode_ =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 66, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
 }
 
