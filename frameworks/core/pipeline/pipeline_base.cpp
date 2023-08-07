@@ -495,8 +495,8 @@ void PipelineBase::PrepareOpenImplicitAnimation()
     pendingImplicitLayout_.push(false);
     pendingImplicitRender_.push(false);
 
-    // flush ui tasks before open implict animation
-    if (!isReloading_) {
+    // flush ui tasks before open implicit animation
+    if (!isReloading_ && !IsLayouting()) {
         FlushUITasks();
     }
 #endif
@@ -513,7 +513,7 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     // layout or render the views immediately to animate all related views, if layout or render updates are pending in
     // the animation closure
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
-        if (!isReloading_) {
+        if (!isReloading_ && !IsLayouting()) {
             FlushUITasks();
         }
     }
