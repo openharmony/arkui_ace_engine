@@ -183,7 +183,9 @@ void VideoPattern::UpdateMediaPlayer()
     platformTask.PostTask([weak = WeakClaim(this)] {
         auto video = weak.Upgrade();
         CHECK_NULL_VOID(video);
-        video->UpdateMediaPlayerOnBg();
+        auto targetNode = video->GetTargetVideoPattern();
+        CHECK_NULL_VOID(targetNode);
+        targetNode->UpdateMediaPlayerOnBg();
     });
 }
 
@@ -250,7 +252,9 @@ void VideoPattern::PrepareMediaPlayer()
     platformTask.PostTask([weak = WeakClaim(this)] {
         auto video = weak.Upgrade();
         CHECK_NULL_VOID(video);
-        video->ResetMediaPlayer();
+        auto targetPattern = video->GetTargetVideoPattern();
+        CHECK_NULL_VOID(targetPattern);
+        targetPattern->ResetMediaPlayer();
     });
 }
 
@@ -1025,57 +1029,36 @@ void VideoPattern::SetMethodCall()
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto fullScreenNode = AceType::DynamicCast<VideoFullScreenNode>(pattern->GetFullScreenNode());
-            // if current is full screen state, send start event to full screen node
-            if (!fullScreenNode) {
-                pattern->Start();
-                return;
-            }
-            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-            CHECK_NULL_VOID(fullScreenPattern);
-            fullScreenPattern->Start();
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
+            targetPattern->Start();
         });
     });
     videoController->SetPausetImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto fullScreenNode = pattern->GetFullScreenNode();
-            if (!fullScreenNode) {
-                pattern->Pause();
-                return;
-            }
-            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-            CHECK_NULL_VOID(fullScreenPattern);
-            fullScreenPattern->Pause();
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
+            targetPattern->Pause();
         });
     });
     videoController->SetStopImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto fullScreenNode = pattern->GetFullScreenNode();
-            if (!fullScreenNode) {
-                pattern->Stop();
-                return;
-            }
-            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-            CHECK_NULL_VOID(fullScreenPattern);
-            fullScreenPattern->Stop();
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
+            targetPattern->Stop();
         });
     });
     videoController->SetSeekToImpl([weak = WeakClaim(this), uiTaskExecutor](float pos, SeekMode seekMode) {
         uiTaskExecutor.PostTask([weak, pos, seekMode]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto fullScreenNode = pattern->GetFullScreenNode();
-            if (!fullScreenNode) {
-                pattern->SetCurrentTime(pos, seekMode);
-                return;
-            }
-            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-            CHECK_NULL_VOID(fullScreenPattern);
-            fullScreenPattern->SetCurrentTime(pos, seekMode);
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
+            targetPattern->SetCurrentTime(pos, seekMode);
         });
     });
     videoController->SetRequestFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isFullScreen) {
@@ -1085,11 +1068,11 @@ void VideoPattern::SetMethodCall()
             if (isFullScreen) {
                 videoPattern->FullScreen();
             } else {
-                auto fullScreenNode = videoPattern->GetFullScreenNode();
-                CHECK_NULL_VOID(fullScreenNode);
-                auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-                CHECK_NULL_VOID(fullScreenPattern);
                 videoPattern->ResetLastBoundsRect();
+                auto targetPattern = videoPattern->GetTargetVideoPattern();
+                CHECK_NULL_VOID(targetPattern);
+                auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(targetPattern);
+                CHECK_NULL_VOID(fullScreenPattern);
                 fullScreenPattern->ExitFullScreen();
             }
             
@@ -1099,22 +1082,21 @@ void VideoPattern::SetMethodCall()
         if (isSync) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto fullScreenNode = pattern->GetFullScreenNode();
-            CHECK_NULL_VOID(fullScreenNode);
-            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-            CHECK_NULL_VOID(fullScreenPattern);
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
             pattern->ResetLastBoundsRect();
+            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(targetPattern);
             fullScreenPattern->ExitFullScreen();
             return;
         }
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto fullScreenNode = pattern->GetFullScreenNode();
-            CHECK_NULL_VOID(fullScreenNode);
-            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-            CHECK_NULL_VOID(fullScreenPattern);
             pattern->ResetLastBoundsRect();
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
+            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(targetPattern);
+            CHECK_NULL_VOID(fullScreenPattern);
             fullScreenPattern->ExitFullScreen();
         });
     });
@@ -1495,8 +1477,26 @@ void VideoPattern::UpdateFsState()
     videoPattern->UpdateState();
 }
 
-bool VideoPattern::IsFullScreen() const
+bool VideoPattern::IsFullScreen()
 {
-    return InstanceOf<VideoFullScreenPattern>(this);
+    return fullScreenNodeId_.has_value();
+}
+
+RefPtr<VideoPattern> VideoPattern::GetTargetVideoPattern()
+{
+    auto isFullScreen = IsFullScreen();
+    auto patternIsFullScreen = AceType::InstanceOf<VideoFullScreenPattern>(this);
+    if ((isFullScreen && patternIsFullScreen) || (!isFullScreen && !patternIsFullScreen)) {
+        return AceType::Claim(this);
+    }
+    if (patternIsFullScreen) {
+        // current is full screen,need to be released
+        auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(this);
+        return fullScreenPattern->GetVideoPattern();
+    }
+    // current node is origin video node, need to operate full screen node
+    auto fullScreenNode = GetFullScreenNode();
+    CHECK_NULL_RETURN(fullScreenNode, nullptr);
+    return fullScreenNode->GetPattern<VideoPattern>();
 }
 } // namespace OHOS::Ace::NG
