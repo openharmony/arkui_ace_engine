@@ -57,6 +57,7 @@ constexpr float CONTENT_OFFSET_FLOAT = 150.0f;
 constexpr float CIRCLE_RADIUS_FLOAT = 200.0f;
 constexpr float DEFAULT_SIDE_LENGTH = 20.0f;
 constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
+constexpr int32_t RADIUS_TO_DIAMETER = 2;
 inline int32_t GetPointIndex(int32_t x, int32_t y)
 {
     return (x - 1) * PATTERN_LOCK_COL_COUNT + (y - 1);
@@ -1516,6 +1517,42 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest010, TestSize.Level1)
     ngChallengeResult.reset();
     patternlockModifier->SetChallengeResult(ngChallengeResult);
     EXPECT_FALSE(patternlockModifier->challengeResult_.has_value());
+}
+
+/**
+ * @tc.name: PatternLockModifierTest011
+ * @tc.desc: Test SetContentOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create patternlockModifier
+     */
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    /**
+     * @tc.steps: step2. call SetContentOffset func
+     * @tc.expected:the value of offset_ is updated
+     */
+    patternlockModifier->SetContentOffset(OffsetF(CONTENT_OFFSET_FLOAT, CONTENT_OFFSET_FLOAT));
+    EXPECT_EQ(patternlockModifier->offset_->Get(), OffsetF(CONTENT_OFFSET_FLOAT, CONTENT_OFFSET_FLOAT));
+    /**
+     * @tc.steps: step3. set ChoosePoint_ of patternlockModifier
+     * @tc.expected:the ChoosePoint_ is not empty
+     */
+    std::vector<PatternLockCell> vecCell = { PatternLockCell(1, 1) };
+    patternlockModifier->SetChoosePoint(vecCell);
+    EXPECT_FALSE(patternlockModifier->choosePoint_.empty());
+    /**
+     * @tc.steps: step4. call SetContentOffset func
+     * @tc.expected:connectedLineTailPoint_ and canceledLineTailPoint_ are updated
+     */
+    patternlockModifier->SetSideLength(DEFAULT_SIDE_LENGTH);
+    patternlockModifier->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto firstPointOffset = OffsetF(DEFAULT_SIDE_LENGTH / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER,
+        DEFAULT_SIDE_LENGTH / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER);
+    EXPECT_EQ(patternlockModifier->connectedLineTailPoint_->Get(), firstPointOffset);
+    EXPECT_EQ(patternlockModifier->canceledLineTailPoint_->Get(), firstPointOffset);
 }
 
 /**
