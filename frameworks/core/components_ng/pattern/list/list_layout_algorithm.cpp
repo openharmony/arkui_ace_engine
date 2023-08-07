@@ -455,16 +455,8 @@ void ListLayoutAlgorithm::MeasureList(
         LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             startIndex, currentOffset_, startMainPos_, endMainPos_);
         bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
-        bool scrollSnapOverTop = false;
-        bool scrollSnapOverBottom = false;
-        if (IsScrollSnapAlignCenter(layoutWrapper)) {
-            scrollSnapOverTop =
-                startIndex == 0 &&
-                GreatNotEqual(startPos + contentMainSize_ / 2.0f - startItemHeight / 2.0f, startMainPos_);
-            scrollSnapOverBottom = LessNotEqual(endPos - contentMainSize_ / 2.0f - startItemHeight / 2.0f, endMainPos_);
-        }
-        if ((!overScrollFeature_ && NonNegative(currentOffset_) && !scrollSnapOverBottom) ||
-            (overScrollFeature_ && overScrollTop) || scrollSnapOverTop || scrollSnapOverBottom) {
+        if ((!overScrollFeature_ && NonNegative(currentOffset_)) ||
+            (overScrollFeature_ && overScrollTop)) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
@@ -652,11 +644,7 @@ void ListLayoutAlgorithm::LayoutBackward(
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
         bool overBottom = LessNotEqual(GetEndPosition(), endMainPos_);
-        bool scrollSnapOverBottom = false;
-        if (IsScrollSnapAlignCenter(layoutWrapper)) {
-            scrollSnapOverBottom = LessNotEqual(GetEndPosition() - contentMainSize_ / 2.0f, endMainPos_);
-        }
-        if (!canOverScroll_ || overBottom || jumpIndex_.has_value() || scrollSnapOverBottom) {
+        if (((!canOverScroll_ || overBottom) && !IsScrollSnapAlignCenter(layoutWrapper)) || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos;
             if (!mainSizeIsDefined_ && GetEndIndex() == totalItemCount_ - 1) {
                 auto itemTotalSize = GetEndPosition() - currentStartPos;
