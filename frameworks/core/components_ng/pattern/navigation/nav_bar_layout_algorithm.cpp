@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -192,19 +193,24 @@ float MeasureToolBarDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNod
     return static_cast<float>(theme->GetToolBarDividerWidth().ConvertToPx());
 }
 
-void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
+float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize, float titleBarHeight,
     float toolBarHeight, float toolBarDividerHeight)
 {
     auto contentNode = hostNode->GetNavBarContentNode();
-    CHECK_NULL_VOID(contentNode);
+    CHECK_NULL_RETURN(contentNode, 0.0f);
     auto index = hostNode->GetChildIndexById(contentNode->GetId());
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(contentWrapper);
+    CHECK_NULL_RETURN(contentWrapper, 0.0f);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
-    constraint.selfIdealSize = OptionalSizeF(
-        navigationSize.Width(), navigationSize.Height() - titleBarHeight - toolBarHeight - toolBarDividerHeight);
+    float contentHeight = navigationSize.Height() - titleBarHeight - toolBarHeight - toolBarDividerHeight;
+    if (NavigationLayoutAlgorithm::IsAutoHeight(navBarLayoutProperty)) {
+        constraint.selfIdealSize.SetWidth(navigationSize.Width());
+    } else {
+        constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), contentHeight);
+    }
     contentWrapper->Measure(constraint);
+    return static_cast<float>(contentWrapper->GetGeometryNode()->GetFrameSize().Height());
 }
 
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
@@ -317,8 +323,9 @@ void NavBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float toolBarHeight = MeasureToolBar(layoutWrapper, hostNode, navBarLayoutProperty, size);
     float toolBarDividerHeight =
         MeasureToolBarDivider(layoutWrapper, hostNode, navBarLayoutProperty, size, toolBarHeight);
-    MeasureContentChild(
+    float contentChildHeight = MeasureContentChild(
         layoutWrapper, hostNode, navBarLayoutProperty, size, titleBarHeight, toolBarHeight, toolBarDividerHeight);
+    size.SetHeight(titleBarHeight + toolBarHeight + toolBarDividerHeight + contentChildHeight);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
