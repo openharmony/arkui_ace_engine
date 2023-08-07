@@ -59,7 +59,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
-        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true).ConvertToSizeT() :
     CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -425,7 +425,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
 
     auto sideBarIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
-        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT():
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true).ConvertToSizeT():
         CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
@@ -451,7 +451,7 @@ void SideBarContainerLayoutAlgorithm::MeasureDivider(const RefPtr<SideBarContain
     auto scaleProperty = constraint->scaleProperty;
     auto dividerIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
-        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true).ConvertToSizeT() :
     CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
 
@@ -494,7 +494,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
 
     auto contentIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
-        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true).ConvertToSizeT() :
     CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     contentIdealSize.SetWidth(contentWidth);
