@@ -178,6 +178,53 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+    Dimension GetMinNavBarWidthValue() const
+    {
+        return minNavBarWidthValue_;
+    }
+    void SetMinNavBarWidthValue(Dimension minNavBarWidthValue)
+    {
+        minNavBarWidthValue_ = minNavBarWidthValue;
+    }
+
+    Dimension GetMaxNavBarWidthValue() const
+    {
+        return maxNavBarWidthValue_;
+    }
+    void SetMaxNavBarWidthValue(Dimension maxNavBarWidthValue)
+    {
+        maxNavBarWidthValue_ = maxNavBarWidthValue;
+    }
+
+    Dimension GetMinContentWidthValue() const
+    {
+        return minContentWidthValue_;
+    }
+
+    void SetMinContentWidthValue(Dimension minContentWidthValue)
+    {
+        minContentWidthValue_ = minContentWidthValue;
+    }
+
+    bool GetUserSetNavBarRangeFlag() const
+    {
+        return userSetNavBarRangeFlag_;
+    }
+
+    void SetUserSetNavBarRangeFlag(bool userSetNavBarRangeFlag)
+    {
+        userSetNavBarRangeFlag_ = userSetNavBarRangeFlag;
+    }
+
+    bool GetUserSetMinContentFlag() const
+    {
+        return userSetMinContentFlag_;
+    }
+
+    void SetUserSetMinContentFlag(bool userSetMinContentFlag)
+    {
+        userSetMinContentFlag_ = userSetMinContentFlag;
+    }
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
@@ -187,6 +234,8 @@ private:
     void DoAnimation(NavigationMode usrNavigationMode);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    bool UpdateEventHub(const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, NavigationMode navigationMode);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();

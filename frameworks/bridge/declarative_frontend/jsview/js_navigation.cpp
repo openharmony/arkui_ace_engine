@@ -60,9 +60,7 @@ namespace {
 constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
-constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 200;
-constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
-constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 280.0_vp;
+constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
@@ -599,24 +597,19 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
     JSRef<JSVal> max = rangeArray->GetValueAt(1);
 
     CalcDimension minNavBarWidth;
-    if (!ParseJsDimensionVp(min, minNavBarWidth)) {
-        minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
-    }
 
     CalcDimension maxNavBarWidth;
-    if (!ParseJsDimensionVp(max, maxNavBarWidth)) {
-        maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
-    }
+    ParseJsDimensionVp(min, minNavBarWidth);
+    ParseJsDimensionVp(max, maxNavBarWidth);
 
     if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
-        minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
+        minNavBarWidth.SetValue(0);
     }
+    NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
 
     if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
-        maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
+        maxNavBarWidth.SetValue(0);
     }
-
-    NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
     NavigationModel::GetInstance()->SetMaxNavBarWidth(maxNavBarWidth);
 
 }
