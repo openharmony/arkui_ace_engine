@@ -2550,8 +2550,13 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
-    LOGW("Insert text through key event is no longer supported");
-    return false;
+    auto editingValue = std::make_shared<TextEditingValue>();
+    editingValue->text = GetEditingValue().GetBeforeSelection() + appendElement + GetEditingValue().GetAfterSelection();
+    editingValue->UpdateSelection(
+        std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
+    UpdateEditingValue(editingValue);
+    MarkNeedLayout();
+    return true;
 }
 
 void RenderTextField::UpdateAccessibilityAttr()
