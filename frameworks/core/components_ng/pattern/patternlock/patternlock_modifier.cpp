@@ -432,7 +432,16 @@ void PatternLockModifier::SetPathStrokeWidth(float pathStrokeWidth)
 void PatternLockModifier::SetContentOffset(const OffsetF& offset)
 {
     CHECK_NULL_VOID(offset_);
-    offset_->Set(offset);
+    if (!NearEqual(offset_->Get(), offset)) {
+        offset_->Set(offset);
+        size_t count = choosePoint_.size();
+        if (count > 0) {
+            OffsetF lastPoint =
+                GetCircleCenterByXY(offset, choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
+            connectedLineTailPoint_->Set(lastPoint);
+            canceledLineTailPoint_->Set(lastPoint);
+        }
+    }
 }
 
 void PatternLockModifier::SetIsMoveEventValid(bool isMoveEventValid)
