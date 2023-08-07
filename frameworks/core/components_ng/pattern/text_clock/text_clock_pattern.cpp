@@ -28,6 +28,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+#ifdef WINDOWS_PLATFORM
+constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
+#endif
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
@@ -66,7 +69,15 @@ std::unordered_map<char, TextClockElementIndex> curDateTimeMap = { { 'y', TextCl
 
 int32_t GetSystemTimeZone()
 {
+#ifndef WINDOWS_PLATFORM
     return timezone / TOTAL_SECONDS_OF_HOUR;
+#else
+    struct timeval currentTime;
+    struct timezone timeZone;
+    gettimeofday(&currentTime, &timeZone);
+    int32_t timeZoneHour = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
+    return timeZoneHour;
+#endif
 }
 
 /**
