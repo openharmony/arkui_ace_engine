@@ -87,6 +87,10 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(richEditorLayoutAlgorithm, false);
     parentGlobalOffset_ = richEditorLayoutAlgorithm->GetParentGlobalOffset();
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
+    if (showSelectOverlay_) {
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
     if (!isRichEditorInit_) {
         auto eventHub = GetEventHub<RichEditorEventHub>();
         CHECK_NULL_RETURN(eventHub, ret);
@@ -730,10 +734,6 @@ void RichEditorPattern::UpdateSpanStyle(int32_t start, int32_t end, TextStyle te
             break;
         }
     }
-    if (textSelector_.IsValid()) {
-        CloseSelectOverlay();
-        ResetSelection();
-    }
 }
 
 void RichEditorPattern::ScheduleCaretTwinkling()
@@ -786,7 +786,7 @@ void RichEditorPattern::StopTwinkling()
 
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 {
-    if (textSelector_.IsValid()) {
+    if (textSelector_.IsValid() && !isMouseSelect_) {
         CloseSelectOverlay();
         ResetSelection();
     }
@@ -1787,24 +1787,26 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
         CHECK_NULL_VOID(paragraph_);
-        if (!isFirstmouseSelect_) {
+        if (isFirstMouseSelect_) {
             int32_t extend = paragraph_->GetHandlePositionForClick(textOffset);
             int32_t extendEnd = extend + GetGraphemeClusterLength(extend);
             textSelector_.Update(extend, extendEnd);
-            isFirstmouseSelect_ = true;
+            isFirstMouseSelect_ = false;
         } else {
             int32_t extend = paragraph_->GetHandlePositionForClick(textOffset);
             textSelector_.Update(textSelector_.baseOffset, extend);
             SetCaretPosition(extend);
         }
+        isMouseSelect_ = true;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
         isMousePressed_ = true;
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+        isMouseSelect_ = false;
         isMousePressed_ = false;
-        isFirstmouseSelect_ = false;
+        isFirstMouseSelect_ = true;
 
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -2109,19 +2111,19 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight);
     auto endOffset =
         CalcCursorOffsetByPosition(std::min(textSelector_.destinationOffset, GetTextContentLength()), endSelectHeight);
-    float selectLineHeight = std::max(startSelectHeight, endSelectHeight);
-    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), selectLineHeight };
+    SizeF firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
+    SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
-    firstHandle.SetSize(handlePaintSize);
+    firstHandle.SetSize(firstHandlePaintSize);
     textSelector_.firstHandle = firstHandle;
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleOffset);
-    secondHandle.SetSize(handlePaintSize);
+    secondHandle.SetSize(secondHandlePaintSize);
     textSelector_.secondHandle = secondHandle;
 }
 
@@ -2159,18 +2161,20 @@ void RichEditorPattern::CreateHandles()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    float selectLineHeight = 0.0f;
-    auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight);
+    float startSelectHeight = 0.0f;
+    float endSelectHeight = 0.0f;
+    auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart(), startSelectHeight);
     OffsetF firstHandleOffset(firstHandlePosition.GetX() + parentGlobalOffset_.GetX(),
         firstHandlePosition.GetY() + parentGlobalOffset_.GetY());
     textSelector_.firstHandleOffset_ = firstHandleOffset;
-    auto secondHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight);
+    auto secondHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetEnd(), endSelectHeight);
     OffsetF secondHandleOffset(secondHandlePosition.GetX() + parentGlobalOffset_.GetX(),
         secondHandlePosition.GetY() + parentGlobalOffset_.GetY());
     textSelector_.secondHandleOffset_ = secondHandleOffset;
-    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), selectLineHeight };
-    RectF firstHandle = RectF(firstHandleOffset, handlePaintSize);
-    RectF secondHandle = RectF(secondHandleOffset, handlePaintSize);
+    SizeF firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
+    SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
+    RectF firstHandle = RectF(firstHandleOffset, firstHandlePaintSize);
+    RectF secondHandle = RectF(secondHandleOffset, secondHandlePaintSize);
     ShowSelectOverlay(firstHandle, secondHandle);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }

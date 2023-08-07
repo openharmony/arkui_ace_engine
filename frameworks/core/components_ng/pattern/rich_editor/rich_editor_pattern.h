@@ -221,8 +221,9 @@ private:
 #else
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
+    bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
-    bool isFirstmouseSelect_ = false;
+    bool isFirstMouseSelect_ = true;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
     bool imeShown_ = false;
