@@ -491,19 +491,19 @@ void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std:
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow();
-        CHECK_NULL_VOID(subwindow);
-        subwindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
+        auto subWindow = GetOrCreateSubWindow();
+        CHECK_NULL_VOID(subWindow);
+        subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
         // for ability
     } else {
-        auto subwindow = GetSubwindow(containerId);
-        if (!subwindow) {
-            LOGI("Subwindow is null, add a new one.");
-            subwindow = Subwindow::CreateSubwindow(containerId);
-            subwindow->InitContainer();
-            AddSubwindow(containerId, subwindow);
+        auto subWindow = GetSubwindow(containerId);
+        if (!subWindow) {
+            LOGI("SubWindow is null, add a new one.");
+            subWindow = Subwindow::CreateSubwindow(containerId);
+            subWindow->InitContainer();
+            AddSubwindow(containerId, subWindow);
         }
-        subwindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
+        subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
     }
 }
 
