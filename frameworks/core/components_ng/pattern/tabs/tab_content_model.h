@@ -25,14 +25,26 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
-
 enum class SelectedMode {
     INDICATOR,
     BOARD,
+};
+
+enum class LayoutMode {
+    AUTO,
+    VERTICAL,
+    HORIZONTAL,
+};
+
+struct BottomTabBarStyle {
+    bool symmetricExtensible = false;
+    LayoutMode layoutMode = LayoutMode::VERTICAL;
+    FlexAlign verticalAlign = FlexAlign::CENTER;
 };
 
 struct IndicatorStyle final {
@@ -110,6 +122,10 @@ public:
     virtual void SetBoard(const BoardStyle& board) = 0;
     virtual void SetSelectedMode(SelectedMode selectedMode) = 0;
     virtual void SetLabelStyle(const LabelStyle& labelStyle) = 0;
+    virtual void SetPadding(const NG::PaddingProperty& padding) = 0;
+    virtual void SetLayoutMode(LayoutMode layoutMode) = 0;
+    virtual void SetVerticalAlign(FlexAlign verticalAlign) = 0;
+    virtual void SetSymmetricExtensible(bool isExtensible) = 0;
 
 private:
     static std::unique_ptr<TabContentModel> instance_;

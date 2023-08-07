@@ -144,12 +144,32 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto selectedMode = tabContentPattern->GetSelectedMode();
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
     auto boardStyle = tabContentPattern->GetBoardStyle();
+    auto bottomTabBarStyle = tabContentPattern->GetBottomTabBarStyle();
+    auto padding = tabContentPattern->GetPadding();
+
+    auto linearLayoutPattern = columnNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(linearLayoutPattern);
+
+    if (tabBarParam.GetTabBarStyle() == TabBarStyle::BOTTOMTABBATSTYLE) {
+        if (bottomTabBarStyle.layoutMode == LayoutMode::HORIZONTAL) {
+            linearLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+            linearLayoutProperty->UpdateSpace(tabTheme->GetHorizontalBottomTabBarSpace());
+            linearLayoutProperty->UpdateCrossAxisAlign(bottomTabBarStyle.verticalAlign);
+            linearLayoutProperty->SetIsVertical(false);
+        } else {
+            linearLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
+            linearLayoutProperty->UpdateSpace(tabTheme->GetBottomTabBarSpace());
+            linearLayoutProperty->UpdateMainAxisAlign(bottomTabBarStyle.verticalAlign);
+            linearLayoutProperty->SetIsVertical(true);
+        }
+    }
 
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
     auto myIndex = swiperNode->GetChildFlatIndex(tabContentId).second;
-    
+
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
+    tabBarPattern->SetBottomTabBarStyle(bottomTabBarStyle, myIndex);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
         auto renderContext = columnNode->GetRenderContext();
@@ -195,13 +215,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     RefPtr<FrameNode> imageNode;
     auto layoutProperty = columnNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
-        auto horizontalPadding = tabTheme->GetSubTabHorizontalPadding();
-        layoutProperty->UpdatePadding({ CalcLength(horizontalPadding), CalcLength(horizontalPadding),
-            CalcLength(tabTheme->GetSubTabTopPadding()), CalcLength(tabTheme->GetSubTabBottomPadding()) });
-    } else if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
-        layoutProperty->UpdatePadding({ CalcLength(tabTheme->GetBottomTabHorizontalPadding()),
-            CalcLength(tabTheme->GetBottomTabHorizontalPadding()), {}, {} });
+    if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE || tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
+        layoutProperty->UpdatePadding(padding);
     } else {
         auto deviceType = SystemProperties::GetDeviceType();
         auto tabBarItemPadding = deviceType == DeviceType::PHONE ? tabTheme->GetSubTabHorizontalPadding()
@@ -252,8 +267,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textLayoutProperty->UpdateContent(tabBarParam.GetText());
     textLayoutProperty->UpdateFontSize(tabTheme->GetSubTabTextDefaultFontSize());
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE && bottomTabBarStyle.layoutMode == LayoutMode::HORIZONTAL) {
+        textLayoutProperty->UpdateTextAlign(TextAlign::LEFT);
+    }
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateFlexShrink(1.0f);
 
     // Update property of image.
     auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -348,6 +367,34 @@ void TabContentModelNG::SetLabelStyle(const LabelStyle& labelStyle)
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetLabelStyle(labelStyle);
+}
+
+void TabContentModelNG::SetPadding(const PaddingProperty& padding)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetPadding(padding);
+}
+
+void TabContentModelNG::SetLayoutMode(LayoutMode layoutMode)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetLayoutMode(layoutMode);
+}
+
+void TabContentModelNG::SetVerticalAlign(FlexAlign verticalAlign)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetVerticalAlign(verticalAlign);
+}
+
+void TabContentModelNG::SetSymmetricExtensible(bool isExtensible)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetSymmetricExtensible(isExtensible);
 }
 
 void TabContentModelNG::UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty)

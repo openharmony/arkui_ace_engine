@@ -202,6 +202,13 @@ void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
 }
 
+void TabsModelNG::SetBarAdaptiveHeight(bool barAdaptiveHeight)
+{
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateBarAdaptiveHeight(barAdaptiveHeight);
+}
+
 void TabsModelNG::SetIsVertical(bool isVertical)
 {
     auto axis = isVertical ? Axis::VERTICAL : Axis::HORIZONTAL;
@@ -209,8 +216,16 @@ void TabsModelNG::SetIsVertical(bool isVertical)
 
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
+    if (tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL) != axis) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->UpdateCurrentOffset(0.0f);
+    }
     tabBarLayoutProperty->UpdateAxis(axis);
-
     auto swiperLayoutProperty = GetSwiperLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateDirection(axis);
@@ -522,5 +537,19 @@ void TabsModelNG::SetClipEdge(bool clipEdge)
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateClipEdge(clipEdge);
     }
+}
+
+void TabsModelNG::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option)
+{
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateScrollableBarModeOptions(option);
+}
+
+void TabsModelNG::SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions)
+{
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateBarGridAlign(BarGridColumnOptions);
 }
 } // namespace OHOS::Ace::NG

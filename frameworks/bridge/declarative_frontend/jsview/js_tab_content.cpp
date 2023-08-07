@@ -18,10 +18,11 @@
 #include <optional>
 
 #include "base/log/ace_trace.h"
-#include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
 
@@ -122,31 +123,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
             return;
         }
         if (type == "BottomTabBarStyle") {
-            JSRef<JSVal> textParam = paramObject->GetProperty("text");
-            auto isTextEmpty = textParam->IsEmpty() || textParam->IsUndefined() || textParam->IsNull();
-            std::optional<std::string> textOpt = std::nullopt;
-            if (isTextEmpty) {
-                LOGE("The text param is empty");
-                return;
-            }
-            std::string text;
-            if (ParseJsString(textParam, text)) {
-                textOpt = text;
-            }
-
-            JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
-            auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
-            std::optional<std::string> iconOpt = std::nullopt;
-            if (isIconEmpty) {
-                LOGE("The icon param is empty");
-                return;
-            }
-            std::string icon;
-            if (ParseJsMedia(iconParam, icon)) {
-                iconOpt = icon;
-            }
-            TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-            TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, nullptr, false);
+            SetBottomTabBarStyle(paramObject);
             return;
         }
     }
@@ -231,8 +208,8 @@ void JSTabContent::SetBoard(const JSRef<JSVal>& info)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
     BoardStyle board;
     CalcDimension borderRadius;
-    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), borderRadius)
-        || borderRadius.Value() < 0.0f || borderRadius.Unit() == DimensionUnit::PERCENT) {
+    if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), borderRadius) ||
+        borderRadius.Value() < 0.0f || borderRadius.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             board.borderRadius = tabTheme->GetFocusIndicatorRadius();
@@ -283,7 +260,7 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
     }
 }
 
-void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
+void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info, bool isSubTabStyle)
 {
     LabelStyle labelStyle;
     if (!info->IsObject()) {
@@ -299,7 +276,7 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
         }
 
         JSRef<JSVal> maxLines = obj->GetProperty("maxLines");
-        if (!maxLines->IsNull() && maxLines->IsNumber()) {
+        if (!maxLines->IsNull() && maxLines->IsNumber() && maxLines->ToNumber<int32_t>() > 0) {
             labelStyle.maxLines = maxLines->ToNumber<int32_t>();
         }
 
@@ -331,11 +308,64 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
             GetFontContent(font, labelStyle);
         }
     }
-    CompleteParameters(labelStyle);
+    CompleteParameters(labelStyle, isSubTabStyle);
     TabContentModel::GetInstance()->SetLabelStyle(labelStyle);
 }
 
-void JSTabContent::CompleteParameters(LabelStyle& labelStyle)
+void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
+{
+    CalcDimension length;
+    NG::PaddingProperty padding;
+    if (ParseJsDimensionVp(info, length) && NonNegative(length.Value()) && length.Unit() != DimensionUnit::PERCENT) {
+        padding.left = NG::CalcLength(length);
+        padding.right = NG::CalcLength(length);
+        padding.top = NG::CalcLength(length);
+        padding.bottom = NG::CalcLength(length);
+        TabContentModel::GetInstance()->SetPadding(padding);
+        return;
+    }
+
+    RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+    if (tabTheme) {
+        if (isSubTabStyle) {
+            padding.top = NG::CalcLength(tabTheme->GetSubTabTopPadding());
+            padding.bottom = NG::CalcLength(tabTheme->GetSubTabBottomPadding());
+            padding.left = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
+            padding.right = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
+        } else {
+            padding.top = NG::CalcLength(0.0_vp);
+            padding.bottom = NG::CalcLength(0.0_vp);
+            padding.left = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+            padding.right = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+        }
+    }
+    if (info->IsObject()) {
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info);
+        CalcDimension left;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), left) && NonNegative(left.Value()) &&
+            left.Unit() != DimensionUnit::PERCENT) {
+            padding.left = NG::CalcLength(left);
+        }
+        CalcDimension right;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), right) && NonNegative(right.Value()) &&
+            right.Unit() != DimensionUnit::PERCENT) {
+            padding.right = NG::CalcLength(right);
+        }
+        CalcDimension top;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), top) && NonNegative(top.Value()) &&
+            top.Unit() != DimensionUnit::PERCENT) {
+            padding.top = NG::CalcLength(top);
+        }
+        CalcDimension bottom;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottom) && NonNegative(bottom.Value()) &&
+            bottom.Unit() != DimensionUnit::PERCENT) {
+            padding.bottom = NG::CalcLength(bottom);
+        }
+    }
+    TabContentModel::GetInstance()->SetPadding(padding);
+}
+
+void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle)
 {
     auto tabTheme = GetTheme<TabTheme>();
     if (!tabTheme) {
@@ -351,16 +381,24 @@ void JSTabContent::CompleteParameters(LabelStyle& labelStyle)
         labelStyle.maxFontSize = 0.0_vp;
     }
     if (!labelStyle.fontSize.has_value()) {
-        labelStyle.fontSize = tabTheme->GetSubTabTextDefaultFontSize();
+        if (isSubTabStyle) {
+            labelStyle.fontSize = tabTheme->GetSubTabTextDefaultFontSize();
+        } else {
+            labelStyle.fontSize = tabTheme->GetBottomTabTextSize();
+        }
     }
     if (!labelStyle.fontWeight.has_value()) {
-        labelStyle.fontWeight = FontWeight::NORMAL;
+        if (isSubTabStyle) {
+            labelStyle.fontWeight = FontWeight::NORMAL;
+        } else {
+            labelStyle.fontWeight = FontWeight::MEDIUM;
+        }
     }
     if (!labelStyle.fontStyle.has_value()) {
         labelStyle.fontStyle = FontStyle::NORMAL;
     }
     if (!labelStyle.fontFamily.has_value()) {
-        labelStyle.fontFamily = {"HarmonyOS Sans"};
+        labelStyle.fontFamily = { "HarmonyOS Sans" };
     }
     if (!labelStyle.heightAdaptivePolicy.has_value()) {
         labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
@@ -382,6 +420,7 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     if (ParseJsString(contentParam, content)) {
         contentOpt = content;
     }
+
     JSRef<JSVal> indicatorParam = paramObject->GetProperty("indicator");
     SetIndicator(indicatorParam);
 
@@ -392,10 +431,88 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     SetBoard(boardParam);
 
     JSRef<JSVal> labelStyleParam = paramObject->GetProperty("labelStyle");
-    SetLabelStyle(labelStyleParam);
+    SetLabelStyle(labelStyleParam, true);
+
+    JSRef<JSVal> paddingParam = paramObject->GetProperty("padding");
+    SetPadding(paddingParam, true);
 
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, nullptr, false);
+}
+
+void JSTabContent::SetLayoutMode(const JSRef<JSVal>& info)
+{
+    int32_t layoutMode;
+    if (!ConvertFromJSValue(info, layoutMode)) {
+        TabContentModel::GetInstance()->SetLayoutMode(LayoutMode::VERTICAL);
+    } else {
+        TabContentModel::GetInstance()->SetLayoutMode(static_cast<LayoutMode>(layoutMode));
+    }
+}
+
+void JSTabContent::SetVerticalAlign(const JSRef<JSVal>& info)
+{
+    auto align = FlexAlign::CENTER;
+    if (info->IsNumber()) {
+        auto value = info->ToNumber<int32_t>();
+        if (value >= static_cast<int32_t>(FlexAlign::FLEX_START) &&
+            value <= static_cast<int32_t>(FlexAlign::FLEX_END)) {
+            align = static_cast<FlexAlign>(value);
+        }
+    }
+    TabContentModel::GetInstance()->SetVerticalAlign(align);
+}
+
+void JSTabContent::SetSymmetricExtensible(const JSRef<JSVal>& info)
+{
+    bool isExtensible = false;
+    ParseJsBool(info, isExtensible);
+    TabContentModel::GetInstance()->SetSymmetricExtensible(isExtensible);
+}
+
+void JSTabContent::SetBottomTabBarStyle(const JSRef<JSObject>& paramObject)
+{
+    JSRef<JSVal> textParam = paramObject->GetProperty("text");
+    auto isTextEmpty = textParam->IsEmpty() || textParam->IsUndefined() || textParam->IsNull();
+    std::optional<std::string> textOpt = std::nullopt;
+    if (isTextEmpty) {
+        LOGE("The text param is empty");
+        return;
+    }
+    std::string text;
+    if (ParseJsString(textParam, text)) {
+        textOpt = text;
+    }
+
+    JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
+    auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
+    std::optional<std::string> iconOpt = std::nullopt;
+    if (isIconEmpty) {
+        LOGE("The icon param is empty");
+        return;
+    }
+    std::string icon;
+    if (ParseJsMedia(iconParam, icon)) {
+        iconOpt = icon;
+    }
+
+    JSRef<JSVal> paddingParam = paramObject->GetProperty("padding");
+    SetPadding(paddingParam, false);
+
+    JSRef<JSVal> layoutParam = paramObject->GetProperty("layoutMode");
+    SetLayoutMode(layoutParam);
+
+    JSRef<JSVal> verticalAlignParam = paramObject->GetProperty("verticalAlign");
+    SetVerticalAlign(verticalAlignParam);
+
+    JSRef<JSVal> extensibleParam = paramObject->GetProperty("symmetricExtensible");
+    SetSymmetricExtensible(extensibleParam);
+
+    JSRef<JSVal> labelStyleParam = paramObject->GetProperty("labelStyle");
+    SetLabelStyle(labelStyleParam, false);
+
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, nullptr, false);
 }
 
 void JSTabContent::JSBind(BindingTarget globalObj)

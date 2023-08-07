@@ -41,8 +41,8 @@ private:
     TabsItemDivider GetDivider(LayoutWrapper* layoutWrapper) const;
     float MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& dividerWrapper, const SizeF& idealSize);
-    std::vector<OffsetF> LayoutOffsetList(LayoutWrapper* layoutWrapper,
-        const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const;
+    std::vector<OffsetF> LayoutOffsetList(
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const;
 };
 
 } // namespace OHOS::Ace::NG

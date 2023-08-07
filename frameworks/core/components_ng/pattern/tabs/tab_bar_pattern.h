@@ -132,6 +132,7 @@ public:
             layoutAlgorithm->SetNeedSetCentered();
             needSetCentered_ = false;
         }
+        layoutAlgorithm->SetScrollMargin(scrollMargin_);
         return layoutAlgorithm;
     }
 
@@ -255,6 +256,15 @@ public:
         }
     }
 
+    void SetBottomTabBarStyle(const BottomTabBarStyle& bottomTabBarStyle, uint32_t position)
+    {
+        if (bottomTabBarStyles_.size() == position) {
+            bottomTabBarStyles_.emplace_back(bottomTabBarStyle);
+        } else {
+            bottomTabBarStyles_[position] = bottomTabBarStyle;
+        }
+    }
+
     bool IsMaskAnimationByCreate()
     {
         return isMaskAnimationByCreate_;
@@ -292,6 +302,22 @@ public:
     bool GetTouchingSwiper() const
     {
         return isTouchingSwiper_;
+    }
+
+    TabBarStyle GetTabBarStyle(uint32_t position) const
+    {
+        if (position < 0 || position >= tabBarStyles_.size()) {
+            return TabBarStyle::NOSTYLE;
+        }
+        return tabBarStyles_[position];
+    }
+
+    const BottomTabBarStyle& GetBottomTabBarStyle(uint32_t position) const
+    {
+        if (position < 0 || position >= bottomTabBarStyles_.size()) {
+            return bottomTabBarStyle_;
+        }
+        return bottomTabBarStyles_[position];
     }
 
 private:
@@ -354,6 +380,7 @@ private:
     void AdjustOffset(double& offset) const;
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
+    float GetLeftPadding() const;
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -390,12 +417,15 @@ private:
     bool isTouchingSwiper_ = false;
     float turnPageRate_ = 0.0f;
     int32_t swiperStartIndex_ = 0;
+    std::vector<BottomTabBarStyle> bottomTabBarStyles_;
+    BottomTabBarStyle bottomTabBarStyle_;
 
     RefPtr<TabBarModifier> tabBarModifier_;
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
     bool needSetCentered_ = false;
+    float scrollMargin_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG
