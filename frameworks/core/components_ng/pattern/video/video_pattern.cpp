@@ -1121,12 +1121,6 @@ void VideoPattern::Start()
         LOGE("Player has not prepared");
         return;
     }
-
-    if (isPlaying_) {
-        LOGI("Already isPlaying");
-        return;
-    }
-
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
@@ -1155,12 +1149,6 @@ void VideoPattern::Pause()
         LOGE("media player is invalid.");
         return;
     }
-
-    if (!isPlaying_) {
-        LOGI("Already pause");
-        return;
-    }
-
     LOGD("Video Pause");
     mediaPlayer_->Pause();
 }
