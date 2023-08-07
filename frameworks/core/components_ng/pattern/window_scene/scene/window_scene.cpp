@@ -131,8 +131,6 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void WindowScene::BufferAvailableCallback()
 {
-    ContainerScope scope(instanceId_);
-
     const auto& config =
         Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
     if (config.enabled_) {
@@ -152,11 +150,21 @@ void WindowScene::BufferAvailableCallback()
         });
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->RemoveChild(startingNode_);
-    startingNode_.Reset();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChild(self->startingNode_);
+        self->startingNode_.Reset();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnConnect()
