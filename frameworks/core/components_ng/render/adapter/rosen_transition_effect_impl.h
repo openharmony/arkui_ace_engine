@@ -57,7 +57,7 @@ public:
 
 protected:
     void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) override;
-    void OnDetach(const RefPtr<RosenRenderContext>& context) override;
+    void OnDetach(RosenRenderContext* context) override;
     void OnAppear() override
     {
         isActive_ = false;
@@ -146,7 +146,7 @@ public:
 
 protected:
     void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) override;
-    void OnDetach(const RefPtr<RosenRenderContext>& context) override;
+    void OnDetach(RosenRenderContext* context) override;
     void OnAppear() override;
     void OnDisappear(bool activeTransition) override;
     void OnUpdateTransitionContext(
@@ -238,7 +238,7 @@ protected:
     {
         std::apply([&](auto&&... effect) { (effect.Attach(context, activeTransition), ...); }, effects_);
     }
-    void OnDetach(const RefPtr<RosenRenderContext>& context) override
+    void OnDetach(RosenRenderContext* context) override
     {
         std::apply([&](auto&&... effect) { (effect.Detach(context), ...); }, effects_);
     }

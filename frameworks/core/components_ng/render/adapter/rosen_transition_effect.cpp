@@ -40,7 +40,7 @@ void RosenTransitionEffect::Attach(const RefPtr<RosenRenderContext>& context, bo
     }
 }
 
-void RosenTransitionEffect::Detach(const RefPtr<RosenRenderContext>& context)
+void RosenTransitionEffect::Detach(RosenRenderContext* context)
 {
     OnDetach(context);
     if (chainedEffect_) {
@@ -335,7 +335,7 @@ void PropertyTransitionEffectTemplate<Modifier, PropertyType>::OnAttach(
 }
 
 template<typename Modifier, typename PropertyType>
-void PropertyTransitionEffectTemplate<Modifier, PropertyType>::OnDetach(const RefPtr<RosenRenderContext>& context)
+void PropertyTransitionEffectTemplate<Modifier, PropertyType>::OnDetach(RosenRenderContext* context)
 {
     // remove the modifier
     context->RemoveModifier(modifier_);
@@ -391,7 +391,7 @@ void RosenAsymmetricTransitionEffect::OnAttach(const RefPtr<RosenRenderContext>&
     }
 }
 
-void RosenAsymmetricTransitionEffect::OnDetach(const RefPtr<RosenRenderContext>& context)
+void RosenAsymmetricTransitionEffect::OnDetach(RosenRenderContext* context)
 {
     if (transitionIn_) {
         transitionIn_->Detach(context);
