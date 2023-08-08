@@ -6047,6 +6047,9 @@ void JSViewAbstract::SetDirection(const std::string& dir)
         direction = TextDirection::RTL;
     } else if (dir == "Auto") {
         direction = TextDirection::AUTO;
+    } else if (dir == "undefined" && PipelineBase::GetCurrentContext() &&
+               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        direction = TextDirection::AUTO;
     }
     ViewAbstractModel::GetInstance()->SetLayoutDirection(direction);
 }
