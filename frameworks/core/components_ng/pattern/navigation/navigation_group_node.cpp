@@ -244,6 +244,7 @@ void NavigationGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestinat
         backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
     backButtonNode->MarkModifyDone();
+    navDestination->UpdateTitleFontSize(isVisible);
 }
 
 void NavigationGroupNode::SetBackButtonEvent(
