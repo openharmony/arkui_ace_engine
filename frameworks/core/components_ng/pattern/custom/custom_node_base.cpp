@@ -20,6 +20,8 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include <queue>
+
 namespace OHOS::Ace::NG {
 
 CustomNodeBase::~CustomNodeBase()
@@ -49,5 +51,31 @@ void CustomNodeBase::MarkNeedUpdate()
     }
     needRebuild_ = true;
     context->AddDirtyCustomNode(AceType::DynamicCast<UINode>(Claim(this)));
+}
+
+void CustomNodeBase::FireRecycleSelf()
+{
+    std::queue<RefPtr<UINode>> q;
+    q.push(AceType::DynamicCast<UINode>(Claim(this)));
+    while (!q.empty()) {
+        auto node = q.front();
+        q.pop();
+        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        if (frameNode) {
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            if (layoutProperty && layoutProperty->GetGeometryTransition()) {
+                auto geometryTransitionId = layoutProperty->GetGeometryTransition()->GetId();
+                layoutProperty->UpdateGeometryTransition("");
+            }
+        }
+        const auto& children = node->GetChildren();
+        for (const auto& child : children) {
+            q.push(child);
+        }
+    }
+
+    if (recycleCustomNodeFunc_) {
+        recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));
+    }
 }
 } // namespace OHOS::Ace::NG

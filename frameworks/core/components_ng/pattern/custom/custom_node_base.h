@@ -98,12 +98,7 @@ public:
         }
     }
 
-    void FireRecycleSelf()
-    {
-        if (recycleCustomNodeFunc_) {
-            recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));
-        }
-    }
+    void FireRecycleSelf();
 
     void SetRecycleFunction(std::function<void(RefPtr<CustomNodeBase>)>&& recycleCustomNode)
     {

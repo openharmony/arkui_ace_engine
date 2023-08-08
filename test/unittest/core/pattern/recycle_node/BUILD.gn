@@ -26,5 +26,7 @@ ace_unittest("recycle_node_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/recycle_view/recycle_view_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "recycle_node_test_ng.cpp",
+
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
   ]
 }

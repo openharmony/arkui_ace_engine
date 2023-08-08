@@ -842,7 +842,6 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
         auto uiNode = AceType::DynamicCast<NG::UINode>(node);
         ElementRegister::GetInstance()->UpdateRecycleElmtId(uiNode->GetId(), newElmtId);
         uiNode->UpdateRecycleElmtId(newElmtId);
-        NG::LayoutProperty::UpdateAllGeometryTransition(uiNode);
         ViewStackModel::GetInstance()->Push(node, true);
     } else {
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
