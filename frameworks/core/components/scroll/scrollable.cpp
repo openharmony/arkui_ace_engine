@@ -241,7 +241,9 @@ void Scrollable::SetAxis(Axis axis)
 {
     axis_ = axis;
     PanDirection panDirection;
-    if (axis_ == Axis::VERTICAL) {
+    if (axis_ == Axis::NONE) {
+        panDirection.type = PanDirection::NONE;
+    } else if (axis_ == Axis::VERTICAL) {
         panDirection.type = PanDirection::VERTICAL;
     } else {
         panDirection.type = PanDirection::HORIZONTAL;
