@@ -190,6 +190,7 @@ public:
         customKeyboardBulder_ = keyboardBuilder;
     }
     void DumpInfo() override;
+    void InitSelection(const Offset& pos);
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
