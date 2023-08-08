@@ -72,6 +72,11 @@ public:
 
 private:
     void CreateBuilder();
+    inline size_t GetParagraphLength() const
+    {
+        return text_.length() + placeHolderIndex_ + 1;
+    }
+
     ParagraphStyle paraStyle_;
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::ParagraphBuilder> builder_;

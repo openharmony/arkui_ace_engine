@@ -425,6 +425,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator002, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.letterSpacing = std::make_optional(LETTER_SPACING);
+    testProperty.baselineOffsetValue = std::make_optional(BASELINE_OFFSET_VALUE);
     auto frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();

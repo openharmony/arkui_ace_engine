@@ -135,10 +135,10 @@ OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectL
                           paragraph_->ComputeOffsetForCaretDownstream(position, metrics);
     if (!computeSuccess) {
         LOGW("Get caret offset failed, set it to text tail");
-        return OffsetF(rect.Width(), 0.0f);
+        return { rect.Width(), 0.0f };
     }
     selectLineHeight = metrics.height;
-    return OffsetF(static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY()));
+    return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY()) };
 }
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
