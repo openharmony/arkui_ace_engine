@@ -91,6 +91,11 @@ public:
         onAccessibilityEventFunc_ = std::move(onAccessibilityEvent);
     }
 
+    void SetIsForDrag(bool isForDrag)
+    {
+        isForDrag_ = isForDrag;
+    }
+
     GestureEventFunc GetLongPressActionFunc();
 
 private:

@@ -80,7 +80,7 @@ DragEventActuator::DragEventActuator(
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
     previewLongPressRecognizer_ =
-        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, false);
+        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, true);
     isNotInPreviewState_ = false;
 }
 
@@ -349,6 +349,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         result.emplace_back(SequencedRecognizer_);
         return;
+    }
+    auto menuLongPress = gestureHub->GetLongPressRecognizer();
+    if (menuLongPress) {
+        menuLongPress->SetIsForDrag(true);
     }
     auto longPressUpdateValue = [weak = WeakClaim(this)](GestureEvent& info) {
         if (SystemProperties::GetDebugEnabled()) {
