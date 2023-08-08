@@ -440,7 +440,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
 
     UpdateTitleModeChangeEventHub(hostNode);
-    UpdateEventHub(hostNode, navigationLayoutProperty, navigationLayoutAlgorithm->GetNavigationMode());
     UpdateResponseRegion(navigationLayoutAlgorithm->GetRealDividerWidth(),
         navigationLayoutAlgorithm->GetRealNavBarWidth(), navigationLayoutAlgorithm->GetRealNavBarHeight(),
         navigationLayoutAlgorithm->GetNavBarOffset());
@@ -448,31 +447,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     AddDividerHotZoneRect(navigationLayoutAlgorithm);
     ifNeedInit_ = false;
     return false;
-}
-
-bool NavigationPattern::UpdateEventHub(const RefPtr<NavigationGroupNode>& hostNode,
-    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, NavigationMode navigationMode)
-{
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_RETURN(navBarNode, false);
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_RETURN(navBarLayoutProperty, false);
-    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    if (navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
-        eventHub->FireNavBarStateChangeEvent(false);
-    } else {
-        if (navigationMode == NavigationMode::SPLIT) {
-            if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-                navBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                eventHub->FireNavBarStateChangeEvent(false);
-            } else {
-                navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                eventHub->FireNavBarStateChangeEvent(true);
-            }
-        }
-    }
-    return true;
 }
 
 bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode)
