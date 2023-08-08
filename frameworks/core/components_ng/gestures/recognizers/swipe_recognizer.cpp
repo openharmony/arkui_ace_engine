@@ -118,6 +118,10 @@ void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGI("swipe recognizer receives %{public}d touch up event", event.id);
+    if (currentFingers_ < fingers_) {
+        LOGW("SwipeGesture current finger number is less than requiried finger number.");
+        return;
+    }
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
     lastTouchEvent_ = event;
@@ -172,6 +176,10 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("swipe recognizer receives touch move event");
+    if (currentFingers_ < fingers_) {
+        LOGW("SwipeGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if (refereeState_ != RefereeState::DETECTING) {
         return;
     }

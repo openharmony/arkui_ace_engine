@@ -94,6 +94,10 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch up event");
+    if (currentFingers_ < fingers_) {
+        LOGW("PinchGesture current finger number is less than requiried finger number.");
+        return;
+    }
 
     if (isPinchEnd_) {
         return;
@@ -131,6 +135,10 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
+    if (currentFingers_ < fingers_) {
+        LOGW("PinchGesture current finger number is less than requiried finger number.");
+        return;
+    }
 
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;

@@ -131,6 +131,10 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 {
     LOGD("long press recognizer receives touch up event");
+    if (currentFingers_ < fingers_) {
+        LOGW("LongPressGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionUpdate_, false);
         SendCallbackMsg(onActionEnd_, false);
@@ -142,6 +146,10 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("long press recognizer receives touch move event");
+    if (currentFingers_ < fingers_) {
+        LOGW("LongPressGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;

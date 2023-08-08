@@ -47,10 +47,12 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
         case TouchType::DOWN:
             deviceId_ = point.deviceId;
             deviceType_ = point.sourceType;
+            currentFingers_++;
             HandleTouchDownEvent(point);
             break;
         case TouchType::UP:
             HandleTouchUpEvent(point);
+            currentFingers_--;
             break;
         case TouchType::CANCEL:
             HandleTouchCancelEvent(point);

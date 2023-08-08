@@ -242,6 +242,7 @@ protected:
     // size of recognizer target.
     std::optional<EventTarget> recognizerTarget_ = std::nullopt;
 
+    int32_t currentFingers_ = 0;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
 };

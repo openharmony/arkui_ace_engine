@@ -150,6 +150,10 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    if (currentFingers_ < fingers_) {
+        LOGW("ClickGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
@@ -192,6 +196,10 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    if (currentFingers_ < fingers_) {
+        LOGW("ClickGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
