@@ -169,26 +169,6 @@ public:
         return estimateOffset_;
     }
 
-    void SetContentStartOffset(float startOffset)
-    {
-        contentStartOffset_ = startOffset;
-    }
-
-    void SetContentEndOffset(float endOffset)
-    {
-        contentEndOffset_ = endOffset;
-    }
-
-    float GetContentStartOffset() const
-    {
-        return contentStartOffset_;
-    }
-
-    float GetContentEndOffset() const
-    {
-        return contentEndOffset_;
-    }
-
     float GetStartPosition() const
     {
         if (itemPosition_.empty()) {
@@ -343,8 +323,7 @@ private:
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
-    float contentStartOffset_ = 0.0f;
-    float contentEndOffset_ = 0.0f;
+
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;
