@@ -226,7 +226,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
 RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     float globalX, float globalY, DragType dragType, bool findDrop)
 {
-    std::set<WeakPtr<FrameNode>> frameNodes;
+    std::map<int32_t, WeakPtr<FrameNode>> frameNodes;
     switch (dragType) {
         case DragType::COMMON:
             frameNodes = dragFrameNodes_;
@@ -253,8 +253,8 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
 
     PointF point(globalX, globalY);
     std::vector<RefPtr<FrameNode>> hitFrameNodes;
-    for (const auto& weakNode : frameNodes) {
-        auto frameNode = weakNode.Upgrade();
+    for (auto iterOfFrameNode = frameNodes.begin(); iterOfFrameNode != frameNodes.end(); iterOfFrameNode++) {
+        auto frameNode = iterOfFrameNode->second.Upgrade();
         if (!frameNode || !frameNode->IsVisible()) {
             continue;
         }

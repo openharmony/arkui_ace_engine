@@ -39,32 +39,32 @@ public:
     RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<UINode>& customNode, const GestureEvent& info);
     RefPtr<DragDropProxy> CreateTextDragDropProxy();
 
-    void AddDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void AddDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        dragFrameNodes_.insert(dragFrameNode);
+        dragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
-    void RemoveDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void RemoveDragFrameNode(int32_t id)
     {
-        dragFrameNodes_.erase(dragFrameNode);
-        gridDragFrameNodes_.erase(dragFrameNode);
-        listDragFrameNodes_.erase(dragFrameNode);
-        textFieldDragFrameNodes_.erase(dragFrameNode);
+        dragFrameNodes_.erase(id);
+        gridDragFrameNodes_.erase(id);
+        listDragFrameNodes_.erase(id);
+        textFieldDragFrameNodes_.erase(id);
     }
 
-    void AddGridDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void AddGridDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        gridDragFrameNodes_.insert(dragFrameNode);
+        gridDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
-    void AddListDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void AddListDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        listDragFrameNodes_.insert(dragFrameNode);
+        listDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
-    void AddTextFieldDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void AddTextFieldDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        textFieldDragFrameNodes_.insert(dragFrameNode);
+        textFieldDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
@@ -164,10 +164,10 @@ private:
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
 
-    std::set<WeakPtr<FrameNode>> dragFrameNodes_;
-    std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;
-    std::set<WeakPtr<FrameNode>> listDragFrameNodes_;
-    std::set<WeakPtr<FrameNode>> textFieldDragFrameNodes_;
+    std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
+    std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
+    std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
+    std::map<int32_t, WeakPtr<FrameNode>> textFieldDragFrameNodes_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<FrameNode> draggedFrameNode_;
     RefPtr<FrameNode> preTargetFrameNode_;
