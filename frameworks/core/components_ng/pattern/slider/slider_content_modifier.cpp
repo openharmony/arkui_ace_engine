@@ -344,6 +344,34 @@ void SliderContentModifier::JudgeNeedAimate(const RefPtr<SliderPaintProperty>& p
     }
 }
 
+void SliderContentModifier::StopSelectAnimation(const PointF& end)
+{
+    bool stop = false;
+    if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
+        auto current = selectEnd_->Get().GetX();
+        if ((LessNotEqual(targetSelectEnd_.GetX(), current) && GreatNotEqual(end.GetX(), current)) ||
+            (LessNotEqual(end.GetX(), current) && GreatNotEqual(targetSelectEnd_.GetX(), current))) {
+            stop = true;
+        }
+    } else {
+        auto current = selectEnd_->Get().GetY();
+        if ((LessNotEqual(targetSelectEnd_.GetY(), current) && GreatNotEqual(end.GetY(), current)) ||
+            (LessNotEqual(end.GetY(), current) && GreatNotEqual(targetSelectEnd_.GetY(), current))) {
+            stop = true;
+        }
+    }
+    if (stop) {
+        AnimationOption option = AnimationOption();
+        AnimationUtils::Animate(option, [this]() {
+            if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
+                selectEnd_->Set(selectEnd_->Get());
+            } else {
+                selectEnd_->Set(selectEnd_->Get());
+            }
+        });
+    }
+}
+
 void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end)
 {
     if (selectStart_) {
@@ -351,6 +379,7 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
     }
     CHECK_NULL_VOID(selectEnd_);
     if (needAnimate_ && isVisible_) {
+        StopSelectAnimation(end);
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
@@ -359,13 +388,47 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
     } else {
         selectEnd_->Set(end - PointF());
     }
+    targetSelectEnd_ = end - PointF();
+}
+
+void SliderContentModifier::StopCircleCenterAnimation(const PointF& center)
+{
+    bool stop = false;
+    if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
+        auto current = blockCenterX_->Get();
+        if ((LessNotEqual(targetCenter_.GetX(), current) && GreatNotEqual(center.GetX(), current)) ||
+            (LessNotEqual(center.GetX(), current) && GreatNotEqual(targetCenter_.GetX(), current))) {
+            stop = true;
+        }
+    } else {
+        auto current = blockCenterY_->Get();
+        if ((LessNotEqual(targetCenter_.GetY(), current) && GreatNotEqual(center.GetY(), current)) ||
+            (LessNotEqual(center.GetY(), current) && GreatNotEqual(targetCenter_.GetY(), current))) {
+            stop = true;
+        }
+    }
+    if (stop) {
+        AnimationOption option = AnimationOption();
+        AnimationUtils::Animate(option, [this]() {
+            if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
+                blockCenterX_->Set(blockCenterX_->Get());
+            } else {
+                blockCenterY_->Set(blockCenterY_->Get());
+            }
+        });
+    }
 }
 
 void SliderContentModifier::SetCircleCenter(const PointF& center)
 {
+    if (center == targetCenter_) {
+        return;
+    }
+
     CHECK_NULL_VOID(blockCenterX_);
     CHECK_NULL_VOID(blockCenterY_);
     if (needAnimate_ && isVisible_) {
+        StopCircleCenterAnimation(center);
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
@@ -386,6 +449,7 @@ void SliderContentModifier::SetCircleCenter(const PointF& center)
         blockCenterX_->Set(center.GetX());
         blockCenterY_->Set(center.GetY());
     }
+    targetCenter_ = center;
 }
 
 RSRect SliderContentModifier::GetTrackRect()

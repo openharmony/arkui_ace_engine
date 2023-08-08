@@ -246,6 +246,8 @@ private:
     void DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect);
     void SetShapeRectRadius(RSRoundRect& roundRect, float borderWidth);
     void SetBlockClip(DrawingContext& context);
+    void StopSelectAnimation(const PointF& end);
+    void StopCircleCenterAnimation(const PointF& center);
 
 private:
     std::function<void()> updateImageFunc_;
@@ -296,6 +298,8 @@ private:
         RSPath path;
     } markerPenAndPath;
 
+    OffsetF targetSelectEnd_;
+    PointF targetCenter_;
     bool isVisible_ = true;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;

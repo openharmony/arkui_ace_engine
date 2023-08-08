@@ -407,18 +407,20 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureStart(info);
+        pattern->OpenTranslateAnimation();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
         pattern->FireChangeEvent(SliderChangeMode::Moving);
-        pattern->CloseTranslateAnimation();
+        pattern->OpenTranslateAnimation();
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandledGestureEvent();
+        pattern->CloseTranslateAnimation();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -426,6 +428,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandledGestureEvent();
         pattern->FireChangeEvent(SliderChangeMode::End);
         pattern->axisFlag_ = false;
+        pattern->CloseTranslateAnimation();
     };
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
