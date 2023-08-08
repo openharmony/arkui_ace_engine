@@ -552,7 +552,7 @@ bool CheckWhetherHideToolbarIfDeviceRotation(const float& navbarWidth)
     float gutterWidth = columnInfo->GetParent()->GetGutterWidth().ConvertToPx();
     float hideLimitWidth = gridWidth + gutterWidth * 2;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        if (static_cast<uint32_t>(currentColumns) >= rotationLimitCount && GreatOrEqual(navbarWidth, hideLimitWidth)) {
+        if (static_cast<uint32_t>(currentColumns) >= rotationLimitCount && GreatOrEqual(navbarWidth, gridWidth)) {
             return true;
         }
     } else if (SystemProperties::GetDeviceType() == DeviceType::TABLET) {
