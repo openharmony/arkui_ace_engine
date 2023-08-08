@@ -109,8 +109,11 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     miniHeight_ = layoutProperty->GetMiniHeight().value_or(Dimension(DRAG_UP_THRESHOLD.ConvertToPx()));
     customHeight_ = layoutProperty->GetCustomHeight().value_or(Dimension(0.0));
     auto type = layoutProperty->GetPanelType();
-    if (type == PanelType::CUSTOM && NearEqual(customHeight_.Value(), 0.0)) {
-        customHeight_ = Dimension(columnGeometryNode->GetFrameSize().Height());
+    if (type == PanelType::CUSTOM) {
+        auto calc = layoutProperty->GetCustomHeight().value();
+        if (!calc.CalcValue().empty() && calc.CalcValue().find("wrapContent") != std::string::npos) {
+            customHeight_ = Dimension(columnGeometryNode->GetFrameSize().Height());
+        }
     }
 
     auto childOffset = OffsetF();

@@ -291,7 +291,7 @@ var PanelType;
 
 var PanelHeight;
 (function (PanelHeight) {
-  PanelHeight[PanelHeight["WRAP_CONTENT"] = 0] = "WRAP_CONTENT";
+  PanelHeight[PanelHeight["WRAP_CONTENT"] = "wrapContent"] = "WRAP_CONTENT";
 })(PanelHeight || (PanelHeight = {}));
 
 var PanelMode;
