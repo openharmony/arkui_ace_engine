@@ -165,6 +165,10 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGI("pan recognizer receives %{public}d touch up event", event.id);
+    if (currentFingers_ < fingers_) {
+        LOGW("PanGesture current finger number is less than requiried finger number.");
+        return;
+    }
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
@@ -206,6 +210,10 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch move event");
+    if (currentFingers_ < fingers_) {
+        LOGW("PanGesture current finger number is less than requiried finger number.");
+        return;
+    }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     delta_ = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
