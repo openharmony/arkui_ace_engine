@@ -959,6 +959,11 @@ public:
     {
         return inlinePadding_;
     }
+    
+    bool GetScrollBarVisible() const
+    {
+        return scrollBarVisible_;
+    }
 
     bool IsNormalInlineState() const;
     void TextIsEmptyRect(RectF &rect);
@@ -1199,6 +1204,7 @@ private:
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = UNDERLINE_WIDTH;
     Color underlineColor_;
+    bool scrollBarVisible_ = false;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
