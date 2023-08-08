@@ -66,6 +66,7 @@ ProgressModifier::ProgressModifier()
       sweepingDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingHeadDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingTailDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+      strokeRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(FLOAT_TWO_ZERO / INT32_TWO)),
       offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       maxValue_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_MAX_VALUE)),
@@ -94,6 +95,7 @@ ProgressModifier::ProgressModifier()
     AttachProperty(sweepEffect_);
     AttachProperty(trailingHeadDate_);
     AttachProperty(trailingTailDate_);
+    AttachProperty(strokeRadius_);
 
     AttachProperty(ringProgressColors_);
     AttachProperty(sweepingDate_);
@@ -651,7 +653,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
-    double radius = strokeWidth_->Get() / INT32_TWO;
+    double radius = strokeRadius_->Get();
     if (contentSize.Width() >= contentSize.Height()) {
         double barLength = contentSize.Width() - radius * INT32_TWO;
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
@@ -1427,5 +1429,10 @@ bool ProgressModifier::PostTask(const TaskExecutor::Task& task)
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
+void ProgressModifier::SetStrokeRadius(float strokeRaidus)
+{
+    strokeRadius_->Set(strokeRaidus);
 }
 } // namespace OHOS::Ace::NG
