@@ -91,19 +91,25 @@ void BubblePattern::OnModifyDone()
     InitTouchEvent();
     RegisterButtonOnHover();
     RegisterButtonOnTouch();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
-    pipelineContext->AddWindowStateChangedCallback(host->GetId());
 }
 
 void BubblePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+    pipelineContext->AddWindowStateChangedCallback(host->GetId());
     host->GetRenderContext()->SetClipToFrame(true);
+}
+
+void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
 
 void BubblePattern::InitTouchEvent()

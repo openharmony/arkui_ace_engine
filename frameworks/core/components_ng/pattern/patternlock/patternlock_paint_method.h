@@ -56,7 +56,7 @@ private:
 
     float sideLength_ = 0.0f;
     float scaleActiveCircleRadius_ = 1.0f;
-    float scaleBackRoundCircleRadius_ = 1.0f;
+    float scaleBackgroundCircleRadius_ = 1.0f;
     float scaleWaveCircleRadiusStart_ = 1.0f;
     float scaleWaveCircleRadiusEnd_ = 1.0f;
     float pressRadiusScale_ = 1.0f;

@@ -44,7 +44,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->SetRegularColor(regularColor_);
     patternlockModifier_->SetSelectColor(selectedColor_);
     patternlockModifier_->SetActiveColor(activeColor_);
-    patternlockModifier_->SetPathColor(pathColor_);
+    patternlockModifier_->SetPathColor(LinearColor(pathColor_));
     patternlockModifier_->SetHoverColor(hoverColor_);
     patternlockModifier_->SetWrongColor(wrongColor_);
     patternlockModifier_->SetCorrectColor(correctColor_);
@@ -55,7 +55,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->SetContentOffset(paintWrapper->GetContentOffset());
     patternlockModifier_->SetChoosePoint(choosePoint_);
     patternlockModifier_->SetActiveCircleRadiusScale(scaleActiveCircleRadius_);
-    patternlockModifier_->SetBackgroundCircleRadiusScale(scaleBackRoundCircleRadius_);
+    patternlockModifier_->SetBackgroundCircleRadiusScale(scaleBackgroundCircleRadius_);
     patternlockModifier_->SetLightRingRadiusStartScale(scaleWaveCircleRadiusStart_);
     patternlockModifier_->SetLightRingRadiusEndScale(scaleWaveCircleRadiusEnd_);
     patternlockModifier_->SetPressRadiusScale(pressRadiusScale_);
@@ -79,7 +79,7 @@ void PatternLockPaintMethod::GetThemeProp()
     circleRadius_ = patternLockTheme->GetCircleRadius();
     pathStrokeWidth_ = patternLockTheme->GetPathStrokeWidth();
     scaleActiveCircleRadius_ = patternLockTheme->GetActiveCircleRadiusScale();
-    scaleBackRoundCircleRadius_ = patternLockTheme->GetBackgroundRadiusScale();
+    scaleBackgroundCircleRadius_ = patternLockTheme->GetBackgroundRadiusScale();
     scaleWaveCircleRadiusStart_ = patternLockTheme->GetLightRingCircleRadiusStartScale();
     scaleWaveCircleRadiusEnd_ = patternLockTheme->GetLightRingCircleRadiusEndScale();
     pressRadiusScale_ = patternLockTheme->GetPressRadiusScale();

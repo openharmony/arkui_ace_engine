@@ -883,6 +883,34 @@ void VideoPattern::OnAreaChangedInner()
     }
 }
 
+void VideoPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
+    CHECK_NULL_VOID(videoTheme);
+    auto renderContext = controlBar_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(videoTheme->GetBkgColor());
+    for (const auto& child : controlBar_->GetChildren()) {
+        if (child->GetTag() == V2::TEXT_ETS_TAG) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (frameNode) {
+                auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+                if (textLayoutProperty) {
+                    auto textStyle = videoTheme->GetTimeTextStyle();
+                    textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
+                }
+            }
+        }
+    }
+    host->SetNeedCallChildrenUpdate(false);
+    host->MarkModifyDone();
+    host->MarkDirtyNode();
+}
+
 RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -892,6 +920,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
     auto controlBar = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_RETURN(controlBar, nullptr);
+    controlBar_ = controlBar;
 
     auto playButton = CreateSVG();
     CHECK_NULL_RETURN(playButton, nullptr);
@@ -1121,12 +1150,6 @@ void VideoPattern::Start()
         LOGE("Player has not prepared");
         return;
     }
-
-    if (isPlaying_) {
-        LOGI("Already isPlaying");
-        return;
-    }
-
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
@@ -1155,12 +1178,6 @@ void VideoPattern::Pause()
         LOGE("media player is invalid.");
         return;
     }
-
-    if (!isPlaying_) {
-        LOGI("Already pause");
-        return;
-    }
-
     LOGD("Video Pause");
     mediaPlayer_->Pause();
 }

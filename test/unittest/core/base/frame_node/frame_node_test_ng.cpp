@@ -694,7 +694,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
     FRAME_NODE2->TriggerVisibleAreaChangeCallback();
     EXPECT_TRUE(context->GetOnShow());
-    EXPECT_NE(FRAME_NODE2->lastVisibleRatio_, 0);
+    EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 0);
 }
 
 /**

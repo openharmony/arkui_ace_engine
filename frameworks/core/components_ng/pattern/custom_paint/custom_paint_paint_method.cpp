@@ -875,11 +875,6 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
     paint.setStyle(SkPaint::Style::kFill_Style);
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
-    if (HasShadow()) {
-        SkPath path;
-        path.addRect(skRect);
-        PaintShadow(path, shadow_, skCanvas_.get());
-    }
     if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
@@ -888,6 +883,11 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
     }
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha()); // update the global alpha after setting the color
+    }
+    if (HasShadow()) {
+        SkPath path;
+        path.addRect(skRect);
+        PaintShadow(path, shadow_, skCanvas_.get(), &paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawRect(skRect, paint);
@@ -955,16 +955,16 @@ void CustomPaintPaintMethod::StrokeRect(PaintWrapper* paintWrapper, const Rect& 
     paint.setAntiAlias(antiAlias_);
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
-    if (HasShadow()) {
-        SkPath path;
-        path.addRect(skRect);
-        PaintShadow(path, shadow_, skCanvas_.get());
-    }
     if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
     if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), paint);
+    }
+    if (HasShadow()) {
+        SkPath path;
+        path.addRect(skRect);
+        PaintShadow(path, shadow_, skCanvas_.get(), &paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawRect(skRect, paint);
@@ -1108,9 +1108,6 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
         paint.setColor(fillState_.GetColor().GetValue());
     }
     paint.setStyle(SkPaint::Style::kFill_Style);
-    if (HasShadow()) {
-        PaintShadow(skPath_, shadow_, skCanvas_.get());
-    }
     if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
@@ -1119,6 +1116,9 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
     }
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha());
+    }
+    if (HasShadow()) {
+        PaintShadow(skPath_, shadow_, skCanvas_.get(), &paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath_, paint);
@@ -1196,9 +1196,6 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
         paint.setColor(fillState_.GetColor().GetValue());
     }
     paint.setStyle(SkPaint::Style::kFill_Style);
-    if (HasShadow()) {
-        PaintShadow(skPath2d_, shadow_, skCanvas_.get());
-    }
     if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
     }
@@ -1207,6 +1204,9 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
     }
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha());
+    }
+    if (HasShadow()) {
+        PaintShadow(skPath2d_, shadow_, skCanvas_.get(), &paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath2d_, paint);
@@ -1268,14 +1268,14 @@ void CustomPaintPaintMethod::Stroke(PaintWrapper* paintWrapper)
     GetStrokePaint(paint, options);
 #endif
     paint.setAntiAlias(antiAlias_);
-    if (HasShadow()) {
-        PaintShadow(skPath_, shadow_, skCanvas_.get());
-    }
     if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
     if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), paint);
+    }
+    if (HasShadow()) {
+        PaintShadow(skPath_, shadow_, skCanvas_.get(), &paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath_, paint);
@@ -1343,14 +1343,14 @@ void CustomPaintPaintMethod::Path2DStroke(const OffsetF& offset)
     GetStrokePaint(paint, options);
 #endif
     paint.setAntiAlias(antiAlias_);
-    if (HasShadow()) {
-        PaintShadow(skPath2d_, shadow_, skCanvas_.get());
-    }
     if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
     }
     if (strokeState_.GetPatternValue().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::ImagePattern) {
         UpdatePaintShader(strokeState_.GetPatternValue(), paint);
+    }
+    if (HasShadow()) {
+        PaintShadow(skPath2d_, shadow_, skCanvas_.get(), &paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawPath(skPath2d_, paint);

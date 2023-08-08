@@ -95,7 +95,8 @@ constexpr Dimension BUTTON_PADDING = 12.0_vp;
 constexpr Dimension BUTTON_RADIUS = 5.0_vp;
 constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
-constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 280.0_vp;
+constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 432.0_vp;
+constexpr float MAX_NAV_BAR_WIDTH_SCALE = 0.4f;
 
 // more button
 constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;

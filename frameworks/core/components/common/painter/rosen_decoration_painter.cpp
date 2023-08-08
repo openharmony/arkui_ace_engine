@@ -3028,7 +3028,8 @@ void RosenDecorationPainter::PaintShadow(
 }
 
 #ifndef USE_ROSEN_DRAWING
-void RosenDecorationPainter::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
+void RosenDecorationPainter::PaintShadow(
+    const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint)
 {
     if (!canvas) {
         LOGE("PaintShadow failed, canvas is null.");
@@ -3056,11 +3057,20 @@ void RosenDecorationPainter::PaintShadow(const SkPath& path, const Shadow& shado
         SkShadowUtils::DrawShadow(canvas, skPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor,
             spotColor, SkShadowFlags::kTransparentOccluder_ShadowFlag);
     } else {
-        SkPaint paint;
-        paint.setColor(spotColor);
-        paint.setAntiAlias(true);
-        paint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, ConvertRadiusToSigma(shadow.GetBlurRadius())));
-        canvas->drawPath(skPath, paint);
+        SkPaint ShadowPaint;
+        ShadowPaint.setColor(spotColor);
+        ShadowPaint.setAntiAlias(true);
+        if (paint) {
+            ShadowPaint.setStyle(paint->getStyle());
+            ShadowPaint.setStrokeWidth(paint->getStrokeWidth());
+            ShadowPaint.setStrokeMiter(paint->getStrokeMiter());
+            ShadowPaint.setStrokeCap(paint->getStrokeCap());
+            ShadowPaint.setStrokeJoin(paint->getStrokeJoin());
+            ShadowPaint.setAlphaf(paint->getAlphaf());
+        }
+        ShadowPaint.setMaskFilter(
+            SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, ConvertRadiusToSigma(shadow.GetBlurRadius())));
+        canvas->drawPath(skPath, ShadowPaint);
     }
     canvas->restore();
 }

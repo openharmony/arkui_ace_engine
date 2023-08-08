@@ -329,6 +329,12 @@ public:
     {
         selectPopupMenuShowing_ = showing;
     }
+    void SetCurrentStartHandleDragging(bool isStartHandle)
+    {
+        isCurrentStartHandleDragging_ = isStartHandle;
+    }
+    void UpdateSelectHandleInfo();
+    bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     bool OnBackPressed() const;
@@ -529,6 +535,7 @@ private:
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
+    bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;

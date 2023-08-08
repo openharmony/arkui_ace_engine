@@ -69,7 +69,7 @@ public:
     void SetRegularColor(const Color& regularColor);
     void SetSelectColor(const Color& selectedColor);
     void SetActiveColor(const Color& activeColor);
-    void SetPathColor(const Color& pathColor);
+    void SetPathColor(const LinearColor& pathColor);
     void SetHoverColor(const Color& hoverColor);
     void SetWrongColor(const Color& wrongColor);
     void SetCorrectColor(const Color& correctColor);
@@ -130,7 +130,7 @@ private:
     RefPtr<PropertyColor> hoverColor_;
     RefPtr<PropertyColor> wrongColor_;
     RefPtr<PropertyColor> correctColor_;
-    RefPtr<PropertyColor> pathColor_;
+    RefPtr<AnimatablePropertyColor> pathColor_;
     RefPtr<PropertyColor> pressColor_;
     RefPtr<AnimatablePropertyOffsetF> connectedLineTailPoint_;
     RefPtr<AnimatablePropertyOffsetF> canceledLineTailPoint_;

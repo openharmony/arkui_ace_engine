@@ -140,7 +140,7 @@ public:
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
-    int32_t AddImageSpan(const ImageSpanOptions& options, int32_t index = -1);
+    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, int32_t index = -1);
     void AddSpanItem(RefPtr<SpanItem> item, int32_t offset);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
@@ -222,6 +222,9 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void UseHostToUpdateTextFieldManager();
+    void UpdateTextFieldManager(const Offset& offset, float height);
+    bool HasFocus() const;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
@@ -271,8 +274,9 @@ private:
 #else
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
+    bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
-    bool isFirstmouseSelect_ = false;
+    bool isFirstMouseSelect_ = true;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
     bool imeShown_ = false;
@@ -296,6 +300,7 @@ private:
     RefPtr<RichEditorContentModifier> richEditorContentModifier_;
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
+    RectF frameRect_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
     bool isDragMoving = false;

@@ -59,9 +59,11 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     OffsetT<Dimension> offset { Dimension((rootWidth - text->GetGeometryNode()->GetMarginFrameSize().Width()) / 2.0f),
         {} };
     if (context->GetMinPlatformVersion() > API_VERSION_9) {
-        auto safeArea = context->GetSafeArea();
+        auto layoutProperty = dirty->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        const auto& safeArea = layoutProperty->GetSafeAreaInsets();
         offset.SetY(Dimension { rootHeight - toastBottom - dirty->GetGeometryNode()->GetMarginFrameSize().Height() -
-                                safeArea.bottom_.Length() });
+                                (safeArea ? safeArea->bottom_.Length() : 0.0f) });
     } else {
         offset.SetY(Dimension { rootHeight - toastBottom });
     }

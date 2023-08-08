@@ -312,7 +312,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             placeHolderIndex.emplace_back(child->placeHolderIndex);
         }
     }
-    if (spanItemChildren_.empty() || placeHolderIndex.size() == 0) {
+    if (spanItemChildren_.empty() || placeHolderIndex.empty()) {
         return;
     }
 
@@ -731,7 +731,7 @@ void TextLayoutAlgorithm::ApplyIndents(const TextStyle& textStyle, double width)
 bool TextLayoutAlgorithm::IncludeImageSpan(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
-    return (layoutWrapper->GetAllChildrenWithBuild().size() > 0);
+    return (!layoutWrapper->GetAllChildrenWithBuild().empty());
 }
 
 void TextLayoutAlgorithm::GetSpanAndImageSpanList(
