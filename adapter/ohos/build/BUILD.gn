@@ -19,9 +19,11 @@ group("ace_packages") {
   # core library for Ability Cross-platform Environment(ACE) JS
   deps = [
     "$ace_root/build:libace",
-    "$ace_root/build:libace_engine_pa_ark",
+    "$ace_root/build:libace_compatible",
+    "$ace_root/build:libace_engine_pa_ark_ohos",
     "$ace_root/frameworks/core/common/register:hdc_register",
     "$ace_root/interfaces/inner_api:innerkits_target",
+    "$ace_root/interfaces/inner_api/ace:ace_forward_compatibility",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     "$ace_root/interfaces/napi/kits:napi_group",
     "$ace_root/interfaces/native:ace_packages_ndk",

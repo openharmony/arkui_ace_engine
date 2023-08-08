@@ -23,6 +23,7 @@
 #include "core/common/ace_page.h"
 #include "core/common/container.h"
 #include "core/common/frontend.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
@@ -179,7 +180,7 @@ public:
         return jsEngine_;
     }
 
-    void AttachSubPipelineContext(const RefPtr<PipelineContext>& context);
+    void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
     void FlushReload() override;
     void HotReload() override;

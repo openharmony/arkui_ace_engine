@@ -23,6 +23,15 @@ if (is_ohos_standard_system) {
       import("config.gni")
     }
   }
+  ohos_platform_ng = {
+    name = "ohos_ng"
+    config = {
+      import("config_ng.gni")
+    }
+  }
 
-  platforms += [ ohos_platform ]
+  platforms += [
+    ohos_platform,
+    ohos_platform_ng,
+  ]
 }

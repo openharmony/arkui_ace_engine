@@ -31,10 +31,7 @@ template("napi_prompt_static") {
       "$root_out_dir/arkui/framework",
     ]
 
-    sources = [
-      "../promptaction/prompt_action.cpp",
-      "js_prompt.cpp",
-    ]
+    sources = [ "../promptaction/prompt_action.cpp" ]
 
     deps = []
     external_deps = []

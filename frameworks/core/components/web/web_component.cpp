@@ -86,10 +86,14 @@ RefPtr<Element> WebComponent::CreateElement()
 
 void WebComponent::RequestFocus()
 {
+#ifndef NG_BUILD
     auto focus = focusElement_.Upgrade();
     if (focus) {
         focus->RequestFocusImmediately();
     }
+#else
+    LOGE("not support focus node in new pipeline");
+#endif
 }
 
 } // namespace OHOS::Ace

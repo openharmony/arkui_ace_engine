@@ -31,7 +31,7 @@ namespace {
 
     std::mutex gMapLock_;
 }
-
+#ifdef FORM_SUPPORTED
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime, const char* bundleName)
 {
     std::unordered_set<std::string> formModuleList;
@@ -54,6 +54,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ReloadAceModuleCard(void* runtime, con
     }
     Framework::JsiDeclarativeEngineInstance::ReloadAceModuleCard(runtime, formModuleList);
 }
+#endif
 
 bool FormModulePreloader::CreateFormModuleList(
     const std::string& bundleName, std::unordered_set<std::string>& formModuleList)

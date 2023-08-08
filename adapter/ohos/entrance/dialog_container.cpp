@@ -364,6 +364,11 @@ void DialogContainer::AttachView(
 void DialogContainer::InitPipelineContext(std::unique_ptr<Window> window, int32_t instanceId, double density,
     int32_t width, int32_t height, uint32_t windowId)
 {
+#ifdef NG_BUILD
+    LOGI("New pipeline version creating...");
+    pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
+        std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+#else
     if (useNewPipeline_) {
         LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
@@ -372,6 +377,7 @@ void DialogContainer::InitPipelineContext(std::unique_ptr<Window> window, int32_
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     }
+#endif
     pipelineContext_->SetRootSize(density, width, height);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());

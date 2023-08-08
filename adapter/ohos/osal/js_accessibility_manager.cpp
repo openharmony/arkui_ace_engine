@@ -2247,7 +2247,9 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
         case ActionType::ACCESSIBILITY_ACTION_CLICK: {
             node->SetClicked(true);
             if (!node->GetClickEventMarker().IsEmpty()) {
+#ifndef NG_BUILD
                 context->SendEventToFrontend(node->GetClickEventMarker());
+#endif
                 node->ActionClick();
                 return true;
             }
@@ -2255,7 +2257,9 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
         }
         case ActionType::ACCESSIBILITY_ACTION_LONG_CLICK: {
             if (!node->GetLongPressEventMarker().IsEmpty()) {
+#ifndef NG_BUILD
                 context->SendEventToFrontend(node->GetLongPressEventMarker());
+#endif
                 node->ActionLongClick();
                 return true;
             }
@@ -2263,16 +2267,22 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
         }
         case ActionType::ACCESSIBILITY_ACTION_SET_TEXT: {
             if (!node->GetSetTextEventMarker().IsEmpty()) {
+#ifndef NG_BUILD
                 context->SendEventToFrontend(node->GetSetTextEventMarker());
+#endif
                 node->ActionSetText(actionArguments.find(ACTION_ARGU_SET_TEXT)->second);
                 return true;
             }
             return node->ActionSetText(actionArguments.find(ACTION_ARGU_SET_TEXT)->second);
         }
         case ActionType::ACCESSIBILITY_ACTION_FOCUS: {
+#ifndef NG_BUILD
             context->AccessibilityRequestFocus(std::to_string(node->GetNodeId()));
+#endif
             if (!node->GetFocusEventMarker().IsEmpty()) {
+#ifndef NG_BUILD
                 context->SendEventToFrontend(node->GetFocusEventMarker());
+#endif
                 node->ActionFocus();
                 return true;
             }
