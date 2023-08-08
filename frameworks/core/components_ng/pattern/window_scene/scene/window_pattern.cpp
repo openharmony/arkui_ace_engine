@@ -109,6 +109,9 @@ void WindowPattern::InitContent()
         context->SetRSNode(surfaceNode);
     }
 
+    auto showRecent = session_->GetShowRecent();
+    session_->SetShowRecent(false);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -119,8 +122,7 @@ void WindowPattern::InitContent()
         if (!HasStartingPage()) {
             return;
         }
-        if (session_->GetShowRecent()) {
-            session_->SetShowRecent(false);
+        if (showRecent) {
             CreateSnapshotNode();
             host->AddChild(snapshotNode_);
             return;
