@@ -422,8 +422,9 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        LOGI("Parse to dimension FP failed!");
-        return;
+        auto theme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        textColor = theme->GetTextColor();
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);
 }
