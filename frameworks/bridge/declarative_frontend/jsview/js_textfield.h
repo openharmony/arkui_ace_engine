@@ -87,6 +87,9 @@ public:
     static void SetShowUnderline(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
+    static bool ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info,
+        int32_t index, std::function<void()>& buildFunc);
+    static void SetCustomKeyboard(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

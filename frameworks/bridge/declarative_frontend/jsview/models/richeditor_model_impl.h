@@ -27,6 +27,7 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) override;
     void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
+    void SetCustomKeyboard(std::function<void()>&& func) override;
 };
 } // namespace OHOS::Ace::Framework
 

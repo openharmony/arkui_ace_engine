@@ -194,6 +194,7 @@ public:
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
+    virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

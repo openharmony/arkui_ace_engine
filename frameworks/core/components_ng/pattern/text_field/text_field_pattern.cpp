@@ -26,6 +26,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
+#include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -211,6 +212,9 @@ TextFieldPattern::~TextFieldPattern()
         connection_->Close(GetInstanceId());
         connection_ = nullptr;
 #endif
+    }
+    if (isCustomKeyboardAttached_) {
+        CloseCustomKeyboard();
     }
 }
 
@@ -3037,6 +3041,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(context, false);
     if (needShowSoftKeyboard) {
         LOGI("Start to request keyboard");
+        if (customKeyboardBulder_) {
+            return RequestCustomKeyboard();
+        }
 #if defined(ENABLE_STANDARD_INPUT)
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
@@ -3089,6 +3096,9 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
     LOGI("Request close soft keyboard");
     if (forceClose) {
         StopTwinkling();
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+            return CloseCustomKeyboard();
+        }
 #if defined(ENABLE_STANDARD_INPUT)
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (!imeAttached_) {
@@ -3114,6 +3124,37 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
         return true;
     }
     return false;
+}
+
+bool TextFieldPattern::RequestCustomKeyboard()
+{
+    if (isCustomKeyboardAttached_) {
+        return true;
+    }
+    CHECK_NULL_RETURN(customKeyboardBulder_, false);
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->BindKeyboard(customKeyboardBulder_, frameNode->GetId());
+    isCustomKeyboardAttached_ = true;
+    return true;
+}
+
+bool TextFieldPattern::CloseCustomKeyboard()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    overlayManager->DestroyKeyboard();
+    isCustomKeyboardAttached_ = false;
+    return true;
 }
 
 void TextFieldPattern::ProcessPasswordIcon()
@@ -4648,11 +4689,14 @@ bool TextFieldPattern::OnBackPressed()
 {
     LOGI("Textfield %{public}d receives back press event", GetHost()->GetId());
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!imeAttached_ || (imeAttached_ && !imeShown_)) {
+    if ((!imeAttached_ || (imeAttached_ && !imeShown_)) && !isCustomKeyboardAttached_) {
+#else
+    if (!isCustomKeyboardAttached_) {
+#endif
         LOGI("Ime is not attached or is hidden, return for not consuming the back press event");
         return false;
     }
-#endif
+
     LOGI("Closing keyboard on back press");
     CloseKeyboard(true);
 #if defined(ANDROID_PLATFORM)
@@ -5660,18 +5704,28 @@ void TextFieldPattern::StopEditing()
         return;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (GetImeAttached()) {
+    if (GetImeAttached() || isCustomKeyboardAttached_) {
+#else
+    if (isCustomKeyboardAttached_) {
+#endif
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnEditChanged(false);
     }
-#endif
     HandleSetSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
     StopTwinkling();
     MarkRedrawOverlay();
     CloseSelectOverlay();
     CloseKeyboard(true);
+}
+
+void TextFieldPattern::DumpInfo()
+{
+    if (customKeyboardBulder_) {
+        DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
+            .append(", Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
+    }
 }
 } // namespace OHOS::Ace::NG

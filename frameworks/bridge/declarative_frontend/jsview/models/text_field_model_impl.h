@@ -76,6 +76,7 @@ public:
     void SetOnClick(std::function<void(const ClickInfo&)>&& func) override;
     void SetFocusableAndFocusNode() override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override {};
+    void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

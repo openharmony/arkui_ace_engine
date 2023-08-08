@@ -55,6 +55,7 @@ public:
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override;
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
+    void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override;
 
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,

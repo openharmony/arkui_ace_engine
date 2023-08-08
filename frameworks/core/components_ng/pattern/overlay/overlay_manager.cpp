@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
@@ -980,6 +981,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
+    DestroyKeyboard();
     auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
         // stage node is at index 0, remove overlay at last
@@ -1737,6 +1739,27 @@ void OverlayManager::DestroySheetMask(const RefPtr<FrameNode>& sheetNode)
         return;
     }
     root->RemoveChild(*sheetChild);
+}
+
+void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    customKeyboard_ = KeyboardView::CreateKeyboard(targetId, keybordBuilder);
+    customKeyboard_->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    PlayDefaultModalTransition(customKeyboard_, true);
+}
+
+void OverlayManager::DestroyKeyboard()
+{
+    if (!customKeyboard_) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    rootNode->RemoveChild(customKeyboard_);
+    customKeyboard_ = nullptr;
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 // This function will be used in SceneBoard Thread only.
