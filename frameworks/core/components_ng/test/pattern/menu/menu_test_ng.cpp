@@ -3807,6 +3807,11 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg034, TestSize.Level1)
     ASSERT_TRUE(algorithm);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    layoutProp->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutProp->UpdateContentConstraint();
     auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
     // create menu item
     for (int32_t i = 0; i < 3; ++i) {
@@ -4013,9 +4018,14 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
         []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
 
     menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, true);
-    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_,
-        OffsetF(-static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
-            -static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx() + CONTAINER_BORDER_WIDTH.ConvertToPx())));
+    auto pipelineContext = menuLayoutAlgorithm->GetCurrentPipelineContext();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
+    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
+    OffsetF offset = OffsetF(windowsOffsetX, windowsOffsetY);
+    OffsetF offset2 = menuLayoutAlgorithm->GetMenuWrapperOffset(layoutWrapper);
+    offset -= offset2;
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, offset);
 
     /**
      * @tc.steps: step5. layoutWrapper, target and the geometry node of target is not null, isContextMenu is false
