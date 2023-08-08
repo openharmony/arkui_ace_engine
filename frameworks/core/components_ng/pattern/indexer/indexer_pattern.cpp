@@ -60,13 +60,10 @@ void IndexerPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto itemCountChanged = false;
     if (layoutProperty->GetArrayValue().has_value()) {
         arrayValue_ = layoutProperty->GetArrayValue().value();
-        itemCountChanged = (itemCount_ != static_cast<int32_t>(arrayValue_.size()));
         itemCount_ = static_cast<int32_t>(arrayValue_.size());
     } else {
-        itemCountChanged = (itemCount_ != 0);
         itemCount_ = 0;
     }
     auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
@@ -84,11 +81,12 @@ void IndexerPattern::OnModifyDone()
         selectChanged_ = true;
         ResetStatus();
     }
-    auto itemSize =
-        layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
-    auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
-    lastItemSize_ = itemSize;
-    ApplyIndexChanged(false, initialized_ && selectChanged_, false, indexerSizeChanged);
+    if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag()) ||
+        CheckLayoutFlag(layoutProperty->GetPropertyChangeFlag())) {
+        isLayoutChange_ = true;
+    } else {
+        ApplyIndexChanged(initialized_ && selectChanged_);
+    }
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
         InitPanEvent(gesture);
@@ -114,6 +112,10 @@ void IndexerPattern::OnModifyDone()
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (isLayoutChange_) {
+        isLayoutChange_ = false;
+        ApplyIndexChanged(initialized_ && selectChanged_);
+    }
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
@@ -181,13 +183,13 @@ void IndexerPattern::OnHover(bool isHover)
     } else {
         IndexerHoverOutAnimation();
     }
-    ApplyIndexChanged(true, false);
+    ApplyIndexChanged(false);
 }
 
 void IndexerPattern::OnChildHover(int32_t index, bool isHover)
 {
     childHoverIndex_ = isHover ? index : -1;
-    ApplyIndexChanged(true, childHoverIndex_ >= 0 && childHoverIndex_ < itemCount_);
+    ApplyIndexChanged(childHoverIndex_ >= 0 && childHoverIndex_ < itemCount_);
 }
 
 void IndexerPattern::InitInputEvent()
@@ -256,7 +258,7 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     selected_ = nextSelectIndex;
     refreshBubble = true;
     ResetStatus();
-    ApplyIndexChanged(true, refreshBubble, true);
+    ApplyIndexChanged(refreshBubble, true);
     OnSelect(refreshBubble);
 }
 
@@ -282,7 +284,7 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
     }
     childFocusIndex_ = -1;
     childHoverIndex_ = -1;
-    ApplyIndexChanged(true, true);
+    ApplyIndexChanged(true);
 }
 
 int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
@@ -324,7 +326,7 @@ bool IndexerPattern::KeyIndexByStep(int32_t step)
     }
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
-    ApplyIndexChanged(true, refreshBubble);
+    ApplyIndexChanged(refreshBubble);
     return nextSected >= 0;
 }
 
@@ -345,7 +347,7 @@ bool IndexerPattern::MoveIndexByStep(int32_t step)
     }
     selected_ = nextSected;
     ResetStatus();
-    ApplyIndexChanged(true, true);
+    ApplyIndexChanged(true);
     return nextSected >= 0;
 }
 
@@ -359,7 +361,7 @@ bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
     childFocusIndex_ = nextSelectIndex;
     childHoverIndex_ = -1;
     childPressIndex_ = -1;
-    ApplyIndexChanged(true, true);
+    ApplyIndexChanged(true);
     return nextSelectIndex >= 0;
 }
 
@@ -422,8 +424,7 @@ void IndexerPattern::OnSelect(bool changed)
     lastSelected_ = selected_;
 }
 
-void IndexerPattern::ApplyIndexChanged(
-    bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged)
+void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
 {
     initialized_ = true;
     selectChanged_ = false;
@@ -449,9 +450,6 @@ void IndexerPattern::ApplyIndexChanged(
             childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
             childRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
         } else if (index == childFocusIndex_ || index == selected_) {
-            nodeLayoutProperty->UpdateContent(arrayValue_[index]);
-            nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-            nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
             if (index == childFocusIndex_) {
                 auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
@@ -480,9 +478,6 @@ void IndexerPattern::ApplyIndexChanged(
             nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
             childRenderContext->SetClipToBounds(true);
             childNode->MarkModifyDone();
-            if (isTextNodeInTree) {
-                childNode->MarkDirtyNode();
-            }
             index++;
 
             AccessibilityEventType type = AccessibilityEventType::SELECTED;
@@ -500,9 +495,6 @@ void IndexerPattern::ApplyIndexChanged(
             childRenderContext->UpdateBorderRadius({ radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
         }
         Dimension borderWidth;
-        nodeLayoutProperty->UpdateContent(arrayValue_[index]);
-        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
@@ -517,16 +509,12 @@ void IndexerPattern::ApplyIndexChanged(
             textAccessibilityProperty->SetSelected(false);
         }
         childNode->MarkModifyDone();
-        if (isTextNodeInTree) {
-            childNode->MarkDirtyNode();
-        }
+        childNode->MarkDirtyNode();
     }
     if (selectChanged || NeedShowPopupView()) {
         ShowBubble();
     }
-    if (isTextNodeInTree && indexerSizeChanged) {
-        host->MarkDirtyNode();
-    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void IndexerPattern::ShowBubble()
@@ -673,7 +661,6 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
     letterLayoutProperty->UpdateItalicFontStyle(popupTextFont.GetFontStyle());
     letterLayoutProperty->UpdateTextColor(layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor()));
     letterLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    letterLayoutProperty->UpdateAlignment(Alignment::CENTER);
     auto textPadding = Dimension(IndexerTheme::TEXT_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdatePadding(
         { CalcLength(textPadding), CalcLength(textPadding), CalcLength(0), CalcLength(0) });
@@ -961,7 +948,7 @@ bool IndexerPattern::OnKeyEvent(const KeyEvent& event)
 void IndexerPattern::OnKeyEventDisapear()
 {
     ResetStatus();
-    ApplyIndexChanged(true, false);
+    ApplyIndexChanged(false);
 }
 
 void IndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
@@ -1212,7 +1199,7 @@ void IndexerPattern::SetAccessibilityAction()
                 }
                 indexerPattern->selected_ = index;
                 indexerPattern->ResetStatus();
-                indexerPattern->ApplyIndexChanged(true, true, true);
+                indexerPattern->ApplyIndexChanged(true, true);
                 indexerPattern->OnSelect(true);
             });
 
@@ -1235,7 +1222,7 @@ void IndexerPattern::SetAccessibilityAction()
                 }
                 indexerPattern->selected_ = 0;
                 indexerPattern->ResetStatus();
-                indexerPattern->ApplyIndexChanged(true, false);
+                indexerPattern->ApplyIndexChanged(false);
                 indexerPattern->OnSelect(false);
             });
     }
