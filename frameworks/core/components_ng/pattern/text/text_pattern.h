@@ -266,10 +266,10 @@ public:
     void CheckHandles(SelectHandleInfo& handleInfo);
 
 protected:
-    void HandleOnCopy();
+    virtual void HandleOnCopy();
     void InitMouseEvent();
     void ResetSelection();
-    void HandleOnSelectAll();
+    virtual void HandleOnSelectAll();
     void InitSelection(const Offset& pos);
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
