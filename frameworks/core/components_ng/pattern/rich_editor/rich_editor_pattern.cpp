@@ -992,9 +992,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (richEditorOverlayModifier_) {
         RequestKeyboard(false, true, true);
     }
-    if (caretVisible_) {
-        StopTwinkling();
-    }
+    StopTwinkling();
 }
 
 void RichEditorPattern::HandleOnSelectAll()
@@ -2635,5 +2633,24 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
     textFieldManager->SetClickPosition(offset);
     textFieldManager->SetHeight(height);
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
+}
+
+void RichEditorPattern::InitSelection(const Offset& pos)
+{
+    CHECK_NULL_VOID(paragraph_);
+    int32_t currentPosition = paragraph_->GetHandlePositionForClick(pos);
+    int32_t nextPosition = currentPosition + GetGraphemeClusterLength(currentPosition);
+    textSelector_.Update(currentPosition, nextPosition);
+    std::vector<Rect> selectedRects;
+    paragraph_->GetRectsForRange(currentPosition, nextPosition, selectedRects);
+    if (selectedRects.size() == 1 && (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top())) {
+        std::vector<Rect> selectedNextRects;
+        paragraph_->GetRectsForRange(currentPosition - 1, nextPosition - 1, selectedNextRects);
+        bool isInRange = pos.GetX() >= selectedNextRects[0].Left() && pos.GetX() <= selectedNextRects[0].Right() &&
+            pos.GetY() >= selectedNextRects[0].Top() && pos.GetY() <= selectedNextRects[0].Bottom();
+        if (isInRange) {
+            textSelector_.Update(currentPosition - 1, nextPosition - 1);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
