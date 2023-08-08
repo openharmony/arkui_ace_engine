@@ -128,11 +128,13 @@ bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const Siz
     float gutterWidth = columnInfo->GetParent()->GetGutterWidth().ConvertToPx();
     float hideLimitWidth = gridWidth + gutterWidth * 2;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        if (currentColumns >= rotationLimitCount && GreatOrEqual(navigationSize.Width(), hideLimitWidth)) {
+        if (currentColumns >= static_cast<int32_t>(rotationLimitCount) &&
+            GreatOrEqual(navigationSize.Width(), gridWidth)) {
             return true;
         }
     } else if (SystemProperties::GetDeviceType() == DeviceType::TABLET) {
-        if (currentColumns > rotationLimitCount && GreatOrEqual(navigationSize.Width(), hideLimitWidth)) {
+        if (currentColumns > static_cast<int32_t>(rotationLimitCount) &&
+            GreatNotEqual(navigationSize.Width(), hideLimitWidth)) {
             return true;
         }
     }

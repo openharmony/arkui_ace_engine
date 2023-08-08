@@ -196,6 +196,7 @@ void ToolbarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     auto containerNode = toolbarNode->GetToolbarContainerNode();
+    CHECK_NULL_VOID(containerNode);
     auto toolbarItemNum = containerNode->GetChildren().size();
     if (!containerNode || toolbarItemNum == 0) {
         return;
