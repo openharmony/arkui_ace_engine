@@ -974,6 +974,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     showSelectOverlay_ = true;
     InitSelection(textOffset);
     CalculateHandleOffsetAndShowOverlay();
+    CloseSelectOverlay();
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
@@ -994,6 +995,28 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (caretVisible_) {
         StopTwinkling();
     }
+}
+
+void RichEditorPattern::HandleOnSelectAll()
+{
+    auto textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
+    textSelector_.Update(0, textSize);
+    CalculateHandleOffsetAndShowOverlay();
+    CloseSelectOverlay();
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    selectMenuInfo_.showCopyAll = false;
+    selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto textSelectInfo =
+        GetSpansInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
+    if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
+        eventHub->FireOnSelect(&textSelectInfo);
+    }
+    SetCaretPosition(textSize);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -2325,7 +2348,7 @@ void RichEditorPattern::HandleOnPaste()
             index = richEditor->AddImageSpan(imageOption, true, richEditor->GetCaretSpanIndex() + 1);
         }
         if (isLastRecord) {
-            richEditor->SetCaretSpanIndex(-1);
+            richEditor->ResetAfterPaste();
         } else {
             richEditor->SetCaretSpanIndex(index);
         }
@@ -2502,7 +2525,7 @@ void RichEditorPattern::OnAreaChangedInner()
 
 void RichEditorPattern::CloseSelectOverlay()
 {
-    TextPattern::CloseSelectOverlay();
+    TextPattern::CloseSelectOverlay(true);
 }
 
 void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)

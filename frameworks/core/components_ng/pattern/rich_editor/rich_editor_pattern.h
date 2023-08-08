@@ -152,6 +152,8 @@ public:
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
+    void HandleOnSelectAll() override;
+    void HandleOnCopy() override;
 
     bool IsUsingMouse() const
     {
@@ -202,7 +204,6 @@ private:
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
         selectMenuInfo_ = selectInfo.menuInfo;
     }
-    void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
