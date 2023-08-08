@@ -96,7 +96,6 @@ void MarqueePattern::OnModifyDone()
     }
     textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(theme->GetTextStyle().GetTextColor()));
     textChild->MarkModifyDone();
-    textChild->MarkDirtyNode();
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag()) ||
         CheckLayoutFlag(layoutProperty->GetPropertyChangeFlag())) {
         measureChanged_ = true;
@@ -109,7 +108,6 @@ void MarqueePattern::OnModifyDone()
         StopMarqueeAnimation(playStatus);
     }
     StoreProperties();
-    host->MarkDirtyNode();
     RegistVisibleAreaChangeCallback();
     RegistOritationListener();
 }
@@ -426,9 +424,6 @@ float MarqueePattern::CalculateEnd()
 
 void MarqueePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     measureChanged_ = true;
 }
 
