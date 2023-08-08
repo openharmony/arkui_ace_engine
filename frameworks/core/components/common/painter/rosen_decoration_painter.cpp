@@ -2990,7 +2990,7 @@ void RosenDecorationPainter::PaintBoxShadows(
 #ifndef USE_ROSEN_DRAWING
             PaintShadow(SkPath(), shadow, rsNode);
 #else
-            PaintShadow(RSPath(), shadow, rsNode);
+            PaintShadow(RSRecordingPath(), shadow, rsNode);
 #endif
         }
     } else {
@@ -3097,7 +3097,8 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path,
 
         // LightPos is the location of a spot light source, which is by default located directly above the center
         // of the component.
-        auto drRect = drPath.GetBounds();
+        auto tmpPath = drPath.GetCmdList()->Playback();
+        auto drRect = tmpPath->GetBounds();
         RSPoint3 lightPos = RSPoint3(
             drRect.GetLeft() * FLOAT_HALF + drRect.GetRight() * FLOAT_HALF,
             drRect.GetTop() * FLOAT_HALF + drRect.GetBottom() * FLOAT_HALF, shadow.GetLightHeight());
@@ -3111,7 +3112,7 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path,
         brush.SetColor(spotColor);
         brush.SetAntiAlias(true);
         RSFilter filter;
-        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+        filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(
             RSBlurType::NORMAL, ConvertRadiusToSigma(shadow.GetBlurRadius())));
         brush.SetFilter(filter);
         canvas->AttachBrush(brush);

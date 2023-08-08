@@ -58,7 +58,7 @@ void RosenRenderSvgCircle::Paint(RenderContext& context, const Offset& offset)
     RSAutoCanvasRestore save(*canvas, false);
     PaintMaskLayer(context, offset, offset);
 
-    RSPath path;
+    RSRecordingPath path;
     path.AddCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL), ConvertDimensionToPx(cy_, LengthType::VERTICAL),
         ConvertDimensionToPx(r_, LengthType::OTHER));
 #endif
@@ -95,7 +95,7 @@ void RosenRenderSvgCircle::PaintDirectly(RenderContext& context, const Offset& o
     }
     PaintMaskLayer(context, offset, offset);
 
-    RSPath path;
+    RSRecordingPath path;
     path.AddCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL), ConvertDimensionToPx(cy_, LengthType::VERTICAL),
         ConvertDimensionToPx(r_, LengthType::OTHER));
 #endif
