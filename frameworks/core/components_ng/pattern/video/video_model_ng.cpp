@@ -205,6 +205,6 @@ void VideoModelNG::AddDragFrameNodeToManager() const
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddDragFrameNode(frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 }
 } // namespace OHOS::Ace::NG

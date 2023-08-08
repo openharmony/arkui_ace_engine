@@ -533,7 +533,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
      * @tc.steps: step5. call AddDragFrameNode
      *                   after that, dragFrameNodes_ is not empty
      */
-    dragDropManager->AddDragFrameNode(frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step6. call OnDragMove
@@ -681,7 +681,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
      * @tc.steps: step5. call AddGridDragFrameNode
      *                   after that, gridDragFrameNodes_ is not empty
      */
-    dragDropManager->AddGridDragFrameNode(frameNode);
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step6. call OnItemDragMove
@@ -827,7 +827,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
      *                   after that, listDragFrameNodes_ is not empty
      *                   need adding grid maybe a bug
      */
-    dragDropManager->AddGridDragFrameNode(frameNode);
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step6. call OnItemDragMove
@@ -939,7 +939,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
      * @tc.steps: step4. call AddDragFrameNode
      *                   after that, dragFrameNodes_ is not empty
      */
-    dragDropManager->AddDragFrameNode(frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step5. call OnDragEnd
@@ -1042,7 +1042,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest012, TestSize.Level1)
      * @tc.steps: step4. call AddDragFrameNode
      *                   after that, gridDragFrameNodes_ is not empty
      */
-    dragDropManager->AddGridDragFrameNode(frameNode);
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step5. call OnItemDragEnd
@@ -1129,7 +1129,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
      * @tc.steps: step4. call AddDragFrameNode
      *                   after that, listDragFrameNodes_ is not empty
      */
-    dragDropManager->AddListDragFrameNode(frameNode);
+    dragDropManager->AddListDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step5. call OnItemDragEnd
@@ -1171,12 +1171,15 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest014, TestSize.Level1)
      * @tc.steps: step2. call FindDragFrameNodeByPosition with frameNodes contains nullptr
      * @tc.expected: step2.
      */
-    auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->AddDragFrameNode(frameNodeNull);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
-    auto frameNodeGeoNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeGeoNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId,
+        AceType::MakeRefPtr<Pattern>());
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull);
+    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
     auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
     EXPECT_FALSE(targetFrameNode);

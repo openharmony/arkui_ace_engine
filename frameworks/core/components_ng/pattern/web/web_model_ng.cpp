@@ -810,7 +810,7 @@ void WebModelNG::AddDragFrameNodeToManager()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddDragFrameNode(frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 }
 
 void WebModelNG::SetAudioResumeInterval(int32_t resumeInterval)

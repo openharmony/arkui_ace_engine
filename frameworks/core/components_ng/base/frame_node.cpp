@@ -276,6 +276,7 @@ FrameNode::~FrameNode()
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
+
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false);
@@ -291,7 +292,7 @@ FrameNode::~FrameNode()
         pipeline->FreeMouseStyleHoldNode(GetId());
         pipeline->RemoveStoredNode(GetRestoreId());
         auto dragManager = pipeline->GetDragDropManager();
-        dragManager->RemoveDragFrameNode(AceType::WeakClaim(this));
+        dragManager->RemoveDragFrameNode(GetId());
     }
 }
 
