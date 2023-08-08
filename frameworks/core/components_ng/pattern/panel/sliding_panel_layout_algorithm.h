@@ -74,7 +74,7 @@ public:
         return miniHeight_;
     }
 
-    Dimension GetCustomHeight()
+    CalcDimension GetCustomHeight()
     {
         return customHeight_;
     }
@@ -100,7 +100,7 @@ private:
     Dimension fullHeight_;
     Dimension halfHeight_;
     Dimension miniHeight_;
-    Dimension customHeight_;
+    CalcDimension customHeight_;
     bool invisibleFlag_ = false;
     float maxWidth_ = 0.0f;
     SizeF idealSize_;

@@ -132,7 +132,7 @@ private:
     Dimension fullHeight_;
     Dimension halfHeight_;
     Dimension miniHeight_;
-    Dimension customHeight_;
+    CalcDimension customHeight_;
     float maxWidth_ = 0.0f;
     SizeF maxSize_;
 
