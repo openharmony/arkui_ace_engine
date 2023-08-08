@@ -37,6 +37,8 @@
 
 namespace OHOS::Ace::NG {
 
+const auto TabBarPhysicalCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 288.0f, 30.f);
+
 using TabBarBuilderFunc = std::function<void()>;
 class TabBarParam : public virtual Referenced {
 public:
@@ -351,6 +353,7 @@ private:
     void TabBarClickEvent(int32_t index) const;
     void ApplyTurnPageRateToIndicator(float turnPageRate);
     bool CheckSwiperDisable() const;
+    void SetSwiperCurve(const RefPtr<Curve>& curve) const;
     void AdjustOffset(double& offset) const;
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle);

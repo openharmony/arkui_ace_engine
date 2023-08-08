@@ -98,6 +98,13 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
         if (!pattern) {
             return false;
         }
+        if (pattern->controller_ && pattern->controller_->IsRunning()) {
+            auto scrollable = pattern->scrollableEvent_->GetScrollable();
+            if (scrollable) {
+                scrollable->StopScrollable();
+            }
+            return true;
+        }
         if (pattern->tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && pattern->axis_ == Axis::HORIZONTAL &&
             pattern->IsOutOfBoundary()) {
             // over scroll in drag update from normal to over scroll.
@@ -142,6 +149,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
         if (scrollable) {
             scrollable->StopScrollable();
         }
+        tabBarPattern->SetSwiperCurve(TabBarPhysicalCurve);
     };
 
     swiperController_->SetTabBarFinishCallback(std::move(callback));
@@ -152,6 +160,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     scrollable->Initialize(host->GetContext());
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
+    scrollableEvent_->GetScrollable()->SetEdgeEffect(EdgeEffect::SPRING);
 }
 
 void TabBarPattern::InitTouch(const RefPtr<GestureEventHub>& gestureHub)
@@ -1283,17 +1292,13 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
 
     // If animation is still running, stop it before play new animation.
     StopTranslateAnimation();
+    SetSwiperCurve(curve);
 
     auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(startPos, endPos, curve);
     auto weak = AceType::WeakClaim(this);
     translate->AddListener(Animation<double>::ValueCallback([weak, startPos, endPos](double value) {
         auto tabBarPattern = weak.Upgrade();
         CHECK_NULL_VOID(tabBarPattern);
-        if (!NearEqual(value, startPos) && !NearEqual(value, endPos) && !NearEqual(startPos, endPos)) {
-            float moveRate =
-                Curves::EASE_OUT->MoveInternal(static_cast<float>((value - startPos) / (endPos - startPos)));
-            value = startPos + (endPos - startPos) * moveRate;
-        }
         tabBarPattern->UpdateIndicatorCurrentOffset(static_cast<float>(value - tabBarPattern->currentIndicatorOffset_));
     }));
     auto startCurrentOffset = currentOffset_;
@@ -1302,12 +1307,6 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
         Animation<double>::ValueCallback([weak, startCurrentOffset, targetCurrentOffset](double value) {
             auto tabBarPattern = weak.Upgrade();
             CHECK_NULL_VOID(tabBarPattern);
-            if (!NearEqual(value, startCurrentOffset) && !NearEqual(value, targetCurrentOffset) &&
-                !NearEqual(startCurrentOffset, targetCurrentOffset)) {
-                float moveRate = Curves::EASE_OUT->MoveInternal(
-                    static_cast<float>((value - startCurrentOffset) / (targetCurrentOffset - startCurrentOffset)));
-                value = startCurrentOffset + (targetCurrentOffset - startCurrentOffset) * moveRate;
-            }
             tabBarPattern->currentOffset_ = value;
             auto host = tabBarPattern->GetHost();
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -1820,6 +1819,19 @@ bool TabBarPattern::CheckSwiperDisable() const
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, true);
     return swiperPaintProperty->GetDisableSwipe().value_or(false);
+}
+
+void TabBarPattern::SetSwiperCurve(const RefPtr<Curve>& curve) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateCurve(curve);
 }
 
 void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
