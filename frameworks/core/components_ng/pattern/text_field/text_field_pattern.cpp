@@ -239,9 +239,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto textFieldLayoutAlgorithm = DynamicCast<TextFieldLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textFieldLayoutAlgorithm, false);
     auto paragraph = textFieldLayoutAlgorithm->GetParagraph();
-    if (paragraph) {
-        paragraph_ = paragraph;
-    }
     auto counterParagraph = textFieldLayoutAlgorithm->GetCounterParagraph();
     if (counterParagraph) {
         counterParagraph_ = counterParagraph;
@@ -263,6 +260,16 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     UpdateCaretInfoToController();
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
+    if (paragraph) {
+        paragraph_ = paragraph;
+        if (inlineFocusState_) {
+            CalcSize idealSize;
+            auto paragraphWidth = paragraph_->GetLongestLine();
+            std::optional<CalcLength> width(paragraphWidth + inlinePadding_);
+            idealSize.SetWidth(width);
+            hostLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
+        }
+    }
     if (hostLayoutProperty) {
         hostLayoutProperty->ResetTextAlignChanged();
     }

@@ -237,7 +237,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     } else {
         // for text area or placeholder, max width is content width without password icon
         if (isInlineStyle) {
-            paragraph_->Layout(idealWidth + textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
+            paragraph_->Layout(pattern->GetPreviewWidth() == 0 ? idealWidth : pattern->GetPreviewWidth() +
+                textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
                 textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
         } else if (showPlaceHolder && isPasswordType) {
             paragraph_->Layout(idealWidth - imageHotZoneWidth);
