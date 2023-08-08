@@ -522,6 +522,11 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
             onReachStart();
             initialIndex_ = true;
         }
+        if ((scrollState_ == SCROLL_FROM_BAR || scrollState_ == SCROLL_FROM_BAR_FLING) && gridLayoutInfo_.reachStart_ &&
+            !reachStart && NearZero(gridLayoutInfo_.currentOffset_) && Negative(finalOffset)) {
+            onReachStart();
+            initialIndex_ = true;
+        }
         if (scrollState_ == SCROLL_FROM_ANIMATION_CONTROLLER && NearZero(gridLayoutInfo_.currentOffset_) &&
             ((!gridLayoutInfo_.reachStart_ && !NearZero(finalOffset)) || gridLayoutInfo_.reachStart_)) {
             onReachStart();
@@ -559,6 +564,10 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset, float curre
         if (scrollState_ == SCROLL_FROM_ANIMATION_CONTROLLER && gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
             onReachEnd();
         }
+        if ((scrollState_ == SCROLL_FROM_BAR || scrollState_ == SCROLL_FROM_BAR_FLING) && Positive(finalOffset) &&
+            !NearZero(gridLayoutInfo_.currentOffset_) && gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
+            onReachEnd();
+        }
         if (scrollState_ == SCROLL_FROM_NONE && reachEnd && gridLayoutInfo_.reachEnd_ && !gridLayoutInfo_.offsetEnd_ &&
             !offsetEnd && Positive(prevFinalOffset_)) {
             onReachEnd();
@@ -592,6 +601,11 @@ void GridPattern::OnScrollEndCallback()
 {
     scrollStop_ = true;
     MarkDirtyNodeSelf();
+}
+
+void GridPattern::OnScrollStartCallback()
+{
+    FireOnScrollStart();
 }
 
 void GridPattern::FlushCurrentFocus()

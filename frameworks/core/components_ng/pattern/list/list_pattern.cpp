@@ -711,6 +711,11 @@ void ListPattern::OnScrollEndCallback()
     MarkDirtyNodeSelf();
 }
 
+void ListPattern::OnScrollStartCallback()
+{
+    FireOnScrollStart();
+}
+
 SizeF ListPattern::GetContentSize() const
 {
     auto host = GetHost();

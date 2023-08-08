@@ -226,6 +226,7 @@ private:
                       bool prevReachEnd, bool reachStart);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
+    void OnScrollStartCallback() override;
     void FireOnScrollStart();
     void InitScrollableEvent();
 
