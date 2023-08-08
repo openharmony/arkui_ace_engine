@@ -76,11 +76,16 @@ public:
         return navBarOffset_;
     }
 
+    static bool IsAutoHeight(const RefPtr<LayoutProperty>& layoutProperty);
+
 private:
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
     void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize);
+
+    void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& contentSize_);
 
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
@@ -99,6 +104,8 @@ private:
     void SizeCalculationStack(const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
 
+    void SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size);
+
     bool ifNeedInit_ = true;
     OffsetF navBarOffset_;
 
@@ -112,6 +119,7 @@ private:
     float realDividerWidth_ = 0.0f;
     float realNavBarHeight_ = 0.0f;
     float realContentWidth_ = 0.0f;
+    float realContentHeight_ = 0.0f;
 
     SizeF navBarSize_ = SizeF(0.0f, 0.0f);
     SizeF contentSize_ = SizeF(0.0f, 0.0f);

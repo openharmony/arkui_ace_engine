@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -62,18 +63,24 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
     return static_cast<float>(titleHeight.ConvertToPxWithSize(constraint.percentReference.Height()));
 }
 
-void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
+float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
     const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty, const SizeF& size,
     float titleBarHeight)
 {
     auto contentNode = hostNode->GetContentNode();
-    CHECK_NULL_VOID(contentNode);
+    CHECK_NULL_RETURN(contentNode, 0.0f);
     auto index = hostNode->GetChildIndexById(contentNode->GetId());
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(contentWrapper);
+    CHECK_NULL_RETURN(contentWrapper, 0.0f);
     auto constraint = navDestinationLayoutProperty->CreateChildConstraint();
-    constraint.selfIdealSize = OptionalSizeF(size.Width(), size.Height() - titleBarHeight);
+    float contentHeight = size.Height() - titleBarHeight;
+    if (NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty)) {
+        constraint.selfIdealSize.SetWidth(size.Width());
+    } else {
+        constraint.selfIdealSize = OptionalSizeF(size.Width(), contentHeight);
+    }
     contentWrapper->Measure(constraint);
+    return contentWrapper->GetGeometryNode()->GetFrameSize().Height();
 }
 
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
@@ -132,7 +139,9 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
 
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
-    MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
+    float contentChildHeight = MeasureContentChild(layoutWrapper, hostNode,
+        navDestinationLayoutProperty, size, titleBarHeight);
+    size.SetHeight(titleBarHeight + contentChildHeight);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
