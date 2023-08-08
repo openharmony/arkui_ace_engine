@@ -892,7 +892,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
         LOGD("no need to refresh span node");
         return;
     }
-
+    imageCount_ = 0;
     // When dirty areas are marked because of child node changes, the text rendering node tree is reset.
     const auto& children = host->GetChildren();
     if (children.empty()) {
@@ -916,7 +916,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (!nodes.empty()) {
         textCache = textForDisplay_;
         textForDisplay_.clear();
-        imageCount_ = 0;
     }
 
     bool isSpanHasClick = false;

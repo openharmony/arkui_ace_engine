@@ -194,11 +194,12 @@ public:
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
     {
-        selectInfo.menuInfo.showCopy = true;
-        selectInfo.menuInfo.showCut = true;
-        selectInfo.menuInfo.showCopyAll = true;
+        auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
+        selectInfo.menuInfo.showCopy = hasValue;
+        selectInfo.menuInfo.showCut = hasValue;
+        selectInfo.menuInfo.showCopyAll = hasValue;
         selectInfo.menuInfo.showPaste = hasData;
-        selectInfo.menuInfo.menuIsShow = true;
+        selectInfo.menuInfo.menuIsShow = hasValue || hasData;
         selectMenuInfo_ = selectInfo.menuInfo;
     }
     void HandleOnCopy();
