@@ -144,7 +144,7 @@ class Environment {
       default:
         tmp = value;
     }
-    if (!tmp) {
+    if (!tmp && tmp !== 0) {
       tmp = value;
     }
     prop = AppStorage.setAndProp(key, tmp);
