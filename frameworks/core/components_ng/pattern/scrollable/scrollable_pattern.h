@@ -73,6 +73,11 @@ public:
     {
         CHECK_NULL_VOID_NOLOG(scrollableEvent_);
         scrollableEvent_->SetEnabled(enable);
+        if (!enable) {
+            scrollableEvent_->SetAxis(Axis::NONE);
+        } else {
+            scrollableEvent_->SetAxis(axis_);
+        }
     }
     void SetScrollableAxis(Axis axis);
     RefPtr<GestureEventHub> GetGestureHub();
