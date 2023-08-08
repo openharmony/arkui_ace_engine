@@ -36,8 +36,6 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);
     json->Put("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("contentStartOffset", std::to_string(propContentStartOffset_.value_or(0)).c_str());
-    json->Put("contentEndOffset", std::to_string(propContentEndOffset_.value_or(0)).c_str());
     json->Put("initialIndex", std::to_string(propInitialIndex_.value_or(0)).c_str());
     json->Put("listDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
                                    ? "Axis.Vertical"

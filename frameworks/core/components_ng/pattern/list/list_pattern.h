@@ -271,8 +271,6 @@ private:
     float currentOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;
-    float contentStartOffset_ = 0.0f;
-    float contentEndOffset_ = 0.0f;
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
