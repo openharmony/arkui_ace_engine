@@ -788,6 +788,7 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
@@ -797,13 +798,14 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
     pickerProperty->UpdateColor(normalStyle.GetTextColor());
     pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
     if (isPicker_) {
-        host->SetNeedCallChildrenUpdate(false);
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
+    CHECK_NULL_VOID(buttonTitleNode_);
     auto buttonTitleRenderContext = buttonTitleNode_->GetRenderContext();
     CHECK_NULL_VOID(buttonTitleRenderContext);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -814,10 +816,10 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-    auto contentChildren = contentRowNode_->GetChildren();
+    CHECK_NULL_VOID(contentRowNode_);
     auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    CHECK_NULL_VOID(layoutRenderContext);
     layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
-    host->SetNeedCallChildrenUpdate(false);
-    OnModifyDone();
+    host->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

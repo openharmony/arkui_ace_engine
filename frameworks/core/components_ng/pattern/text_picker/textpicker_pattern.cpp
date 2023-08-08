@@ -821,8 +821,7 @@ void TextPickerPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::string tag = host->GetTag();
-    auto child = host->GetChildren();
+    host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
@@ -830,24 +829,23 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto dialogContext = host->GetRenderContext();
-    CHECK_NULL_VOID(dialogContext);
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
     pickerProperty->UpdateColor(normalStyle.GetTextColor());
     pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
     if (isPicker_) {
-        host->SetNeedCallChildrenUpdate(false);
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
-    auto contentChildren = contentRowNode_->GetChildren();
-    auto layoutRenderContext = contentRowNode_->GetRenderContext();
-    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    if (contentRowNode_) {
+        auto layoutRenderContext = contentRowNode_->GetRenderContext();
+        CHECK_NULL_VOID(layoutRenderContext);
+        layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    }
     auto frameNode = DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(frameNode);
     FrameNode::ProcessOffscreenNode(frameNode);
-    host->SetNeedCallChildrenUpdate(false);
-    OnModifyDone();
+    host->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG
