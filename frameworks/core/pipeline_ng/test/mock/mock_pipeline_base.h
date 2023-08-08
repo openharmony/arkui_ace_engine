@@ -87,6 +87,7 @@ public:
     MOCK_METHOD1(NotifyMemoryLevel, void(int32_t level));
     MOCK_METHOD0(FlushMessages, void());
     MOCK_METHOD0(FlushUITasks, void());
+    MOCK_METHOD1(AddAnimationClosure, void(std::function<void()>&& animation));
     MOCK_CONST_METHOD1(OnDumpInfo, bool(const std::vector<std::string>& params));
     MOCK_METHOD2(FlushVsync, void(uint64_t nanoTimestamp, uint32_t frameCount));
     MOCK_METHOD3(SetRootRect, void(double width, double height, double offset));

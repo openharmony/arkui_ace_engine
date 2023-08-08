@@ -291,10 +291,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg003, TestSize.Level1)
      * @tc.steps2: Add dirty layout and render nodes to taskScheduler_ to test functions
      *             FlushLayoutTask and FlushRenderTask of the UITaskScheduler.
      */
-    context_->taskScheduler_.AddDirtyLayoutNode(frameNode_);
-    context_->taskScheduler_.dirtyLayoutNodes_[frameNode_->GetPageId()].emplace(nullptr);
-    context_->taskScheduler_.AddDirtyRenderNode(frameNode_);
-    context_->taskScheduler_.dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
+    context_->taskScheduler_->AddDirtyLayoutNode(frameNode_);
+    context_->taskScheduler_->dirtyLayoutNodes_[frameNode_->GetPageId()].emplace(nullptr);
+    context_->taskScheduler_->AddDirtyRenderNode(frameNode_);
+    context_->taskScheduler_->dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
 
     /**
      * @tc.steps3: Call the function FlushVsync with isEtsCard=true.

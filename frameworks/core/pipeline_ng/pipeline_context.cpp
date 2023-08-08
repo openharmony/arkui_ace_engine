@@ -129,7 +129,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    taskScheduler_.AddDirtyLayoutNode(dirty);
+    taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -148,7 +148,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    taskScheduler_.AddDirtyRenderNode(dirty);
+    taskScheduler_->AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -235,15 +235,16 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
     }
-    if (!taskScheduler_.isEmpty()) {
+    if (!taskScheduler_->isEmpty()) {
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
 #endif
     }
 
-    taskScheduler_.StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
-    taskScheduler_.FlushTask();
-    taskScheduler_.FinishRecordFrameInfo();
+    taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
+    taskScheduler_->FlushTask();
+    taskScheduler_->FinishRecordFrameInfo();
+    FlushAnimationClosure();
     TryCallNextFrameLayoutCallback();
 
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -272,7 +273,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isNeedFlushMouseEvent_ = false;
     }
     needRenderNode_.clear();
-    taskScheduler_.FlushAfterRenderTask();
+    taskScheduler_->FlushAfterRenderTask();
     // Keep the call sent at the end of the function
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().FlushEnd();
@@ -420,7 +421,8 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     ACE_FUNCTION_TRACE();
     FlushBuild();
     FlushTouchEvents();
-    taskScheduler_.FlushTask();
+    taskScheduler_->FlushTask();
+    FlushAnimationClosure();
     FlushMessages();
     FlushFocus();
 }
@@ -431,6 +433,28 @@ void PipelineContext::FlushBuild()
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
+}
+
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
+{
+    animationClosuresList_.emplace_back(std::move(animation));
+}
+
+void PipelineContext::FlushAnimationClosure()
+{
+    if (animationClosuresList_.empty()) {
+        return;
+    }
+    taskScheduler_->FlushTask();
+
+    decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
+    auto scheduler = std::move(taskScheduler_);
+    taskScheduler_ = std::make_unique<UITaskScheduler>();
+    for (const auto& animation : temp) {
+        animation();
+        taskScheduler_->CleanUp();
+    }
+    taskScheduler_ = std::move(scheduler);
 }
 
 void PipelineContext::FlushBuildFinishCallbacks()
@@ -1688,7 +1712,7 @@ void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
     LOGI("PipelineContext::Destroy begin.");
-    taskScheduler_.CleanUp();
+    taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
     rootNode_.Reset();
@@ -1870,7 +1894,7 @@ void PipelineContext::NotifyMemoryLevel(int32_t level)
 }
 void PipelineContext::AddPredictTask(PredictTask&& task)
 {
-    taskScheduler_.AddPredictTask(std::move(task));
+    taskScheduler_->AddPredictTask(std::move(task));
     RequestFrame();
 }
 
@@ -1888,7 +1912,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     }
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
-    taskScheduler_.FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
+    taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
 }
 
@@ -1905,12 +1929,12 @@ void PipelineContext::Finish(bool /*autoFinish*/) const
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
 {
-    taskScheduler_.AddAfterLayoutTask(std::move(task));
+    taskScheduler_->AddAfterLayoutTask(std::move(task));
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
-    taskScheduler_.AddAfterRenderTask(std::move(task));
+    taskScheduler_->AddAfterRenderTask(std::move(task));
 }
 
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)

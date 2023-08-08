@@ -300,12 +300,12 @@ public:
 
     void FlushUITasks() override
     {
-        taskScheduler_.FlushTask();
+        taskScheduler_->FlushTask();
     }
 
     bool IsLayouting() const override
     {
-        return taskScheduler_.IsLayouting();
+        return taskScheduler_->IsLayouting();
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
@@ -385,6 +385,9 @@ public:
     void SetIgnoreViewSafeArea(bool value) override;
     void SetIsLayoutFullScreen(bool value) override;
 
+    void AddAnimationClosure(std::function<void()>&& animation);
+    void FlushAnimationClosure();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -442,7 +445,7 @@ private:
         }
     };
 
-    UITaskScheduler taskScheduler_;
+    std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
@@ -498,6 +501,7 @@ private:
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     std::list<FrameInfo> dumpFrameInfos_;
+    std::list<std::function<void()>> animationClosuresList_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
