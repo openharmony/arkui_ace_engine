@@ -250,46 +250,22 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     rotate.zDirection = static_cast<float>(dzVal);
     // if specify centerX
     CalcDimension length;
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length, true)) {
-            LOGW("centerX is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
-        if (length.Unit() == DimensionUnit::INVALID) {
-            LOGW("centerX is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-        rotate.centerX = length;
+    if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length, true)) {
+        length = Dimension(0.5f, DimensionUnit::PERCENT);
     }
+    rotate.centerX = length;
     // if specify centerY
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length, true)) {
-            LOGW("centerY is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
-        if (length.Unit() == DimensionUnit::INVALID) {
-            LOGW("centerY is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-        rotate.centerY = length;
+
+    if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length, true)) {
+        length = Dimension(0.5f, DimensionUnit::PERCENT);
     }
+    rotate.centerY = length;
+
     // if specify centerZ
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length, true)) {
-            LOGW("centerZ is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
-        if (length.Unit() == DimensionUnit::INVALID) {
-            LOGW("centerZ is invalid");
-        }
-        rotate.centerZ = length;
+    if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length, true)) {
+        length = Dimension(0.5f, DimensionUnit::PERCENT);
     }
+    rotate.centerZ = length;
     // if specify angle
     JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
     float perspective = 0.0f;
@@ -5865,6 +5841,10 @@ bool JSViewAbstract::ParseJsonDimension(
 bool JSViewAbstract::ParseJsonDimensionVp(
     const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, bool checkIllegal)
 {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, true);
+    }
     return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, checkIllegal);
 }
 

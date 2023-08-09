@@ -241,6 +241,7 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
     if (PipelineBase::GetCurrentContext() &&
         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         if (!ParseJsDimensionVpNG(info[0], width)) {
+            width = Dimension(-1.0, DimensionUnit::VP);
             TabsModel::GetInstance()->SetTabBarWidth(width);
             return;
         }
@@ -265,6 +266,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         if (PipelineBase::GetCurrentContext() &&
             PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
             if (!ParseJsDimensionVpNG(info[0], height)) {
+                height = Dimension(-1.0, DimensionUnit::VP);
                 LOGD("The arg is wrong, fail to parse dimension");
             }
         } else if (!ParseJsDimensionVp(info[0], height)) {
