@@ -120,7 +120,8 @@ void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
     int32_t extend = paragraph_->GetHandlePositionForClick(pos);
-    int32_t extendEnd = extend + GetGraphemeClusterLength(extend);
+    int32_t extendEnd =
+        std::min(static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
     textSelector_.Update(extend, extendEnd);
 }
 
