@@ -74,6 +74,10 @@ void JSMenu::Font(const JSCallbackInfo& info)
         JSRef<JSVal> size = obj->GetProperty("size");
         if (!size->IsNull()) {
             ParseJsDimensionFp(size, fontSize);
+            if (fontSize.Unit() == DimensionUnit::PERCENT) {
+                // set zero for abnormal value
+                fontSize = CalcDimension();
+            }
         }
 
         auto jsWeight = obj->GetProperty("weight");
