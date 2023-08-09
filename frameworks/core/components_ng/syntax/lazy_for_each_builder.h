@@ -30,6 +30,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 
 namespace OHOS::Ace::NG {
@@ -243,7 +244,9 @@ public:
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, itemInfo.second);
         cachedItems_[index] = itemInfo.first;
+        ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
         itemInfo.second->Build();
+        ViewStackProcessor::GetInstance()->ResetPredict();
         itemInfo.second->SetJSViewActive(false);
         return itemInfo.second;
     }

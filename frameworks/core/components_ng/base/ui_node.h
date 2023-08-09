@@ -459,6 +459,9 @@ public:
     {
         isBuildByJS_ = isBuildByJS;
     }
+    void AddAttachToMainTreeTask(std::function<void()>&& func) {
+        attachToMainTreeTasks_.emplace_back(std::move(func));
+    }
 
     // --------------------------------------------------------------------------------
 
@@ -539,6 +542,8 @@ private:
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;
+
+    std::list<std::function<void()>> attachToMainTreeTasks_;
 
 #ifdef PREVIEW
     std::string debugLine_;
