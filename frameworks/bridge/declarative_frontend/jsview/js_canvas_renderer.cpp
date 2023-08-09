@@ -1073,18 +1073,18 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
     std::unique_ptr<ImageData> data;
     data = GetImageDataFromCanvas(left, top, width, height);
-
+    if (data == nullptr) {
+        return;
+    }
     final_height = static_cast<uint32_t>(data->dirtyHeight);
     final_width = static_cast<uint32_t>(data->dirtyWidth);
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(final_height * final_width * 4);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
-    if (data != nullptr) {
-        for (uint32_t idx = 0; idx < final_height * final_width; ++idx) {
-            buffer[4 * idx] = data->data[idx].GetRed();
-            buffer[4 * idx + 1] = data->data[idx].GetGreen();
-            buffer[4 * idx + 2] = data->data[idx].GetBlue();
-            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
-        }
+    for (uint32_t idx = 0; idx < final_height * final_width; ++idx) {
+        buffer[4 * idx] = data->data[idx].GetRed();
+        buffer[4 * idx + 1] = data->data[idx].GetGreen();
+        buffer[4 * idx + 2] = data->data[idx].GetBlue();
+        buffer[4 * idx + 3] = data->data[idx].GetAlpha();
     }
 
     JSRef<JSUint8ClampedArray> colorArray =
