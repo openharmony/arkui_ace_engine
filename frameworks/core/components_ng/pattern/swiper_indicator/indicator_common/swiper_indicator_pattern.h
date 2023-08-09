@@ -93,16 +93,25 @@ public:
 
             auto geometryNode = swiperNode->GetGeometryNode();
             CHECK_NULL_RETURN(geometryNode, nullptr);
-            auto frameOffset = geometryNode->GetFrameOffset();
             auto host = GetHost();
             CHECK_NULL_RETURN(host, nullptr);
             auto indicatorGeometryNode = host->GetGeometryNode();
             CHECK_NULL_RETURN(indicatorGeometryNode, nullptr);
             auto indicatorFrameOffset = indicatorGeometryNode->GetFrameOffset();
-            float boundsRectOriginX = frameOffset.GetX();
-            float boundsRectOriginY = indicatorFrameOffset.GetY();
-            float boundsRectWidth = geometryNode->GetFrameSize().Width();
-            float boundsRectHeight = indicatorGeometryNode->GetFrameSize().Height();
+            auto boundsValue =
+                (geometryNode->GetFrameSize().Width() - indicatorGeometryNode->GetFrameSize().Width()) * 0.5f;
+            auto boundsRectOriginX = -boundsValue;
+            auto boundsRectOriginY = indicatorFrameOffset.GetY();
+            auto boundsRectWidth = geometryNode->GetFrameSize().Width();
+            auto boundsRectHeight = indicatorGeometryNode->GetFrameSize().Height();
+            if (swiperPattern->GetDirection() == Axis::VERTICAL) {
+                boundsValue =
+                    (geometryNode->GetFrameSize().Height() - indicatorGeometryNode->GetFrameSize().Height()) * 0.5f;
+                boundsRectOriginX = indicatorFrameOffset.GetX();
+                boundsRectOriginY = -boundsValue;
+                boundsRectWidth = indicatorGeometryNode->GetFrameSize().Width();
+                boundsRectHeight = geometryNode->GetFrameSize().Height();
+            }
             RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
             dotIndicatorModifier_->SetBoundsRect(boundsRect);
 
