@@ -292,7 +292,9 @@ FrameNode::~FrameNode()
         pipeline->FreeMouseStyleHoldNode(GetId());
         pipeline->RemoveStoredNode(GetRestoreId());
         auto dragManager = pipeline->GetDragDropManager();
-        dragManager->RemoveDragFrameNode(GetId());
+        if (dragManager) {
+            dragManager->RemoveDragFrameNode(GetId());
+        }
     }
 }
 
