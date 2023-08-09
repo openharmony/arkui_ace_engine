@@ -5410,6 +5410,7 @@ void TextFieldPattern::SaveInlineStates()
     }
     if (renderContext->HasBorderColor()) {
         inlineState_.borderColor = renderContext->GetBorderColor().value();
+        inlineState_.hasBorderColor = true;
     }
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     if (paddingProperty) {
@@ -5606,12 +5607,6 @@ void TextFieldPattern::RestorePreInlineStates()
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     layoutProperty->UpdateTextColor(inlineState_.textColor);
-    auto radius = theme->GetInlineRadiusSize();
-    renderContext->UpdateBorderRadius(inlineState_.radius);
-    renderContext->UpdateBackgroundColor(inlineState_.bgColor);
-    layoutProperty->UpdateBorderWidth(inlineState_.borderWidth);
-    renderContext->UpdateBorderWidth(inlineState_.borderWidth);
-    renderContext->UpdateBorderColor(inlineState_.borderColor);
     layoutProperty->UpdatePadding(inlineState_.padding);
     ProcessInnerPadding();
     inlinePadding_ = 0.0f;
@@ -5632,6 +5627,13 @@ void TextFieldPattern::RestorePreInlineStates()
         idealSize.SetHeight(height);
     }
     layoutProperty->UpdateUserDefinedIdealSize(idealSize);
+    renderContext->UpdateBackgroundColor(inlineState_.bgColor);
+    layoutProperty->UpdateBorderWidth(inlineState_.borderWidth);
+    renderContext->UpdateBorderWidth(inlineState_.borderWidth);
+    renderContext->UpdateBorderRadius(inlineState_.radius);
+    if (inlineState_.hasBorderColor) {
+        renderContext->UpdateBorderColor(inlineState_.borderColor);
+    }
 }
 
 bool TextFieldPattern::IsNormalInlineState() const
