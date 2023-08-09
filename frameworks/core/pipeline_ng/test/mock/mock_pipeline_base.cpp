@@ -157,6 +157,8 @@ void PipelineContext::FlushReload() {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
