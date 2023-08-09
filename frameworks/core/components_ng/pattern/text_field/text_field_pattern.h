@@ -1115,6 +1115,7 @@ private:
     bool IsInPasswordMode() const;
     void GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end);
     bool IsTouchAtLeftOffset(float currentOffsetX);
+    void FilterExistText();
 
     RectF frameRect_;
     RectF contentRect_;

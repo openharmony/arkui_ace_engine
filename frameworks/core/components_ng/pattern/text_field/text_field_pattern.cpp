@@ -2245,6 +2245,7 @@ void TextFieldPattern::OnModifyDone()
     InitMouseEvent();
     InitTouchEvent();
     SetAccessibilityAction();
+    FilterExistText();
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
         InitDragDropEvent();
@@ -2276,7 +2277,6 @@ void TextFieldPattern::OnModifyDone()
         }
     }
     if (layoutProperty->GetTypeChangedValue(false)) {
-        ClearEditingValue();
         layoutProperty->ResetTypeChanged();
         operationRecords_.clear();
         redoOperationRecords_.clear();
@@ -5935,13 +5935,16 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
              !contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON }));
 }
 
-void TextFieldPattern::EditingValueFilterChange()
+void TextFieldPattern::FilterExistText()
 {
-    if (!textEditingValue_.text.empty()) {
-        std::string result = "";
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto inputFilter = layoutProperty->GetInputFilter();
+    auto inputType = layoutProperty->GetTextInputType();
+    if ((inputFilter.has_value() || inputType.has_value()) && !textEditingValue_.text.empty()) {
+        std::string result;
         EditingValueFilter(textEditingValue_.text, result);
-        textEditingValue_.text = std::move(result);
-        textEditingValue_.caretPosition = textEditingValue_.GetWideText().length();
+        InitEditingValueText(result);
     }
 }
 
