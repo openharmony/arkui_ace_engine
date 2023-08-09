@@ -480,7 +480,7 @@ void DotIndicatorPaintMethod::BackwardCalculation(
             } else {
                 endVectorBlackPointCenterX[i] = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.endLongPointRightCenterX = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                pointCenter.endLongPointLeftCenterX = pointCenter.endLongPointLeftCenterX - selectedItemWidth;
+                pointCenter.endLongPointLeftCenterX = pointCenter.endLongPointRightCenterX - selectedItemWidth;
                 endCenterX -= selectedItemWidth * TWOFOLD;
             }
         }
