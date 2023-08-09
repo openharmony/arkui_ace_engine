@@ -54,6 +54,8 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 WindowScene::~WindowScene()
 {
     CHECK_NULL_VOID_NOLOG(IsMainWindow());
+    CHECK_NULL_VOID_NOLOG(session_);
+    session_->SetShowRecent(false);
     UnregisterLifecycleListener();
 }
 
@@ -229,7 +231,7 @@ void WindowScene::OnBackground()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->CreateSnapshotNode();
+        self->CreateSnapshotNode(true);
         host->RemoveChild(self->contentNode_);
         host->AddChild(self->snapshotNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -249,7 +251,7 @@ void WindowScene::OnDisconnect()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->CreateSnapshotNode();
+        self->CreateSnapshotNode(true);
         host->RemoveChild(self->contentNode_);
         self->contentNode_.Reset();
         host->RemoveChild(self->startingNode_);

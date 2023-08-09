@@ -24,7 +24,7 @@ void WindowPattern::InitContent() {}
 
 void WindowPattern::CreateStartingNode() {}
 
-void WindowPattern::CreateSnapshotNode() {}
+void WindowPattern::CreateSnapshotNode(bool usePixelMap) {}
 
 void WindowPattern::OnAttachToFrameNode() {}
 
