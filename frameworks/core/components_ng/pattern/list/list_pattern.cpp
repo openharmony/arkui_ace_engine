@@ -180,7 +180,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
             (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
-            (centerIndex_ != listLayoutAlgorithm->GetMidIndex());
+            (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
     } else {
         indexChanged =
             (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
@@ -188,7 +188,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (indexChanged) {
         startIndex_ = listLayoutAlgorithm->GetStartIndex();
         endIndex_ = listLayoutAlgorithm->GetEndIndex();
-        centerIndex_ = listLayoutAlgorithm->GetMidIndex();
+        centerIndex_ = listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty));
     }
     ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();

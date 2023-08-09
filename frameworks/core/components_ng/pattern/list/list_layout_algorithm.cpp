@@ -1028,12 +1028,14 @@ void ListLayoutAlgorithm::OffScreenLayoutDirection()
     }
 }
 
-int32_t ListLayoutAlgorithm::GetMidIndex()
+int32_t ListLayoutAlgorithm::GetMidIndex(LayoutWrapper* layoutWrapper)
 {
     float midPos = contentMainSize_ / 2.0f;
-    if (GetStartIndex() == 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+    if (GetStartIndex() == 0 && !IsScrollSnapAlignCenter(layoutWrapper) &&
+        GreatNotEqual(GetStartPosition(), startMainPos_)) {
         midPos = GetStartPosition() + contentMainSize_ / 2.0f;
-    } else if (GetEndIndex() == totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_) &&
+    } else if (GetEndIndex() == totalItemCount_ - 1 && !IsScrollSnapAlignCenter(layoutWrapper) &&
+        LessNotEqual(GetEndPosition(), endMainPos_) &&
         (GetStartIndex() != 0 || !NearEqual(GetStartPosition(), startMainPos_))) {
         midPos = GetEndPosition() - contentMainSize_ / 2.0f;
     }

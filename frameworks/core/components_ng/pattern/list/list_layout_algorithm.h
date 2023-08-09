@@ -147,7 +147,7 @@ public:
         return itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
     }
 
-    int32_t GetMidIndex();
+    int32_t GetMidIndex(LayoutWrapper* layoutWrapper);
 
     int32_t GetMaxListItemIndex() const
     {
