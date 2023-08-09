@@ -51,7 +51,7 @@ void RosenRenderSvgRect::Paint(RenderContext& context, const Offset& offset)
     RSAutoCanvasRestore save(*canvas, false);
     PaintMaskLayer(context, offset, offset);
 
-    RSPath path;
+    RSRecordingPath path;
 #endif
     GetPath(path);
     UpdateGradient(fillState_);
@@ -85,7 +85,7 @@ void RosenRenderSvgRect::PaintDirectly(RenderContext& context, const Offset& off
     }
     PaintMaskLayer(context, offset, offset);
 
-    RSPath path;
+    RSRecordingPath path;
 #endif
     GetPath(path);
     UpdateGradient(fillState_);

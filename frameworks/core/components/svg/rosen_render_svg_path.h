@@ -48,7 +48,7 @@ protected:
 #ifndef USE_ROSEN_DRAWING
     void GetPath(SkPath& out);
 #else
-    void GetPath(RSPath& out);
+    void GetPath(RSRecordingPath& out);
 #endif
 
 private:

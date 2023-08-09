@@ -295,12 +295,20 @@ void SliderContentModifier::DrawShadow(DrawingContext& context)
         shadowBrush.SetAntiAlias(true);
         shadowBrush.SetColor(ToRSColor(blockShadowColor_));
         RSFilter filter;
+#ifndef USE_ROSEN_DRAWING
         filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+#else
+        filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(
+#endif
             RSBlurType::NORMAL, RSDrawing::ConvertRadiusToSigma(hotCircleShadowWidth_)));
         shadowBrush.SetFilter(filter);
 
         canvas.AttachBrush(shadowBrush);
+#ifndef USE_ROSEN_DRAWING
         RSPath path;
+#else
+        RSRecordingPath path;
+#endif
         path.AddCircle(ToRSPoint(blockCenter).GetX(), ToRSPoint(blockCenter).GetY(), radius);
         canvas.DrawPath(path);
         canvas.DetachBrush();
