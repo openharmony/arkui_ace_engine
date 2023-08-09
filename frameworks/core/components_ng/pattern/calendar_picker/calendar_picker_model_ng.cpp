@@ -119,7 +119,6 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(int32_t id, bool isAd
     BorderColorProperty borderColor;
     borderColor.SetColor(theme->GetEntryBorderColor());
     buttonNode->GetRenderContext()->UpdateBorderColor(borderColor);
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->MarkModifyDone();
 
     auto imageNode = CreateButtonImageChild(isAdd, theme);

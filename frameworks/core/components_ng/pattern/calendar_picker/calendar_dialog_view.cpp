@@ -74,7 +74,6 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
         renderContext->UpdateBorderRadius(radius);
     }
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
-    renderContext->UpdateBackgroundColor(theme->GetDialogBackgroundColor());
 
     auto calendarNode = CreateCalendarNode(contentColumn, settingData, dialogEvent);
     CHECK_NULL_RETURN(calendarNode, nullptr);
@@ -186,7 +185,6 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
         CalcSize(CalcLength(theme->GetCalendarImageWidthHeight()), CalcLength(theme->GetCalendarImageWidthHeight())));
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
-    buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonRenderContext->UpdateBorderRadius(borderRadius);
     MarginProperty margin;
     if (resourceId == InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG) {
@@ -372,7 +370,6 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm)
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(
         Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
-    textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 
@@ -383,8 +380,6 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm)
     buttonLayoutProperty->UpdateFlexShrink(1.0);
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(calendarTheme->GetCalendarActionRowHeight())));
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(SystemProperties::GetDeviceType() == DeviceType::PHONE ?
-        Color::TRANSPARENT : dialogTheme->GetCommonButtonBgColor());
 
     auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
@@ -510,7 +505,6 @@ void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& s
     ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekHeight, theme->GetCalendarPickerDayWidthOrHeight());
     ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekWidth, theme->GetCalendarPickerDayWidthOrHeight());
     ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarDayFontSize());
-    ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekColor, theme->GetTextCurrentMonthColor());
     if (settingData.dayRadius.has_value()) {
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayRadius, settingData.dayRadius.value());
     }
