@@ -59,6 +59,7 @@ private:
     void PaintSelection(DrawingContext& context) const;
     void PaintCursor(DrawingContext& context) const;
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
+    void PaintScrollBar(DrawingContext& context);
 
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollBar> scrollBar_;

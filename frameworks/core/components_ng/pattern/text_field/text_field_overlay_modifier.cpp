@@ -63,8 +63,7 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
 {
     PaintCursor(context);
     PaintSelection(context);
-    ScrollBarOverlayModifier::onDraw(context);
-
+    PaintScrollBar(context);
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
 }
@@ -191,6 +190,15 @@ void TextFieldOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas&
     auto edgeEffect = edgeEffect_.Upgrade();
     CHECK_NULL_VOID_NOLOG(edgeEffect);
     edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
+}
+
+void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->GetScrollBarVisible()) {
+        ScrollBarOverlayModifier::onDraw(context);
+    }
 }
 
 void TextFieldOverlayModifier::SetCursorColor(Color& value)

@@ -2272,7 +2272,12 @@ void TextFieldPattern::OnModifyDone()
         if (!GetScrollableEvent()) {
             AddScrollEvent();
         }
-        SetScrollBar(layoutProperty->GetDisplayModeValue(DisplayMode::AUTO));
+        auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
+        scrollBarVisible_ = true;
+        if (barState == DisplayMode::OFF) {
+            scrollBarVisible_ = false;
+        }
+        SetScrollBar(barState == DisplayMode::OFF ? DisplayMode::ON : barState);
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
             scrollBar->SetMinHeight(SCROLL_BAR_MIN_HEIGHT);
