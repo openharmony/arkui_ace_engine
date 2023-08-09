@@ -48,6 +48,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         self->BufferAvailableCallback();
+        Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
     };
 }
 
