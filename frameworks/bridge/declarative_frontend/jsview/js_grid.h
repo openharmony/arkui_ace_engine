@@ -32,7 +32,7 @@ public:
     static void SetRowsTemplate(const std::string& value);
     static void SetColumnsGap(const JSCallbackInfo& info);
     static void SetRowsGap(const JSCallbackInfo& info);
-    static void SetScrollBar(int32_t displayMode);
+    static void SetScrollBar(const JSCallbackInfo& info);
     static void SetScrollBarColor(const std::string& color);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
 
