@@ -61,7 +61,8 @@ void HyperlinkModelNG::SetTextStyle(const RefPtr<FrameNode>& hyperlinkNode, cons
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
     textLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
     textLayoutProperty->UpdateAdaptMinFontSize(10.0_vp);
-    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    textLayoutProperty->UpdateAdaptMaxFontSize(textStyle.GetFontSize());
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     hyperlinkNode->MarkModifyDone();
     hyperlinkNode->MarkDirtyNode();
 }

@@ -68,6 +68,7 @@ private:
     RefPtr<TouchEventImpl> onTouchEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<InputEvent> onMouseEvent_;
+    RefPtr<ClickEvent> clickListener_;
 
     // Mark the address in the pattern, used to link to the website.
     std::string address_;
