@@ -39,7 +39,7 @@ class AnimatedImage : public virtual CanvasImage {
 public:
     // initialize animator
     AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url);
-    ~AnimatedImage() override = default;
+    ~AnimatedImage() override;
 
     struct ResizeParam {
         int32_t width = 0;
