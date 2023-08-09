@@ -907,7 +907,7 @@ void DialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(colRenderContext);
     colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     CHECK_NULL_VOID(menuNode_);
-    for (const auto buttonNode : menuNode_->GetChildren()) {
+    for (const auto& buttonNode : menuNode_->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
         }
