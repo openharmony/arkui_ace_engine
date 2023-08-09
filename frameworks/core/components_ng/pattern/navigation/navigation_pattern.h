@@ -234,8 +234,6 @@ private:
     void DoAnimation(NavigationMode usrNavigationMode);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
-    bool UpdateEventHub(const RefPtr<NavigationGroupNode>& hostNode,
-        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, NavigationMode navigationMode);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();

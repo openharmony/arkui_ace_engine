@@ -193,24 +193,23 @@ void NavigationLayoutAlgorithm::RangeCalculation(
     } else {
         userSetMinContentFlag_ = true;
     }
-
     minNavBarWidthValue_ = navigationLayoutProperty->GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH);
     auto userSetMaxNavBarWidthValue = navigationLayoutProperty->GetMaxNavBarWidthValue(defaultValue);
 
-    float minNavBarWidth = std::min(static_cast<float>(minNavBarWidthValue_.ConvertToPx()), frameSizeWidth);
+    float minNavBarWidth =
+        std::min(static_cast<float>(minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f))),
+            frameSizeWidth);
     float maxNavBarWidth = 0.0f;
-
     if (userSetMaxNavBarWidthValue == defaultValue) {
         userSetNavBarRangeFlag_ = false;
         maxNavBarWidth = std::min(
             static_cast<float>(DEFAULT_MAX_NAV_BAR_WIDTH.ConvertToPx()), frameSizeWidth * MAX_NAV_BAR_WIDTH_SCALE);
     } else {
         userSetNavBarRangeFlag_ = true;
-        maxNavBarWidth = static_cast<float>(userSetMaxNavBarWidthValue.ConvertToPx());
+        maxNavBarWidth =
+            static_cast<float>(userSetMaxNavBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f)));
     }
-
     maxNavBarWidthValue_ = Dimension(std::max(maxNavBarWidth, minNavBarWidth), DimensionUnit::PX);
-
     auto navBarWidthValue = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH);
     auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     realNavBarWidth_ = navBarWidth;
@@ -221,7 +220,6 @@ void NavigationLayoutAlgorithm::RangeCalculation(
         realNavBarWidth_ = std::max(realNavBarWidth_, static_cast<float>(minNavBarWidth));
         realNavBarWidth_ = std::min(realNavBarWidth_, static_cast<float>(maxNavBarWidth));
     }
-
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SetMinNavBarWidthValue(minNavBarWidthValue_);
