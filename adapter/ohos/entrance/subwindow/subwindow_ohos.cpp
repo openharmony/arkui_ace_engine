@@ -826,6 +826,70 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
     LOGI("SubwindowOhos::ShowDialogForService end");
 }
 
+void SubwindowOhos::ShowDialogForAbility(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
+{
+    LOGI("Show the dialog");
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    if (!aceContainer) {
+        LOGE("Get container failed, it is null");
+        return;
+    }
+
+    auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    auto delegate = engine->GetFrontend();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return;
+    }
+    delegate->ShowDialog(dialogAttr, buttons, std::move(callback), callbacks);
+}
+
+void SubwindowOhos::ShowDialogForService(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
+{
+    LOGI("SubwindowOhos::ShowDialogForService begin");
+    bool ret = CreateEventRunner();
+    if (!ret) {
+        return;
+    }
+
+    SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
+    auto showDialogCallback = [dialogAttr, &buttons, callbackParam = std::move(callback),
+            &callbacks]() {
+        int32_t posX = 0;
+        int32_t posY = 0;
+        int32_t width = 0;
+        int32_t height = 0;
+        float density = 1.0f;
+        auto subwindowOhos =
+                AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
+        CHECK_NULL_VOID(subwindowOhos);
+        subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
+        bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY);
+        if (!ret) {
+            return;
+        }
+        ret = subwindowOhos->InitToastDialogView(width, height, density);
+        if (!ret) {
+            return;
+        }
+        auto childContainerId = subwindowOhos->GetChildContainerId();
+        ContainerScope scope(childContainerId);
+        Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
+        Platform::DialogContainer::ShowDialog(childContainerId, dialogAttr, buttons,
+            std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
+    };
+    isToastWindow_ = false;
+    if (!handler_->PostTask(showDialogCallback)) {
+        LOGE("Post sync task error");
+        return;
+    }
+    LOGI("SubwindowOhos::ShowDialogForService end");
+}
+
 void SubwindowOhos::ShowDialog(const std::string& title, const std::string& message,
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
@@ -834,6 +898,16 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
         ShowDialogForService(title, message, buttons, autoCancel, std::move(callback), callbacks);
     } else {
         ShowDialogForAbility(title, message, buttons, autoCancel, std::move(callback), callbacks);
+    }
+}
+
+void SubwindowOhos::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
+{
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
+        ShowDialogForService(dialogAttr, buttons, std::move(callback), callbacks);
+    } else {
+        ShowDialogForAbility(dialogAttr, buttons, std::move(callback), callbacks);
     }
 }
 

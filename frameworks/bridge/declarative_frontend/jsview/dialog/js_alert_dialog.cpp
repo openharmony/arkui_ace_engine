@@ -215,6 +215,13 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             ParseJsDimensionVp(dyValue, dy);
             properties.offset = DimensionOffset(dx, dy);
         }
+
+        // Parse maskRect.
+        auto maskRectValue = obj->GetProperty("maskRect");
+        DimensionRect maskRect;
+        if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+            properties.maskRect = maskRect;
+        }
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }
 }

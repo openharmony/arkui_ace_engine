@@ -166,6 +166,17 @@ struct DialogProperties {
     std::vector<ActionSheetInfo> sheetsInfo;
 
     WeakPtr<NG::UINode> windowScene;
+    std::optional<DimensionRect> maskRect;
+};
+
+struct PromptDialogAttr {
+    std::string title;
+    std::string message;
+    bool autoCancel = true;
+
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
+    std::optional<DimensionRect> maskRect;
 };
 
 } // namespace OHOS::Ace

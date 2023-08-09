@@ -33,6 +33,14 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
+namespace {
+const DimensionOffset TEXT_PICKER_OFFSET_DEFAULT_TOP = DimensionOffset(0.0_vp, 40.0_vp);
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
+    DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
+    DialogAlignment::BOTTOM_END };
+}
+
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
 std::unique_ptr<TextPickerDialogModel> TextPickerDialogModel::textPickerDialogInstance_ = nullptr;
 std::mutex TextPickerModel::mutex_;
@@ -1158,6 +1166,41 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         textPickerDialog.selectedValue = selectedValue;
         textPickerDialog.getRangeVector = getRangeVector;
     }
+
+    // Parse alignment
+    auto alignmentValue = paramObject->GetProperty("alignment");
+    if (alignmentValue->IsNumber()) {
+        auto alignment = alignmentValue->ToNumber<int32_t>();
+        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            textPickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
+        }
+        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+            textPickerDialog.offset = TEXT_PICKER_OFFSET_DEFAULT_TOP;
+        }
+    }
+
+    // Parse offset
+    auto offsetValue = paramObject->GetProperty("offset");
+    if (offsetValue->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+        CalcDimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        JSAlertDialog::ParseJsDimensionVp(dxValue, dx);
+        CalcDimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        JSAlertDialog::ParseJsDimensionVp(dyValue, dy);
+        textPickerDialog.offset = DimensionOffset(dx, dy);
+    }
+
+    // Parse maskRect.
+    auto maskRectValue = paramObject->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        textPickerDialog.maskRect = maskRect;
+    }
+
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData, std::move(cancelEvent),
         std::move(acceptEvent), std::move(changeEvent), textPickerDialog);
 }

@@ -33,6 +33,28 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
+                         const RefPtr<DialogTheme>& theme)
+{
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        properties.alignment = DialogAlignment::BOTTOM;
+    } else {
+        properties.alignment = DialogAlignment::CENTER;
+    }
+    if (textPickerDialog.alignment.has_value()) {
+        properties.alignment = textPickerDialog.alignment.value();
+    }
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (textPickerDialog.offset.has_value()) {
+        properties.offset = textPickerDialog.offset.value();
+    }
+
+    properties.maskRect = textPickerDialog.maskRect;
+}
+}
+
 void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnKind)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -488,13 +510,7 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     dialogCancelEvent["cancelId"] = func;
     DialogProperties properties;
     ButtonInfo buttonInfo;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        properties.alignment = DialogAlignment::BOTTOM;
-    } else {
-        properties.alignment = DialogAlignment::CENTER;
-    }
-    properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    SetDialogProperties(properties, textPickerDialog, theme);
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

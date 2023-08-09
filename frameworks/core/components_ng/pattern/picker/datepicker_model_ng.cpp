@@ -317,9 +317,18 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     } else {
         properties.alignment = DialogAlignment::CENTER;
     }
+    if (pickerDialog.alignment.has_value()) {
+        properties.alignment = pickerDialog.alignment.value();
+    }
 
     properties.customStyle = false;
     properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (pickerDialog.offset.has_value()) {
+        properties.offset = pickerDialog.offset.value();
+    }
+
+    properties.maskRect = pickerDialog.maskRect;
+
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
     if (pickerDialog.isStartDate == true) {

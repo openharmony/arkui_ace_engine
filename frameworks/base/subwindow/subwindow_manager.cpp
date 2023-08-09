@@ -478,6 +478,35 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
     }
 }
 
+void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& napiCallback, const std::set<std::string>& dialogCallbacks)
+{
+    auto containerId = Container::CurrentId();
+    // Get active container when current instanceid is less than 0
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    // for pa service
+    if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
+        auto subWindow = GetOrCreateSubWindow();
+        CHECK_NULL_VOID(subWindow);
+        subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
+        // for ability
+    } else {
+        auto subWindow = GetSubwindow(containerId);
+        if (!subWindow) {
+            LOGI("SubWindow is null, add a new one.");
+            subWindow = Subwindow::CreateSubwindow(containerId);
+            subWindow->InitContainer();
+            AddSubwindow(containerId, subWindow);
+        }
+        subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
+    }
+}
+
 void SubwindowManager::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
