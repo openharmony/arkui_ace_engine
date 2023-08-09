@@ -307,6 +307,7 @@ protected:
     bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
+    bool touchEventInitialized_ = false;
     std::vector<Rect> rectsForPlaceholders_;
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
@@ -321,6 +322,8 @@ private:
     void HandlePanStart(const GestureEvent& info);
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
+    void InitTouchEvent();
+    void HandleTouchEvent(const TouchEventInfo& info);
     inline RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
