@@ -137,6 +137,9 @@ float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimensi
 RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
+    if (transitionEffect_) {
+        transitionEffect_->Detach(this);
+    }
 }
 
 void RosenRenderContext::StartRecording()
@@ -2730,8 +2733,8 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
         if (RosenTransitionEffect::UpdateRosenTransitionEffect(transitionEffect_, effect)) {
             return;
         }
-        LOGW("transition effect struct changed");
-        transitionEffect_->Detach(Claim(this));
+        LOGD("transition effect struct changed");
+        transitionEffect_->Detach(this);
     }
     transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
     hasDefaultTransition_ = false;
@@ -2830,7 +2833,7 @@ void RosenRenderContext::RemoveDefaultTransition()
 {
     if (hasDefaultTransition_ && transitionEffect_ && disappearingTransitionCount_ == 0 &&
         appearingTransitionCount_ == 0) {
-        transitionEffect_->Detach(Claim(this));
+        transitionEffect_->Detach(this);
         transitionEffect_ = nullptr;
         hasDefaultTransition_ = false;
     }
