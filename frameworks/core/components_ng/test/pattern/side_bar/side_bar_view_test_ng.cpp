@@ -637,4 +637,20 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg013, TestSize.Level1)
     SideBarContainerModelInstance.Pop();
     EXPECT_TRUE(pattern->HasControlButton());
 }
+
+/**
+ * @tc.name: SideBarViewTestNg014
+ * @tc.desc: Test SideBar Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarViewTestNg, SideBarViewTestNg014, TestSize.Level1)
+{
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->minPlatformVersion_ = 12;
+    SideBarContainerModelInstance.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+}
 } // namespace OHOS::Ace::NG
