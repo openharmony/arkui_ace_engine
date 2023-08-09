@@ -372,7 +372,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::DEL ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED ||
-                          layoutProperty->GetTextAlignChangedValue(false);
+                          layoutProperty->GetTextAlignChangedValue(false) ||
+                          pattern->GetTextEditingValue().text.empty();
     auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
                               pattern->GetIsMousePressed();
     if (needToKeepTextRect) {
