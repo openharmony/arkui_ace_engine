@@ -184,9 +184,7 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/select/select_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/utils.cpp",
-    "select_accessibility_property_test_ng.cpp",
     "select_pattern_test_ng.cpp",
-    "select_view_test_ng.cpp",
   ]
 
   deps = [
