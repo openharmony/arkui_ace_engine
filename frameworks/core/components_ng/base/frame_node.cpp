@@ -1487,7 +1487,6 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             return HitTestResult::OUT_OF_REGION;
         }
     }
-    pattern_->OnTouchTestHit(touchRestrict.hitTestType);
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
@@ -1541,6 +1540,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
         (InResponseRegionList(parentLocalPoint, responseRegionList))) {
+        pattern_->OnTouchTestHit(touchRestrict.hitTestType);
         consumed = true;
         if (touchRestrict.hitTestType == SourceType::TOUCH) {
             auto gestureHub = eventHub_->GetGestureEventHub();
