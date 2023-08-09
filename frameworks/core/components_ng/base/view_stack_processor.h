@@ -205,10 +205,14 @@ public:
     void PopKey();
 
     // Prevent predict mark dirty when creating predict node
-    void SetPredict(bool predict)
+    void SetPredict(RefPtr<UINode> predictNode)
     {
-        predict_ = predict;
-    };
+        predictNode_ = predictNode;
+    }
+
+    void ResetPredict() {
+        predictNode_.Reset();
+    }
 
     // Check whether the current node is in the corresponding polymorphic style state.
     // When the polymorphic style is not set on the front end, it returns true regardless of the current node state;
@@ -350,7 +354,7 @@ private:
     std::string viewKey_;
     std::stack<size_t> keyStack_;
 
-    bool predict_ = false;
+    RefPtr<UINode> predictNode_;
 
     std::stack<int32_t> parentIdStack_;
 

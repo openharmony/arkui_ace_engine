@@ -133,10 +133,8 @@ void LazyForEachNode::PostIdleTask()
             "LazyForEach predict [%d-%d] cache size [%d]", node->startIndex_, node->endIndex_, node->cacheCount_);
         auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
         if (node->builder_) {
-            ViewStackProcessor::GetInstance()->SetPredict(true);
             auto preBuildResult = node->builder_->PreBuild(node->startIndex_, node->endIndex_, node->cacheCount_,
                 deadline, node->itemConstraint_, canRunLongPredictTask);
-            ViewStackProcessor::GetInstance()->SetPredict(false);
             if (!preBuildResult) {
                 node->PostIdleTask();
             }
