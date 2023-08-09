@@ -172,7 +172,7 @@ struct DialogProperties {
 struct PromptDialogAttr {
     std::string title;
     std::string message;
-    bool autoCancel;
+    bool autoCancel = true;
 
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
