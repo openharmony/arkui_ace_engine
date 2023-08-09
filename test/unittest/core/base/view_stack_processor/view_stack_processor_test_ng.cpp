@@ -99,7 +99,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg003, TestSize.Level1)
     ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
     ViewStackProcessor::GetInstance()->FlushRerenderTask();
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
-    ViewStackProcessor::GetInstance()->SetPredict(true);
+    ViewStackProcessor::GetInstance()->SetPredict(nullptr);
     ViewStackProcessor::GetInstance()->FlushRerenderTask();
     ViewStackProcessor::GetInstance()->FlushRerenderTask();
     EXPECT_FALSE(FRAME_NODE_ROOT->isMeasureBoundary_);

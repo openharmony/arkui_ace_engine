@@ -20,8 +20,6 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#include <queue>
-
 namespace OHOS::Ace::NG {
 
 CustomNodeBase::~CustomNodeBase()
@@ -64,7 +62,6 @@ void CustomNodeBase::FireRecycleSelf()
         if (frameNode) {
             auto layoutProperty = frameNode->GetLayoutProperty();
             if (layoutProperty && layoutProperty->GetGeometryTransition()) {
-                auto geometryTransitionId = layoutProperty->GetGeometryTransition()->GetId();
                 layoutProperty->UpdateGeometryTransition("");
             }
         }
