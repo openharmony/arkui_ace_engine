@@ -88,7 +88,9 @@ void IndexerPattern::OnModifyDone()
         layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
     auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
     lastItemSize_ = itemSize;
-    ApplyIndexChanged(false, initialized_ && selectChanged_, false, indexerSizeChanged);
+    auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
+    ApplyIndexChanged(needMarkDirty,
+        initialized_ && selectChanged_, false, indexerSizeChanged);
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
         InitPanEvent(gesture);
@@ -442,6 +444,7 @@ void IndexerPattern::ApplyIndexChanged(
     auto childrenNode = host->GetChildren();
     for (auto& iter : childrenNode) {
         auto childNode = AceType::DynamicCast<FrameNode>(iter);
+        UpdateChildBoundary(childNode);
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
         auto childRenderContext = childNode->GetRenderContext();
         if (index == childHoverIndex_ || index == childPressIndex_) {
@@ -523,9 +526,6 @@ void IndexerPattern::ApplyIndexChanged(
     }
     if (selectChanged || NeedShowPopupView()) {
         ShowBubble();
-    }
-    if (isTextNodeInTree && indexerSizeChanged) {
-        host->MarkDirtyNode();
     }
 }
 
@@ -1250,5 +1250,27 @@ void IndexerPattern::RemoveBubble()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemoveIndexerPopupById(host->GetId());
+}
+
+bool IndexerPattern::IsMeasureBoundary() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return CheckMeasureSelfFlag(layoutProperty->GetPropertyChangeFlag());
+}
+
+void IndexerPattern::UpdateChildBoundary(RefPtr<FrameNode>& frameNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = DynamicCast<TextPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    auto isMeasureBoundary = layoutProperty->GetPropertyChangeFlag() ==  PROPERTY_UPDATE_NORMAL;
+    pattern->SetIsMeasureBoundary(isMeasureBoundary);
 }
 } // namespace OHOS::Ace::NG

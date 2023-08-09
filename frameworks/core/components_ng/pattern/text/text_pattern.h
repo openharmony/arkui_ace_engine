@@ -264,6 +264,14 @@ public:
 
     void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
     void CheckHandles(SelectHandleInfo& handleInfo);
+    bool IsMeasureBoundary() const override
+    {
+        return isMeasureBoundary_;
+    }
+    void SetIsMeasureBoundary(bool isMeasureBoundary)
+    {
+        isMeasureBoundary_ = isMeasureBoundary;
+    }
 
 protected:
     virtual void HandleOnCopy();
@@ -310,6 +318,7 @@ protected:
     std::vector<Rect> rectsForPlaceholders_;
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
+    bool isMeasureBoundary_ = false;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
