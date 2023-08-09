@@ -352,6 +352,18 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    if (info[0]->IsString()) {
+        auto value = info[0]->ToString();
+        if (!value.empty() && value.back() == '%') {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            CalcDimension defaultValue = theme->GetTextStyle().GetLetterSpacing();
+            TextModel::GetInstance()->SetLetterSpacing(defaultValue);
+            return;
+        }
+    }
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
