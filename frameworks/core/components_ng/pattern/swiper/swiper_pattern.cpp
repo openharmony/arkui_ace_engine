@@ -1256,6 +1256,11 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
     if (!indicatorDoingAnimation_) {
         child->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    if (GetLoopIndex(currentIndex_) != GetLoopIndex(currentShowIndex)) {
+        auto swiperEventHub = GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(swiperEventHub);
+        swiperEventHub->FireIndicatorChangeEvent(GetLoopIndex(currentShowIndex));
+    }
 }
 
 void SwiperPattern::UpdateAnimationProperty(float velocity)
