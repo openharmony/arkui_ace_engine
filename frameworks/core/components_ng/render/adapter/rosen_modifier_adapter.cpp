@@ -91,7 +91,8 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
         auto castProp = AceType::DynamicCast<srcType>(prop);                             \
         auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get()); \
         castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },       \
-            [rsProp](const propType& value) { rsProp->Set(value); });                    \
+            [rsProp](const propType& value) { rsProp->Set(value); },                     \
+            [rsProp]() -> propType { return rsProp->GetStagingValue(); });               \
         rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                        \
         return rsProp;                                                                   \
     }
