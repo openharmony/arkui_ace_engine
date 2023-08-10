@@ -134,6 +134,7 @@ template("ace_ohos_standard_source_set") {
       "resource_management:global_resmgr",
       "window_manager:libdm",
       "window_manager:libwm",
+      "window_manager:libwsutils",
     ]
   }
 }
