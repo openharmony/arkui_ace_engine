@@ -51,7 +51,7 @@ protected:
 
     void InitContent();
     void CreateStartingNode();
-    void CreateSnapshotNode();
+    void CreateSnapshotNode(bool usePixelMap = false);
 
     virtual void OnConnect() {}
     virtual void OnForeground() {}

@@ -109,9 +109,6 @@ void WindowPattern::InitContent()
         context->SetRSNode(surfaceNode);
     }
 
-    auto showRecent = session_->GetShowRecent();
-    session_->SetShowRecent(false);
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -122,7 +119,7 @@ void WindowPattern::InitContent()
         if (!HasStartingPage()) {
             return;
         }
-        if (showRecent) {
+        if (session_->GetShowRecent()) {
             CreateSnapshotNode();
             host->AddChild(snapshotNode_);
             return;
@@ -169,7 +166,7 @@ void WindowPattern::CreateStartingNode()
     startingNode_->MarkModifyDone();
 }
 
-void WindowPattern::CreateSnapshotNode()
+void WindowPattern::CreateSnapshotNode(bool usePixelMap)
 {
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -180,9 +177,16 @@ void WindowPattern::CreateSnapshotNode()
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     CHECK_NULL_VOID(session_);
-    CHECK_NULL_VOID(session_->GetScenePersistence());
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo("file:/" + session_->GetScenePersistence()->GetSnapshotFilePath()));
+    if (usePixelMap) {
+        auto snapshot = session_->GetSnapshot();
+        auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
+        CHECK_NULL_VOID(pixelMap);
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    } else {
+        CHECK_NULL_VOID(session_->GetScenePersistence());
+        imageLayoutProperty->UpdateImageSourceInfo(
+            ImageSourceInfo("file:/" + session_->GetScenePersistence()->GetSnapshotFilePath()));
+    }
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
 }
