@@ -966,6 +966,11 @@ public:
         return scrollBarVisible_;
     }
 
+    float GetPreviewWidth() const
+    {
+        return inlineState_.frameRect.Width();
+    }
+
     bool IsNormalInlineState() const;
     void TextIsEmptyRect(RectF &rect);
     void TextAreaInputRectUpdate(RectF &rect);
