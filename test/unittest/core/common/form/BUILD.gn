@@ -30,9 +30,12 @@ ohos_unittest("form_manager_test") {
     "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
   ]
-
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
   if (is_ohos_standard_system) {
-    external_deps = [ "form_fwk:fmskit_native" ]
+    external_deps += [ "form_fwk:fmskit_native" ]
   }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
