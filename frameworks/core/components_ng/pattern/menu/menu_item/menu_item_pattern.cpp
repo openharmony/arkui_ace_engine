@@ -159,6 +159,8 @@ void MenuItemPattern::OnModifyDone()
         UpdateDisabledStyle();
     }
     SetAccessibilityAction();
+
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()

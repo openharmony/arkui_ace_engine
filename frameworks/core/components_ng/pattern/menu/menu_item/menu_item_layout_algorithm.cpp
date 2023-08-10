@@ -86,7 +86,7 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(leftRow);
     auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
     float topSpace = (itemHeight - leftRowSize.Height()) / 2.0f;
-    if (padding.top.has_value() && padding.top.value() > topSpace) {
+    if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
         topSpace = padding.top.value();
     }
     leftRow->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
@@ -97,7 +97,7 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(rightRow);
     auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
     topSpace = (itemHeight - rightRowSize.Height()) / 2.0f;
-    if (padding.top.has_value() && padding.top.value() > topSpace) {
+    if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
         topSpace = padding.top.value();
     }
     rightRow->GetGeometryNode()->SetMarginFrameOffset(
