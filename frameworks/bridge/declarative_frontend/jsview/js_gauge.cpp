@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/models/gauge_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
+#include "core/components_ng/pattern/gauge/gauge_theme.h"
 
 namespace OHOS::Ace {
 
@@ -119,10 +120,13 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 
 void JSGauge::SetColors(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= NG::PLATFORM_VERSION_ELEVEN) {
         SetGradientColors(info);
         return;
     }
+
     if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The number of argument is less than 1, or the argument is not array.");
         return;

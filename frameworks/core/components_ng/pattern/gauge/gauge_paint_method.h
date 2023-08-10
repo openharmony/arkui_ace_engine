@@ -25,12 +25,9 @@ struct RenderRingInfo {
     float startDegree = 0.0f;
     float sweepDegree = 0.0f;
     float thickness = 0.0f;
-    float clockwise = 1.0f;
-    float scaleStrokeWidth = 0.0f;
-    int32_t totalScaleNumber = 0;
-    Color color;
     Offset center;
     SizeF contentSize;
+    Color color;
 };
 
 class ACE_EXPORT GaugePaintMethod : public NodePaintMethod {
@@ -43,7 +40,12 @@ public:
 
 private:
     void Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    void DrawIndicator(RSCanvas& canvas, const RenderRingInfo& data) const;
+    void DrawGauge(RSCanvas& canvas, RenderRingInfo data) const;
+    void DrawIndicator(RSCanvas& canvas, RenderRingInfo data) const;
+    bool ShouldHighLight(float start, float interval, float percent) const;
+    // API11
+    void NewPaint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
+    void NewDrawIndicator(RSCanvas& canvas, const RenderRingInfo& data) const;
     void PaintMonochromeCircular(
         RSCanvas& canvas, RenderRingInfo data, const RefPtr<GaugePaintProperty>& paintProperty) const;
     void PaintSingleSegmentGradientCircular(
