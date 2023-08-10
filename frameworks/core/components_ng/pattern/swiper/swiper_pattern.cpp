@@ -1287,12 +1287,6 @@ void SwiperPattern::OnTouchTestHit(SourceType hitTestType)
     }
     if (!isTouchDown_) {
         isTouchDown_ = true;
-        if (indicatorController_) {
-            indicatorController_->Stop();
-        }
-        if (usePropertyAnimation_) {
-            StopPropertyTranslateAnimation();
-        }
     }
 }
 
@@ -1310,6 +1304,13 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
+    if (indicatorController_) {
+        indicatorController_->Stop();
+    }
+    if (usePropertyAnimation_) {
+        StopPropertyTranslateAnimation();
+    }
+
     indicatorDoingAnimation_ = false;
     // Stop translate animation when touch down.
     if (controller_ && controller_->IsRunning()) {
