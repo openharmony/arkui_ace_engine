@@ -81,6 +81,20 @@ private:
     void HandleBlurEvent();
     bool KeyEventConsumed(const KeyEvent& event);
 
+    void OnVisibleChange(bool visible) override
+    {
+        if (!adapter_) {
+            return;
+        }
+        if (visible && !isActive_) {
+            adapter_->Show();
+            isActive_ = true;
+        } else if (!visible && isActive_) {
+            adapter_->Hide();
+            isActive_ = false;
+        }
+    }
+
     void OnActive() override
     {
         if (!isActive_) {
