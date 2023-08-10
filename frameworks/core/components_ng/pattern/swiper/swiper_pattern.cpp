@@ -287,6 +287,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         targetIndex_.reset();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation();
+            currentDelta_ = 0.0f;
             if (indicatorController_) {
                 indicatorController_->Stop();
             }
