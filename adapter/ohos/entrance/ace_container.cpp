@@ -22,6 +22,7 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "pointer_event.h"
+#include "scene_board_judgement.h"
 #include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
@@ -1662,6 +1663,11 @@ bool AceContainer::IsScenceBoardWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+}
+
+bool AceContainer::IsSceneBoardEnabled()
+{
+    return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
 }
 // ArkTsCard end
 
