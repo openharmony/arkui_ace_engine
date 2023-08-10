@@ -45,7 +45,7 @@ ImageLoadingContext::~ImageLoadingContext()
             ImageProvider::CancelTask(src_.GetKey(), WeakClaim(this));
         } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE) {
             // cancel MakeCanvasImage task
-            if (DynamicCast<StaticImageObject>(imageObj_)) {
+            if (InstanceOf<StaticImageObject>(imageObj_)) {
                 ImageProvider::CancelTask(canvasKey_, WeakClaim(this));
             }
         }
@@ -166,7 +166,7 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
-    LOGD("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
+    LOGW("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }
 
@@ -286,7 +286,7 @@ void ImageLoadingContext::SetSourceSize(const std::optional<SizeF>& sourceSize)
 
 std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 {
-    CHECK_NULL_RETURN(sourceSizePtr_, std::nullopt);
+    CHECK_NULL_RETURN_NOLOG(sourceSizePtr_, std::nullopt);
     if (sourceSizePtr_->Width() <= 0.0 || sourceSizePtr_->Height() <= 0.0) {
         LOGW("Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
         return std::nullopt;

@@ -61,13 +61,13 @@ public:
 
     /** Decode image data and make CanvasImage from ImageObject.
      *
-     *    @param imageObjWp           weakPtr of imageObj, contains image data
+     *    @param obj                  imageObject, contains image data
      *    @param targetSize           target size of canvasImage
      *    @param forceResize          force resize image to target size
      *    @param sync                 if true, run task synchronously
      *    @return                     true if MakeCanvasImage was successful
      */
-    static void MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
+    static void MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
         const SizeF& targetSize, bool forceResize = false, bool sync = false);
 
     /** Check if data is present in imageObj, if not, reload image data.
@@ -104,8 +104,8 @@ private:
     // helper function to create image object from ImageSourceInfo
     static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false);
 
-    static void MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, const SizeF& targetSize,
-        const std::string& key, bool forceResize, bool sync = false);
+    static void MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& targetSize, const std::string& key,
+        bool forceResize, bool sync = false);
 
     // helper functions to end task and callback to LoadingContexts
     static void SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false);
