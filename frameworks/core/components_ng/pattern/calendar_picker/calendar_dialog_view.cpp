@@ -63,7 +63,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     CHECK_NULL_RETURN(theme, nullptr);
     PaddingProperty padding;
     padding.top = CalcLength(theme->GetCalendarTitleRowTopPadding());
-    padding.bottom = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
+    padding.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
     layoutProperty->UpdatePadding(padding);
     auto renderContext = contentColumn->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
@@ -441,7 +441,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
         theme->GetDialogDividerColor() : Color::TRANSPARENT);
 
     dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(theme->GetCalendarActionRowHeight() / 2)));
+        CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(theme->GetEntryArrowWidth())));
 
     dividerNode->MarkModifyDone();
     return dividerNode;
@@ -469,6 +469,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     margin.top = CalcLength(theme->GetCalendarActionRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
     margin.left = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
     margin.right = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
+    margin.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
     layoutProps->UpdateMargin(margin);
     layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarActionRowHeight())));
 
