@@ -297,11 +297,7 @@ void NavigationGroupNode::SetBackButtonEvent(
         }; // backButton event
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
-    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(onBackButtonEvent));
-    if (!backButtonEventHub->GetGestureEventHub()) {
-        return;
-    }
-    backButtonEventHub->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent);
+    backButtonEventHub->GetOrCreateGestureEventHub()->SetUserOnClick(onBackButtonEvent);
 }
 
 RefPtr<FrameNode> NavigationGroupNode::GetNavDestinationNodeToHandleBack()
