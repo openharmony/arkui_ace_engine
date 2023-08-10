@@ -301,7 +301,6 @@ private:
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
-    void CreateItemGroupList(LayoutWrapper* layoutWrapper);
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
     void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
