@@ -199,7 +199,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         CalcDimension fontSize;
         auto fontSizeProp = param->GetProperty("fontSize");
         if (!fontSizeProp->IsUndefined() && !fontSizeProp->IsNull() && ParseJsDimensionFp(fontSizeProp, fontSize)) {
-            if (LessNotEqual(fontSize.Value(), 0.0)) {
+            if (LessNotEqual(fontSize.Value(), 0.0) || fontSize.Unit() == DimensionUnit::PERCENT) {
                 fontSize = theme->GetFontSize();
             }
         } else {
@@ -228,7 +228,7 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
         CalcDimension size;
         auto sizeProp = param->GetProperty("size");
         if (!sizeProp->IsUndefined() && !sizeProp->IsNull() && ParseJsDimensionVp(sizeProp, size)) {
-            if (LessNotEqual(size.Value(), 0.0)) {
+            if (LessNotEqual(size.Value(), 0.0) || size.Unit() == DimensionUnit::PERCENT) {
                 size = theme->GetIconHeight();
             }
         } else {
@@ -312,7 +312,7 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     auto iconSizeProp = iconParam->GetProperty("size");
     auto theme = GetTheme<SearchTheme>();
     if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVp(iconSizeProp, iconSize)) {
-        if (LessNotEqual(iconSize.Value(), 0.0)) {
+        if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
             iconSize = theme->GetIconHeight();
         }
     } else {
