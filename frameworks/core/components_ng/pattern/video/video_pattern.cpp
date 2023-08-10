@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/video/video_pattern.h"
+
 #include "video_node.h"
 
 #include "base/geometry/dimension.h"
@@ -43,14 +44,13 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/video/video_event_hub.h"
+#include "core/components_ng/pattern/video/video_full_screen_node.h"
+#include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/video/video_full_screen_pattern.h"
-#include "core/components_ng/pattern/video/video_full_screen_node.h"
-
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
@@ -207,13 +207,6 @@ void VideoPattern::ResetMediaPlayer()
 
 void VideoPattern::UpdateMediaPlayerOnBg()
 {
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        mediaPlayer_->CreateMediaPlayer();
-        if (!mediaPlayer_->IsMediaPlayerValid()) {
-            LOGE("Video create media player failed");
-            return;
-        }
-    }
     PrepareMediaPlayer();
     UpdateSpeed();
     UpdateLooping();
@@ -230,9 +223,17 @@ void VideoPattern::PrepareMediaPlayer()
     auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(videoLayoutProperty);
     // src has not set/changed
-    if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource() == src_) {
+    if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource().value() == src_) {
         LOGW("Video source is null or the source has not changed.");
         return;
+    }
+    src_ = videoLayoutProperty->GetVideoSource().value();
+    if (!mediaPlayer_->IsMediaPlayerValid()) {
+        mediaPlayer_->CreateMediaPlayer();
+        if (!mediaPlayer_->IsMediaPlayerValid()) {
+            LOGE("Video create media player failed");
+            return;
+        }
     }
 
     if (!mediaPlayer_->IsMediaPlayerValid()) {
@@ -256,16 +257,12 @@ void VideoPattern::PrepareMediaPlayer()
 
 bool VideoPattern::SetSourceForMediaPlayer()
 {
-    auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    CHECK_NULL_RETURN(videoLayoutProperty, false);
-    auto videoSrc = videoLayoutProperty->GetVideoSource().value();
-    src_ = videoSrc;
-    LOGI("Video Set src for media, it is : %{public}s", videoSrc.c_str());
+    LOGI("Video Set src for media, it is : %{public}s", src_.c_str());
     if (mediaPlayer_ == nullptr) {
         LOGE("mediaPlayer is nullptr");
         return false;
     }
-    return mediaPlayer_->SetSource(videoSrc);
+    return mediaPlayer_->SetSource(src_);
 }
 
 void VideoPattern::RegisterMediaPlayerEvent()
@@ -841,11 +838,12 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
             videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
             videoFrameSize.Width(), videoFrameSize.Height());
-    LOGD("Video renderContext for mediaPlayer position x is %{public}lf,y is %{public}lf,width is %{public}lf,height "
-         "is %{public}lf.",
-        videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-        videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
-        videoFrameSize.Width(), videoFrameSize.Height());
+        LOGD("Video renderContext for mediaPlayer position x is %{public}lf,y is %{public}lf,width is "
+             "%{public}lf,height "
+             "is %{public}lf.",
+            videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+            videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+            videoFrameSize.Width(), videoFrameSize.Height());
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1092,7 +1090,6 @@ void VideoPattern::SetMethodCall()
                 videoPattern->ResetLastBoundsRect();
                 fullScreenPattern->ExitFullScreen();
             }
-            
         });
     });
     videoController->SetExitFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isSync) {
@@ -1348,11 +1345,11 @@ void VideoPattern::FullScreen()
     auto videoNode = AceType::DynamicCast<VideoNode>(host);
     CHECK_NULL_VOID(videoNode);
     auto fullScreenPattern = AceType::MakeRefPtr<VideoFullScreenPattern>(videoControllerV2_);
-    fullScreenPattern->InitFullScreenParam(AceType::Claim(this),
-        renderSurface_, mediaPlayer_, renderContextForMediaPlayer_);
+    fullScreenPattern->InitFullScreenParam(
+        AceType::Claim(this), renderSurface_, mediaPlayer_, renderContextForMediaPlayer_);
     fullScreenNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-    auto fullScreenNode = VideoFullScreenNode::CreateFullScreenNode(V2::VIDEO_ETS_TAG,
-        fullScreenNodeId_.value(), fullScreenPattern);
+    auto fullScreenNode =
+        VideoFullScreenNode::CreateFullScreenNode(V2::VIDEO_ETS_TAG, fullScreenNodeId_.value(), fullScreenPattern);
     CHECK_NULL_VOID(fullScreenNode);
     fullScreenPattern->RequestFullScreen(videoNode);
 }
