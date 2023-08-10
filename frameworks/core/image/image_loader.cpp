@@ -366,16 +366,6 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
     auto data = std::make_shared<RSData>();
     data->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(skData);
 #endif
-    BackgroundTaskExecutor::GetInstance().PostTask(
-        [src, data]() {
-            // cache file content
-#ifndef USE_ROSEN_DRAWING
-            ImageCache::WriteCacheFile(src, data->data(), data->size());
-#else
-            ImageCache::WriteCacheFile(src, data->GetData(), data->GetSize());
-#endif
-        },
-        BgTaskPriority::LOW);
     return data;
 }
 
