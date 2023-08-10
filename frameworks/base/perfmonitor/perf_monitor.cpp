@@ -88,12 +88,14 @@ void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
     dataRs.inputTime = data.inputTime;
     dataRs.beginVsyncTime = data.beginVsyncTime;
     dataRs.endVsyncTime = data.endVsyncTime;
-    dataRs.versionCode = std::to_string(data.baseInfo.versionCode);
+    dataRs.versionCode = data.baseInfo.versionCode;
     dataRs.versionName = data.baseInfo.versionName;
     dataRs.bundleName = data.baseInfo.bundleName;
     dataRs.processName = data.baseInfo.processName;
     dataRs.abilityName = data.baseInfo.abilityName;
     dataRs.pageUrl = data.baseInfo.pageUrl;
+    dataRs.sourceType = GetSourceTypeName(data.sourceType);
+    dataRs.note = data.baseInfo.note;
 }
 
 void ReportPerfEventToRS(DataBase& data)
