@@ -409,9 +409,9 @@ protected:
     virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
 #ifndef USE_ROSEN_DRAWING
-    virtual sk_sp<SkImage> GetImage(const std::string& src) = 0;
+    sk_sp<SkImage> GetImage(const std::string& src);
 #else
-    virtual std::shared_ptr<RSImage> GetImage(const std::string& src) = 0;
+    std::shared_ptr<RSImage> GetImage(const std::string& src);
 #endif
     void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
 #ifndef USE_ROSEN_DRAWING
@@ -486,6 +486,7 @@ protected:
 #endif
 
     SizeF lastLayoutSize_;
+    RefPtr<ImageCache> imageCache_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -56,16 +56,6 @@ public:
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }
-#else
-    std::shared_ptr<RSImage> GetImage(const std::string& src) override
-    {
-        return std::shared_ptr<RSImage>();
-    }
-#endif
-
     void PaintText(const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke,
         bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);

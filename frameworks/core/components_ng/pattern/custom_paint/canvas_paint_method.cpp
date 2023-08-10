@@ -42,7 +42,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double HANGING_PERCENT = 0.8;
-constexpr int32_t IMAGE_CACHE_COUNT = 50;
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
@@ -308,54 +307,6 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     LOGE("Drawing is not supported");
 #endif
 }
-
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
-{
-    if (!imageCache_) {
-        imageCache_ = ImageCache::Create();
-        imageCache_->SetCapacity(IMAGE_CACHE_COUNT);
-    }
-    auto cacheImage = imageCache_->GetCacheImage(src);
-    if (cacheImage && cacheImage->imagePtr) {
-        return cacheImage->imagePtr;
-    }
-
-    auto context = context_.Upgrade();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto image = Ace::ImageProvider::GetSkImage(src, context);
-    CHECK_NULL_RETURN(image, nullptr);
-    auto rasterizedImage = image->makeRasterImage();
-    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
-    return rasterizedImage;
-}
-#else
-std::shared_ptr<RSImage> CanvasPaintMethod::GetImage(const std::string& src)
-{
-    if (!imageCache_) {
-        imageCache_ = ImageCache::Create();
-        imageCache_->SetCapacity(IMAGE_CACHE_COUNT);
-    }
-    auto cacheImage = imageCache_->GetCacheImage(src);
-    if (cacheImage && cacheImage->imagePtr) {
-        return cacheImage->imagePtr;
-    }
-
-    auto context = context_.Upgrade();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto image = Ace::ImageProvider::GetDrawingImage(src, context);
-    CHECK_NULL_RETURN(image, nullptr);
-    RSBitmapFormat rsBitmapFormat { image->GetColorType(), image->GetAlphaType() };
-    RSBitmap rsBitmap;
-    rsBitmap.Build(image->GetWidth(), image->GetHeight(), rsBitmapFormat);
-    CHECK_NULL_RETURN(image->ReadPixels(rsBitmap, 0, 0), nullptr);
-    auto rasterizedImage = std::make_shared<RSImage>();
-    rasterizedImage->BuildFromBitmap(rsBitmap);
-    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
-    return rasterizedImage;
-}
-#endif
-
 
 void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
 {
