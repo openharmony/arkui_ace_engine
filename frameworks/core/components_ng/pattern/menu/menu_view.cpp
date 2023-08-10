@@ -85,6 +85,8 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     textProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textProperty->UpdateTextColor(theme->GetMenuTitleFontColor());
     textProperty->UpdateContent(title);
+    textProperty->UpdateMaxLines(1);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
 
     CalcSize idealSize;
     idealSize.SetHeight(CalcLength(theme->GetMenuTitleHeight()));
