@@ -125,20 +125,23 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
-            if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
-                return true;
+            if (nodeLeft->GetLayoutPriority() == nodeRight->GetLayoutPriority()) {
+                if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
+                    return true;
+                }
+                if (nodeLeft->GetDepth() == nodeRight->GetDepth()) {
+                    return nodeLeft < nodeRight;
+                }
+                return false;
             }
-            if (nodeLeft->GetDepth() == nodeRight->GetDepth()) {
-                return nodeLeft < nodeRight;
-            }
-            return false;
+            return nodeLeft->GetLayoutPriority() > nodeRight->GetLayoutPriority();
         }
     };
 
     using PageDirtySet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
     using RootDirtyMap = std::map<uint32_t, PageDirtySet>;
 
-    RootDirtyMap dirtyLayoutNodes_;
+    std::list<RefPtr<FrameNode>> dirtyLayoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
     std::list<PredictTask> predictTask_;
     std::list<std::function<void()>> afterLayoutTasks_;
