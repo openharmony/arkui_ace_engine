@@ -162,8 +162,6 @@ private:
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
     CopyOptions copyOption_ = CopyOptions::None;
-    bool syncLoad_ = false;
-    bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
@@ -183,6 +181,9 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
+
+    bool syncLoad_ = false;
+    bool isShow_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

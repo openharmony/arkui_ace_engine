@@ -978,16 +978,16 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
-    auto weak = AceType::WeakClaim(this);
-    auto task = [weak, wrapper, paintProperty = paintProperty_]() {
+    auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
-        auto ref = weak.Upgrade();
+        auto self = weak.Upgrade();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
 
-        if (ref->GetInspectorId().has_value()) {
-            auto renderContext = ref->GetRenderContext();
-            renderContext->RequestNextFrame();
+        if (self->GetInspectorId()) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetNeedRenderNode(self);
         }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
@@ -2189,9 +2189,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     RestoreGeoState();
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
-    if (!oldGeometryNode_) {
-        oldGeometryNode_ = geometryNode_->Clone();
-    }
+
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         layoutAlgorithm_->SetSkipMeasure();
         layoutAlgorithm_->SetSkipLayout();
@@ -2353,7 +2351,7 @@ void FrameNode::SyncGeometryNode()
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
-    if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
+    if (!config.skipMeasure && !config.skipLayout && GetInspectorId()) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
