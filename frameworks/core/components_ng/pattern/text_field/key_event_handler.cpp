@@ -180,6 +180,7 @@ bool KeyEventHandler::HandleDirectionalKey(const KeyEvent& keyEvent)
 {
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
+    pattern->ResetTouchAtLeftOffsetFlag();
     bool updateSelection = false;
     if (keyEvent.IsShiftWith(KeyCode::KEY_DPAD_UP)) {
         pattern->HandleSelectionUp();

@@ -299,4 +299,13 @@ void TxtParagraph::SetIndents(const std::vector<float>& indents)
     paragraphTxt->SetIndents(indents);
 }
 
+bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
+{
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+    CHECK_NULL_RETURN(paragraphTxt, false);
+    auto range = paragraphTxt->GetWordBoundary(static_cast<size_t>(offset));
+    start = static_cast<int32_t>(range.start);
+    end = static_cast<int32_t>(range.end);
+    return true;
+}
 } // namespace OHOS::Ace::NG

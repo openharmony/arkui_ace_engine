@@ -69,6 +69,18 @@ public:
         secondHandleIsShow_->Set(isShow);
     }
 
+    void SetIsHiddenHandle(bool isHidden)
+    {
+        CHECK_NULL_VOID(isHiddenHandle_);
+        isHiddenHandle_->Set(isHidden);
+    }
+
+    void SetIsHandleLineShow(bool isShow)
+    {
+        CHECK_NULL_VOID(isHandleLineShow_);
+        isHandleLineShow_->Set(isShow);
+    }
+
     void SetViewPort(const RectF& viewPort)
     {
         CHECK_NULL_VOID(viewPort_);
@@ -118,13 +130,15 @@ public:
     }
 
 private:
-    void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop);
+    void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow = true);
 
     RefPtr<PropertyBool> inShowArea_;
     RefPtr<PropertyBool> handleReverse_;
     RefPtr<PropertyBool> isSingleHandle_;
     RefPtr<PropertyBool> firstHandleIsShow_;
     RefPtr<PropertyBool> secondHandleIsShow_;
+    RefPtr<PropertyBool> isHiddenHandle_;
+    RefPtr<PropertyBool> isHandleLineShow_;
     RefPtr<PropertyRectF> viewPort_;
     RefPtr<PropertyRectF> firstHandle_;
     RefPtr<PropertyRectF> secondHandle_;

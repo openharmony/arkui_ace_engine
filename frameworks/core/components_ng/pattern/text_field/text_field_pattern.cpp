@@ -452,7 +452,7 @@ float TextFieldPattern::GetIconRightOffset()
     return (iconHotZoneSize - iconSize) / 2.0f;
 }
 
-void TextFieldPattern::CreateSingleHandle(bool animation)
+void TextFieldPattern::CreateSingleHandle(bool animation, bool isMenuShow)
 {
     isSingleHandle_ = true;
     auto renderContext = GetHost()->GetRenderContext();
@@ -460,7 +460,7 @@ void TextFieldPattern::CreateSingleHandle(bool animation)
         AnimatePressAndHover(renderContext, 0.0f);
     }
     RectF secondHandle;
-    auto secondHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
+    auto secondHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition, isTouchAtLeftOffset_);
     OffsetF secondHandleOffset(secondHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX(),
         secondHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY());
     if (textEditingValue_.Empty()) {
@@ -491,23 +491,26 @@ void TextFieldPattern::CreateSingleHandle(bool animation)
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     secondHandle.SetOffset(secondHandleOffset);
     secondHandle.SetSize(handlePaintSize);
-    ShowSelectOverlay(std::nullopt, secondHandle, animation);
+    ShowSelectOverlay(std::nullopt, secondHandle, animation, isMenuShow);
     selectionMode_ = SelectionMode::NONE;
-    StopTwinkling();
+    StartTwinkling();
 }
 
 bool TextFieldPattern::UpdateCaretByPressOrLongPress()
 {
     if (CaretPositionCloseToTouchPosition() && !SelectOverlayIsOn() &&
         caretUpdateType_ != CaretUpdateType::LONG_PRESSED && !isMousePressed_) {
-        isSingleHandle_ = true;
-        CreateSingleHandle(true);
+        CreateSingleHandle(true, false);
         return true;
     }
     // caret offset updated by gesture will not cause textRect to change offset
     UpdateCaretPositionByPressOffset();
     if (caretUpdateType_ == CaretUpdateType::PRESSED) {
-        StartTwinkling();
+        if (!GetEditingValue().text.empty() && isFocusedBeforeClick_ && !isMousePressed_) {
+            CreateSingleHandle(true, false);
+        } else {
+            StartTwinkling();
+        }
         return true;
     }
     // in long press case, we have caret and one handle at pressed location and another handle at -1 or +1 position
@@ -666,7 +669,7 @@ void TextFieldPattern::UpdateCaretPositionByTextEdit()
 
 void TextFieldPattern::UpdateCaretRectByPosition(int32_t position)
 {
-    auto caretMetrics = CalcCursorOffsetByPosition(position);
+    auto caretMetrics = CalcCursorOffsetByPosition(position, isTouchAtLeftOffset_);
     caretRect_.SetLeft(caretMetrics.offset.GetX());
     // add 1.0f here for offsetToParagraphBeginning offsetY is negative when caret position is zero
     caretRect_.SetTop(caretMetrics.offset.GetY());
@@ -708,8 +711,7 @@ void TextFieldPattern::UpdateCaretPositionByPressOffset()
     }
     UpdateCaretOffsetByLastTouchOffset();
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED && !textEditingValue_.CaretAtLast()) {
-        int32_t oneWord = GetGraphemeClusterLength(GetEditingValue().GetWideText(), 1);
-        textSelector_.Update(textEditingValue_.caretPosition, textEditingValue_.caretPosition + oneWord);
+        UpdateSelectorByPosition(textEditingValue_.caretPosition);
     } else {
         UpdateSelection(textEditingValue_.caretPosition);
     }
@@ -865,7 +867,9 @@ void TextFieldPattern::OnScrollEndCallback()
 {
     auto selectOverlayProxy = GetSelectOverlay();
     CHECK_NULL_VOID_NOLOG(selectOverlayProxy);
-    selectOverlayProxy->ShowOrHiddenMenu(false);
+    if (originalIsMenuShow_) {
+        selectOverlayProxy->ShowOrHiddenMenu(false);
+    }
 }
 
 void TextFieldPattern::OnTextAreaScroll(float offset)
@@ -887,47 +891,47 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
         SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
         textSelector_.secondHandleOffset_.SetY(textSelector_.secondHandleOffset_.GetY() + offset);
         std::optional<RectF> secondHandle = RectF(textSelector_.secondHandleOffset_, handlePaintSize);
-
+        auto secondHandleHeight = 0.0f;
+        auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
+        if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
+            secondHandleHeight = secondHandle->Height();
+        }
+        if (LessNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY() + secondHandle->Height(),
+                                              contentRect_.GetY() + contentRect_.Height())) {
+            secondHandleHeight = secondHandle->Height();
+        }
         std::optional<RectF> firstHandle;
+        auto firstHandleHeight = 0.0f;
         if (!isSingleHandle_) {
             textSelector_.firstHandleOffset_.SetY(textSelector_.firstHandleOffset_.GetY() + offset);
             firstHandle = { textSelector_.firstHandleOffset_, handlePaintSize };
-        }
-        auto firstHandleHeight = 0.0f;
-        auto secondHandleHeight = 0.0f;
-        auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
-        auto secondHandleOffset = textSelector_.secondHandleOffset_ - parentGlobalOffset_;
-        if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
-            firstHandleHeight = firstHandle->Height();
-        }
-        if (LessNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY() + firstHandle->Height(),
-                                              contentRect_.GetY() + contentRect_.Height())) {
-            firstHandleHeight = firstHandle->Height();
-        }
-        if (!isSingleHandle_) {
-            if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY(), contentRect_.GetY())) {
-                secondHandleHeight = secondHandle->Height();
+            auto firstHandleOffset = textSelector_.firstHandleOffset_ - parentGlobalOffset_;
+            if (GreatOrEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY(), contentRect_.GetY())) {
+                firstHandleHeight = firstHandle->Height();
             }
-            if (LessNotEqual(offset, 0.0f) && GreatNotEqual(secondHandleOffset.GetY() + secondHandle->Height(),
+            if (LessNotEqual(offset, 0.0f) && GreatNotEqual(firstHandleOffset.GetY() + firstHandle->Height(),
                                                   contentRect_.GetY() + contentRect_.Height())) {
-                secondHandleHeight = secondHandle->Height();
+                firstHandleHeight = firstHandle->Height();
             }
         }
-        CheckHandles(firstHandle, secondHandle, firstHandleHeight, secondHandleHeight);
-
         SelectHandleInfo firstHandleInfo;
         SelectHandleInfo secondHandleInfo;
         firstHandleInfo.paintRect =
             RectF(firstHandle->Left(), firstHandle->Top(), firstHandle->Width(), firstHandle->Height());
         secondHandleInfo.paintRect =
             RectF(secondHandle->Left(), secondHandle->Top(), secondHandle->Width(), secondHandle->Height());
+        CheckHandles(firstHandle, secondHandle, firstHandleHeight, secondHandleHeight);
         if (!firstHandle.has_value()) {
             firstHandleInfo.isShow = false;
         }
         if (!secondHandle.has_value()) {
             secondHandleInfo.isShow = false;
         }
-        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+        if (!isSingleHandle_) {
+            selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+        } else {
+            selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
+        }
     }
     UpdateScrollBarOffset();
 }
@@ -948,29 +952,31 @@ void TextFieldPattern::OnTextInputScroll(float offset)
     UpdateSelectionOffset();
     if (SelectOverlayIsOn()) {
         SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
-        textSelector_.firstHandleOffset_.SetX(textSelector_.firstHandleOffset_.GetX() + offset);
-        std::optional<RectF> firstHandle = RectF(textSelector_.firstHandleOffset_, handlePaintSize);
-
-        std::optional<RectF> secondHandle;
+        textSelector_.secondHandleOffset_.SetX(textSelector_.secondHandleOffset_.GetX() + offset);
+        std::optional<RectF> secondHandle = RectF(textSelector_.secondHandleOffset_, handlePaintSize);
+        std::optional<RectF> firstHandle;
         if (!isSingleHandle_) {
-            textSelector_.secondHandleOffset_.SetX(textSelector_.secondHandleOffset_.GetX() + offset);
-            secondHandle = { textSelector_.secondHandleOffset_, handlePaintSize };
+            textSelector_.firstHandleOffset_.SetX(textSelector_.firstHandleOffset_.GetX() + offset);
+            firstHandle = { textSelector_.firstHandleOffset_, handlePaintSize };
         }
-        CheckHandles(firstHandle, secondHandle);
-
         SelectHandleInfo firstHandleInfo;
         SelectHandleInfo secondHandleInfo;
         firstHandleInfo.paintRect =
             RectF(firstHandle->Left(), firstHandle->Top(), firstHandle->Width(), firstHandle->Height());
         secondHandleInfo.paintRect =
             RectF(secondHandle->Left(), secondHandle->Top(), secondHandle->Width(), secondHandle->Height());
+        CheckHandles(firstHandle, secondHandle);
         if (!firstHandle.has_value()) {
             firstHandleInfo.isShow = false;
         }
         if (!secondHandle.has_value()) {
             secondHandleInfo.isShow = false;
         }
-        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+        if (!isSingleHandle_) {
+            selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
+        } else {
+            selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
+        }
     }
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -988,14 +994,17 @@ void TextFieldPattern::GetTextRectsInRange(
     if (textBoxes.size() == 1 && caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX(), textRect_.GetY());
         if (offset.GetX() < textBoxes[0].rect_.GetLeft() || offset.GetY() < textBoxes[0].rect_.GetTop()) {
-            auto tmp = paragraph_->GetRectsForRange(base - 1, destination - 1,
-                RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
+            int32_t start = 0;
+            int32_t end = 0;
+            GetWordBoundaryPositon(base - 1, start, end);
+            auto tmp = paragraph_->GetRectsForRange(start, end, RSTypographyProperties::RectHeightStyle::MAX,
+                RSTypographyProperties::RectWidthStyle::TIGHT);
             if (tmp.size() != 1) {
                 return;
             }
             if (LastTouchIsInSelectRegion(tmp)) {
                 textBoxes = tmp;
-                UpdateSelectorByPosition(base - 1);
+                textSelector_.Update(start, end);
             }
         }
     }
@@ -1112,6 +1121,14 @@ int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localO
 {
     CHECK_NULL_RETURN(paragraph_, 0);
     return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(localOffset.GetX(), localOffset.GetY()).pos_);
+}
+
+void TextFieldPattern::GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end)
+{
+    CHECK_NULL_VOID_NOLOG(paragraph_);
+    auto positon = paragraph_->GetWordBoundary(offset);
+    start = static_cast<int32_t>(positon.start_);
+    end = static_cast<int32_t>(positon.end_);
 }
 
 bool TextFieldPattern::DisplayPlaceHolder()
@@ -2063,7 +2080,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         return;
     }
     lastTouchOffset_ = info.GetLocalLocation();
+    isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
     caretUpdateType_ = CaretUpdateType::PRESSED;
+    isFocusedBeforeClick_ = HasFocus();
     selectionMode_ = SelectionMode::NONE;
     isUsingMouse_ = false;
     CloseSelectOverlay(true);
@@ -2496,8 +2515,10 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 void TextFieldPattern::UpdateSelectorByPosition(const int32_t& pos)
 {
     CHECK_NULL_VOID(paragraph_);
-    int32_t extendEnd = pos + GetGraphemeClusterLength(GetEditingValue().GetWideText(), pos);
-    textSelector_.Update(pos, extendEnd);
+    int32_t start = 0;
+    int32_t end = 0;
+    GetWordBoundaryPositon(pos, start, end);
+    textSelector_.Update(start, end);
 }
 
 int32_t TextFieldPattern::GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev)
@@ -2592,7 +2613,7 @@ void TextFieldPattern::CreateHandles(bool animation)
 }
 
 void TextFieldPattern::ShowSelectOverlay(
-    const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle, bool animation)
+    const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle, bool animation, bool isMenuShow)
 {
     CloseSelectOverlay();
     if (isTransparent_) {
@@ -2600,7 +2621,8 @@ void TextFieldPattern::ShowSelectOverlay(
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, animation](bool hasData) {
+    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, animation, isMenuShow](
+                               bool hasData) {
         auto pattern = weak.Upgrade();
         SelectOverlayInfo selectInfo;
         if (!pattern->IsUsingMouse()) {
@@ -2656,6 +2678,12 @@ void TextFieldPattern::ShowSelectOverlay(
         selectInfo.singleLineHeight = pattern->PreferredLineHeight();
         pattern->UpdateSelectMenuInfo(hasData);
         selectInfo.menuInfo = pattern->GetSelectMenuInfo();
+        if (!isMenuShow) {
+            selectInfo.menuInfo.menuIsShow = false;
+        }
+        if (pattern->isSingleHandle_) {
+            selectInfo.isHandleLineShow = false;
+        }
         selectInfo.menuCallback.onCopy = [weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -2711,8 +2739,9 @@ void TextFieldPattern::ShowSelectOverlay(
         auto start = pattern->GetTextSelector().GetStart();
         auto end = pattern->GetTextSelector().GetEnd();
         selectOverlay->SetSelectInfo(pattern->GetTextEditingValue().GetSelectedText(start, end));
-
-        selectOverlay->ShowOrHiddenMenu(layoutProperty->GetSelectionMenuHiddenValue(false));
+        if (isMenuShow) {
+            selectOverlay->ShowOrHiddenMenu(layoutProperty->GetSelectionMenuHiddenValue(false));
+        }
         selectOverlay->DisableMenu(layoutProperty->GetSelectionMenuHiddenValue(false));
     };
     clipboard_->HasData(hasDataCallback);
@@ -2768,6 +2797,7 @@ void TextFieldPattern::CloseSelectOverlay(bool animation)
     CHECK_NULL_VOID_NOLOG(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->AddTouchEvent(GetTouchListener());
+    originalIsMenuShow_ = false;
 }
 
 bool TextFieldPattern::SelectOverlayIsOn()
@@ -2785,9 +2815,10 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     CHECK_NULL_VOID_NOLOG(!textEditingValue_.Empty());
     isFirstHandle_ = isFirstHandle;
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
+    isTouchAtLeftOffset_ = IsTouchAtLeftOffset(localOffset.GetX());
     auto position = UpdateCaretPositionOnHandleMove(localOffset);
     textEditingValue_.CursorMoveToPosition(position);
-    auto caretMetrics = CalcCursorOffsetByPosition(position);
+    auto caretMetrics = CalcCursorOffsetByPosition(position, isTouchAtLeftOffset_);
     caretRect_.SetOffset(caretMetrics.offset);
     selectionMode_ = isSingleHandle_ ? SelectionMode::NONE : SelectionMode::SELECT;
     caretUpdateType_ = CaretUpdateType::HANDLE_MOVE;
@@ -2871,7 +2902,9 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
     CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
     caretUpdateType_ = CaretUpdateType::HANDLE_MOVE_DONE;
     isFirstHandle_ = isFirstHandle;
-    StopTwinkling();
+    if (!isSingleHandle_) {
+        StopTwinkling();
+    }
     UpdateCopyAllStatus();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -2906,8 +2939,13 @@ void TextFieldPattern::SetHandlerOnMoveDone()
 {
     SelectHandleInfo info;
     auto newHandleOffset = parentGlobalOffset_;
-    auto handleOffset = CalcCursorOffsetByPosition(
-        isFirstHandle_ ? textSelector_.baseOffset : textSelector_.destinationOffset, isFirstHandle_ ? true : false);
+    CaretMetricsF handleOffset;
+    if (!isSingleHandle_) {
+        handleOffset = CalcCursorOffsetByPosition(
+            isFirstHandle_ ? textSelector_.baseOffset : textSelector_.destinationOffset, isFirstHandle_ ? true : false);
+    } else {
+        handleOffset = CalcCursorOffsetByPosition(textEditingValue_.caretPosition, isTouchAtLeftOffset_);
+    }
     newHandleOffset += handleOffset.offset;
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     RectF newHandle;
@@ -3085,6 +3123,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         mouseStatus_ = MouseStatus::PRESSED;
         StartTwinkling();
         lastTouchOffset_ = info.GetLocalLocation();
+        isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
         caretUpdateType_ = CaretUpdateType::PRESSED;
         selectionMode_ = SelectionMode::NONE;
         UpdateCaretPositionByPressOffset();
@@ -3127,6 +3166,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         }
         caretUpdateType_ = CaretUpdateType::EVENT;
         lastTouchOffset_ = info.GetLocalLocation();
+        isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
         mouseStatus_ = MouseStatus::MOVE;
         MarkRedrawOverlay();
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -5177,13 +5217,17 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
         if (scrollBar) {
             scrollBar->PlayScrollBarStartAnimation();
         }
+        auto selectOverlayProxy = GetSelectOverlay();
+        if (selectOverlayProxy) {
+            if (selectOverlayProxy->IsHandleShow()) {
+                originalIsMenuShow_ = selectOverlayProxy->IsMenuShow();
+            }
+            selectOverlayProxy->ShowOrHiddenMenu(true);
+        }
         return true;
     }
     OnTextInputScroll(offset);
     OnTextAreaScroll(offset);
-    auto selectOverlayProxy = GetSelectOverlay();
-    CHECK_NULL_RETURN_NOLOG(selectOverlayProxy, true);
-    selectOverlayProxy->ShowOrHiddenMenu(true);
     return true;
 }
 
@@ -5907,5 +5951,10 @@ void TextFieldPattern::DumpInfo()
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
             .append(", Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
     }
+}
+
+bool TextFieldPattern::IsTouchAtLeftOffset(float currentOffsetX)
+{
+    return LessNotEqual(currentOffsetX, contentRect_.GetX() + contentRect_.Width() * 0.5) ? true : false;
 }
 } // namespace OHOS::Ace::NG

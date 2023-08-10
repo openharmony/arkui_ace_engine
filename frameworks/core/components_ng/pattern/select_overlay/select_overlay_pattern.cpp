@@ -35,6 +35,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t HIDDEN_HANDLE_TIMER_MS = 4000; // 4000ms
+} // namespace
+
 void SelectOverlayPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -86,6 +90,10 @@ void SelectOverlayPattern::OnAttachToFrameNode()
     };
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gesture->AddTouchEvent(touchEvent_);
+
+    if (info_->isSingleHandle && !info_->isHandleLineShow) {
+        StartHiddenHandleTask();
+    }
 }
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
@@ -173,7 +181,13 @@ void SelectOverlayPattern::HandleOnClick(GestureEvent& /*info*/)
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     if (!info_->menuInfo.menuDisable) {
-        if (!info_->menuInfo.menuIsShow) {
+        if (!info_->isHandleLineShow) {
+            info_->menuInfo.menuIsShow = !info_->menuInfo.menuIsShow;
+            host->UpdateToolBar(false);
+
+            StopHiddenHandleTask();
+            StartHiddenHandleTask();
+        } else if (!info_->menuInfo.menuIsShow) {
             info_->menuInfo.menuIsShow = true;
             host->UpdateToolBar(false);
         }
@@ -217,6 +231,10 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
     } else {
         LOGW("the point is not in drag area");
     }
+
+    if (info_->isSingleHandle && !info_->isHandleLineShow) {
+        StopHiddenHandleTask();
+    }
 }
 
 void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
@@ -258,13 +276,14 @@ void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
             info_->onHandleMoveDone(info_->firstHandle.paintRect, true);
         }
         firstHandleDrag_ = false;
-        return;
-    }
-    if (secondHandleDrag_) {
+    } else if (secondHandleDrag_) {
         if (info_->onHandleMoveDone) {
             info_->onHandleMoveDone(info_->secondHandle.paintRect, false);
         }
         secondHandleDrag_ = false;
+    }
+    if (info_->isSingleHandle && !info_->isHandleLineShow) {
+        StartHiddenHandleTask();
     }
 }
 
@@ -429,4 +448,47 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return true;
 }
 
+bool SelectOverlayPattern::IsMenuShow()
+{
+    CHECK_NULL_RETURN(info_, false);
+    return info_->menuInfo.menuIsShow;
+}
+
+bool SelectOverlayPattern::IsHandleShow()
+{
+    CHECK_NULL_RETURN(info_, false);
+    return info_->firstHandle.isShow || info_->secondHandle.isShow;
+}
+
+void SelectOverlayPattern::StartHiddenHandleTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto weak = WeakClaim(this);
+    hiddenHandleTask_.Reset([weak] {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(client);
+        client->HiddenHandle();
+    });
+    taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS);
+}
+
+void SelectOverlayPattern::HiddenHandle()
+{
+    hiddenHandleTask_.Cancel();
+    isHiddenHandle_ = true;
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->GetOrCreateGestureEventHub()->RemoveClickEvent(clickEvent_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SelectOverlayPattern::StopHiddenHandleTask()
+{
+    hiddenHandleTask_.Cancel();
+}
 } // namespace OHOS::Ace::NG
