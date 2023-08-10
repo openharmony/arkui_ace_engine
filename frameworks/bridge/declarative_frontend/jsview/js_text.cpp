@@ -251,7 +251,9 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
 void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
     int32_t value = Infinity<uint32_t>();
-    ParseJsInt32(info[0], value);
+    if (info[0]->ToString() != "Infinity") {
+        ParseJsInt32(info[0], value);
+    }
     TextModel::GetInstance()->SetMaxLines(value);
 }
 
