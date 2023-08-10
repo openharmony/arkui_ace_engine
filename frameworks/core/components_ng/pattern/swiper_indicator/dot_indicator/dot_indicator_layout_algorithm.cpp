@@ -136,7 +136,7 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (borderWidthProperty != nullptr) {
         borderWidthLeft = borderWidthProperty->leftDimen.value_or(Dimension(0.0, DimensionUnit::PX)).ConvertToPx();
         borderWidthRight = borderWidthProperty->rightDimen.value_or(Dimension(0.0, DimensionUnit::PX)).ConvertToPx();
-        borderWidthTop = borderWidthProperty->topDimen.value_or(Dimension(0.0, DimensionUnit::PX)).ConvertToPx();  
+        borderWidthTop = borderWidthProperty->topDimen.value_or(Dimension(0.0, DimensionUnit::PX)).ConvertToPx();
         borderWidthBottom = borderWidthProperty->bottomDimen.value_or(Dimension(0.0, DimensionUnit::PX)).ConvertToPx();
     }
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
@@ -163,7 +163,8 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         position.SetX(swiperWidth - indicatorWidth_ - rightValue - swiperPaddingRight - borderWidthRight);
     } else {
         if (direction == Axis::HORIZONTAL) {
-            position.SetX((swiperWidth - swiperPaddingRight - borderWidthRight + swiperPaddingLeft + borderWidthLeft - indicatorWidth_) * 0.5f);
+            position.SetX((swiperWidth - swiperPaddingRight - borderWidthRight +
+                swiperPaddingLeft + borderWidthLeft - indicatorWidth_) * 0.5f);
         } else {
             position.SetX(swiperWidth - indicatorWidth_ - swiperPaddingRight - borderWidthRight);
         }
@@ -178,7 +179,8 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (direction == Axis::HORIZONTAL) {
             position.SetY(swiperHeight - indicatorHeight_ - swiperPaddingBottom - borderWidthBottom);
         } else {
-            position.SetY((swiperHeight - swiperPaddingBottom - borderWidthBottom + swiperPaddingTop + borderWidthTop - indicatorHeight_) * 0.5f);
+            position.SetY((swiperHeight - swiperPaddingBottom - borderWidthBottom +
+                swiperPaddingTop + borderWidthTop - indicatorHeight_) * 0.5f);
         }
     }
     auto currentOffset = OffsetF {static_cast<float>(position.GetX()), static_cast<float>(position.GetY())};
