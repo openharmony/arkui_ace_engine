@@ -72,6 +72,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingBeforeContent_ = axis == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
+    contentStartOffset_ = listLayoutProperty->GetContentStartOffset().value_or(0.0f);
+    contentEndOffset_ = listLayoutProperty->GetContentEndOffset().value_or(0.0f);
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
     if (!GetMainAxisSize(contentIdealSize, axis)) {
         if (totalItemCount_ == 0) {
@@ -218,7 +220,7 @@ void ListLayoutAlgorithm::BeginLayoutForward(float startPos, LayoutWrapper* layo
 {
     LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startPos);
     if (((jumpIndex_.value() > 0) || (!IsScrollSnapAlignCenter(layoutWrapper) && jumpIndex_.value() == 0)) &&
-        GreatNotEqual(GetStartPosition(), startMainPos_)) {
+        GreatNotEqual(GetStartPosition(), (contentStartOffset_ + startMainPos_))) {       
         LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
         if (LessNotEqual(GetEndIndex(), totalItemCount_ - 1) &&
             LessNotEqual(GetEndPosition(), endMainPos_)) {
@@ -417,7 +419,7 @@ void ListLayoutAlgorithm::MeasureList(
             case ScrollAlign::CENTER:
                 jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
                 if (scrollAlign_ == ScrollAlign::START) {
-                    startPos = 0.0f;
+                    startPos = contentStartOffset_;
                 } else {
                     float mainLen =
                         MeasureAndGetChildHeight(layoutWrapper, layoutConstraint, axis, jumpIndex_.value());
