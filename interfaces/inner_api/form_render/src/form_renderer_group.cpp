@@ -23,6 +23,7 @@ namespace OHOS {
 namespace Ace {
 namespace {
 constexpr char FORM_RENDERER_COMP_ID[] = "ohos.extra.param.key.form_comp_id";
+constexpr char FORM_RENDER_STATE[] = "ohos.extra.param.key.form_render_state";
 }
 std::shared_ptr<FormRendererGroup> FormRendererGroup::Create(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
@@ -56,14 +57,42 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
     } else {
         formRequests_.emplace_back(formRequest);
     }
+    bool isVerified = want.GetBoolParam(FORM_RENDER_STATE, false);
+    if (isVerified) {
+        HILOG_DEBUG("The user is verified, start rendering form.");
+        InnerAddForm(formRequest);
+        return;
+    }
+    HILOG_INFO("The user is not verified at this time, can not render the form now.");
+}
 
+void FormRendererGroup::OnUnlock()
+{
+    HILOG_INFO("The user is verified, OnUnlock called.");
+    FormRequest currentFormRequest;
+    for (auto& formRequest : formRequests_) {
+        if (currentCompId_ == formRequest.compId) {
+            currentFormRequest = formRequest;
+            formRequest.want.SetParam(FORM_RENDER_STATE, true);
+        }
+    }
+    HILOG_DEBUG("start rendering form.");
+    InnerAddForm(currentFormRequest);
+}
+
+void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
+{
+    HILOG_DEBUG("InnerAddForm called");
+    auto compId = formRequest.compId;
+    OHOS::AAFwk::Want want = formRequest.want;
+    AppExecFwk::FormJsInfo formJsInfo = formRequest.formJsInfo;
     if (formRenderer_ == nullptr) {
         formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_);
         if (!formRenderer_) {
-            HILOG_ERROR("AddForm create form render failed");
+            HILOG_ERROR("InnerAddForm create form render failed");
             return;
         }
-        HILOG_INFO("AddForm compId is %{public}s. formId is %{public}s", compId.c_str(),
+        HILOG_INFO("InnerAddForm compId is %{public}s. formId is %{public}s", compId.c_str(),
             std::to_string(formJsInfo.formId).c_str());
         formRenderer_->AddForm(want, formJsInfo);
     } else {
