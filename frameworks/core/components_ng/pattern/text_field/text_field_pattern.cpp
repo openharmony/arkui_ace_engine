@@ -3641,7 +3641,7 @@ bool TextFieldPattern::FilterWithAscii(const std::string& valueToUpdate, std::st
     }
     bool textChange = true;
     std::string errorText = "";
-    for (auto valuePtr = 0; valuePtr < valueToUpdate.size(); valuePtr++) {
+    for (uint32_t valuePtr = 0; valuePtr < valueToUpdate.size(); valuePtr++) {
         if (isascii(valueToUpdate[valuePtr])) {
             result += valueToUpdate[valuePtr];
         } else {
