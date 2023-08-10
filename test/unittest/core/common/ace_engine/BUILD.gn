@@ -24,4 +24,8 @@ ace_unittest("ace_engine_special_test") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "ace_engine_special_test.cpp",
   ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }

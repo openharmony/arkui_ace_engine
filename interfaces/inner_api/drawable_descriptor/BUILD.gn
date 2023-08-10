@@ -65,6 +65,7 @@ ohos_shared_library("drawable_descriptor") {
 
   external_deps = [
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "napi:ace_napi",
   ]
 

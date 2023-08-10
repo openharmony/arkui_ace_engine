@@ -35,7 +35,10 @@ ohos_unittest("flutter_test") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "//third_party/googletest:gmock_main",
   ]
-
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
   if (ace_use_new_skia) {
     sources += [
       "$flutter_root/engine/flutter/shell/common/thread_host.cc",
