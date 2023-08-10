@@ -252,12 +252,6 @@ void SwiperPattern::OnModifyDone()
         }
     };
     swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
-
-    if (IsAutoPlay()) {
-        StartAutoPlay();
-    } else {
-        translateTask_.Cancel();
-    }
     SetAccessibilityAction();
 }
 
@@ -296,6 +290,11 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     if (mainSizeIsMeasured_ && isNeedResetPrevMarginAndNextMargin_) {
         layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
         layoutProperty->UpdateNextMarginWithoutMeasure(0.0_px);
+    }
+    if (IsAutoPlay()) {
+        StartAutoPlay();
+    } else {
+        translateTask_.Cancel();
     }
 }
 
