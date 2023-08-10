@@ -566,11 +566,11 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     auto controlImageLeft = layoutProperty->GetControlButtonLeft().value_or(DEFAULT_CONTROL_BUTTON_LEFT);
     auto controlImageTop = layoutProperty->GetControlButtonTop().value_or(DEFAULT_CONTROL_BUTTON_TOP);
 
-    if (LessNotEqual(controlImageLeft.Value(), padding.left.value_or(0))) {
+    if (LessNotEqual(controlImageLeft.Value(), 0.0)) {
         controlImageLeft = DEFAULT_CONTROL_BUTTON_LEFT;
     }
 
-    if (LessNotEqual(controlImageTop.Value(), padding.top.value_or(0))) {
+    if (LessNotEqual(controlImageTop.Value(), 0.0)) {
         controlImageTop = DEFAULT_CONTROL_BUTTON_TOP;
     }
     auto controlButtonLeft = controlImageLeft - CONTROL_BUTTON_PADDING;
