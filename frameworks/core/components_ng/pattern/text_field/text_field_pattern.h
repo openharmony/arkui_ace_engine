@@ -1097,7 +1097,6 @@ private:
 
     void UpdateCopyAllStatus();
     void SaveInlineStates();
-    void TextRectSetOffset(RefPtr<TextFieldLayoutProperty> layoutProperty);
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
     bool CheckHandleVisible(const RectF& paintRect);
