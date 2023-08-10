@@ -847,7 +847,7 @@ void SwiperPattern::ShowPrevious()
 
 void SwiperPattern::FinishAnimation()
 {
-    LOGD("SwiperPattern::FinishAnimation start");
+    LOGI("SwiperPattern::FinishAnimation start");
     StopTranslateAnimation();
     if (indicatorController_) {
         indicatorController_->Stop();
@@ -858,7 +858,7 @@ void SwiperPattern::FinishAnimation()
     }
     if (isUserFinish_) {
         if (swiperController_ && swiperController_->GetFinishCallback()) {
-            LOGD("SwiperPattern::FinishAnimation execute finish callback.");
+            LOGI("SwiperPattern::FinishAnimation execute finish callback.");
             swiperController_->GetFinishCallback()();
         }
     } else {
