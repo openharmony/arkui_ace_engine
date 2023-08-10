@@ -128,6 +128,17 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         swiperPaddingBottom =
             static_cast<float>(swiperPaddingProperty->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
     }
+    const auto& borderWidthProperty = swiperLayoutProperty->GetBorderWidthProperty();
+    double borderWidthLeft = 0.0f;
+    double borderWidthRight = 0.0f;
+    double borderWidthTop = 0.0f;
+    double borderWidthBottom = 0.0f;
+    if (borderWidthProperty != nullptr) {
+        borderWidthLeft = borderWidthProperty->leftDimen.value_or(Dimension(0.0, DimensionUnit::PX)).ConvertToPx();
+        borderWidthRight = borderWidthProperty->rightDimen.value_or(Dimension(0.0, DimensionUnit::PX)).ConvertToPx();
+        borderWidthTop = borderWidthProperty->topDimen.value_or(Dimension(0.0, DimensionUnit::PX)).ConvertToPx();  
+        borderWidthBottom = borderWidthProperty->bottomDimen.value_or(Dimension(0.0, DimensionUnit::PX)).ConvertToPx();
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
@@ -146,26 +157,28 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     Offset position;
     if (left.has_value() && !NearZero(left.value().Value())) {
         auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, left.value());
-        position.SetX(leftValue + swiperPaddingLeft);
+        position.SetX(leftValue + swiperPaddingLeft + borderWidthLeft);
     } else if (right.has_value() && !NearZero(right.value().Value())) {
         auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, right.value());
-        position.SetX(swiperWidth - indicatorWidth_ - rightValue - swiperPaddingRight);
+        position.SetX(swiperWidth - indicatorWidth_ - rightValue - swiperPaddingRight - borderWidthRight);
     } else {
-        position.SetX(direction == Axis::HORIZONTAL
-                          ? (swiperWidth - swiperPaddingRight + swiperPaddingLeft - indicatorWidth_) * 0.5f
-                          : swiperWidth - indicatorWidth_ - swiperPaddingRight);
+        if (direction == Axis::HORIZONTAL) {
+            position.SetX((swiperWidth - swiperPaddingRight - borderWidthRight + swiperPaddingLeft + borderWidthLeft - indicatorWidth_) * 0.5f);
+        } else {
+            position.SetX(swiperWidth - indicatorWidth_ - swiperPaddingRight - borderWidthRight);
+        }
     }
     if (top.has_value() && !NearZero(top.value().Value())) {
         auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, top.value());
-        position.SetY(topValue + swiperPaddingTop);
+        position.SetY(topValue + swiperPaddingTop + borderWidthTop);
     } else if (bottom.has_value() && !NearZero(bottom.value().Value())) {
         auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, bottom.value());
-        position.SetY(swiperHeight - indicatorHeight_ - bottomValue - swiperPaddingBottom);
+        position.SetY(swiperHeight - indicatorHeight_ - bottomValue - swiperPaddingBottom - borderWidthBottom);
     } else {
         if (direction == Axis::HORIZONTAL) {
-            position.SetY(swiperHeight - indicatorHeight_ - swiperPaddingBottom);
+            position.SetY(swiperHeight - indicatorHeight_ - swiperPaddingBottom - borderWidthBottom);
         } else {
-            position.SetY((swiperHeight - swiperPaddingBottom + swiperPaddingTop - indicatorHeight_) * 0.5f);
+            position.SetY((swiperHeight - swiperPaddingBottom - borderWidthBottom + swiperPaddingTop + borderWidthTop - indicatorHeight_) * 0.5f);
         }
     }
     auto currentOffset = OffsetF {static_cast<float>(position.GetX()), static_cast<float>(position.GetY())};
