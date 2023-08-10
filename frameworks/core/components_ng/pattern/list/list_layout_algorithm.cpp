@@ -220,7 +220,7 @@ void ListLayoutAlgorithm::BeginLayoutForward(float startPos, LayoutWrapper* layo
 {
     LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startPos);
     if (((jumpIndex_.value() > 0) || (!IsScrollSnapAlignCenter(layoutWrapper) && jumpIndex_.value() == 0)) &&
-        GreatNotEqual(GetStartPosition(), (contentStartOffset_ + startMainPos_))) {       
+        GreatNotEqual(GetStartPosition(), (contentStartOffset_ + startMainPos_))) {
         LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
         if (LessNotEqual(GetEndIndex(), totalItemCount_ - 1) &&
             LessNotEqual(GetEndPosition(), endMainPos_)) {
