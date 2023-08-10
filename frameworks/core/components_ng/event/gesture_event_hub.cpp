@@ -633,14 +633,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     std::string udKey;
     int32_t recordsSize = 1;
     auto unifiedData = dragEvent->GetData();
-    if (SystemProperties::GetDebugEnabled()) {
-        if (unifiedData) {
-            LOGI("HandleOnDragStart: event getData success, unifiedData size is %{public}lld.", unifiedData->GetSize());
-        } else {
-            LOGW("HandleOnDragStart: event get empty data.");
-        }
-    }
-
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetDragRecordSize() >= 0) {
