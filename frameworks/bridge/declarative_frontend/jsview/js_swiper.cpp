@@ -1054,6 +1054,7 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
         auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Swiper.finishAnimation");
+            LOGD("Swiper finish callback execute.");
             func->Execute();
         };
 
