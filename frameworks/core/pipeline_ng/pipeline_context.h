@@ -203,6 +203,10 @@ public:
 
     void SetRootRect(double width, double height, double offset) override;
 
+    void SetWindowSceneConsumed(bool isConsumed);
+    
+    bool IsWindowSceneConsumed();
+
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
@@ -495,6 +499,7 @@ private:
     bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;
     bool canUseLongPredictTask_ = false;
+    bool isWindowSceneConsumed_ = false;
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
