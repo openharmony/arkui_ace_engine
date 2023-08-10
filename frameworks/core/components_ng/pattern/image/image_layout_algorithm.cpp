@@ -29,20 +29,20 @@ namespace {
 SizeF GetMaxSize(const SizeF& maxSize, float aspectRatio)
 {
     if (NearZero(aspectRatio)) {
-        return SizeF(0.0, 0.0);
+        return { 0.0, 0.0 };
     }
     // infinite size not allowed
     bool infWidth = GreaterOrEqualToInfinity(maxSize.Width());
     bool infHeight = GreaterOrEqualToInfinity(maxSize.Height());
     if (infWidth && infHeight) {
         auto width = PipelineContext::GetCurrentRootWidth();
-        return SizeF(width, width / aspectRatio);
+        return { width, width / aspectRatio };
     }
     if (infWidth) {
-        return SizeF(maxSize.Height() * aspectRatio, maxSize.Height());
+        return { maxSize.Height() * aspectRatio, maxSize.Height() };
     }
     if (infHeight) {
-        return SizeF(maxSize.Width(), maxSize.Width() / aspectRatio);
+        return { maxSize.Width(), maxSize.Width() / aspectRatio };
     }
     return maxSize;
 }
