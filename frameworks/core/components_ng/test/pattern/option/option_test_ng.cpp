@@ -33,6 +33,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -56,6 +58,9 @@ public:
     RefPtr<FrameNode> frameNode_;
     RefPtr<OptionPattern> optionPattern_;
     RefPtr<OptionAccessibilityProperty> optionAccessibilityProperty_;
+
+protected:
+    PaintWrapper* GetPaintWrapper(RefPtr<OptionPaintProperty> paintProperty);
 };
 
 void OptionTestNg::SetUp()
@@ -80,6 +85,14 @@ void OptionTestNg::SetUpTestCase()
 void OptionTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
+}
+
+PaintWrapper* OptionTestNg::GetPaintWrapper(RefPtr<OptionPaintProperty> paintProperty)
+{
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    return paintWrapper;
 }
 
 bool OptionTestNg::InitOptionTestNg()
@@ -262,5 +275,205 @@ HWTEST_F(OptionTestNg, OptionLayoutTest002, TestSize.Level1)
     rosenOptionLayoutAlgorithm.Measure(rosenLayoutWrapper);
     EXPECT_NE(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
     EXPECT_EQ(rosenLayoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 0);
+}
+
+/**
+ * @tc.name: OptionPaintPropertyTestNg001
+ * @tc.desc: Verify Property Update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object OptionPaintProperty.
+     * @tc.expected: property has not value.
+     */
+    OptionPaintProperty property;
+    EXPECT_FALSE(property.GetHover().has_value());
+    EXPECT_FALSE(property.GetPress().has_value());
+    EXPECT_FALSE(property.GetNeedDivider().has_value());
+    EXPECT_FALSE(property.GetHasIcon().has_value());
+    /**
+     * @tc.steps: step2. Update property value.
+     * @tc.expected: property value are as expected.
+     */
+    property.UpdateHover(true);
+    property.UpdatePress(true);
+    property.UpdateNeedDivider(true);
+    property.UpdateHasIcon(true);
+    EXPECT_TRUE(property.GetHover().value());
+    EXPECT_TRUE(property.GetPress().value());
+    EXPECT_TRUE(property.GetNeedDivider().value());
+    EXPECT_TRUE(property.GetHasIcon().value());
+}
+
+/**
+ * @tc.name: OptionPaintPropertyTestNg002
+ * @tc.desc: Verify Property Reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object OptionPaintProperty, udpate property
+     * @tc.expected: property value are as expected.
+     */
+    OptionPaintProperty property;
+    property.UpdateHover(true);
+    property.UpdatePress(true);
+    property.UpdateNeedDivider(true);
+    property.UpdateHasIcon(true);
+    EXPECT_TRUE(property.GetHover().value());
+    EXPECT_TRUE(property.GetPress().value());
+    EXPECT_TRUE(property.GetNeedDivider().value());
+    EXPECT_TRUE(property.GetHasIcon().value());
+    /**
+     * @tc.steps: step2. reset property
+     * @tc.expected: property value are as expected.
+     */
+    property.Reset();
+    EXPECT_FALSE(property.GetHover().has_value());
+    EXPECT_FALSE(property.GetPress().has_value());
+    EXPECT_FALSE(property.GetNeedDivider().has_value());
+    EXPECT_FALSE(property.GetHasIcon().has_value());
+}
+
+/**
+ * @tc.name: OptionPaintPropertyTestNg003
+ * @tc.desc: Verify Property Clone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object OptionPaintProperty, udpate property
+     */
+    OptionPaintProperty property;
+    property.UpdateHover(true);
+    property.UpdatePress(true);
+    property.UpdateNeedDivider(true);
+    property.UpdateHasIcon(true);
+    /**
+     * @tc.steps: step2. clone property
+     * @tc.expected: property value are as expected.
+     */
+    auto cloneProperty = AceType::DynamicCast<OptionPaintProperty>(property.Clone());
+    ASSERT_NE(cloneProperty, nullptr);
+    EXPECT_TRUE(property.GetHover());
+    EXPECT_TRUE(property.GetPress());
+    EXPECT_TRUE(property.GetNeedDivider());
+    EXPECT_TRUE(property.GetHasIcon());
+}
+
+/**
+ * @tc.name: OptionPaintPropertyTestNg004
+ * @tc.desc: Verify ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object OptionPaintProperty, udpate property
+     */
+    OptionPaintProperty property;
+    property.UpdateHover(true);
+    property.UpdateNeedDivider(true);
+    property.UpdateHasIcon(true);
+    /**
+     * @tc.steps: step2. clone property
+     * @tc.expected: property value are as expected.
+     */
+    auto json = JsonUtil::Create(true);
+    property.ToJsonValue(json);
+    EXPECT_EQ(json->GetString("hover"), "true");
+    EXPECT_EQ(json->GetString("needDivider"), "true");
+    EXPECT_EQ(json->GetString("hasIcon"), "true");
+}
+
+/**
+ * @tc.name: OptionPaintPropertyTestNg005
+ * @tc.desc: Verify ToJsonValue default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object OptionPaintProperty, udpate property
+     */
+    OptionPaintProperty property;
+    /**
+     * @tc.steps: step2. clone property
+     * @tc.expected: property value are as expected.
+     */
+    auto json = JsonUtil::Create(true);
+    property.ToJsonValue(json);
+    EXPECT_EQ(json->GetString("hover"), "false");
+    EXPECT_EQ(json->GetString("needDivider"), "true");
+    EXPECT_EQ(json->GetString("hasIcon"), "false");
+}
+
+/**
+ * @tc.name: OptionPaintMethodTestNg001
+ * @tc.desc: Verify ToJsonValue default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionPaintMethodTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare paint method object.
+     */
+    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
+    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    /**
+     * @tc.steps: step2. excute GetOverlayDrawFunction.
+     * @tc.expected:  return value are as expected.
+     */
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+}
+
+/**
+ * @tc.name: OptionPaintMethodTestNg002
+ * @tc.desc: Verify ToJsonValue default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
+     */
+    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
+    paintProp->UpdatePress(false);
+    paintProp->UpdateHover(false);
+    paintProp->UpdateNeedDivider(true);
+    paintProp->UpdateHasIcon(true);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    /**
+     * @tc.steps: step2. excute GetOverlayDrawFunction.
+     * @tc.expected:  return value are as expected.
+     */
+    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    paintMethod->PaintDivider(canvas, paintWrapper);
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+    /**
+     * @tc.steps: step3. update hover to true.
+     * @tc.expected:  return value are as expected.
+     */
+    paintProp->UpdateHover(true);
+    paintWrapper = GetPaintWrapper(paintProp);
+    paintMethod->PaintDivider(canvas, paintWrapper);
+    result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    delete paintWrapper;
+    paintWrapper = nullptr;
 }
 } // namespace OHOS::Ace::NG
