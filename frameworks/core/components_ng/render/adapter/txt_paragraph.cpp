@@ -78,7 +78,7 @@ void TxtParagraph::AddText(const std::u16string& text)
     if (!builder_) {
         CreateBuilder();
     }
-    text_ = text;
+    text_ += text;
     builder_->AddText(text);
 }
 
@@ -188,8 +188,11 @@ int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
 
 bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result)
 {
-    if (!paragraph_ || text_.empty()) {
+    if (!paragraph_ || (text_.empty() && placeHolderIndex_ == -1)) {
         return false;
+    }
+    if (static_cast<size_t>(extent) > GetParagraphLength()) {
+        extent = GetParagraphLength();
     }
 
     char16_t prevChar = 0;
@@ -240,7 +243,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
 
 bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result)
 {
-    if (!paragraph_ || static_cast<size_t>(extent) >= text_.length()) {
+    if (!paragraph_ || static_cast<size_t>(extent) >= GetParagraphLength()) {
         return false;
     }
 
