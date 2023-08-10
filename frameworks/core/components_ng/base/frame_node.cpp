@@ -1904,9 +1904,10 @@ std::optional<RectF> FrameNode::GetViewPort() const
         return viewPort_;
     }
     auto parent = GetAncestorNodeOfFrame();
-    while (parent) {
-        if (parent->GetViewPort().has_value()) {
-            return parent->GetViewPort();
+    while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
+        auto parentViewPort = parent->GetSelfViewPort();
+        if (parentViewPort.has_value()) {
+            return parentViewPort;
         }
         parent = parent->GetAncestorNodeOfFrame();
     }
