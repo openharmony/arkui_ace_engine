@@ -194,6 +194,7 @@ public:
     }
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
+    bool HasFocus() const;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
@@ -228,7 +229,6 @@ private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
-    bool HasFocus() const;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
