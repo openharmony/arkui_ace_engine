@@ -614,9 +614,11 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(renderContext, false);
 
     auto borderRadius = theme->GetChangeBorderRadius();
-    auto TopRadius = borderRadius.radiusTopLeft.value() + borderRadius.radiusTopRight.value();
-    auto bottomRadius = borderRadius.radiusBottomLeft.value() + borderRadius.radiusBottomRight.value();
-    auto menuRadius = std::max(TopRadius.ConvertToVp(), bottomRadius.ConvertToVp());
+    auto topRadius = borderRadius.radiusTopLeft.value_or(Dimension())
+        + borderRadius.radiusTopRight.value_or(Dimension());
+    auto bottomRadius = borderRadius.radiusBottomLeft.value_or(Dimension())
+        + borderRadius.radiusBottomRight.value_or(Dimension());
+    auto menuRadius = std::max(topRadius.ConvertToVp(), bottomRadius.ConvertToVp());
     auto idealSize = dirty->GetGeometryNode()->GetMarginFrameSize();
     if (LessOrEqual(menuRadius, idealSize.Width())) {
         renderContext->UpdateBorderRadius(borderRadius);
