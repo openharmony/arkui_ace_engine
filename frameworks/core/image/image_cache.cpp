@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 std::shared_mutex ImageCache::cacheFilePathMutex_;
 std::string ImageCache::cacheFilePath_;
 
-std::atomic<size_t> ImageCache::cacheFileLimit_ = 100 * 1024 * 1024; // the capacity is 100MB
+std::atomic<size_t> ImageCache::fileLimit_ = 100 * 1024 * 1024; // the capacity is 100MB
 
 std::atomic<float> ImageCache::clearCacheFileRatio_ = 0.5f; // default clear ratio is 0.5
 
@@ -214,6 +214,11 @@ RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
 
 void ImageCache::WriteCacheFile(const std::string& url, const void* const data, size_t size, const std::string& suffix)
 {
+    if (size > fileLimit_) {
+        LOGW("file size is %{public}d, greater than limit %{public}d, cannot cache", static_cast<int32_t>(size),
+            static_cast<int32_t>(fileLimit_));
+        return;
+    }
     std::vector<std::string> removeVector;
     std::string cacheNetworkFilePath = GetImageCacheFilePath(url) + suffix;
 
@@ -240,16 +245,16 @@ void ImageCache::WriteCacheFile(const std::string& url, const void* const data, 
     cacheFileSize_ += size;
     cacheFileInfo_.emplace_back(cacheNetworkFilePath, size, time(nullptr));
     // check if cache files too big.
-    if (cacheFileSize_ > static_cast<int32_t>(cacheFileLimit_)) {
-        int32_t removeCount = static_cast<int32_t>(cacheFileInfo_.size() * clearCacheFileRatio_);
+    if (cacheFileSize_ > static_cast<int32_t>(fileLimit_)) {
+        auto removeCount = static_cast<int32_t>(cacheFileInfo_.size() * clearCacheFileRatio_);
         int32_t removeSize = 0;
         auto iter = cacheFileInfo_.begin();
         int32_t count = 0;
         while (count < removeCount) {
             removeSize += static_cast<int32_t>(iter->fileSize);
             removeVector.push_back(iter->filePath);
-            iter++;
-            count++;
+            ++iter;
+            ++count;
         }
         cacheFileInfo_.erase(cacheFileInfo_.begin(), iter);
         cacheFileSize_ -= static_cast<int32_t>(removeSize);
@@ -261,7 +266,7 @@ void ImageCache::WriteCacheFile(const std::string& url, const void* const data, 
 void ImageCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
 {
     LOGD("begin to clear %{public}zu files: ", removeFiles.size());
-    for (auto iter : removeFiles) {
+    for (auto&& iter : removeFiles) {
         if (remove(iter.c_str()) != 0) {
             LOGW("remove file %{private}s failed.", iter.c_str());
             continue;

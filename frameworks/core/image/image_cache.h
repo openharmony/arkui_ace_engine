@@ -159,7 +159,7 @@ public:
     static void SetCacheFileLimit(size_t cacheFileLimit)
     {
         LOGI("Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
-        cacheFileLimit_ = cacheFileLimit;
+        fileLimit_ = cacheFileLimit;
     }
 
     static void SetClearCacheFileRatio(float clearRatio)
@@ -227,7 +227,7 @@ protected:
     static std::shared_mutex cacheFilePathMutex_;
     static std::string cacheFilePath_;
 
-    static std::atomic<size_t> cacheFileLimit_;
+    static std::atomic<size_t> fileLimit_;
 
     static std::atomic<float> clearCacheFileRatio_;
 
