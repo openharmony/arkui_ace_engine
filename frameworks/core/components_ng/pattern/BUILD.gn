@@ -241,6 +241,7 @@ build_component_ng("pattern_ng") {
     "option/option_paint_method.cpp",
     "option/option_pattern.cpp",
     "option/option_view.cpp",
+    "overlay/keyboard_base_pattern.cpp",
     "overlay/modal_presentation_pattern.cpp",
     "overlay/overlay_manager.cpp",
     "overlay/popup_base_pattern.cpp",
