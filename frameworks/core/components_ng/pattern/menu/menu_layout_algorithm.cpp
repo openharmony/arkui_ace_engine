@@ -271,9 +271,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
     LOGD("menu position_ = %{public}s, targetSize = %{public}s", position_.ToString().c_str(),
         targetSize.ToString().c_str());
-
     InitializePadding(layoutWrapper);
-
     auto constraint = props->GetLayoutConstraint();
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, props->GetMeasureType(MeasureType::MATCH_PARENT), true);
@@ -670,26 +668,16 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     } else {
         columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
     }
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto menuWidth = theme->GetMenuWidth().ConvertToPxWithSize(wrapperSize_.Width());
-    if (LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth)) {
-        if (LessNotEqual(menuWidth, wrapperSize_.Width())) {
-            theme->SetMenuWidth(Dimension(menuWidth, DimensionUnit::PX));
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(menuLayoutProperty);
+    if (menuLayoutProperty->GetMenuWidth().has_value()) {
+        auto menuWidth = menuLayoutProperty->GetMenuWidthValue().ConvertToPxWithSize(wrapperSize_.Width());
+        if (LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth) && LessNotEqual(menuWidth, wrapperSize_.Width())) {
             constraint.maxSize.SetWidth(menuWidth);
             constraint.minSize.SetWidth(MIN_MENU_WIDTH.ConvertToPx());
             return;
-        } else {
-            theme->SetMenuWidth(DEFAULT_MENU_WIDTH);
         }
-
     }
-
-    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(menuLayoutProperty);
     // set max width
     const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
     auto maxHorizontalSpace = std::max(leftSpace_, rightSpace_) - 2.0f * padding.Width();

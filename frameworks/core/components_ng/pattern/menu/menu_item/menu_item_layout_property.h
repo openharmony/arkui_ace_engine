@@ -59,6 +59,7 @@ public:
         value->propEndIcon_ = CloneEndIcon();
         value->propLabel_ = CloneLabel();
         value->propSelectIconStyle_ = CloneSelectIconStyle();
+        value->propMenuWidth_ = CloneMenuWidth();
         return value;
     }
 
@@ -72,12 +73,14 @@ public:
         ResetEndIcon();
         ResetLabel();
         ResetSelectIconStyle();
+        ResetMenuWidth();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartIcon, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndIcon, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Label, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(SelectIconStyle, MenuItemSelectIconStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectIconStyle, SelectIcon, bool, PROPERTY_UPDATE_MEASURE);
