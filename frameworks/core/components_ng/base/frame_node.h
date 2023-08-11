@@ -431,6 +431,11 @@ public:
         viewPort_ = viewPort;
     }
 
+    std::optional<RectF> GetSelfViewPort() const
+    {
+        return viewPort_;
+    }
+
     std::optional<RectF> GetViewPort() const;
 
     enum class SceneStatus {
