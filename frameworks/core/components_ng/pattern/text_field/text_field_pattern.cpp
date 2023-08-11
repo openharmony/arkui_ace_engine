@@ -2623,6 +2623,7 @@ void TextFieldPattern::ShowSelectOverlay(
     CHECK_NULL_VOID(pipeline);
     auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, animation, isMenuShow](
                                bool hasData) {
+        LOGI("HasData callback from clipboard, data available ? %{public}d", hasData);                    
         auto pattern = weak.Upgrade();
         SelectOverlayInfo selectInfo;
         if (!pattern->IsUsingMouse()) {
