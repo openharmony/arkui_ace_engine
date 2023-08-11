@@ -1793,3 +1793,10 @@ var PatternLockChallengeResult;
   PatternLockChallengeResult[PatternLockChallengeResult["CORRECT"] = 1] = "CORRECT";
   PatternLockChallengeResult[PatternLockChallengeResult["WRONG"] = 2] = "WRONG";
 })(PatternLockChallengeResult || (PatternLockChallengeResult = {}));
+
+var DialogButtonDirection;
+(function (DialogButtonDirection) {
+  DialogButtonDirection[DialogButtonDirection["AUTO"] = 0] = "AUTO";
+  DialogButtonDirection[DialogButtonDirection["HORIZONTAL"] = 1] = "HORIZONTAL";
+  DialogButtonDirection[DialogButtonDirection["VERTICAL"] = 2] = "VERTICAL";
+})(DialogButtonDirection || (DialogButtonDirection = {}));

@@ -296,6 +296,7 @@ public:
 
     void SetContainerWindow(bool isShow) override;
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetCloseButtonStatus(bool isEnabled);
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);

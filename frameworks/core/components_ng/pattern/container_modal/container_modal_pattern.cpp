@@ -19,6 +19,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -465,6 +466,31 @@ void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaxi
     LOGI("Set containerModal button status successfully, hideSplit: %{public}d, hideMaximize: %{public}d, "
          "hideMinimize: %{public}d",
         hideSplit, hideMaximize, hideMinimize);
+}
+
+void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
+    CHECK_NULL_VOID(floatingTitleNode);
+
+    // set closeButton enable or disable
+    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, CLOSE_BUTTON_INDEX));
+    CHECK_NULL_VOID(closeButton);
+    auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEvent);
+    buttonEvent->SetEnabled(isEnabled);
+
+    // set closeButton in floatingTitle enable or disable
+    auto floatingCloseButton = AceType::DynamicCast<FrameNode>(
+        GetTitleItemByIndex(floatingTitleNode, CLOSE_BUTTON_INDEX));
+    CHECK_NULL_VOID(floatingCloseButton);
+    auto floatingButtonEvent = floatingCloseButton->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(floatingButtonEvent);
+    floatingButtonEvent->SetEnabled(isEnabled);
 }
 
 } // namespace OHOS::Ace::NG

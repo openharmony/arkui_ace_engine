@@ -2024,4 +2024,16 @@ bool PipelineContext::IsWindowSceneConsumed()
 {
     return isWindowSceneConsumed_;
 }
+
+void PipelineContext::SetCloseButtonStatus(bool isEnabled)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetCloseButtonStatus(isEnabled);
+}
 } // namespace OHOS::Ace::NG
