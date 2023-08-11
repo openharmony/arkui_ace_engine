@@ -56,9 +56,9 @@ constexpr Dimension HEIGHT = 150.0_vp;
 constexpr Dimension LEFT = 50.0_vp;
 constexpr Dimension TOP = 50.0_vp;
 constexpr float UPDATE_SIDE_BAR_POSITION_VALUE = 1.0f;
-constexpr float REAL_SIDE_BAR_WIDTH_VALUE = 1.0f;
+constexpr Dimension REAL_SIDE_BAR_WIDTH_VALUE = 1.0_px;
 constexpr float CURRENT_OFFSET_VALUE = 1.0f;
-constexpr float FLOAT_240 = 240.0f;
+constexpr float UPDATE_SIDE_BAR_WIDTH = 240.0f;
 const std::string SHOW_ICON_STR = "123";
 const std::string HIDDEN_ICON_STR = "123";
 const std::string SWITCHING_ICON_STR = "123";
@@ -745,14 +745,14 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg025, TestSize.Level1)
     
     pattern->sideBarStatus_ = SideBarStatus::SHOW;
     EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
-    pattern->HandleDragUpdate(FLOAT_240);
+    pattern->HandleDragUpdate(UPDATE_SIDE_BAR_WIDTH);
     EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::CHANGING);
     /**
      * @tc.steps: step2. change pattern->sideBarStatus_.
      * @tc.expected: check whether the pattern->sideBarStatus_ is correct.
      */
     pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
-    pattern->HandleDragUpdate(FLOAT_240);
+    pattern->HandleDragUpdate(UPDATE_SIDE_BAR_WIDTH);
     EXPECT_NE(pattern->sideBarStatus_, SideBarStatus::SHOW);
 }
 
@@ -850,12 +850,13 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg028, TestSize.Level1)
     bool isSideBarStart = sideBarPosition == SideBarPosition::START;
     EXPECT_TRUE(isSideBarStart);
 
-    auto sideBarLine = pattern->preSidebarWidth_ + (isSideBarStart ? FLOAT_240 : -FLOAT_240);
-    EXPECT_EQ(sideBarLine, FLOAT_240);
+    auto preSidebarWidthPx = pattern->DimensionConvertToPx(pattern->preSidebarWidth_).value_or(0.0);
+    auto sideBarLine = preSidebarWidthPx + (isSideBarStart ? UPDATE_SIDE_BAR_WIDTH : -UPDATE_SIDE_BAR_WIDTH);
+    EXPECT_EQ(sideBarLine, UPDATE_SIDE_BAR_WIDTH);
     EXPECT_EQ(200, minSideBarWidthPx);
     EXPECT_EQ(280, maxSideBarWidthPx);
 
-    pattern->HandleDragUpdate(FLOAT_240);
+    pattern->HandleDragUpdate(UPDATE_SIDE_BAR_WIDTH);
     /**
      * @tc.steps: step3. change pattern->dragRect_.width_ and param.
      * @tc.expected: check whether halfDragRegionWidth is correct.

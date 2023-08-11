@@ -67,6 +67,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AdjustMinAndMaxSideBarWidth(layoutWrapper);
 
     auto parentWidth = idealSize.Width();
+    realSideBarWidth_ = ConvertToPx(realSideBarWidthDimension_, constraint->scaleProperty, parentWidth).value_or(-1.0f);
     if (needInitRealSideBarWidth_) {
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
@@ -125,6 +126,14 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
         auto contentLayoutWrapper = children.front();
         MeasureSideBarContent(layoutProperty, contentLayoutWrapper, parentWidth);
+    }
+
+    if (realSideBarWidthDimension_.Unit() == DimensionUnit::PERCENT) {
+        realSideBarWidthDimension_ = NearZero(parentWidth)
+                                         ? Dimension(0.0, DimensionUnit::PERCENT)
+                                         : Dimension(realSideBarWidth_ / parentWidth, DimensionUnit::PERCENT);
+    } else {
+        realSideBarWidthDimension_ = Dimension(realSideBarWidth_, DimensionUnit::PX);
     }
 }
 
