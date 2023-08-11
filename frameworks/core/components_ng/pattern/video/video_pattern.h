@@ -210,6 +210,8 @@ public:
 
     void OnResolutionChange() const;
 
+    void OnStartRenderFrameCb() const;
+
     void ResetLastBoundsRect()
     {
         lastBoundsRect_.SetRect(0.0f, 0.0f, 0.0f, 0.0f);
