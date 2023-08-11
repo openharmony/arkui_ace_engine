@@ -911,10 +911,8 @@ void RichEditorPattern::UseHostToUpdateTextFieldManager()
 void RichEditorPattern::OnVisibleChange(bool isVisible)
 {
     TextPattern::OnVisibleChange(isVisible);
-    if (!isVisible) {
-        StopTwinkling();
-        CloseKeyboard(true);
-    }
+    StopTwinkling();
+    CloseKeyboard(true);
 }
 
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
