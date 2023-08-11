@@ -61,6 +61,7 @@ const std::string DEFAULT_FORMAT = "hms";
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 
 bool HoursWestIsValid(int32_t hoursWest)
 {
@@ -244,7 +245,11 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
 
     std::string value;
     auto format = info[0]->ToString();
-    if (format.length() == 0) {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
+    if ((currentPlatformVersion >= PLATFORM_VERSION_TEN) ? (format.length() == 0)
+                                                         : (format.length() == 0 || !StringUtils::IsAscii(format))) {
         format = DEFAULT_FORMAT;
         TextClockModel::GetInstance()->SetFormat(format);
         return;
@@ -253,6 +258,16 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (!ParseJsString(info[0], value)) {
         return;
     }
+    if (currentPlatformVersion < PLATFORM_VERSION_TEN) {
+        std::regex pattern(
+            R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
+        if (!std::regex_match(value, pattern)) {
+            LOGW("The arg is wrong, because of format matching error.");
+            TextClockModel::GetInstance()->SetFormat("hms");
+            return;
+        }
+    }
+
     TextClockModel::GetInstance()->SetFormat(value);
 }
 
