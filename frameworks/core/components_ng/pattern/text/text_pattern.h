@@ -218,7 +218,7 @@ public:
     // ===========================================================
 
     void InitSurfaceChangedCallback();
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     bool HasSurfaceChangedCallback()
     {
         return surfaceChangedCallbackId_.has_value();
