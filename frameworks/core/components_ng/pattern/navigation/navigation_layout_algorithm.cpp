@@ -59,7 +59,8 @@ void MeasureDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
 }
 
 float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
-    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const NavBarPosition& position)
+    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const NavBarPosition& position,
+    OffsetF& returnNavBarOffset)
 {
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0.0f);
@@ -84,11 +85,13 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
                 geometryNode->GetFrameOffset().GetY());
         geometryNode->SetMarginFrameOffset(navBarOffset);
         navBarWrapper->Layout();
+        returnNavBarOffset = navBarOffset;
         return geometryNode->GetFrameSize().Width();
     }
     auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
     geometryNode->SetMarginFrameOffset(navBarOffset);
     navBarWrapper->Layout();
+    returnNavBarOffset = navBarOffset;
     return geometryNode->GetFrameSize().Width();
 }
 
@@ -317,9 +320,8 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize)
 {
     float frameWidth = frameSize.Width();
-    auto constraint = navigationLayoutProperty->GetLayoutConstraint();
-    auto parentSize =
-         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+    auto parentSize = CreateIdealSizeByPercentRef(
+        navigationLayoutProperty->GetLayoutConstraint().value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
     auto minContentWidth = minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     realContentWidth_ = minContentWidth;
@@ -341,11 +343,13 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
                 realNavBarWidth_ = frameWidth - realContentWidth_ - dividerWidth;
             }
         } else {
-            float remainingSpace = frameWidth - realNavBarWidth_ - dividerWidth;
             auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+            float remainingSpace = frameWidth - realNavBarWidth_ - dividerWidth;
+            float remainingMaxSpace = frameWidth - minNavBarWidth - dividerWidth;
             if (remainingSpace >= minContentWidth) {
                 realContentWidth_ = remainingSpace;
-            } else if (remainingSpace < minContentWidth && realNavBarWidth_ > minNavBarWidth) {
+            } else if (remainingSpace < minContentWidth && remainingMaxSpace > minContentWidth &&
+                       realNavBarWidth_ > minNavBarWidth) {
                 realContentWidth_ = minContentWidth;
                 realNavBarWidth_ = frameWidth - minContentWidth - dividerWidth;
             } else {
@@ -464,9 +468,11 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto navBarPosition = navigationLayoutProperty->GetNavBarPositionValue(NavBarPosition::START);
-    float navBarWidth = LayoutNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition);
+    OffsetF navBarOffset(0.0, 0.0);
+    float navBarWidth = LayoutNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
     float dividerWidth = LayoutDivider(layoutWrapper, hostNode, navigationLayoutProperty, navBarWidth, navBarPosition);
     LayoutContent(layoutWrapper, hostNode, navigationLayoutProperty, navBarWidth, dividerWidth, navBarPosition);
+    navBarOffset_ = navBarOffset;
 }
 
 void NavigationLayoutAlgorithm::SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size)
