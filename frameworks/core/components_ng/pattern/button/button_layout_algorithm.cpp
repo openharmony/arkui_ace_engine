@@ -166,12 +166,10 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             minSize = GetFirstValidRadius(buttonLayoutProperty->GetBorderRadius().value()).ConvertToPx() * 2;
         }
         radius.SetValue(minSize / 2.0);
-        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(radius));
         renderContext->UpdateBorderRadius(BorderRadiusProperty(radius));
         MeasureCircleButton(layoutWrapper);
     } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
         radius.SetValue(frameSize.Height() / 2.0);
-        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(radius));
         renderContext->UpdateBorderRadius(BorderRadiusProperty(radius));
     } else {
         auto normalRadius =
