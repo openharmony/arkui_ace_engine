@@ -53,6 +53,7 @@ constexpr static int32_t SIDE_BAR_INDEX = 2;
 constexpr static int32_t CONTENT_INDEX = 3;
 Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+Dimension SIDEBAR_WIDTH_NEGATIVE = -1.0_vp;
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -333,6 +334,10 @@ void SideBarContainerPattern::InitSideBar()
     auto showSideBar = layoutProperty->GetShowSideBar().value_or(true);
     sideBarStatus_ = showSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN;
     type_ = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
+
+    if (realSideBarWidth_.IsNegative()) {
+        realSideBarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
+    }
 }
 
 void SideBarContainerPattern::CreateAnimation()
@@ -445,17 +450,18 @@ void SideBarContainerPattern::DoAnimation()
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
+    auto realSideBarWidthPx = DimensionConvertToPx(realSideBarWidth_).value_or(0.0);
     if (sideBarPosition == SideBarPosition::START) {
         if (animDir_ == SideBarAnimationDirection::LTR) {
             currentOffset_ = 0.0f;
         } else {
-            currentOffset_ = -realSideBarWidth_ - realDividerWidth_;
+            currentOffset_ = -realSideBarWidthPx - realDividerWidth_;
         }
     } else {
         if (animDir_ == SideBarAnimationDirection::LTR) {
             currentOffset_ = 0.0f + realDividerWidth_;
         } else {
-            currentOffset_ = -realSideBarWidth_;
+            currentOffset_ = -realSideBarWidthPx;
         }
     }
 
@@ -526,7 +532,8 @@ void SideBarContainerPattern::UpdateSideBarPosition(float value)
         UpdateControlButtonIcon();
     }
 
-    currentOffset_ = value * (realSideBarWidth_ + realDividerWidth_);
+    auto realSideBarWidthPx = DimensionConvertToPx(realSideBarWidth_).value_or(0.0);
+    currentOffset_ = value * (realSideBarWidthPx + realDividerWidth_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -696,27 +703,32 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
     bool isSideBarStart = sideBarPosition == SideBarPosition::START;
 
-    auto sideBarLine = preSidebarWidth_ + (isSideBarStart ? xOffset : -xOffset);
+    bool isPercent = realSideBarWidth_.Unit() == DimensionUnit::PERCENT;
+    auto preSidebarWidthPx = DimensionConvertToPx(preSidebarWidth_).value_or(0.0);
+    auto sideBarLine = preSidebarWidthPx + (isSideBarStart ? xOffset : -xOffset);
 
     if (sideBarLine > minSideBarWidth_ && sideBarLine < maxSideBarWidth_) {
-        realSideBarWidth_ = sideBarLine;
+        realSideBarWidth_ = isPercent ? ConvertPxToPercent(sideBarLine) : Dimension(sideBarLine, DimensionUnit::PX);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 
     if (sideBarLine >= maxSideBarWidth_) {
-        realSideBarWidth_ = maxSideBarWidth_;
+        realSideBarWidth_ =
+            isPercent ? ConvertPxToPercent(maxSideBarWidth_) : Dimension(maxSideBarWidth_, DimensionUnit::PX);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 
     auto halfDragRegionWidth = dragRect_.Width() / 2;
     if (sideBarLine > minSideBarWidth_ - halfDragRegionWidth) {
-        realSideBarWidth_ = minSideBarWidth_;
+        realSideBarWidth_ =
+            isPercent ? ConvertPxToPercent(minSideBarWidth_) : Dimension(minSideBarWidth_, DimensionUnit::PX);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
-    realSideBarWidth_ = minSideBarWidth_;
+    realSideBarWidth_ =
+        isPercent ? ConvertPxToPercent(minSideBarWidth_) : Dimension(minSideBarWidth_, DimensionUnit::PX);
 
     auto autoHide_ = layoutProperty->GetAutoHide().value_or(true);
     if (autoHide_) {
@@ -788,5 +800,37 @@ RefPtr<NodePaintMethod> SideBarContainerPattern::CreateNodePaintMethod()
     auto paintMethod = MakeRefPtr<SideBarContainerPaintMethod>();
     paintMethod->SetNeedClipPadding(needClipPadding);
     return paintMethod;
+}
+
+std::optional<float> SideBarContainerPattern::DimensionConvertToPx(const Dimension& value) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, std::nullopt);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto parentWidth = frameSize.Width();
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto scaleProperty = constraint->scaleProperty;
+    return ConvertToPx(value, scaleProperty, parentWidth);
+}
+
+Dimension SideBarContainerPattern::ConvertPxToPercent(float value) const
+{
+    auto result = Dimension(0.0, DimensionUnit::PERCENT);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, result);
+
+    auto frameSize = geometryNode->GetFrameSize();
+    auto parentWidth = frameSize.Width();
+    if (!NearZero(parentWidth)) {
+        result = Dimension(value / parentWidth, DimensionUnit::PERCENT);
+    }
+
+    return result;
 }
 } // namespace OHOS::Ace::NG
