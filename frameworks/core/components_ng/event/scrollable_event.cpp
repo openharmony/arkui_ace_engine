@@ -58,7 +58,7 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         }
         if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
             event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
-        } else {
+        } else if (event->GetScrollable()) {
             const auto& scrollable = event->GetScrollable();
             scrollable->SetGetEventTargetImpl(getEventTargetImpl);
             scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
